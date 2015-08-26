@@ -1,9 +1,11 @@
 #ifndef ClusterCollection_h
 #define ClusterCollection_h
-#include "TClonesArray.h"
+#include <TClonesArray.h>
+#include "Tracks.h"
+#include "Constants.h"
 #include "Cluster.h"
-
 #include <vector>
+
 using namespace std;
 
 class Track;
@@ -24,7 +26,7 @@ class Clusters : public TClonesArray {
       virtual void appendCluster(Float_t x, Float_t y, Int_t layer = -1, Int_t size = -1);
       virtual void appendCluster(Cluster *cluster);
       virtual void appendClusterWithoutTrack(Cluster *cluster);
-      virtual TClonesArray* getClustersWithoutTrack() { return clustersWithoutTrack_; }
+      virtual TClonesArray* getClustersWithoutTrack() { return (TClonesArray*) &clustersWithoutTrack_; }
 
       virtual void Clear() { clusters_.Clear("C"); }
 

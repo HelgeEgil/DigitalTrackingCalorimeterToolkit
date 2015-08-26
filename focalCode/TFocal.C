@@ -30,6 +30,7 @@
 
 //using namespace std;
 
+/*
 void Focal::GetData3D(Int_t RunFrom, Int_t RunTo, TH3F* Frame3D) {
 	if (fChain==0) return;
 
@@ -163,7 +164,7 @@ void Focal::GetClusterFrames(vector<Hits*> *clusterHitMap, Bool_t MC) {
 				Int_t y = lY->GetValue(h) + ny;
 				Int_t z = lZ->GetValue(h);
 
-				layerHits->at(z)->appendPOint(x, y, z, f);
+				layerHits->at(z)->appendPoint(x, y, z, f);
 			}
 
 			for (Int_t layer=0; layer<nLayers; layer++) {
@@ -265,6 +266,7 @@ void Focal::GetFrame2D(Int_t Runs, Int_t Layer, TH2F *Frame2D) {
       }
    }
 }
+*/
 
 /*
 // TOOL
@@ -648,6 +650,7 @@ void Focal::getFrame3D(Int_t runNo, CalorimeterFrame *cf) {
    Float_t offsetX = (nx+2) * dx;
    Float_t offsetY = (ny) * dy;
    Float_t x,y;
+   Int_t calorimeterLayer;
 
 	if (fChain == 0) return;
    Long64_t nentries = fChain->GetEntriesFast();
@@ -661,11 +664,12 @@ void Focal::getFrame3D(Int_t runNo, CalorimeterFrame *cf) {
 		if (eventID < eventIdFrom) continue;
 		if (eventID >= eventIdTo) break;
 
-      Int_t calorimeterLayer = level1ID - 4;
+      calorimeterLayer = level1ID - 4;
       if (calorimeterLayer<0) continue;
 
       x = (posX + offsetX) * nx / (offsetX);
       y = (posY + offsetY) * ny / (offsetY);
+
 	   cf->fillAt(calorimeterLayer, x, y, edep*1000);
    }
 }

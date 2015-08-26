@@ -2,6 +2,7 @@
 #include "Analysis.h"
 #include "Constants.h"
 #include "TFocal.h"
+#include "Tracks.h"
 #include <TH2.h>
 #include <TH3.h>
 #include <TPolyLine3D.h>
@@ -1100,13 +1101,17 @@ Tracks * getTracks(Int_t Runs) {
 
 	for (Int_t i=0; i<Runs; i++) {
 		f->getFrame3D(i, cf);
-		if (!cf->GetEntriesFast()) break;
+//		cout << "Frame " << i << ": " << cf->GetEntriesFast() << " entries in CalorimeterFrame.\n";
+//		if (!cf->GetEntriesFast()) break;
 		cf->diffuseFrame();
 		hits = cf->findHits();
+		cout << hits->GetEntriesFast() << " hits\n";
 		clusters = hits->findClustersFromHits();
+		cout << clusters->GetEntriesFast() << " clusters\n";
 		tracks = clusters->findTracks();
+		cout << tracks->GetEntriesFast() << " tracks\n";
 
-		for (Int_t j; j<tracks->GetEntriesFast(); j++) {
+		for (Int_t j=0; j<tracks->GetEntriesFast(); j++) {
 			allTracks->appendTrack(tracks->At(j));
 			allTracks->appendClustersWithoutTrack(clusters->getClustersWithoutTrack());
 		}
@@ -1143,7 +1148,7 @@ void DrawTracks3D(Int_t Runs) {
 
       if (!restPoints->At(i)) continue;
 
-      Cluster *thisCluster = restPoints->At(i);
+      Cluster *thisCluster = (Cluster*) restPoints->At(i);
       Float_t x = thisCluster->getX();
 
       // reverse to get correct viewpoint

@@ -1,15 +1,8 @@
-/*
- * Layer.C
- *
- *  Created on: Aug 11, 2015
- *      Author: local1
- */
-
 #include "Layer.h"
 #include <TH2F.h>
 #include <TRandom3.h>
 
-Layer::Layer(Int_t layerNo, Bool_t frameType, Bool_t dataType) : frame2D_("frame2D_", Form("frame2D_layer_%i", layerNo), 2*nx, 0, 2*nx, 2*ny, 0, 2*ny) {
+Layer::Layer(Int_t layerNo, Bool_t frameType, Bool_t dataType) : frame2D_(Form("frame2D_%i",layerNo), Form("frame2D_layer_%i", layerNo), 2*nx, 0, 2*nx, 2*ny, 0, 2*ny) {
 	dataType_ = dataType;
 	frameType_ = frameType;
 	layerNo_ = layerNo;
@@ -25,19 +18,19 @@ void Layer::diffuseLayer() {
 	Float_t newSigma, eDep;
    gRandom = new TRandom3(0);
 
-	TH2F frame2DCopy = frame2D_.Clone();
-	frame2DCopy.SetName("frame2DCopy");
+	TH2F *frame2DCopy = (TH2F*) frame2D_.Clone();
+	frame2DCopy->SetName("frame2DCopy");
 	frame2D_.Reset();
 
 	Int_t nBins = frame2D_.GetBin(frame2D_.GetNbinsX(), frame2D_.GetNbinsY());
 	for (Int_t b=1; b<nBins+1; b++) {
-		eDep = frame2DCopy.GetBinContent(b);
+		eDep = frame2DCopy->GetBinContent(b);
 		if (eDep == 0.0) continue;
 
 		repeatFactor = eDep * EnergyFactor;
 		newSigma = pow(repeatFactor, 0.25) / 6;
 
-		frame2DCopy.GetBinXYZ(b, x, y, z);
+		frame2DCopy->GetBinXYZ(b, x, y, z);
 
 		for (Int_t j = 0; j < repeatFactor; j++) {
 			randX = gRandom->Gaus(x, newSigma);
@@ -45,6 +38,7 @@ void Layer::diffuseLayer() {
 			frame2D_.Fill(randX, randY, EnergyFactor);
 		}
 	}
+	delete frame2DCopy;
 }
 
 void Layer::findHits(Hits* hits) {

@@ -27,7 +27,7 @@ class Tracks : public TClonesArray {
 		Float_t getSinuosity(Int_t i) { return At(i)->getSinuosity(); }
 		Float_t getSlopeAngle(Int_t i) { return At(i)->getSlopeAngle(); }
 		Float_t getTrackLengthmm(Int_t i) { return At(i)->getTrackLengthmm(); }
-		TClonesArray * getClustersWithoutTrack() { return clustersWithoutTrack_; }
+		TClonesArray * getClustersWithoutTrack() { return (TClonesArray*) &clustersWithoutTrack_; }
 
 
       virtual void extrapolateToLayer0();

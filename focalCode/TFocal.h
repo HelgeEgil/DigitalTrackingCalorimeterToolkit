@@ -18,8 +18,8 @@
 #include "Clusters.h"
 #include "Track.h"
 #include "Tracks.h"
-#include "Tracker.h"
-#include "TrackerCollection.h"
+#include "CalorimeterFrame.h"
+#include "TrackerFrame.h"
 //#include "ClusterFinder.h"
 //#include "TrackFinder.h"
 #include "LinkDef.h"
@@ -128,13 +128,13 @@ public :
 
    // My own functions in TFocal.C
    virtual void getFrame3D(Int_t runNo, CalorimeterFrame *cf);
-	virtual Tracks * FindRealTracks(Int_t Runs, Clusters *restPoints, Int_t energy = -1);
-	virtual TrackerCollection * FindTrackerFrame(Int_t EventFrom, Int_t EventTo, Clusters *restPoints);
-	virtual void		GetRealFrame2D(Int_t Runs, Int_t Layer, TH2F *Frame2D);
-   virtual void      GetData3D(Int_t EventFrom, Int_t EventTo, TH3F *Frame3D);
-	virtual void		GetRealData3D(Int_t EventFrom, Int_t EventTo, TH3F *Frame3D);
-	virtual void		GetTrackerData(Int_t EventFrom, Int_t EventTo, vector<TH2F*> *Frame3D);
-	virtual void		GetClusterFrames(vector<Hits*> *clusterHitMap, Bool_t MC);
+	//virtual Tracks * FindRealTracks(Int_t Runs, Clusters *restPoints, Int_t energy = -1);
+	//virtual TrackerCollection * FindTrackerFrame(Int_t EventFrom, Int_t EventTo, Clusters *restPoints);
+	//virtual void		GetRealFrame2D(Int_t Runs, Int_t Layer, TH2F *Frame2D);
+   //virtual void      GetData3D(Int_t EventFrom, Int_t EventTo, TH3F *Frame3D);
+	//virtual void		GetRealData3D(Int_t EventFrom, Int_t EventTo, TH3F *Frame3D);
+	//virtual void		GetTrackerData(Int_t EventFrom, Int_t EventTo, vector<TH2F*> *Frame3D);
+	//virtual void		GetClusterFrames(vector<Hits*> *clusterHitMap, Bool_t MC);
 };
 
 #endif

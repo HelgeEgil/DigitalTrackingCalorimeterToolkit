@@ -145,7 +145,7 @@
 /gate/run/initialize
 
 # Geometry is unaltered since last time
-/geometry/test/recursive_test
+#/geometry/test/recursive_test
 
 #=======================#
 # ADD PROTON BEAM	      #
@@ -186,7 +186,7 @@
 
 # Enable ROOT output
 /gate/output/root/enable
-/gate/output/root/setFileName output/testWithTrackers260MeV
+/gate/output/root/setFileName ../focalCode/test.root
 
 #===============#
 # START BEAMS	#
@@ -194,5 +194,5 @@
 
 /gate/random/setEngineName MersenneTwister
 /gate/random/setEngineSeed auto
-/gate/application/setTotalNumberOfPrimaries 1000
+/gate/application/setTotalNumberOfPrimaries 500
 /gate/application/start

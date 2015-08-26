@@ -1,21 +1,16 @@
-/*
- * Layer.h
- *
- *  Created on: Aug 11, 2015
- *      Author: local1
- */
-
 #ifndef Layer_h
 #define Layer_h
 
 #include "Constants.h"
+#include "Clusters.h"
+#include <TH2F.h>
 
 class Layer : public TH2F {
 	private:
 		TH2F frame2D_;
-		const Int_t layerNo_;
-		const Bool_t frameType_;
-		const Bool_t dataType_;
+		Int_t layerNo_;
+		Bool_t frameType_;
+		Bool_t dataType_;
 
 	public:
 		// frameType: kCalorimeter og kTracker
@@ -26,13 +21,13 @@ class Layer : public TH2F {
 
 		void diffuseLayer();
 		virtual void findHits(Hits *hits);
-		Clusters *findClustersFromHits();
 
 		virtual void Reset() { frame2D_.Reset(); }
 
 		virtual void Fill(Float_t x, Float_t y, Float_t val = 1) { frame2D_.Fill(x,y,val); }
-		TH2F * getTH2F() { return (TH2F*) &frame2D_; }
+		virtual TH2F * getTH2F() { return (TH2F*) &frame2D_; }
 
+		ClassDef(Layer,1);
 };
 
 #endif /* Layer_h */

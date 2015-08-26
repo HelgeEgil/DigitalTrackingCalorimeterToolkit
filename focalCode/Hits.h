@@ -33,7 +33,7 @@ class Hits : public TClonesArray {
 
 		virtual Int_t getI(Int_t x, Int_t y);
 
-		Bool_t isItemInVector(Int_t item, vector<Int_t> vector);
+		Bool_t isItemInVector(Int_t item, vector<Int_t> v);
 		Clusters * findClustersFromHits();
 		vector<Int_t> findNeighbours(Int_t index);
 		vector<Int_t> findExpandedCluster(Int_t i, vector<Int_t> checkedIndices);

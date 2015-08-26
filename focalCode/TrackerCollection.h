@@ -27,7 +27,7 @@ class TrackerCollection : public TClonesArray {
       virtual void AddTracker(Tracker* tracker);
    
       virtual void Remove(Tracker *t) { fTrackerCollection.Remove((TObject*) t); }
-      virtual TObject* RemoveAt(Int_t i) { return fTrackerCollection.removeClusterAt(i); }
+      virtual TObject* RemoveAt(Int_t i) { return fTrackerCollection.RemoveAt(i); }
 
       virtual Cluster* GetPreTracker1(Int_t i) { return At(i)->GetPreTracker1(); }
       virtual Cluster* GetPreTracker2(Int_t i) { return At(i)->GetPreTracker2(); }

@@ -5,6 +5,7 @@
 #include "Constants.h"
 #include <iostream>
 #include <TClonesArray.h>
+#include <vector>
 
 using namespace std;
 
@@ -119,7 +120,7 @@ void Clusters::makeLayerIndex() {
 
 		Int_t startOffset = 0;
 		Bool_t kStarted = kFALSE;
-		for (Int_t i=0; i<layerIndex_.size(); i++) {
+		for (UInt_t i=0; i<layerIndex_.size(); i++) {
 			if (layerIndex_.at(i) == -999 && !kStarted) {
 				startOffset = i;
 			}
@@ -135,7 +136,7 @@ void Clusters::makeLayerIndex() {
 
 
    }
-	for (Int_t i=0; i<layerIndex_.size(); i++) cout << i << ": " << layerIndex_.at(i) << ". ";
+	for (UInt_t i=0; i<layerIndex_.size(); i++) cout << i << ": " << layerIndex_.at(i) << ". ";
 	cout << endl;
 }
 
@@ -166,7 +167,7 @@ Tracks * Clusters::findTracks() {
    findTracksFromLayer(tracks, 0);
    findTracksFromLayer(tracks, 1);
 
-   cout << "Found " << tracks->GetEntriesFast() << " tracks from " << nRuns << " runs.\n";
+   cout << "Found " << tracks->GetEntriesFast() << " tracks.\n";
 
 	Int_t clustersLeft = 0;
 	for (Int_t i=0; i<GetEntriesFast(); i++) {
@@ -367,7 +368,7 @@ Track * Clusters::findLongestTrack(Tracks *seedTracks) {
    Int_t bestIdx = -1;
    Float_t bestLen = -1;
 
-   Track * longestTrack;
+   Track * longestTrack = new Track();
 
   for (Int_t i=0; i<seedTracks->GetEntriesFast(); i++) {
       Float_t trackLength = seedTracks->getTrackLengthmm(i);

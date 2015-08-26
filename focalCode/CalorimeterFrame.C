@@ -4,6 +4,17 @@
 
 using namespace std;
 
+CalorimeterFrame::CalorimeterFrame() : calorimeterFrame_("Layer", nLayers) {
+	for (Int_t i=0; i<nLayers; i++) {
+		// make new layer
+		new(calorimeterFrame_[i]) Layer(i, kCalorimeter, kMC);
+	}
+}
+
+CalorimeterFrame::~CalorimeterFrame() {
+	calorimeterFrame_.Delete();
+}
+
 Hits * CalorimeterFrame::findHits() {
 	Hits *hits = new Hits();
 

@@ -1,6 +1,8 @@
 #include "Hits.h"
 #include "Clusters.h"
 #include <vector>
+#include <algorithm>
+
 // #include <iostream>
 // #include <TClonesArray.h>
 // #include <TObject.h>
@@ -199,6 +201,6 @@ vector<Hits*> * Hits::findClustersHitMap(Int_t nRuns) {
 }
 
 
-Bool_t Hits::isItemInVector(Int_t i, vector<Int_t> vector) {
-	return find(vector.begin(), vector.end(), i) != vector.end();
+Bool_t Hits::isItemInVector(Int_t i, vector<Int_t> v) {
+	return std::find(v.begin(), v.end(), i) != v.end();
 }

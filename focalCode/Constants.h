@@ -1,6 +1,8 @@
 #ifndef Constants_h
 #define Constants_h
 
+#include <TObject.h>
+
 const Int_t nx = 640;
 const Int_t ny = 640;
 
