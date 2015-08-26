@@ -1,0 +1,7 @@
+/control/execute focal.mac
+/vis/viewer/set/viewpointThetaPhi 90 0
+/vis/viewer/zoom 500
+/vis/viewer/panTo -0.0435 0
+/gate/scanner/vis/setColor black
+/gate/layer/vis/setColor black
+/gate/doublelayer/vis/setColor black

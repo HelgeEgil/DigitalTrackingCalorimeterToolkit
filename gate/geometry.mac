@@ -1,0 +1,213 @@
+# world
+/gate/world/geometry/setXLength 80. cm
+/gate/world/geometry/setYLength 80. cm
+/gate/world/geometry/setZLength 80. cm
+
+# system
+/gate/world/daughters/name scanner
+/gate/world/daughters/insert box
+/gate/scanner/geometry/setXLength 10. cm
+/gate/scanner/geometry/setYLength 10. cm
+/gate/scanner/geometry/setZLength 50. cm
+/gate/scanner/setMaterial Air
+/gate/scanner/vis/forceWireframe
+
+/gate/world/daughters/name phantom
+/gate/world/daughters/insert cylinder
+/gate/phantom/geometry/setRmin 0. mm
+/gate/phantom/geometry/setRmax 20. mm
+/gate/phantom/geometry/setHeight 25. mm
+/gate/phantom/geometry/setPhiStart 0 deg
+/gate/phantom/geometry/setDeltaPhi 360 deg
+/gate/phantom/placement/setTranslation 0. 0. -82.54 mm
+/gate/phantom/setMaterial PMMA
+
+/gate/phantom/daughters/name west
+/gate/phantom/daughters/insert cylinder
+/gate/west/geometry/setRmin 0. mm
+/gate/west/geometry/setRmax 5. mm
+/gate/west/geometry/setHeight 20. mm
+/gate/west/geometry/setPhiStart 0 deg
+/gate/west/geometry/setDeltaPhi 360 deg
+/gate/west/placement/setTranslation 10 0. 0. mm
+/gate/west/setMaterial Aluminium
+
+/gate/phantom/daughters/name east
+/gate/phantom/daughters/insert cylinder
+/gate/east/geometry/setRmin 0. mm
+/gate/east/geometry/setRmax 5. mm
+/gate/east/geometry/setHeight 20. mm
+/gate/east/geometry/setPhiStart 0 deg
+/gate/east/geometry/setDeltaPhi 360 deg
+/gate/east/placement/setTranslation -10 0. 0. mm
+/gate/east/setMaterial Air
+
+/gate/scanner/daughters/name frontabsorber
+/gate/scanner/daughters/insert box
+/gate/frontabsorber/geometry/setXLength 50. mm
+/gate/frontabsorber/geometry/setYLength 50. mm
+/gate/frontabsorber/geometry/setZLength 1.5 mm
+/gate/frontabsorber/placement/setTranslation 0. 0. -50. mm
+/gate/frontabsorber/setMaterial Aluminium
+/gate/frontabsorber/vis/forceWireframe
+/gate/frontabsorber/vis/setColor grey
+
+/gate/scanner/daughters/name doublelayer
+/gate/scanner/daughters/insert box
+/gate/doublelayer/geometry/setXLength 70. mm
+/gate/doublelayer/geometry/setYLength 80. mm
+/gate/doublelayer/geometry/setZLength 3.84 mm
+/gate/doublelayer/placement/setTranslation 0. 0. -43.7 mm
+/gate/doublelayer/setMaterial Air
+/gate/doublelayer/vis/setColor white
+/gate/doublelayer/vis/forceWireframe
+/gate/doublelayer/disable
+
+/gate/doublelayer/daughters/name layer
+/gate/doublelayer/daughters/insert box
+/gate/layer/geometry/setXLength 60. mm
+/gate/layer/geometry/setYLength 70. mm
+/gate/layer/geometry/setZLength 1.9 mm
+/gate/layer/placement/setTranslation 0. 0. 0. mm
+/gate/layer/setMaterial Air
+/gate/layer/vis/setColor white
+/gate/layer/vis/forceWireframe
+/gate/layer/disable
+
+/gate/layer/daughters/name absorber
+/gate/layer/daughters/insert box
+/gate/absorber/geometry/setXLength 50. mm
+/gate/absorber/geometry/setYLength 49.85 mm
+/gate/absorber/geometry/setZLength 1.5 mm
+/gate/absorber/placement/setTranslation 0. -5.725 -0.2 mm
+/gate/absorber/setMaterial Tungsten
+/gate/absorber/vis/forceWireframe
+/gate/absorber/vis/setColor grey
+
+/gate/layer/daughters/name filler
+/gate/layer/daughters/insert box
+/gate/filler/geometry/setXLength 39.35 mm
+/gate/filler/geometry/setYLength 18.85 mm
+/gate/filler/geometry/setZLength 0.3 mm
+/gate/filler/placement/setTranslation 0. 9.375 0.7 mm # was 9.275
+/gate/filler/setMaterial Tungsten
+/gate/filler/vis/forceWireframe
+/gate/filler/vis/setColor blue
+
+/gate/layer/daughters/name pcb
+/gate/layer/daughters/insert box
+/gate/pcb/geometry/setXLength 39.35 mm
+/gate/pcb/geometry/setYLength 20. mm
+/gate/pcb/geometry/setZLength 0.15 mm
+/gate/pcb/placement/setTranslation 0. -10.05 0.625 mm
+/gate/pcb/setMaterial Plastic # fixme
+/gate/pcb/vis/setColor green
+/gate/pcb/vis/forceWireframe
+
+/gate/layer/daughters/name glue
+/gate/layer/daughters/insert box
+/gate/glue/geometry/setXLength 39.35 mm
+/gate/glue/geometry/setYLength 20. mm
+/gate/glue/geometry/setZLength 0.03 mm
+/gate/glue/placement/setTranslation 0. -10.05 0.715 mm
+/gate/glue/setMaterial Water # fixme
+/gate/glue/vis/setColor yellow
+/gate/glue/vis/forceWireframe
+
+/gate/layer/daughters/name passive
+/gate/layer/daughters/insert box
+/gate/passive/geometry/setXLength 39.35 mm
+/gate/passive/geometry/setYLength 19.7 mm
+/gate/passive/geometry/setZLength 0.15 mm
+/gate/passive/placement/setTranslation 0. -9.9 0.805 mm
+/gate/passive/setMaterial Silicon # fixme
+/gate/passive/vis/setColor white
+/gate/passive/vis/forceWireframe
+
+# couple this to an SD
+/gate/layer/daughters/name active
+/gate/layer/daughters/insert box
+/gate/active/geometry/setXLength 19.2 mm
+/gate/active/geometry/setYLength 19.2 mm
+/gate/active/geometry/setZLength 0.03 mm
+/gate/active/placement/setTranslation -9.65 -10.05 0.895 mm # was x -9.85
+/gate/active/vis/setColor red
+/gate/active/vis/forceWireframe
+
+# we copy active with a linear 1x repeater
+# move x by diff(9.85, -9.85) = 19.7
+# move x by diff(9.65, -9.65) = 19.3
+
+# Copy left chip to right chip
+/gate/active/repeaters/insert linear
+/gate/active/linear/setRepeatNumber 2
+/gate/active/linear/setRepeatVector 19.3 0. 0. mm
+/gate/active/linear/autoCenter false
+
+#===============================================================#
+# pixel size dx, dy					                               #
+# mimosa size Lx Ly (= 19.2 cm in both dirs)	                	 #
+# setTranslation: relative to mother volume, so			          #
+# setTranslation (x,y,z) = (-Lx/2 + dx/2, Ly/2 - dy/2, 0)	    #
+# See getPixelDimensions.py <nx> to get these numbers			    #
+#===============================================================#
+
+# leave some um of space between each (due to geo errors)
+
+# LOW RESOLUTION
+# 0.028 x 40 = 1.12 (or 1.18 w/correct 2 um spacing)
+# old Translation 9.58
+# new translation should then be ... 19.2 / 2 - 1.18/2 = 9.01
+
+/gate/active/daughters/name pixels
+/gate/active/daughters/insert box
+/gate/pixels/geometry/setXLength 1.18 mm
+/gate/pixels/geometry/setYLength 1.18 mm
+/gate/pixels/geometry/setZLength 0.03 mm
+/gate/pixels/placement/setTranslation -9.01 9.01 0. mm 
+/gate/pixels/setMaterial Silicon
+/gate/pixels/vis/setColor red
+/gate/pixels/vis/forceWireframe
+
+# repeat pixels
+# Pixel size = 19.2 mm / NPixels
+
+# LOW RESOLUTION
+# WE GO FROM 640 x 640 to 16 x 16
+# Repeat vector from 0.03 to 0.03 x (640 / 16) = 0.03 x 40 = 1.2
+
+/gate/pixels/repeaters/insert cubicArray
+/gate/pixels/cubicArray/setRepeatNumberX 16
+/gate/pixels/cubicArray/setRepeatNumberY 16
+/gate/pixels/cubicArray/setRepeatNumberZ 1
+/gate/pixels/cubicArray/setRepeatVector 1.2 -1.2 0. mm
+/gate/pixels/cubicArray/autoCenter false
+
+/gate/layer/daughters/name spacer
+/gate/layer/daughters/insert box
+/gate/spacer/geometry/setXLength 4. mm
+/gate/spacer/geometry/setYLength 29. mm
+/gate/spacer/geometry/setZLength 0.4 mm
+/gate/spacer/placement/setTranslation -23. -16.15 0.75 mm
+/gate/spacer/setMaterial Plastic # fixme
+/gate/spacer/vis/setColor green
+/gate/spacer/vis/forceWireframe
+
+/gate/spacer/repeaters/insert linear
+/gate/spacer/linear/setRepeatNumber 2
+/gate/spacer/linear/setRepeatVector 46. 0. 0. mm
+/gate/spacer/linear/autoCenter false
+
+# repeat layer once to get 4x chip
+/gate/layer/repeaters/insert genericRepeater
+/gate/layer/genericRepeater/setPlacementsFilename layer.placements
+
+# repeat layers
+# FOCAL has 24 layers
+#/gate/doublelayer/repeaters/insert linear
+#/gate/doublelayer/linear/setRepeatNumber 12
+#/gate/doublelayer/linear/setRepeatVector 0. 0. 3.84 mm
+#/gate/doublelayer/linear/autoCenter false
+
+/gate/doublelayer/repeaters/insert genericRepeater
+/gate/doublelayer/genericRepeater/setPlacementsFilename doublelayer.placements
