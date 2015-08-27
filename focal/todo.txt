@@ -1,0 +1,7 @@
+1) restPoints are not added / drawn
+2) Many of the tracks are upward bent. Why...?
+3) Port rest of the code (but wait with the phantom layer)
+	3.1) Include kData
+4) Bragg Peak fitting - template Gaussian fit, one sided
+5) Re-evaluate the refactoring
+6) Phantom layer analysis
