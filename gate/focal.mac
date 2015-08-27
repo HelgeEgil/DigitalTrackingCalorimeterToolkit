@@ -29,8 +29,8 @@
 #/vis/scene/add/trajectories
 /vis/viewer/update
 
-#/gate/geometry/setMaterialDatabase /home/rttn/gate/GateMaterials.db
-/gate/geometry/setMaterialDatabase /home/local1/GateMaterials.db
+/gate/geometry/setMaterialDatabase /home/rttn/GateMaterials.db
+#/gate/geometry/setMaterialDatabase /home/local1/GateMaterials.db
 
 #=======================#
 #    Load geometry	#
@@ -186,7 +186,7 @@
 
 # Enable ROOT output
 /gate/output/root/enable
-/gate/output/root/setFileName ../focalCode/test.root
+/gate/output/root/setFileName ../focalCode/test
 
 #===============#
 # START BEAMS	#
@@ -194,5 +194,5 @@
 
 /gate/random/setEngineName MersenneTwister
 /gate/random/setEngineSeed auto
-/gate/application/setTotalNumberOfPrimaries 500
+/gate/application/setTotalNumberOfPrimaries 2000
 /gate/application/start

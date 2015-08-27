@@ -5,7 +5,7 @@
 #include "Clusters.h"
 #include <TH2F.h>
 
-class Layer : public TH2F {
+class Layer : public TObject {
 	private:
 		TH2F frame2D_;
 		Int_t layerNo_;

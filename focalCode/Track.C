@@ -9,7 +9,7 @@
 
 Track::~Track() {
    // Destructor
-   Clear();
+   clearTrack();
 }
 
 Float_t Track::diffmm(Cluster *p1, Cluster *p2) {
@@ -20,7 +20,7 @@ Float_t Track::diffmm(Cluster *p1, Cluster *p2) {
 
 
 void Track::setTrack(Track *copyTrack, Int_t startOffset /* default 0 */) {
-   Clear();
+   clearTrack();
 	for (Int_t i=0; i<copyTrack->GetEntriesFast(); i++) {
       appendCluster(copyTrack->At(i), startOffset);
    }

@@ -7,7 +7,7 @@
 
 Tracks::~Tracks() {
    // Destructor
-   Clear();
+   clearTracks();
 }
 
 void Tracks::appendTrack(Track *copyTrack, Int_t startOffset /* default 0 */) {
@@ -15,14 +15,20 @@ void Tracks::appendTrack(Track *copyTrack, Int_t startOffset /* default 0 */) {
    Track *track = (Track*) tracks_.ConstructedAt(newIdx);
 
    for (Int_t i=0; i<copyTrack->GetEntriesFast(); i++) {
+   	if(!copyTrack->At(i))
+   		continue;
+
       track->appendCluster(copyTrack->At(i), startOffset);
    }
 }
 
-void Tracks::appendClustersWithoutTrack(TClonesArray* clustersWithoutTrack) {
+void Tracks::appendClustersWithoutTrack(TClonesArray *clustersWithoutTrack) {
 	Int_t idxFrom = clustersWithoutTrack_.GetEntriesFast();
 
 	for (Int_t i=0; i<clustersWithoutTrack->GetEntriesFast(); i++) {
+		if (!clustersWithoutTrack->At(i))
+			continue;
+
 		Cluster *newCluster = (Cluster*) clustersWithoutTrack_.ConstructedAt(idxFrom + i);
 		newCluster->set((Cluster*) clustersWithoutTrack->At(i));
 	}

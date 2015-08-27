@@ -645,7 +645,7 @@ void Focal::getFrame3D(Int_t runNo, CalorimeterFrame *cf) {
 	// Retrieve kEventsPerRun events and put them into CalorimeterFrame*
 	
    Int_t eventIdFrom = runNo * kEventsPerRun;
-   Int_t eventIdTo = eventIdTo + kEventsPerRun;
+   Int_t eventIdTo = eventIdFrom + kEventsPerRun;
 
    Float_t offsetX = (nx+2) * dx;
    Float_t offsetY = (ny) * dy;

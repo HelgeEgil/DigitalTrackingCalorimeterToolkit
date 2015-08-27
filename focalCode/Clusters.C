@@ -18,7 +18,7 @@ Clusters::Clusters(Bool_t frameType) : clusters_("Cluster", kEventsPerRun*2),
 
 Clusters::~Clusters() {
    // Destructor
-   Clear();
+   clearClusters();
 }
 
 void Clusters::appendCluster(Float_t x, Float_t y, Int_t layer, Int_t size) {
@@ -39,16 +39,16 @@ void Clusters::appendClusterWithoutTrack(Cluster *cluster) {
    c->set(cluster->getX(), cluster->getY(), cluster->getLayer(), cluster->getSize());
 }
 
-void Clusters::removeAllClustersInTrack(Track *track) {
-   // Remove all points in track from clusters_
-   //
-   // since both fClusterCollection and track are sorted
-   // by increasing layer
-   // we keep searching from the index where the last point
-   // in track was found
-   // Instead of O(100) passes through fClusterCollection,
-   // it's only 1
+void Clusters::clearClusters() {
+	 clusters_.Clear("C");
+	 clustersWithoutTrack_.Clear("C");
+	 for (UInt_t i=0; i<layerIndex_.size(); i++) {
+		 layerIndex_.at(i) = - 1;
+	 }
+	 frameType_ = 0;
+}
 
+void Clusters::removeAllClustersInTrack(Track *track) {
    Int_t lastIndex = 0;
 
    for (Int_t i = 0; i < track->GetEntriesFast(); i++) {
@@ -59,21 +59,23 @@ void Clusters::removeAllClustersInTrack(Track *track) {
 
       for (Int_t j=lastIndex; j<GetEntriesFast(); j++) {
 
-			if (!At(j)) continue; // NaC
-         if (getLayer(j) < layer) continue;
+			if (!At(j))
+				continue;
+
+         if (getLayer(j) < layer)
+         	continue;
+
          if (getX(j) == x) {
             if (getY(j) == y && getLayer(j) == layer) {
-               // it's a match, remove from fClusterCollection
                removeClusterAt(j);
                lastIndex = j+1;
-            } // end check for point validity (y,z)
-         } // end check for point validity (x)
-      } // end loop over this track clusters
-   } // end loop over foreign track clusters
-} // end function RemoveTrack
+            }
+         }
+      }
+   }
+}
 
 Bool_t Clusters::removeClusterFromCoords(Float_t x, Float_t y, Int_t layer) {
-   // loop through fClusterCollection to find matching point
    for (Int_t i=0; GetEntriesFast(); i++) {
       if (getLayer(i) < layer) continue;
       if (x == getX(i)) {
@@ -89,58 +91,45 @@ Bool_t Clusters::removeClusterFromCoords(Float_t x, Float_t y, Int_t layer) {
 }
 
 void Clusters::makeLayerIndex() {
-   // update or make layerIndex_
-
-	Int_t layerOffset = 0;
-
-   // Purge layerIndex_
    if (layerIndex_.size() == 0) {
-      for (Int_t i=0; i<nLayers; i++) layerIndex_.push_back(-999);
+      for (Int_t i=0; i<nLayers; i++) layerIndex_.push_back(-1);
    }
    else {
-      for (Int_t i=0; i<nLayers; i++) layerIndex_.at(i) = -999;
+      for (Int_t i=0; i<nLayers; i++) layerIndex_.at(i) = -1;
    }
 
-   // Make new list
-   if (GetEntriesFast() > 0) {
-      Int_t lastLayer = -999;
-      for (Int_t i=0; i<GetEntriesFast(); i++) {
-			
-			if (!At(i)) continue;
-         if (lastLayer != (getLayer(i) + layerOffset)) {
-				if (getLayer(i)<0 && getLayer(i)>-100) {
-					layerOffset = nTrackers;
-				}
+   if (!GetEntriesFast()) return;
 
-				cout << "Setting idx " << i << " to layer " << getLayer(i) << " + " << layerOffset << endl;
-            layerIndex_.at(getLayer(i) + layerOffset) = i;
-            lastLayer = getLayer(i) + layerOffset;
-         } // end check for new layer
-      } // end loop over all tracks
+	Int_t lastLayer = -1;
+	for (Int_t i=0; i<GetEntriesFast(); i++) {
+		if (!At(i))
+			continue;
 
-		Int_t startOffset = 0;
-		Bool_t kStarted = kFALSE;
-		for (UInt_t i=0; i<layerIndex_.size(); i++) {
-			if (layerIndex_.at(i) == -999 && !kStarted) {
-				startOffset = i;
-			}
-			else if (layerIndex_.at(i) != -999) {
-				kStarted = kTRUE;
-			}
+		if (lastLayer != getLayer(i)) {
+			layerIndex_.at(getLayer(i)) = i;
+			lastLayer = getLayer(i);
 		}
+	}
 
-		if (startOffset>0) {
-			for (Int_t i=0; i<=startOffset; i++)
-				layerIndex_.at(i) = 0;
+	// set first indices to  0 if getLayer(0)>0
+	Int_t startOffset = 0;
+	Bool_t kStarted = kFALSE;
+	for (UInt_t i=0; i<layerIndex_.size(); i++) {
+		if (layerIndex_.at(i) == -1 && !kStarted) {
+			startOffset = i;
 		}
+		else if (layerIndex_.at(i) != -1) {
+			kStarted = kTRUE;
+		}
+	}
 
-
-   }
-	for (UInt_t i=0; i<layerIndex_.size(); i++) cout << i << ": " << layerIndex_.at(i) << ". ";
-	cout << endl;
+	if (startOffset>0) {
+		for (Int_t i=0; i<=startOffset; i++)
+			layerIndex_.at(i) = 0;
+	}
 }
 
-Int_t Clusters::getFirstIndexOfLayer(Int_t layer) {
+Int_t Clusters::getFirstIndexOfLayer(UInt_t layer) {
    // return index in clusters based on fLayerIndex
    // Return value -1 == no cluster in that layer
 
@@ -150,7 +139,7 @@ Int_t Clusters::getFirstIndexOfLayer(Int_t layer) {
    return layerIndex_.at(layer);
 }
 
-Int_t Clusters::getLastIndexOfLayer(Int_t layer) {
+Int_t Clusters::getLastIndexOfLayer(UInt_t layer) {
    for (Int_t i=layer+1; i<nLayers; i++) {
       if (getFirstIndexOfLayer(i) != -999 ) {
          return getFirstIndexOfLayer(i);
@@ -163,6 +152,8 @@ Tracks * Clusters::findTracks() {
    Tracks *tracks = new Tracks(kEventsPerRun * 5);
    Track *bestTrack = new Track();
    Int_t startOffset = 0;
+
+   makeLayerIndex();
 
    findTracksFromLayer(tracks, 0);
    findTracksFromLayer(tracks, 1);
@@ -207,6 +198,7 @@ Clusters * Clusters::findSeeds(Int_t layer) {
 	Clusters *seeds = new Clusters(1000);
    Int_t layerIdxFrom = getFirstIndexOfLayer(layer);
    Int_t layerIdxTo = getLastIndexOfLayer(layer);
+
    if (layerIdxFrom<0)
    	return seeds;
 
@@ -221,6 +213,7 @@ Clusters * Clusters::findSeeds(Int_t layer) {
 Track * Clusters::growTracksFromSeed(Cluster *seed) {
    Tracks *seedTracks = new Tracks(100);
    Track *currentTrack = new Track();
+   Track *longestTrack = new Track();
 
 	Clusters * nextClusters = findNearestClustersInNextLayer(seed);
 
@@ -232,28 +225,34 @@ Track * Clusters::growTracksFromSeed(Cluster *seed) {
       if (currentTrack->GetEntriesFast())
          seedTracks->appendTrack(currentTrack);
 
-      currentTrack->Clear();
+      currentTrack->clearTrack();
    }
 
-   Track * longestTrack = findLongestTrack(seedTracks);
+   if (seedTracks->GetEntriesFast())
+   	longestTrack = findLongestTrack(seedTracks);
+
    return longestTrack;
 }
 
 Clusters * Clusters::findNearestClustersInNextLayer(Cluster *seed) {
 	Clusters *nextClusters = new Clusters(50);
-
-	Int_t layerOffset = 0;
-	if (frameType_ == kTracker)
-	   layerOffset = nTrackers;
+	Clusters *clustersFromThisLayer = 0;
 
 	Int_t layerCounter = 1;
-	while (!nextClusters->GetEntriesFast()) {
-		Int_t nextLayer = seed->getLayer() + layerOffset + layerCounter++;
-		Clusters *clustersFromThisLayer = findClustersFromSeedInLayer(seed, nextLayer);
 
-		for (Int_t i=0; i<clustersFromThisLayer->GetEntriesFast(); i++)
-			nextClusters->appendCluster(clustersFromThisLayer->At(i));
+	for (Int_t skipLayers=0; skipLayers<2; skipLayers++) {
+		Int_t nextLayer = seed->getLayer() + 1 + skipLayers;
+		clustersFromThisLayer = findClustersFromSeedInLayer(seed, nextLayer);
+
+		if (clustersFromThisLayer->GetEntriesFast())
+			break;
 	}
+
+	for (Int_t i=0; i<clustersFromThisLayer->GetEntriesFast(); i++) {
+		nextClusters->appendCluster(clustersFromThisLayer->At(i));
+	}
+
+	delete clustersFromThisLayer;
 	return nextClusters;
 }
 
@@ -262,7 +261,7 @@ Clusters * Clusters::findClustersFromSeedInLayer(Cluster *seed, Int_t nextLayer)
    Int_t layerIdxTo = getLastIndexOfLayer(nextLayer);
    Clusters *clustersFromThisLayer = new Clusters(50);
 
-	if (layerIdxFrom<0)
+	if (layerIdxFrom < 0)
 		return 0;
 
 	for (Int_t i=layerIdxFrom; i<layerIdxTo; i++) {
@@ -272,7 +271,6 @@ Clusters * Clusters::findClustersFromSeedInLayer(Cluster *seed, Int_t nextLayer)
 		if (diffmm(seed, At(i)) < searchRadius)
 			clustersFromThisLayer->appendCluster(At(i));
 	}
-
 	return clustersFromThisLayer;
 }
 
@@ -327,22 +325,23 @@ Cluster * Clusters::getTrackPropagationToLayer(Track *track, Int_t layer) {
 }
 
 Bool_t Clusters::isPointOutOfBounds(Cluster *point) {
-	Bool_t isInside;
+	Bool_t isOutside;
    Float_t x = point->getX();
    Float_t y = point->getY();
 
    if (x < 0 || x > 2*nx || y < 0 || y > 2*ny)
-   	isInside = kFALSE;
+   	isOutside = kTRUE;
    else
-   	isInside = kTRUE;
+   	isOutside = kFALSE;
 
-   return isInside;
+   return isOutside;
 }
 
 Cluster * Clusters::findNearestNeighbour(Cluster *projectedPoint) {
    Cluster *nearestNeighbour = new Cluster();
    Float_t distance = secondSearchRadius; // maximum distance for nearest neighbour
    Float_t delta;
+   Bool_t kFoundNeighbour = kFALSE;
 
    Int_t searchLayer = projectedPoint->getLayer();
    Int_t layerIdxFrom = getFirstIndexOfLayer(searchLayer);
@@ -359,8 +358,13 @@ Cluster * Clusters::findNearestNeighbour(Cluster *projectedPoint) {
       if (delta < distance) {
 			nearestNeighbour->set(At(i));
 			distance = delta;
+			kFoundNeighbour = kTRUE;
       }
    }
+
+   if (!kFoundNeighbour)
+   	return 0;
+
 	return nearestNeighbour;
 }
 
@@ -370,17 +374,18 @@ Track * Clusters::findLongestTrack(Tracks *seedTracks) {
 
    Track * longestTrack = new Track();
 
-  for (Int_t i=0; i<seedTracks->GetEntriesFast(); i++) {
-      Float_t trackLength = seedTracks->getTrackLengthmm(i);
-      if (trackLength > bestLen) {
+   for (Int_t i=0; i<seedTracks->GetEntriesFast(); i++) {
+   	Float_t trackLength = seedTracks->getTrackLengthmm(i);
+   	if (trackLength > bestLen) {
          bestLen = trackLength;
          bestIdx = i;
-      }
-  }
+   	}
+   }
 
-   // if first layer is >0 add empty track to make space for extrapolation
    Int_t startOffset = 0;
-   if (seedTracks->At(bestIdx)->getLayer(0)>0)
+   Int_t trackStartingLayer = seedTracks->At(bestIdx)->getLayer(0);
+
+   if (trackStartingLayer > 0)
    	startOffset = 1;
 
    longestTrack->setTrack((Track*) seedTracks->At(bestIdx), startOffset);

@@ -7,7 +7,7 @@
 #include <vector>
 using namespace std;
 
-class TrackerCollection : public TClonesArray {
+class TrackerCollection : public TObject {
 
    private:
       TClonesArray fTrackerCollection;
@@ -18,7 +18,7 @@ class TrackerCollection : public TClonesArray {
 		TrackerCollection() : fTrackerCollection("Tracker", 500) {}
       virtual ~TrackerCollection(); 
 
-      virtual void Clear() { fTrackerCollection.Clear("C"); }
+      // virtual void Clear() { fTrackerCollection.Clear("C"); }
 
       virtual Int_t GetEntriesFast() { return fTrackerCollection.GetEntriesFast(); }
 		virtual Int_t GetEntries() { return fTrackerCollection.GetEntries(); }

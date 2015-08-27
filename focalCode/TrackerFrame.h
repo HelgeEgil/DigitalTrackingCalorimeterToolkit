@@ -10,7 +10,7 @@ using namespace std;
 
 // A Frame contains many layers
 
-class TrackerFrame : public TClonesArray {
+class TrackerFrame : public TObject {
 
    private:
       TClonesArray frameTracker3D_;

@@ -4,7 +4,7 @@
 #include "Track.h"
 #include <vector>
 
-class Tracks : public TClonesArray {
+class Tracks : public TObject {
 
    private:
       TClonesArray tracks_;
@@ -17,9 +17,9 @@ class Tracks : public TClonesArray {
       virtual ~Tracks(); 
 
       virtual void appendTrack(Track *copyTrack, Int_t startOffset = 0);
-      virtual void appendClustersWithoutTrack(TClonesArray* clustersWithoutTrack);
+      virtual void appendClustersWithoutTrack(TClonesArray *clustersWithoutTrack);
 
-      virtual void Clear() { tracks_.Clear("C"); }
+      virtual void clearTracks() { tracks_.Clear("C"); }
 
       virtual Int_t GetEntriesFast() { return tracks_.GetEntriesFast(); }
 		virtual Int_t GetEntriesFast(Int_t i) { return At(i)->GetEntriesFast(); }

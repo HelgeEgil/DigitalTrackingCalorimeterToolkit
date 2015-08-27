@@ -11,7 +11,7 @@
 
 Hits::~Hits() {
    // Destructor
-   Clear();
+   clearHits();
 }
 
 void Hits::appendPoint(Int_t x, Int_t y, Int_t layer, Int_t event) {
@@ -30,46 +30,44 @@ Int_t Hits::getI(Int_t x, Int_t y) {
 
 Clusters * Hits::findClustersFromHits() {
 	Clusters *clusters = new Clusters(kEventsPerRun * 20);
-	vector<Int_t> checkedIndices;
-	checkedIndices.reserve(GetEntriesFast());
-	Int_t layerNo = -999;
+	vector<Int_t> *checkedIndices = new vector<Int_t>;
+	checkedIndices->reserve(GetEntriesFast());
 
 	for (Int_t i = 0; i < GetEntriesFast(); i++) {
-		if (layerNo == -999) layerNo = getLayer(i);
 		if (isItemInVector(i, checkedIndices)) continue;
 
 		vector<Int_t> firstHits = findNeighbours(i);
 		if (firstHits.size()) {
-			vector<Int_t> expandedCluster = findExpandedCluster(i, checkedIndices);
+			vector<Int_t> *expandedCluster = findExpandedCluster(i, checkedIndices);
 			appendExpandedClusterToClusters(expandedCluster, clusters);
 		}
 	}
 	return clusters;
 }
 
-void Hits::appendExpandedClusterToClusters(vector<Int_t> expandedCluster, Clusters *clusters) {
-	Int_t cSize = expandedCluster.size();
+void Hits::appendExpandedClusterToClusters(vector<Int_t> *expandedCluster, Clusters *clusters) {
+	Int_t cSize = expandedCluster->size();
 	Float_t sumX = 0; Float_t sumY = 0;
-	Int_t layerNo = getLayer(expandedCluster.at(0));
+	Int_t layerNo = getLayer(expandedCluster->at(0));
 
 	for (Int_t j=0; j<cSize; j++) {
-		Int_t idx = expandedCluster.at(j);
+		Int_t idx = expandedCluster->at(j);
 		sumX += getX(idx) - 0.5; // -0.5  to get
 		sumY += getY(idx) - 0.5; // pixel center
 	}
 	clusters->appendCluster(sumX / cSize, sumY / cSize, layerNo, cSize);
 }
 
-void Hits::appendExpandedClusterToClusterHitMap(vector<Int_t> expandedCluster, vector<Hits*> *clusterHitMap) {
+void Hits::appendExpandedClusterToClusterHitMap(vector<Int_t> *expandedCluster, vector<Hits*> *clusterHitMap) {
 	Float_t sumX = 0; Float_t sumY = 0;
 	Float_t x; Float_t y;
 	Int_t idx;
-	Int_t cSize = expandedCluster.size();
+	Int_t cSize = expandedCluster->size();
 
 	for (Int_t j=0; j<cSize; j++) {
-		Int_t idx = expandedCluster.at(j);
-		sumX += getX(idx) - 0.5; // -0.5  to get
-		sumY += getY(idx) - 0.5; // pixel center
+		Int_t idx = expandedCluster->at(j);
+		sumX += getX(idx) - 0.5;
+		sumY += getY(idx) - 0.5;
 	}
 
 	// center cluster hitmap
@@ -80,7 +78,7 @@ void Hits::appendExpandedClusterToClusterHitMap(vector<Int_t> expandedCluster, v
 
 	Int_t cidx = clusterHitMap->size() - 1;
 	for (Int_t j=0; j<cSize; j++) {
-		idx = expandedCluster.at(j);
+		idx = expandedCluster->at(j);
 		x = offsetForHistogramX + getX(idx);
 		y = offsetForHistogramY + getY(idx);
 
@@ -139,19 +137,19 @@ vector<Int_t> Hits::findNeighbours(Int_t index) {
 	return neighbours;
 }
 
-vector<Int_t> Hits::findExpandedCluster(Int_t i, vector<Int_t> checkedIndices) {
-	vector<Int_t> expandedCluster;
-	vector<Int_t> toCheck;
-	expandedCluster.reserve(80);
-	toCheck.reserve(80);
+vector<Int_t> * Hits::findExpandedCluster(Int_t i, vector<Int_t> *checkedIndices) {
+	vector<Int_t> *expandedCluster = new vector<Int_t>;
+	vector<Int_t> *toCheck = new vector<Int_t>;
+	expandedCluster->reserve(80);
+	toCheck->reserve(80);
 
-	expandedCluster.push_back(i);
-	toCheck.push_back(i);
+	expandedCluster->push_back(i);
+	toCheck->push_back(i);
 	
-	while (!toCheck.empty()) {
-		Int_t currentCandidate = toCheck.back();
-		toCheck.pop_back();
-		checkedIndices.push_back(currentCandidate);
+	while (!toCheck->empty()) {
+		Int_t currentCandidate = toCheck->back();
+		toCheck->pop_back();
+		checkedIndices->push_back(currentCandidate);
 
 		vector<Int_t> nextCandidates = findNeighbours(currentCandidate);
 		checkAndAppendAllNextCandidates(nextCandidates, checkedIndices, toCheck, expandedCluster);
@@ -160,8 +158,8 @@ vector<Int_t> Hits::findExpandedCluster(Int_t i, vector<Int_t> checkedIndices) {
 	return expandedCluster;
 }
 
-void Hits::checkAndAppendAllNextCandidates(vector<Int_t> nextCandidates, vector<Int_t> checkedIndices,
-			vector<Int_t> toCheck, vector<Int_t> expandedCluster) {
+void Hits::checkAndAppendAllNextCandidates(vector<Int_t> nextCandidates, vector<Int_t> *checkedIndices,
+			vector<Int_t> *toCheck, vector<Int_t> *expandedCluster) {
 
 	while (!nextCandidates.empty()) {
 		Int_t nextCandidate = nextCandidates.back();
@@ -174,8 +172,8 @@ void Hits::checkAndAppendAllNextCandidates(vector<Int_t> nextCandidates, vector<
 			isValidCandidate = kFALSE;
 
 		if (isValidCandidate) {
-				expandedCluster.push_back(nextCandidate);
-				toCheck.push_back(nextCandidate);
+			expandedCluster->push_back(nextCandidate);
+			toCheck->push_back(nextCandidate);
 		}
 	}
 }
@@ -183,8 +181,8 @@ void Hits::checkAndAppendAllNextCandidates(vector<Int_t> nextCandidates, vector<
 vector<Hits*> * Hits::findClustersHitMap(Int_t nRuns) {
 	Clusters *clusters = new Clusters(nRuns * 20);
 	vector<Hits*> *clusterHitMap = new vector<Hits*>;
-	vector<Int_t> checkedIndices;
-	checkedIndices.reserve(GetEntriesFast());
+	vector<Int_t> *checkedIndices = new vector<Int_t>;
+	checkedIndices->reserve(GetEntriesFast());
 	Int_t layerNo = -999;
 
 	for (Int_t i = 0; i < GetEntriesFast(); i++) {
@@ -193,14 +191,13 @@ vector<Hits*> * Hits::findClustersHitMap(Int_t nRuns) {
 
 		vector<Int_t> firstHits = findNeighbours(i);
 		if (firstHits.size()) {
-			vector<Int_t> expandedCluster = findExpandedCluster(i, checkedIndices);
+			vector<Int_t> *expandedCluster = findExpandedCluster(i, checkedIndices);
 			appendExpandedClusterToClusterHitMap(expandedCluster, clusterHitMap);
 		}
 	}
 	return clusterHitMap;
 }
 
-
-Bool_t Hits::isItemInVector(Int_t i, vector<Int_t> v) {
-	return std::find(v.begin(), v.end(), i) != v.end();
+Bool_t Hits::isItemInVector(Int_t i, vector<Int_t> *v) {
+	return find(v->begin(), v->end(), i) != v->end();
 }

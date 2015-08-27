@@ -46,8 +46,8 @@ void Cluster::set(Cluster* copyCluster) {
 void Cluster::set(Float_t x, Float_t y, Int_t layer, Int_t size) {
    	x_ = x;
       y_ = y;
-      if (layer>0) layerNo_ = layer;
-      if(size>0) clusterSize_ = size;
+      if (layer>=0) layerNo_ = layer;
+      if(size>=0) clusterSize_ = size;
    }
 
    ostream& operator<< (ostream &os, Cluster& c) {

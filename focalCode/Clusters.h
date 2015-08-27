@@ -10,7 +10,7 @@ using namespace std;
 
 class Track;
 
-class Clusters : public TClonesArray {
+class Clusters : public TObject {
 
    private:
       TClonesArray clusters_;
@@ -26,9 +26,9 @@ class Clusters : public TClonesArray {
       virtual void appendCluster(Float_t x, Float_t y, Int_t layer = -1, Int_t size = -1);
       virtual void appendCluster(Cluster *cluster);
       virtual void appendClusterWithoutTrack(Cluster *cluster);
-      virtual TClonesArray* getClustersWithoutTrack() { return (TClonesArray*) &clustersWithoutTrack_; }
+      virtual TClonesArray * getClustersWithoutTrack() { return (TClonesArray*) &clustersWithoutTrack_; }
 
-      virtual void Clear() { clusters_.Clear("C"); }
+      virtual void clearClusters();
 
       virtual Int_t GetEntriesFast() { return clusters_.GetEntriesFast(); }
 		virtual Int_t GetEntries() { return clusters_.GetEntries(); }
@@ -47,8 +47,8 @@ class Clusters : public TClonesArray {
       virtual void removeAllClustersInTrack(Track *track);
 
       virtual void makeLayerIndex();
-      virtual Int_t getFirstIndexOfLayer(Int_t layer);
-      virtual Int_t getLastIndexOfLayer(Int_t layer);
+      virtual Int_t getFirstIndexOfLayer(UInt_t layer);
+      virtual Int_t getLastIndexOfLayer(UInt_t layer);
 
       Int_t getLastActiveLayer();
       Float_t diffmm(Cluster *p1, Cluster *p2);

@@ -6,7 +6,7 @@
 #include "Constants.h"
 #include <vector>
 
-class Hits : public TClonesArray {
+class Hits : public TObject {
 
    private:
       TClonesArray hits_;
@@ -19,7 +19,7 @@ class Hits : public TClonesArray {
 
 		virtual void appendPoint(Int_t x, Int_t y, Int_t layer = -1, Int_t event = -1);
 
-      virtual void Clear() { hits_.Clear("C"); }
+      virtual void clearHits() { hits_.Clear("C"); }
 
       virtual Int_t GetEntriesFast() { return hits_.GetEntriesFast(); }
       
@@ -33,14 +33,14 @@ class Hits : public TClonesArray {
 
 		virtual Int_t getI(Int_t x, Int_t y);
 
-		Bool_t isItemInVector(Int_t item, vector<Int_t> v);
+		Bool_t isItemInVector(Int_t item, vector<Int_t> *v);
 		Clusters * findClustersFromHits();
 		vector<Int_t> findNeighbours(Int_t index);
-		vector<Int_t> findExpandedCluster(Int_t i, vector<Int_t> checkedIndices);
-		void appendExpandedClusterToClusters(vector<Int_t> expandedCluster, Clusters *clusters);
-		void appendExpandedClusterToClusterHitMap(vector<Int_t> expandedCluster, vector<Hits*> *clusterHitMap);
-		void checkAndAppendAllNextCandidates(vector<Int_t> nextCandidates, vector<Int_t> checkedIndices,
-				vector<Int_t> toCheck, vector<Int_t> expandedCluster);
+		vector<Int_t> * findExpandedCluster(Int_t i, vector<Int_t> *checkedIndices);
+		void appendExpandedClusterToClusters(vector<Int_t> *expandedCluster, Clusters *clusters);
+		void appendExpandedClusterToClusterHitMap(vector<Int_t> *expandedCluster, vector<Hits*> *clusterHitMap);
+		void checkAndAppendAllNextCandidates(vector<Int_t> nextCandidates, vector<Int_t> *checkedIndices,
+				vector<Int_t> *toCheck, vector<Int_t> *expandedCluster);
 		vector<Hits*> * findClustersHitMap(Int_t nRuns);
 
    ClassDef(Hits,1);

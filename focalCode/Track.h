@@ -9,7 +9,7 @@
 
 const Int_t MaxTrackLength = 40;
 
-class Track : public TClonesArray {
+class Track : public TObject {
 
    private:
       TClonesArray track_;
@@ -23,7 +23,7 @@ class Track : public TClonesArray {
       virtual void appendCluster(Cluster *copyCluster, Int_t startOffset = 0); // copy cluster
       virtual void appendPoint(Float_t x, Float_t y, Int_t layer, Int_t size = -1);
 
-      virtual void Clear() { track_.Clear("C"); }
+      virtual void clearTrack() { track_.Clear("C"); }
 
       virtual Int_t GetEntriesFast() { return track_.GetEntriesFast(); }
       

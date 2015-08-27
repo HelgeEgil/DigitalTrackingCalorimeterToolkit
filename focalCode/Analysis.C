@@ -1101,25 +1101,21 @@ Tracks * getTracks(Int_t Runs) {
 
 	for (Int_t i=0; i<Runs; i++) {
 		f->getFrame3D(i, cf);
-//		cout << "Frame " << i << ": " << cf->GetEntriesFast() << " entries in CalorimeterFrame.\n";
-//		if (!cf->GetEntriesFast()) break;
 		cf->diffuseFrame();
 		hits = cf->findHits();
-		cout << hits->GetEntriesFast() << " hits\n";
 		clusters = hits->findClustersFromHits();
-		cout << clusters->GetEntriesFast() << " clusters\n";
 		tracks = clusters->findTracks();
-		cout << tracks->GetEntriesFast() << " tracks\n";
 
 		for (Int_t j=0; j<tracks->GetEntriesFast(); j++) {
 			allTracks->appendTrack(tracks->At(j));
-			allTracks->appendClustersWithoutTrack(clusters->getClustersWithoutTrack());
 		}
 
+		allTracks->appendClustersWithoutTrack(clusters->getClustersWithoutTrack());
+
 		cf->Reset();
-		hits->Clear();
-		clusters->Clear();
-		tracks->Clear();
+		hits->clearHits();
+		clusters->clearClusters();
+		tracks->clearTracks();
 	}
 	return allTracks;
 }
@@ -1127,7 +1123,7 @@ Tracks * getTracks(Int_t Runs) {
 void DrawTracks3D(Int_t Runs) {
 	Tracks *tracks = getTracks(Runs);
 	tracks->extrapolateToLayer0();
-			
+
 	TCanvas *c1 = new TCanvas("c1");
 	TView *view = TView::CreateView(1);
 	Int_t xf = 0;
@@ -1139,14 +1135,17 @@ void DrawTracks3D(Int_t Runs) {
 
 	view->SetRange(xf, zf, yf, xt, zt, yt);
 
-	TClonesArray * restPoints = tracks->getClustersWithoutTrack();
+	TClonesArray *restPoints = tracks->getClustersWithoutTrack();
+
+	cout << "In restPoints: " << restPoints->GetEntriesFast() << endl;
    
    TPolyMarker3D *p = new TPolyMarker3D(restPoints->GetEntriesFast(), 7);
    p->SetMarkerColor(kRed);
 
    for (Int_t i=0; i<restPoints->GetEntriesFast(); i++) {
 
-      if (!restPoints->At(i)) continue;
+      if (!restPoints->At(i))
+      	continue;
 
       Cluster *thisCluster = (Cluster*) restPoints->At(i);
       Float_t x = thisCluster->getX();
@@ -1165,11 +1164,11 @@ void DrawTracks3D(Int_t Runs) {
 	// for tracks
 	for (Int_t i=0; i<ntracks; i++) {
 		Track *thisTrack = tracks->At(i);
-		if (thisTrack->getTrackLengthmm() < 15) continue;
+		if (thisTrack->getTrackLengthmm() < 2) continue;
 		
 		Int_t n = thisTrack->GetEntriesFast();
 
-		TPolyLine3D *l = new TPolyLine3D(thisTrack->GetEntries());
+		TPolyLine3D *l = new TPolyLine3D(n);
 		l->SetLineWidth(2);
 		
 		// for points

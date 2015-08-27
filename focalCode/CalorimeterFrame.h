@@ -12,7 +12,7 @@ using namespace std;
 
 // A Frame contains many layers
 
-class CalorimeterFrame : public TClonesArray {
+class CalorimeterFrame : public TObject {
 
    private:
       TClonesArray calorimeterFrame_;
