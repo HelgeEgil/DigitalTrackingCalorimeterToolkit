@@ -29,7 +29,6 @@ class Tracks : public TObject {
 		Float_t getTrackLengthmm(Int_t i) { return At(i)->getTrackLengthmm(); }
 		TClonesArray * getClustersWithoutTrack() { return (TClonesArray*) &clustersWithoutTrack_; }
 
-
       virtual void extrapolateToLayer0();
 
       virtual Track* At(Int_t i) { return ((Track*) tracks_.At(i)); }

@@ -24,12 +24,13 @@ void Tracks::appendTrack(Track *copyTrack, Int_t startOffset /* default 0 */) {
 
 void Tracks::appendClustersWithoutTrack(TClonesArray *clustersWithoutTrack) {
 	Int_t idxFrom = clustersWithoutTrack_.GetEntriesFast();
+	Cluster *newCluster = 0;
 
 	for (Int_t i=0; i<clustersWithoutTrack->GetEntriesFast(); i++) {
 		if (!clustersWithoutTrack->At(i))
 			continue;
 
-		Cluster *newCluster = (Cluster*) clustersWithoutTrack_.ConstructedAt(idxFrom + i);
+		newCluster = (Cluster*) clustersWithoutTrack_.ConstructedAt(idxFrom + i);
 		newCluster->set((Cluster*) clustersWithoutTrack->At(i));
 	}
 }

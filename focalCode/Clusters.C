@@ -34,7 +34,7 @@ void Clusters::appendCluster(Cluster *cluster) {
 }
 
 void Clusters::appendClusterWithoutTrack(Cluster *cluster) {
-   Int_t i = GetEntriesFast();
+   Int_t i = clustersWithoutTrack_.GetEntriesFast();
    Cluster *c = (Cluster*) clustersWithoutTrack_.ConstructedAt(i);
    c->set(cluster->getX(), cluster->getY(), cluster->getLayer(), cluster->getSize());
 }

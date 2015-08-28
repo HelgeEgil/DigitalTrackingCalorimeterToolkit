@@ -1138,6 +1138,7 @@ void DrawTracks3D(Int_t Runs) {
 	TClonesArray *restPoints = tracks->getClustersWithoutTrack();
 
 	cout << "In restPoints: " << restPoints->GetEntriesFast() << endl;
+	cout << "In restpoints (only good points): " << restPoints->GetEntries() << endl;
    
    TPolyMarker3D *p = new TPolyMarker3D(restPoints->GetEntriesFast(), 7);
    p->SetMarkerColor(kRed);
