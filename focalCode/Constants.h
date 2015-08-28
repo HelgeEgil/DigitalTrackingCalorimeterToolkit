@@ -14,7 +14,7 @@ const Float_t dy = 0.03; // mm
 const Float_t dz = 3.84; // mm
 
 const Float_t searchRadius = 50 * dx; // 20 if dimensionless
-const Float_t secondSearchRadius = 50 * dx; // 20 if dimensionless
+const Float_t secondSearchRadius = 40 * dx; // 20 if dimensionless
 
 // Diffusion constants
 

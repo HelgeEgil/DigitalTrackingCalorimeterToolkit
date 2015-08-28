@@ -167,7 +167,8 @@ Tracks * Clusters::findTracks() {
 		   appendClusterWithoutTrack(At(i));
       }
 	}
-   cout << clustersLeft << " of total " << GetEntriesFast() << " clusters were not assigned to track!\n";
+	Float_t factor = 100 * (1 - (Float_t) clustersLeft / (Float_t) GetEntriesFast());
+   cout << clustersLeft << " of total " << GetEntriesFast() << " clusters were not assigned to track! (" << factor << " %)\n";
 
    return tracks;
 }
@@ -276,16 +277,39 @@ Clusters * Clusters::findClustersFromSeedInLayer(Cluster *seed, Int_t nextLayer)
 
 void Clusters::doTrackPropagation(Track *track, Int_t lastHitLayer) {
 	Int_t nSearchLayers = getLastActiveLayer();
+	Cluster * projectedPoint = 0;
+	Cluster * nearestNeighbour = 0;
+	Cluster * skipNearestNeighbour = 0;
+	Float_t distance, skipDistance;
+
    for (Int_t layer = lastHitLayer + 1; layer<nSearchLayers-1; layer++) {
-   	Cluster * projectedPoint = getTrackPropagationToLayer(track, layer);
+   	projectedPoint = getTrackPropagationToLayer(track, layer);
 
    	if (isPointOutOfBounds(projectedPoint))
    		break;
 
-      Cluster * nearestNeighbour = findNearestNeighbour(projectedPoint);
-      Float_t distance = diffmm(projectedPoint, nearestNeighbour);
+      nearestNeighbour = findNearestNeighbour(projectedPoint);
+      distance = diffmm(projectedPoint, nearestNeighbour);
 
-      if (distance > 0) {
+      if (distance > secondSearchRadius/2) {
+      	projectedPoint = getTrackPropagationToLayer(track, layer+1);
+      	if (!isPointOutOfBounds(projectedPoint)) {
+      		skipNearestNeighbour = findNearestNeighbour(projectedPoint);
+      		skipDistance = diffmm(projectedPoint, skipNearestNeighbour);
+      		if (skipDistance * 1.2 < distance  && skipDistance > 0) {
+      			cout << "A better match was found in layer+1! (" << skipDistance << " vs " << distance << ")\n";
+      			track->appendCluster(skipNearestNeighbour);
+      			lastHitLayer = ++layer+1; // don't search next layer...
+      		}
+      		else if (distance > 0) {
+      			cout << "No better matches were found (distance = " << distance << ")\n";
+      			track->appendCluster(nearestNeighbour);
+      			lastHitLayer = layer+1;
+      		}
+      	}
+      }
+
+      else if (distance > 0) {
          track->appendCluster(nearestNeighbour);
          lastHitLayer = layer;
       }
@@ -293,6 +317,9 @@ void Clusters::doTrackPropagation(Track *track, Int_t lastHitLayer) {
       if (layer>lastHitLayer+2)
       	break;
    }
+   delete projectedPoint;
+   delete nearestNeighbour;
+   delete skipNearestNeighbour;
 }
 
 Int_t Clusters::getLastActiveLayer() {
@@ -329,10 +356,14 @@ Bool_t Clusters::isPointOutOfBounds(Cluster *point) {
    Float_t x = point->getX();
    Float_t y = point->getY();
 
-   if (x < 0 || x > 2*nx || y < 0 || y > 2*ny)
+   if (!point)
    	isOutside = kTRUE;
-   else
-   	isOutside = kFALSE;
+   else {
+		if (x < 0 || x > 2*nx || y < 0 || y > 2*ny)
+			isOutside = kTRUE;
+		else
+			isOutside = kFALSE;
+   }
 
    return isOutside;
 }
