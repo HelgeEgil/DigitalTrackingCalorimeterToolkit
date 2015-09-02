@@ -311,7 +311,6 @@ void GetTrackerStatistics(Int_t Events, Int_t Runs) {
 	delete allTrackerFrames;
 }
 
-
 void GetTrackStatistics(Int_t Events, Int_t Runs) {
 	
 	Focal f;
@@ -383,13 +382,15 @@ void GetTrackStatistics(Int_t Events, Int_t Runs) {
 	c2->cd();
 		gStyle->SetOptStat(0);
 		hClusterSizeAlongTrack->Draw("COLZ");
-	c3->cd();
+	c3->cd();f
 		hStraightness->Draw();
 	c4->cd();
 		hSlope->Draw();
 
 	delete allTracks;
 }
+
+
 
 // Kristian
 // - range resolution for eksperimentelle data
@@ -1137,10 +1138,7 @@ void DrawTracks3D(Int_t Runs) {
 
 	TClonesArray *restPoints = tracks->getClustersWithoutTrack();
 
-	cout << "In restPoints: " << restPoints->GetEntriesFast() << endl;
-	cout << "In restpoints (only good points): " << restPoints->GetEntries() << endl;
-   
-   TPolyMarker3D *p = new TPolyMarker3D(restPoints->GetEntriesFast(), 7);
+	TPolyMarker3D *p = new TPolyMarker3D(restPoints->GetEntriesFast(), 7);
    p->SetMarkerColor(kRed);
 
    for (Int_t i=0; i<restPoints->GetEntriesFast(); i++) {

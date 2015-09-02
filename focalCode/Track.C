@@ -122,9 +122,9 @@ Float_t Track::getTrackLengthmmAt(Int_t i) {
 Float_t Track::getSnakeness() {
 	// How much the track bends
 	Int_t n = GetEntriesFast();
-	Float_t snakeness;
+	Float_t snakeness = 0;
 
-	if (n<3 || !At(0) || !At(1)) snakeness = 0;
+	if (n<3 || !At(0) || !At(1)) snakeness = 5;
 	else {
 		Float_t x, y, xp, yp, dXY, dX, dY;
 
@@ -151,10 +151,10 @@ Float_t Track::getSnakeness() {
 }
 
 Float_t Track::getTrackScore() {
-	Float_t upperTrackLength = 30; // FIXME add correct value
-	Float_t upperSnakeness = 100; // FIXME add correct value
+	Float_t upperTrackLength = 35; // FIXME add correct value
+	Float_t upperSnakeness = 3; // FIXME add correct value
 	Int_t snakePoints = 5;
-	Int_t trackLengthPoints = 20;
+	Int_t trackLengthPoints = 25;
 
 	Float_t trackLength = getTrackLengthmm();
 	Float_t snakeness = getSnakeness();

@@ -13,8 +13,8 @@ const Float_t dx = 0.03; // mm
 const Float_t dy = 0.03; // mm
 const Float_t dz = 3.84; // mm
 
-const Float_t searchRadius = 50 * dx; // 20 if dimensionless
-const Float_t secondSearchRadius = 40 * dx; // 20 if dimensionless
+const Float_t initialSearchRadius = 50 * dx; // 20 if dimensionless
+const Float_t searchRadius = 40 * dx; // 20 if dimensionless
 
 // Diffusion constants
 
@@ -27,6 +27,16 @@ const Bool_t kTracker = 1;
 const Bool_t kMC = 0;
 const Bool_t kData = 1;
 
-const Int_t kEventsPerRun = 15;
+const Int_t kEventsPerRun = 150;
+
+/*
+ * Track reconstruction algorithms
+ *  recursive is excellent on small frames, really slow on large
+ *  nearestCluster is good on everything
+ */
+
+const Int_t kRecursive = 0;
+const Int_t kNearestCluster = 1;
+const Int_t kTrackFindingAlgorithm = kNearestCluster;
 
 #endif

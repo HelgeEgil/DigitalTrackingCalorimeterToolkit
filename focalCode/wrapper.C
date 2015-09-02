@@ -5,10 +5,11 @@
 #include "Hit.C"
 #include "Cluster.h"
 #include "Cluster.C"
-#include "Clusters.C"
 #include "Clusters.h"
-#include "Hits.C"
+#include "Clusters.C"
+#include "Clusters_findTracks.C"
 #include "Hits.h"
+#include "Hits.C"
 #include "Track.h"
 #include "Track.C"
 #include "Tracks.h"
@@ -23,11 +24,3 @@
 
 #include "TFocal.h"
 #include "TFocal.C"
-
-/*
-
-#ifdef __MAKECINT__
-#pragma link C++ function start;
-#endif
-
-*/
