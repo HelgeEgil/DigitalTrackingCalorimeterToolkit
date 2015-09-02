@@ -127,7 +127,8 @@ public :
    virtual void      Show(Long64_t entry = -1);
 
    // My own functions in TFocal.C
-   virtual void getFrame3D(Int_t runNo, CalorimeterFrame *cf);
+   virtual void getMCFrame(Int_t runNo, CalorimeterFrame *cf);
+   virtual void getDataFrame(Int_t runNo, CalorimeterFrame *cf, Int_t energy = 190);
 	//virtual Tracks * FindRealTracks(Int_t Runs, Clusters *restPoints, Int_t energy = -1);
 	//virtual TrackerCollection * FindTrackerFrame(Int_t EventFrom, Int_t EventTo, Clusters *restPoints);
 	//virtual void		GetRealFrame2D(Int_t Runs, Int_t Layer, TH2F *Frame2D);

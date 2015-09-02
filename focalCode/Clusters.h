@@ -51,7 +51,6 @@ class Clusters : public TObject {
       virtual Int_t getFirstIndexOfLayer(UInt_t layer);
       virtual Int_t getLastIndexOfLayer(UInt_t layer);
 
-      Float_t diffmm(Cluster *p1, Cluster *p2);
    	Bool_t isPointOutOfBounds(Cluster *point);
 
       // in file Clusters_findTracks.C

@@ -16,6 +16,7 @@
 
 // mine
 #include "Constants.h"
+#include "Tools.h"
 #include "TFocal.h"
 #include "Hit.h"
 #include "Hits.h"
@@ -27,6 +28,7 @@
 #include "CalorimeterFrame.h"
 #include "TrackerFrame.h"
 #include "LinkDef.h"
+
 
 //using namespace std;
 
@@ -89,44 +91,6 @@ void Focal::GetTrackerData(Int_t EventFrom, Int_t EventTo, vector<TH2F*> *Frame3
       DiffuseAndFill(Frame3D, gRandom, X, Y, Tracker, edep*1000);
    } // end loop over entries
 } // end function GetTrackerData
-
-void Focal::GetRealData3D(Int_t RunFrom, Int_t RunTo, TH3F* Frame3D) {
-	// Get data from DataFrame root files
-	// TODO: Write a function to do data reduction (maybe later when doing clustering...?)
-	TFile *f = new TFile("DataFrame/DataFrame_170_MeV.root");
-	TTree *tree = (TTree*) f->Get("tree");
-
-	Int_t nentries = tree->GetEntries();
-
-	// Read information about
-	// X position (-644 -> 644)
-	// Y position (-644 -> 644)
-	// layer (0 -> 24)
-
-	TLeaf *lX = tree->GetLeaf("fDataFrame.fX");
-	TLeaf *lY = tree->GetLeaf("fDataFrame.fY");
-	TLeaf *lLayer = tree->GetLeaf("fDataFrame.fLayer");
-
-	Int_t counter = 0;
-	for (Int_t i=0; i<nentries; i++) {
-		if (counter < RunFrom) continue;
-		if (counter > RunTo) break;
-		tree->GetEntry(i);
-
-		Int_t nleafs = lX->GetLen();
-		cout << " ------ " << nleafs << " leafs ------ \n";
-		for (Int_t j=0; j<nleafs; j++) {
-			Int_t x = lX->GetValue(j);
-			Int_t y = lY->GetValue(j);
-			Int_t z = lLayer->GetValue(j);
-
-			cout << "(" << x << "," << y << "," << z << ")\n";
-
-			Frame3D->Fill(z, x, y);
-			counter++;
-		}
-	}
-}
 
 void Focal::GetClusterFrames(vector<Hits*> *clusterHitMap, Bool_t MC) {
 	// return TH2F's with different cluster shapes
@@ -641,7 +605,48 @@ Tracks* Focal::FindRealTracks(Int_t Runs, Clusters *restPoints, Int_t energy) {
 
 // TOOL
 
-void Focal::getFrame3D(Int_t runNo, CalorimeterFrame *cf) {
+void Focal::getDataFrame(Int_t runNo, CalorimeterFrame * cf, Int_t energy) {
+
+	if (!isItemInVector(energy, &kPossibleEnergies)) {
+		cout << "There are no data files with energy " << energy << endl;
+		return;
+	}
+
+   Int_t eventIdFrom = runNo * kEventsPerRun;
+   Int_t eventIdTo = eventIdFrom + kEventsPerRun;
+
+	TString fn = Form("DataFrame/DataFrame_%i_MeV.root", energy);
+	TFile *f = new TFile(fn);
+	TTree *tree = (TTree*) f->Get("tree");
+
+	Int_t nentries = tree->GetEntries();
+
+	TLeaf *lX = tree->GetLeaf("fDataFrame.fX");
+	TLeaf *lY = tree->GetLeaf("fDataFrame.fY");
+	TLeaf *lLayer = tree->GetLeaf("fDataFrame.fLayer");
+
+	Int_t counter = 0;
+	for (Int_t i=0; i<nentries; i++) {
+		if (counter < eventIdFrom) continue;
+		if (counter > eventIdTo) break;
+		tree->GetEntry(i);
+
+		Int_t nleafs = lX->GetLen();
+		cout << " ------ " << nleafs << " leafs ------ \n";
+		for (Int_t j=0; j<nleafs; j++) {
+			Int_t x = lX->GetValue(j);
+			Int_t y = lY->GetValue(j);
+			Int_t z = lLayer->GetValue(j);
+
+			cout << "(" << x << "," << y << "," << z << ")\n";
+
+			cf->fillAt(z, x, y);
+		}
+		counter++;
+	}
+}
+
+void Focal::getMCFrame(Int_t runNo, CalorimeterFrame *cf) {
 	// Retrieve kEventsPerRun events and put them into CalorimeterFrame*
 	
    Int_t eventIdFrom = runNo * kEventsPerRun;

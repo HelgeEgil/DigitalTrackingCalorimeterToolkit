@@ -2,6 +2,7 @@
 #include "Cluster.h"
 #include "Track.h"
 #include "Constants.h"
+#include "Tools.h"
 #include <iostream>
 #include <TClonesArray.h>
 #include <vector>
@@ -181,13 +182,4 @@ void Clusters::removeSmallClusters(Int_t size) {
 			removeClusterAt(i);
 		}
 	}
-}
-
-Float_t Clusters::diffmm(Cluster *p1, Cluster *p2) {
-	if (!p1 || !p2)
-		return -1;
-
-	Float_t diffx = p2->getXmm() - p1->getXmm();
-	Float_t diffy = p2->getYmm() - p1->getYmm();
-	return sqrt(pow(diffx,2) + pow(diffy,2));
 }

@@ -20,6 +20,7 @@ class Tracks : public TObject {
       virtual void appendClustersWithoutTrack(TClonesArray *clustersWithoutTrack);
 
       virtual void clearTracks() { tracks_.Clear("C"); }
+      virtual void SetOwner(Bool_t val) { tracks_.SetOwner(val); }
 
       virtual Int_t GetEntriesFast() { return tracks_.GetEntriesFast(); }
       virtual Int_t GetEntries() { return tracks_.GetEntries(); }
@@ -30,7 +31,6 @@ class Tracks : public TObject {
 		Float_t getTrackLengthmm(Int_t i) { return At(i)->getTrackLengthmm(); }
 		Float_t getTrackScore(Int_t i) { return At(i)->getTrackScore(); }
 		TClonesArray * getClustersWithoutTrack() { return (TClonesArray*) &clustersWithoutTrack_; }
-
 
       virtual void extrapolateToLayer0();
 

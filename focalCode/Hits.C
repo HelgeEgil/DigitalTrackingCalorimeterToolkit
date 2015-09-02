@@ -1,5 +1,6 @@
 #include "Hits.h"
 #include "Clusters.h"
+#include "Tools.h"
 #include <vector>
 #include <algorithm>
 
@@ -196,8 +197,4 @@ vector<Hits*> * Hits::findClustersHitMap(Int_t nRuns) {
 		}
 	}
 	return clusterHitMap;
-}
-
-Bool_t Hits::isItemInVector(Int_t i, vector<Int_t> *v) {
-	return find(v->begin(), v->end(), i) != v->end();
 }

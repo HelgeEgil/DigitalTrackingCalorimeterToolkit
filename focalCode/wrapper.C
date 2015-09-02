@@ -15,6 +15,8 @@
 #include "Tracks.h"
 #include "Tracks.C"
 
+#include "Tools.h"
+#include "Tools.C"
 #include "Layer.h"
 #include "Layer.C"
 #include "CalorimeterFrame.h"

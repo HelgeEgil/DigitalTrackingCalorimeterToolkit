@@ -151,8 +151,8 @@ Float_t Track::getSnakeness() {
 }
 
 Float_t Track::getTrackScore() {
-	Float_t upperTrackLength = 35; // FIXME add correct value
-	Float_t upperSnakeness = 3; // FIXME add correct value
+	Float_t upperTrackLength = 35;
+	Float_t upperSnakeness = 3;
 	Int_t snakePoints = 5;
 	Int_t trackLengthPoints = 25;
 

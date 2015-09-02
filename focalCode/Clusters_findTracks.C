@@ -2,11 +2,13 @@
 #include "Cluster.h"
 #include "Track.h"
 #include "Constants.h"
+#include "Tools.h"
 #include <iostream>
 #include <TClonesArray.h>
 #include <vector>
 
 using namespace std;
+
 
 Tracks * Clusters::findTracks() {
 	Tracks *tracks = new Tracks(kEventsPerRun * 5);
@@ -314,7 +316,7 @@ Track * Clusters::findLongestTrack(Tracks *seedTracks) {
 	Track * track = 0;
 
 	for (Int_t i=0; i<seedTracks->GetEntriesFast(); i++) {
-		Float_t trackLength = seedTracks->getTrackLengthmm(i);
+		// Float_t trackLength = seedTracks->getTrackLengthmm(i);
 		Float_t score = seedTracks->getTrackScore(i);
 		if (score > bestScore) {
 			bestScore = score;

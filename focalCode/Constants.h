@@ -2,6 +2,7 @@
 #define Constants_h
 
 #include <TObject.h>
+#include <vector>
 
 const Int_t nx = 640;
 const Int_t ny = 640;
@@ -28,6 +29,9 @@ const Bool_t kMC = 0;
 const Bool_t kData = 1;
 
 const Int_t kEventsPerRun = 150;
+
+Int_t energies[7] = {122, 140, 150, 160, 170, 180, 190};
+std::vector<Int_t> kPossibleEnergies(&energies[0], &energies[0]+7);
 
 /*
  * Track reconstruction algorithms

@@ -20,8 +20,8 @@ class Hit : public TObject {
       Int_t getLayer() { return layerNo_; }
 		Int_t getEvent() { return eventNo_; }
 
-		Int_t getXmm() { return x_ * dx; }
-		Int_t getYmm() { return y_ * dy; }
+		Double_t getXmm() { return x_ * dx; }
+		Double_t getYmm() { return y_ * dy; }
 
       void set(Int_t x, Int_t y, Int_t layerNo = -1, Int_t eventNo = -1);
 		void setEvent(Int_t event) { eventNo_ = event; }

@@ -311,41 +311,12 @@ void GetTrackerStatistics(Int_t Events, Int_t Runs) {
 	delete allTrackerFrames;
 }
 
-void GetTrackStatistics(Int_t Events, Int_t Runs) {
-	
+*/
+void GetTrackStatistics(Int_t Runs, Int_t dataType, Int_t energy) {
 	Focal f;
 
-	Tracks *allTracks = new Tracks(2*Events*Runs);
-
-	allTracks->SetOwner(true);
-
-	for (Int_t i=0; i<Runs; i++) {
-		Int_t EventFrom = Runs * i;
-		Int_t EventTo = EventFrom + Events;
-
-		// could use absorbobjects(tracks), but i don't get it to work
-		// Track objects are small though.
-		
-		Tracks *tracks = f.FindTracks(EventFrom, EventTo);
-		tracks->SetOwner(true);
-
-		cout << "--- Run " << i+1 << " of " << Runs << " complete --- \n";
-
-		for (Int_t j=0; j<tracks->GetEntriesFast(); j++) {
-			allTracks->appendTrack(tracks->At(j));
-		}
-		delete tracks;
-	}
-
-	cout << "From " << Runs << " runs with " <<Events << " events in each, we have collected"
-			<< allTracks->GetEntriesFast() << " tracks.\n";
-
-	// now we can calulate some statistics, such as
-	//  - average track length
-	//  - position of bragg peak ( with track -> cluster -> size )
-	//  - make histogram of naive track lengths (number of particles per layer)
-	//			versus realistic track lengths
-	//	 - make histogram of naive size distributions along track vs realistic
+	Tracks *tracks = getTracks(Runs, dataType, kCalorimeter, energy);
+	tracks->extrapolateToLayer0();
 	
 	TCanvas *c1 = new TCanvas("c1", "c1", 800, 600);
 	TCanvas *c2 = new TCanvas("c2", "c2", 800, 600);
@@ -365,31 +336,30 @@ void GetTrackStatistics(Int_t Events, Int_t Runs) {
 	hSlope->SetXTitle("Total track angle (degree)");
 
 	Float_t trackLengthSoFar = 0;
-	for (Int_t i=0; i<allTracks->GetEntriesFast(); i++) {
-		hTrackLengths->Fill(allTracks->getTrackLengthmm(i));
-		hStraightness->Fill(allTracks->getSinuosity(i));
-		hSlope->Fill(allTracks->getSlopeAngle(i));
-		for (Int_t j=0; j<allTracks->GetEntriesFast(i); j++) {
-			trackLengthSoFar += allTracks->At(i)->getTrackLengthmmAt(j);
-			hClusterSizeAlongTrack->Fill(trackLengthSoFar, allTracks->At(i)->getSize(j));
-			cout << "GetSize for cluster at " << *allTracks->At(i)->At(j) << ": " << allTracks->At(i)->getSize(j) << endl;
-		} // end loop over clusters
+	for (Int_t i=0; i<tracks->GetEntriesFast(); i++) {
+		hTrackLengths->Fill(tracks->getTrackLengthmm(i));
+		hStraightness->Fill(tracks->getSinuosity(i));
+		hSlope->Fill(tracks->getSlopeAngle(i));
+		for (Int_t j=0; j<tracks->GetEntriesFast(i); j++) {
+			trackLengthSoFar += tracks->At(i)->getTrackLengthmmAt(j);
+			hClusterSizeAlongTrack->Fill(trackLengthSoFar, tracks->At(i)->getSize(j));
+		}
 		trackLengthSoFar = 0;
-	} // end loop over tracks
+	}
 
 	c1->cd();
 		hTrackLengths->Draw();
 	c2->cd();
 		gStyle->SetOptStat(0);
 		hClusterSizeAlongTrack->Draw("COLZ");
-	c3->cd();f
+	c3->cd();
 		hStraightness->Draw();
 	c4->cd();
 		hSlope->Draw();
 
-	delete allTracks;
+	delete tracks;
 }
-
+/*
 
 
 // Kristian
@@ -1086,8 +1056,7 @@ void Draw2DProjection(Int_t Runs, Int_t Events) {
 }
 */
 
-Tracks * getTracks(Int_t Runs) {
-
+Tracks * getTracks(Int_t Runs, Int_t dataType, Int_t frameType, Int_t energy) {
 	Focal *f = new Focal();
 
 	Int_t nClusters = kEventsPerRun * 5;
@@ -1101,10 +1070,21 @@ Tracks * getTracks(Int_t Runs) {
 	Tracks *allTracks = new Tracks(nTracks * Runs);
 
 	for (Int_t i=0; i<Runs; i++) {
-		f->getFrame3D(i, cf);
-		cf->diffuseFrame();
-		hits = cf->findHits();
-		clusters = hits->findClustersFromHits();
+
+		if (dataType == kMC) {
+			f->getMCFrame(i, cf);
+			cf->diffuseFrame();
+			hits = cf->findHits();
+			clusters = hits->findClustersFromHits();
+		}
+
+		else if (dataType == kData) {
+			f->getDataFrame(i, cf, energy);
+			hits = cf->findHits();
+			clusters = hits->findClustersFromHits();
+			clusters->removeSmallClusters(2);
+		}
+
 		tracks = clusters->findTracks();
 
 		for (Int_t j=0; j<tracks->GetEntriesFast(); j++) {
@@ -1121,20 +1101,13 @@ Tracks * getTracks(Int_t Runs) {
 	return allTracks;
 }
 
-void DrawTracks3D(Int_t Runs) {
+void DrawTracks3D(Int_t Runs, Int_t dataType, Int_t frameType, Int_t energy) {
 	Tracks *tracks = getTracks(Runs);
 	tracks->extrapolateToLayer0();
 
 	TCanvas *c1 = new TCanvas("c1");
 	TView *view = TView::CreateView(1);
-	Int_t xf = 0;
-	Int_t yf = 0;
-	Int_t zf = 0;
-	Int_t xt = 2*nx;
-	Int_t yt = 2*ny;
-	Int_t zt = nLayers;
-
-	view->SetRange(xf, zf, yf, xt, zt, yt);
+	view->SetRange(0, 0, 0, 2*nx, nLayers, 2*ny);
 
 	TClonesArray *restPoints = tracks->getClustersWithoutTrack();
 
@@ -1149,7 +1122,6 @@ void DrawTracks3D(Int_t Runs) {
       Cluster *thisCluster = (Cluster*) restPoints->At(i);
       Float_t x = thisCluster->getX();
 
-      // reverse to get correct viewpoint
       Float_t z = thisCluster->getY();
       Float_t y = thisCluster->getLayer();
 
@@ -1160,7 +1132,6 @@ void DrawTracks3D(Int_t Runs) {
    
 	Int_t ntracks = tracks->GetEntriesFast();
 
-	// for tracks
 	for (Int_t i=0; i<ntracks; i++) {
 		Track *thisTrack = tracks->At(i);
 		if (thisTrack->getTrackLengthmm() < 2) continue;
@@ -1189,67 +1160,6 @@ void DrawTracks3D(Int_t Runs) {
 }
 
 /*
-
-void DrawRealTracks3D(Int_t Runs) {
-
-   // Draw a vector representation of the tracks
-   // found in TrackCollections
-
-   Focal f;
-   Clusters *restPoints = new Clusters(10000);
-   Tracks *tracks = f.FindRealTracks(Runs, restPoints);
-
-	TCanvas *c1 = new TCanvas("c1");
-	TView *view = TView::CreateView(1);
-	Int_t xf = 0.2*nx*dx;
-	Int_t yf = 0.2*ny*dy;
-	Int_t zf = 0.1*dz*nLayers/3;
-	Int_t xt = 1.8*nx*dx;
-	Int_t yt = 1.8*ny*dy;
-	Int_t zt = 0.9*dz*nLayers/3;
-
-	view->SetRange(xf, zf, yf, xt, zt, yt);
-
-   // for Clusters
-
-   TPolyMarker3D *p = new TPolyMarker3D(restPoints->GetEntriesFast(), 7);
-   p->SetMarkerColor(kRed);
-
-   for (Int_t i=0; i<restPoints->GetEntriesFast(); i++) {
-      Cluster *thisCluster = restPoints->At(i);
-      Float_t x = thisCluster->getXmm();
-
-      // reverse to get correct viewpoint
-      Float_t z = thisCluster->getYmm();
-      Float_t y = thisCluster->getLayermm();
-
-      p->SetPoint(i, x, y, z);
-   }
-
-   p->Draw();
-
-	Int_t ntracks = tracks->GetEntriesFast();
-	// for tracks
-	for (Int_t i=0; i<ntracks; i++) {
-		Track *thisTrack = tracks->At(i);
-		
-		Int_t n = thisTrack->GetEntriesFast();
-
-		TPolyLine3D *l = new TPolyLine3D(n);
-		
-		// for lines
-		for (Int_t j=0; j<n; j++) {
-			Float_t x = thisTrack->getXmm(j);
-			Float_t z = thisTrack->getYmm(j);
-			Float_t y = thisTrack->getLayermm(j);
-			l->SetPoint(j,x,y,z);
-		}
-		l->Draw();
-	} // end loop over tracks
-	view->ShowAxis();
-   c1->Update();
-
-} // end function DrawRealTracks3D
 
 
 void FindClusters(Int_t Runs, Int_t Layer) {
