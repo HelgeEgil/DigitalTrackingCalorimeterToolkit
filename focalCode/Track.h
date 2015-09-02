@@ -17,6 +17,10 @@ class Track : public TObject {
    public:
 
       Track() : track_("Cluster", MaxTrackLength) {}
+      Track(Cluster *cluster) : track_("Cluster", MaxTrackLength) {
+      	appendCluster(cluster);
+      }
+
       virtual ~Track(); 
 
       virtual void setTrack(Track *copyTrack, Int_t startOffset = 0); // copy whole track
@@ -26,6 +30,7 @@ class Track : public TObject {
       virtual void clearTrack() { track_.Clear("C"); }
 
       virtual Int_t GetEntriesFast() { return track_.GetEntriesFast(); }
+      virtual Int_t GetEntries() { return track_.GetEntries(); }
       
       virtual Float_t getX(Int_t i) { return At(i)->getX(); }
       virtual Float_t getY(Int_t i) { return At(i)->getY(); }
@@ -41,6 +46,9 @@ class Track : public TObject {
 		Float_t getSinuosity();
 		Float_t getSlopeAngle();
 		Float_t getSlopeAngleAtLayer(Int_t i);
+		Float_t getSnakeness();
+		Float_t getTrackScore();
+
       Int_t getNMissingLayers();
 		Float_t diffmm(Cluster *p1, Cluster *p2);
 

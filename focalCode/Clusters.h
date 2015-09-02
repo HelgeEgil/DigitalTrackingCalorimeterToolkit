@@ -58,13 +58,14 @@ class Clusters : public TObject {
 //      Tracks * findTracksFromTracker();
       void findTracksFromLayer(Tracks * tracks, Int_t layer);
       Clusters * findSeeds(Int_t layer);
-      void doTrackPropagation(Track *track, Int_t lastHitLayer);
-      Track * growTracksFromSeed(Cluster *seed);
+      // void doTrackPropagation(Track *track, Int_t lastHitLayer);
+      Track * recursiveTrackPropagation(Cluster *cluster, Track currentTrack);
       Clusters * findNearestClustersInNextLayer(Cluster *seed);
       Clusters * findClustersFromSeedInLayer(Cluster *seed, Int_t nextLayer);
       Cluster * getTrackPropagationToLayer(Track *track, Int_t layer);
       Bool_t isPointOutOfBounds(Cluster *point);
       Cluster * findNearestNeighbour(Cluster *projectedPoint);
+      Clusters * findAllClosePointsInNextLayer(Cluster *projectedPoint);
       Track * findLongestTrack(Tracks *seedTracks);
 
    ClassDef(Clusters,1);

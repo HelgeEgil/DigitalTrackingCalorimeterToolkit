@@ -53,6 +53,8 @@ Float_t Track::getTrackLengthmm() {
    Float_t y = -1; Float_t yp = -1;
    Float_t z = -1; Float_t zp = -1;
 
+   if (!At(0)) return 0;
+
    xp = getXmm(0);
    yp = getYmm(0);
    zp = getLayermm(0);
@@ -115,6 +117,52 @@ Float_t Track::getTrackLengthmmAt(Int_t i) {
 	if (i>GetEntriesFast()) return 0;
 
 	return diffmm(At(i-1), At(i));
+}
+
+Float_t Track::getSnakeness() {
+	// How much the track bends
+	Int_t n = GetEntriesFast();
+	Float_t snakeness;
+
+	if (n<3 || !At(0) || !At(1)) snakeness = 0;
+	else {
+		Float_t x, y, xp, yp, dXY, dX, dY;
+
+		xp = At(1)->getXmm(); yp = At(1)->getYmm();
+
+		Float_t slopeX = xp - At(0)->getXmm();
+		Float_t slopeY = yp - At(0)->getYmm();
+
+		for (Int_t i=2; i<n; i++) {
+			if (!At(i)) continue;
+			x = At(i)->getXmm(); y = At(i)->getYmm();
+
+			dX = xp + slopeX - x;
+			dY = yp + slopeY - y;
+			dXY = pow(dX*dX + dY*dY, 0.5);
+
+			slopeX = x - xp; slopeY = y - yp;
+
+			snakeness += dXY;
+			xp = x; yp = y;
+		}
+	}
+	return snakeness;
+}
+
+Float_t Track::getTrackScore() {
+	Float_t upperTrackLength = 30; // FIXME add correct value
+	Float_t upperSnakeness = 100; // FIXME add correct value
+	Int_t snakePoints = 5;
+	Int_t trackLengthPoints = 20;
+
+	Float_t trackLength = getTrackLengthmm();
+	Float_t snakeness = getSnakeness();
+
+	Float_t points = trackLength * (trackLengthPoints / upperTrackLength)
+						+ (upperSnakeness - snakeness) * snakePoints/upperSnakeness;
+
+	return points;
 }
 
 Int_t Track::getNMissingLayers() {

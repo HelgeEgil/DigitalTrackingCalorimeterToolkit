@@ -141,7 +141,7 @@ Int_t Clusters::getFirstIndexOfLayer(UInt_t layer) {
 
 Int_t Clusters::getLastIndexOfLayer(UInt_t layer) {
    for (Int_t i=layer+1; i<nLayers; i++) {
-      if (getFirstIndexOfLayer(i) != -999 ) {
+      if (getFirstIndexOfLayer(i) != -1 ) {
          return getFirstIndexOfLayer(i);
       }
    }
@@ -156,7 +156,7 @@ Tracks * Clusters::findTracks() {
    makeLayerIndex();
 
    findTracksFromLayer(tracks, 0);
-   findTracksFromLayer(tracks, 1);
+//   findTracksFromLayer(tracks, 1);
 
    cout << "Found " << tracks->GetEntriesFast() << " tracks.\n";
 
@@ -181,8 +181,7 @@ void Clusters::findTracksFromLayer(Tracks * tracks, Int_t layer) {
 			if (!seeds->At(i))
 				continue;
 
-			Track * bestTrack = growTracksFromSeed(seeds->At(i));
-
+			Track * bestTrack = recursiveTrackPropagation(seeds->At(i), Track(seeds->At(i)));
 	      if (bestTrack->GetEntriesFast() > 0) {
 	      	if (!bestTrack->At(0))
 	      		startOffset = 1;
@@ -211,6 +210,48 @@ Clusters * Clusters::findSeeds(Int_t layer) {
    return seeds;
 }
 
+Track * Clusters::recursiveTrackPropagation(Cluster *cluster, Track currentTrack) {
+   currentTrack.appendCluster(cluster);
+
+	Tracks *tracksFromThisCluster = new Tracks(100);
+   Track *bestTrack = new Track();
+   Cluster *projectedPoint;
+   Clusters *closePointsInNextLayer = new Clusters();
+
+   Int_t layer = cluster->getLayer() + 1;
+	if (layer >= nLayers) return new Track();
+
+   while (!closePointsInNextLayer->GetEntriesFast()) {
+   	projectedPoint = getTrackPropagationToLayer(&currentTrack, layer++);
+   	if (isPointOutOfBounds(projectedPoint) || layer > cluster->getLayer() + 3)
+   		return new Track();
+   	closePointsInNextLayer = findAllClosePointsInNextLayer(projectedPoint);
+   }
+
+   cout << closePointsInNextLayer->GetEntriesFast() << "closePoints in layer " << cluster->getLayer()+1 << endl;
+
+	for (Int_t i=0; i<closePointsInNextLayer->GetEntriesFast(); i++) {
+		Cluster *nextClosePoint = closePointsInNextLayer->At(i);
+		cout << "Treating nextClosePoint @ layer " << nextClosePoint->getLayer() << endl;
+		Track * bestNextTrack = recursiveTrackPropagation(nextClosePoint, currentTrack);
+		cout << "- Found a track with " << bestNextTrack->GetEntriesFast() << " entries.\n";
+		if (bestNextTrack->GetEntriesFast())
+			tracksFromThisCluster->appendTrack(bestNextTrack);
+	}
+
+	cout << "- - Appending to bestTrack\n";
+	bestTrack->appendCluster(cluster);
+
+	Track *track = findLongestTrack(tracksFromThisCluster);
+	if (track->GetEntriesFast()) {
+		for (Int_t i=0; i<track->GetEntriesFast(); i++) {
+			bestTrack->appendCluster(track->At(i));
+		}
+	}
+	return bestTrack;
+}
+
+/*
 Track * Clusters::growTracksFromSeed(Cluster *seed) {
    Tracks *seedTracks = new Tracks(100);
    Track *currentTrack = new Track();
@@ -234,6 +275,8 @@ Track * Clusters::growTracksFromSeed(Cluster *seed) {
 
    return longestTrack;
 }
+
+*/
 
 Clusters * Clusters::findNearestClustersInNextLayer(Cluster *seed) {
 	Clusters *nextClusters = new Clusters(50);
@@ -275,6 +318,7 @@ Clusters * Clusters::findClustersFromSeedInLayer(Cluster *seed, Int_t nextLayer)
 	return clustersFromThisLayer;
 }
 
+/*
 void Clusters::doTrackPropagation(Track *track, Int_t lastHitLayer) {
 	Int_t nSearchLayers = getLastActiveLayer();
 	Cluster * projectedPoint = 0;
@@ -322,6 +366,8 @@ void Clusters::doTrackPropagation(Track *track, Int_t lastHitLayer) {
    delete skipNearestNeighbour;
 }
 
+*/
+
 Int_t Clusters::getLastActiveLayer() {
 	Int_t lastActiveLayer = 0;
 	for (Int_t i=0; i<GetEntriesFast(); i++) {
@@ -334,7 +380,6 @@ Int_t Clusters::getLastActiveLayer() {
 }
 
 Cluster * Clusters::getTrackPropagationToLayer(Track *track, Int_t layer) {
-   Cluster *nextProjectedPoint = new Cluster();
    Int_t last = track->GetEntriesFast() - 1;
    Int_t diffLayer = layer - track->getLayer(last);
 
@@ -346,9 +391,7 @@ Cluster * Clusters::getTrackPropagationToLayer(Track *track, Int_t layer) {
    Float_t x = p2.getX() + diffLayer * slope.getX();
    Float_t y = p2.getY() + diffLayer * slope.getY();
 
-   nextProjectedPoint->set(x, y, layer);
-
-   return nextProjectedPoint;
+   return new Cluster(x, y, layer);
 }
 
 Bool_t Clusters::isPointOutOfBounds(Cluster *point) {
@@ -399,9 +442,39 @@ Cluster * Clusters::findNearestNeighbour(Cluster *projectedPoint) {
 	return nearestNeighbour;
 }
 
+Clusters * Clusters::findAllClosePointsInNextLayer(Cluster *projectedPoint) {
+   Clusters *nearestNeighbours = new Clusters();
+   Float_t distance = secondSearchRadius; // maximum distance for nearest neighbour
+   Float_t delta;
+
+   Int_t searchLayer = projectedPoint->getLayer();
+   Int_t layerIdxFrom = getFirstIndexOfLayer(searchLayer);
+   Int_t layerIdxTo = getLastIndexOfLayer(searchLayer);
+
+   if (layerIdxFrom < 0) {
+   		return nearestNeighbours;
+   }
+
+   for (Int_t i=layerIdxFrom; i<layerIdxTo; i++) {
+		if (!At(i))
+			continue;
+
+      delta = diffmm(projectedPoint, At(i));
+      if (delta < distance) {
+			nearestNeighbours->appendCluster(At(i));
+	      }
+   }
+	return nearestNeighbours;
+}
+
+
+
 Track * Clusters::findLongestTrack(Tracks *seedTracks) {
    Int_t bestIdx = -1;
    Float_t bestLen = -1;
+
+   if (!seedTracks->GetEntriesFast())
+   	return new Track();
 
    Track * longestTrack = new Track();
 

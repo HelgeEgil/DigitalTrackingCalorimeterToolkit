@@ -22,6 +22,7 @@ class Tracks : public TObject {
       virtual void clearTracks() { tracks_.Clear("C"); }
 
       virtual Int_t GetEntriesFast() { return tracks_.GetEntriesFast(); }
+      virtual Int_t GetEntries() { return tracks_.GetEntries(); }
 		virtual Int_t GetEntriesFast(Int_t i) { return At(i)->GetEntriesFast(); }
 
 		Float_t getSinuosity(Int_t i) { return At(i)->getSinuosity(); }

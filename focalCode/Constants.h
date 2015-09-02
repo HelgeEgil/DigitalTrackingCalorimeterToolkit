@@ -27,6 +27,6 @@ const Bool_t kTracker = 1;
 const Bool_t kMC = 0;
 const Bool_t kData = 1;
 
-const Int_t kEventsPerRun = 150;
+const Int_t kEventsPerRun = 15;
 
 #endif
