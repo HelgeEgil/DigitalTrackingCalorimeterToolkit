@@ -312,22 +312,73 @@ void GetTrackerStatistics(Int_t Events, Int_t Runs) {
 }
 
 */
+
 void GetTrackStatistics(Int_t Runs, Int_t dataType, Int_t energy) {
 	Focal f;
 
 	Tracks *tracks = getTracks(Runs, dataType, kCalorimeter, energy);
 	tracks->extrapolateToLayer0();
 	
+	Int_t nTracksToPlot = 25;
+	Int_t nTracksToPlot1D = 5;
+
+	TString sDataType = getDataTypeString(dataType);
+
 	TCanvas *c1 = new TCanvas("c1", "c1", 800, 600);
 	TCanvas *c2 = new TCanvas("c2", "c2", 800, 600);
 	TCanvas *c3 = new TCanvas("c3", "c3", 800, 600);
 	TCanvas *c4 = new TCanvas("c4", "c4", 800, 600);
+	TCanvas *c5 = new TCanvas("c5", "c5", 800, 600);
+	TCanvas *c6 = new TCanvas("c6", "c6", 1000, 800);
+	TCanvas *c7 = new TCanvas("c7", "c7", 1000, 800);
+	TCanvas *c8 = new TCanvas("c8", "c8", 1000, 800);
 
-	TH1F *hTrackLengths = new TH1F("hTrackLengths", "Track Lengths (MC)", 100, 0, 120);
+	c5->Divide(2, 2, 0.01, 0.01, 0);
+	c6->Divide(3, 3, 0.01, 0.01, 0);
+	c7->Divide(nTracksToPlot1D, nTracksToPlot1D, 0.001, 0.001, 0);
+	c8->Divide(3,3,0.01,0.01,0);
+
+	TH1F *hTrackLengths = new TH1F("hTrackLengths", Form("Track Lengths (%s)", sDataType.Data()), 100, 0, 120);
 	TH2F *hClusterSizeAlongTrack = new TH2F("hClusterSizeAlongTrack",
-				"Cluster size along track length (MC)", 1.5*nLayers, 0, 1.5*nLayers*dz, 50, 0, 50);
-	TH1F *hStraightness = new TH1F("hStraightness", "Sinuosity plot (MC)", 500, 1, 1.01);
-	TH1F *hSlope = new TH1F("hSlope", "Proton angle plot (MC)", 500, 0, 20);
+				Form("Cluster size along track length (%s)", sDataType.Data()), 1.5*nLayers, 0, 1.5*nLayers*dz, 50, 0, 50);
+	TH1F *hStraightness = new TH1F("hStraightness", Form("Sinuosity plot (%s)", sDataType.Data()), 500, 1, 1.01);
+	TH1F *hSlope = new TH1F("hSlope", Form("Proton angle plot (%s)", sDataType.Data()), 500, 0, 20);
+
+	// Average cluster size
+	vector<TH1F*> *hAvgCS = new vector<TH1F*>;
+	hAvgCS->reserve(4);
+	for (Int_t chip=0; chip<4; chip++) {
+		hAvgCS->push_back(new TH1F(Form("hAvgCS_chip_%i",chip),
+				Form("Average Cluster Size vs Track Length for chip %i (%s)",chip, sDataType.Data()), 50, 0, 50));
+	}
+
+	// Cluster size for individual layers
+	vector<TH1F*> *hCSLayer = new vector<TH1F*>;
+	hCSLayer->reserve(9);
+	for (Int_t layer=0; layer<9; layer++) {
+		hCSLayer->push_back(new TH1F(Form("hCSLayer_%i", layer),
+				Form("Cluster size for layer %i (%s)", layer, sDataType.Data()), 50, 0, 50));
+	}
+
+	// Cluster size along track length for a single track
+	vector<TH1F*> *hFollowTrack = new vector<TH1F*>;
+	hFollowTrack->reserve(nTracksToPlot);
+	for (Int_t track=0; track<nTracksToPlot; track++) {
+		hFollowTrack->push_back(new TH1F(Form("hFollowTrack_%i", track),
+				Form("Cluster size along track length for a single track (%s)", sDataType.Data()), 50, 0, 50));
+		hFollowTrack->at(track)->SetXTitle("Track Length [mm]");
+		hFollowTrack->at(track)->SetYTitle("Cluster size [# of pixels]");
+	}
+
+	// Proton angle distribution in layer
+	vector<TH1F*> *hAngles = new vector<TH1F*>;
+	hAngles->reserve(9);
+	for (Int_t layer=0; layer<9; layer++) {
+		hAngles->push_back(new TH1F(Form("hAngles_%i", layer),
+				Form("Proton angle distribution in layer %i (%s)", layer, sDataType.Data()), 50, 0, 20));
+		hAngles->at(layer)->SetXTitle("Track Length [mm]");
+		hAngles->at(layer)->SetYTitle("Cluster size [# of pixels]");
+	}
 	
 	hTrackLengths->SetXTitle("Track length [mm]");
 	hClusterSizeAlongTrack->SetXTitle("Track length [mm]");
@@ -336,16 +387,60 @@ void GetTrackStatistics(Int_t Runs, Int_t dataType, Int_t energy) {
 	hSlope->SetXTitle("Total track angle (degree)");
 
 	Float_t trackLengthSoFar = 0;
+	Int_t trackNum = 0;
+	Int_t chip = 0; // the quadrant
+	Bool_t cutTL = false;
+	Bool_t cutCHIP = false;
+	Int_t okTL = 0;
+	Int_t okCHIP = 0;
+
+	Track *thisTrack;
 	for (Int_t i=0; i<tracks->GetEntriesFast(); i++) {
-		hTrackLengths->Fill(tracks->getTrackLengthmm(i));
-		hStraightness->Fill(tracks->getSinuosity(i));
-		hSlope->Fill(tracks->getSlopeAngle(i));
+		thisTrack = tracks->At(i);
+
+		Float_t TL = thisTrack->getTrackLengthmm();
+		Int_t x0 = thisTrack->getX(0);
+		Int_t y0 = thisTrack->getY(0);
+
+		cutTL = (TL > kMinimumTracklength) ? true : false;
+
+		chip = (x0 >= nx) + 2 * (y0 < ny);
+		cutCHIP = (chip<2 || dataType == kMC) ? true : false;
+
+		hTrackLengths->Fill(TL);
+		hStraightness->Fill(thisTrack->getSinuosity());
+		hSlope->Fill(thisTrack->getSlopeAngle());
+
 		for (Int_t j=0; j<tracks->GetEntriesFast(i); j++) {
-			trackLengthSoFar += tracks->At(i)->getTrackLengthmmAt(j);
-			hClusterSizeAlongTrack->Fill(trackLengthSoFar, tracks->At(i)->getSize(j));
+
+			trackLengthSoFar += thisTrack->getTrackLengthmmAt(j);
+			if (cutTL && cutCHIP)
+				hClusterSizeAlongTrack->Fill(trackLengthSoFar, thisTrack->getSize(j));
+
+			if (cutTL)
+				hAvgCS->at(chip)->Fill(trackLengthSoFar, thisTrack->getSize(j));
+
+			Int_t layer = thisTrack->getLayer(j);
+			if (layer<9) {
+				hCSLayer->at(layer)->Fill(thisTrack->getSize(j));
+				hAngles->at(layer)->Fill(thisTrack->getSlopeAngleAtLayer(j));
+			}
+
+			if (trackNum < nTracksToPlot && cutTL && cutCHIP) {
+				hFollowTrack->at(trackNum)->Fill(trackLengthSoFar, thisTrack->getSize(j));
+				hFollowTrack->at(trackNum)->SetTitle(Form("Track length histogram for run %i (%s)", i, sDataType.Data()));
+			}
 		}
 		trackLengthSoFar = 0;
+
+		if (cutTL) okTL++;
+		if (cutCHIP) okCHIP++;
+		if (cutTL && cutCHIP) trackNum++;
 	}
+
+	cout << "Total number of tracks: " << tracks->GetEntriesFast() << endl;
+	cout << "Passed track length: " << okTL << " (" << 100 * okTL / tracks->GetEntriesFast() << ")\n";
+	cout << "Passed chip #: " << okCHIP << " (" << 100 * okCHIP / tracks->GetEntriesFast() << ")\n";
 
 	c1->cd();
 		hTrackLengths->Draw();
@@ -356,6 +451,30 @@ void GetTrackStatistics(Int_t Runs, Int_t dataType, Int_t energy) {
 		hStraightness->Draw();
 	c4->cd();
 		hSlope->Draw();
+
+	for (Int_t chip=0; chip<4; chip++) {
+		c5->cd(chip+1);
+		hAvgCS->at(chip)->SetFillColor(kRed-chip*2);
+		hAvgCS->at(chip)->Draw();
+	}
+	for (Int_t layer=0; layer<9; layer++) {
+		c6->cd(layer+1);
+		hCSLayer->at(layer)->SetFillColor(kRed-9+layer);
+		hCSLayer->at(layer)->Draw("same");
+	}
+
+	for (Int_t track=0; track<nTracksToPlot; track++) {
+		c7->cd(track+1);
+		gPad->DrawFrame(0, 0, 50, 35);
+		hFollowTrack->at(track)->SetFillColor(kBlue-2);
+		hFollowTrack->at(track)->Draw("same");
+	}
+
+	for (Int_t layer=0; layer<9; layer++) {
+		c8->cd(layer+1);
+		hAngles->at(layer)->SetFillColor(kRed-9+layer);
+		hAngles->at(layer)->Draw("same");
+	}
 
 	delete tracks;
 }
@@ -443,214 +562,158 @@ void DrawClusterShapes() {
 	}
 }
 
-void DrawBraggPeakFit(Int_t Runs, Int_t energy) {
+*/
+
+TString getDataTypeString(Int_t dataType) {
+	TString sDataType;
+	if (dataType == kMC)
+		sDataType = "MC";
+	else if (dataType == kData)
+		sDataType = "Exp. data";
+	else
+		sDataType = "Unknown source";
+
+	return sDataType;
+}
+
+Int_t getMinimumTrackLength(Int_t energy) {
+	Int_t minTL = 0;
+
+	if (energy < 150) minTL = 5;
+	else if (energy < 170) minTL = 10;
+	else if (energy < 190) minTL = 15;
+	else if (energy < 200) minTL = 20;
+
+	return minTL;
+}
+
+void DrawBraggPeakFit(Int_t Runs, Int_t dataType, Int_t energy) {
 
 	Focal f;
-
-//	Int_t energy = 190;
-
-	Clusters *restPoints = new Clusters(Runs*200);
-	Tracks *allTracks = f.FindRealTracks(Runs, restPoints, energy);
-	allTracks->SetOwner(true);
-
-//	TCanvas *cFollowTrack = new TCanvas("c1", "c1", 1000, 800);
-//	cFollowTrack->Divide(4, 4, 0.01, 0.01, 0);
-
-	vector<TH1F*> *hFollowTrackCut = new vector<TH1F*>;
-	hFollowTrackCut->reserve(allTracks->GetEntriesFast());
-
-	vector<TH1F*> *hFollowTrack = new vector<TH1F*>;
-	hFollowTrack->reserve(allTracks->GetEntriesFast());
-	for (Int_t track=0; track<allTracks->GetEntriesFast(); track++) {
-		// why doesn't the titles appear?
-		hFollowTrack->push_back(new TH1F(Form("hFollowTrack_%i", track), "Cluster size along track length for a single track", nLayers, 0, nLayers*dz));
-		hFollowTrack->at(track)->SetXTitle("Track Length [mm]");
-		hFollowTrack->at(track)->SetYTitle("Cluster size [# of pixels]");
-		
-		hFollowTrackCut->push_back(new TH1F(Form("hFollowTrackCut_%i", track), "Cluster size along track length for a single track", nLayers, 0, nLayers*dz));
-		hFollowTrackCut->at(track)->SetXTitle("Track Length [mm]");
-		hFollowTrackCut->at(track)->SetYTitle("Cluster size [# of pixels]");
-	}
-
 	Float_t trackLengthSoFar = 0;
-	Int_t trackNum = 0;
-	Int_t chip = 0; // quadrant to plot
-	Bool_t cutTL;
-	Bool_t cutCHIP;
-	Bool_t cutBP;
-	Bool_t cutNTBP; // bin next-to-bp must be filled
-	Bool_t cutCombined;
-	
-	Int_t okCHIP = 0;
-	Int_t okTL = 0;
-	Int_t okBP = 0;
-	Int_t okALL = 0;
-
+	Int_t trackNum = 0, chip = 0, minTL = 0;
+	Bool_t cutTL, cutCHIP, cutBP, cutNTBP, cutCombined, BPSampled;
+	Int_t okCHIP = 0, okTL = 0, okBP = 0, okALL = 0;
 	vector<TArrow*> arrows;
 	arrows.reserve(100);
 
-	for (Int_t i=0; i<allTracks->GetEntriesFast(); i++) {
+	Tracks *tracks = getTracks(Runs, dataType, kCalorimeter, energy);
+	tracks->extrapolateToLayer0();
+	TString sDataType = getDataTypeString(dataType);
 
-		Float_t TL = allTracks->getTrackLengthmm(i);
-		Int_t x0 = allTracks->At(i)->getX(0);
-		Int_t y0 = allTracks->At(i)->getY(0);
+	TCanvas *cFollowTrack = new TCanvas("c1", "c1", 1000, 800);
+	cFollowTrack->Divide(4, 4, 0.01, 0.01, 0);
 
-		// Find the largest bin of the last three
-		// This will probably be where the bragg peak is
+	vector<TH1F*> *hFollowTrack = new vector<TH1F*>;
+	hFollowTrack->reserve(tracks->GetEntriesFast());
+	for (Int_t track=0; track<tracks->GetEntriesFast(); track++) {
+		hFollowTrack->push_back(new TH1F(Form("hFollowTrack_%i", track), "Cluster size along track length for a single track", nLayers, 0, nLayers*dz));
+		hFollowTrack->at(track)->SetXTitle("Track Length [mm]");
+		hFollowTrack->at(track)->SetYTitle("Cluster size [# of pixels]");
+	}
+
+	Track *thisTrack;
+	for (Int_t i=0; i<tracks->GetEntriesFast(); i++) {
+		thisTrack = tracks->At(i);
+
+		Float_t TL = thisTrack->getTrackLengthmm();
+		Int_t x0 = thisTrack->getX(0);
+		Int_t y0 = thisTrack->getY(0);
+
+		cutNTBP = true;
+
 		Int_t BP = 0;
 		Int_t BPidx = -1;
-		Int_t BPidxFrom = allTracks->GetEntriesFast(i) - 4;
+		Int_t BPidxFrom = thisTrack->GetEntriesFast() - 4;
 		if (BPidxFrom < 0) BPidxFrom = 0;
-		
-		cutNTBP = kTRUE;
-
-		for (Int_t j=BPidxFrom; j<allTracks->GetEntriesFast(i); j++) {
-			if (BP <= allTracks->At(i)->getSize(j)) {
-				BP = allTracks->At(i)->getSize(j);
+		for (Int_t j=BPidxFrom; j<thisTrack->GetEntriesFast(); j++) {
+			if (BP <= thisTrack->getSize(j)) {
+				BP = thisTrack->getSize(j);
 				BPidx = j;
 			}
-			if (allTracks->At(i)->getSize(j) < 0.5) cutNTBP = kFALSE;
 		}
 
-		if (!cutNTBP) {
-			cout << "!cutNTBP for i = " << i << ". GetSizes follows.\n";
-			for (Int_t j=0; j<allTracks->GetEntriesFast(i); j++) {
-				cout << allTracks->At(i)->getSize(j) << endl;
-			}
+		if (BPidx > 2) {
+			if (thisTrack->getSize(BPidx-1) < 0.5) cutNTBP = false;
 		}
+		else
+			cutNTBP = false;
 
+		cutBP = (BP > 20) ? true : false;
 
-		if (BP > 20) {
-			cutBP = kTRUE;
-			okBP++;
-		}
-		else cutBP = kFALSE;
-
-		// Is the bragg peak located in the last three bins?
 		Int_t nextToMaxBP = 0;
-		for (Int_t j=BPidxFrom; j<allTracks->GetEntriesFast(i); j++) {
+		for (Int_t j=BPidxFrom; j<tracks->GetEntriesFast(i); j++) {
 			if (j==BPidx) continue;
-			if (nextToMaxBP <= allTracks->At(i)->getSize(j)) {
-				nextToMaxBP = allTracks->At(i)->getSize(j);
+			if (nextToMaxBP <= thisTrack->getSize(j)) {
+				nextToMaxBP = thisTrack->getSize(j);
 			}
 		}
 		
-		Bool_t BPSampled;
-		if ((Float_t) BP / nextToMaxBP >= 1.2 && BP > 20) {
-			BPSampled = kTRUE;
-		}
-		else BPSampled = kFALSE;
+		BPSampled = ((Float_t) BP / nextToMaxBP > 1.2 && cutBP) ? true : false;
+		minTL = getMinimumTrackLength(energy);
 
-		Int_t minTL;
+		cutTL = (TL > minTL) ? true : false;
 
-		if (energy == 190) minTL = 20;
-		if (energy == 180) minTL = 15;
-		if (energy == 170) minTL = 15;
-		if (energy == 160) minTL = 10;
-		if (energy == 150) minTL = 10;
-		if (energy == 140) minTL = 5;
-		if (energy == 130) minTL = 5;
-		if (energy == 122) minTL = 5;
+		chip = (x0 >= nx) + 2 * (y0 < ny);
+		cutCHIP = (chip<2 || dataType == kMC) ? true : false;
 
-		if (TL>minTL) {
-			cutTL = kTRUE;
-			okTL++;
-		}
-		else cutTL = kFALSE;
-				
-		if (x0<nx && y0>=ny) chip = 0;
-		else if (x0>=nx && y0>=ny) chip = 1;
-		else if (x0<nx && y0<ny) chip = 2;
-		else if (x0>=nx && y0<ny) chip = 3;
-
-		if (chip == 0 || chip == 1) {
-			cutCHIP = kTRUE;
-			okCHIP++;
-		}
-		
-		else cutCHIP = kFALSE;
-		
-		cutCombined = cutCHIP * cutTL;// * BPSampled;
+		cutCombined = cutCHIP * cutTL;
 		if (cutCombined) okALL++;
 
-		// start comment here
+		for (Int_t j=0; j<thisTrack->GetEntriesFast(); j++) {
+			trackLengthSoFar += thisTrack->getTrackLengthmmAt(j);
+			Float_t arrowPos = trackLengthSoFar + dz/2;
 
-		for (Int_t j=0; j<allTracks->GetEntriesFast(i); j++) {
-			trackLengthSoFar += allTracks->At(i)->GetTrackLengthAtmm(j);
 			if (trackNum < 16 && cutCombined) {
-				hFollowTrack->at(trackNum)->Fill(trackLengthSoFar, allTracks->At(i)->GetSize(j));
-	//				hFollowTrack->at(trackNum)->SetTitle(Form("Track length histogram for run %i", i));
+				hFollowTrack->at(trackNum)->Fill(trackLengthSoFar, thisTrack->getSize(j));
 				if (BPSampled && BPidx == j) {
-					// draw arrow on top of bin
-					// containing the bragg peak
-					arrows.push_back(new TArrow(trackLengthSoFar+dz/2, allTracks->At(i)->GetSize(j) * 1.3, 
-										  trackLengthSoFar+dz/2, allTracks->At(i)->GetSize(j) * 1.1, 0.005, "|>"));
+					arrows.push_back(new TArrow(arrowPos, thisTrack->getSize(j) * 1.3,
+										arrowPos, thisTrack->getSize(j) * 1.1, 0.005, "|>"));
 					arrows.back()->SetLineColor(kRed);
 					arrows.back()->SetLineWidth(2.);
 					arrows.back()->SetFillColor(kRed);
-					cout << "BP ok for trackNum " << trackNum << endl;
 				}
-				else if (!BPSampled && BPidx == j) {
+				else if (!BPSampled && BPidx == j)
 					arrows.push_back(NULL);
-				}
 			}
-			else if (cutCombined) {
-				// add to hFollowTrack anyway
-				// but don't plot it
-				hFollowTrack->at(trackNum)->Fill(trackLengthSoFar, allTracks->At(i)->GetSize(j));
-			}
-
-		} // end loop over clusters
-
-		// end comment here
-
-		for (Int_t j=0; j<allTracks->GetEntriesFast(i); j++) {
-			trackLengthSoFar += allTracks->At(i)->getTrackLengthmmAt(j);
-			if (cutCombined) {
-				hFollowTrack->at(trackNum)->Fill(trackLengthSoFar, allTracks->At(i)->getSize(j));
-
-				if (BPSampled) {
-					hFollowTrackCut->at(trackNum)->Fill(trackLengthSoFar, allTracks->At(i)->getSize(j));
-				}
-			}
+			else if (cutCombined)
+				hFollowTrack->at(trackNum)->Fill(trackLengthSoFar, thisTrack->getSize(j));
 		}
 
 		trackLengthSoFar = 0;
 		if (cutCombined) trackNum++;
-	} // end loop over tracks
+		if (cutTL) okTL++;
+		if (cutCHIP) okCHIP++;
+	}
 
-	cout << "Total tracks: " << allTracks->GetEntriesFast() << endl;
+	cout << "Total tracks: " << tracks->GetEntriesFast() << endl;
 	cout << "Total okCHIP: " << okCHIP << endl;
 	cout << "Total okTL: " << okTL << endl;
 	cout << "Total okBP: " << okBP << endl;
 	cout << "Total ok combined: " << okALL << endl;
 
-	// start comment here
-	// Fill histogram hFollowTrack with 16 first tracks
-	for (Int_t track=0; track<16; track++) {
-		cFollowTrack->cd(track+1);
+	for (UInt_t trackNo=0; trackNo<16; trackNo++) {
+		cFollowTrack->cd(trackNo+1);
 		gPad->DrawFrame(0, 0, 50, 45);
-		hFollowTrack->at(track)->SetFillColor(kBlue-2);
-		hFollowTrack->at(track)->Draw("same");
-		if (track < arrows.size()) {
-			if (arrows.at(track)) {
-				arrows.at(track)->Draw();
+		hFollowTrack->at(trackNo)->SetFillColor(kBlue-2);
+		hFollowTrack->at(trackNo)->Draw("same");
+		if (trackNo < arrows.size()) {
+			if (arrows.at(trackNo)) {
+				arrows.at(trackNo)->Draw();
 			}
 		}
 	}
-	// end comment here
 
 	TCanvas *c2 = new TCanvas("c2", "c2", 800, 600);
 	TH1F *hMu = new TH1F("hMu", "Mean fit value", 400, 0, 30);
 
-	TCanvas *c3 = new TCanvas("c3", "c3", 800, 600);
-	TH1F *hTotal = new TH1F("hTotal", "Sum of clustersizes in last two layers", 150, 0, 150);
-	TH1F *hTotalCut = new TH1F("hTotalBPcut", "Size of last two bins, with cuts", 150, 0, 150);
+	//TCanvas *c3 = new TCanvas("c3", "c3", 800, 600);
 
 	Float_t cog;
 
 	for (UInt_t track=0; track<hFollowTrack->size(); track++) {
-// start comment here
+
+	/*
  *   BRAGG PEAK GAUSSIAN FIT ALGORITHM
  *   NOT SUITED FOR THIS PROBLEM ...
  
@@ -669,10 +732,9 @@ void DrawBraggPeakFit(Int_t Runs, Int_t energy) {
 		cFollowTrack->cd(track+1);
 
 		hFollowTrack->at(track)->Fit("m1", "R, WW");
-	// end comment here
+	*/
 
 
-		// CoG for last two bins...
 		cog = 0;
 		Int_t hLen = hFollowTrack->at(track)->FindLastBinAbove();
 		if (hLen<3) continue;
@@ -684,10 +746,6 @@ void DrawBraggPeakFit(Int_t Runs, Int_t energy) {
 
 		// sometimes penultimate channel is bad, in that case fix it
 		if (pu<1 && ppu > pu*5) pu = ppu;
-//		if (pu<1) continue;
-	
-		// if the BP is not located in last layer, "push" the cog a bit
-//		if (u<21) u += (ppu+pu)/4;
 
 		// cog for last two bins
 		cog = (pu * (hLen-1)*dz + u * (hLen)*dz) / (u + pu);
@@ -713,22 +771,8 @@ void DrawBraggPeakFit(Int_t Runs, Int_t energy) {
 			if (mu<10) break;
 		}
 
-//		if (cog<22) continue;
 		hMu->Fill(cog);
-		hTotal->Fill(u);
 
-	}
-
-	// loop over track with extra cuts
-	for (UInt_t track=0; track<hFollowTrackCut->size(); track++) {
-		Int_t hLen = hFollowTrackCut->at(track)->FindLastBinAbove();
-		if (hLen<3) continue;
-
-		Float_t ppu = hFollowTrackCut->at(track)->GetBinContent(hLen-2);
-		Float_t pu = hFollowTrackCut->at(track)->GetBinContent(hLen-1);
-		Float_t u = hFollowTrackCut->at(track)->GetBinContent(hLen);
-		if (pu<1 && ppu > pu*5) pu = ppu;
-		hTotalCut->Fill(u);
 	}
 
 	c2->cd();
@@ -736,202 +780,10 @@ void DrawBraggPeakFit(Int_t Runs, Int_t energy) {
 	hMu->SetTitle(Form("Bragg peak positions for %i MeV protons", energy));
 	hMu->Draw();
 
-	// save hMu to root file
-	c2->Print(Form("bp_root/%iMeV.root", energy));
-
-	c3->cd();
-	hTotal->SetFillColor(kBlue-3);
-	hTotal->SetFillStyle(3002);
-	hTotal->Draw();
-	hTotalCut->SetFillColor(kGreen-5);
-//	hTotalCut->Draw("SAME");
-	hTotalCut->SetFillStyle(3002);
-
-	delete allTracks;
+	delete tracks;
 }
 
-void GetRealTrackStatistics(Int_t Runs) {
-	
-	Focal f;
-
-	Clusters *restPoints = new Clusters(10000);
-	Tracks *allTracks = f.FindRealTracks(Runs, restPoints);
-	allTracks->SetOwner(true);
-
-	// now we can calulate some statistics, such as
-	//  - average track length
-	//  - position of bragg peak ( with track -> cluster -> size )
-	//  - make histogram of naive track lengths (number of particles per layer)
-	//			versus realistic track lengths
-	//	 - make histogram of naive size distributions along track vs realistic
-
-	Int_t nTracksToPlot = 25;
-	Int_t nTracksToPlot1D = 5;
-
-	TCanvas *c1d = new TCanvas("c1d", "c1", 800, 600);
-	TCanvas *c2d = new TCanvas("c2d", "c2", 800, 600);
-	TCanvas *c3d = new TCanvas("c3d", "c3", 800, 600);
-	TCanvas *c4d = new TCanvas("c4d", "c4", 800, 600);
-	TCanvas *c5d = new TCanvas("c5d", "c5", 800, 600);
-	c5d->Divide(2, 2, 0.01, 0.01, 0);
-
-	TCanvas *c6d = new TCanvas("c6d", "c6", 1000, 800);
-	c6d->Divide(3, 3, 0.01, 0.01, 0);
-
-	TCanvas *c7d = new TCanvas("c7d", "c7", 1000, 800);
-	c7d->Divide(nTracksToPlot1D, nTracksToPlot1D, 0.01, 0.01, 0);
-
-	TCanvas *c8d = new TCanvas("c8d", "c8", 1000, 800);
-	c8d->Divide(3,3,0.01,0.01,0);
-
-	TH1F *hTrackLengths = new TH1F("hTrackLengthsd", "Track Lengths (data)", nLayers, 0, nLayers*dz);
-	TH2F *hClusterSizeAlongTrack = new TH2F("hClusterSizeAlongTrackd",
-				"Cluster size along track length (data)", nLayers, 0, nLayers*dz, 50, 0, 50);
-	TH1F *hStraightness = new TH1F("hStraightnessd", "Sinuosity plot (data)", 50, 1, 1.11);
-	TH1F *hSlope = new TH1F("hSloped", "Proton angle plot (data)", 50, 0, 20);
-
-	vector<TH1F*> *hAvgCS = new vector<TH1F*>;
-	hAvgCS->reserve(4);
-	for (Int_t chip=0; chip<4; chip++) {
-		hAvgCS->push_back(new TH1F("hAvgCS", Form("Average Cluster Size vs Track Length for chip %i (data)",chip), 50, 0, 50));
-	}
-
-	vector<TH1F*> *hCSLayer = new vector<TH1F*>;
-	hCSLayer->reserve(9);
-	for (Int_t layer=0; layer<9; layer++) {
-		hCSLayer->push_back(new TH1F(Form("hCSLayer%id", layer), Form("Cluster Size for layer %i", layer), 50, 0, 50));
-	}
-
-	vector<TH1F*> *hFollowTrack = new vector<TH1F*>;
-	hFollowTrack->reserve(nTracksToPlot);
-	for (Int_t track=0; track<nTracksToPlot; track++) {
-		hFollowTrack->push_back(new TH1F(Form("hFollowTrack_%i", track), "Cluster size along track length for a single track", 50, 0, 50));
-		hFollowTrack->at(track)->SetXTitle("Track Length [mm]");
-		hFollowTrack->at(track)->SetYTitle("Cluster size [# of pixels]");
-	Int_t trackNum = 0;
-	}
-	
-	vector<TH1F*> *hAngles = new vector<TH1F*>;
-	hAngles->reserve(9);
-	for (Int_t layer=0; layer<9; layer++) {
-		hAngles->push_back(new TH1F(Form("hANgles_%i", layer), Form("Proton angle distribution in layer %i", layer), 50, 0, 20));
-		hAngles->at(layer)->SetXTitle("Track Length [mm]");
-		hAngles->at(layer)->SetYTitle("Cluster size [# of pixels]");
-	}
-
-	hTrackLengths->SetXTitle("Track length [mm]");
-	hClusterSizeAlongTrack->SetXTitle("Track length [mm]");
-	hClusterSizeAlongTrack->SetYTitle("Cluster size [# of pixels]");
-	hStraightness->SetXTitle("Sinuosity parameter");
-	hSlope->SetXTitle("Total track angle (degree)");
-
-	Float_t trackLengthSoFar = 0;
-	Int_t trackNum = 0;
-	Int_t chip = 0; // quadrant to plot
-	Bool_t cutTL;
-	Bool_t cutCHIP;
-	
-	Int_t okCHIP = 0;
-	Int_t okTL = 0;
-	Int_t okBOTH = 0;
-
-	for (Int_t i=0; i<allTracks->GetEntriesFast(); i++) {
-		Float_t TL = allTracks->getTrackLengthmm(i);
-		Int_t x0 = allTracks->At(i)->getX(0);
-		Int_t y0 = allTracks->At(i)->getY(0);
-	
-		if (TL>22) {
-			cutTL = kTRUE;
-			okTL++;
-		}
-
-		else cutTL = kFALSE;
-				
-		if (x0<nx && y0>=ny) chip = 0;
-		else if (x0>=nx && y0>=ny) chip = 1;
-		else if (x0<nx && y0<ny) chip = 2;
-		else if (x0>=nx && y0<ny) chip = 3;
-
-		if (chip == 0 || chip == 1) {
-			cutCHIP = kTRUE;
-			okCHIP++;
-		}
-		else cutCHIP = kFALSE;
-		
-		if (cutTL && cutCHIP) {
-			okBOTH++;
-		}
-		
-		hTrackLengths->Fill(TL);
-		hStraightness->Fill(allTracks->getSinuosity(i));
-		hSlope->Fill(allTracks->getSlopeAngle(i));
-
-		for (Int_t j=0; j<allTracks->GetEntriesFast(i); j++) {
-			trackLengthSoFar += allTracks->At(i)->getTrackLengthmmAt(j);
-			if (cutTL && cutCHIP) hClusterSizeAlongTrack->Fill(trackLengthSoFar, allTracks->At(i)->getSize(j));
-			if (cutTL) {
-				// find quadrant to plot from
-				hAvgCS->at(chip)->Fill(trackLengthSoFar, allTracks->At(i)->getSize(j));
-			}
-			Int_t layer = allTracks->At(i)->getLayer(j);
-			if (layer < 9) {
-				hCSLayer->at(layer)->Fill(allTracks->At(i)->getSize(j));
-			}
-			if (layer<9) {
-				hAngles->at(layer)->Fill(allTracks->At(i)->getSlopeAngleAtLayer(j));
-				// slope angle between track at layer 0 and layer j
-			}
-
-			if (trackNum < nTracksToPlot && cutTL && cutCHIP) { // don't plot the shortest tracks
-				hFollowTrack->at(trackNum)->Fill(trackLengthSoFar, allTracks->At(i)->getSize(j));
-				hFollowTrack->at(trackNum)->SetTitle(Form("Track length histogram for run %i", i));
-//				cout << "hFollowTrack_" << trackNum << ": Run " << i << endl;
-			}
-		} // end loop over clusters
-		trackLengthSoFar = 0;
-		if (cutTL && cutCHIP) trackNum++;
-	} // end loop over tracks
-
-	cout << "Total tracks: " << allTracks->GetEntriesFast() << endl;
-	cout << "Total okCHIP: " << okCHIP << endl;
-	cout << "Total okTL: " << okTL << endl;
-	cout << "Total ok(CHIP+TL): " << okBOTH << endl;
-
-	c1d->cd();
-		hTrackLengths->Draw();
-	c2d->cd();
-		gStyle->SetOptStat(0);
-		hClusterSizeAlongTrack->Draw("COLZ");
-	c3d->cd();
-		hStraightness->Draw();
-	c4d->cd();
-		hSlope->Draw();
-	for (Int_t chip=0; chip<4; chip++) {
-		c5d->cd(chip+1);
-		hAvgCS->at(chip)->SetFillColor(kRed-chip*2);
-		hAvgCS->at(chip)->Draw();
-	}
-	for (Int_t layer=0; layer<9; layer++) {
-		c6d->cd(layer+1);
-		hCSLayer->at(layer)->SetFillColor(kRed-9+layer);
-		hCSLayer->at(layer)->Draw("same");
-	}
-
-	for (Int_t track=0; track<nTracksToPlot; track++) {
-		c7d->cd(track+1);
-		gPad->DrawFrame(0, 0, 50, 35);
-		hFollowTrack->at(track)->SetFillColor(kBlue-2);
-		hFollowTrack->at(track)->Draw("same");
-	}
-
-	for (Int_t layer=0; layer<9; layer++) {
-		c8d->cd(layer+1);
-		hAngles->at(layer)->SetFillColor(kRed-9+layer);
-		hAngles->at(layer)->Draw("same");
-	}
-
-	delete allTracks;
-}
+/*
 	
 void WriteClusterFile(Int_t Runs) {
 	// loop through hits in histogram and make a TTree branch of them
@@ -1102,7 +954,7 @@ Tracks * getTracks(Int_t Runs, Int_t dataType, Int_t frameType, Int_t energy) {
 }
 
 void DrawTracks3D(Int_t Runs, Int_t dataType, Int_t frameType, Int_t energy) {
-	Tracks *tracks = getTracks(Runs);
+	Tracks *tracks = getTracks(Runs, dataType, frameType, energy);
 	tracks->extrapolateToLayer0();
 
 	TCanvas *c1 = new TCanvas("c1");
@@ -1302,20 +1154,6 @@ void DrawDiffusionCheck(Int_t Runs, Int_t Layer) {
    c1->Update();
 } // end function Frame2DWithDiffusion
 
-void DrawRealFrame2D(Int_t Runs, Int_t Layer) {
-   Focal f;
-
-   TH2F *Frame2D = new TH2F("Frame2D", "Hitsmap in all layers", 
-                              nx*2, 0, nx*2, ny*2, 0, ny*2);
-   Frame2D->SetXTitle("Pixel number");
-   Frame2D->SetYTitle("Pixel number");
-  	
-   f.GetRealFrame2D(Runs, Layer, Frame2D);
-
-	Frame2D->Draw("COLZ");
-	gStyle->SetOptStat(0);
-
-} // end function DrawRealFrame2D
 
 void DrawFrame2D(Int_t Runs, Int_t Layer) {
    // Draw one layer using GetFrame2D
@@ -1428,3 +1266,4 @@ Long64_t nentries = fChain->GetEntriesFast();
 // end comment here
 
  */
+

@@ -4,6 +4,8 @@
 #include "Tracks.h"
 
 Tracks * getTracks(Int_t Runs, Int_t dataType = kMC, Int_t frameType = kCalorimeter, Int_t energy = 190);
+void		DrawBraggPeakFit(Int_t Runs, Int_t dataType = kMC, Int_t energy = 190);
+TString getDataTypeString(Int_t dataType);
 //void		DrawFrame2D(Int_t Runs, Int_t Layer);
 //void		DrawRealFrame2D(Int_t Runs, Int_t Layer);
 //void		DrawData3D(Int_t RunFrom, Int_t RunTo);
@@ -14,7 +16,6 @@ void		DrawTracks3D(Int_t Runs, Int_t dataType, Int_t frameType, Int_t energy);
 //void		WriteClusterFile(Int_t Runs);
 //void		FindClusters(Int_t Runs, Int_t Layer);
 //void		MakeLayerPNGs(Int_t Runs, Int_t Diffusion);
-//void		DrawBraggPeakFit(Int_t Runs, Int_t energy);
 //void		DrawClusterShapes();
 //void		CompareDataAndMC(Int_t Runs, Int_t DataRuns);
 //void		Draw2DProjection(Int_t Runs, Int_t Events);

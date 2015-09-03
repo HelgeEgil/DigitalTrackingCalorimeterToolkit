@@ -8,7 +8,7 @@ void Load() {
    gROOT->LoadMacro("TrackCollection.C+");
    gROOT->LoadMacro("TFocal.C+");
 */
-	gSystem->Load("libMathMore");
+//	gSystem->Load("libMathMore");
 	gROOT->LoadMacro("wrapper.C+");
 	gROOT->LoadMacro("Analysis.C+");
 }

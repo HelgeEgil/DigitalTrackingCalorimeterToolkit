@@ -1,6 +1,7 @@
 // wrapper.C
 // include all the .C files to compile
 
+#include "Constants.h"
 #include "Hit.h"
 #include "Hit.C"
 #include "Cluster.h"

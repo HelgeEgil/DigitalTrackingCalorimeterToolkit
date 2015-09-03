@@ -620,25 +620,25 @@ void Focal::getDataFrame(Int_t runNo, CalorimeterFrame * cf, Int_t energy) {
 	TTree *tree = (TTree*) f->Get("tree");
 
 	Int_t nentries = tree->GetEntries();
+	if (eventIdTo > nentries) {
+		eventIdTo = nentries;
+	}
+	cout << "Found " << nentries << " frames in the DataFrame.\n";
 
 	TLeaf *lX = tree->GetLeaf("fDataFrame.fX");
 	TLeaf *lY = tree->GetLeaf("fDataFrame.fY");
 	TLeaf *lLayer = tree->GetLeaf("fDataFrame.fLayer");
 
 	Int_t counter = 0;
-	for (Int_t i=0; i<nentries; i++) {
-		if (counter < eventIdFrom) continue;
-		if (counter > eventIdTo) break;
+	for (Int_t i=eventIdFrom; i<eventIdTo; i++) {
+//		if (counter < eventIdFrom) continue;
+//		if (counter > eventIdTo) break;
 		tree->GetEntry(i);
 
-		Int_t nleafs = lX->GetLen();
-		cout << " ------ " << nleafs << " leafs ------ \n";
-		for (Int_t j=0; j<nleafs; j++) {
-			Int_t x = lX->GetValue(j);
-			Int_t y = lY->GetValue(j);
+		for (Int_t j=0; j<lX->GetLen(); j++) {
+			Int_t x = lX->GetValue(j) + nx;
+			Int_t y = lY->GetValue(j) + ny;
 			Int_t z = lLayer->GetValue(j);
-
-			cout << "(" << x << "," << y << "," << z << ")\n";
 
 			cf->fillAt(z, x, y);
 		}

@@ -43,4 +43,7 @@ const Int_t kRecursive = 0;
 const Int_t kNearestCluster = 1;
 const Int_t kTrackFindingAlgorithm = kNearestCluster;
 
+// For the bragg peak analysis
+const Int_t kMinimumTracklength = 22;
+
 #endif
