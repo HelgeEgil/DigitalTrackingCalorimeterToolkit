@@ -597,9 +597,21 @@ void DrawBraggPeakFit(Int_t Runs, Int_t dataType, Int_t energy) {
 	vector<TArrow*> arrows;
 	arrows.reserve(100);
 
+	vector<TArrow*> cogArrows;
+	cogArrows.reserve(100);
+
 	Tracks *tracks = getTracks(Runs, dataType, kCalorimeter, energy);
 	tracks->extrapolateToLayer0();
 	TString sDataType = getDataTypeString(dataType);
+
+	TCanvas *cAverageTrack = new TCanvas("cAverageTrack", "Average Cluster Size along track", 1000, 800);
+	TH1F *hAverageTrack = new TH1F("hAverageTrack", "Average Cluster Size along track", nLayers, 0, nLayers*dz);
+
+	TCanvas *cBPResult = new TCanvas("cBPResult", "Bragg Peak fit mean values", 1000, 800);
+	TH1F *hBPResult = new TH1F("hBPResult", "Bragg peak fit mean values", nLayers*50, 0, nLayers*dz);
+
+	TCanvas *c2 = new TCanvas("c2", "c2", 800, 600);
+	TH1F *hMu = new TH1F("hMu", "Mean fit value", 400, 0, 30);
 
 	TCanvas *cFollowTrack = new TCanvas("c1", "c1", 1000, 800);
 	cFollowTrack->Divide(4, 4, 0.01, 0.01, 0);
@@ -639,7 +651,7 @@ void DrawBraggPeakFit(Int_t Runs, Int_t dataType, Int_t energy) {
 		else
 			cutNTBP = false;
 
-		cutBP = (BP > 20) ? true : false;
+		cutBP = (BP > 20 && BPidx > 3) ? true : false;
 
 		Int_t nextToMaxBP = 0;
 		for (Int_t j=BPidxFrom; j<tracks->GetEntriesFast(i); j++) {
@@ -657,12 +669,15 @@ void DrawBraggPeakFit(Int_t Runs, Int_t dataType, Int_t energy) {
 		chip = (x0 >= nx) + 2 * (y0 < ny);
 		cutCHIP = (chip<2 || dataType == kMC) ? true : false;
 
-		cutCombined = cutCHIP * cutTL;
+		cutCombined = cutCHIP * cutTL * BPSampled;
 		if (cutCombined) okALL++;
 
 		for (Int_t j=0; j<thisTrack->GetEntriesFast(); j++) {
 			trackLengthSoFar += thisTrack->getTrackLengthmmAt(j);
 			Float_t arrowPos = trackLengthSoFar + dz/2;
+
+			if (cutCombined)
+				hAverageTrack->Fill(trackLengthSoFar, thisTrack->getSize(j));
 
 			if (trackNum < 16 && cutCombined) {
 				hFollowTrack->at(trackNum)->Fill(trackLengthSoFar, thisTrack->getSize(j));
@@ -680,11 +695,45 @@ void DrawBraggPeakFit(Int_t Runs, Int_t dataType, Int_t energy) {
 				hFollowTrack->at(trackNum)->Fill(trackLengthSoFar, thisTrack->getSize(j));
 		}
 
+		if (trackNum < 16 && cutCombined) {
+			TF1 *g1 = new TF1("m1", "gaus", 15, 35);
+
+			Float_t BPpos = hFollowTrack->at(trackNum)->GetMaximumBin() * dz;
+			Float_t BP = hFollowTrack->at(trackNum)->GetBinContent(BPpos/dz);
+			Float_t BPwidth = 2;
+
+			g1->SetParameters(BP, BPpos, BPwidth); // BP, BPpos, 2.5
+			g1->SetParLimits(0, BP*0.8, BP*1.2);
+			g1->SetParLimits(1, BPpos*0.85, BPpos*1.15);
+			cout << "Constant limits: " << BPpos*0.9 << " -> " << BPpos*1.1 << endl;
+			g1->SetParLimits(2, BPwidth, BPwidth);
+
+			cFollowTrack->cd(trackNum+1);
+
+			hFollowTrack->at(trackNum)->Fit("m1", "R, WW", "", BPpos*0.7, BPpos*1.3);
+		}
+
 		trackLengthSoFar = 0;
 		if (cutCombined) trackNum++;
 		if (cutTL) okTL++;
 		if (cutCHIP) okCHIP++;
+		if (cutBP) okBP++;
 	}
+
+	TF1 *g1 = new TF1("m1", "gaus", 15, 35);
+
+	Float_t BPpos = hAverageTrack->GetMaximumBin() * dz;
+	Float_t BP = hAverageTrack->GetBinContent(BPpos/dz);
+	Float_t BPwidth = 2;
+
+	g1->SetParameters(BP, BPpos, BPwidth); // BP, BPpos, 2.5
+	g1->SetParLimits(0, BP*0.8, BP*1.2);
+	g1->SetParLimits(1, BPpos*0.85, BPpos*1.15);
+	g1->SetParLimits(2, BPwidth, BPwidth);
+
+	cAverageTrack->cd();
+
+	hAverageTrack->Fit("m1", "R, WW", "", BPpos*0.7, BPpos*1.3);
 
 	cout << "Total tracks: " << tracks->GetEntriesFast() << endl;
 	cout << "Total okCHIP: " << okCHIP << endl;
@@ -692,49 +741,17 @@ void DrawBraggPeakFit(Int_t Runs, Int_t dataType, Int_t energy) {
 	cout << "Total okBP: " << okBP << endl;
 	cout << "Total ok combined: " << okALL << endl;
 
-	for (UInt_t trackNo=0; trackNo<16; trackNo++) {
-		cFollowTrack->cd(trackNo+1);
-		gPad->DrawFrame(0, 0, 50, 45);
-		hFollowTrack->at(trackNo)->SetFillColor(kBlue-2);
-		hFollowTrack->at(trackNo)->Draw("same");
-		if (trackNo < arrows.size()) {
-			if (arrows.at(trackNo)) {
-				arrows.at(trackNo)->Draw();
-			}
-		}
-	}
 
-	TCanvas *c2 = new TCanvas("c2", "c2", 800, 600);
-	TH1F *hMu = new TH1F("hMu", "Mean fit value", 400, 0, 30);
+
+	cAverageTrack->cd();
+	hAverageTrack->SetFillColor(kOrange+7);
+	hAverageTrack->Draw();
 
 	//TCanvas *c3 = new TCanvas("c3", "c3", 800, 600);
 
 	Float_t cog;
 
 	for (UInt_t track=0; track<hFollowTrack->size(); track++) {
-
-	/*
- *   BRAGG PEAK GAUSSIAN FIT ALGORITHM
- *   NOT SUITED FOR THIS PROBLEM ...
- 
-		
- TF1 *g1 = new TF1("m1", "gaus", 15, 35);
-		
-		Float_t BPpos = hFollowTrack->at(track)->GetMaximumBin() * dz;
-		Float_t BP = hFollowTrack->at(track)->GetBinContent(BPpos/dz);
-		Float_t BPwidth = 2;
-
-		g1->SetParameters(BP, BPpos, BPwidth); // BP, BPpos, 2.5
-		g1->SetParLimits(0, BP*0.8, BP*1.2);
-		g1->SetParLimits(1, BPpos*0.9, BPpos*1.1);
-		g1->SetParLimits(2, BPwidth, BPwidth);
-
-		cFollowTrack->cd(track+1);
-
-		hFollowTrack->at(track)->Fit("m1", "R, WW");
-	*/
-
-
 		cog = 0;
 		Int_t hLen = hFollowTrack->at(track)->FindLastBinAbove();
 		if (hLen<3) continue;
@@ -749,30 +766,31 @@ void DrawBraggPeakFit(Int_t Runs, Int_t dataType, Int_t energy) {
 
 		// cog for last two bins
 		cog = (pu * (hLen-1)*dz + u * (hLen)*dz) / (u + pu);
-		
-		// using cumulative Gaussian as LUT
-		Float_t cumGaus = 0;
-		Float_t sumLimit = 45; // sum under whole gaussian
-		Float_t mu = 30;
-		Float_t sigma = dz;
-
-		Float_t limit;
-		if (u<25) { // no bragg peak
-			limit = u;
-		}
-
-		else {
-			limit = pu + u;
-		}
-
-		while (sumLimit*cumGaus < limit) {
-			cumGaus = ROOT::Math::normal_cdf(u, sigma, mu);
-			mu -= 0.05;
-			if (mu<10) break;
-		}
 
 		hMu->Fill(cog);
+		
+		cogArrows.push_back(new TArrow(cog, max(u,pu) * 1.3,
+							cog, max(u,pu) * 1.1, 0.005, "|>"));
+		cogArrows.back()->SetLineColor(kGreen);
+		cogArrows.back()->SetLineWidth(2.);
+		cogArrows.back()->SetFillColor(kGreen);
+	}
 
+	for (UInt_t trackNo=0; trackNo<16; trackNo++) {
+		cFollowTrack->cd(trackNo+1);
+		gPad->DrawFrame(0, 0, 50, 45);
+		hFollowTrack->at(trackNo)->SetFillColor(kBlue-2);
+		hFollowTrack->at(trackNo)->Draw("same");
+		if (trackNo < arrows.size()) {
+			if (arrows.at(trackNo)) {
+				arrows.at(trackNo)->Draw();
+			}
+		}
+		if (trackNo < cogArrows.size()) {
+			if (cogArrows.at(trackNo)) {
+				cogArrows.at(trackNo)->Draw();
+			}
+		}
 	}
 
 	c2->cd();
