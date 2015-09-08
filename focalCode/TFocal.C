@@ -631,8 +631,6 @@ void Focal::getDataFrame(Int_t runNo, CalorimeterFrame * cf, Int_t energy) {
 
 	Int_t counter = 0;
 	for (Int_t i=eventIdFrom; i<eventIdTo; i++) {
-//		if (counter < eventIdFrom) continue;
-//		if (counter > eventIdTo) break;
 		tree->GetEntry(i);
 
 		for (Int_t j=0; j<lX->GetLen(); j++) {
@@ -644,6 +642,7 @@ void Focal::getDataFrame(Int_t runNo, CalorimeterFrame * cf, Int_t energy) {
 		}
 		counter++;
 	}
+	delete f;
 }
 
 void Focal::getMCFrame(Int_t runNo, CalorimeterFrame *cf) {

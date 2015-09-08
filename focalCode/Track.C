@@ -124,7 +124,7 @@ Float_t Track::getSnakeness() {
 	Int_t n = GetEntriesFast();
 	Float_t snakeness = 0;
 
-	if (n<3 || !At(0) || !At(1)) snakeness = 5;
+	if (n<3 || !At(0) || !At(1)) snakeness = 3;
 	else {
 		Float_t x, y, xp, yp, dXY, dX, dY;
 
@@ -158,6 +158,8 @@ Float_t Track::getTrackScore() {
 
 	Float_t trackLength = getTrackLengthmm();
 	Float_t snakeness = getSnakeness();
+
+	if (trackLength == 0) return 0;
 
 	Float_t points = trackLength * (trackLengthPoints / upperTrackLength)
 						+ (upperSnakeness - snakeness) * snakePoints/upperSnakeness;

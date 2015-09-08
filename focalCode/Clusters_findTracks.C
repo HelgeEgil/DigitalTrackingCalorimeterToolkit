@@ -32,6 +32,8 @@ Tracks * Clusters::findTracks() {
 	Float_t factor = 100 * (1 - (Float_t) clustersLeft / (Float_t) GetEntriesFast());
 	cout << clustersLeft << " of total " << GetEntriesFast() << " clusters were not assigned to track! (" << factor << " %)\n";
 
+	delete bestTrack;
+
 	return tracks;
 }
 
@@ -56,8 +58,9 @@ void Clusters::findTracksFromLayer(Tracks * tracks, Int_t layer) {
 			tracks->appendTrack(bestTrack, startOffset);
 			removeAllClustersInTrack(bestTrack);
 		}
-		delete bestTrack;
 	}
+
+	delete bestTrack;
 	delete seeds;
 }
 
@@ -82,7 +85,10 @@ Track * Clusters::recursiveTrackPropagation(Cluster *cluster, Track currentTrack
 
 	Tracks *tracksFromThisCluster = new Tracks(100);
 	Track *bestTrack = new Track();
-	Cluster *projectedPoint;
+	Track *bestNextTrack = 0;
+	Cluster *projectedPoint = 0;
+	Cluster *nextClosePoint = 0;
+
 	Clusters *closePointsInNextLayer = new Clusters();
 
 	Int_t layer = cluster->getLayer() + 1;
@@ -103,8 +109,8 @@ Track * Clusters::recursiveTrackPropagation(Cluster *cluster, Track currentTrack
 	}
 
 	for (Int_t i=0; i<closePointsInNextLayer->GetEntriesFast(); i++) {
-		Cluster *nextClosePoint = closePointsInNextLayer->At(i);
-		Track * bestNextTrack = recursiveTrackPropagation(nextClosePoint, currentTrack);
+		nextClosePoint = closePointsInNextLayer->At(i);
+		bestNextTrack = recursiveTrackPropagation(nextClosePoint, currentTrack);
 
 		if (bestNextTrack->GetEntriesFast())
 			tracksFromThisCluster->appendTrack(bestNextTrack);
@@ -118,6 +124,13 @@ Track * Clusters::recursiveTrackPropagation(Cluster *cluster, Track currentTrack
 			bestTrack->appendCluster(track->At(i));
 		}
 	}
+
+	delete tracksFromThisCluster;
+	delete projectedPoint;
+	delete closePointsInNextLayer;
+	delete nextClosePoint;
+	delete bestNextTrack;
+
 	return bestTrack;
 }
 
@@ -142,6 +155,10 @@ Track * Clusters::nearestClusterTrackPropagation(Cluster *seed) {
 	if (seedTracks->GetEntriesFast())
 		longestTrack = findLongestTrack(seedTracks);
 
+	delete seedTracks;
+	delete currentTrack;
+	delete nextClusters;
+
 	return longestTrack;
 }
 
@@ -164,6 +181,7 @@ Clusters * Clusters::findNearestClustersInNextLayer(Cluster *seed) {
 	}
 
 	delete clustersFromThisLayer;
+
 	return nextClusters;
 }
 
@@ -203,9 +221,11 @@ void Clusters::doNearestClusterTrackPropagation(Track *track, Int_t lastHitLayer
 
 		if (distance > searchRadius/2) {
 			projectedPoint = getTrackPropagationToLayer(track, layer+1);
+
 			if (!isPointOutOfBounds(projectedPoint)) {
 				skipNearestNeighbour = findNearestNeighbour(projectedPoint);
 				skipDistance = diffmm(projectedPoint, skipNearestNeighbour);
+
 				if (skipDistance * 1.2 < distance  && skipDistance > 0) {
 					track->appendCluster(skipNearestNeighbour);
 					lastHitLayer = ++layer+1; // don't search next layer...
@@ -225,6 +245,7 @@ void Clusters::doNearestClusterTrackPropagation(Track *track, Int_t lastHitLayer
 		if (layer>lastHitLayer+2)
 			break;
 	}
+
 	delete projectedPoint;
 	delete nearestNeighbour;
 	delete skipNearestNeighbour;
@@ -316,7 +337,6 @@ Track * Clusters::findLongestTrack(Tracks *seedTracks) {
 	Track * track = 0;
 
 	for (Int_t i=0; i<seedTracks->GetEntriesFast(); i++) {
-		// Float_t trackLength = seedTracks->getTrackLengthmm(i);
 		Float_t score = seedTracks->getTrackScore(i);
 		if (score > bestScore) {
 			bestScore = score;
@@ -331,5 +351,7 @@ Track * Clusters::findLongestTrack(Tracks *seedTracks) {
 		startOffset = 1;
 
 	longestTrack->setTrack(track, startOffset);
+
+	//delete track;
 	return longestTrack;
 }
