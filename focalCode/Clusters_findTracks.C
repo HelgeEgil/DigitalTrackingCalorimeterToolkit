@@ -9,10 +9,42 @@
 
 using namespace std;
 
+Tracks * Clusters::findTrackerTracks() {
+	Tracks * tracks = new Tracks(kEventsPerRun * 5);
 
-Tracks * Clusters::findTracks() {
+	makeLayerIndex();
+
+	findTracksFromLayer(tracks, 0);
+
+	Int_t nComplete = 0;
+	for (Int_t i=0; i<tracks->GetEntriesFast(); i++) {
+		Int_t nClusters = 0;
+		if (!At(i)) continue;
+
+		for (Int_t j=0; j<tracks->GetEntriesFast(i); j++) {
+			if (tracks->At(i)->At(j))
+				nClusters++;
+		}
+
+		if (nClusters == 4) nComplete++;
+	}
+
+	Int_t clustersLeft = 0;
+	for (Int_t i=0; i<GetEntriesFast(); i++) {
+		if (At(i)) {
+			clustersLeft++;
+			appendClusterWithoutTrack(At(i));
+		}
+	}
+
+	Float_t factor = 100 * (1 - (Float_t) clustersLeft / GetEntriesFast());
+	cout << clustersLeft << " of total " << GetEntriesFast() << " tracker clusters were not assigned to track (" << factor << "%)\n";
+
+	return tracks;
+}
+
+Tracks * Clusters::findCalorimeterTracks() {
 	Tracks *tracks = new Tracks(kEventsPerRun * 5);
-	Track *bestTrack = new Track();
 	Int_t startOffset = 0;
 
 	makeLayerIndex();
@@ -29,15 +61,13 @@ Tracks * Clusters::findTracks() {
 			appendClusterWithoutTrack(At(i));
 		}
 	}
-	Float_t factor = 100 * (1 - (Float_t) clustersLeft / (Float_t) GetEntriesFast());
+	Float_t factor = 100 * (1 - (Float_t) clustersLeft / GetEntriesFast());
 	cout << clustersLeft << " of total " << GetEntriesFast() << " clusters were not assigned to track! (" << factor << " %)\n";
-
-	delete bestTrack;
 
 	return tracks;
 }
 
-void Clusters::findTracksFromLayer(Tracks * tracks, Int_t layer) {
+void Clusters::findTracksFromLayer(Tracks * tracks, Int_t layer, Int_t trackFindingAlgorithm) {
 	Int_t startOffset = 0;
 	Track *bestTrack = 0;
 
@@ -46,9 +76,12 @@ void Clusters::findTracksFromLayer(Tracks * tracks, Int_t layer) {
 		if (!seeds->At(i))
 			continue;
 
-		if (kTrackFindingAlgorithm == kRecursive)
+		if (trackFindingAlgorithm < 0)
+			trackFindingAlgorithm = kTrackFindingAlgorithm; // in Constants.h
+
+		if (trackFindingAlgorithm == kRecursive)
 			bestTrack = recursiveTrackPropagation(seeds->At(i), Track(seeds->At(i)));
-		else if (kTrackFindingAlgorithm == kNearestCluster)
+		else if (trackFindingAlgorithm == kNearestCluster)
 			bestTrack = nearestClusterTrackPropagation(seeds->At(i));
 
 		if (bestTrack->GetEntriesFast() > 0) {

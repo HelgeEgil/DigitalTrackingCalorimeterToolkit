@@ -116,7 +116,7 @@ void GetTrackerStatistics(Int_t Events, Int_t Runs) {
 
 */
 
-void GetTrackStatistics(Int_t Runs, Int_t dataType, Int_t energy) {
+void getTrackStatistics(Int_t Runs, Int_t dataType, Int_t energy) {
 	Focal f;
 
 	Tracks *tracks = getTracks(Runs, dataType, kCalorimeter, energy);
@@ -390,12 +390,13 @@ Int_t getMinimumTrackLength(Int_t energy) {
 	return minTL;
 }
 
-void DrawBraggPeakFit(Int_t Runs, Int_t dataType, Int_t energy) {
+void drawBraggPeakFit(Int_t Runs, Int_t dataType, Int_t energy) {
 
 	Focal f;
 	Float_t trackLengthSoFar = 0;
 	Int_t trackNum = 0, chip = 0, minTL = 0;
-	Bool_t cutTL, cutCHIP, cutBP, cutNTBP, cutCombined, BPSampled;
+	Bool_t cutTrackLength, cutChipNumber, cutBraggPeakInTrack;
+	Bool_t cutCombined, BPSampled;
 	Int_t okCHIP = 0, okTL = 0, okBP = 0, okALL = 0, okNTBP = 0;
 	vector<TArrow*> arrows;
 	arrows.reserve(100);
@@ -431,48 +432,16 @@ void DrawBraggPeakFit(Int_t Runs, Int_t dataType, Int_t energy) {
 	for (Int_t i=0; i<tracks->GetEntriesFast(); i++) {
 		thisTrack = tracks->At(i);
 
-		Float_t TL = thisTrack->getTrackLengthmm();
-		Int_t x0 = thisTrack->getX(0);
-		Int_t y0 = thisTrack->getY(0);
+		cutTrackLength = getCutTrackLength(energy, thisTrack);
+		cutBraggPeakInTrack = getCutBraggPeakInTrack(thisTrack);
 
-		cutNTBP = true;
-
-		Int_t BP = 0;
-		Int_t BPidx = -1;
-		Int_t BPidxFrom = thisTrack->GetEntriesFast() - 4;
-		if (BPidxFrom < 0) BPidxFrom = 0;
-		for (Int_t j=BPidxFrom; j<thisTrack->GetEntriesFast(); j++) {
-			if (BP <= thisTrack->getSize(j)) {
-				BP = thisTrack->getSize(j);
-				BPidx = j;
-			}
-		}
-
-		if (BPidx > 2) {
-			if (thisTrack->getSize(BPidx-1) < 0.5) cutNTBP = false;
-		}
+		if (dataType == kData)
+			cutChipNumber = getCutChipNumber(thisTrack);
 		else
-			cutNTBP = false;
+			cutChipNumber = true;
 
-		cutBP = (BP > 20 && BPidx > 3) ? true : false;
-
-		Int_t nextToMaxBP = 0;
-		for (Int_t j=BPidxFrom; j<tracks->GetEntriesFast(i); j++) {
-			if (j==BPidx) continue;
-			if (nextToMaxBP <= thisTrack->getSize(j)) {
-				nextToMaxBP = thisTrack->getSize(j);
-			}
-		}
 		
-		BPSampled = ((Float_t) BP / nextToMaxBP > 1.2 && cutBP) ? true : false;
-		minTL = getMinimumTrackLength(energy);
-
-		cutTL = (TL > minTL) ? true : false;
-
-		chip = (x0 >= nx) + 2 * (y0 < ny);
-		cutCHIP = (chip<2 || dataType == kMC) ? true : false;
-
-		cutCombined = cutCHIP * cutTL * BPSampled * cutNTBP;
+		cutCombined = cutBraggPeakInTrack * cutTrackLength;
 		if (cutCombined) okALL++;
 
 		trackLengthSoFar = 0;
@@ -480,13 +449,14 @@ void DrawBraggPeakFit(Int_t Runs, Int_t dataType, Int_t energy) {
 			trackLengthSoFar += thisTrack->getTrackLengthmmAt(j);
 			Float_t trackLengthLayer = thisTrack->getLayermm(j);
 
-			Float_t arrowPos = trackLengthSoFar + dz/2;
+//			Float_t arrowPos = trackLengthSoFar + dz/2;
 
 			if (cutCombined) {
 				hAverageTrack->Fill(trackLengthLayer, thisTrack->getSize(j));
 				hFollowTrack->at(trackNum)->Fill(trackLengthLayer, thisTrack->getSize(j));
 			}
 
+			/*
 			if (trackNum < 16 && cutCombined) {
 				if (BPSampled && BPidx == j) {
 					arrows.push_back(new TArrow(arrowPos, thisTrack->getSize(j) * 1.3,
@@ -499,6 +469,7 @@ void DrawBraggPeakFit(Int_t Runs, Int_t dataType, Int_t energy) {
 				else if (!BPSampled && BPidx == j)
 					arrows.push_back(NULL);
 			}
+			*/
 		}
 
 		if (cutCombined) {
@@ -523,10 +494,9 @@ void DrawBraggPeakFit(Int_t Runs, Int_t dataType, Int_t energy) {
 		}
 
 		if (cutCombined) trackNum++;
-		if (cutTL) okTL++;
-		if (cutCHIP) okCHIP++;
-		if (cutBP) okBP++;
-		if (cutNTBP) okNTBP++;
+		if (cutTrackLength) okTL++;
+		if (cutChipNumber) okCHIP++;
+		if (cutBraggPeakInTrack) okBP++;
 	}
 
 	hAverageTrack->Scale(1/(float) trackNum);
@@ -550,7 +520,6 @@ void DrawBraggPeakFit(Int_t Runs, Int_t dataType, Int_t energy) {
 	cout << "Total okCHIP: " << okCHIP << endl;
 	cout << "Total okTL: " << okTL << endl;
 	cout << "Total okBP: " << okBP << endl;
-	cout << "Total okNTBP: " << okNTBP << endl;
 	cout << "Total ok combined: " << okALL << endl;
 
 	cAverageTrack->cd();
@@ -580,11 +549,13 @@ void DrawBraggPeakFit(Int_t Runs, Int_t dataType, Int_t energy) {
 
 		hMu->Fill(cog);
 		
+		/*
 		cogArrows.push_back(new TArrow(cog, max(u,pu) * 1.3,
 							cog, max(u,pu) * 1.1, 0.005, "|>"));
 		cogArrows.back()->SetLineColor(kGreen);
 		cogArrows.back()->SetLineWidth(2.);
 		cogArrows.back()->SetFillColor(kGreen);
+		*/
 	}
 
 	for (UInt_t trackNo=0; trackNo<16; trackNo++) {
@@ -592,6 +563,8 @@ void DrawBraggPeakFit(Int_t Runs, Int_t dataType, Int_t energy) {
 		gPad->DrawFrame(0, 0, 50, 45);
 		hFollowTrack->at(trackNo)->SetFillColor(kBlue-2);
 		hFollowTrack->at(trackNo)->Draw("same");
+
+		/*
 		if (trackNo < arrows.size()) {
 			if (arrows.at(trackNo)) {
 				arrows.at(trackNo)->Draw();
@@ -602,6 +575,7 @@ void DrawBraggPeakFit(Int_t Runs, Int_t dataType, Int_t energy) {
 				cogArrows.at(trackNo)->Draw();
 			}
 		}
+		*/
 	}
 
 	cBPResult->cd();
@@ -748,9 +722,13 @@ Tracks * getTracks(Int_t Runs, Int_t dataType, Int_t frameType, Int_t energy) {
 	Int_t nTracks = kEventsPerRun * 2;
 
 	CalorimeterFrame *cf = new CalorimeterFrame();
+	TrackerFrame *tf = new TrackerFrame();
 	Clusters * clusters = new Clusters(nClusters);
+	Clusters * trackerClusters = new Clusters(nClusters);
 	Hits *hits = new Hits(nHits);
-	Tracks *tracks = new Tracks(nTracks);
+	Hits *trackerHits = new Hits(nHits);
+	Tracks *calorimeterTracks = new Tracks(nTracks);
+	Tracks *trackerTracks = new Tracks(nTracks);
 	Tracks *allTracks = new Tracks(nTracks * Runs);
 
 	for (Int_t i=0; i<Runs; i++) {
@@ -760,6 +738,11 @@ Tracks * getTracks(Int_t Runs, Int_t dataType, Int_t frameType, Int_t energy) {
 			cf->diffuseFrame();
 			hits = cf->findHits();
 			clusters = hits->findClustersFromHits();
+
+			f->getMCTrackerFrame(i, tf);
+			tf->diffuseFrame();
+			trackerHits = tf->findHits();
+			trackerClusters = trackerHits->findClustersFromHits();
 		}
 
 		else if (dataType == kData) {
@@ -769,10 +752,14 @@ Tracks * getTracks(Int_t Runs, Int_t dataType, Int_t frameType, Int_t energy) {
 			clusters->removeSmallClusters(2);
 		}
 
-		tracks = clusters->findTracks();
+		calorimeterTracks = clusters->findCalorimeterTracks();
+		trackerTracks = trackerClusters->findTrackerTracks();
 
-		for (Int_t j=0; j<tracks->GetEntriesFast(); j++) {
-			allTracks->appendTrack(tracks->At(j));
+		// should do track matching here
+		// and append calorimeterTracks to trackerTracks...
+
+		for (Int_t j=0; j<calorimeterTracks->GetEntriesFast(); j++) {
+			allTracks->appendTrack(calorimeterTracks->At(j));
 		}
 
 		allTracks->appendClustersWithoutTrack(clusters->getClustersWithoutTrack());
@@ -780,19 +767,20 @@ Tracks * getTracks(Int_t Runs, Int_t dataType, Int_t frameType, Int_t energy) {
 		cf->Reset();
 		hits->clearHits();
 		clusters->clearClusters();
-		tracks->clearTracks();
+		calorimeterTracks->clearTracks();
 	}
 
 	delete cf;
+	delete tf;
 	delete clusters;
 	delete hits;
-	delete tracks;
+	delete calorimeterTracks;
 	delete f;
 
 	return allTracks;
 }
 
-void DrawTracks3D(Int_t Runs, Int_t dataType, Int_t frameType, Int_t energy) {
+void drawTracks3D(Int_t Runs, Int_t dataType, Int_t frameType, Int_t energy) {
 	Tracks *tracks = getTracks(Runs, dataType, frameType, energy);
 	tracks->extrapolateToLayer0();
 
@@ -1008,25 +996,26 @@ void DrawFrame2D(Int_t Runs, Int_t Layer) {
    gStyle->SetOptStat(0);
 }
 
-void DrawData3D(Int_t RunFrom, Int_t RunTo) {
-   // Get hits directly from posX / posY / posZ to show MC data
-   // Plots runs from RunFrom until RunTo
-   // no histogramming
-   // no diffusion
-   // NO NOTHING
+*/
 
-   Focal f;
+void drawData3D(Int_t Runs) {
+   Focal *f = new Focal();
+
    TH3F *Frame3D = new TH3F("Frame3D", "3D map of energy deposition [keV]", 
-                              100, -250, 50, 100, -20, 20, 100, -20, 20);
+                              100, -120, -50, 100, 0, 2*nx, 100, 0, 2*ny);
 
    Frame3D->SetXTitle("Z axis");
    Frame3D->SetYTitle("X axis"); // to get projection right (Z is depth, not up)
    Frame3D->SetZTitle("Y axis"); 
 
-   f.GetData3D(RunFrom, RunTo, Frame3D);
+   for (Int_t run=0; run<Runs; run++) {
+   	f->getMCData(run, Frame3D);
+   }
 
    Frame3D->Draw("LEGO");
 }
+
+/*
 
 void DrawRealData3D(Int_t RunFrom, Int_t RunTo) {
    // Get hits directly from posX / posY / posZ to show MC data
@@ -1105,4 +1094,52 @@ Long64_t nentries = fChain->GetEntriesFast();
 // end comment here
 
  */
+
+Bool_t getCutTrackLength(int energy, Track *track) {
+	Int_t minTL = getMinimumTrackLength(energy);
+	Float_t TL = track->getTrackLengthmm();
+
+	Bool_t cutTL = (TL > minTL) ? true : false;
+
+	return cutTL;
+}
+
+Bool_t getCutChipNumber(Track *track) {
+	Int_t x0 = track->getX(0);
+	Int_t y0 = track->getY(0);
+	Int_t chip = (x0 >= nx) + 2 * (y0 < ny);
+	Bool_t cutChipNumber = (chip<2) ? true : false;
+
+	return cutChipNumber;
+}
+
+Bool_t getCutBraggPeakInTrack(Track *track) {
+	Float_t braggPeakRatio = 1.5;
+
+	Int_t lastBin = track->GetEntriesFast() - 1;
+	if (lastBin < 4) return false;
+
+	Float_t lowStd = track->getStdSizeToIdx(lastBin-1);
+	Int_t nEmptyBins = track->getNMissingLayers();
+
+	cout << "The standard deviation for the first " << lastBin << " bins is " << lowStd << ".\n";
+	cout << "Number of missing layers = " << nEmptyBins << endl;
+
+	if (lowStd > 4) return false;
+	if (nEmptyBins > 1) return false;
+
+	Float_t rMean = track->getMeanSizeToIdx(lastBin - 1);
+	Float_t rrMean = track->getMeanSizeToIdx(lastBin - 2);
+
+	Float_t r = track->getSize(lastBin) / rMean;
+	Float_t rr = track->getSize(lastBin-1) / rrMean;
+
+	if (r > braggPeakRatio) return true;
+	else {
+		if (rr > braggPeakRatio) return true;
+		else return false;
+	}
+}
+
+
 

@@ -55,8 +55,9 @@ class Clusters : public TObject {
 
       // in file Clusters_findTracks.C
    	Int_t getLastActiveLayer();
-   	Tracks * findTracks();
-   	void findTracksFromLayer(Tracks * tracks, Int_t layer);
+   	Tracks * findCalorimeterTracks();
+   	Tracks * findTrackerTracks();
+   	void findTracksFromLayer(Tracks * tracks, Int_t layer, Int_t trackFindingAlgorithm = -1);
    	Clusters * findSeeds(Int_t layer);
    	void doNearestClusterTrackPropagation(Track *track, Int_t lastHitLayer);
    	Track * recursiveTrackPropagation(Cluster *cluster, Track currentTrack);

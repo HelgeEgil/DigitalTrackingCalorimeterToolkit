@@ -32,9 +32,16 @@
 
 //using namespace std;
 
-/*
-void Focal::GetData3D(Int_t RunFrom, Int_t RunTo, TH3F* Frame3D) {
+
+void Focal::getMCData(Int_t runNo, TH3F* Frame3D) {
 	if (fChain==0) return;
+
+   Int_t eventIdFrom = runNo * kEventsPerRun/10;
+   Int_t eventIdTo = eventIdFrom + kEventsPerRun/10;
+
+   Float_t offsetX = (nx+2) * dx;
+   Float_t offsetY = (ny) * dy;
+   Float_t x,y;
 
 	Long64_t nentries = fChain->GetEntriesFast();
 	Long64_t nb = 0;
@@ -43,13 +50,17 @@ void Focal::GetData3D(Int_t RunFrom, Int_t RunTo, TH3F* Frame3D) {
 		Long64_t ientry = LoadTree(jentry);
 		nb = fChain->GetEntry(jentry);
 
-		if (eventID < RunFrom) continue;
-		if (eventID > RunTo) break;
+		if (eventID < eventIdFrom) continue;
+		else if (eventID >= eventIdTo) break;
 
-		Frame3D->Fill(posZ, posX, posY, edep*1000);
+      x = (posX + offsetX) * nx / (offsetX);
+      y = (posY + offsetY) * ny / (offsetY);
+
+		Frame3D->Fill(posZ, x, y, edep*1000);
 	}
 } // end function GetData3D
 
+/*
 void Focal::GetTrackerData(Int_t EventFrom, Int_t EventTo, vector<TH2F*> *Frame3D) {
    // contains a list of clusters
 
@@ -645,6 +656,39 @@ void Focal::getDataFrame(Int_t runNo, CalorimeterFrame * cf, Int_t energy) {
 	delete f;
 }
 
+void Focal::getMCTrackerFrame(Int_t runNo, TrackerFrame *tf) {
+	// Retrieve kEventsPerRun events and put them into TrackerFrame
+
+	Int_t eventIdFrom = runNo * kEventsPerRun;
+	Int_t eventIdTo = eventIdFrom + kEventsPerRun;
+
+	Float_t offsetX = (nx+2) * dx;
+	Float_t offsetY = (ny) * dy;
+	Float_t x,y;
+	Int_t trackerLayer;
+
+	if (fChain == 0) return;
+	Long64_t nentries = fChain->GetEntriesFast();
+	Long64_t nbytes = 0, nb = 0;
+	for (Long64_t jentry=0; jentry<nentries; jentry++) {
+		Long64_t ientry = LoadTree(jentry);
+		if (ientry<0) break;
+		nb = fChain->GetEntry(jentry);
+		nbytes += nb;
+
+		if (eventID < eventIdFrom) continue;
+		else if (eventID >= eventIdTo) break;
+
+		trackerLayer = level1ID;
+		if (trackerLayer >= 4) continue;
+
+		x = (posX + offsetX) * nx / (offsetX);
+		y = (posY + offsetY) * ny / (offsetY);
+
+		tf->fillAt(trackerLayer, x, y, edep*1000);
+	}
+}
+
 void Focal::getMCFrame(Int_t runNo, CalorimeterFrame *cf) {
 	// Retrieve kEventsPerRun events and put them into CalorimeterFrame*
 	
@@ -666,7 +710,7 @@ void Focal::getMCFrame(Int_t runNo, CalorimeterFrame *cf) {
       nbytes += nb;
 
 		if (eventID < eventIdFrom) continue;
-		if (eventID >= eventIdTo) break;
+		else if (eventID >= eventIdTo) break;
 
       calorimeterLayer = level1ID - 4;
       if (calorimeterLayer<0) continue;

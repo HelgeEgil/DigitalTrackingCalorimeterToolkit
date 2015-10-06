@@ -128,11 +128,13 @@ public :
 
    // My own functions in TFocal.C
    virtual void getMCFrame(Int_t runNo, CalorimeterFrame *cf);
+   virtual void getMCTrackerFrame(Int_t runNo, TrackerFrame *tf);
    virtual void getDataFrame(Int_t runNo, CalorimeterFrame *cf, Int_t energy = 190);
 	//virtual Tracks * FindRealTracks(Int_t Runs, Clusters *restPoints, Int_t energy = -1);
 	//virtual TrackerCollection * FindTrackerFrame(Int_t EventFrom, Int_t EventTo, Clusters *restPoints);
 	//virtual void		GetRealFrame2D(Int_t Runs, Int_t Layer, TH2F *Frame2D);
    //virtual void      GetData3D(Int_t EventFrom, Int_t EventTo, TH3F *Frame3D);
+   virtual void getMCData(Int_t runNo, TH3F* Frame3D);
 	//virtual void		GetRealData3D(Int_t EventFrom, Int_t EventTo, TH3F *Frame3D);
 	//virtual void		GetTrackerData(Int_t EventFrom, Int_t EventTo, vector<TH2F*> *Frame3D);
 	//virtual void		GetClusterFrames(vector<Hits*> *clusterHitMap, Bool_t MC);

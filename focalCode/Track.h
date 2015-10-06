@@ -13,12 +13,19 @@ class Track : public TObject {
 
    private:
       TClonesArray track_;
+      Int_t energy_;
 
    public:
 
-      Track() : track_("Cluster", MaxTrackLength) {}
+      Track() : track_("Cluster", MaxTrackLength) {energy_ = 0;}
       Track(Cluster *cluster) : track_("Cluster", MaxTrackLength) {
       	appendCluster(cluster);
+      	energy_ = 0;
+      }
+
+      Track(Cluster *cluster, Int_t energy) : track_("Cluster", MaxTrackLength) {
+      	appendCluster(cluster);
+      	energy_ = energy;
       }
 
       virtual ~Track(); 
@@ -48,6 +55,9 @@ class Track : public TObject {
 		Float_t getSlopeAngleAtLayer(Int_t i);
 		Float_t getSnakeness();
 		Float_t getTrackScore();
+		Float_t getMeanSizeToIdx(Int_t i);
+		Float_t getStdSizeToIdx(Int_t toIdx);
+		Float_t getEnergy() { return energy_; }
 
       Int_t getNMissingLayers();
 		Float_t diffmm(Cluster *p1, Cluster *p2);

@@ -177,6 +177,35 @@ Int_t Track::getNMissingLayers() {
    return missingLayers;
 }
 
+Float_t Track::getMeanSizeToIdx(Int_t toIdx) {
+	Int_t tempSum = 0;
+
+	if (toIdx<0 || toIdx >= GetEntriesFast())
+		toIdx = GetEntriesFast() - 1;
+
+	for (Int_t i=0; i<toIdx; i++) {
+		tempSum += getSize(i);
+	}
+
+	return (float) tempSum / (toIdx + 1 - getNMissingLayers());
+}
+
+Float_t Track::getStdSizeToIdx(Int_t toIdx) {
+	Float_t tempSum = 0;
+
+	if (toIdx<0 || toIdx >= GetEntriesFast())
+		toIdx = GetEntriesFast() - 1;
+
+	Int_t mean = getMeanSizeToIdx(toIdx);
+
+	for (Int_t i=0; i<toIdx; i++) {
+		tempSum += pow(getSize(i) - mean, 2);
+	}
+
+	Float_t std = sqrt((float) tempSum / (toIdx + 1));
+	return std;
+}
+
 void Track::extrapolateToLayer0() {
    Int_t nTracks = GetEntriesFast();
    if (!At(0)) {
