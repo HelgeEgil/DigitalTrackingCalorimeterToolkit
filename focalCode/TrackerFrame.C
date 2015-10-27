@@ -30,7 +30,7 @@ void TrackerFrame::diffuseFrame() {
 }
 
 void TrackerFrame::Reset() {
-	for (Int_t layer=0; layer<nLayers; layer++) {
+	for (Int_t layer=0; layer<nTrackers; layer++) {
 		At(layer)->Reset();
 	}
 }

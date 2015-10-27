@@ -392,13 +392,12 @@ Int_t getMinimumTrackLength(Int_t energy) {
 }
 
 void drawBraggPeakGraphFit(Int_t Runs, Int_t dataType, Int_t energy) {
-	Focal f;
 	Float_t trackLengthSoFar;
 	Bool_t cut;
 
 	TCanvas *cGraphAll = new TCanvas("cGraphAll", "Fitting data points", 1000, 800);
-	TCanvas *cGraph = new TCanvas("cGraph", "Fitted data points", 1000, 800);
-	cGraph->Divide(3,3, 0.01, 0.01, 0);
+	TCanvas *cGraph = new TCanvas("cGraph", "Fitted data points", 1400, 1000);
+	cGraph->Divide(5,5, 0.01, 0.01, 0);
 
 	vector<TGraph*> vGraph;
 	vGraph.reserve(kEventsPerRun);
@@ -409,8 +408,8 @@ void drawBraggPeakGraphFit(Int_t Runs, Int_t dataType, Int_t energy) {
 
 	Int_t m = 0;
 	Track *thisTrack = 0;
-	Float_t xx[20*9];
-	Float_t yy[20*9];
+	Float_t xx[20*tracks->GetEntriesFast()];
+	Float_t yy[20*tracks->GetEntriesFast()];
 
 	for (Int_t j=0; j<tracks->GetEntriesFast(); j++) {
 		thisTrack = tracks->At(j);
@@ -436,18 +435,46 @@ void drawBraggPeakGraphFit(Int_t Runs, Int_t dataType, Int_t energy) {
 
 	vGraph.push_back(new TGraph(m, xx, yy));
 
-	for (Int_t i=0; i<9; i++) {
+	for (Int_t i=0; i<25; i++) {
+		TGraph *gr = vGraph.at(i);
 		cGraph->cd(i+1);
-		vGraph.at(i)->SetMaximum(40);
-		vGraph.at(i)->SetMinimum(0);
-		vGraph.at(i)->Draw("A*");
+		gr->SetMaximum(40);
+		gr->SetMinimum(0);
+		gr->Draw("A*");
+		gr->GetXaxis()->SetRangeUser(0, 35);
+		gr->Draw("A*");
+		cGraph->Update();
+		
+		// fitting
+		Int_t n = gr->GetN();
+		Float_t maxVal = 0;
+		Int_t maxIdx = 0;
+		
+		for (Int_t i=0.5*n; i<n; i++) {
+		    if (gr->GetY()[i] > maxVal) {
+		    maxVal = gr->GetY()[i];
+		    maxIdx = i;
+		   }
+		}
+		
+		Float_t constHeight = 7;
+		Float_t BPpos = maxIdx * dz;
+		Float_t BP = maxVal - constHeight;
+		Float_t BPwidth = 1.7;
+
+		TF1 *g1 = new TF1("m1", "gaus(0) + [3]", 0, BPpos*2);
+
+		g1->SetParameters(BP, BPpos, BPwidth, constHeight); // BP, BPpos, 2.5
+		g1->SetParLimits(0, BP*0.8, BP*2);
+		g1->SetParLimits(1, BPpos*0.9, BPpos*1.3);
+		g1->SetParLimits(2, BPwidth, BPwidth);
+		gr->Fit("m1", "B, W, Q", "", 0, BPpos*1.5);
 	}
 
 	cGraphAll->cd();
 	vGraph.at(vGraph.size()-1)->Draw("A*");
-
-	delete tracks;
-	delete thisTrack;
+	  	
+  	delete tracks;
 }
 
 void drawBraggPeakFit(Int_t Runs, Int_t dataType, Int_t energy) {
@@ -825,16 +852,23 @@ Tracks * getTracks(Int_t Runs, Int_t dataType, Int_t frameType, Int_t energy) {
 		allTracks->appendClustersWithoutTrack(clusters->getClustersWithoutTrack());
 
 		cf->Reset();
+		tf->Reset();
 		hits->clearHits();
+		trackerHits->clearHits();
 		clusters->clearClusters();
+		trackerClusters->clearClusters();
 		calorimeterTracks->clearTracks();
+		trackerTracks->clearTracks();
 	}
 
 	delete cf;
 	delete tf;
 	delete clusters;
+	delete trackerClusters;
 	delete hits;
+	delete trackerHits;
 	delete calorimeterTracks;
+	delete trackerTracks;
 	delete f;
 
 	return allTracks;
@@ -1174,7 +1208,7 @@ Bool_t getCutChipNumber(Track *track) {
 }
 
 Bool_t getCutBraggPeakInTrack(Track *track) {
-	Float_t braggPeakRatio = 1.5;
+	Float_t braggPeakRatio = 2.5;
 
 	Int_t lastBin = track->GetEntriesFast() - 1;
 	if (lastBin < 4) return false;
