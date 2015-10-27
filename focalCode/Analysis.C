@@ -10,6 +10,7 @@
 #include <TRandom3.h>
 #include <TStyle.h>
 #include <TCanvas.h>
+#include <TGraph.h>
 #include <iostream>
 #include <fstream>
 #include <TEllipse.h>
@@ -388,6 +389,65 @@ Int_t getMinimumTrackLength(Int_t energy) {
 	else if (energy < 200) minTL = 20;
 
 	return minTL;
+}
+
+void drawBraggPeakGraphFit(Int_t Runs, Int_t dataType, Int_t energy) {
+	Focal f;
+	Float_t trackLengthSoFar;
+	Bool_t cut;
+
+	TCanvas *cGraphAll = new TCanvas("cGraphAll", "Fitting data points", 1000, 800);
+	TCanvas *cGraph = new TCanvas("cGraph", "Fitted data points", 1000, 800);
+	cGraph->Divide(3,3, 0.01, 0.01, 0);
+
+	vector<TGraph*> vGraph;
+	vGraph.reserve(kEventsPerRun);
+
+	Tracks *tracks = getTracks(Runs, dataType, kCalorimeter, energy);
+	tracks->extrapolateToLayer0();
+	TString sDataType = getDataTypeString(dataType);
+
+	Int_t m = 0;
+	Track *thisTrack = 0;
+	Float_t xx[20*9];
+	Float_t yy[20*9];
+
+	for (Int_t j=0; j<tracks->GetEntriesFast(); j++) {
+		thisTrack = tracks->At(j);
+
+		cut = getCutTrackLength(energy, thisTrack) * getCutBraggPeakInTrack(thisTrack);
+		if (dataType == kData) cut *= getCutChipNumber(thisTrack);
+
+		if (!cut) continue;
+		Int_t n = thisTrack->GetEntriesFast();
+		Float_t x[n], y[n];
+
+		Float_t trackLengthSoFar = 0;
+		for (Int_t k=0; k<n; k++) {
+			trackLengthSoFar += thisTrack->getTrackLengthmmAt(k);
+			x[k] = trackLengthSoFar;
+			y[k] = thisTrack->getSize(k);
+			xx[m+k] = trackLengthSoFar;
+			yy[m+k] = thisTrack->getSize(k);
+		}
+		m += n;
+		vGraph.push_back(new TGraph(n, x, y));
+	}
+
+	vGraph.push_back(new TGraph(m, xx, yy));
+
+	for (Int_t i=0; i<9; i++) {
+		cGraph->cd(i+1);
+		vGraph.at(i)->SetMaximum(40);
+		vGraph.at(i)->SetMinimum(0);
+		vGraph.at(i)->Draw("A*");
+	}
+
+	cGraphAll->cd();
+	vGraph.at(vGraph.size()-1)->Draw("A*");
+
+	delete tracks;
+	delete thisTrack;
 }
 
 void drawBraggPeakFit(Int_t Runs, Int_t dataType, Int_t energy) {
@@ -1122,8 +1182,8 @@ Bool_t getCutBraggPeakInTrack(Track *track) {
 	Float_t lowStd = track->getStdSizeToIdx(lastBin-1);
 	Int_t nEmptyBins = track->getNMissingLayers();
 
-	cout << "The standard deviation for the first " << lastBin << " bins is " << lowStd << ".\n";
-	cout << "Number of missing layers = " << nEmptyBins << endl;
+//	cout << "The standard deviation for the first " << lastBin << " bins is " << lowStd << ".\n";
+//	cout << "Number of missing layers = " << nEmptyBins << endl;
 
 	if (lowStd > 4) return false;
 	if (nEmptyBins > 1) return false;

@@ -5,6 +5,7 @@
 
 Tracks * getTracks(Int_t Runs, Int_t dataType = kMC, Int_t frameType = kCalorimeter, Int_t energy = 190);
 void		drawBraggPeakFit(Int_t Runs, Int_t dataType = kMC, Int_t energy = 190);
+void 		drawBraggPeakGraphFit(Int_t Runs, Int_t dataType = kMC, Int_t energy = 190);
 TString getDataTypeString(Int_t dataType);
 //void		DrawFrame2D(Int_t Runs, Int_t Layer);
 //void		DrawRealFrame2D(Int_t Runs, Int_t Layer);
