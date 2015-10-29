@@ -12,7 +12,7 @@ TString getDataTypeString(Int_t dataType);
 //void		DrawData3D(Int_t RunFrom, Int_t RunTo);
 //void		DrawRealData3D(Int_t RunFrom, Int_t RunTo);
 //void		DrawDiffusionCheck(Int_t Runs, Int_t Layer);
-void		drawTracks3D(Int_t Runs, Int_t dataType, Int_t frameType, Int_t energy);
+void		drawTracks3D(Int_t Runs, Int_t dataType = kMC, Int_t frameType = kCalorimeter, Int_t energy = 190);
 void		drawData3D(Int_t Runs);
 //void		DrawRealTracks3D(Int_t Runs);
 //void		WriteClusterFile(Int_t Runs);
