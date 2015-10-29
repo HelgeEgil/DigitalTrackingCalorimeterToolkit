@@ -51,15 +51,17 @@ if sys.argv:
         E = E0
 
 m0 = mp                   #mass of projectile
-I_water   = 75e-6              #75 eV in J, i.e., average ionization energy of water
+I_water = 75e-6              #75 eV in J, i.e., average ionization energy of water
 I_air = 85.7e-6               # ionization energy of air
 I_W = 727e-6
 I_Si = 173e-6
 I_Al = 166e-6
 #I_eff = 703e-6 # W
-I_eff = .... mat
+#I_eff = 165.51e-6 # Al
+I_eff = 87.4e-6 # PMMA
 #ZA_eff = 0.392 # W
-ZA_eff = 12.998
+#ZA_eff = 0.481 # Al
+ZA_eff = 0.497 # PMMA
 ZA_W = 0.403
 ZA_Si = 0.5
 ZA_water = 0.555
@@ -68,10 +70,13 @@ rho_W = 19.25 # g/cm3
 rho_Si = 2.329
 rho_air = 0.0012
 rho_water = 1
+rho_pmma = 1.19
 #weights = [0.981, 0.0015, 0.0164, 0.00096] # W
-weights = [0.8835, 0.0095, 0.1012, 0.0059] # Al
-#rhos = [rho_w, rho_air, rho_Si, rho_water]
-rhos = [rho_Al, rho_air, rho_Si, rho_water]
+#weights = [0.8835, 0.0095, 0.1012, 0.0059] # Al
+weights = [0.777, 0.0182, 0.1936, 0.0113] # PMMA
+#rhos = [rho_w, rho_air, rho_Si, rho_water] # W
+#rhos = [rho_Al, rho_air, rho_Si, rho_water] # Al
+rhos = [rho_pmma, rho_air, rho_Si, rho_water] # PMMA
 avg_rho = sum([weights[i]*rhos[i] for i in range(4)])
 
 dx = 5e-4 # 1 mm
@@ -85,7 +90,7 @@ while thisE > 0:
     x += dx
     thisE -= dE
 
-print "Final range ({} MeV) with rho weighting: \t".format(E), x, " mm."
+print "Final range ({} MeV) with rho weighting (PMMA): \t".format(E), x, " mm."
 
 """
 x = 0.
@@ -97,7 +102,7 @@ while thisE > 0:
     thisE -= dE
 
 print "Final range ({} MeV) with tungsten: \t\t".format(E), x, " mm."
-"""
+
 
 x = 0.
 thisE = E
@@ -108,4 +113,4 @@ while thisE > 0:
     thisE -= dE
 
 print "Final range ({} MeV) with water: \t\t".format(E), x, " mm."
-
+"""

@@ -119,6 +119,45 @@ Float_t Track::getTrackLengthmmAt(Int_t i) {
 	return diffmm(At(i-1), At(i));
 }
 
+Float_t Track::getTrackLengthWEPLmmAt(Int_t i) {
+	// Returns geometrical track length in WEPL at point i
+	// the WEPL conversion is a LUT calculated from the bethe equation
+	// (see rangeCalculator.py)
+	
+	Float_t tl = getTrackLengthmmAt(i);
+	if (!tl) return 0;
+	return getWEPLFromTL(tl);
+}
+
+Float_t Track::getWEPLFromTL(Float_t tl) {
+	for (Int_t i=0; i<nPLEnergies; i++) {
+		if (kPLFocal[i] < tl) continue;
+		else {
+			Float_t ratio = (tl - kPLFocal[i-1]) / (kPLFocal[i] - kPLFocal[i-1]);
+			return tl * (kWEPLRatio[i-1] + ratio * (kWEPLRatio[i] - kWEPLRatio[i-1]));
+		}
+	}
+}
+
+Float_t Track::getEnergyFromTL(Float_t tl) {
+	// TODO: optimize via stackoverflow.com/questions/11396860
+	// (and create bigger table for tungsten....)
+	for (Int_t i=0; i<nPLEnergies; i++) {
+		if (kPLFocal[i] < tl) continue;
+		else {
+			Float_t ratio = (tl - kPLFocal[i-1]) / (kPLFocal[i] - kPLFocal[i-1]);
+			return kPLEnergies[i-1] + ratio * (kPLEnergies[i] - kPLEnergies[i-1]);
+		}
+	}
+	
+}
+
+Float_t Track::getEnergy() {
+	Float_t tl = getTrackLengthmm();
+	if (!tl) return 0;
+	return getEnergyFromTL(tl);
+}
+
 Float_t Track::getSnakeness() {
 	// How much the track bends
 	Int_t n = GetEntriesFast();
@@ -244,3 +283,4 @@ void Track::extrapolateToLayer0() {
       cout << "Extrapolated to " << *At(0) << " from " << *At(1) << endl;
    }
 }
+
