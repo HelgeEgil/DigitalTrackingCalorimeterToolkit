@@ -3,6 +3,7 @@
 #include "Constants.h"
 #include "TFocal.h"
 #include "Tracks.h"
+#include "Tools.h"
 #include <TH2.h>
 #include <TH3.h>
 #include <TPolyLine3D.h>
@@ -391,6 +392,22 @@ Int_t getMinimumTrackLength(Int_t energy) {
 	return minTL;
 }
 
+Double_t fitfunc_DBP(Double_t *v, Double_t *par) {
+	// we convert to water equivalent path length before fitting
+	// so the numbers are given in water
+	// Based on Bortfeld and Schlegel 1996
+	// v[0] is depth and par[0] is initial energy E0  
+  
+	Float_t d_cm = v[0] / 10.;
+  
+	Float_t rho = 1;
+	Float_t alpha = sqrt(18) / rho;
+	Float_t p = 1.8; // for protons between 10 and 200 MeV
+	Float_t R = alpha * pow(par[0],p);
+	Double_t fitval = par[1] / ( rho * p * pow(alpha, (1/p)) * pow((R - d_cm), (1 - 1/p)) );
+	return fitval;
+}
+
 void drawBraggPeakGraphFit(Int_t Runs, Int_t dataType, Int_t energy) {
 	Float_t trackLengthSoFar;
 	Bool_t cut;
@@ -413,6 +430,7 @@ void drawBraggPeakGraphFit(Int_t Runs, Int_t dataType, Int_t energy) {
 
 	for (Int_t j=0; j<tracks->GetEntriesFast(); j++) {
 		thisTrack = tracks->At(j);
+		if (!thisTrack) continue;
 
 		cut = getCutTrackLength(energy, thisTrack) * getCutBraggPeakInTrack(thisTrack);
 		if (dataType == kData) cut *= getCutChipNumber(thisTrack);
@@ -422,29 +440,38 @@ void drawBraggPeakGraphFit(Int_t Runs, Int_t dataType, Int_t energy) {
 		Float_t x[n], y[n];
 
 		Float_t trackLengthSoFar = 0;
+		Float_t trackLengthSoFarWEPL = 0;
 		for (Int_t k=0; k<n; k++) {
+			if (!thisTrack->At(k)) continue;
 			trackLengthSoFar += thisTrack->getTrackLengthmmAt(k);
+			trackLengthSoFarWEPL += thisTrack->getTrackLengthWEPLmmAt(k);
 			x[k] = trackLengthSoFar;
 			y[k] = thisTrack->getSize(k);
-			xx[m+k] = trackLengthSoFar;
+			xx[m+k] = trackLengthSoFarWEPL;
 			yy[m+k] = thisTrack->getSize(k);
 		}
+		
+		cout << "Energy of track " << j << " is " << thisTrack->getEnergy() << "MeV.\n";
+		
 		m += n;
 		vGraph.push_back(new TGraph(n, x, y));
 	}
 
 	vGraph.push_back(new TGraph(m, xx, yy));
-
-	for (Int_t i=0; i<25; i++) {
+	
+	Int_t gsize = vGraph.size();
+	if (gsize>25) gsize = 25;
+	for (Int_t i=0; i<gsize; i++) {
+		if (!vGraph.at(i)) continue;
 		TGraph *gr = vGraph.at(i);
 		cGraph->cd(i+1);
 		gr->SetMaximum(40);
 		gr->SetMinimum(0);
 		gr->Draw("A*");
-		gr->GetXaxis()->SetRangeUser(0, 35);
+		if (i<gsize-1)
+			gr->GetXaxis()->SetRangeUser(0, 35);
 		gr->Draw("A*");
 		cGraph->Update();
-		
 		// fitting
 		Int_t n = gr->GetN();
 		Float_t maxVal = 0;
@@ -456,7 +483,7 @@ void drawBraggPeakGraphFit(Int_t Runs, Int_t dataType, Int_t energy) {
 		    maxIdx = i;
 		   }
 		}
-		
+				
 		Float_t constHeight = 7;
 		Float_t BPpos = maxIdx * dz;
 		Float_t BP = maxVal - constHeight;
@@ -472,8 +499,18 @@ void drawBraggPeakGraphFit(Int_t Runs, Int_t dataType, Int_t energy) {
 	}
 
 	cGraphAll->cd();
-	vGraph.at(vGraph.size()-1)->Draw("A*");
-	  	
+	TGraph *g = vGraph.at(vGraph.size() - 1);
+	g->GetXaxis()->SetTitle("Water Equivalent Path Length");
+	g->Draw("A*");
+	
+	// fit main function
+	TF1 *func = new TF1("fit_BP", fitfunc_DBP, 0, 300, 2);
+	func->SetParName(0,"Initial energy [MeV]");
+	func->SetParName(1, "Factor");
+	func->SetParameter(0,200.);
+	func->SetParameter(1, 75.);
+	g->Fit("fit_BP");
+	 
   	delete tracks;
 }
 

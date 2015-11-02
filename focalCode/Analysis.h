@@ -28,4 +28,3 @@ Bool_t getCutTrackLength(int energy, Track *track);
 Bool_t getCutChipNumber(Track *track);
 Bool_t getCutBraggPeakInTrack(Track *track);
 #endif
-  

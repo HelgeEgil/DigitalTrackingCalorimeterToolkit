@@ -17,7 +17,7 @@ class Track : public TObject {
 
    public:
 
-      Track() : track_("Cluster", MaxTrackLength) {energy_ = 0;}
+      Track() : track_("Cluster", MaxTrackLength) {};
       Track(Cluster *cluster) : track_("Cluster", MaxTrackLength) {
       	appendCluster(cluster);
 //      	energy_ = 0;
