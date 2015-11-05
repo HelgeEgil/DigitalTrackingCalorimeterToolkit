@@ -18,7 +18,7 @@ void		drawData3D(Int_t Runs);
 //void		WriteClusterFile(Int_t Runs);
 //void		FindClusters(Int_t Runs, Int_t Layer);
 //void		MakeLayerPNGs(Int_t Runs, Int_t Diffusion);
-//void		DrawClusterShapes();
+void		drawClusterShapes(Int_t Runs, Bool_t dataType = kMC, Int_t energy = 190);
 //void		CompareDataAndMC(Int_t Runs, Int_t DataRuns);
 //void		Draw2DProjection(Int_t Runs, Int_t Events);
 //void		GetTrackerStatistics(Int_t Events, Int_t Runs);

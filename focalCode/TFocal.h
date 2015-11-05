@@ -137,7 +137,6 @@ public :
    virtual void getMCData(Int_t runNo, TH3F* Frame3D);
 	//virtual void		GetRealData3D(Int_t EventFrom, Int_t EventTo, TH3F *Frame3D);
 	//virtual void		GetTrackerData(Int_t EventFrom, Int_t EventTo, vector<TH2F*> *Frame3D);
-	//virtual void		GetClusterFrames(vector<Hits*> *clusterHitMap, Bool_t MC);
 };
 
 #endif

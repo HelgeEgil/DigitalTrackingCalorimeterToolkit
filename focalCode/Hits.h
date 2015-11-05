@@ -17,7 +17,8 @@ class Hits : public TObject {
 		Hits() : hits_("Hit", kEventsPerRun*200) {}
       virtual ~Hits(); 
 
-		virtual void appendPoint(Int_t x, Int_t y, Int_t layer = -1, Int_t event = -1);
+      virtual void appendPoint(Int_t x, Int_t y, Int_t layer = -1, Int_t event = -1);
+      virtual void appendHits(Hits *hits);
 
       virtual void clearHits() { hits_.Clear("C"); }
 
@@ -40,7 +41,7 @@ class Hits : public TObject {
 		void appendExpandedClusterToClusterHitMap(vector<Int_t> *expandedCluster, vector<Hits*> *clusterHitMap);
 		void checkAndAppendAllNextCandidates(vector<Int_t> nextCandidates, vector<Int_t> *checkedIndices,
 				vector<Int_t> *toCheck, vector<Int_t> *expandedCluster);
-		vector<Hits*> * findClustersHitMap(Int_t nRuns);
+		vector<Hits*> * findClustersHitMap();
 
    ClassDef(Hits,1);
 };

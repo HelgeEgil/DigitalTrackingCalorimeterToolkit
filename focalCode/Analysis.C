@@ -283,52 +283,81 @@ void getTrackStatistics(Int_t Runs, Int_t dataType, Int_t energy) {
 
 	delete tracks;
 }
-/*
+
 
 
 // Kristian
 // - range resolution for eksperimentelle data
 // - antall partikler vs rekkevidde
 
-void DrawClusterShapes() {
+void drawClusterShapes(Int_t Runs, Bool_t dataType, Int_t energy) {
 	// get vector of TH2F's, each with a hits distribution and cluster size
-	
-	Focal f;
-	
-	TCanvas *c = new TCanvas("c", "c", 1000, 800);
+	// dataType = kMC (0) or kData (1)
 
-	Int_t nRows = 12;
+  	Int_t nRows = 15;
 	Int_t nRepeats = 20;
 	Int_t nN = nRows * nRepeats;
-
-	c->Divide(nRepeats, nRows, 0.0001, 0.0001);
-
-	vector<TH2F*> *hClusterMaps = new vector<TH2F*>;
+	vector<TH2C*> *hClusterMaps = new vector<TH2C*>;
 	hClusterMaps->reserve(nN);
-	for (Int_t i=0; i<nN; i++) {
-		hClusterMaps->push_back(new TH2F(Form("hClusterMap_%i",i),
-								"", 11, 0, 11, 11, 0, 11));
+	for (Int_t i=0; i<nN; i++)
+		hClusterMaps->push_back(new TH2C(Form("hClusterMap_%i",i), "", 11, 0, 11, 11, 0, 11));
+
+	Int_t nClusters = kEventsPerRun * 5;
+	Int_t nHits = kEventsPerRun * 50;
+	Int_t nTracks = kEventsPerRun * 2;
+
+	Focal *f = new Focal();
+	CalorimeterFrame *cf = new CalorimeterFrame();
+	Hits *hits = new Hits(nHits);
+	vector<Hits*> * tempClusterHitMap;
+	vector<Hits*> * clusterHitMap = new vector<Hits*>;
+	clusterHitMap->reserve(Runs*500*kEventsPerRun);
+
+	for (Int_t i=0; i<Runs; i++) {
+		if (dataType == kMC) {
+			f->getMCFrame(i, cf);
+			cf->diffuseFrame(); // THE MAGIC PART
+			hits = cf->findHits();
+			tempClusterHitMap = hits->findClustersHitMap();
+
+		}
+
+		else if (dataType == kData) {
+			f->getDataFrame(i, cf, energy);
+			hits = cf->findHits();
+			tempClusterHitMap = hits->findClustersHitMap();
+		}
+		else {
+		  std::cerr << "Please choose between dataType = kMC (0) or kData (1).\n" << endl;
+		  exit(1);
+		}
+	
+		for (UInt_t j=0; j<tempClusterHitMap->size(); j++)
+			clusterHitMap->push_back( tempClusterHitMap->at(j) );
 	}
-
-	vector<Hits*> *clusterHitMap = new vector<Hits*>;
-	clusterHitMap->reserve(10000);
-
-	Bool_t MonteCarlo = kFALSE;
-
-	f.GetClusterFrames(clusterHitMap, MonteCarlo);
+	
+	// Here it is possible to access and modify the cluster shapes
+	// Each cluster is stored as a Hits (Hit collection) pointer in the vector collection clusterHitMap.
+	// To loop through each cluster use for (i=0; i<clusterHitMap->size(); i++) { Hits * myCluster = clusterHitMap->at(i); myCluster->....; }
+	// E.g. to count the number of hits in each cluster:
+	//
+	// for (int i=0; i<clusterHitMap->size(); i++) {
+	// 	Hits *myCluster = clusterHitMap->at(i);
+	//	if (!myCluster) continue;
+	//	int counter = 0;
+	//	for (int j=0; j<myCluster->GetEntriesFast(); j++) {
+	//		Hit *myHit = myCluster->At(j);
+	//		if (!myHit) continue;
+	//		counter++;
+	//	}
+	// }
+	//
+	
 	
 	// fill hClusterMaps with cluster shapes from clusterHitMap
 	// sizes 3-5 in first row
 	// 6-8 in second row
-	// 9-11 in third row
-	// 12-14 in fourth row
-	// 15-17 in fifth row
-	// 18-20 in sixth row
-	// 21-23 in seventh row
-	// 24-26 in eighth row
-	// 27-29 in ninth row
-	// 30-32 in tenth row
-	// 33-35 in eleventh row
+	// eg. up to 33-35 in 11th row
 	
 	Int_t size_from, size_to, nInRow, x, y;
 
@@ -341,7 +370,7 @@ void DrawClusterShapes() {
 		for (UInt_t j=0; j<clusterHitMap->size(); j++) {
 			Int_t csize = clusterHitMap->at(j)->GetEntriesFast();
 			if (csize >= size_from && csize <= size_to) {
-				// plot it in the j'th row
+				// plot the cluster in the j'th row
 				for (Int_t k=0; k<clusterHitMap->at(j)->GetEntriesFast(); k++) {
 					x = clusterHitMap->at(j)->getX(k);
 					y = clusterHitMap->at(j)->getY(k);
@@ -350,24 +379,24 @@ void DrawClusterShapes() {
 				hClusterMaps->at(nTotal)->SetTitle(Form("Cluster size [%i, %i]", size_from, size_to));
 				nInRow++; nTotal++;
 				if (nInRow >= nRepeats) break; // stop looping over clusters now
-			} // end plot point
-		} // end loop over all clusters
+			}
+		}
 		if (nInRow < nRepeats) {
-			cout << "Only " << nInRow << " clusters with size [" << i*3 << "," << i*3+2 << "] with i = " << i << ". Setting nTotal from " << nTotal << " to " << (i+1)*nRepeats << ".\n";
+ 			cout << "Only " << nInRow << " clusters with size [" << i*3 << "," << i*3+2 << "] with i = " << i << ". Setting nTotal from " << nTotal << " to " << (i+1)*nRepeats << ".\n";
 			nTotal = (i+1)*nRepeats;
 		}
-	} // end loop over row with predefined cluster size window
+	}
 
 	// draw the canvas
 	
+	TCanvas *c = new TCanvas("c", "c", 1000, 800);
+	c->Divide(nRepeats, nRows, 0.0001, 0.0001);
 	for (Int_t i=0; i<nN; i++) {
 		c->cd(i+1);
 		hClusterMaps->at(i)->Draw("same, COL,ah,fb,bb");
 		gStyle->SetOptStat(0);
 	}
 }
-
-*/
 
 TString getDataTypeString(Int_t dataType) {
 	TString sDataType;

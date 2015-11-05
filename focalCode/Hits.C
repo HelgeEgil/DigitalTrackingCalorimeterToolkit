@@ -21,6 +21,15 @@ void Hits::appendPoint(Int_t x, Int_t y, Int_t layer, Int_t event) {
    hit->set(x,y,layer,event);
 }
 
+void Hits::appendHits(Hits *hits) {
+  Int_t i = GetEntriesFast();
+  for (Int_t j=0; j<hits->GetEntriesFast(); j++) {
+	Hit *hit = (Hit*) hits_.ConstructedAt(i);
+	hit->set(hits->At(i));
+	i++;
+  }
+}
+
 Int_t Hits::getI(Int_t x, Int_t y) {
 	for (Int_t i=0; i<GetEntriesFast(); i++) {
 		if (x == getX(i) && y == getY(i))
@@ -91,6 +100,7 @@ void Hits::appendExpandedClusterToClusterHitMap(vector<Int_t> *expandedCluster, 
 		clusterHitMap->at(cidx)->appendPoint(x, y);
 	}
 }
+
 vector<Int_t> Hits::findNeighbours(Int_t index) {
 	vector<Int_t> neighbours;
    neighbours.reserve(8);
@@ -186,16 +196,15 @@ void Hits::checkAndAppendAllNextCandidates(vector<Int_t> nextCandidates, vector<
 	}
 }
 
-vector<Hits*> * Hits::findClustersHitMap(Int_t nRuns) {
-	Clusters *clusters = new Clusters(nRuns * 20);
+vector<Hits*> * Hits::findClustersHitMap() {
 	vector<Hits*> *clusterHitMap = new vector<Hits*>;
 	vector<Int_t> *checkedIndices = new vector<Int_t>;
 	vector<Int_t> *expandedCluster = 0;
 	checkedIndices->reserve(GetEntriesFast());
-	Int_t layerNo = -999;
+// 	Int_t layerNo = -999;
 
 	for (Int_t i = 0; i < GetEntriesFast(); i++) {
-		if (layerNo == -999) layerNo = getLayer(i);
+// 		if (layerNo == -999) layerNo = getLayer(i);
 		if (isItemInVector(i, checkedIndices)) continue;
 
 		vector<Int_t> firstHits = findNeighbours(i);
@@ -205,7 +214,6 @@ vector<Hits*> * Hits::findClustersHitMap(Int_t nRuns) {
 		}
 	}
 
-	delete clusters;
 	delete checkedIndices;
 	delete expandedCluster;
 
