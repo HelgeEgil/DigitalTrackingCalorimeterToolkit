@@ -336,6 +336,22 @@ void drawClusterShapes(Int_t Runs, Bool_t dataType, Int_t energy) {
 			clusterHitMap->push_back( tempClusterHitMap->at(j) );
 	}
 	
+	// is any Hits degenerate!!
+	
+	Hit *hi = 0;
+	Hit *hj = 0;
+	for (int ii=0; ii<hits->GetEntriesFast(); ii++) {
+	  int n=0;
+	  hi = hits->At(ii);
+	  for (int jj=0; jj<hits->GetEntriesFast(); jj++) {
+	    if (ii == jj) continue;
+	    hj = hits->At(jj);
+	    
+	    if (hj->getX() == hi->getX() && hj->getY() == hi->getY()) n++;
+	  }
+	  if (n>0) cout << "Hits idx " << ii << " is degenerate with n = " << n << "!\n";
+	}
+	
 	// Here it is possible to access and modify the cluster shapes
 	// Each cluster is stored as a Hits (Hit collection) pointer in the vector collection clusterHitMap.
 	// To loop through each cluster use for (i=0; i<clusterHitMap->size(); i++) { Hits * myCluster = clusterHitMap->at(i); myCluster->....; }
@@ -352,7 +368,6 @@ void drawClusterShapes(Int_t Runs, Bool_t dataType, Int_t energy) {
 	//	}
 	// }
 	//
-	
 	
 	// fill hClusterMaps with cluster shapes from clusterHitMap
 	// sizes 3-5 in first row
