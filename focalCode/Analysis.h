@@ -7,6 +7,8 @@ Tracks * getTracks(Int_t Runs, Int_t dataType = kMC, Int_t frameType = kCalorime
 void		drawBraggPeakFit(Int_t Runs, Int_t dataType = kMC, Int_t energy = 190);
 void 		drawBraggPeakGraphFit(Int_t Runs, Int_t dataType = kMC, Int_t energy = 190);
 TString getDataTypeString(Int_t dataType);
+Double_t fitfunc_DBP(Double_t *v, Double_t *par);
+
 //void		DrawFrame2D(Int_t Runs, Int_t Layer);
 //void		DrawRealFrame2D(Int_t Runs, Int_t Layer);
 //void		DrawData3D(Int_t RunFrom, Int_t RunTo);

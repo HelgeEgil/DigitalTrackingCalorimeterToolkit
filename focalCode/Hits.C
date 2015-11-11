@@ -115,7 +115,7 @@ void Hits::appendExpandedClusterToClusterHitMap(vector<Int_t> *expandedCluster, 
 	clusterHitMap->push_back(new Hits(cSize));
 
 	Int_t cidx = clusterHitMap->size() - 1;	
-	for (Int_t j=0; j<cSize; j++) {	
+	for (Int_t j=0; j<cSize; j++) {
 		idx = expandedCluster->at(j);
 		x = offsetForHistogramX + getX(idx);
 		y = offsetForHistogramY + getY(idx);
@@ -129,49 +129,14 @@ vector<Int_t> Hits::findNeighbours(Int_t index) {
    neighbours.reserve(8);
 	Int_t xGoal = getX(index);
 	Int_t yGoal = getY(index);
-	Int_t jFrom = 0;
-	Int_t jTo = GetEntriesFast();
+	Int_t zGoal = getLayer(index);
 
-	/* TODO optimization
-	 *Find close starting point and end point
-	 * Find scan direction and correct algorithm
-	 * start on top
-	while (true) {
-		if (yGoal <= 2*ny-3) {
-			// first two columns are defaulted to starting pos. 0
-			jFrom = 0;
-			break;
-		}
+	for (Int_t j=0; j < GetEntriesFast(); j++) {
+		if (neighbours.size() == 8 || getLayer(j) > zGoal) break;
+		if (getLayer(j) < zGoal || index == j) continue;
 
-		else {
-			// Find first index where y <= yGoal + 2
-			if (hits->GetY(jFrom) <= yGoal + 2) break;
-			else if (jFrom <= 0) break;
-			jFrom--;
-		}
-	}
-
-	while (true) {
-		if (yGoal >= 2*ny - 3) {
-			jTo = hit_size;
-			break;
-		}
-
-		else {
-			// Find first index where x >= xGoal + 2
-			if (hits->GetY(jTo) >= yGoal + 2) break;
-			else if (jTo >= hit_size - 1) break;
-			jTo++;
-		}
-	}
-	*/
-
-	for (Int_t j=jFrom; j < jTo; j++) {
-		if (neighbours.size() == 8) break;
-		if (index != j) {
-			if (abs(xGoal - getX(j)) <= 1 && abs(yGoal - getY(j)) <= 1)
-				neighbours.push_back(j);
-		}
+		if (abs(xGoal - getX(j)) <= 1 && abs(yGoal - getY(j)) <= 1)
+			neighbours.push_back(j);
 	}
 	return neighbours;
 }

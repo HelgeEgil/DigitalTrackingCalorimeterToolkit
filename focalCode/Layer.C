@@ -49,8 +49,6 @@ void Layer::findHits(Hits* hits) {
 		if (frame2D_.GetBinContent(i)) {
 			frame2D_.GetBinXYZ(i,x,y,z);
 			
-			// TODO: Check if this point is already in hits... This is where the crux might be
-			
 			hits->appendPoint(x,y,layerNo_);
 		}
 	}

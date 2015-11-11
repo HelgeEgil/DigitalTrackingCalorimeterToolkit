@@ -61,6 +61,7 @@ class Track : public TObject {
 		Float_t getMeanSizeToIdx(Int_t i);
 		Float_t getStdSizeToIdx(Int_t toIdx);
 		//Float_t getEnergy() { return energy_; }
+		Float_t getEnergyFromWEPL(Float_t wepl);
 		Float_t getEnergyFromTL(Float_t tl);
 		Float_t getEnergy();
 		Float_t getWEPLFromTL(Float_t tl);

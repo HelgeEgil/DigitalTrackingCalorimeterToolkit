@@ -152,6 +152,17 @@ Float_t Track::getEnergyFromTL(Float_t tl) {
 	
 }
 
+Float_t Track::getEnergyFromWEPL(Float_t wepl) {
+	for (Int_t i=0; i<nPLEnergies; i++) {
+		if (kPLFocal[i] * kWEPLRatio[i] < wepl) continue;
+		else {
+			Float_t ratio = (wepl - kPLFocal[i-1] * kWEPLRatio[i-1]) / (kPLFocal[i]* kWEPLRatio[i] - kPLFocal[i-1]* kWEPLRatio[i-1]);
+			return kPLEnergies[i-1] + ratio * (kPLEnergies[i] - kPLEnergies[i-1]);
+		}
+	}
+
+}
+
 Float_t Track::getEnergy() {
 	Float_t tl = getTrackLengthmm();
 	if (!tl) return 0;

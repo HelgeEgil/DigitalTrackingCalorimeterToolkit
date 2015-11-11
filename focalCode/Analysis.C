@@ -319,7 +319,6 @@ void drawClusterShapes(Int_t Runs, Bool_t dataType, Int_t energy) {
 			cf->diffuseFrame(); // THE MAGIC PART
 			hits = cf->findHits();
 			tempClusterHitMap = hits->findClustersHitMap();
-
 		}
 
 		else if (dataType == kData) {
@@ -335,22 +334,10 @@ void drawClusterShapes(Int_t Runs, Bool_t dataType, Int_t energy) {
 		for (UInt_t j=0; j<tempClusterHitMap->size(); j++)
 			clusterHitMap->push_back( tempClusterHitMap->at(j) );
 	}
-	
-	// is any Hits degenerate!!
-	
-	Hit *hi = 0;
-	Hit *hj = 0;
-	for (int ii=0; ii<hits->GetEntriesFast(); ii++) {
-	  int n=0;
-	  hi = hits->At(ii);
-	  for (int jj=0; jj<hits->GetEntriesFast(); jj++) {
-	    if (ii == jj) continue;
-	    hj = hits->At(jj);
-	    
-	    if (hj->getX() == hi->getX() && hj->getY() == hi->getY()) n++;
-	  }
-	  if (n>0) cout << "Hits idx " << ii << " is degenerate with n = " << n << "!\n";
-	}
+	// delete tempClusterHitMap;
+	delete hits;
+	delete cf;
+	delete f;
 	
 	// Here it is possible to access and modify the cluster shapes
 	// Each cluster is stored as a Hits (Hit collection) pointer in the vector collection clusterHitMap.
@@ -411,6 +398,8 @@ void drawClusterShapes(Int_t Runs, Bool_t dataType, Int_t energy) {
 		hClusterMaps->at(i)->Draw("same, COL,ah,fb,bb");
 		gStyle->SetOptStat(0);
 	}
+
+
 }
 
 TString getDataTypeString(Int_t dataType) {
@@ -440,15 +429,11 @@ Double_t fitfunc_DBP(Double_t *v, Double_t *par) {
 	// we convert to water equivalent path length before fitting
 	// so the numbers are given in water
 	// Based on Bortfeld and Schlegel 1996
-	// v[0] is depth and par[0] is initial energy E0  
-  
-	Float_t d_cm = v[0] / 10.;
-  
-	Float_t rho = 1;
-	Float_t alpha = sqrt(18) / rho;
-	Float_t p = 1.8; // for protons between 10 and 200 MeV
-	Float_t R = alpha * pow(par[0],p);
-	Double_t fitval = par[1] / ( rho * p * pow(alpha, (1/p)) * pow((R - d_cm), (1 - 1/p)) );
+	// v[0] is depth and par[0] is initial energy E0. par[1] is a scaling.
+
+	Float_t R_mm = 0.0019 * pow(par[0],1.8) * 10;
+	Double_t fitval = par[1] / ( 0.0554 * pow((R_mm - v[0]), 0.444) );
+	if (isnan(fitval)) fitval = 0;
 	return fitval;
 }
 
@@ -489,7 +474,7 @@ void drawBraggPeakGraphFit(Int_t Runs, Int_t dataType, Int_t energy) {
 			if (!thisTrack->At(k)) continue;
 			trackLengthSoFar += thisTrack->getTrackLengthmmAt(k);
 			trackLengthSoFarWEPL += thisTrack->getTrackLengthWEPLmmAt(k);
-			x[k] = trackLengthSoFar;
+			x[k] = trackLengthSoFarWEPL;
 			y[k] = thisTrack->getSize(k);
 			xx[m+k] = trackLengthSoFarWEPL;
 			yy[m+k] = thisTrack->getSize(k);
@@ -513,7 +498,7 @@ void drawBraggPeakGraphFit(Int_t Runs, Int_t dataType, Int_t energy) {
 		gr->SetMinimum(0);
 		gr->Draw("A*");
 		if (i<gsize-1)
-			gr->GetXaxis()->SetRangeUser(0, 35);
+			gr->GetXaxis()->SetRangeUser(0, 300);
 		gr->Draw("A*");
 		cGraph->Update();
 		// fitting
@@ -533,13 +518,28 @@ void drawBraggPeakGraphFit(Int_t Runs, Int_t dataType, Int_t energy) {
 		Float_t BP = maxVal - constHeight;
 		Float_t BPwidth = 1.7;
 
+		/*
 		TF1 *g1 = new TF1("m1", "gaus(0) + [3]", 0, BPpos*2);
-
 		g1->SetParameters(BP, BPpos, BPwidth, constHeight); // BP, BPpos, 2.5
 		g1->SetParLimits(0, BP*0.8, BP*2);
 		g1->SetParLimits(1, BPpos*0.9, BPpos*1.3);
 		g1->SetParLimits(2, BPwidth, BPwidth);
 		gr->Fit("m1", "B, W, Q", "", 0, BPpos*1.5);
+		Float_t fit_tl = g1->GetParameter(1);
+		//cout << Form("The fitted energy is %d MeV.\n", thisTrack->getEnergyFromWEPL(fit_tl));
+		 */
+
+		TF1 *func = new TF1("fit_BP", fitfunc_DBP, 0, 300, 2);
+		func->SetParName(0,"Initial energy [MeV]");
+		func->SetParName(1, "Factor");
+		func->SetParameter(0,190.);
+		func->SetParameter(1, 1);
+		func->SetParLimits(0, 10, 250);
+		func->SetParLimits(1, 1,3);
+		gr->Fit("fit_BP", "B, W, Q", "", 0, 300);
+		Float_t fit_t = func->GetParameter(0);
+		//cout << Form("... MEAN VALUE ... The fitted energy is %d MeV.\n", t->getEnergyFromWEPL(fit_t)) << endl;
+		cout << Form("The fitted energy is %f MeV... Jesus christ that wasn't hard was it\n", fit_t);
 	}
 
 	cGraphAll->cd();
@@ -547,14 +547,20 @@ void drawBraggPeakGraphFit(Int_t Runs, Int_t dataType, Int_t energy) {
 	g->GetXaxis()->SetTitle("Water Equivalent Path Length");
 	g->Draw("A*");
 	
+	//Track *t = new Track;
 	// fit main function
 	TF1 *func = new TF1("fit_BP", fitfunc_DBP, 0, 300, 2);
 	func->SetParName(0,"Initial energy [MeV]");
 	func->SetParName(1, "Factor");
 	func->SetParameter(0,200.);
-	func->SetParameter(1, 75.);
-	g->Fit("fit_BP");
-	 
+	func->SetParameter(1, 1);
+	func->SetParLimits(0, 10, 250);
+	func->SetParLimits(1, 1,3);
+	g->Fit("fit_BP", "B, W", "", 0, 300);
+	Float_t fit_t = func->GetParameter(0);
+	//cout << Form("... MEAN VALUE ... The fitted energy is %d MeV.\n", t->getEnergyFromWEPL(fit_t)) << endl;
+	cout << Form("The fitted energy is %f MeV... Jesus christ that wasn't hard was it\n", fit_t);
+
   	delete tracks;
 }
 
