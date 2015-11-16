@@ -45,6 +45,7 @@ class Track : public TObject {
       virtual Float_t getY(Int_t i) { return At(i)->getY(); }
       virtual Int_t getLayer(Int_t i) { return At(i)->getLayer(); }
       virtual Int_t getSize(Int_t i) { return At(i)->getSize(); }
+      virtual Float_t getDepositedEnergy(Int_t i) {return At(i)->getDepositedEnergy(); }
 
 		// with dimensions
 		Float_t getXmm(Int_t i) { return At(i)->getXmm(); }

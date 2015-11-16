@@ -21,6 +21,7 @@ class Cluster : public TObject {
       Float_t getY() { return y_; }
       Int_t getLayer() { return layerNo_; }
       Int_t getSize() { return clusterSize_; }
+      Float_t getDepositedEnergy();
 
 		Double_t getXmm() { return x_ * dx; }
 		Double_t getYmm() { return y_ * dy; }

@@ -35,6 +35,12 @@ Double_t Cluster::getLayermm() {
 	return z;
 }
 
+Float_t Cluster::getDepositedEnergy() {
+	// An inverse fit to the charge diffusion algorithm defined in Layer.C
+	// Returns the local dEdx value in keV.
+	return -13.6 + 7.524*clusterSize_ + 0.248 * pow(clusterSize_,2);
+}
+
 
 void Cluster::set(Cluster* copyCluster) {
    x_ = copyCluster->getX();

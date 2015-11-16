@@ -475,9 +475,9 @@ void drawBraggPeakGraphFit(Int_t Runs, Int_t dataType, Int_t energy) {
 			trackLengthSoFar += thisTrack->getTrackLengthmmAt(k);
 			trackLengthSoFarWEPL += thisTrack->getTrackLengthWEPLmmAt(k);
 			x[k] = trackLengthSoFarWEPL;
-			y[k] = thisTrack->getSize(k);
+			y[k] = thisTrack->getDepositedEnergy(k);
 			xx[m+k] = trackLengthSoFarWEPL;
-			yy[m+k] = thisTrack->getSize(k);
+			yy[m+k] = thisTrack->getDepositedEnergy(k);
 		}
 		
 		cout << "Energy of track " << j << " is " << thisTrack->getEnergy() << "MeV.\n";
@@ -494,8 +494,10 @@ void drawBraggPeakGraphFit(Int_t Runs, Int_t dataType, Int_t energy) {
 		if (!vGraph.at(i)) continue;
 		TGraph *gr = vGraph.at(i);
 		cGraph->cd(i+1);
-		gr->SetMaximum(40);
+		gr->SetMaximum(500);
 		gr->SetMinimum(0);
+		gr->GetXaxis()->SetTitle("Water Equivalent Path Length");
+		gr->GetYaxis()->SetTitle("Deposited energy [keV/#mum]");
 		gr->Draw("A*");
 		if (i<gsize-1)
 			gr->GetXaxis()->SetRangeUser(0, 300);
@@ -533,9 +535,9 @@ void drawBraggPeakGraphFit(Int_t Runs, Int_t dataType, Int_t energy) {
 		func->SetParName(0,"Initial energy [MeV]");
 		func->SetParName(1, "Factor");
 		func->SetParameter(0,190.);
-		func->SetParameter(1, 1);
+		func->SetParameter(1, 40);
 		func->SetParLimits(0, 10, 250);
-		func->SetParLimits(1, 1,3);
+		func->SetParLimits(1, 30,50);
 		gr->Fit("fit_BP", "B, W, Q", "", 0, 300);
 		Float_t fit_t = func->GetParameter(0);
 		//cout << Form("... MEAN VALUE ... The fitted energy is %d MeV.\n", t->getEnergyFromWEPL(fit_t)) << endl;
@@ -553,9 +555,9 @@ void drawBraggPeakGraphFit(Int_t Runs, Int_t dataType, Int_t energy) {
 	func->SetParName(0,"Initial energy [MeV]");
 	func->SetParName(1, "Factor");
 	func->SetParameter(0,200.);
-	func->SetParameter(1, 1);
+	func->SetParameter(1, 40);
 	func->SetParLimits(0, 10, 250);
-	func->SetParLimits(1, 1,3);
+	func->SetParLimits(1, 30,50);
 	g->Fit("fit_BP", "B, W", "", 0, 300);
 	Float_t fit_t = func->GetParameter(0);
 	//cout << Form("... MEAN VALUE ... The fitted energy is %d MeV.\n", t->getEnergyFromWEPL(fit_t)) << endl;
