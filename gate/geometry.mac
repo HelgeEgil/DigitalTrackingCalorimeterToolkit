@@ -20,7 +20,8 @@
 /gate/phantom/geometry/setPhiStart 0 deg
 /gate/phantom/geometry/setDeltaPhi 360 deg
 /gate/phantom/placement/setTranslation 0. 0. -82.54 mm
-/gate/phantom/setMaterial PMMA
+#/gate/phantom/setMaterial PMMA
+/gate/phantom/setMaterial Air
 
 /gate/phantom/daughters/name west
 /gate/phantom/daughters/insert cylinder
@@ -30,7 +31,8 @@
 /gate/west/geometry/setPhiStart 0 deg
 /gate/west/geometry/setDeltaPhi 360 deg
 /gate/west/placement/setTranslation 10 0. 0. mm
-/gate/west/setMaterial Aluminium
+#/gate/west/setMaterial Aluminium
+/gate/west/setMaterial Air
 
 /gate/phantom/daughters/name east
 /gate/phantom/daughters/insert cylinder
@@ -80,7 +82,8 @@
 /gate/absorber/geometry/setYLength 49.85 mm
 /gate/absorber/geometry/setZLength 1.5 mm
 /gate/absorber/placement/setTranslation 0. -5.725 -0.2 mm
-/gate/absorber/setMaterial Tungsten
+#/gate/absorber/setMaterial Tungsten
+/gate/absorber/setMaterial Aluminium
 /gate/absorber/vis/forceWireframe
 /gate/absorber/vis/setColor grey
 
@@ -90,7 +93,8 @@
 /gate/filler/geometry/setYLength 18.85 mm
 /gate/filler/geometry/setZLength 0.3 mm
 /gate/filler/placement/setTranslation 0. 9.375 0.7 mm # was 9.275
-/gate/filler/setMaterial Tungsten
+#/gate/filler/setMaterial Tungsten
+/gate/filler/setMaterial Aluminium
 /gate/filler/vis/forceWireframe
 /gate/filler/vis/setColor blue
 

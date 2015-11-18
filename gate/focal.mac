@@ -19,18 +19,18 @@
 /vis/open OGL
 #/vis/open OGLSQt
 /vis/viewer/reset
-/vis/viewer/zoom 3
+/vis/viewer/zoom 5
 /vis/viewer/panTo 0.03 -0.05
 /vis/viewer/set/viewpointThetaPhi 130 40
 /vis/viewer/set/style surface
 /vis/drawVolume
-/tracking/storeTrajectory 1
-/vis/scene/endOfEventAction accumulate 25
+#/tracking/storeTrajectory 1
+#/vis/scene/endOfEventAction accumulate 25
 #/vis/scene/add/trajectories
 /vis/viewer/update
 
-/gate/geometry/setMaterialDatabase /home/rttn/GateMaterials.db
-#/gate/geometry/setMaterialDatabase /home/local1/GateMaterials.db
+#/gate/geometry/setMaterialDatabase /home/rttn/GateMaterials.db
+/gate/geometry/setMaterialDatabase /home/local1/GateMaterials.db
 
 #=======================#
 #    Load geometry	#
@@ -100,15 +100,15 @@
 #/gate/physics/SetMaxStepSizeInRegion     spacer 50 um
 #/gate/physics/SetMaxStepSizeInRegion     pcb 50 um
 #/gate/physics/SetMaxStepSizeInRegion     glue 50 um
-/gate/physics/SetMaxStepSizeInRegion      scanner 5 um
+/gate/physics/SetMaxStepSizeInRegion      scanner 10 um
 /gate/physics/ActivateStepLimiter         charged
 /gate/physics/ActivateStepLimiter         gamma
 /gate/physics/ActivateStepLimiter         proton
 
-/gate/physics/Electron/SetCutInRegion  scanner 5 um
-/gate/physics/Positron/SetCutInRegion  scanner 5 um
-/gate/physics/Gamma/SetCutInRegion     scanner 5 um
-/gate/physics/Proton/SetCutInRegion    scanner 5 um
+/gate/physics/Electron/SetCutInRegion  scanner 10 um
+/gate/physics/Positron/SetCutInRegion  scanner 10 um
+/gate/physics/Gamma/SetCutInRegion     scanner 10 um
+/gate/physics/Proton/SetCutInRegion    scanner 10 um
 
 #/gate/physics/Electron/SetCutInRegion   active 5 um
 #/gate/physics/Positron/SetCutInRegion   active 5 um
@@ -153,12 +153,13 @@
 
 /gate/source/addSource PBS PencilBeam
 /gate/source/PBS/setParticleType proton
-#/gate/source/PBS/setEnergy 188. MeV
-/gate/source/PBS/setEnergy 260. MeV
+/gate/source/PBS/setEnergy 188. MeV
+#/gate/source/PBS/setEnergy 260. MeV
 /gate/source/PBS/setSigmaEnergy 1. MeV
-/gate/source/PBS/setPosition 0. 0. -25. cm
-/gate/source/PBS/setSigmaX 8. mm
-/gate/source/PBS/setSigmaY 8. mm
+#/gate/source/PBS/setPosition 0. 0. -25. cm
+/gate/source/PBS/setPosition 0. 0. -5.2 cm
+/gate/source/PBS/setSigmaX 10. mm
+/gate/source/PBS/setSigmaY 10. mm
 /gate/source/PBS/setSigmaTheta 0.1 mrad
 /gate/source/PBS/setSigmaPhi 0.1 mrad
 /gate/source/PBS/setEllipseXThetaEmittance 1 mm*mrad
@@ -186,7 +187,7 @@
 
 # Enable ROOT output
 /gate/output/root/enable
-/gate/output/root/setFileName ../focalCode/test
+/gate/output/root/setFileName ../focalCode/testAl
 
 #===============#
 # START BEAMS	#
@@ -194,5 +195,5 @@
 
 /gate/random/setEngineName MersenneTwister
 /gate/random/setEngineSeed auto
-/gate/application/setTotalNumberOfPrimaries 2000
+/gate/application/setTotalNumberOfPrimaries 10000
 /gate/application/start
