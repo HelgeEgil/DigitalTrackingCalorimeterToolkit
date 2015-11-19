@@ -437,19 +437,33 @@ Double_t fitfunc_DBP(Double_t *v, Double_t *par) {
 	return fitval;
 }
 
-void drawBraggPeakGraphFit(Int_t Runs, Int_t dataType, Int_t energy) {
+void drawBraggPeakGraphFit(Int_t Runs, Int_t dataType, Bool_t recreate, Int_t energy) {
+
 	Float_t trackLengthSoFar;
 	Bool_t cut;
 
 	TCanvas *cGraphAll = new TCanvas("cGraphAll", "Fitting data points", 1000, 800);
 	TCanvas *cGraph = new TCanvas("cGraph", "Fitted data points", 1400, 1000);
-	cGraph->Divide(5,5, 0.01, 0.01, 0);
+	TCanvas *c3 = new TCanvas("c3", "Fit results");
+	cGraph->Divide(4,4, 0.00001, 0.00001, 0);
+
+	TH1F *fitResult = new TH1F("fitResult", "Fitted results", 500, 100, 250);
 
 	vector<TGraph*> vGraph;
 	vGraph.reserve(kEventsPerRun);
 
-	Tracks *tracks = getTracks(Runs, dataType, kCalorimeter, energy);
-	tracks->extrapolateToLayer0();
+	Tracks *tracks;
+
+	if (recreate) {
+		tracks = getTracks(Runs, dataType, kCalorimeter, energy);
+		tracks->extrapolateToLayer0();
+		saveTracks(tracks);
+	}
+
+	else {
+		tracks = loadTracks();
+	}
+
 	TString sDataType = getDataTypeString(dataType);
 
 	Int_t m = 0;
@@ -461,8 +475,8 @@ void drawBraggPeakGraphFit(Int_t Runs, Int_t dataType, Int_t energy) {
 		thisTrack = tracks->At(j);
 		if (!thisTrack) continue;
 
-		cut = getCutTrackLength(energy, thisTrack) * getCutBraggPeakInTrack(thisTrack);
-		if (dataType == kData) cut *= getCutChipNumber(thisTrack);
+		cut = getCutWEPL(thisTrack) * getCutBraggPeakInTrack(thisTrack);
+		//if (dataType == kData) cut *= getCutChipNumber(thisTrack);
 
 		if (!cut) continue;
 		Int_t n = thisTrack->GetEntriesFast();
@@ -480,6 +494,8 @@ void drawBraggPeakGraphFit(Int_t Runs, Int_t dataType, Int_t energy) {
 			yy[m+k] = thisTrack->getDepositedEnergy(k);
 		}
 		
+		cout << Form("Track length = %.2f mm, WEPL = %.2f mm.\n", trackLengthSoFar, trackLengthSoFarWEPL);
+
 		cout << "Energy of track " << j << " is " << thisTrack->getEnergy() << "MeV.\n";
 		
 		m += n;
@@ -489,29 +505,42 @@ void drawBraggPeakGraphFit(Int_t Runs, Int_t dataType, Int_t energy) {
 	vGraph.push_back(new TGraph(m, xx, yy));
 	
 	Int_t gsize = vGraph.size();
-	if (gsize>25) gsize = 25;
+	Int_t plotSize = 16;
+	//if (gsize>25) gsize = 25;
 	for (Int_t i=0; i<gsize; i++) {
 		if (!vGraph.at(i)) continue;
 		TGraph *gr = vGraph.at(i);
-		cGraph->cd(i+1);
-		gr->SetMaximum(500);
-		gr->SetMinimum(0);
-		gr->GetXaxis()->SetTitle("Water Equivalent Path Length");
-		gr->GetYaxis()->SetTitle("Deposited energy [keV/#mum]");
-		gr->Draw("A*");
-		if (i<gsize-1)
-			gr->GetXaxis()->SetRangeUser(0, 300);
-		gr->Draw("A*");
-		cGraph->Update();
+		if (i < plotSize) {
+			cGraph->cd(i+1);
+		   gStyle->SetPadBorderMode(0);
+		   gStyle->SetFrameBorderMode(0);
+		   gStyle->SetTitleH(0.06);
+		   gStyle->SetTitleYOffset(-0.1);
+			gr->SetMaximum(500);
+			gr->SetMinimum(0);
+			gr->SetTitle("");
+			gr->GetXaxis()->SetTitle("Water Equivalent Path Length [mm]");
+			gr->GetXaxis()->SetTitleSize(0.05);
+			gr->GetYaxis()->SetTitleSize(0.05);
+			gr->GetYaxis()->SetTitle("Deposited energy [keV/#mum]");
+			gr->GetXaxis()->SetLabelSize(0.04);
+			gr->GetYaxis()->SetLabelSize(0.04);
+			gr->Draw("A*");
+			if (i<gsize-1)
+				gr->GetXaxis()->SetRangeUser(0, 300);
+			gr->Draw("A*");
+			cGraph->Update();
+		}
+
 		// fitting
 		Int_t n = gr->GetN();
 		Float_t maxVal = 0;
 		Int_t maxIdx = 0;
 		
-		for (Int_t i=0.5*n; i<n; i++) {
-		    if (gr->GetY()[i] > maxVal) {
-		    maxVal = gr->GetY()[i];
-		    maxIdx = i;
+		for (Int_t j=0.5*n; j<n; j++) {
+		    if (gr->GetY()[j] > maxVal) {
+		    maxVal = gr->GetY()[j];
+		    maxIdx = j;
 		   }
 		}
 				
@@ -536,12 +565,14 @@ void drawBraggPeakGraphFit(Int_t Runs, Int_t dataType, Int_t energy) {
 		func->SetParName(1, "Factor");
 		func->SetParameter(0,190.);
 		func->SetParameter(1, 40);
-		func->SetParLimits(0, 10, 250);
+		func->SetParLimits(0, 10, 215);
 		func->SetParLimits(1, 30,50);
 		gr->Fit("fit_BP", "B, W, Q", "", 0, 300);
 		Float_t fit_t = func->GetParameter(0);
-		//cout << Form("... MEAN VALUE ... The fitted energy is %d MeV.\n", t->getEnergyFromWEPL(fit_t)) << endl;
+		if (fit_t<214.5) fitResult->Fill(fit_t);
 		cout << Form("The fitted energy is %f MeV... Jesus christ that wasn't hard was it\n", fit_t);
+
+		if (i<plotSize) vGraph.at(i)->SetTitle(Form("Energy: %.1f MeV", fit_t));
 	}
 
 	cGraphAll->cd();
@@ -556,12 +587,16 @@ void drawBraggPeakGraphFit(Int_t Runs, Int_t dataType, Int_t energy) {
 	func->SetParName(1, "Factor");
 	func->SetParameter(0,200.);
 	func->SetParameter(1, 40);
-	func->SetParLimits(0, 10, 250);
+	func->SetParLimits(0, 10, 215);
 	func->SetParLimits(1, 30,50);
-	g->Fit("fit_BP", "B, W", "", 0, 300);
+	g->Fit("fit_BP", "B, W, Q", "", 0, 300);
 	Float_t fit_t = func->GetParameter(0);
-	//cout << Form("... MEAN VALUE ... The fitted energy is %d MeV.\n", t->getEnergyFromWEPL(fit_t)) << endl;
-	cout << Form("The fitted energy is %f MeV... Jesus christ that wasn't hard was it\n", fit_t);
+	//cout << Form("The fitted energy is %f MeV... Jesus christ that wasn't hard was it\n", fit_t);
+
+	c3->cd();
+	fitResult->SetXTitle("Energy [MeV]");
+	fitResult->SetYTitle("Number of protons");
+	fitResult->Draw();
 
   	delete tracks;
 }
@@ -890,10 +925,37 @@ void Draw2DProjection(Int_t Runs, Int_t Events) {
 }
 */
 
+void saveTracks(Tracks *tracks) {
+	TString fileName = "tracks.root";
+	TFile f(fileName, "recreate");
+	f.SetCompressionLevel(1);
+	TTree T("T", "tracks");
+	T.Branch("tracks", &tracks, 256000, 1);
+	T.Fill();
+	T.Write();
+	f.Close();
+}
+
+Tracks * loadTracks() {
+	TString fileName = "tracks.root";
+	TFile *f = new TFile(fileName);
+	TTree *T = (TTree*) f->Get("T");
+	Tracks * tracks = new Tracks();
+
+	T->GetBranch("tracks")->SetAutoDelete(kFALSE);
+	T->SetBranchAddress("tracks",&tracks);
+
+	// check
+	cout << "There are " << T->GetEntriesFast() << " entries in TTree.\n";
+
+	T->GetEntry(0);
+	return tracks;
+}
+
 Tracks * getTracks(Int_t Runs, Int_t dataType, Int_t frameType, Int_t energy) {
 	Focal *f = new Focal();
 
-	Int_t nClusters = kEventsPerRun * 5;
+	Int_t nClusters = kEventsPerRun * 5 * nLayers;
 	Int_t nHits = kEventsPerRun * 50;
 	Int_t nTracks = kEventsPerRun * 2;
 
@@ -909,16 +971,18 @@ Tracks * getTracks(Int_t Runs, Int_t dataType, Int_t frameType, Int_t energy) {
 
 	for (Int_t i=0; i<Runs; i++) {
 
+		cout << "Finding track " << (i+1)*kEventsPerRun << " of " << Runs*kEventsPerRun << "...\n";
+
 		if (dataType == kMC) {
 			f->getMCFrame(i, cf);
 			cf->diffuseFrame();
 			hits = cf->findHits();
 			clusters = hits->findClustersFromHits();
 
-			f->getMCTrackerFrame(i, tf);
+/*			f->getMCTrackerFrame(i, tf);
 			tf->diffuseFrame();
 			trackerHits = tf->findHits();
-			trackerClusters = trackerHits->findClustersFromHits();
+			trackerClusters = trackerHits->findClustersFromHits();*/
 		}
 
 		else if (dataType == kData) {
@@ -929,7 +993,7 @@ Tracks * getTracks(Int_t Runs, Int_t dataType, Int_t frameType, Int_t energy) {
 		}
 
 		calorimeterTracks = clusters->findCalorimeterTracks();
-		trackerTracks = trackerClusters->findTrackerTracks();
+//		trackerTracks = trackerClusters->findTrackerTracks();
 
 		// should do track matching here
 		// and append calorimeterTracks to trackerTracks...
@@ -941,7 +1005,7 @@ Tracks * getTracks(Int_t Runs, Int_t dataType, Int_t frameType, Int_t energy) {
 		allTracks->appendClustersWithoutTrack(clusters->getClustersWithoutTrack());
 
 		cf->Reset();
-		tf->Reset();
+//		tf->Reset();
 		hits->clearHits();
 		trackerHits->clearHits();
 		clusters->clearClusters();
@@ -951,7 +1015,7 @@ Tracks * getTracks(Int_t Runs, Int_t dataType, Int_t frameType, Int_t energy) {
 	}
 
 	delete cf;
-	delete tf;
+//	delete tf;
 	delete clusters;
 	delete trackerClusters;
 	delete hits;
@@ -1283,6 +1347,15 @@ Bool_t getCutTrackLength(int energy, Track *track) {
 	Float_t TL = track->getTrackLengthmm();
 
 	Bool_t cutTL = (TL > minTL) ? true : false;
+
+	return cutTL;
+}
+
+Bool_t getCutWEPL(Track *track) {
+	Float_t minTLWEPL = 150;
+	Float_t WEPL = track->getWEPL();
+
+	Bool_t cutTL = (WEPL > minTLWEPL) ? true : false;
 
 	return cutTL;
 }

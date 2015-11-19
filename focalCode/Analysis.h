@@ -5,10 +5,11 @@
 
 Tracks * getTracks(Int_t Runs, Int_t dataType = kMC, Int_t frameType = kCalorimeter, Int_t energy = 190);
 void		drawBraggPeakFit(Int_t Runs, Int_t dataType = kMC, Int_t energy = 190);
-void 		drawBraggPeakGraphFit(Int_t Runs, Int_t dataType = kMC, Int_t energy = 190);
+void 		drawBraggPeakGraphFit(Int_t Runs, Int_t dataType = kMC, Bool_t recreate = 0, Int_t energy = 190);
 TString getDataTypeString(Int_t dataType);
 Double_t fitfunc_DBP(Double_t *v, Double_t *par);
-
+void saveTracks(Tracks* tracks);
+Tracks* loadTracks();
 //void		DrawFrame2D(Int_t Runs, Int_t Layer);
 //void		DrawRealFrame2D(Int_t Runs, Int_t Layer);
 //void		DrawData3D(Int_t RunFrom, Int_t RunTo);
@@ -27,6 +28,7 @@ void		drawClusterShapes(Int_t Runs, Bool_t dataType = kMC, Int_t energy = 190);
 void		getTrackStatistics(Int_t Runs, Int_t dataType = kMC, Int_t energy = 190);
 // void   EdepHistogram();
 Bool_t getCutTrackLength(int energy, Track *track);
+Bool_t getCutWEPL(Track *track);
 Bool_t getCutChipNumber(Track *track);
 Bool_t getCutBraggPeakInTrack(Track *track);
 #endif

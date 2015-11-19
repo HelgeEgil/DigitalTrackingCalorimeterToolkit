@@ -66,6 +66,7 @@ class Track : public TObject {
 		Float_t getEnergyFromTL(Float_t tl);
 		Float_t getEnergy();
 		Float_t getWEPLFromTL(Float_t tl);
+		Float_t getWEPL();
 		
 
       Int_t getNMissingLayers();
