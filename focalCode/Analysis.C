@@ -16,6 +16,7 @@
 #include <fstream>
 #include <TEllipse.h>
 #include <vector>
+#include <TStopwatch.h>
 #include <algorithm>
 #include <ctime>
 #include <TView.h>
@@ -23,6 +24,7 @@
 #include <TArrow.h>
 #include <TF1.h>
 #include "Math/ProbFunc.h"
+#include <ctime>
 
 using namespace std;
 
@@ -118,10 +120,10 @@ void GetTrackerStatistics(Int_t Events, Int_t Runs) {
 
 */
 
-void getTrackStatistics(Int_t Runs, Int_t dataType, Int_t energy) {
+void getTrackStatistics(Int_t Runs, Int_t dataType, Bool_t recreate, Int_t energy) {
 	Focal f;
 
-	Tracks *tracks = getTracks(Runs, dataType, kCalorimeter, energy);
+	Tracks * tracks = loadOrCreateTracks(recreate, Runs, dataType, energy);
 	tracks->extrapolateToLayer0();
 	
 	Int_t nTracksToPlot = 25;
@@ -284,13 +286,7 @@ void getTrackStatistics(Int_t Runs, Int_t dataType, Int_t energy) {
 	delete tracks;
 }
 
-
-
-// Kristian
-// - range resolution for eksperimentelle data
-// - antall partikler vs rekkevidde
-
-void drawClusterShapes(Int_t Runs, Bool_t dataType, Int_t energy) {
+void drawClusterShapes(Int_t Runs, Bool_t dataType, Bool_t recreate, Int_t energy) {
 	// get vector of TH2F's, each with a hits distribution and cluster size
 	// dataType = kMC (0) or kData (1)
 
@@ -437,6 +433,12 @@ Double_t fitfunc_DBP(Double_t *v, Double_t *par) {
 	return fitval;
 }
 
+void makeTracks(Int_t Runs, Int_t dataType, Bool_t recreate, Int_t energy) {
+	Tracks * tracks = loadOrCreateTracks(recreate, Runs, dataType, energy);
+	tracks->extrapolateToLayer0();
+}
+
+
 void drawBraggPeakGraphFit(Int_t Runs, Int_t dataType, Bool_t recreate, Int_t energy) {
 
 	Float_t trackLengthSoFar;
@@ -450,19 +452,9 @@ void drawBraggPeakGraphFit(Int_t Runs, Int_t dataType, Bool_t recreate, Int_t en
 	TH1F *fitResult = new TH1F("fitResult", "Fitted results", 500, 100, 250);
 
 	vector<TGraph*> vGraph;
-	vGraph.reserve(kEventsPerRun);
 
-	Tracks *tracks;
-
-	if (recreate) {
-		tracks = getTracks(Runs, dataType, kCalorimeter, energy);
-		tracks->extrapolateToLayer0();
-		saveTracks(tracks);
-	}
-
-	else {
-		tracks = loadTracks();
-	}
+	Tracks * tracks = loadOrCreateTracks(recreate, Runs, dataType, energy);
+	tracks->extrapolateToLayer0();
 
 	TString sDataType = getDataTypeString(dataType);
 
@@ -494,9 +486,9 @@ void drawBraggPeakGraphFit(Int_t Runs, Int_t dataType, Bool_t recreate, Int_t en
 			yy[m+k] = thisTrack->getDepositedEnergy(k);
 		}
 		
-		cout << Form("Track length = %.2f mm, WEPL = %.2f mm.\n", trackLengthSoFar, trackLengthSoFarWEPL);
+// 		cout << Form("Track length = %.2f mm, WEPL = %.2f mm.\n", trackLengthSoFar, trackLengthSoFarWEPL);
 
-		cout << "Energy of track " << j << " is " << thisTrack->getEnergy() << "MeV.\n";
+// 		cout << "Energy of track " << j << " is " << thisTrack->getEnergy() << "MeV.\n";
 		
 		m += n;
 		vGraph.push_back(new TGraph(n, x, y));
@@ -570,7 +562,7 @@ void drawBraggPeakGraphFit(Int_t Runs, Int_t dataType, Bool_t recreate, Int_t en
 		gr->Fit("fit_BP", "B, W, Q", "", 0, 300);
 		Float_t fit_t = func->GetParameter(0);
 		if (fit_t<214.5) fitResult->Fill(fit_t);
-		cout << Form("The fitted energy is %f MeV... Jesus christ that wasn't hard was it\n", fit_t);
+// 		cout << Form("The fitted energy is %f MeV... Jesus christ that wasn't hard was it\n", fit_t);
 
 		if (i<plotSize) vGraph.at(i)->SetTitle(Form("Energy: %.1f MeV", fit_t));
 	}
@@ -601,7 +593,7 @@ void drawBraggPeakGraphFit(Int_t Runs, Int_t dataType, Bool_t recreate, Int_t en
   	delete tracks;
 }
 
-void drawBraggPeakFit(Int_t Runs, Int_t dataType, Int_t energy) {
+void drawBraggPeakFit(Int_t Runs, Int_t dataType, Bool_t recreate, Int_t energy) {
 
 	Focal f;
 	Float_t trackLengthSoFar = 0;
@@ -615,8 +607,9 @@ void drawBraggPeakFit(Int_t Runs, Int_t dataType, Int_t energy) {
 	vector<TArrow*> cogArrows;
 	cogArrows.reserve(100);
 
-	Tracks *tracks = getTracks(Runs, dataType, kCalorimeter, energy);
+	Tracks * tracks = loadOrCreateTracks(recreate, Runs, kCalorimeter, energy);
 	tracks->extrapolateToLayer0();
+	
 	TString sDataType = getDataTypeString(dataType);
 
 	TCanvas *cAverageTrack = new TCanvas("cAverageTrack", "Average Cluster Size along track", 1000, 800);
@@ -925,8 +918,16 @@ void Draw2DProjection(Int_t Runs, Int_t Events) {
 }
 */
 
-void saveTracks(Tracks *tracks) {
-	TString fileName = "tracks.root";
+void saveTracks(Tracks *tracks, Int_t dataType, Int_t energy) {
+  	
+	// C++ / ROOT has something to learn from Python... ;)
+	TString sDataType = (dataType == 0) ? "_MC" : "_data";
+	TString sEnergy = Form("_%dMeV", energy);
+	TString fileName = "tracks";
+	fileName.Append(sDataType);
+	fileName.Append(sEnergy);
+	fileName.Append(".root");
+	
 	TFile f(fileName, "recreate");
 	f.SetCompressionLevel(1);
 	TTree T("T", "tracks");
@@ -936,19 +937,48 @@ void saveTracks(Tracks *tracks) {
 	f.Close();
 }
 
-Tracks * loadTracks() {
-	TString fileName = "tracks.root";
+Tracks * loadTracks(Int_t Runs, Int_t dataType, Int_t energy) {
+  	TString sDataType = (dataType == 0) ? "_MC" : "_data";
+	TString sEnergy = Form("_%dMeV", energy);
+	TString fileName = "tracks";
+	fileName.Append(sDataType);
+	fileName.Append(sEnergy);
+	fileName.Append(".root");
+	
 	TFile *f = new TFile(fileName);
+	if (!f) return 0;
 	TTree *T = (TTree*) f->Get("T");
 	Tracks * tracks = new Tracks();
 
 	T->GetBranch("tracks")->SetAutoDelete(kFALSE);
 	T->SetBranchAddress("tracks",&tracks);
 
-	// check
 	cout << "There are " << T->GetEntriesFast() << " entries in TTree.\n";
 
 	T->GetEntry(0);
+	
+	cout << "There are " << tracks->GetEntriesFast() << " entries in tracks.\n";
+	
+	return tracks;
+}
+
+Tracks * loadOrCreateTracks(Bool_t recreate, Int_t Runs, Int_t dataType, Int_t energy) {
+	Tracks * tracks;
+	
+	if (recreate) {
+		tracks = getTracks(Runs, dataType, kCalorimeter, energy);
+		saveTracks(tracks, dataType, energy);
+	}
+
+	else {
+		tracks = loadTracks(Runs, dataType, energy);
+		
+		if (!tracks) {
+			cout << "!tracks, creating new file\n";
+			tracks = getTracks(Runs, dataType, kCalorimeter, energy);
+			saveTracks(tracks, dataType, energy);
+		}
+	}
 	return tracks;
 }
 
@@ -968,22 +998,33 @@ Tracks * getTracks(Int_t Runs, Int_t dataType, Int_t frameType, Int_t energy) {
 	Tracks *calorimeterTracks = new Tracks(nTracks);
 	Tracks *trackerTracks = new Tracks(nTracks);
 	Tracks *allTracks = new Tracks(nTracks * Runs);
-
+	
+	TStopwatch t1, t2, t3, t4, t5;
+	
 	for (Int_t i=0; i<Runs; i++) {
 
 		cout << "Finding track " << (i+1)*kEventsPerRun << " of " << Runs*kEventsPerRun << "...\n";
-
+		
 		if (dataType == kMC) {
+			t1.Start();
 			f->getMCFrame(i, cf);
+			t1.Stop();
+			t2.Start();
 			cf->diffuseFrame();
+			t2.Stop();
+			t3.Start();
 			hits = cf->findHits();
+			t3.Stop();
+			t4.Start();
 			clusters = hits->findClustersFromHits();
+			t4.Stop();
 
 /*			f->getMCTrackerFrame(i, tf);
 			tf->diffuseFrame();
 			trackerHits = tf->findHits();
 			trackerClusters = trackerHits->findClustersFromHits();*/
 		}
+		
 
 		else if (dataType == kData) {
 			f->getDataFrame(i, cf, energy);
@@ -991,8 +1032,11 @@ Tracks * getTracks(Int_t Runs, Int_t dataType, Int_t frameType, Int_t energy) {
 			clusters = hits->findClustersFromHits();
 			clusters->removeSmallClusters(2);
 		}
-
+		
+		t5.Start();
 		calorimeterTracks = clusters->findCalorimeterTracks();
+		t5.Stop();
+		
 //		trackerTracks = trackerClusters->findTrackerTracks();
 
 		// should do track matching here
@@ -1004,6 +1048,9 @@ Tracks * getTracks(Int_t Runs, Int_t dataType, Int_t frameType, Int_t energy) {
 
 		allTracks->appendClustersWithoutTrack(clusters->getClustersWithoutTrack());
 
+		cout << Form("Timing: getMCframe (%.2f sec), diffuseFrame (%.2f sec), findHits (%.2f sec), findClustersFromHits (%.2f sec), findTracks (%.2f sec)\n",
+			     t1.RealTime(), t2.RealTime(), t3.RealTime(), t4.RealTime(), t5.RealTime());
+		
 		cf->Reset();
 //		tf->Reset();
 		hits->clearHits();
@@ -1028,6 +1075,8 @@ Tracks * getTracks(Int_t Runs, Int_t dataType, Int_t frameType, Int_t energy) {
 }
 
 void drawTracks3D(Int_t Runs, Int_t dataType, Int_t frameType, Int_t energy) {
+	// FIXME Add kTracker to loadOrCreateTracks
+  
 	Tracks *tracks = getTracks(Runs, dataType, frameType, energy);
 	tracks->extrapolateToLayer0();
 

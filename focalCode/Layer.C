@@ -14,9 +14,9 @@ Layer::~Layer() {
 
 void Layer::diffuseLayer() {
 	Int_t repeatFactor, x, y, z, randX, randY;
-   Float_t EnergyFactor = 1000 / 30. * SpreadNumber;
+	Float_t EnergyFactor = 1000 / 30. * SpreadNumber;
 	Float_t newSigma, eDep;
-   gRandom = new TRandom3(0);
+	gRandom = new TRandom3(0);
 
 	TH2F *frame2DCopy = (TH2F*) frame2D_.Clone();
 	frame2DCopy->SetName("frame2DCopy");
@@ -41,15 +41,17 @@ void Layer::diffuseLayer() {
 	delete frame2DCopy;
 }
 
-void Layer::findHits(Hits* hits) {
-	Int_t x; Int_t y; Int_t z;
+Bool_t Layer::findHits(Hits* hits) {
+	Int_t x, y, z;
+	Bool_t isHits = false;
 
 	Int_t nBins = frame2D_.GetBin(frame2D_.GetNbinsX(), frame2D_.GetNbinsY());
 	for (int i=1; i<nBins+1; i++) {
 		if (frame2D_.GetBinContent(i)) {
-			frame2D_.GetBinXYZ(i,x,y,z);
-			
+			frame2D_.GetBinXYZ(i,x,y,z);			
 			hits->appendPoint(x,y,layerNo_);
+			isHits = true;
 		}
 	}
+	return isHits;
 }

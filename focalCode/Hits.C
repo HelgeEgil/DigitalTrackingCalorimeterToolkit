@@ -126,7 +126,7 @@ void Hits::appendExpandedClusterToClusterHitMap(vector<Int_t> *expandedCluster, 
 
 vector<Int_t> Hits::findNeighbours(Int_t index) {
 	vector<Int_t> neighbours;
-   neighbours.reserve(8);
+	neighbours.reserve(8);
 	Int_t xGoal = getX(index);
 	Int_t yGoal = getY(index);
 	Int_t zGoal = getLayer(index);
@@ -184,4 +184,72 @@ void Hits::checkAndAppendAllNextCandidates(vector<Int_t> nextCandidates, vector<
 			toCheck->push_back(nextCandidate);
 		}
 	}
+}
+
+void Hits::makeLayerIndex() {
+  
+	if (layerIndex_.size() == 0)
+		for (Int_t i=0; i<nLayers; i++) layerIndex_.push_back(-1);
+	else
+		for (Int_t i=0; i<nLayers; i++) layerIndex_.at(i) = -1;
+
+	if (!GetEntriesFast()) return;
+
+	Int_t lastLayer = -1;
+	for (Int_t i=0; i<GetEntriesFast(); i++) {
+		if (!At(i))
+			continue;
+
+		if (lastLayer != getLayer(i)) {
+			layerIndex_.at(getLayer(i)) = i;
+			lastLayer = getLayer(i);
+		}
+	}
+
+	// set first indices to  0 if getLayer(0)>0
+	Int_t startOffset = 0;
+	Bool_t kStarted = kFALSE;
+	for (UInt_t i=0; i<layerIndex_.size(); i++) {
+		if (layerIndex_.at(i) == -1 && !kStarted) {
+			startOffset = i;
+		}
+		else if (layerIndex_.at(i) != -1) {
+			kStarted = kTRUE;
+		}
+	}
+
+	if (startOffset>0) {
+		for (Int_t i=0; i<=startOffset; i++)
+			layerIndex_.at(i) = 0;
+	}
+}
+
+Int_t Hits::getFirstIndexOfLayer(UInt_t layer) {
+   // return index in clusters based on fLayerIndex
+   // Return value -1 == no cluster in that layer
+
+   if (layerIndex_.size() == 0) return -1;
+	if (layerIndex_.size() < layer) return -1;
+
+   return layerIndex_.at(layer);
+}
+
+Int_t Hits::getLastIndexOfLayer(UInt_t layer) {
+   for (Int_t i=layer+1; i<nLayers; i++) {
+      if (getFirstIndexOfLayer(i) != -1 ) {
+         return getFirstIndexOfLayer(i);
+      }
+   }
+   return GetEntriesFast(); // no hits beyond layer
+}
+
+Int_t Hits::getLastActiveLayer() {
+	Int_t lastActiveLayer = 0;
+	for (Int_t i=0; i<GetEntriesFast(); i++) {
+		if (!At(i))
+			continue;
+		if (getLayer(i) > lastActiveLayer)
+			lastActiveLayer = getLayer(i);
+	}
+	return lastActiveLayer;
 }

@@ -10,6 +10,7 @@ class Hits : public TObject {
 
    private:
       TClonesArray hits_;
+      vector<Int_t> layerIndex_;
 
    public:
 
