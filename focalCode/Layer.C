@@ -2,7 +2,7 @@
 #include <TH2F.h>
 #include <TRandom3.h>
 
-Layer::Layer(Int_t layerNo, Bool_t frameType, Bool_t dataType) : frame2D_(Form("frame2D_%i",layerNo), Form("frame2D_layer_%i", layerNo), 2*nx, 0, 2*nx, 2*ny, 0, 2*ny) {
+Layer::Layer(Int_t layerNo, Bool_t frameType, Bool_t dataType) : frame2D_(Form("%d_frame2D_%i",frameType, layerNo), Form("frame2D_layer_%i", layerNo), 2*nx, 0, 2*nx, 2*ny, 0, 2*ny) {
 	dataType_ = dataType;
 	frameType_ = frameType;
 	layerNo_ = layerNo;

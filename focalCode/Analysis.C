@@ -438,7 +438,6 @@ void makeTracks(Int_t Runs, Int_t dataType, Bool_t recreate, Int_t energy) {
 	tracks->extrapolateToLayer0();
 }
 
-
 void drawBraggPeakGraphFit(Int_t Runs, Int_t dataType, Bool_t recreate, Int_t energy) {
 
 	Float_t trackLengthSoFar;
@@ -485,10 +484,6 @@ void drawBraggPeakGraphFit(Int_t Runs, Int_t dataType, Bool_t recreate, Int_t en
 			xx[m+k] = trackLengthSoFarWEPL;
 			yy[m+k] = thisTrack->getDepositedEnergy(k);
 		}
-		
-// 		cout << Form("Track length = %.2f mm, WEPL = %.2f mm.\n", trackLengthSoFar, trackLengthSoFarWEPL);
-
-// 		cout << "Energy of track " << j << " is " << thisTrack->getEnergy() << "MeV.\n";
 		
 		m += n;
 		vGraph.push_back(new TGraph(n, x, y));
@@ -1007,16 +1002,21 @@ Tracks * getTracks(Int_t Runs, Int_t dataType, Int_t frameType, Int_t energy) {
 		
 		if (dataType == kMC) {
 			t1.Start();
+
 			f->getMCFrame(i, cf);
-			t1.Stop();
-			t2.Start();
+
+			t1.Stop(); t2.Start();
+
 			cf->diffuseFrame();
-			t2.Stop();
-			t3.Start();
+
+			t2.Stop(); t3.Start();
+
 			hits = cf->findHits();
-			t3.Stop();
-			t4.Start();
-			clusters = hits->findClustersFromHits();
+
+			t3.Stop(); t4.Start();
+
+			clusters = hits->findClustersFromHits(); // badly optimized
+
 			t4.Stop();
 
 /*			f->getMCTrackerFrame(i, tf);

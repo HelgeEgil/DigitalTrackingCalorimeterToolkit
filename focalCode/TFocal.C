@@ -618,6 +618,8 @@ void Focal::getMCFrame(Int_t runNo, CalorimeterFrame *cf) {
    Int_t eventIdFrom = runNo * kEventsPerRun;
    Int_t eventIdTo = eventIdFrom + kEventsPerRun;
 
+   if (runNo == 0) lastJentry_ = 0;
+
    Float_t offsetX = (nx+2) * dx;
    Float_t offsetY = (ny) * dy;
    Float_t x,y;
@@ -626,14 +628,17 @@ void Focal::getMCFrame(Int_t runNo, CalorimeterFrame *cf) {
 	if (fChain == 0) return;
    Long64_t nentries = fChain->GetEntriesFast();
    Long64_t nbytes = 0, nb = 0;
-   for (Long64_t jentry=0; jentry<nentries; jentry++) {
+   for (Long64_t jentry=lastJentry_; jentry<nentries; jentry++) {
 		Long64_t ientry = LoadTree(jentry);
       if (ientry<0) break;
       nb = fChain->GetEntry(jentry);
       nbytes += nb;
 
 		if (eventID < eventIdFrom) continue;
-		else if (eventID >= eventIdTo) break;
+		else if (eventID >= eventIdTo) {
+			lastJentry_ = jentry;
+			break;
+		}
 
       calorimeterLayer = level1ID - 4;
       if (calorimeterLayer<0) continue;

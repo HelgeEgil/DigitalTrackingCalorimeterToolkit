@@ -6,7 +6,7 @@ using namespace std;
 TrackerFrame::TrackerFrame() : trackerFrame_("Layer", nTrackers) {
 	for (Int_t i=0; i<nTrackers; i++) {
 		// make new layer
-		new(trackerFrame_[i]) Layer(i, kCalorimeter, kMC);
+		new(trackerFrame_[i]) Layer(i, kTracker, kMC);
 	}
 }
 

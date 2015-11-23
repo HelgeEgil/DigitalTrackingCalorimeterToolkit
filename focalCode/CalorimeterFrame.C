@@ -17,17 +17,18 @@ CalorimeterFrame::~CalorimeterFrame() {
 
 Hits * CalorimeterFrame::findHits() {
 	Hits *hits = new Hits();
-	  
+
 	Int_t nNoHits = 0;
 	Bool_t isHits = false;
 	for (Int_t layer=0; layer<nLayers; layer++) {
 		isHits = At(layer)->findHits(hits);
 		
 		if (!isHits) nNoHits++;
-		else nNoHits=0;
+		else nNoHits = 0;
 		if (nNoHits>2) break;
 	}
 	
+	hits->makeLayerIndex();
 	return hits;
 }
 

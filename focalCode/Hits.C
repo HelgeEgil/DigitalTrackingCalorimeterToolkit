@@ -40,23 +40,33 @@ Int_t Hits::getI(Int_t x, Int_t y) {
 
 Clusters * Hits::findClustersFromHits() {
 	Clusters *clusters = new Clusters(kEventsPerRun * 20);
-
-	vector<Int_t> *checkedIndices = new vector<Int_t>;
 	vector<Int_t> *expandedCluster = 0;
-	checkedIndices->reserve(GetEntriesFast());
 
-	for (Int_t i = 0; i < GetEntriesFast(); i++) {
-		if (isItemInVector(i, checkedIndices)) continue;
+	Int_t layerIdxFrom, layerIdxTo;
+	for (Int_t layer=0; layer<nLayers; layer++) {
+		layerIdxFrom = getFirstIndexOfLayer(layer);
+		layerIdxTo = getLastIndexOfLayer(layer);
 
-		vector<Int_t> firstHits = findNeighbours(i);
-		if (firstHits.size()) {
-			expandedCluster = findExpandedCluster(i, checkedIndices);
-			appendExpandedClusterToClusters(expandedCluster, clusters);
-			delete expandedCluster;
+		if (layerIdxFrom<0) continue;
+
+		makeVerticalIndexOnLayer(layer); // only stores on this layer
+
+		Int_t nHits = layerIdxTo - layerIdxFrom;
+		vector<Int_t> *checkedIndices = new vector<Int_t>;
+		checkedIndices->reserve(nHits);
+
+		for (Int_t i = layerIdxFrom; i < layerIdxTo; i++) {
+			if (isItemInVector(i, checkedIndices)) continue;
+
+			vector<Int_t> firstHits = findNeighbours(i);
+			if (firstHits.size()) {
+				expandedCluster = findExpandedCluster(i, checkedIndices);
+				appendExpandedClusterToClusters(expandedCluster, clusters);
+				delete expandedCluster;
+			}
 		}
+		delete checkedIndices;
 	}
-	delete checkedIndices;
-// 	delete expandedCluster;
 
 	return clusters;
 }
@@ -127,16 +137,21 @@ void Hits::appendExpandedClusterToClusterHitMap(vector<Int_t> *expandedCluster, 
 vector<Int_t> Hits::findNeighbours(Int_t index) {
 	vector<Int_t> neighbours;
 	neighbours.reserve(8);
+
 	Int_t xGoal = getX(index);
 	Int_t yGoal = getY(index);
-	Int_t zGoal = getLayer(index);
+	Int_t layer = getLayer(index);
 
-	for (Int_t j=0; j < GetEntriesFast(); j++) {
-		if (neighbours.size() == 8 || getLayer(j) > zGoal) break;
-		if (getLayer(j) < zGoal || index == j) continue;
+	Int_t idxFrom = getFirstIndexBeforeY(yGoal);
+	Int_t idxTo = getLastIndexAfterY(yGoal);
 
-		if (abs(xGoal - getX(j)) <= 1 && abs(yGoal - getY(j)) <= 1)
+	for (Int_t j=idxFrom; j < idxTo; j++) {
+		if (neighbours.size() == 8) break;
+		if (index == j) continue;
+
+		if (abs(xGoal - getX(j)) <= 1 && abs(yGoal - getY(j)) <= 1) {
 			neighbours.push_back(j);
+		}
 	}
 	return neighbours;
 }
@@ -252,4 +267,79 @@ Int_t Hits::getLastActiveLayer() {
 			lastActiveLayer = getLayer(i);
 	}
 	return lastActiveLayer;
+}
+
+void Hits::makeVerticalIndexOnLayer(Int_t layer) {
+	// ALWAYS RUN THIS COMMAND ON A NEW LAYER,
+	// IT DOES NOT STORE DIFFERENT LAYERS!
+
+	if (!layerIndex_.size())
+		makeLayerIndex();
+
+	Int_t layerIdxFrom = getFirstIndexOfLayer(layer);
+	Int_t layerIdxTo = getLastIndexOfLayer(layer);
+
+	if (verticalIndexOfLayer_.size() == 0)
+		for (Int_t i=0; i<2*ny+1; i++) verticalIndexOfLayer_.push_back(-1);
+	else
+		for (Int_t i=0; i<2*ny+1; i++) verticalIndexOfLayer_.at(i) = -1;
+
+	if (!GetEntriesFast()) return;
+
+
+	Int_t lastY = -1;
+	for (Int_t i=layerIdxFrom; i<layerIdxTo; i++) {
+		if (!At(i))
+			continue;
+
+		if (lastY != getY(i)) {
+			verticalIndexOfLayer_.at(getY(i)) = i;
+			lastY = getY(i);
+		}
+	}
+
+	// set first indices to  0 if getLayer(0)>0
+	Int_t startOffset = 0;
+	Bool_t kStarted = kFALSE;
+	for (UInt_t i=0; i<verticalIndexOfLayer_.size(); i++) {
+		if (verticalIndexOfLayer_.at(i) == -1 && !kStarted) {
+			startOffset = i;
+		}
+		else if (verticalIndexOfLayer_.at(i) != -1) {
+			kStarted = kTRUE;
+		}
+	}
+
+	if (startOffset>0) {
+		for (Int_t i=0; i<=startOffset; i++)
+			verticalIndexOfLayer_.at(i) = 0;
+	}
+}
+
+Int_t Hits::getFirstIndexBeforeY(Int_t y) {
+	Int_t idx = 0;
+
+	if (y==0) return idx;
+
+	for (Int_t i=y-1; i>=0; i--) {
+		idx = verticalIndexOfLayer_.at(i);
+		if (idx>=0) break;
+	}
+
+	if (idx == -1) idx = 0;
+	return idx;
+}
+
+Int_t Hits::getLastIndexAfterY(Int_t y) {
+	Int_t idx = GetEntriesFast()-1;
+
+	if (y>2*ny-2) return idx;
+
+	for (Int_t i=y+2; i<2*ny; i++) {
+		idx = verticalIndexOfLayer_.at(i);
+		if (idx>=0) break;
+	}
+
+	if (idx == -1) idx = GetEntriesFast()-1;
+	return idx;
 }

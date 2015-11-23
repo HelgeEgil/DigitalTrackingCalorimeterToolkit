@@ -11,6 +11,7 @@ class Hits : public TObject {
    private:
       TClonesArray hits_;
       vector<Int_t> layerIndex_;
+      vector<Int_t> verticalIndexOfLayer_;
 
    public:
 
@@ -43,6 +44,16 @@ class Hits : public TObject {
 		void checkAndAppendAllNextCandidates(vector<Int_t> nextCandidates, vector<Int_t> *checkedIndices,
 				vector<Int_t> *toCheck, vector<Int_t> *expandedCluster);
 		vector<Hits*> * findClustersHitMap();
+
+		void makeLayerIndex();
+		Int_t getFirstIndexOfLayer(UInt_t layer);
+		Int_t getLastIndexOfLayer(UInt_t layer);
+		Int_t getLastActiveLayer();
+
+		void makeVerticalIndexOnLayer(Int_t layer);
+		Int_t getFirstIndexBeforeY(Int_t y);
+		Int_t getLastIndexAfterY(Int_t y);
+
 
    ClassDef(Hits,1);
 };

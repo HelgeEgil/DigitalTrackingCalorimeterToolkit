@@ -115,6 +115,8 @@ public :
    TBranch        *b_comptVolName;   //!
    TBranch        *b_RayleighVolName;   //!
 
+   Long64_t lastJentry_;
+
    Focal(TTree *tree=0);
    virtual ~Focal();
 
