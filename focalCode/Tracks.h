@@ -33,6 +33,7 @@ class Tracks : public TObject {
       TClonesArray * getClustersWithoutTrack() { return (TClonesArray*) &clustersWithoutTrack_; }
 
       virtual void extrapolateToLayer0();
+      virtual void splitSharedClusters();
 
       virtual Track* At(Int_t i) { return ((Track*) tracks_.At(i)); }
 

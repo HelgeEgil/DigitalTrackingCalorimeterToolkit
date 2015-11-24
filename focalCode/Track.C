@@ -228,8 +228,17 @@ Float_t Track::getTrackScore() {
 
 Int_t Track::getNMissingLayers() {
    Int_t missingLayers = 0;
-   Int_t lastLayer = getLayer(0);
-   for (Int_t i=1; i<track_.GetEntriesFast(); i++) {
+   Int_t lastLayer = 0;
+
+   if (At(0))
+   	lastLayer = getLayer(0);
+
+   else
+   	if (At(1))
+   		lastLayer = getLayer(1);
+
+   for (Int_t i=1; i<GetEntriesFast(); i++) {
+   	if (!At(i)) continue;
       if (getLayer(i) - lastLayer > 1) missingLayers++;
       lastLayer = getLayer(i);
    }
@@ -304,3 +313,73 @@ void Track::extrapolateToLayer0() {
    }
 }
 
+Cluster* Track::getClusterFromLayer(Int_t layer) {
+	// slow implementation first
+	for (Int_t i=0; i<GetEntriesFast(); i++) {
+		if (!At(i)) continue;
+
+		if (getLayer(i) == layer)
+			return At(i);
+		else if (getLayer(i) > layer)
+			break;
+	}
+	return 0;
+}
+
+Cluster * Track::getInterpolatedClusterAt(Int_t layer) {
+	Cluster *pre = 0;
+	Cluster *post = 0;
+	Int_t lastIdx = 0;
+
+	Int_t firstLayerIdx = 0;
+	if (!At(0)) {
+		if (At(1)) firstLayerIdx = 1;
+		else return 0;
+	}
+
+	// is layer the first layer?
+	Bool_t isBefore = false;
+	for (Int_t i=firstLayerIdx; i<GetEntriesFast(); i++) {
+		if (At(i))
+			if (getLayer(i) < layer) {
+				isBefore = true;
+				break;
+			}
+	}
+
+	// is layer the last layer?
+	Bool_t isAfter = false;
+	for (Int_t i=GetEntriesFast()-1; i>=firstLayerIdx; i--) {
+		if (At(i))
+			if (getLayer(i) > layer) {
+				isAfter = true;
+				break;
+			}
+	}
+
+	if (!isBefore || !isAfter) return 0;
+
+	for (Int_t i=firstLayerIdx; i<GetEntriesFast(); i++) {
+		if (!At(i)) continue;
+
+		if (getLayer(i) > layer) {
+			post = At(i);
+			lastIdx = i;
+			break;
+		}
+	}
+
+	for (Int_t i=lastIdx; i>=firstLayerIdx; i--) {
+		if (!At(i)) continue;
+
+		if (getLayer(i) < layer) {
+			pre = At(i);
+			break;
+		}
+	}
+
+	Float_t x = ( pre->getX() + post->getX() ) / 2.;
+	Float_t y = ( pre->getY() + post->getY() ) / 2.;
+
+	return new Cluster(x, y, layer);
+}

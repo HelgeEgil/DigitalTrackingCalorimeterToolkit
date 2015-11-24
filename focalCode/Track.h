@@ -73,6 +73,8 @@ class Track : public TObject {
       Float_t diffmm(Cluster *p1, Cluster *p2);
 
       virtual Cluster* At(Int_t i) { return ((Cluster*) track_.At(i)); }
+      virtual Cluster* getClusterFromLayer(Int_t layer);
+      Cluster * getInterpolatedClusterAt(Int_t layer);
 		virtual Cluster* Last() { return ((Cluster*) track_.At(GetEntriesFast()-1)); }
 
       virtual TObject* removeClusterAt(Int_t i) { return track_.RemoveAt(i); }

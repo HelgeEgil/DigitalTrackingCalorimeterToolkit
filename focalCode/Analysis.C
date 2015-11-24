@@ -1039,6 +1039,8 @@ Tracks * getTracks(Int_t Runs, Int_t dataType, Int_t frameType, Int_t energy) {
 		
 //		trackerTracks = trackerClusters->findTrackerTracks();
 
+		calorimeterTracks->splitSharedClusters();
+
 		// should do track matching here
 		// and append calorimeterTracks to trackerTracks...
 
@@ -1048,8 +1050,8 @@ Tracks * getTracks(Int_t Runs, Int_t dataType, Int_t frameType, Int_t energy) {
 
 		allTracks->appendClustersWithoutTrack(clusters->getClustersWithoutTrack());
 
-		cout << Form("Timing: getMCframe (%.2f sec), diffuseFrame (%.2f sec), findHits (%.2f sec), findClustersFromHits (%.2f sec), findTracks (%.2f sec)\n",
-			     t1.RealTime(), t2.RealTime(), t3.RealTime(), t4.RealTime(), t5.RealTime());
+		/*cout << Form("Timing: getMCframe (%.2f sec), diffuseFrame (%.2f sec), findHits (%.2f sec), findClustersFromHits (%.2f sec), findTracks (%.2f sec)\n",
+			     t1.RealTime(), t2.RealTime(), t3.RealTime(), t4.RealTime(), t5.RealTime());*/
 		
 		cf->Reset();
 //		tf->Reset();
