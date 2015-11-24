@@ -70,10 +70,13 @@ class Track : public TObject {
 		
 
       Int_t getNMissingLayers();
+      Int_t getLastLayer();
+      Int_t getFirstLayer();
+      Bool_t hasLayer(Int_t layer);
       Float_t diffmm(Cluster *p1, Cluster *p2);
 
       virtual Cluster* At(Int_t i) { return ((Cluster*) track_.At(i)); }
-      virtual Cluster* getClusterFromLayer(Int_t layer);
+      Int_t getClusterFromLayer( Int_t layer );
       Cluster * getInterpolatedClusterAt(Int_t layer);
 		virtual Cluster* Last() { return ((Cluster*) track_.At(GetEntriesFast()-1)); }
 

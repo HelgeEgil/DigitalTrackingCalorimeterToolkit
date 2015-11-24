@@ -7,6 +7,8 @@
 #include <TClonesArray.h>
 // #include <TObject.h>
 
+using namespace std;
+
 Track::~Track() {
    // Destructor
    clearTrack();
@@ -228,21 +230,36 @@ Float_t Track::getTrackScore() {
 
 Int_t Track::getNMissingLayers() {
    Int_t missingLayers = 0;
-   Int_t lastLayer = 0;
-
-   if (At(0))
-   	lastLayer = getLayer(0);
-
-   else
-   	if (At(1))
-   		lastLayer = getLayer(1);
-
-   for (Int_t i=1; i<GetEntriesFast(); i++) {
-   	if (!At(i)) continue;
-      if (getLayer(i) - lastLayer > 1) missingLayers++;
-      lastLayer = getLayer(i);
+   Int_t lastLayer = 0, firstLayer = 1e6;
+   
+   for (Int_t i=0; i<GetEntriesFast(); i++) {
+     if (At(i)) {
+       firstLayer = i;
+       break;
+     }
    }
-   return missingLayers;
+   if (firstLayer > 1e5) cout << "Couldn't set first layer!\n";
+   
+   for (Int_t i=GetEntriesFast()-1; i>=0; i--) {
+     if (At(i)) {
+       lastLayer = i;
+       break;
+     }   
+  }
+  if (lastLayer == 0) cout << "Couldn't set last layer!\n";
+  
+  Int_t previousLayer = firstLayer - 1;
+  Int_t diff = 0;
+  
+  for (Int_t i=firstLayer; i<=lastLayer; i++) {
+    if (!At(i)) continue;
+    
+    diff = getLayer(i) - previousLayer - 1;
+    if (diff>0) missingLayers += diff;
+    previousLayer = getLayer(i);
+  }
+  
+  return missingLayers;
 }
 
 Float_t Track::getMeanSizeToIdx(Int_t toIdx) {
@@ -313,53 +330,57 @@ void Track::extrapolateToLayer0() {
    }
 }
 
-Cluster* Track::getClusterFromLayer(Int_t layer) {
+Int_t Track::getClusterFromLayer(Int_t layer) {
 	// slow implementation first
 	for (Int_t i=0; i<GetEntriesFast(); i++) {
 		if (!At(i)) continue;
 
 		if (getLayer(i) == layer)
-			return At(i);
-		else if (getLayer(i) > layer)
-			break;
+			return i;
+		else if (getLayer(i) > layer) {
+			cout << "GOT BREAK COMMAND. COULD NOT FIND LAYER " << layer << ": ";
+			for (Int_t j=0; j<GetEntriesFast(); j++) cout << getLayer(j) << ", ";
+			cout << endl;
+		}
 	}
-	return 0;
+	return -1;
+}
+
+Bool_t Track::hasLayer(Int_t layer) {
+  for (Int_t i=0; i<GetEntriesFast(); i++) {
+    if (!At(i)) continue;
+    if (getLayer(i) == layer) return true;
+  }
+  return false;
+}
+
+Int_t Track::getLastLayer() {
+  for (Int_t i=GetEntriesFast()-1; i>=0; i--) {
+    if (!At(i)) continue;
+    return getLayer(i);
+  }
+}
+
+Int_t Track::getFirstLayer() { 
+  for (Int_t i=0; i<GetEntriesFast(); i++) {
+    if (!At(i)) continue;
+    return getLayer(i);
+  }
 }
 
 Cluster * Track::getInterpolatedClusterAt(Int_t layer) {
 	Cluster *pre = 0;
 	Cluster *post = 0;
 	Int_t lastIdx = 0;
-
-	Int_t firstLayerIdx = 0;
-	if (!At(0)) {
-		if (At(1)) firstLayerIdx = 1;
-		else return 0;
-	}
-
-	// is layer the first layer?
-	Bool_t isBefore = false;
-	for (Int_t i=firstLayerIdx; i<GetEntriesFast(); i++) {
-		if (At(i))
-			if (getLayer(i) < layer) {
-				isBefore = true;
-				break;
-			}
-	}
-
-	// is layer the last layer?
-	Bool_t isAfter = false;
-	for (Int_t i=GetEntriesFast()-1; i>=firstLayerIdx; i--) {
-		if (At(i))
-			if (getLayer(i) > layer) {
-				isAfter = true;
-				break;
-			}
-	}
-
-	if (!isBefore || !isAfter) return 0;
-
-	for (Int_t i=firstLayerIdx; i<GetEntriesFast(); i++) {
+	
+	Int_t firstLayer = getFirstLayer();
+	Int_t lastLayer = getLastLayer();
+	Int_t firstIdx = getClusterFromLayer(firstLayer);
+	
+	if (firstLayer == layer) return 0;
+	if (lastLayer == layer) return 0;
+	
+	for (Int_t i=firstIdx; i<GetEntriesFast(); i++) {
 		if (!At(i)) continue;
 
 		if (getLayer(i) > layer) {
@@ -369,7 +390,7 @@ Cluster * Track::getInterpolatedClusterAt(Int_t layer) {
 		}
 	}
 
-	for (Int_t i=lastIdx; i>=firstLayerIdx; i--) {
+	for (Int_t i=lastIdx; i>=firstIdx; i--) {
 		if (!At(i)) continue;
 
 		if (getLayer(i) < layer) {

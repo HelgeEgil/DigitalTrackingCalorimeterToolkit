@@ -70,8 +70,9 @@ Tracks * Clusters::findCalorimeterTracks() {
 void Clusters::findTracksFromLayer(Tracks * tracks, Int_t layer, Int_t trackFindingAlgorithm) {
 	Int_t startOffset = 0;
 	Track *bestTrack = 0;
-
+	
 	Clusters * seeds = findSeeds(layer);
+	
 	for (Int_t i=0; i<seeds->GetEntriesFast(); i++) {
 		if (!seeds->At(i))
 			continue;
@@ -163,6 +164,7 @@ Track * Clusters::recursiveTrackPropagation(Cluster *cluster, Track currentTrack
 	delete closePointsInNextLayer;
 	delete nextClosePoint;
 	delete bestNextTrack;
+	delete track;
 
 	return bestTrack;
 }
@@ -385,6 +387,5 @@ Track * Clusters::findLongestTrack(Tracks *seedTracks) {
 
 	longestTrack->setTrack(track, startOffset);
 
-	//delete track;
 	return longestTrack;
 }

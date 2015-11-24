@@ -1,6 +1,8 @@
 #include "Layer.h"
 #include <TH2F.h>
 #include <TRandom3.h>
+#include <TStopwatch.h>
+#include <math.h>
 
 Layer::Layer(Int_t layerNo, Bool_t frameType, Bool_t dataType) : frame2D_(Form("%d_frame2D_%i",frameType, layerNo), Form("frame2D_layer_%i", layerNo), 2*nx, 0, 2*nx, 2*ny, 0, 2*ny) {
 	dataType_ = dataType;
@@ -13,6 +15,7 @@ Layer::~Layer() {
 }
 
 void Layer::diffuseLayer() {
+  
 	Int_t repeatFactor, x, y, z, randX, randY;
 	Float_t EnergyFactor = 1000 / 30. * SpreadNumber;
 	Float_t newSigma, eDep;
@@ -29,9 +32,8 @@ void Layer::diffuseLayer() {
 
 		repeatFactor = eDep * EnergyFactor;
 		newSigma = pow(repeatFactor, 0.25) / 6;
-
 		frame2DCopy->GetBinXYZ(b, x, y, z);
-
+		
 		for (Int_t j = 0; j < repeatFactor; j++) {
 			randX = gRandom->Gaus(x, newSigma);
 			randY = gRandom->Gaus(y, newSigma);
@@ -39,6 +41,7 @@ void Layer::diffuseLayer() {
 		}
 	}
 	delete frame2DCopy;
+	delete gRandom;
 }
 
 Bool_t Layer::findHits(Hits* hits) {

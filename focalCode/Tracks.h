@@ -4,6 +4,11 @@
 #include "Track.h"
 #include <vector>
 
+struct trackCluster { 
+  int track; 
+  int cluster;
+};
+
 class Tracks : public TObject {
 
    private:
