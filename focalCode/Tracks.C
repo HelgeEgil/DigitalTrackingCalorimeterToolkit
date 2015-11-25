@@ -3,9 +3,15 @@
 #include "Clusters.h"
 // #include "TFocal.h"
 #include <iostream>
-// #include <TClonesArray.h>
-// #include <TObject.h>
+#include <TClonesArray.h>
+#include <TObject.h>
 #include "Tools.h"
+#include <TCanvas.h>
+#include <TView.h>
+#include <TAttMarker.h>
+#include <TAttLine.h>
+#include <TPolyMarker3D.h>
+#include <TPolyLine3D.h>
 
 using namespace std;
 
@@ -47,80 +53,152 @@ void Tracks::extrapolateToLayer0() {
 }
 
 void Tracks::splitSharedClusters() {
-  // to be run as early as possible before joining Tracks* objects
+	// to be run as early as possible before joining Tracks* objects
 
-  cout << "Welcome to splitSharedClusters! We'll start out with " << GetEntriesFast() << " track objects.\n\n";
+	cout << "Welcome to splitSharedClusters! We'll start out with " << GetEntriesFast() << " track objects.\n\n";
 
-  Cluster *interpolatedCluster;
-  Float_t dist, minDist = 1e5;
-  Int_t minIdx = 0, idx = 0, clusterIdx;
-  Bool_t isMissing;
+	Cluster *interpolatedCluster;
+	Clusters* interpolatedClusters = new Clusters();
+	Clusters* interpolatedClosestClusters = new Clusters();
 
-  for (Int_t layer=1; layer<nLayers; layer++) {
-	  
-    vector<trackCluster> clustersThisLayer;
-    vector<trackCluster> missingClustersThisLayer;
-    
-    // 1) Find missing clusters in layer
-    // 2) Find all other clusters in layer
-    
-    for (Int_t i=0; i<GetEntriesFast(); i++) {
-      if (!At(i)) continue;
-      
-      trackCluster thisCluster;
-      thisCluster.track = i;
+	Float_t dist, minDist = 1e5;
+	Int_t minIdx = 0, idx = 0, clusterIdx;
+	Bool_t isMissing;
 
-      Track *thisTrack = At(i);
+	for (Int_t layer=1; layer<nLayers; layer++) {
+		
+		vector<trackCluster> clustersThisLayer;
+		vector<trackCluster> missingClustersThisLayer;
+		
+		for (Int_t i=0; i<GetEntriesFast(); i++) {
+		Track *thisTrack = At(i);
+		
+		if (!thisTrack) continue;
+		if (thisTrack->getLastLayer() < layer) continue;
+		
+		trackCluster thisCluster;
+		thisCluster.track = i;
+		
+		if (thisTrack->hasLayer(layer)) {
+			thisCluster.cluster = thisTrack->getClusterFromLayer(layer);
+			clustersThisLayer.push_back(thisCluster);
+		}
+		
+		else
+			missingClustersThisLayer.push_back(thisCluster);
+		}
+		
+		cout << "Layer " << layer << ": Found " << clustersThisLayer.size() << " clusters and " << missingClustersThisLayer.size() << " missing clusters.\n";
 
-      if (thisTrack->hasLayer(layer)) {
-	thisCluster.cluster = thisTrack->getClusterFromLayer(layer);
-	clustersThisLayer.push_back(thisCluster);
-      }
-      
-      else {
-	missingClustersThisLayer.push_back(thisCluster);
-      }
-    }
-    
-    cout << "Layer " << layer << ": Found " << clustersThisLayer.size() << " clusters and " << missingClustersThisLayer.size() << " missing clusters.\n";
-
-    // 3) For all missing clusters, see if any of the clusters are a good match
-    // 4) Good match: Small distance and matching enlarged cluster size.
-    // 5) If good match: Split them (?) and remove from missingClustersThisLayer.
-
-    for (UInt_t i=0; i<missingClustersThisLayer.size(); i++) {
-      Track *thisTrack = At(missingClustersThisLayer.at(i).track);
-      if (!thisTrack) continue;
-      
-      interpolatedCluster = thisTrack->getInterpolatedClusterAt(layer);
-      if (interpolatedCluster) {
-	cout << "\t Found new interpolated cluster: " << *interpolatedCluster << endl;
-	cout << "\t\t From track: ";
-	for (Int_t i=0; i<At(idx)->GetEntriesFast(); i++) {
-	  if (!At(idx)->At(i)) continue;
-	  cout << *At(idx)->At(i) << ", ";
+		for (UInt_t i=0; i<missingClustersThisLayer.size(); i++) {
+			Int_t trackIdx = missingClustersThisLayer.at(i).track;
+			Track *missingTrack = At(trackIdx);
+			if (!missingTrack ) continue;
+		
+			interpolatedCluster = missingTrack->getInterpolatedClusterAt(layer);
+				if (interpolatedCluster) {
+				minIdx = getClosestCluster(clustersThisLayer, interpolatedCluster);
+				interpolatedClusters->appendCluster(interpolatedCluster);
+				
+				trackCluster closestTC= clustersThisLayer.at(minIdx);
+				Track *closestTrack = At(closestTC.track);
+				Cluster *closestCluster = closestTrack->At(closestTC.cluster);
+				
+				minDist = diffmm(closestCluster, interpolatedCluster);
+				
+				Float_t clusterRadius = closestCluster->getRadiusmm();
+				if (minDist < clusterRadius * 2) {
+					cout << "--> Minimum distance (" << minDist << " mm) is smaller than the cluster radius of " << clusterRadius << " mm (csize = " << closestCluster->getSize() << ")!\n";
+					
+					// 1) Find interpolated cluster no 2
+					Cluster *interpolatedClosestCluster = closestTrack->getInterpolatedClusterAt(layer);
+					if (interpolatedClosestCluster) {
+						cout << "Distance between interpolated closest cluster " << *interpolatedClosestCluster
+							<< " and actual closest cluster " << *closestCluster << " is " << diffmm(interpolatedClosestCluster, closestCluster) << " mm.\n";
+						cout << "Distance between interpolated missing cluster " << *interpolatedClosestCluster
+							<< " and interpolated closest cluster " << *interpolatedCluster << " is " << diffmm(interpolatedClosestCluster, interpolatedCluster) << " mm.\n";
+						
+						interpolatedClosestClusters->appendCluster(interpolatedClosestCluster);
+						
+						Float_t sizeFactor = minDist / closestCluster->getRadiusmm() + 1;
+						Float_t x = ( closestCluster->getX() + interpolatedCluster->getX()) / 2;
+						Float_t y = ( closestCluster->getY() + interpolatedCluster->getY()) / 2;
+						Float_t size = closestCluster->getSize() / sizeFactor;
+						missingTrack->appendCluster(new Cluster(x, y, layer, size));
+						
+						sortTrackByLayer(trackIdx);
+						// FIXME: When not tired, do validation of this method
+					}
+				}
+			}
+		}
 	}
-	cout << endl;
+}
+
+Int_t Tracks::getClosestCluster(vector<trackCluster> clusters, Cluster* interpolatedCluster) {
+	Float_t minDist = 1e5, dist;
+	Int_t minIdx = 0;
+
+	for (UInt_t i=0; i<clusters.size(); i++) {
+		trackCluster thisTrackCluster = clusters.at(i);
+		Cluster *thisCluster = At(thisTrackCluster.track)->At(thisTrackCluster.cluster);
+		
+		dist = diffmm(thisCluster, interpolatedCluster);
+		if (dist < minDist) {
+			minDist = dist;
+			minIdx = i;
+		}
+	}
+	return minIdx;
+}
+
+void Tracks::sortTrackByLayer(Int_t trackIdx) {
+	Int_t lastLayer = 0;
+	Bool_t isSorted = true;
+	Cluster *lastCluster;
 	
-	// does interpolatedCluster match any in clustersThisLayer?
+	Int_t n = GetEntriesFast( trackIdx );
 	
-	minDist = 1e5;
-	for (UInt_t i=0; i<clustersThisLayer.size(); i++) {
-	  trackCluster thisTrackCluster = clustersThisLayer.at(i);
-	  Cluster *thisCluster = At(thisTrackCluster.track)->At(thisTrackCluster.cluster);
-	  
-	  dist = diffmm(thisCluster, interpolatedCluster);
-	  if (dist < minDist) {
-	    minDist = dist;
-	    minIdx = i;
-	  }
+	for (Int_t i=0; i<n; i++) {
+		if (!At( trackIdx )->At(i)) continue;
+		if (lastLayer > At( trackIdx )->getLayer(i)) {
+			isSorted = false;
+		}
+		lastLayer = At( trackIdx )->getLayer(i);
 	}
 	
-	trackCluster thisTrackCluster = clustersThisLayer.at(minIdx);
-	Cluster *thisCluster = At(thisTrackCluster.track)->At(thisTrackCluster.cluster);
-	
-	cout << "Found minimum distance between " << *interpolatedCluster << " and " << *thisCluster << " of " << minDist << " mm.\n";
-      }
-    }
-  }
+	if (!isSorted) {
+		vector<Int_t> sortList;
+		sortList.resize(nLayers);
+		for (Int_t i=0; i<nLayers; i++) sortList.at(i) = -1;
+		for (Int_t i=0; i<n; i++) {
+			if (!At( trackIdx )->At(i)) continue;
+			sortList.at(At( trackIdx)->getLayer(i)) = i;
+		}
+		
+		cout << "A new sorting of the track with layers: ";
+		for (Int_t i=0; i<n; i++) {
+			if (!At(trackIdx)->At(i)) continue;
+			cout << At(trackIdx)->getLayer(i) << ", ";
+		}
+		cout << " is with indices: ";
+		for (UInt_t i=0; i<sortList.size(); i++) cout << sortList.at(i) << ", ";
+		cout << ".\n";
+		
+		Track *newTrack = new Track();
+		Cluster *nextCluster = 0;
+		for (UInt_t i=0; i<sortList.size(); i++) {
+			if (sortList.at(i) <0) continue;
+			nextCluster = At(trackIdx)->At(sortList.at(i));
+			newTrack->appendCluster(nextCluster);
+		}
+		if (newTrack->GetEntriesFast()) {
+			appendTrack(newTrack);
+			removeTrackAt(trackIdx);
+		}
+		
+		cout << "New Track: ";
+		for (Int_t i=0; i<newTrack->GetEntriesFast(); i++) { if (!newTrack->At(i)) continue; cout << *newTrack->At(i) << ", "; }
+		cout << endl;
+	}
 }

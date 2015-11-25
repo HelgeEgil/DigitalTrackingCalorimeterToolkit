@@ -1,5 +1,6 @@
 #include <iostream>
 #include "Cluster.h"
+#include <math.h>
 
 // ClassImp(Cluster)
 
@@ -34,6 +35,14 @@ Double_t Cluster::getLayermm() {
 
 	return z;
 }
+
+Float_t Cluster::getRadiusmm() {
+  Float_t A = getSize();
+  Float_t r = sqrt( A / 3.141592653);
+  Float_t r_mm = r * dx;
+  
+  return r_mm;
+}  
 
 Float_t Cluster::getDepositedEnergy() {
 	// An inverse fit to the charge diffusion algorithm defined in Layer.C

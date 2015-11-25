@@ -2,6 +2,7 @@
 #define TrackCollection_h
 #include "TClonesArray.h"
 #include "Track.h"
+// 	#include "Clusters.h"
 #include <vector>
 
 struct trackCluster { 
@@ -39,12 +40,18 @@ class Tracks : public TObject {
 
       virtual void extrapolateToLayer0();
       virtual void splitSharedClusters();
+      Int_t getClosestCluster(vector<trackCluster> clusters, Cluster* interpolatedCluster);
+
 
       virtual Track* At(Int_t i) { return ((Track*) tracks_.At(i)); }
 
-      virtual void removeCluster(Track *c) { tracks_.Remove((TObject*) c); }
-      virtual TObject* removeClusterAt(Int_t i) { return tracks_.RemoveAt(i); }
+      virtual void removeTrack(Track *t) { tracks_.Remove((TObject*) t); }
+      virtual TObject* removeTrackAt(Int_t i) { return tracks_.RemoveAt(i); }
+      void sortTrackByLayer(Int_t track);
 
+      
+//       virtual void drawClusters(Clusters *a, Clusters *b);
+	  
    ClassDef(Tracks,1);
 };
 #endif

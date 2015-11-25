@@ -378,7 +378,7 @@ Cluster * Track::getInterpolatedClusterAt(Int_t layer) {
 	Int_t firstIdx = getClusterFromLayer(firstLayer);
 	
 	if (firstLayer == layer) return 0;
-	if (lastLayer == layer) return 0;
+	if (lastLayer <= layer) return 0;
 	
 	for (Int_t i=firstIdx; i<GetEntriesFast(); i++) {
 		if (!At(i)) continue;
