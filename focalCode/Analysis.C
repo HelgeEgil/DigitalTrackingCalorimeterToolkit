@@ -984,6 +984,8 @@ Tracks * getTracks(Int_t Runs, Int_t dataType, Int_t frameType, Int_t energy) {
 	Int_t nHits = kEventsPerRun * 50;
 	Int_t nTracks = kEventsPerRun * 2;
 
+	Bool_t breakSignal = kFALSE;
+
 	CalorimeterFrame *cf = new CalorimeterFrame();
 	TrackerFrame *tf = new TrackerFrame();
 	Clusters * clusters = new Clusters(nClusters);
@@ -994,7 +996,7 @@ Tracks * getTracks(Int_t Runs, Int_t dataType, Int_t frameType, Int_t energy) {
 	Tracks *trackerTracks = new Tracks(nTracks);
 	Tracks *allTracks = new Tracks(nTracks * Runs);
 	
-	TStopwatch t1, t2, t3, t4, t5;
+	TStopwatch t1, t2, t3, t4, t5, t6;
 	
 	for (Int_t i=0; i<Runs; i++) {
 
@@ -1002,21 +1004,13 @@ Tracks * getTracks(Int_t Runs, Int_t dataType, Int_t frameType, Int_t energy) {
 		
 		if (dataType == kMC) {
 			t1.Start();
-
 			f->getMCFrame(i, cf);
-
 			t1.Stop(); t2.Start();
-
 			cf->diffuseFrame();
-
 			t2.Stop(); t3.Start();
-
 			hits = cf->findHits();
-
 			t3.Stop(); t4.Start();
-
 			clusters = hits->findClustersFromHits(); // badly optimized
-
 			t4.Stop();
 
 /*			f->getMCTrackerFrame(i, tf);
@@ -1036,20 +1030,23 @@ Tracks * getTracks(Int_t Runs, Int_t dataType, Int_t frameType, Int_t energy) {
 		t5.Start();
 		calorimeterTracks = clusters->findCalorimeterTracks();
 		t5.Stop();
-		
 //		trackerTracks = trackerClusters->findTrackerTracks();
 
-		calorimeterTracks->splitSharedClusters();
+		if (calorimeterTracks->GetEntriesFast() == 0) breakSignal = kTRUE; // to stop running
+
+		if (kUseTrackSplitting)
+			calorimeterTracks->splitSharedClusters();
 
 		// should do track matching here
 		// and append calorimeterTracks to trackerTracks...
 
 		for (Int_t j=0; j<calorimeterTracks->GetEntriesFast(); j++) {
+			if (!calorimeterTracks->At(j)) continue;
+
 			allTracks->appendTrack(calorimeterTracks->At(j));
 		}
 
 		allTracks->appendClustersWithoutTrack(clusters->getClustersWithoutTrack());
-
 		cout << Form("Timing: getMCframe (%.2f sec), diffuseFrame (%.2f sec), findHits (%.2f sec), findClustersFromHits (%.2f sec), findTracks (%.2f sec)\n",
 			     t1.RealTime(), t2.RealTime(), t3.RealTime(), t4.RealTime(), t5.RealTime());
 		
@@ -1061,6 +1058,8 @@ Tracks * getTracks(Int_t Runs, Int_t dataType, Int_t frameType, Int_t energy) {
 		trackerClusters->clearClusters();
 		calorimeterTracks->clearTracks();
 		trackerTracks->clearTracks();
+
+		if (breakSignal) break;
 	}
 
 	delete cf;

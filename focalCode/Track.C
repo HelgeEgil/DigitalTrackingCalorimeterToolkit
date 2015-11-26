@@ -29,7 +29,8 @@ void Track::setTrack(Track *copyTrack, Int_t startOffset /* default 0 */) {
 }
 
 void Track::appendCluster(Cluster *copyCluster, Int_t startOffset /* default 0 */) {
-   Int_t i = GetEntriesFast() + startOffset;
+   Int_t i = GetEntriesFast();
+   if (i==0) i += startOffset;
 
    // copy PROPERTIES from copycluster onto track
    // new object, no pointers are copied
@@ -347,25 +348,27 @@ Int_t Track::getClusterFromLayer(Int_t layer) {
 }
 
 Bool_t Track::hasLayer(Int_t layer) {
-  for (Int_t i=0; i<GetEntriesFast(); i++) {
-    if (!At(i)) continue;
-    if (getLayer(i) == layer) return true;
-  }
-  return false;
+	for (Int_t i = 0; i < GetEntriesFast(); i++) {
+		if (!At(i)) continue;
+		if (getLayer(i) == layer) return true;
+	}
+	return false;
 }
 
 Int_t Track::getLastLayer() {
-  for (Int_t i=GetEntriesFast()-1; i>=0; i--) {
-    if (!At(i)) continue;
-    return getLayer(i);
-  }
+	for (Int_t i = GetEntriesFast() - 1; i >= 0; i--) {
+		if (!At(i)) continue;
+		return getLayer(i);
+	}
+	return -1;
 }
 
 Int_t Track::getFirstLayer() { 
-  for (Int_t i=0; i<GetEntriesFast(); i++) {
-    if (!At(i)) continue;
-    return getLayer(i);
-  }
+	for (Int_t i = 0; i < GetEntriesFast(); i++) {
+		if (!At(i)) continue;
+		return getLayer(i);
+	}
+	return -1;
 }
 
 Cluster * Track::getInterpolatedClusterAt(Int_t layer) {

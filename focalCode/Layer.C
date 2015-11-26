@@ -15,7 +15,40 @@ Layer::~Layer() {
 }
 
 void Layer::diffuseLayer() {
-  
+	Int_t repeatFactor, x, y, z, randX, randY;
+	Float_t EnergyFactor = 1000 / 30. * SpreadNumber;
+	Float_t newSigma, eDep;
+
+	gRandom = new TRandom3(0);
+	Hits *hits = new Hits();
+	Bool_t isHits = findHits(hits);
+	Int_t nHits = hits->GetEntriesFast();
+
+	for (Int_t h=0; h<nHits; h++) {
+		x = hits->getX(h);
+		y = hits->getY(h);
+		eDep = frame2D_.GetBinContent(x, y);
+		if (eDep == 0) continue; // not likely
+
+		frame2D_.SetBinContent(x, y, 0);
+
+		repeatFactor = eDep * EnergyFactor;
+		newSigma = pow(repeatFactor, 0.25) / 6;
+		
+		for (Int_t j=0; j<repeatFactor; j++) {
+			randX = gRandom->Gaus(x, newSigma);
+			randY = gRandom->Gaus(y, newSigma);
+			frame2D_.Fill(randX, randY, EnergyFactor);
+		}
+	}
+
+	delete hits;
+	delete gRandom;
+}
+
+
+void Layer::oldDiffuseLayer() {
+
 	Int_t repeatFactor, x, y, z, randX, randY;
 	Float_t EnergyFactor = 1000 / 30. * SpreadNumber;
 	Float_t newSigma, eDep;
@@ -33,7 +66,7 @@ void Layer::diffuseLayer() {
 		repeatFactor = eDep * EnergyFactor;
 		newSigma = pow(repeatFactor, 0.25) / 6;
 		frame2DCopy->GetBinXYZ(b, x, y, z);
-		
+
 		for (Int_t j = 0; j < repeatFactor; j++) {
 			randX = gRandom->Gaus(x, newSigma);
 			randY = gRandom->Gaus(y, newSigma);

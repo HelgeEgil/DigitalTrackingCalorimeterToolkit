@@ -20,6 +20,7 @@ class Layer : public TObject {
 		virtual ~Layer();
 
 		void diffuseLayer();
+		void oldDiffuseLayer();
 		virtual Bool_t findHits(Hits *hits);
 
 		virtual void Reset() { frame2D_.Reset(); }

@@ -5,6 +5,8 @@
 // 	#include "Clusters.h"
 #include <vector>
 
+using namespace std;
+
 struct trackCluster { 
   int track; 
   int cluster;
