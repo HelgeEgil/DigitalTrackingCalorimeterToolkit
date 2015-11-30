@@ -15,6 +15,11 @@ Hits::~Hits() {
    clearHits();
 }
 
+void Hits::Clear(Option_t * = "") {
+	hits_.Clear("C");
+	delete hits_;
+}
+
 void Hits::appendPoint(Int_t x, Int_t y, Int_t layer, Int_t event) {
    Int_t i = GetEntriesFast();
    Hit *hit = (Hit*) hits_.ConstructedAt(i);

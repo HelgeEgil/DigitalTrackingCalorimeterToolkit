@@ -12,7 +12,12 @@ CalorimeterFrame::CalorimeterFrame() : calorimeterFrame_("Layer", nLayers) {
 }
 
 CalorimeterFrame::~CalorimeterFrame() {
-	calorimeterFrame_.Delete();
+	Clear("C");
+	delete calorimeterFrame_;
+}
+
+void CalorimeterFrame::Clear(Option_t * = "") {
+	calorimeterFrame_.Clear("C");
 }
 
 Hits * CalorimeterFrame::findHits() {

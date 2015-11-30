@@ -6,7 +6,6 @@
 
 Cluster::~Cluster() {
    // Destructor
-   Clear();
 }
 
 Cluster::Cluster(Cluster* cluster) {

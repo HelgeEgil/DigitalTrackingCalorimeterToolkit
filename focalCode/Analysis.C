@@ -1034,8 +1034,9 @@ Tracks * getTracks(Int_t Runs, Int_t dataType, Int_t frameType, Int_t energy) {
 
 		if (calorimeterTracks->GetEntriesFast() == 0) breakSignal = kTRUE; // to stop running
 
-		if (kUseTrackSplitting)
+		if (kUseTrackSplitting) {
 			calorimeterTracks->splitSharedClusters();
+		}
 
 		// should do track matching here
 		// and append calorimeterTracks to trackerTracks...
@@ -1050,6 +1051,8 @@ Tracks * getTracks(Int_t Runs, Int_t dataType, Int_t frameType, Int_t energy) {
 		cout << Form("Timing: getMCframe (%.2f sec), diffuseFrame (%.2f sec), findHits (%.2f sec), findClustersFromHits (%.2f sec), findTracks (%.2f sec)\n",
 			     t1.RealTime(), t2.RealTime(), t3.RealTime(), t4.RealTime(), t5.RealTime());
 		
+		cout << "Test: Size of hits is " << hits->GetEntriesFast() << " (" << hits->GetEntries() << ").\n";
+
 		cf->Reset();
 //		tf->Reset();
 		hits->clearHits();

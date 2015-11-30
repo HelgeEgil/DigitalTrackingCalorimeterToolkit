@@ -37,4 +37,3 @@ Float_t diffmm(Hit *h1, Hit *h2) {
 
 	return sqrt(pow(diffx,2) + pow(diffy,2));
 }
-

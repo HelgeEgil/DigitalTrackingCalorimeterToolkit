@@ -33,6 +33,7 @@ public:
 	virtual Cluster* At(Int_t i) { return ((Cluster*) clusters_.At(i)); }
 	
 	virtual void clearClusters();
+	virtual void Clear(Option_t * = "");
 
 	virtual Float_t getX(Int_t i) { return At(i)->getX(); }
 	virtual Float_t getY(Int_t i) { return At(i)->getY(); }

@@ -28,6 +28,7 @@ class Tracks : public TObject {
       virtual void appendClustersWithoutTrack(TClonesArray *clustersWithoutTrack);
 
       virtual void clearTracks() { tracks_.Clear("C"); }
+      virtual void Clear(Option_t * = "");
       virtual void SetOwner(Bool_t val) { tracks_.SetOwner(val); }
 
       virtual Int_t GetEntriesFast() { return tracks_.GetEntriesFast(); }

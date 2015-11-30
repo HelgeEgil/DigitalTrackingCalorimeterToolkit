@@ -17,7 +17,14 @@ using namespace std;
 
 Tracks::~Tracks() {
    // Destructor
-   clearTracks();
+	// FIX
+   tracks_.Delete();
+   clustersWithoutTrack_.Delete();
+}
+
+void Tracks::Clear(Option_t * = "") {
+	tracks_.Clear("C");
+	clustersWithoutTrack_.Clear("C");
 }
 
 void Tracks::appendTrack(Track *copyTrack, Int_t startOffset /* default 0 */) {

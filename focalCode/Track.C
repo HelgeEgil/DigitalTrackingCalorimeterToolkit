@@ -11,7 +11,13 @@ using namespace std;
 
 Track::~Track() {
    // Destructor
-   clearTrack();
+//   ClearTrack();
+	Clear();
+	delete track_;
+}
+
+void Track::Clear(Option_t * = "") {
+	track_.Clear("C");
 }
 
 Float_t Track::diffmm(Cluster *p1, Cluster *p2) {

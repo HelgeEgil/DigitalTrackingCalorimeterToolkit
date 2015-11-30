@@ -18,7 +18,7 @@ class Track : public TObject {
    public:
 
       Track() : track_("Cluster", MaxTrackLength) {};
-      Track(Cluster *cluster) : track_("Cluster", MaxTrackLength) {
+      Track(Cluster *cluster) : track_("Cluster", MaxTrackLength) { // FIXME: Make Float_t kPLFocal[] etc. here based on new switch in Constants.h
       	appendCluster(cluster);
 //      	energy_ = 0;
       }
@@ -37,6 +37,7 @@ class Track : public TObject {
       virtual void appendPoint(Float_t x, Float_t y, Int_t layer, Int_t size = -1);
 
       virtual void clearTrack() { track_.Clear("C"); }
+      virtual void Clear(Option_t * = "");
 
       virtual Int_t GetEntriesFast() { return track_.GetEntriesFast(); }
       virtual Int_t GetEntries() { return track_.GetEntries(); }

@@ -12,7 +12,6 @@ Hit::Hit() {
 
 Hit::~Hit() {
   // Destructor
-  Clear();
 }
 
 Hit::Hit(Int_t x, Int_t y, Int_t layerNo, Int_t eventNo) {

@@ -21,6 +21,8 @@ class CalorimeterFrame : public TObject {
       CalorimeterFrame();
       virtual ~CalorimeterFrame();
 
+      virtual void Clear(Option_t * = "");
+
       virtual Layer * At(Int_t i) { return (Layer*) calorimeterFrame_.At(i); }
       virtual TH2F * getTH2F(Int_t i) { return (TH2F*) At(i)->getTH2F(); }
       virtual void fillAt(Int_t i, Float_t x, Float_t y, Float_t val = 1) { getTH2F(i)->Fill(x, y, val); }

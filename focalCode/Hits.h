@@ -23,8 +23,10 @@ class Hits : public TObject {
       virtual void appendHits(Hits *hits);
 
       virtual void clearHits() { hits_.Clear("C"); }
+      virtual void Clear(Option_t * = "");
 
       virtual Int_t GetEntriesFast() { return hits_.GetEntriesFast(); }
+      virtual Int_t GetEntries() { return hits_.GetEntries(); }
       
       virtual Int_t getX(Int_t i) { return At(i)->getX(); }
       virtual Int_t getY(Int_t i) { return At(i)->getY(); }
