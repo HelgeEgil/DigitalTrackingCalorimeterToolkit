@@ -18,9 +18,8 @@ Clusters::Clusters(Bool_t frameType) : clusters_("Cluster", kEventsPerRun*2),
 
 Clusters::~Clusters() {
    // Destructor
-   Clear();
-   delete clusters_;
-   delete clustersWithoutTrack_;
+   clusters_.Delete();
+   clustersWithoutTrack_.Delete();
 }
 
 void Clusters::appendCluster(Float_t x, Float_t y, Int_t layer, Int_t size) {
@@ -41,7 +40,7 @@ void Clusters::appendClusterWithoutTrack(Cluster *cluster) {
    c->set(cluster->getX(), cluster->getY(), cluster->getLayer(), cluster->getSize());
 }
 
-void Clusters::Clear(Option_t * = "") {
+void Clusters::Clear(Option_t *) {
 	clusters_.Clear("C");
 	clustersWithoutTrack_.Clear("C");
 }

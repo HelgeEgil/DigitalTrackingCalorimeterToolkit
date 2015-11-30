@@ -12,11 +12,10 @@ using namespace std;
 Track::~Track() {
    // Destructor
 //   ClearTrack();
-	Clear();
-	delete track_;
+	track_.Delete();
 }
 
-void Track::Clear(Option_t * = "") {
+void Track::Clear(Option_t *) {
 	track_.Clear("C");
 }
 

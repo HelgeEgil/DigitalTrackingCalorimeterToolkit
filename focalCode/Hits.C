@@ -12,12 +12,11 @@
 
 Hits::~Hits() {
    // Destructor
-   clearHits();
+   hits_.Delete();
 }
 
-void Hits::Clear(Option_t * = "") {
+void Hits::Clear(Option_t *) {
 	hits_.Clear("C");
-	delete hits_;
 }
 
 void Hits::appendPoint(Int_t x, Int_t y, Int_t layer, Int_t event) {

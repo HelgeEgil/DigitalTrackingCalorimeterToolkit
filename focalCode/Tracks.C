@@ -22,7 +22,7 @@ Tracks::~Tracks() {
    clustersWithoutTrack_.Delete();
 }
 
-void Tracks::Clear(Option_t * = "") {
+void Tracks::Clear(Option_t *) {
 	tracks_.Clear("C");
 	clustersWithoutTrack_.Clear("C");
 }

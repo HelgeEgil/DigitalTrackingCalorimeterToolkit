@@ -12,11 +12,10 @@ CalorimeterFrame::CalorimeterFrame() : calorimeterFrame_("Layer", nLayers) {
 }
 
 CalorimeterFrame::~CalorimeterFrame() {
-	Clear("C");
-	delete calorimeterFrame_;
+	calorimeterFrame_.Delete();
 }
 
-void CalorimeterFrame::Clear(Option_t * = "") {
+void CalorimeterFrame::Clear(Option_t *) {
 	calorimeterFrame_.Clear("C");
 }
 
