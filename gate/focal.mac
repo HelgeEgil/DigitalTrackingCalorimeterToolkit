@@ -29,8 +29,8 @@
 #/vis/scene/add/trajectories
 /vis/viewer/update
 
-/gate/geometry/setMaterialDatabase /home/rttn/GateMaterials.db
-#/gate/geometry/setMaterialDatabase /home/local1/GateMaterials.db
+#/gate/geometry/setMaterialDatabase /home/rttn/GateMaterials.db
+/gate/geometry/setMaterialDatabase /home/local1/GateMaterials.db
 
 #=======================#
 #    Load geometry	#

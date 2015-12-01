@@ -96,7 +96,7 @@
 #/gate/filler/setMaterial Tungsten
 /gate/filler/setMaterial Aluminium
 /gate/filler/vis/forceWireframe
-/gate/filler/vis/setColor blue
+/gate/filler/vis/setColor grey
 
 /gate/layer/daughters/name pcb
 /gate/layer/daughters/insert box
