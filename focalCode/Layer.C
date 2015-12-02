@@ -1,4 +1,5 @@
 #include "Layer.h"
+#include "Hits.h"
 #include <TH2F.h>
 #include <TRandom3.h>
 #include <TStopwatch.h>

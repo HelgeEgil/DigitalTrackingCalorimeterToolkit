@@ -1,4 +1,6 @@
 #include "Hits.h"
+#include "Constants.h"
+#include "MaterialConstants.h"
 #include "Clusters.h"
 #include "Tools.h"
 #include <vector>

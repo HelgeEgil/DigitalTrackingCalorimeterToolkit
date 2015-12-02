@@ -30,7 +30,8 @@
 /vis/viewer/update
 
 #/gate/geometry/setMaterialDatabase /home/rttn/GateMaterials.db
-/gate/geometry/setMaterialDatabase /home/local1/GateMaterials.db
+#/gate/geometry/setMaterialDatabase /home/local1/GateMaterials.db
+/gate/geometry/setMaterialDatabase GateMaterials.db
 
 #=======================#
 #    Load geometry	#
@@ -153,7 +154,7 @@
 
 /gate/source/addSource PBS PencilBeam
 /gate/source/PBS/setParticleType proton
-/gate/source/PBS/setEnergy 125. MeV
+/gate/source/PBS/setEnergy 200. MeV
 #/gate/source/PBS/setEnergy 260. MeV
 /gate/source/PBS/setSigmaEnergy 0. MeV
 #/gate/source/PBS/setPosition 0. 0. -25. cm
@@ -187,7 +188,7 @@
 
 # Enable ROOT output
 /gate/output/root/enable
-/gate/output/root/setFileName ../focalCode/testAl125MeV
+/gate/output/root/setFileName ../focalCode/testAl200MeV
 
 #===============#
 # START BEAMS	#
@@ -195,5 +196,5 @@
 
 /gate/random/setEngineName MersenneTwister
 /gate/random/setEngineSeed auto
-/gate/application/setTotalNumberOfPrimaries 10000
+/gate/application/setTotalNumberOfPrimaries 1000
 /gate/application/start

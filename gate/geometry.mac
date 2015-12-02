@@ -104,7 +104,7 @@
 /gate/pcb/geometry/setYLength 20. mm
 /gate/pcb/geometry/setZLength 0.15 mm
 /gate/pcb/placement/setTranslation 0. -10.05 0.625 mm
-/gate/pcb/setMaterial Plastic # fixme
+/gate/pcb/setMaterial PCB # fixme
 /gate/pcb/vis/setColor green
 /gate/pcb/vis/forceWireframe
 
@@ -193,7 +193,7 @@
 /gate/spacer/geometry/setYLength 29. mm
 /gate/spacer/geometry/setZLength 0.4 mm
 /gate/spacer/placement/setTranslation -23. -16.15 0.75 mm
-/gate/spacer/setMaterial Plastic # fixme
+/gate/spacer/setMaterial PCB # fixme
 /gate/spacer/vis/setColor green
 /gate/spacer/vis/forceWireframe
 

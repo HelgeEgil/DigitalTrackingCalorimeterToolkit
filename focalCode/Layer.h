@@ -3,6 +3,7 @@
 
 #include "Constants.h"
 #include "Clusters.h"
+#include "Hits.h"
 #include <TH2F.h>
 
 class Layer : public TObject {

@@ -1,5 +1,7 @@
 #include "CalorimeterFrame.h"
 #include "Layer.h"
+#include "Constants.h"
+#include "MaterialConstants.h"
 // #include <iostream>
 
 using namespace std;

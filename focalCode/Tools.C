@@ -8,14 +8,22 @@
 #include "TObject.h"
 #include "Cluster.h"
 #include "Hit.h"
+#include "Constants.h"
 #include <vector>
 #include <algorithm>
-
 
 using namespace std;
 
 Bool_t isItemInVector(Int_t i, vector<Int_t> *v) {
 	return find(v->begin(), v->end(), i) != v->end();
+}
+
+Bool_t existsEnergyFile(Int_t energy) {
+	Bool_t res = false;
+	for (Int_t i=0; i<nEnergies; i++) {
+		if (energies[i] == energy) res = true;
+	}
+	return res;
 }
 
 Float_t diffmm(Cluster *p1, Cluster *p2) {

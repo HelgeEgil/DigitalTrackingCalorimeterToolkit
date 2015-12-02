@@ -1,6 +1,7 @@
 #define Analysis_cxx
 #include "Analysis.h"
 #include "Constants.h"
+#include "MaterialConstants.h"
 #include "TFocal.h"
 #include "Tracks.h"
 #include "Tools.h"

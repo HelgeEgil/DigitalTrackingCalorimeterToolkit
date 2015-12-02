@@ -541,7 +541,7 @@ Tracks* Focal::FindRealTracks(Int_t Runs, Clusters *restPoints, Int_t energy) {
 
 void Focal::getDataFrame(Int_t runNo, CalorimeterFrame * cf, Int_t energy) {
 
-	if (!isItemInVector(energy, &kPossibleEnergies)) {
+	if (existsEnergyFile(energy)) {
 		cout << "There are no data files with energy " << energy << endl;
 		return;
 	}
