@@ -418,6 +418,7 @@ Int_t getMinimumTrackLength(Int_t energy) {
 	else if (energy < 170) minTL = 10;
 	else if (energy < 190) minTL = 15;
 	else if (energy < 200) minTL = 20;
+	else if (energy < 230) minTL = 23;
 
 	return minTL;
 }
@@ -551,9 +552,9 @@ void drawBraggPeakGraphFit(Int_t Runs, Int_t dataType, Bool_t recreate, Int_t en
 		TF1 *func = new TF1("fit_BP", fitfunc_DBP, 0, 300, 2);
 		func->SetParName(0,"Initial energy [MeV]");
 		func->SetParName(1, "Factor");
-		func->SetParameter(0,190.);
+		func->SetParameter(0,energy);
 		func->SetParameter(1, 40);
-		func->SetParLimits(0, 10, 215);
+		func->SetParLimits(0, 10, energy*1.1);
 		func->SetParLimits(1, 30,50);
 		gr->Fit("fit_BP", "B, W, Q", "", 0, 300);
 		Float_t fit_t = func->GetParameter(0);

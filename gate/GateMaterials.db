@@ -490,18 +490,15 @@ myEpoxy: d=1.18 g/cm3; n=3; state=Solid
         +el: name=Hydrogen   ; n=19
         +el: name=Oxygen     ; n=3
 
-FR4:	  d=1.782 g/cm3; n=2; state=Solid
-		  +el: name=Silicon    ; n=1
-		  +el: name=Oxygen     ; n=2
+FR4:	  d=1.782 g/cm3; n=4; state=Solid
+        +el: name=Hydrogen   ; f=0.1730
+        +el: name=Carbon     ; f=0.1640
+        +el: name=Oxygen     ; f=0.4510
+        +el: name=Silicon    ; f=0.2120
 
-		  +el: name=Oxygen     ; n=3
-		  +el: name=Hydrogen   ; n=19
-		  +el: name=Carbon     ; n=18
-
-
-		  +el: name=Quartz     ; f=0.528
-		  +el: name=myEpoxy	  ; f=0.472
-
-PCB:    d=3.566 g/cm3; n=2; state=Solid
-		  +el: name=FR4		  ; f=0.75
-		  +el: name=Copper	  ; f=0.25
+PCB:    d=3.566 g/cm3; n=5; state=Solid
+        +el: name=Hydrogen   ; f=0.1502
+        +el: name=Carbon     ; f=0.1423
+        +el: name=Oxygen     ; f=0.3910
+        +el: name=Silicon    ; f=0.1836
+        +el: name=Copper     ; f=0.1329

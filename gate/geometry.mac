@@ -82,8 +82,8 @@
 /gate/absorber/geometry/setYLength 49.85 mm
 /gate/absorber/geometry/setZLength 1.5 mm
 /gate/absorber/placement/setTranslation 0. -5.725 -0.2 mm
-#/gate/absorber/setMaterial Tungsten
-/gate/absorber/setMaterial Aluminium
+/gate/absorber/setMaterial Tungsten
+#/gate/absorber/setMaterial Aluminium
 /gate/absorber/vis/forceWireframe
 /gate/absorber/vis/setColor grey
 
@@ -93,8 +93,8 @@
 /gate/filler/geometry/setYLength 18.85 mm
 /gate/filler/geometry/setZLength 0.3 mm
 /gate/filler/placement/setTranslation 0. 9.375 0.7 mm # was 9.275
-#/gate/filler/setMaterial Tungsten
-/gate/filler/setMaterial Aluminium
+/gate/filler/setMaterial Tungsten
+#/gate/filler/setMaterial Aluminium
 /gate/filler/vis/forceWireframe
 /gate/filler/vis/setColor grey
 
@@ -104,7 +104,7 @@
 /gate/pcb/geometry/setYLength 20. mm
 /gate/pcb/geometry/setZLength 0.15 mm
 /gate/pcb/placement/setTranslation 0. -10.05 0.625 mm
-/gate/pcb/setMaterial PCB # fixme
+/gate/pcb/setMaterial PCB
 /gate/pcb/vis/setColor green
 /gate/pcb/vis/forceWireframe
 
@@ -124,7 +124,7 @@
 /gate/passive/geometry/setYLength 19.7 mm
 /gate/passive/geometry/setZLength 0.15 mm
 /gate/passive/placement/setTranslation 0. -9.9 0.805 mm
-/gate/passive/setMaterial Silicon # fixme
+/gate/passive/setMaterial Silicon
 /gate/passive/vis/setColor white
 /gate/passive/vis/forceWireframe
 

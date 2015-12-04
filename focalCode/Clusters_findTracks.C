@@ -205,7 +205,7 @@ Clusters * Clusters::findNearestClustersInNextLayer(Cluster *seed) {
 
 	Int_t layerCounter = 1;
 
-	for (Int_t skipLayers=0; skipLayers<2; skipLayers++) {
+	for (Int_t skipLayers=0; skipLayers<3; skipLayers++) {
 		Int_t nextLayer = seed->getLayer() + 1 + skipLayers;
 		clustersFromThisLayer = findClustersFromSeedInLayer(seed, nextLayer);
 
@@ -214,6 +214,7 @@ Clusters * Clusters::findNearestClustersInNextLayer(Cluster *seed) {
 	}
 
 	for (Int_t i=0; i<clustersFromThisLayer->GetEntriesFast(); i++) {
+		if (!clustersFromThisLayer->At(i)) continue;
 		nextClusters->appendCluster(clustersFromThisLayer->At(i));
 	}
 

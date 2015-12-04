@@ -8,11 +8,11 @@
 enum eFrameType {kCalorimeter, kTracker};
 enum eDataType {kMC, kData};
 
-
 // Some general run parameters
 const Int_t nx = 640;
 const Int_t ny = 640;
 const Int_t nTrackers = 4;
+
 // nLayers are loaded in WEPL-LUT.C according to the detector geometry
 const Float_t dx = 0.03; // mm
 const Float_t dy = 0.03; // mm
@@ -32,7 +32,7 @@ Int_t energies[nEnergies] = {122, 140, 150, 160, 170, 180, 190};
  * 
 */
 enum eMaterial {kTungsten, kAluminum, kPMMA};
-const Int_t kMaterial = kAluminum;
+const Int_t kMaterial = kTungsten;
 
 /*
  * Track reconstruction algorithms
@@ -62,6 +62,6 @@ const Double_t SpreadSigma  = 0.7; // sigma (in pixels) to spread
 
 
 // Minimum track length (in mm) to account for the track in the bragg peak fitting analysis.
-const Int_t kMinimumTracklength = 22;
+const Int_t kMinimumTracklength = 5;
 
 #endif

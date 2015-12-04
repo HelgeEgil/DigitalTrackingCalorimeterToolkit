@@ -14,7 +14,8 @@ void MaterialConstants() {
 	if (kMaterial == kTungsten) {
 		memcpy(kPLFocal, kPLFocal_W, sizeof(kPLFocal_W));
 		memcpy(kWEPLRatio, kWEPLRatio_W, sizeof(kWEPLRatio_W));
-		nLayers = 24;
+//		nLayers = 24;
+		nLayers = 41;
 	}
 
 	else if (kMaterial == kAluminum) {
