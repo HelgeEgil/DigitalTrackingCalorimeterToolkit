@@ -68,7 +68,7 @@ class Track : public TObject {
 		Float_t getEnergy();
 		Float_t getWEPLFromTL(Float_t tl);
 		Float_t getWEPL();
-		
+		Float_t getWEPLFactorFromEnergy ( Float_t energy );
 
       Int_t getNMissingLayers();
       Int_t getLastLayer();
@@ -76,6 +76,8 @@ class Track : public TObject {
       Bool_t hasLayer(Int_t layer);
       Float_t diffmm(Cluster *p1, Cluster *p2);
 
+	  
+	  
       virtual Cluster* At(Int_t i) { return ((Cluster*) track_.At(i)); }
       Int_t getClusterFromLayer( Int_t layer );
       Cluster * getInterpolatedClusterAt(Int_t layer);

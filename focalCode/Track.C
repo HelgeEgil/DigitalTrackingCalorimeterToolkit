@@ -122,7 +122,7 @@ Float_t Track::getSlopeAngleAtLayer(Int_t i) {
 Float_t Track::getTrackLengthmmAt(Int_t i) {
 	// returns geometrical track length at point i
 	
-	if (i==0) return 0;
+	if (i==0) return 3.15; // pre-detector material
 	if (i>GetEntriesFast()) return 0;
 
 	return diffmm(At(i-1), At(i));
@@ -131,7 +131,7 @@ Float_t Track::getTrackLengthmmAt(Int_t i) {
 Float_t Track::getWEPL() {
 	Float_t tl = getTrackLengthmm();
 	if (!tl) return 0;
-	return getWEPLFromTL(tl);
+	return getWEPLFromTL(tl) + 3.09 + 1.65 * getWEPLFactorFromEnergy(run_energy);
 }
 
 Float_t Track::getTrackLengthWEPLmmAt(Int_t i) {
@@ -140,8 +140,14 @@ Float_t Track::getTrackLengthWEPLmmAt(Int_t i) {
 	// (see rangeCalculator.py)
 	
 	Float_t tl = getTrackLengthmmAt(i);
-	if (i==0) return 3.09; // WEPL of 1.5 mm Al
+	
+	if (i==0) {
+		// WEPL of 1.5 mm Al + WEPL of 1.65 (avg) detector materal
+		return 3.09 + 1.65 * getWEPLFactorFromEnergy(run_energy);
+	}
+	
 	if (!tl) return 0;
+	
 	return getWEPLFromTL(tl);
 }
 
@@ -178,6 +184,13 @@ Float_t Track::getEnergyFromWEPL(Float_t wepl) {
 			Float_t ratio = (wepl - kPLFocal[i-1] * kWEPLRatio[i-1]) / (kPLFocal[i]* kWEPLRatio[i] - kPLFocal[i-1]* kWEPLRatio[i-1]);
 			return kPLEnergies[i-1] + ratio * (kPLEnergies[i] - kPLEnergies[i-1]);
 		}
+	}
+}
+
+Float_t Track::getWEPLFactorFromEnergy(Float_t energy) {
+	for (Int_t i=0; i<nPLEnergies; i++) {
+		if (kPLEnergies[i] < energy) { continue; }
+		else { return kWEPLRatio[i]; }
 	}
 }
 

@@ -10,6 +10,7 @@
 #include <TPolyLine3D.h>
 #include <TPolyMarker3D.h>
 #include <TRandom3.h>
+#include <TLatex.h>
 #include <TStyle.h>
 #include <TCanvas.h>
 #include <TGraph.h>
@@ -442,33 +443,45 @@ void makeTracks(Int_t Runs, Int_t dataType, Bool_t recreate, Int_t energy) {
 
 void drawBraggPeakGraphFit(Int_t Runs, Int_t dataType, Bool_t recreate, Int_t energy) {
 
+	run_energy = energy;
+	TString sDataType = getDataTypeString(dataType);
+	
 	Float_t trackLengthSoFar;
 	Bool_t cut;
 
 	TCanvas *cGraphAll = new TCanvas("cGraphAll", "Fitting data points", 1000, 800);
 	TCanvas *cGraph = new TCanvas("cGraph", "Fitted data points", 1400, 1000);
 	TCanvas *c3 = new TCanvas("c3", "Fit results");
-	cGraph->Divide(4,4, 0.00001, 0.00001, 0);
+	cGraph->Divide(4,4, 0.000001, 0.000001, 0);
 
-	TH1F *fitResult = new TH1F("fitResult", "Fitted results", 500, 100, 250);
-
-	vector<TGraph*> vGraph;
+	char *sMaterial;
+	if (kMaterial == kTungsten) { sMaterial = "W"; }
+	else if (kMaterial == kAluminum) { sMaterial = "Al"; }
+	else if (kMaterial == kPMMA) { sMaterial = "PMMA";}
+	
+	TH1F *fitResult = new TH1F("fitResult", Form("Fitted energy of a %d MeV beam in %s", energy, sMaterial), 500, 100, 325);
 
 	Tracks * tracks = loadOrCreateTracks(recreate, Runs, dataType, energy);
 	tracks->extrapolateToLayer0();
 
-	TString sDataType = getDataTypeString(dataType);
+	vector<TGraph*> vGraph;
+	vGraph.reserve(tracks->GetEntriesFast());
 
 	Int_t m = 0;
 	Track *thisTrack = 0;
-	Float_t xx[20*tracks->GetEntriesFast()];
-	Float_t yy[20*tracks->GetEntriesFast()];
+	Float_t xx[nLayers*tracks->GetEntriesFast()];
+	Float_t yy[nLayers*tracks->GetEntriesFast()];
 
+	Int_t cutWEPL = 0, cutBPinT = 0;
+	
 	for (Int_t j=0; j<tracks->GetEntriesFast(); j++) {
 		thisTrack = tracks->At(j);
 		if (!thisTrack) continue;
-
-		cut = getCutWEPL(thisTrack) * getCutBraggPeakInTrack(thisTrack);
+		
+		if (getCutWEPL(thisTrack)) cutWEPL++;
+		if (getCutBraggPeakInTrack(thisTrack)) cutBPinT++;
+		
+		cut = getCutWEPL(thisTrack);//* getCutBraggPeakInTrack(thisTrack);
 		//if (dataType == kData) cut *= getCutChipNumber(thisTrack);
 
 		if (!cut) continue;
@@ -486,16 +499,18 @@ void drawBraggPeakGraphFit(Int_t Runs, Int_t dataType, Bool_t recreate, Int_t en
 			xx[m+k] = trackLengthSoFarWEPL;
 			yy[m+k] = thisTrack->getDepositedEnergy(k);
 		}
-		
 		m += n;
 		vGraph.push_back(new TGraph(n, x, y));
 	}
+	
+	cout << "Of " << tracks->GetEntriesFast() << ", " << cutWEPL << " made the WEPL cut and " << cutBPinT << " made the BP cut.\n";
 
 	vGraph.push_back(new TGraph(m, xx, yy));
 	
 	Int_t gsize = vGraph.size();
 	Int_t plotSize = 16;
 	//if (gsize>25) gsize = 25;
+	
 	for (Int_t i=0; i<gsize; i++) {
 		if (!vGraph.at(i)) continue;
 		TGraph *gr = vGraph.at(i);
@@ -504,7 +519,7 @@ void drawBraggPeakGraphFit(Int_t Runs, Int_t dataType, Bool_t recreate, Int_t en
 		   gStyle->SetPadBorderMode(0);
 		   gStyle->SetFrameBorderMode(0);
 		   gStyle->SetTitleH(0.06);
-		   gStyle->SetTitleYOffset(-0.1);
+		   gStyle->SetTitleYOffset(1);
 			gr->SetMaximum(500);
 			gr->SetMinimum(0);
 			gr->SetTitle("");
@@ -516,7 +531,7 @@ void drawBraggPeakGraphFit(Int_t Runs, Int_t dataType, Bool_t recreate, Int_t en
 			gr->GetYaxis()->SetLabelSize(0.04);
 			gr->Draw("A*");
 			if (i<gsize-1)
-				gr->GetXaxis()->SetRangeUser(0, 300);
+				gr->GetXaxis()->SetRangeUser(0, 500);
 			gr->Draw("A*");
 			cGraph->Update();
 		}
@@ -549,19 +564,25 @@ void drawBraggPeakGraphFit(Int_t Runs, Int_t dataType, Bool_t recreate, Int_t en
 		//cout << Form("The fitted energy is %d MeV.\n", thisTrack->getEnergyFromWEPL(fit_tl));
 		 */
 
-		TF1 *func = new TF1("fit_BP", fitfunc_DBP, 0, 300, 2);
+		TF1 *func = new TF1("fit_BP", fitfunc_DBP, 0, 500, 2);
 		func->SetParName(0,"Initial energy [MeV]");
 		func->SetParName(1, "Factor");
 		func->SetParameter(0,energy);
 		func->SetParameter(1, 40);
-		func->SetParLimits(0, 10, energy*1.1);
+		func->SetParLimits(0, 10, energy*1.25);
 		func->SetParLimits(1, 30,50);
-		gr->Fit("fit_BP", "B, W, Q", "", 0, 300);
+		gr->Fit("fit_BP", "B, W, Q", "", 0, 500);
 		Float_t fit_t = func->GetParameter(0);
-		if (fit_t<214.5) fitResult->Fill(fit_t);
+		if (fit_t < energy*1.24) fitResult->Fill(fit_t);
 // 		cout << Form("The fitted energy is %f MeV... Jesus christ that wasn't hard was it\n", fit_t);
 
-		if (i<plotSize) vGraph.at(i)->SetTitle(Form("Energy: %.1f MeV", fit_t));
+		if (i<plotSize) {
+			TLatex *myl = new TLatex(20,400,Form("Fitted energy: %.1f MeV", fit_t));
+			myl->SetTextSize(0.06);
+			myl->Draw();
+		}
+			
+
 	}
 
 	cGraphAll->cd();
@@ -1053,8 +1074,6 @@ Tracks * getTracks(Int_t Runs, Int_t dataType, Int_t frameType, Int_t energy) {
 		cout << Form("Timing: getMCframe (%.2f sec), diffuseFrame (%.2f sec), findHits (%.2f sec), findClustersFromHits (%.2f sec), findTracks (%.2f sec)\n",
 			     t1.RealTime(), t2.RealTime(), t3.RealTime(), t4.RealTime(), t5.RealTime());
 		
-		cout << "Test: Size of hits is " << hits->GetEntriesFast() << " (" << hits->GetEntries() << ").\n";
-
 		cf->Reset();
 //		tf->Reset();
 		hits->clearHits();

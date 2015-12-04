@@ -8,6 +8,8 @@
 enum eFrameType {kCalorimeter, kTracker};
 enum eDataType {kMC, kData};
 
+Int_t run_energy = 0;
+
 // Some general run parameters
 const Int_t nx = 640;
 const Int_t ny = 640;
@@ -39,6 +41,7 @@ const Int_t kMaterial = kTungsten;
  *  recursive is excellent on small frames, really slow on large
  *  nearestCluster is good on everything
  */
+
 enum eTrackFindingAlgorithm {kRecursive, kNearestCluster};
 const Int_t kTrackFindingAlgorithm = kNearestCluster;
 

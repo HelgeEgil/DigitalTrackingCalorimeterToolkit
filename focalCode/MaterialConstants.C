@@ -19,14 +19,14 @@ void MaterialConstants() {
 	}
 
 	else if (kMaterial == kAluminum) {
-		memcpy(kPLFocal, kPLFocal_W, sizeof(kPLFocal_Al));
-		memcpy(kWEPLRatio, kWEPLRatio_W, sizeof(kWEPLRatio_Al));
+		memcpy(kPLFocal, kPLFocal_Al, sizeof(kPLFocal_Al));
+		memcpy(kWEPLRatio, kWEPLRatio_Al, sizeof(kWEPLRatio_Al));
 		nLayers = 41;
 	}
 
 	else if (kMaterial == kPMMA) {
-		memcpy(kPLFocal, kPLFocal_W, sizeof(kPLFocal_PMMA));
-		memcpy(kWEPLRatio, kWEPLRatio_W, sizeof(kWEPLRatio_PMMA));
+		memcpy(kPLFocal, kPLFocal_PMMA, sizeof(kPLFocal_PMMA));
+		memcpy(kWEPLRatio, kWEPLRatio_PMMA, sizeof(kWEPLRatio_PMMA));
 		nLayers = 65;
 	}
 }
