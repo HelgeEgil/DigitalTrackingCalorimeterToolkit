@@ -1,6 +1,8 @@
 #include "TrackerFrame.h"
 // #include <iostream>
 
+class TRandom3;
+
 using namespace std;
 
 TrackerFrame::TrackerFrame() : trackerFrame_("Layer", nTrackers) {
@@ -23,9 +25,9 @@ Hits * TrackerFrame::findHits() {
 	return hits;
 }
 
-void TrackerFrame::diffuseFrame() {
+void TrackerFrame::diffuseFrame(TRandom3 *gRandom) {
 	for (Int_t layer=0; layer<nTrackers; layer++) {
-		At(layer)->diffuseLayer();
+		At(layer)->diffuseLayer(gRandom);
 	}
 }
 

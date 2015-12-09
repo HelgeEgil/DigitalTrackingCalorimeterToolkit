@@ -1,11 +1,14 @@
 #include "Track.h"
 #include "Cluster.h"
 #include "Hit.h"
+#include "Tools.h"
 #include <iostream>
 #include <cmath>
+#include <TGraph.h>
 #include "Constants.h"
 #include "MaterialConstants.h"
 #include <TClonesArray.h>
+#include <TF1.h>
 // #include <TObject.h>
 
 using namespace std;
@@ -173,7 +176,6 @@ Float_t Track::getEnergyFromTL(Float_t tl) {
 			return kPLEnergies[i-1] + ratio * (kPLEnergies[i] - kPLEnergies[i-1]);
 		}
 	}
-	
 }
 
 Float_t Track::getEnergyFromWEPL(Float_t wepl) {
@@ -425,4 +427,96 @@ Cluster * Track::getInterpolatedClusterAt(Int_t layer) {
 	Float_t y = ( pre->getY() + post->getY() ) / 2.;
 
 	return new Cluster(x, y, layer);
+}
+
+Float_t Track::getAverageCS() {
+	Int_t n = GetEntries();
+	if (!n) return 0;
+
+	Float_t sum=0, avg=0;
+
+	for (Int_t i=0; i<GetEntriesFast(); i++) {
+		if (!At(i)) continue;
+
+		sum += getSize(i);
+	}
+	avg = sum / n;
+
+	return avg;
+}
+
+
+Float_t Track::getAverageCSLastN(Int_t last_n) {
+	Int_t n=0;
+
+	Float_t sum=0;
+	Float_t avg=0;
+
+	// find last index
+	Int_t nFound = 0;
+	Int_t lastIdx = 0;
+	for (Int_t i=GetEntriesFast()-1; i>=0; i--) {
+		if (!At(i)) continue;
+		nFound++;
+		if (nFound == last_n) {
+			lastIdx = i;
+			break;
+		}
+	}
+
+	for (Int_t i=lastIdx; i<GetEntriesFast(); i++) {
+		if (!At(i)) continue;
+		n++;
+		sum += getSize(i);
+	}
+
+	avg = sum / n;
+	return avg;
+}
+
+void Track::doFit() {
+	Bool_t newCutBraggPeak = (getAverageCSLastN(2) > getAverageCS()*kBPFactorAboveAverage);
+	Bool_t WEPLCut = (getWEPL() > 150);
+
+	TGraph *graph;
+
+	Bool_t cut = WEPLCut * newCutBraggPeak;
+
+	if (!cut) return;
+
+	Int_t n = GetEntriesFast();
+	Float_t x[n], y[n];
+
+	Float_t trackLengthSoFarWEPL = 0;
+	for (Int_t i=0; i<n; i++) {
+		if (!At(i)) continue;
+		trackLengthSoFarWEPL += getTrackLengthWEPLmmAt(i);
+		x[i] = trackLengthSoFarWEPL;
+		y[i] = getDepositedEnergy(i);
+	}
+
+	graph = new TGraph(n, x, y);
+
+	TF1 *func = new TF1("fit_BP", fitfunc_DBP, 0, 500, 2);
+	func->SetParameter(0,run_energy);
+	func->SetParameter(1, 40);
+	func->SetParLimits(0, 10, run_energy*1.25);
+	func->SetParLimits(1, 30,50);
+	graph->Fit("fit_BP", "B, W, Q", "", 0, 500);
+
+	energy_ = func->GetParameter(0);
+
+	delete graph;
+}
+
+Float_t Track::getFittedEnergy() {
+	if (!energy_ && run_energy) {
+		doFit();
+	}
+
+	else if (!energy_ && !run_energy) {
+		return 0;
+	}
+
+	return energy_;
 }

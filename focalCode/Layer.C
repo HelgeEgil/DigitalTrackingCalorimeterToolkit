@@ -15,12 +15,11 @@ Layer::~Layer() {
 	// TODO Auto-generated destructor stub
 }
 
-void Layer::diffuseLayer() {
+void Layer::diffuseLayer(TRandom3 *gRandom) {
 	Int_t repeatFactor, x, y, z, randX, randY;
 	Float_t EnergyFactor = 1000 / 30. * SpreadNumber;
 	Float_t newSigma, eDep;
 
-	gRandom = new TRandom3(0);
 	Hits *hits = new Hits();
 	Bool_t isHits = findHits(hits);
 	Int_t nHits = hits->GetEntriesFast();
@@ -44,7 +43,6 @@ void Layer::diffuseLayer() {
 	}
 
 	delete hits;
-	delete gRandom;
 }
 
 

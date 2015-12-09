@@ -6,6 +6,8 @@
 #include "Hits.h"
 #include <TH2F.h>
 
+class TRandom3;
+
 class Layer : public TObject {
 	private:
 		TH2F frame2D_;
@@ -20,7 +22,7 @@ class Layer : public TObject {
 		Layer(Int_t layerNo, Bool_t frameType, Bool_t dataType);
 		virtual ~Layer();
 
-		void diffuseLayer();
+		void diffuseLayer(TRandom3 *gRandom);
 		void oldDiffuseLayer();
 		virtual Bool_t findHits(Hits *hits);
 

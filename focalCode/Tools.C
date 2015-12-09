@@ -45,3 +45,18 @@ Float_t diffmm(Hit *h1, Hit *h2) {
 
 	return sqrt(pow(diffx,2) + pow(diffy,2));
 }
+
+Double_t fitfunc_DBP(Double_t *v, Double_t *par) {
+	// Based on Bortfeld and Schlegel 1996
+
+	Float_t depth = v[0];
+	Float_t energy = par[0];
+	Float_t scale = par[1];
+
+	Float_t R_mm = 0.0019 * pow(energy,1.8) * 10;
+	Double_t fitval = scale / ( 0.0554 * pow((R_mm - depth), 0.444) );
+
+	if (isnan(fitval)) fitval = 0;
+
+	return fitval;
+}

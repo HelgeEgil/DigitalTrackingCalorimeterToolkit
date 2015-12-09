@@ -52,6 +52,9 @@ class Tracks : public TObject {
       virtual TObject* removeTrackAt(Int_t i) { return tracks_.RemoveAt(i); }
       void sortTrackByLayer(Int_t track);
 
+      void checkLayerOrientation();
+      void doFit();
+
       
 //       virtual void drawClusters(Clusters *a, Clusters *b);
 	  

@@ -135,6 +135,9 @@ void Tracks::splitSharedClusters() {
 						missingTrack->appendCluster(new Cluster(x, y, layer, size));
 						nSplit++;
 						
+						// set size of closest cluster as well!
+						closestCluster->setSize(size);
+
 						sortTrackByLayer(trackIdx);
 					}
 				}
@@ -189,8 +192,8 @@ void Tracks::sortTrackByLayer(Int_t trackIdx) {
 		sortList.resize(nLayers);
 		for (Int_t i=0; i<nLayers; i++) sortList.at(i) = -1;
 		for (Int_t i=0; i<n; i++) {
-			if (!At( trackIdx )->At(i)) continue;
-			sortList.at(At( trackIdx)->getLayer(i)) = i;
+			if (!At(trackIdx)->At(i)) continue;
+			sortList.at(At(trackIdx)->getLayer(i)) = i;
 		}
 		
 		Track *newTrack = new Track();
@@ -205,5 +208,43 @@ void Tracks::sortTrackByLayer(Int_t trackIdx) {
 			appendTrack(newTrack);
 			removeTrackAt(trackIdx);
 		}
+	}
+}
+
+void Tracks::checkLayerOrientation() {
+	Float_t n[nLayers-1], x[nLayers-1], y[nLayers-1];
+	Float_t dx, dy;
+
+	for (Int_t i=0; i<GetEntriesFast(); i++) {
+		Track *track = At(i);
+		Int_t first = 0;
+		if (!At(first)) first = 1;
+		if (!At(first)) continue;
+		Cluster *lastCluster = track->At(first);
+		for (Int_t j=first+1; j<track->GetEntriesFast(); j++) {
+			Cluster *thisCluster = track->At(j);
+			dx = thisCluster->getX() - lastCluster->getX();
+			dy = thisCluster->getY() - lastCluster->getY();
+
+			x[j] += dx;
+			y[j] += dy;
+			n[j]++;
+
+			lastCluster = thisCluster;
+		}
+	}
+
+	cout << "The average track movement between layers is: ";
+	for (Int_t i=0; i<nLayers-1; i++) {
+		if (n[i])
+			cout << Form("Layer %d: (%.1f, %.1f), ", i, x[i]/n[i], y[i]/n[i]);
+	}
+	cout << ".\n";
+}
+
+void Tracks::doFit() {
+	for (Int_t i=0; i<GetEntriesFast(); i++) {
+		if (!At(i)) continue;
+		At(i)->doFit();
 	}
 }

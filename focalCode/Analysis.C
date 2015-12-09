@@ -12,6 +12,7 @@
 #include <TRandom3.h>
 #include <TLatex.h>
 #include <TStyle.h>
+#include <TAxis3D.h>
 #include <TCanvas.h>
 #include <TGraph.h>
 #include <iostream>
@@ -314,7 +315,7 @@ void drawClusterShapes(Int_t Runs, Bool_t dataType, Bool_t recreate, Int_t energ
 	for (Int_t i=0; i<Runs; i++) {
 		if (dataType == kMC) {
 			f->getMCFrame(i, cf);
-			cf->diffuseFrame(); // THE MAGIC PART
+			cf->diffuseFrame(new TRandom3(0)); // THE MAGIC PART
 			hits = cf->findHits();
 			tempClusterHitMap = hits->findClustersHitMap();
 		}
@@ -400,6 +401,16 @@ void drawClusterShapes(Int_t Runs, Bool_t dataType, Bool_t recreate, Int_t energ
 
 }
 
+char * getMaterialChar() {
+	char *sMaterial;
+
+	if (kMaterial == kTungsten) sMaterial = (char*) "tungsten";
+	if (kMaterial == kAluminum) sMaterial = (char*) "aluminum";
+	if (kMaterial == kPMMA) sMaterial = (char*) "PMMA";
+
+	return sMaterial;
+}
+
 TString getDataTypeString(Int_t dataType) {
 	TString sDataType;
 	if (dataType == kMC)
@@ -424,21 +435,42 @@ Int_t getMinimumTrackLength(Int_t energy) {
 	return minTL;
 }
 
-Double_t fitfunc_DBP(Double_t *v, Double_t *par) {
-	// we convert to water equivalent path length before fitting
-	// so the numbers are given in water
-	// Based on Bortfeld and Schlegel 1996
-	// v[0] is depth and par[0] is initial energy E0. par[1] is a scaling.
-
-	Float_t R_mm = 0.0019 * pow(par[0],1.8) * 10;
-	Double_t fitval = par[1] / ( 0.0554 * pow((R_mm - v[0]), 0.444) );
-	if (isnan(fitval)) fitval = 0;
-	return fitval;
-}
-
 void makeTracks(Int_t Runs, Int_t dataType, Bool_t recreate, Int_t energy) {
 	Tracks * tracks = loadOrCreateTracks(recreate, Runs, dataType, energy);
 	tracks->extrapolateToLayer0();
+}
+
+void drawBraggPeakFit(Int_t Runs, Int_t dataType, Bool_t recreate, Int_t energy) {
+	run_energy = energy;
+	TStopwatch t1, t2;
+
+	char *title = Form("Fitted energy of a %d MeV beam in %s", energy, getMaterialChar());
+	TH1F *fitResult = new TH1F("fitResult", title, 1000, 100, 325);
+
+	fitResult->SetLineColor(kBlack);
+	if (dataType == kMC) { fitResult->SetFillColor(kGreen-5); }
+
+	cout << "Loading tracks...\n";
+	t1.Start();
+	Tracks *tracks = loadOrCreateTracks(recreate, Runs, dataType, energy);
+	t1.Stop();
+	cout << Form("Done (%.2f s).\n", t1.RealTime());
+	tracks->extrapolateToLayer0();
+	cout << "Fitting tracks...\n";
+	t2.Start();
+	tracks->doFit();
+	t2.Stop();
+	cout << Form("Done (%.2f s).\n", t2.RealTime());
+
+	for (Int_t i=0; i<tracks->GetEntriesFast(); i++) {
+		Track *thisTrack = tracks->At(i);
+		if (!thisTrack) {	continue; }
+
+		Float_t res = thisTrack->getFittedEnergy();
+		if (res) { fitResult->Fill(res); }
+	}
+
+	fitResult->Draw();
 }
 
 void drawBraggPeakGraphFit(Int_t Runs, Int_t dataType, Bool_t recreate, Int_t energy) {
@@ -454,12 +486,15 @@ void drawBraggPeakGraphFit(Int_t Runs, Int_t dataType, Bool_t recreate, Int_t en
 	TCanvas *c3 = new TCanvas("c3", "Fit results");
 	cGraph->Divide(4,4, 0.000001, 0.000001, 0);
 
-	char *sMaterial;
-	if (kMaterial == kTungsten) { sMaterial = "W"; }
-	else if (kMaterial == kAluminum) { sMaterial = "Al"; }
-	else if (kMaterial == kPMMA) { sMaterial = "PMMA";}
+	char *sMaterial = getMaterialChar();
+
+//	char *sMaterial;
+//	if (kMaterial == kTungsten) { sMaterial = (char*) "W"; }
+//	else if (kMaterial == kAluminum) { sMaterial = (char*) "Al"; }
+//	else if (kMaterial == kPMMA) { sMaterial = (char*) "PMMA";}
 	
-	TH1F *fitResult = new TH1F("fitResult", Form("Fitted energy of a %d MeV beam in %s", energy, sMaterial), 500, 100, 325);
+	TH1F *fitResult = new TH1F("fitResult", Form("Fitted energy of a %d MeV beam in %s", energy, sMaterial), 1000, 100, 325);
+	c3->SetTitle(Form("Fitted energy of a %d MeV beam in %s", energy, sMaterial));
 
 	Tracks * tracks = loadOrCreateTracks(recreate, Runs, dataType, energy);
 	tracks->extrapolateToLayer0();
@@ -472,7 +507,7 @@ void drawBraggPeakGraphFit(Int_t Runs, Int_t dataType, Bool_t recreate, Int_t en
 	Float_t xx[nLayers*tracks->GetEntriesFast()];
 	Float_t yy[nLayers*tracks->GetEntriesFast()];
 
-	Int_t cutWEPL = 0, cutBPinT = 0;
+	Int_t cutWEPL = 0, cutBPinT = 0, newCutBP = 0;
 	
 	for (Int_t j=0; j<tracks->GetEntriesFast(); j++) {
 		thisTrack = tracks->At(j);
@@ -481,7 +516,15 @@ void drawBraggPeakGraphFit(Int_t Runs, Int_t dataType, Bool_t recreate, Int_t en
 		if (getCutWEPL(thisTrack)) cutWEPL++;
 		if (getCutBraggPeakInTrack(thisTrack)) cutBPinT++;
 		
-		cut = getCutWEPL(thisTrack);//* getCutBraggPeakInTrack(thisTrack);
+		// is last three bins higher than average?
+		Float_t avg = thisTrack->getAverageCS();
+		Float_t last_three = thisTrack->getAverageCSLastN(2);
+
+		Bool_t newCutBraggPeak = (last_three > avg*1.6) ? true : false;
+		if (newCutBraggPeak) newCutBP++;
+
+
+		cut = getCutWEPL(thisTrack) * newCutBraggPeak; //* getCutBraggPeakInTrack(thisTrack);
 		//if (dataType == kData) cut *= getCutChipNumber(thisTrack);
 
 		if (!cut) continue;
@@ -504,6 +547,7 @@ void drawBraggPeakGraphFit(Int_t Runs, Int_t dataType, Bool_t recreate, Int_t en
 	}
 	
 	cout << "Of " << tracks->GetEntriesFast() << ", " << cutWEPL << " made the WEPL cut and " << cutBPinT << " made the BP cut.\n";
+	cout << Form("And %d made the new BP cut.\n", newCutBP);
 
 	vGraph.push_back(new TGraph(m, xx, yy));
 	
@@ -553,16 +597,16 @@ void drawBraggPeakGraphFit(Int_t Runs, Int_t dataType, Bool_t recreate, Int_t en
 		Float_t BP = maxVal - constHeight;
 		Float_t BPwidth = 1.7;
 
-		/*
-		TF1 *g1 = new TF1("m1", "gaus(0) + [3]", 0, BPpos*2);
-		g1->SetParameters(BP, BPpos, BPwidth, constHeight); // BP, BPpos, 2.5
-		g1->SetParLimits(0, BP*0.8, BP*2);
-		g1->SetParLimits(1, BPpos*0.9, BPpos*1.3);
-		g1->SetParLimits(2, BPwidth, BPwidth);
-		gr->Fit("m1", "B, W, Q", "", 0, BPpos*1.5);
-		Float_t fit_tl = g1->GetParameter(1);
-		//cout << Form("The fitted energy is %d MeV.\n", thisTrack->getEnergyFromWEPL(fit_tl));
-		 */
+
+//		TF1 *g1 = new TF1("m1", "gaus(0) + [3]", 0, BPpos*2);
+//		g1->SetParameters(BP, BPpos, BPwidth, constHeight); // BP, BPpos, 2.5
+//		g1->SetParLimits(0, BP*0.8, BP*2);
+//		g1->SetParLimits(1, BPpos*0.9, BPpos*1.3);
+//		g1->SetParLimits(2, BPwidth, BPwidth);
+//		gr->Fit("m1", "B, W, Q", "", 0, BPpos*1.5);
+//		Float_t fit_tl = g1->GetParameter(1);
+//		//cout << Form("The fitted energy is %d MeV.\n", thisTrack->getEnergyFromWEPL(fit_tl));
+
 
 		TF1 *func = new TF1("fit_BP", fitfunc_DBP, 0, 500, 2);
 		func->SetParName(0,"Initial energy [MeV]");
@@ -611,206 +655,6 @@ void drawBraggPeakGraphFit(Int_t Runs, Int_t dataType, Bool_t recreate, Int_t en
   	delete tracks;
 }
 
-void drawBraggPeakFit(Int_t Runs, Int_t dataType, Bool_t recreate, Int_t energy) {
-
-	Focal f;
-	Float_t trackLengthSoFar = 0;
-	Int_t trackNum = 0, chip = 0, minTL = 0;
-	Bool_t cutTrackLength, cutChipNumber, cutBraggPeakInTrack;
-	Bool_t cutCombined, BPSampled;
-	Int_t okCHIP = 0, okTL = 0, okBP = 0, okALL = 0, okNTBP = 0;
-	vector<TArrow*> arrows;
-	arrows.reserve(100);
-
-	vector<TArrow*> cogArrows;
-	cogArrows.reserve(100);
-
-	Tracks * tracks = loadOrCreateTracks(recreate, Runs, kCalorimeter, energy);
-	tracks->extrapolateToLayer0();
-	
-	TString sDataType = getDataTypeString(dataType);
-
-	TCanvas *cAverageTrack = new TCanvas("cAverageTrack", "Average Cluster Size along track", 1000, 800);
-	TH1F *hAverageTrack = new TH1F("hAverageTrack", "Average Cluster Size along track", nLayers+1, -dz/2, nLayers*dz+dz/2);
-
-	TCanvas *cBPResult = new TCanvas("cBPResult", "Bragg Peak fit mean values", 1000, 800);
-	TH1F *hBPResult = new TH1F("hBPResult", "Bragg peak fit mean values", 400, 0, 30);
-
-	TCanvas *c2 = new TCanvas("c2", "c2", 800, 600);
-	TH1F *hMu = new TH1F("hMu", "Weighted CoG BP position", 400, 0, 30);
-
-	TCanvas *cFollowTrack = new TCanvas("c1", "c1", 1000, 800);
-	cFollowTrack->Divide(4, 4, 0.01, 0.01, 0);
-
-	vector<TH1F*> *hFollowTrack = new vector<TH1F*>;
-	hFollowTrack->reserve(tracks->GetEntriesFast());
-	for (Int_t track=0; track<tracks->GetEntriesFast(); track++) {
-		hFollowTrack->push_back(new TH1F(Form("hFollowTrack_%i", track), "Cluster size along track length for a single track", nLayers+1, -dz/2, nLayers*dz+dz/2));
-		hFollowTrack->at(track)->SetXTitle("Track Length [mm]");
-		hFollowTrack->at(track)->SetYTitle("Cluster size [# of pixels]");
-	}
-
-	Track *thisTrack;
-	for (Int_t i=0; i<tracks->GetEntriesFast(); i++) {
-		thisTrack = tracks->At(i);
-
-		cutTrackLength = getCutTrackLength(energy, thisTrack);
-		cutBraggPeakInTrack = getCutBraggPeakInTrack(thisTrack);
-
-		if (dataType == kData)
-			cutChipNumber = getCutChipNumber(thisTrack);
-		else
-			cutChipNumber = true;
-
-		
-		cutCombined = cutBraggPeakInTrack * cutTrackLength;
-		if (cutCombined) okALL++;
-
-		trackLengthSoFar = 0;
-		for (Int_t j=0; j<thisTrack->GetEntriesFast(); j++) {
-			trackLengthSoFar += thisTrack->getTrackLengthmmAt(j);
-			Float_t trackLengthLayer = thisTrack->getLayermm(j);
-
-//			Float_t arrowPos = trackLengthSoFar + dz/2;
-
-			if (cutCombined) {
-				hAverageTrack->Fill(trackLengthLayer, thisTrack->getSize(j));
-				hFollowTrack->at(trackNum)->Fill(trackLengthLayer, thisTrack->getSize(j));
-			}
-
-			/*
-			if (trackNum < 16 && cutCombined) {
-				if (BPSampled && BPidx == j) {
-					arrows.push_back(new TArrow(arrowPos, thisTrack->getSize(j) * 1.3,
-										arrowPos, thisTrack->getSize(j) * 1.1, 0.005, "|>"));
-					arrows.back()->SetLineColor(kRed);
-					arrows.back()->SetLineWidth(2.);
-					arrows.back()->SetFillColor(kRed);
-				}
-
-				else if (!BPSampled && BPidx == j)
-					arrows.push_back(NULL);
-			}
-			*/
-		}
-
-		if (cutCombined) {
-			Float_t BPpos = hFollowTrack->at(trackNum)->GetMaximumBin() * dz;
-			Float_t BP = hFollowTrack->at(trackNum)->GetBinContent(BPpos/dz);
-			Float_t BPwidth = 1.7;
-
-			TF1 *g1 = new TF1("m1", "gaus", 0, BPpos*2);
-
-			g1->SetParameters(BP, BPpos, BPwidth); // BP, BPpos, 2.5
-			g1->SetParLimits(0, BP*0.8, BP*1.2);
-			g1->SetParLimits(1, BPpos*0.85, BPpos*1.15);
-			g1->SetParLimits(2, BPwidth, BPwidth);
-
-			if (trackNum<16)
-				cFollowTrack->cd(trackNum+1);
-
-			hFollowTrack->at(trackNum)->Fit("m1", "B, W, Q", "", BPpos*0.7, BPpos*1.3);
-
-			cout << "BPpos = " << BPpos << ", mean value after fit: " << g1->GetParameter(1) << endl;
-			hBPResult->Fill(g1->GetParameter(1));
-		}
-
-		if (cutCombined) trackNum++;
-		if (cutTrackLength) okTL++;
-		if (cutChipNumber) okCHIP++;
-		if (cutBraggPeakInTrack) okBP++;
-	}
-
-	hAverageTrack->Scale(1/(float) trackNum);
-
-	TF1 *g1 = new TF1("m1", "gaus", 15, 35);
-
-	Float_t BPpos = hAverageTrack->GetMaximumBin() * dz;
-	Float_t BP = hAverageTrack->GetBinContent(BPpos/dz);
-	Float_t BPwidth = 1.7;
-
-	g1->SetParameters(BP, BPpos, BPwidth); // BP, BPpos, 2.5
-	g1->SetParLimits(0, BP*0.8, BP*1.2);
-	g1->SetParLimits(1, BPpos*0.85, BPpos*1.15);
-	g1->SetParLimits(2, BPwidth, BPwidth);
-
-	cAverageTrack->cd();
-
-	hAverageTrack->Fit("m1", "R, WW", "", BPpos*0.7, BPpos*1.3);
-
-	cout << "Total tracks: " << tracks->GetEntriesFast() << endl;
-	cout << "Total okCHIP: " << okCHIP << endl;
-	cout << "Total okTL: " << okTL << endl;
-	cout << "Total okBP: " << okBP << endl;
-	cout << "Total ok combined: " << okALL << endl;
-
-	cAverageTrack->cd();
-
-	hAverageTrack->SetFillColor(kOrange+7);
-	hAverageTrack->Draw();
-
-	//TCanvas *c3 = new TCanvas("c3", "c3", 800, 600);
-
-	Float_t cog;
-
-	for (UInt_t track=0; track<hFollowTrack->size(); track++) {
-		cog = 0;
-		Int_t hLen = hFollowTrack->at(track)->FindLastBinAbove();
-		if (hLen<3) continue;
-
-		// pen-penultimate, penultimate and ultimate bin
-		Float_t ppu = hFollowTrack->at(track)->GetBinContent(hLen-2);
-		Float_t pu = hFollowTrack->at(track)->GetBinContent(hLen-1);
-		Float_t u = hFollowTrack->at(track)->GetBinContent(hLen);
-
-		// sometimes penultimate channel is bad, in that case fix it
-		if (pu<1 && ppu > pu*5) pu = ppu;
-
-		// cog for last two bins
-		cog = (pu * (hLen-1)*dz + u * (hLen)*dz) / (u + pu);
-
-		hMu->Fill(cog);
-		
-		/*
-		cogArrows.push_back(new TArrow(cog, max(u,pu) * 1.3,
-							cog, max(u,pu) * 1.1, 0.005, "|>"));
-		cogArrows.back()->SetLineColor(kGreen);
-		cogArrows.back()->SetLineWidth(2.);
-		cogArrows.back()->SetFillColor(kGreen);
-		*/
-	}
-
-	for (UInt_t trackNo=0; trackNo<16; trackNo++) {
-		cFollowTrack->cd(trackNo+1);
-		gPad->DrawFrame(0, 0, 50, 45);
-		hFollowTrack->at(trackNo)->SetFillColor(kBlue-2);
-		hFollowTrack->at(trackNo)->Draw("same");
-
-		/*
-		if (trackNo < arrows.size()) {
-			if (arrows.at(trackNo)) {
-				arrows.at(trackNo)->Draw();
-			}
-		}
-		if (trackNo < cogArrows.size()) {
-			if (cogArrows.at(trackNo)) {
-				cogArrows.at(trackNo)->Draw();
-			}
-		}
-		*/
-	}
-
-	cBPResult->cd();
-	hBPResult->Draw();
-
-	c2->cd();
-	hMu->SetFillColor(kGray);
-	hMu->SetTitle(Form("Bragg peak positions for %i MeV protons", energy));
-	hMu->Draw();
-
-	delete tracks;
-}
-
 /*
 	
 void WriteClusterFile(Int_t Runs) {
@@ -855,48 +699,30 @@ void WriteClusterFile(Int_t Runs) {
 
 } // end function FindClustersToLayers
 
-void Draw2DProjection(Int_t Runs, Int_t Events) {
+*/
+
+void Draw2DProjection(Int_t Runs, Int_t dataType, Bool_t recreate, Int_t energy) {
+
+	Tracks * tracks = loadOrCreateTracks(recreate, Runs, kCalorimeter, energy);
+	tracks->extrapolateToLayer0();
 	
-	// first get tracks
-
-	Focal f;
-	Tracks *allTracks = new Tracks(2*Events*Runs);
-
-	allTracks->SetOwner(true);
-
-	for (Int_t i=0; i<Runs; i++) {
-		Int_t EventFrom = Runs * i;
-		Int_t EventTo = EventFrom + Events;
-
-		// could use absorbobjects(tracks), but i don't get it to work
-		// Track objects are small though.
-		
-		Tracks *tracks = f.FindTracks(EventFrom, EventTo);
-		tracks->SetOwner(true);
-
-		cout << "--- Run " << i+1 << " of " << Runs << " complete --- \n";
-
-		for (Int_t j=0; j<tracks->GetEntriesFast(); j++) {
-			allTracks->appendTrack(tracks->At(j));
-		}
-		delete tracks;
-	}
+	Int_t hSizeX = nx/8;
+	Int_t hSizeY = ny/8;
 
 	Float_t angleCut = 5.;
-	Float_t TLCut = 15.;
-	Float_t x0, y0, theta0, TL;
+	Float_t x0, y0, theta0;
 	Int_t nPoints = 0;
 
-	allTracks->extrapolateToLayer0();
+	Float_t fit_energy;
 
-	Int_t ntracks = allTracks->GetEntriesFast();
+	Int_t ntracks = tracks->GetEntriesFast();
 
-	TCanvas *c1 = new TCanvas("2D Projection of data");
+	char *title = (char*) Form("2D Projection of data from %d MeV proton beam on %s type FOCAL", energy, getMaterialChar());
+
+	TCanvas *c1 = new TCanvas(title);
 	
-	cout << TLCut;
-	
-	TH2F *Frame2D = new TH2F("Frame2D", "2D Projection of data, at first detector frame",
-			nx/8, 0, nx*2, ny/8, 0, ny*2);
+	TH2F *Frame2D = new TH2F("Frame2D", title, hSizeX, 0, nx*2, hSizeY, 0, ny*2);
+	TH2F *normalizeFrame = new TH2F("normalizeFrame", "title", hSizeX, 0, nx*2, hSizeY, 0, ny*2);
 
 //   gPad->Update();
 
@@ -905,36 +731,29 @@ void Draw2DProjection(Int_t Runs, Int_t Events) {
 //   pt->InsertText(Form("Track length treshold at %d mm", TLCut));
 
 	for (Int_t i=0; i<ntracks; i++) {
-		// loop through tracks to get the relevant information:
-		//    - track starting point
-		//    - total track angle (until end point)
-		//    - track length (somewhat \propto WEPL)
-		//
-		// Then cut at the angle, and plot a value \propto the TL at the track starting point
-		x0 = allTracks->At(i)->getX(0);
-		y0 = allTracks->At(i)->getY(0);
-		theta0 = allTracks->At(i)->getSlopeAngle();
-		TL = allTracks->At(i)->getTrackLengthmm();
-		
-		if (theta0 > angleCut) continue;
-		if (TL < TLCut) {
-			cout << "TL = " << TL << ", continuing\n";
-			continue;
-		}
+		Track *thisTrack = tracks->At(i);
 
-		Frame2D->Fill(x0, y0, TL);
+		x0 = thisTrack->getX(0);
+		y0 = thisTrack->getY(0);
+		theta0 = thisTrack->getSlopeAngle();
+		fit_energy = thisTrack->getEnergy();
+
+		if (theta0 > angleCut) continue;
+
+		Frame2D->Fill(x0, y0, energy);
+		normalizeFrame->Fill(x0, y0);
+
 		nPoints++;
 	}
 
-	delete allTracks;
+	Frame2D->Divide(normalizeFrame);
 
-	cout << "Plotted " << nPoints << " data points\n";
+	delete tracks;
 
 	Frame2D->Draw("COLZ");
 	gStyle->SetOptStat(0);
 
 }
-*/
 
 void saveTracks(Tracks *tracks, Int_t dataType, Int_t energy) {
   	
@@ -971,11 +790,11 @@ Tracks * loadTracks(Int_t Runs, Int_t dataType, Int_t energy) {
 	T->GetBranch("tracks")->SetAutoDelete(kFALSE);
 	T->SetBranchAddress("tracks",&tracks);
 
-	cout << "There are " << T->GetEntriesFast() << " entries in TTree.\n";
+//	cout << "There are " << T->GetEntriesFast() << " entries in TTree.\n";
 
 	T->GetEntry(0);
 	
-	cout << "There are " << tracks->GetEntriesFast() << " entries in tracks.\n";
+	cout << "There are " << tracks->GetEntriesFast() << " tracks in the " << fileName << ".\n";
 	
 	return tracks;
 }
@@ -1029,7 +848,7 @@ Tracks * getTracks(Int_t Runs, Int_t dataType, Int_t frameType, Int_t energy) {
 			t1.Start();
 			f->getMCFrame(i, cf);
 			t1.Stop(); t2.Start();
-			cf->diffuseFrame();
+			cf->diffuseFrame(new TRandom3(0));
 			t2.Stop(); t3.Start();
 			hits = cf->findHits();
 			t3.Stop(); t4.Start();
@@ -1099,13 +918,14 @@ Tracks * getTracks(Int_t Runs, Int_t dataType, Int_t frameType, Int_t energy) {
 	return allTracks;
 }
 
-void drawTracks3D(Int_t Runs, Int_t dataType, Int_t frameType, Int_t energy) {
+void drawTracks3D(Int_t Runs, Int_t dataType, Bool_t recreate, Int_t energy) {
 	// FIXME Add kTracker to loadOrCreateTracks
   
-	Tracks *tracks = getTracks(Runs, dataType, frameType, energy);
+	Tracks * tracks = loadOrCreateTracks(recreate, Runs, kCalorimeter, energy);
 	tracks->extrapolateToLayer0();
 
 	TCanvas *c1 = new TCanvas("c1");
+	c1->SetTitle(Form("Tracks from %d MeV protons on %s", energy, getMaterialChar()));
 	TView *view = TView::CreateView(1);
 	view->SetRange(0, 0, 0, 2*nx, nLayers, 2*ny);
 
@@ -1139,7 +959,7 @@ void drawTracks3D(Int_t Runs, Int_t dataType, Int_t frameType, Int_t energy) {
 		Int_t n = thisTrack->GetEntriesFast();
 
 		TPolyLine3D *l = new TPolyLine3D(n);
-		l->SetLineWidth(2);
+		l->SetLineWidth(1);
 		
 		// for points
 		Int_t pointNumber = 0;
@@ -1157,6 +977,15 @@ void drawTracks3D(Int_t Runs, Int_t dataType, Int_t frameType, Int_t energy) {
 	}
 	view->ShowAxis();
    c1->Update();
+
+   TAxis3D *axis = TAxis3D::GetPadAxis();
+   axis->SetLabelColor(kBlack);
+   axis->SetAxisColor(kBlack);
+
+   tracks->checkLayerOrientation();
+
+   delete tracks;
+
 }
 
 /*
@@ -1335,86 +1164,6 @@ void drawData3D(Int_t Runs) {
 
    Frame3D->Draw("LEGO");
 }
-
-/*
-
-void DrawRealData3D(Int_t RunFrom, Int_t RunTo) {
-   // Get hits directly from posX / posY / posZ to show MC data
-   // Plots runs from RunFrom until RunTo
-   // no histogramming
-   // no diffusion
-   // NO NOTHING
-
-   Focal f;
-   TH3F *Frame3D = new TH3F("Frame3D", "3D map of energy deposition [keV]", 
-                              25, 0, 25, 100, -650, 650, 100, -650, 650);
-
-   Frame3D->SetXTitle("Z axis");
-   Frame3D->SetYTitle("X axis"); // to get projection right (Z is depth, not up)
-   Frame3D->SetZTitle("Y axis"); 
-
-   f.GetRealData3D(RunFrom, RunTo, Frame3D);
-
-   Frame3D->Draw("LEGO");
-}
-
-void MakeLayerPNGs(Int_t Runs, Int_t Diffusion) {
-   // write PNG files from all layers
-   // diffusion = 1 or = 0 to activate / deactivate
-   
-   Focal f;
-   Int_t nlayers = 23;
-
-   TCanvas *c = new TCanvas;
-
-   vector<TH2F*> *Frame3D = new vector<TH2F*>;
-   f.GetFrame3D(0, Runs, Frame3D);
-
-   if (Diffusion > 0) {
-      f.DiffuseFrame(Frame3D);
-   }
-
-   for (Int_t Layer = 0; Layer < nlayers; Layer++) {
-   
-      // Save TH2F to Diffused_Frame2D_LayerXX.png
-      Frame3D->at(Layer)->Draw("COLZ");
-      if (Diffusion > 0) {
-         c->Print(Form("Frames/Diffused_Frame2D_Layer%i.png",Layer));
-      }
-      else {
-         c->Print(Form("Frames/Undiffused_Frame2D_Layer%i.png", Layer));
-      }
-   } // end loop over layers
-   delete Frame3D;
-   delete c;
-} // end function MakeLayerPNGs
-
-// start comment here
- * Must be added in Focal:: namespace before
- * it can work properly, but we don't need it for now...
- * 
-void EdepHistogram()
-{
-   if (fChain == 0) return;
-
-Long64_t nentries = fChain->GetEntriesFast();
-   TH1I *eDepHisto = new TH1I("eDepHisto", "Energy Deposition on pixels [keV]", 
-                              1000, 0, 3000);
-   eDepHisto->SetXTitle("Deposited Energy [keV]");
-   eDepHisto->SetYTitle("Number of pixels");
-
-   Long64_t nb = 0;
-   for (Long64_t jentry=0; jentry<nentries; jentry++) {
-      Long64_t ientry = LoadTree(jentry);
-      if (ientry<0) break;
-      nb = fChain->GetEntry(jentry);
-      eDepHisto->Fill(edep * 1000);
-   }
-   eDepHisto->Draw();
-}
-// end comment here
-
- */
 
 Bool_t getCutTrackLength(int energy, Track *track) {
 	Int_t minTL = getMinimumTrackLength(energy);

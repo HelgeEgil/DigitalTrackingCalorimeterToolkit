@@ -2,6 +2,7 @@
 #include "Layer.h"
 #include "Constants.h"
 #include "MaterialConstants.h"
+#include <TRandom3.h>
 // #include <iostream>
 
 using namespace std;
@@ -38,9 +39,9 @@ Hits * CalorimeterFrame::findHits() {
 	return hits;
 }
 
-void CalorimeterFrame::diffuseFrame() {
+void CalorimeterFrame::diffuseFrame(TRandom3 *gRandom) {
 	for (Int_t layer=0; layer<nLayers; layer++) {
-		At(layer)->diffuseLayer();
+		At(layer)->diffuseLayer(gRandom);
 	}
 }
 

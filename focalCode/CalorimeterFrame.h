@@ -28,7 +28,7 @@ class CalorimeterFrame : public TObject {
       virtual void fillAt(Int_t i, Float_t x, Float_t y, Float_t val = 1) { getTH2F(i)->Fill(x, y, val); }
 
       virtual Hits *findHits();
-      virtual void diffuseFrame();
+      virtual void diffuseFrame(TRandom3 *gRandom);
       virtual void Reset();
 
    ClassDef(CalorimeterFrame,1);

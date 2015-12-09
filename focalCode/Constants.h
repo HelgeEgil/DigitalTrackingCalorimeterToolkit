@@ -34,7 +34,7 @@ Int_t energies[nEnergies] = {122, 140, 150, 160, 170, 180, 190};
  * 
 */
 enum eMaterial {kTungsten, kAluminum, kPMMA};
-const Int_t kMaterial = kTungsten;
+const Int_t kMaterial = kAluminum;
 
 /*
  * Track reconstruction algorithms
@@ -66,5 +66,8 @@ const Double_t SpreadSigma  = 0.7; // sigma (in pixels) to spread
 
 // Minimum track length (in mm) to account for the track in the bragg peak fitting analysis.
 const Int_t kMinimumTracklength = 5;
+
+// How much above the average edep must the bragg peak (last two layers) be?
+const Float_t kBPFactorAboveAverage = 1.4;
 
 #endif

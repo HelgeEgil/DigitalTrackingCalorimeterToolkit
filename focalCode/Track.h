@@ -3,32 +3,21 @@
 #include "TClonesArray.h"
 #include "Cluster.h"
 
-// A track should have a cluster on each layer
-// and have statistics such as track length,
-// straightness, chi2, etc.
-
 const Int_t MaxTrackLength = 40;
 
 class Track : public TObject {
 
    private:
       TClonesArray track_;
-      //Int_t energy_;
+      Float_t energy_;
 
    public:
 
-      Track() : track_("Cluster", MaxTrackLength) {};
+      Track() : track_("Cluster", MaxTrackLength) { energy_ = 0; };
       Track(Cluster *cluster) : track_("Cluster", MaxTrackLength) { // FIXME: Make Float_t kPLFocal[] etc. here based on new switch in Constants.h
       	appendCluster(cluster);
-//      	energy_ = 0;
+      	energy_ = 0;
       }
-
-      /*
-      Track(Cluster *cluster, Int_t energy) : track_("Cluster", MaxTrackLength) {
-      	appendCluster(cluster);
-      	energy_ = energy;
-      }
-      */
 
       virtual ~Track(); 
 
@@ -66,6 +55,7 @@ class Track : public TObject {
 		Float_t getEnergyFromWEPL(Float_t wepl);
 		Float_t getEnergyFromTL(Float_t tl);
 		Float_t getEnergy();
+		Float_t getFittedEnergy();
 		Float_t getWEPLFromTL(Float_t tl);
 		Float_t getWEPL();
 		Float_t getWEPLFactorFromEnergy ( Float_t energy );
@@ -76,7 +66,10 @@ class Track : public TObject {
       Bool_t hasLayer(Int_t layer);
       Float_t diffmm(Cluster *p1, Cluster *p2);
 
-	  
+      Float_t getAverageCS();
+      Float_t getAverageCSLastN(Int_t i);
+
+      void doFit();
 	  
       virtual Cluster* At(Int_t i) { return ((Cluster*) track_.At(i)); }
       Int_t getClusterFromLayer( Int_t layer );
@@ -87,12 +80,7 @@ class Track : public TObject {
       virtual void removeCluster(Cluster *c) { track_.Remove((TObject*) c); }
 
       virtual void extrapolateToLayer0();
-      
-      
 
-
-//      virtual Bool_t IsPoint(Int_t x, Int_t y, Int_t layer);
-
-   ClassDef(Track,1);
+   ClassDef(Track,2);
 };
 #endif
