@@ -4,19 +4,28 @@
 #include "Cluster.h"
 
 const Int_t MaxTrackLength = 40;
+struct Fit {
+	Float_t energy;
+	Float_t scale;
+};
 
 class Track : public TObject {
 
    private:
       TClonesArray track_;
-      Float_t energy_;
+      Fit fitValues_;
 
    public:
 
-      Track() : track_("Cluster", MaxTrackLength) { energy_ = 0; };
-      Track(Cluster *cluster) : track_("Cluster", MaxTrackLength) { // FIXME: Make Float_t kPLFocal[] etc. here based on new switch in Constants.h
+      Track() : track_("Cluster", MaxTrackLength) {
+		  fitValues_.energy = 0;
+		  fitValues_.scale = 0;
+	  };
+
+      Track(Cluster *cluster) : track_("Cluster", MaxTrackLength) { 
       	appendCluster(cluster);
-      	energy_ = 0;
+      	fitValues_.energy = 0;
+		fitValues_.scale = 0;
       }
 
       virtual ~Track(); 
@@ -51,11 +60,11 @@ class Track : public TObject {
 		Float_t getTrackScore();
 		Float_t getMeanSizeToIdx(Int_t i);
 		Float_t getStdSizeToIdx(Int_t toIdx);
-		//Float_t getEnergy() { return energy_; }
 		Float_t getEnergyFromWEPL(Float_t wepl);
 		Float_t getEnergyFromTL(Float_t tl);
 		Float_t getEnergy();
-		Float_t getFittedEnergy();
+		Float_t getFitParameterEnergy();
+		Float_t getFitParameterScale();
 		Float_t getWEPLFromTL(Float_t tl);
 		Float_t getWEPL();
 		Float_t getWEPLFactorFromEnergy ( Float_t energy );
@@ -69,7 +78,7 @@ class Track : public TObject {
       Float_t getAverageCS();
       Float_t getAverageCSLastN(Int_t i);
 
-      void doFit();
+      Bool_t doFit();
 	  
       virtual Cluster* At(Int_t i) { return ((Cluster*) track_.At(i)); }
       Int_t getClusterFromLayer( Int_t layer );

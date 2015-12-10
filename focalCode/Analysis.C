@@ -132,7 +132,7 @@ void getTrackStatistics(Int_t Runs, Int_t dataType, Bool_t recreate, Int_t energ
 	Int_t nTracksToPlot = 25;
 	Int_t nTracksToPlot1D = 5;
 
-	TString sDataType = getDataTypeString(dataType);
+	char * sDataType = getDataTypeChar(dataType);
 
 	TCanvas *c1 = new TCanvas("c1", "c1", 800, 600);
 	TCanvas *c2 = new TCanvas("c2", "c2", 800, 600);
@@ -148,18 +148,18 @@ void getTrackStatistics(Int_t Runs, Int_t dataType, Bool_t recreate, Int_t energ
 	c7->Divide(nTracksToPlot1D, nTracksToPlot1D, 0.001, 0.001, 0);
 	c8->Divide(3,3,0.01,0.01,0);
 
-	TH1F *hTrackLengths = new TH1F("hTrackLengths", Form("Track Lengths (%s)", sDataType.Data()), 100, 0, 120);
+	TH1F *hTrackLengths = new TH1F("hTrackLengths", Form("Track Lengths (%s)", sDataType), 100, 0, 120);
 	TH2F *hClusterSizeAlongTrack = new TH2F("hClusterSizeAlongTrack",
-				Form("Cluster size along track length (%s)", sDataType.Data()), 1.5*nLayers, 0, 1.5*nLayers*dz, 50, 0, 50);
-	TH1F *hStraightness = new TH1F("hStraightness", Form("Sinuosity plot (%s)", sDataType.Data()), 500, 1, 1.01);
-	TH1F *hSlope = new TH1F("hSlope", Form("Proton angle plot (%s)", sDataType.Data()), 500, 0, 20);
+				Form("Cluster size along track length (%s)", sDataType), 1.5*nLayers, 0, 1.5*nLayers*dz, 50, 0, 50);
+	TH1F *hStraightness = new TH1F("hStraightness", Form("Sinuosity plot (%s)", sDataType), 500, 1, 1.01);
+	TH1F *hSlope = new TH1F("hSlope", Form("Proton angle plot (%s)", sDataType), 500, 0, 20);
 
 	// Average cluster size
 	vector<TH1F*> *hAvgCS = new vector<TH1F*>;
 	hAvgCS->reserve(4);
 	for (Int_t chip=0; chip<4; chip++) {
 		hAvgCS->push_back(new TH1F(Form("hAvgCS_chip_%i",chip),
-				Form("Average Cluster Size vs Track Length for chip %i (%s)",chip, sDataType.Data()), 50, 0, 50));
+				Form("Average Cluster Size vs Track Length for chip %i (%s)",chip, sDataType), 50, 0, 50));
 	}
 
 	// Cluster size for individual layers
@@ -167,7 +167,7 @@ void getTrackStatistics(Int_t Runs, Int_t dataType, Bool_t recreate, Int_t energ
 	hCSLayer->reserve(9);
 	for (Int_t layer=0; layer<9; layer++) {
 		hCSLayer->push_back(new TH1F(Form("hCSLayer_%i", layer),
-				Form("Cluster size for layer %i (%s)", layer, sDataType.Data()), 50, 0, 50));
+				Form("Cluster size for layer %i (%s)", layer, sDataType), 50, 0, 50));
 	}
 
 	// Cluster size along track length for a single track
@@ -175,7 +175,7 @@ void getTrackStatistics(Int_t Runs, Int_t dataType, Bool_t recreate, Int_t energ
 	hFollowTrack->reserve(nTracksToPlot);
 	for (Int_t track=0; track<nTracksToPlot; track++) {
 		hFollowTrack->push_back(new TH1F(Form("hFollowTrack_%i", track),
-				Form("Cluster size along track length for a single track (%s)", sDataType.Data()), 50, 0, 50));
+				Form("Cluster size along track length for a single track (%s)", sDataType), 50, 0, 50));
 		hFollowTrack->at(track)->SetXTitle("Track Length [mm]");
 		hFollowTrack->at(track)->SetYTitle("Cluster size [# of pixels]");
 	}
@@ -185,7 +185,7 @@ void getTrackStatistics(Int_t Runs, Int_t dataType, Bool_t recreate, Int_t energ
 	hAngles->reserve(9);
 	for (Int_t layer=0; layer<9; layer++) {
 		hAngles->push_back(new TH1F(Form("hAngles_%i", layer),
-				Form("Proton angle distribution in layer %i (%s)", layer, sDataType.Data()), 50, 0, 20));
+				Form("Proton angle distribution in layer %i (%s)", layer, sDataType), 50, 0, 20));
 		hAngles->at(layer)->SetXTitle("Track Length [mm]");
 		hAngles->at(layer)->SetYTitle("Cluster size [# of pixels]");
 	}
@@ -238,7 +238,7 @@ void getTrackStatistics(Int_t Runs, Int_t dataType, Bool_t recreate, Int_t energ
 
 			if (trackNum < nTracksToPlot && cutTL && cutCHIP) {
 				hFollowTrack->at(trackNum)->Fill(trackLengthSoFar, thisTrack->getSize(j));
-				hFollowTrack->at(trackNum)->SetTitle(Form("Track length histogram for run %i (%s)", i, sDataType.Data()));
+				hFollowTrack->at(trackNum)->SetTitle(Form("Track length histogram for run %i (%s)", i, sDataType));
 			}
 		}
 		trackLengthSoFar = 0;
@@ -397,43 +397,8 @@ void drawClusterShapes(Int_t Runs, Bool_t dataType, Bool_t recreate, Int_t energ
 		hClusterMaps->at(i)->Draw("same, COL,ah,fb,bb");
 		gStyle->SetOptStat(0);
 	}
-
-
 }
 
-char * getMaterialChar() {
-	char *sMaterial;
-
-	if (kMaterial == kTungsten) sMaterial = (char*) "tungsten";
-	if (kMaterial == kAluminum) sMaterial = (char*) "aluminum";
-	if (kMaterial == kPMMA) sMaterial = (char*) "PMMA";
-
-	return sMaterial;
-}
-
-TString getDataTypeString(Int_t dataType) {
-	TString sDataType;
-	if (dataType == kMC)
-		sDataType = "MC";
-	else if (dataType == kData)
-		sDataType = "Exp. data";
-	else
-		sDataType = "Unknown source";
-
-	return sDataType;
-}
-
-Int_t getMinimumTrackLength(Int_t energy) {
-	Int_t minTL = 0;
-
-	if (energy < 150) minTL = 5;
-	else if (energy < 170) minTL = 10;
-	else if (energy < 190) minTL = 15;
-	else if (energy < 200) minTL = 20;
-	else if (energy < 230) minTL = 23;
-
-	return minTL;
-}
 
 void makeTracks(Int_t Runs, Int_t dataType, Bool_t recreate, Int_t energy) {
 	Tracks * tracks = loadOrCreateTracks(recreate, Runs, dataType, energy);
@@ -444,213 +409,118 @@ void drawBraggPeakFit(Int_t Runs, Int_t dataType, Bool_t recreate, Int_t energy)
 	run_energy = energy;
 	TStopwatch t1, t2;
 
-	char *title = Form("Fitted energy of a %d MeV beam in %s", energy, getMaterialChar());
-	TH1F *fitResult = new TH1F("fitResult", title, 1000, 100, 325);
+	char *title = Form("Fitted energy of a %d MeV beam in %s (%s)", energy, getMaterialChar(), getDataTypeChar(dataType));
+	TCanvas *c = new TCanvas("c", title, 2000, 1400);
+	TH1F *fitResult = new TH1F("fitResult", title, 100, 80, 240);
 
 	fitResult->SetLineColor(kBlack);
 	if (dataType == kMC) { fitResult->SetFillColor(kGreen-5); }
+	else if (dataType == kData) { fitResult->SetFillColor(kOrange+4); }
 
 	cout << "Loading tracks...\n";
-	t1.Start();
-	Tracks *tracks = loadOrCreateTracks(recreate, Runs, dataType, energy);
-	t1.Stop();
+	t1.Start(); Tracks *tracks = loadOrCreateTracks(recreate, Runs, dataType, energy); t1.Stop();
 	cout << Form("Done (%.2f s).\n", t1.RealTime());
 	tracks->extrapolateToLayer0();
 	cout << "Fitting tracks...\n";
-	t2.Start();
-	tracks->doFit();
-	t2.Stop();
+	t2.Start(); tracks->doFit(); t2.Stop();
 	cout << Form("Done (%.2f s).\n", t2.RealTime());
 
 	for (Int_t i=0; i<tracks->GetEntriesFast(); i++) {
 		Track *thisTrack = tracks->At(i);
 		if (!thisTrack) {	continue; }
 
-		Float_t res = thisTrack->getFittedEnergy();
+		Float_t res = thisTrack->getFitParameterEnergy();
 		if (res) { fitResult->Fill(res); }
 	}
 
 	fitResult->Draw();
+	
+	c->SaveAs(Form("Fitted_energies_%d_MeV_%s_material_%s_datatype.pdf", energy, getMaterialChar(), getDataTypeChar(dataType)));
 }
 
 void drawBraggPeakGraphFit(Int_t Runs, Int_t dataType, Bool_t recreate, Int_t energy) {
-
 	run_energy = energy;
-	TString sDataType = getDataTypeString(dataType);
 	
-	Float_t trackLengthSoFar;
-	Bool_t cut;
+	char * sDataType = getDataTypeChar(dataType);
+	char * sMaterial = getMaterialChar();
+	char * hTitle = Form("Fitted energy of a %d MeV beam in %s (%s)", energy, sMaterial, sDataType);
 
-	TCanvas *cGraphAll = new TCanvas("cGraphAll", "Fitting data points", 1000, 800);
+	Int_t nPlotX = 4, nPlotY = 4;
+	Int_t fitIdx = 0, plotSize = nPlotX*nPlotY;
+	Bool_t isFitOk = false;
+
 	TCanvas *cGraph = new TCanvas("cGraph", "Fitted data points", 1400, 1000);
-	TCanvas *c3 = new TCanvas("c3", "Fit results");
-	cGraph->Divide(4,4, 0.000001, 0.000001, 0);
+	TCanvas *cFitResults = new TCanvas("cFitResults", hTitle);
+	cGraph->Divide(nPlotX,nPlotY, 0.000001, 0.000001, 0);
+	TH1F *hFitResults = new TH1F("fitResult", hTitle, 1000, 100, 325);
 
-	char *sMaterial = getMaterialChar();
-
-//	char *sMaterial;
-//	if (kMaterial == kTungsten) { sMaterial = (char*) "W"; }
-//	else if (kMaterial == kAluminum) { sMaterial = (char*) "Al"; }
-//	else if (kMaterial == kPMMA) { sMaterial = (char*) "PMMA";}
+	gStyle->SetPadBorderMode(0);
+	gStyle->SetFrameBorderMode(0);
+	gStyle->SetTitleH(0.06);
+	gStyle->SetTitleYOffset(1);
 	
-	TH1F *fitResult = new TH1F("fitResult", Form("Fitted energy of a %d MeV beam in %s", energy, sMaterial), 1000, 100, 325);
-	c3->SetTitle(Form("Fitted energy of a %d MeV beam in %s", energy, sMaterial));
-
 	Tracks * tracks = loadOrCreateTracks(recreate, Runs, dataType, energy);
 	tracks->extrapolateToLayer0();
 
-	vector<TGraph*> vGraph;
-	vGraph.reserve(tracks->GetEntriesFast());
-
-	Int_t m = 0;
-	Track *thisTrack = 0;
-	Float_t xx[nLayers*tracks->GetEntriesFast()];
-	Float_t yy[nLayers*tracks->GetEntriesFast()];
-
-	Int_t cutWEPL = 0, cutBPinT = 0, newCutBP = 0;
-	
 	for (Int_t j=0; j<tracks->GetEntriesFast(); j++) {
-		thisTrack = tracks->At(j);
+		Track *thisTrack = tracks->At(j);
 		if (!thisTrack) continue;
-		
-		if (getCutWEPL(thisTrack)) cutWEPL++;
-		if (getCutBraggPeakInTrack(thisTrack)) cutBPinT++;
-		
-		// is last three bins higher than average?
-		Float_t avg = thisTrack->getAverageCS();
-		Float_t last_three = thisTrack->getAverageCSLastN(2);
+	
+		isFitOk = thisTrack->doFit();
+		if (!isFitOk) continue;
+			
+		Float_t fitEnergy = thisTrack->getFitParameterEnergy();
+		Float_t fitScale = thisTrack->getFitParameterScale();
 
-		Bool_t newCutBraggPeak = (last_three > avg*1.6) ? true : false;
-		if (newCutBraggPeak) newCutBP++;
+		hFitResults->Fill(fitEnergy);
 
-
-		cut = getCutWEPL(thisTrack) * newCutBraggPeak; //* getCutBraggPeakInTrack(thisTrack);
-		//if (dataType == kData) cut *= getCutChipNumber(thisTrack);
-
-		if (!cut) continue;
 		Int_t n = thisTrack->GetEntriesFast();
 		Float_t x[n], y[n];
 
-		Float_t trackLengthSoFar = 0;
-		Float_t trackLengthSoFarWEPL = 0;
-		for (Int_t k=0; k<n; k++) {
-			if (!thisTrack->At(k)) continue;
-			trackLengthSoFar += thisTrack->getTrackLengthmmAt(k);
-			trackLengthSoFarWEPL += thisTrack->getTrackLengthWEPLmmAt(k);
-			x[k] = trackLengthSoFarWEPL;
-			y[k] = thisTrack->getDepositedEnergy(k);
-			xx[m+k] = trackLengthSoFarWEPL;
-			yy[m+k] = thisTrack->getDepositedEnergy(k);
-		}
-		m += n;
-		vGraph.push_back(new TGraph(n, x, y));
-	}
-	
-	cout << "Of " << tracks->GetEntriesFast() << ", " << cutWEPL << " made the WEPL cut and " << cutBPinT << " made the BP cut.\n";
-	cout << Form("And %d made the new BP cut.\n", newCutBP);
+		if (fitIdx < plotSize) {		
+			cGraph->cd(fitIdx+1);
+			
+			Float_t trackLengthWEPL = 0;
+			for (Int_t k=0; k<n; k++) {
+				if (!thisTrack->At(k)) continue;
+				trackLengthWEPL += thisTrack->getTrackLengthWEPLmmAt(k);
+				x[k] = trackLengthWEPL;
+				y[k] = thisTrack->getDepositedEnergy(k);
+			}
+			
+			TGraph *graph = new TGraph(n,x,y);
 
-	vGraph.push_back(new TGraph(m, xx, yy));
-	
-	Int_t gsize = vGraph.size();
-	Int_t plotSize = 16;
-	//if (gsize>25) gsize = 25;
-	
-	for (Int_t i=0; i<gsize; i++) {
-		if (!vGraph.at(i)) continue;
-		TGraph *gr = vGraph.at(i);
-		if (i < plotSize) {
-			cGraph->cd(i+1);
-		   gStyle->SetPadBorderMode(0);
-		   gStyle->SetFrameBorderMode(0);
-		   gStyle->SetTitleH(0.06);
-		   gStyle->SetTitleYOffset(1);
-			gr->SetMaximum(500);
-			gr->SetMinimum(0);
-			gr->SetTitle("");
-			gr->GetXaxis()->SetTitle("Water Equivalent Path Length [mm]");
-			gr->GetXaxis()->SetTitleSize(0.05);
-			gr->GetYaxis()->SetTitleSize(0.05);
-			gr->GetYaxis()->SetTitle("Deposited energy [keV/#mum]");
-			gr->GetXaxis()->SetLabelSize(0.04);
-			gr->GetYaxis()->SetLabelSize(0.04);
-			gr->Draw("A*");
-			if (i<gsize-1)
-				gr->GetXaxis()->SetRangeUser(0, 500);
-			gr->Draw("A*");
-			cGraph->Update();
-		}
-
-		// fitting
-		Int_t n = gr->GetN();
-		Float_t maxVal = 0;
-		Int_t maxIdx = 0;
-		
-		for (Int_t j=0.5*n; j<n; j++) {
-		    if (gr->GetY()[j] > maxVal) {
-		    maxVal = gr->GetY()[j];
-		    maxIdx = j;
-		   }
-		}
-				
-		Float_t constHeight = 7;
-		Float_t BPpos = maxIdx * dz;
-		Float_t BP = maxVal - constHeight;
-		Float_t BPwidth = 1.7;
-
-
-//		TF1 *g1 = new TF1("m1", "gaus(0) + [3]", 0, BPpos*2);
-//		g1->SetParameters(BP, BPpos, BPwidth, constHeight); // BP, BPpos, 2.5
-//		g1->SetParLimits(0, BP*0.8, BP*2);
-//		g1->SetParLimits(1, BPpos*0.9, BPpos*1.3);
-//		g1->SetParLimits(2, BPwidth, BPwidth);
-//		gr->Fit("m1", "B, W, Q", "", 0, BPpos*1.5);
-//		Float_t fit_tl = g1->GetParameter(1);
-//		//cout << Form("The fitted energy is %d MeV.\n", thisTrack->getEnergyFromWEPL(fit_tl));
-
-
-		TF1 *func = new TF1("fit_BP", fitfunc_DBP, 0, 500, 2);
-		func->SetParName(0,"Initial energy [MeV]");
-		func->SetParName(1, "Factor");
-		func->SetParameter(0,energy);
-		func->SetParameter(1, 40);
-		func->SetParLimits(0, 10, energy*1.25);
-		func->SetParLimits(1, 30,50);
-		gr->Fit("fit_BP", "B, W, Q", "", 0, 500);
-		Float_t fit_t = func->GetParameter(0);
-		if (fit_t < energy*1.24) fitResult->Fill(fit_t);
-// 		cout << Form("The fitted energy is %f MeV... Jesus christ that wasn't hard was it\n", fit_t);
-
-		if (i<plotSize) {
-			TLatex *myl = new TLatex(20,400,Form("Fitted energy: %.1f MeV", fit_t));
-			myl->SetTextSize(0.06);
-			myl->Draw();
-		}
+			graph->SetMinimum(0);
+			graph->SetMaximum(600);
+			graph->SetTitle("");
+			graph->GetXaxis()->SetTitle("Water Equivalent Path Length [mm]");
+			graph->GetYaxis()->SetTitle("Deposited energy per layer [keV]");
+			graph->GetXaxis()->SetTitleSize(0.05);
+			graph->GetYaxis()->SetTitleSize(0.05);
+			graph->GetXaxis()->SetLabelSize(0.04);
+			graph->GetYaxis()->SetLabelSize(0.04);
+			graph->GetXaxis()->SetLimits(0, 300);
+			
+			graph->Draw("A*");
 			
 
+			TF1 *func = new TF1("fit_BP", fitfunc_DBP, 0, 500, 2);
+			func->SetParameters(fitEnergy, fitScale);
+			func->Draw("same");
+
+			TLatex *text = new TLatex(20, 400, Form("Fitted energy: %.1f MeV", fitEnergy));
+			text->SetTextSize(0.06);
+			text->Draw();
+		
+			cGraph->Update();
+			fitIdx++;
+		}
 	}
-
-	cGraphAll->cd();
-	TGraph *g = vGraph.at(vGraph.size() - 1);
-	g->GetXaxis()->SetTitle("Water Equivalent Path Length");
-	g->Draw("A*");
 	
-	//Track *t = new Track;
-	// fit main function
-	TF1 *func = new TF1("fit_BP", fitfunc_DBP, 0, 300, 2);
-	func->SetParName(0,"Initial energy [MeV]");
-	func->SetParName(1, "Factor");
-	func->SetParameter(0,200.);
-	func->SetParameter(1, 40);
-	func->SetParLimits(0, 10, 215);
-	func->SetParLimits(1, 30,50);
-	g->Fit("fit_BP", "B, W, Q", "", 0, 300);
-	Float_t fit_t = func->GetParameter(0);
-	//cout << Form("The fitted energy is %f MeV... Jesus christ that wasn't hard was it\n", fit_t);
-
-	c3->cd();
-	fitResult->SetXTitle("Energy [MeV]");
-	fitResult->SetYTitle("Number of protons");
-	fitResult->Draw();
+	cFitResults->cd();
+	hFitResults->SetXTitle("Energy [MeV]");
+	hFitResults->SetYTitle("Number of protons");
+	hFitResults->Draw();
 
   	delete tracks;
 }
@@ -759,6 +629,7 @@ void saveTracks(Tracks *tracks, Int_t dataType, Int_t energy) {
   	
 	// C++ / ROOT has something to learn from Python... ;)
 	TString sDataType = (dataType == 0) ? "_MC" : "_data";
+
 	TString sEnergy = Form("_%dMeV", energy);
 	TString fileName = "tracks";
 	fileName.Append(sDataType);
@@ -794,7 +665,7 @@ Tracks * loadTracks(Int_t Runs, Int_t dataType, Int_t energy) {
 
 	T->GetEntry(0);
 	
-	cout << "There are " << tracks->GetEntriesFast() << " tracks in the " << fileName << ".\n";
+	cout << "There are " << tracks->GetEntriesFast() << " tracks in " << fileName << ".\n";
 	
 	return tracks;
 }
@@ -809,13 +680,16 @@ Tracks * loadOrCreateTracks(Bool_t recreate, Int_t Runs, Int_t dataType, Int_t e
 
 	else {
 		tracks = loadTracks(Runs, dataType, energy);
-		
+	
+		cout << "Finished loading tracks\n";
+
 		if (!tracks) {
 			cout << "!tracks, creating new file\n";
 			tracks = getTracks(Runs, dataType, kCalorimeter, energy);
 			saveTracks(tracks, dataType, energy);
 		}
 	}
+	cout << "returning tracks\n";
 	return tracks;
 }
 

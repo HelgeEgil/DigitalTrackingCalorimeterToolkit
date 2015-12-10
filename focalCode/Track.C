@@ -474,28 +474,25 @@ Float_t Track::getAverageCSLastN(Int_t last_n) {
 	return avg;
 }
 
-void Track::doFit() {
+Bool_t Track::doFit() {
+	Float_t trackLengthWEPL = 0;
+
 	Bool_t newCutBraggPeak = (getAverageCSLastN(2) > getAverageCS()*kBPFactorAboveAverage);
 	Bool_t WEPLCut = (getWEPL() > 150);
-
-	TGraph *graph;
-
 	Bool_t cut = WEPLCut * newCutBraggPeak;
-
-	if (!cut) return;
+	if (!cut) false;
 
 	Int_t n = GetEntriesFast();
 	Float_t x[n], y[n];
 
-	Float_t trackLengthSoFarWEPL = 0;
 	for (Int_t i=0; i<n; i++) {
 		if (!At(i)) continue;
-		trackLengthSoFarWEPL += getTrackLengthWEPLmmAt(i);
-		x[i] = trackLengthSoFarWEPL;
+		trackLengthWEPL += getTrackLengthWEPLmmAt(i);
+		x[i] = trackLengthWEPL;
 		y[i] = getDepositedEnergy(i);
 	}
 
-	graph = new TGraph(n, x, y);
+	TGraph *graph = new TGraph(n, x, y);
 
 	TF1 *func = new TF1("fit_BP", fitfunc_DBP, 0, 500, 2);
 	func->SetParameter(0,run_energy);
@@ -504,19 +501,35 @@ void Track::doFit() {
 	func->SetParLimits(1, 30,50);
 	graph->Fit("fit_BP", "B, W, Q", "", 0, 500);
 
-	energy_ = func->GetParameter(0);
+	fitValues_.energy = func->GetParameter(0);
+	fitValues_.scale = func->GetParameter(1);
 
 	delete graph;
+	return true;
 }
 
-Float_t Track::getFittedEnergy() {
-	if (!energy_ && run_energy) {
-		doFit();
+Float_t Track::getFitParameterEnergy() {
+	if (!fitValues_.energy) {
+		if (!run_energy) {
+			return 0;
+		}
+		else {
+			doFit();
+		}
 	}
 
-	else if (!energy_ && !run_energy) {
-		return 0;
-	}
-
-	return energy_;
+	return fitValues_.energy;
 }
+
+Float_t Track::getFitParameterScale() {
+	if (!fitValues_.scale) {
+		if (!run_energy) {
+			return 0;
+		}
+		else {
+			doFit();
+		}
+	}
+	return fitValues_.scale;
+}
+

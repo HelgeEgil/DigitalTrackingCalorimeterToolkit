@@ -5,12 +5,14 @@
  *      Author: local1
  */
 
-#include "TObject.h"
 #include "Cluster.h"
 #include "Hit.h"
 #include "Constants.h"
 #include <vector>
 #include <algorithm>
+#include <TObject.h>
+#include <TAxis.h>
+#include <TGraph.h>
 
 using namespace std;
 
@@ -59,4 +61,34 @@ Double_t fitfunc_DBP(Double_t *v, Double_t *par) {
 	if (isnan(fitval)) fitval = 0;
 
 	return fitval;
+}
+
+char * getMaterialChar() {
+	char *sMaterial;
+
+	if (kMaterial == kTungsten) sMaterial = (char*) "tungsten";
+	if (kMaterial == kAluminum) sMaterial = (char*) "aluminum";
+	if (kMaterial == kPMMA) sMaterial = (char*) "PMMA";
+
+	return sMaterial;
+}
+
+char * getDataTypeChar(Int_t dataType) {
+	char * sDataType = (char*) "";
+	if (dataType == kMC) sDataType = (char*) "MC";
+	else if (dataType == kData) sDataType = (char*) "Exp. data";
+
+	return sDataType;
+}
+
+Int_t getMinimumTrackLength(Int_t energy) {
+	Int_t minTL = 0;
+
+	if (energy < 150) minTL = 5;
+	else if (energy < 170) minTL = 10;
+	else if (energy < 190) minTL = 15;
+	else if (energy < 200) minTL = 20;
+	else if (energy < 230) minTL = 23;
+
+	return minTL;
 }
