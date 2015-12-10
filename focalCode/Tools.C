@@ -8,6 +8,7 @@
 #include "Cluster.h"
 #include "Hit.h"
 #include "Constants.h"
+#include "Track_conversion.h"
 #include <vector>
 #include <algorithm>
 #include <TObject.h>
@@ -55,7 +56,11 @@ Double_t fitfunc_DBP(Double_t *v, Double_t *par) {
 	Float_t energy = par[0];
 	Float_t scale = par[1];
 
-	Float_t R_mm = 0.0019 * pow(energy,1.8) * 10;
+// 	Float_t alpha = 0.0019;
+	
+// 	Float_t R_mm = 0.0019 * pow(energy,1.8) * 10;
+	Float_t R_mm = getWEPLFromEnergy(energy);
+	
 	Double_t fitval = scale / ( 0.0554 * pow((R_mm - depth), 0.444) );
 
 	if (isnan(fitval)) fitval = 0;

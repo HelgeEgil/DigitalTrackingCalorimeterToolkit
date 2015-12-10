@@ -2,6 +2,7 @@
 #include "Analysis.h"
 #include "Constants.h"
 #include "MaterialConstants.h"
+#include "Track_conversion.h"
 #include "TFocal.h"
 #include "Tracks.h"
 #include "Tools.h"
@@ -411,12 +412,12 @@ void drawBraggPeakFit(Int_t Runs, Int_t dataType, Bool_t recreate, Int_t energy)
 
 	char *title = Form("Fitted energy of a %d MeV beam in %s (%s)", energy, getMaterialChar(), getDataTypeChar(dataType));
 	TCanvas *c = new TCanvas("c", title, 2000, 1400);
-	TH1F *fitResult = new TH1F("fitResult", title, 100, 80, 240);
+	TH1F *hFitResults = new TH1F("fitResult", title, 100, 80, 240);
 
-	fitResult->SetLineColor(kBlack);
-	if (dataType == kMC) { fitResult->SetFillColor(kGreen-5); }
-	else if (dataType == kData) { fitResult->SetFillColor(kOrange+4); }
-
+	hFitResults->SetLineColor(kBlack);
+	if (dataType == kMC) { hFitResults->SetFillColor(kGreen-5); }
+	else if (dataType == kData) { hFitResults->SetFillColor(kBlue-2); }
+	
 	cout << "Loading tracks...\n";
 	t1.Start(); Tracks *tracks = loadOrCreateTracks(recreate, Runs, dataType, energy); t1.Stop();
 	cout << Form("Done (%.2f s).\n", t1.RealTime());
@@ -430,10 +431,10 @@ void drawBraggPeakFit(Int_t Runs, Int_t dataType, Bool_t recreate, Int_t energy)
 		if (!thisTrack) {	continue; }
 
 		Float_t res = thisTrack->getFitParameterEnergy();
-		if (res) { fitResult->Fill(res); }
+		if (res) { hFitResults->Fill(res); }
 	}
 
-	fitResult->Draw();
+	hFitResults->Draw();
 	
 	c->SaveAs(Form("Fitted_energies_%d_MeV_%s_material_%s_datatype.pdf", energy, getMaterialChar(), getDataTypeChar(dataType)));
 }
@@ -454,6 +455,10 @@ void drawBraggPeakGraphFit(Int_t Runs, Int_t dataType, Bool_t recreate, Int_t en
 	cGraph->Divide(nPlotX,nPlotY, 0.000001, 0.000001, 0);
 	TH1F *hFitResults = new TH1F("fitResult", hTitle, 1000, 100, 325);
 
+	hFitResults->SetLineColor(kBlack);
+	if (dataType == kMC) { hFitResults->SetFillColor(kGreen-5); }
+	else if (dataType == kData) { hFitResults->SetFillColor(kBlue-2); }
+	
 	gStyle->SetPadBorderMode(0);
 	gStyle->SetFrameBorderMode(0);
 	gStyle->SetTitleH(0.06);
@@ -499,7 +504,7 @@ void drawBraggPeakGraphFit(Int_t Runs, Int_t dataType, Bool_t recreate, Int_t en
 			graph->GetYaxis()->SetTitleSize(0.05);
 			graph->GetXaxis()->SetLabelSize(0.04);
 			graph->GetYaxis()->SetLabelSize(0.04);
-			graph->GetXaxis()->SetLimits(0, 300);
+			graph->GetXaxis()->SetLimits(0, 350);
 			
 			graph->Draw("A*");
 			
@@ -521,7 +526,24 @@ void drawBraggPeakGraphFit(Int_t Runs, Int_t dataType, Bool_t recreate, Int_t en
 	hFitResults->SetXTitle("Energy [MeV]");
 	hFitResults->SetYTitle("Number of protons");
 	hFitResults->Draw();
-
+	
+	// draw expected energy straggling on top of histogram
+	Float_t maxBin = hFitResults->GetMaximum();
+	Float_t meanEnergy = hFitResults->GetMean();
+	Float_t energyStraggling = getEnergyStragglingFromEnergy(meanEnergy);
+	Float_t energyStraggling2 = 1.8 * getRangeStraggling(meanEnergy);
+	TF1 *ES = new TF1("ES", "gaus(0)", 0, 500);
+	ES->SetParameters(maxBin,energy, energyStraggling);
+ 	ES->SetParLimits(0,maxBin*0.85,maxBin);
+ 	ES->SetParLimits(1,energy,energy);
+ 	ES->SetParLimits(2,energyStraggling,energyStraggling);
+ 	hFitResults->Fit(ES,"B",0,500);
+	cout << "Tryna draw Gauss(" << maxBin << "," << meanEnergy << "," << energyStraggling << ").\n";
+	cout << "Another guess (HA): Energy straggling 2 = " << getRangeStraggling(meanEnergy) * 1.8 << endl;
+	ES->Draw("same");
+	
+	cFitResults->Update();
+	
   	delete tracks;
 }
 

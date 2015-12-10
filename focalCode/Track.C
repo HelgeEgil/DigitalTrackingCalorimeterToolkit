@@ -154,52 +154,33 @@ Float_t Track::getTrackLengthWEPLmmAt(Int_t i) {
 	return getWEPLFromTL(tl);
 }
 
-Float_t Track::getWEPLFromTL(Float_t tl) {
-
-	for (Int_t i=0; i<nPLEnergies; i++) {
-		if (kPLFocal[i] < tl) continue;
-		else {
-			Float_t ratio = (tl - kPLFocal[i-1]) / (kPLFocal[i] - kPLFocal[i-1]);
-			return tl * (kWEPLRatio[i-1] + ratio * (kWEPLRatio[i] - kWEPLRatio[i-1]));
-		}
-	}
-}
-
-Float_t Track::getEnergyFromTL(Float_t tl) {
-	// TODO: optimize via stackoverflow.com/questions/11396860
-	// (and create bigger table for tungsten....)
-
-	for (Int_t i=0; i<nPLEnergies; i++) {
-		if (kPLFocal[i] < tl) continue;
-		else {
-			Float_t ratio = (tl - kPLFocal[i-1]) / (kPLFocal[i] - kPLFocal[i-1]);
-			return kPLEnergies[i-1] + ratio * (kPLEnergies[i] - kPLEnergies[i-1]);
-		}
-	}
-}
-
-Float_t Track::getEnergyFromWEPL(Float_t wepl) {
-
-	for (Int_t i=0; i<nPLEnergies; i++) {
-		if (kPLFocal[i] * kWEPLRatio[i] < wepl) continue;
-		else {
-			Float_t ratio = (wepl - kPLFocal[i-1] * kWEPLRatio[i-1]) / (kPLFocal[i]* kWEPLRatio[i] - kPLFocal[i-1]* kWEPLRatio[i-1]);
-			return kPLEnergies[i-1] + ratio * (kPLEnergies[i] - kPLEnergies[i-1]);
-		}
-	}
-}
-
-Float_t Track::getWEPLFactorFromEnergy(Float_t energy) {
-	for (Int_t i=0; i<nPLEnergies; i++) {
-		if (kPLEnergies[i] < energy) { continue; }
-		else { return kWEPLRatio[i]; }
-	}
+Float_t Track::getEnergyStraggling() {
+	Float_t energy = getEnergy();
+	if (!energy) return 0;
+	
+	Float_t range = getRangeFromEnergy(energy);
+	if (!range) return 0;
+	
+	Float_t rangeStraggling = getRangeStraggling(energy);
+	if (!rangeStraggling) return 0;
+	
+	Float_t energyStraggling = getEnergyStragglingFromRangeStraggling(range, rangeStraggling);
+	
+	return energyStraggling;
 }
 
 Float_t Track::getEnergy() {
-	Float_t tl = getTrackLengthmm();
-	if (!tl) return 0;
-	return getEnergyFromTL(tl);
+	Float_t energy = 0;
+	
+	if (fitValues_.energy) {
+		energy = fitValues_.energy;
+	}
+	
+	else { // coarse method
+		Float_t tl = getTrackLengthmm();
+		energy = (tl>0) ? getEnergyFromTL(tl) : 0;	
+	}
+		return energy;
 }
 
 Float_t Track::getSnakeness() {
@@ -478,9 +459,11 @@ Bool_t Track::doFit() {
 	Float_t trackLengthWEPL = 0;
 
 	Bool_t newCutBraggPeak = (getAverageCSLastN(2) > getAverageCS()*kBPFactorAboveAverage);
-	Bool_t WEPLCut = (getWEPL() > 150);
-	Bool_t cut = WEPLCut * newCutBraggPeak;
-	if (!cut) false;
+	Bool_t WEPLCut = true; // (getWEPL() > 150);
+	Bool_t cutNPointsInTrack = (GetEntries()>3);
+	
+	Bool_t cut = WEPLCut * newCutBraggPeak * cutNPointsInTrack;
+	if (!cut) return false;
 
 	Int_t n = GetEntriesFast();
 	Float_t x[n], y[n];
@@ -505,6 +488,7 @@ Bool_t Track::doFit() {
 	fitValues_.scale = func->GetParameter(1);
 
 	delete graph;
+	
 	return true;
 }
 

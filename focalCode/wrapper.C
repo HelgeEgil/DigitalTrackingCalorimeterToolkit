@@ -11,6 +11,8 @@
 #include "Clusters_findTracks.C"
 #include "Hits.h"
 #include "Hits.C"
+#include "Track_conversion.h"
+#include "Track_conversion.C"
 #include "Track.h"
 #include "Track.C"
 #include "Tracks.h"
