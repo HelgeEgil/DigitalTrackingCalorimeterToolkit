@@ -5,10 +5,6 @@
 
 using namespace std;
 
-// Float_t kPLFocal[nPLEnergies];
-// Float_t kWEPLRatio[nPLEnergies];
-// Int_t nLayers;
-
 void MaterialConstants() {
 
 	if (kMaterial == kTungsten) {

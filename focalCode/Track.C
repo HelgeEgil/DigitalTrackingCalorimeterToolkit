@@ -172,8 +172,8 @@ Float_t Track::getEnergyStraggling() {
 Float_t Track::getEnergy() {
 	Float_t energy = 0;
 	
-	if (fitValues_.energy) {
-		energy = fitValues_.energy;
+	if (fitEnergy_) {
+		energy = fitEnergy_;
 	}
 	
 	else { // coarse method
@@ -479,13 +479,13 @@ Bool_t Track::doFit() {
 
 	TF1 *func = new TF1("fit_BP", fitfunc_DBP, 0, 500, 2);
 	func->SetParameter(0,run_energy);
-	func->SetParameter(1, 40);
+	func->SetParameter(1, 140);
 	func->SetParLimits(0, 10, run_energy*1.25);
-	func->SetParLimits(1, 30,50);
-	graph->Fit("fit_BP", "B, W, Q", "", 0, 500);
+	func->SetParLimits(1, 100,300);
+	graph->Fit("fit_BP", "B, W,Q", "", 0, 500);
 
-	fitValues_.energy = func->GetParameter(0);
-	fitValues_.scale = func->GetParameter(1);
+	fitEnergy_ = func->GetParameter(0);
+	fitScale_ = func->GetParameter(1);
 
 	delete graph;
 	
@@ -493,7 +493,7 @@ Bool_t Track::doFit() {
 }
 
 Float_t Track::getFitParameterEnergy() {
-	if (!fitValues_.energy) {
+	if (!fitEnergy_) {
 		if (!run_energy) {
 			return 0;
 		}
@@ -502,11 +502,11 @@ Float_t Track::getFitParameterEnergy() {
 		}
 	}
 
-	return fitValues_.energy;
+	return fitEnergy_;
 }
 
 Float_t Track::getFitParameterScale() {
-	if (!fitValues_.scale) {
+	if (!fitScale_) {
 		if (!run_energy) {
 			return 0;
 		}
@@ -514,6 +514,6 @@ Float_t Track::getFitParameterScale() {
 			doFit();
 		}
 	}
-	return fitValues_.scale;
+	return fitScale_;
 }
 

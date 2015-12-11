@@ -20,6 +20,7 @@
 #include <fstream>
 #include <TEllipse.h>
 #include <vector>
+#include <TLegend.h>
 #include <TStopwatch.h>
 #include <algorithm>
 #include <ctime>
@@ -415,8 +416,7 @@ void drawBraggPeakFit(Int_t Runs, Int_t dataType, Bool_t recreate, Int_t energy)
 	TH1F *hFitResults = new TH1F("fitResult", title, 100, 80, 240);
 
 	hFitResults->SetLineColor(kBlack);
-	if (dataType == kMC) { hFitResults->SetFillColor(kGreen-5); }
-	else if (dataType == kData) { hFitResults->SetFillColor(kBlue-2); }
+	hFitResults->SetFillColor(kGreen-5); 
 	
 	cout << "Loading tracks...\n";
 	t1.Start(); Tracks *tracks = loadOrCreateTracks(recreate, Runs, dataType, energy); t1.Stop();
@@ -436,7 +436,7 @@ void drawBraggPeakFit(Int_t Runs, Int_t dataType, Bool_t recreate, Int_t energy)
 
 	hFitResults->Draw();
 	
-	c->SaveAs(Form("Fitted_energies_%d_MeV_%s_material_%s_datatype.pdf", energy, getMaterialChar(), getDataTypeChar(dataType)));
+	c->SaveAs(Form("figures/Fitted_energies_%d_MeV_%s_material_%s_datatype.pdf", energy, getMaterialChar(), getDataTypeChar(dataType)));
 }
 
 void drawBraggPeakGraphFit(Int_t Runs, Int_t dataType, Bool_t recreate, Int_t energy) {
@@ -451,13 +451,12 @@ void drawBraggPeakGraphFit(Int_t Runs, Int_t dataType, Bool_t recreate, Int_t en
 	Bool_t isFitOk = false;
 
 	TCanvas *cGraph = new TCanvas("cGraph", "Fitted data points", 1400, 1000);
-	TCanvas *cFitResults = new TCanvas("cFitResults", hTitle);
+	TCanvas *cFitResults = new TCanvas("cFitResults", hTitle, 1400, 1000);
 	cGraph->Divide(nPlotX,nPlotY, 0.000001, 0.000001, 0);
-	TH1F *hFitResults = new TH1F("fitResult", hTitle, 1000, 100, 325);
+	TH1F *hFitResults = new TH1F("fitResult", hTitle, 1000, 100, 300);
 
 	hFitResults->SetLineColor(kBlack);
-	if (dataType == kMC) { hFitResults->SetFillColor(kGreen-5); }
-	else if (dataType == kData) { hFitResults->SetFillColor(kBlue-2); }
+	hFitResults->SetFillColor(kGreen-5); 
 	
 	gStyle->SetPadBorderMode(0);
 	gStyle->SetFrameBorderMode(0);
@@ -496,7 +495,7 @@ void drawBraggPeakGraphFit(Int_t Runs, Int_t dataType, Bool_t recreate, Int_t en
 			TGraph *graph = new TGraph(n,x,y);
 
 			graph->SetMinimum(0);
-			graph->SetMaximum(600);
+			graph->SetMaximum(700);
 			graph->SetTitle("");
 			graph->GetXaxis()->SetTitle("Water Equivalent Path Length [mm]");
 			graph->GetYaxis()->SetTitle("Deposited energy per layer [keV]");
@@ -513,7 +512,7 @@ void drawBraggPeakGraphFit(Int_t Runs, Int_t dataType, Bool_t recreate, Int_t en
 			func->SetParameters(fitEnergy, fitScale);
 			func->Draw("same");
 
-			TLatex *text = new TLatex(20, 400, Form("Fitted energy: %.1f MeV", fitEnergy));
+			TLatex *text = new TLatex(20, 600, Form("Fitted energy: %.1f MeV", fitEnergy));
 			text->SetTextSize(0.06);
 			text->Draw();
 		
@@ -531,18 +530,23 @@ void drawBraggPeakGraphFit(Int_t Runs, Int_t dataType, Bool_t recreate, Int_t en
 	Float_t maxBin = hFitResults->GetMaximum();
 	Float_t meanEnergy = hFitResults->GetMean();
 	Float_t energyStraggling = getEnergyStragglingFromEnergy(meanEnergy);
-	Float_t energyStraggling2 = 1.8 * getRangeStraggling(meanEnergy);
 	TF1 *ES = new TF1("ES", "gaus(0)", 0, 500);
-	ES->SetParameters(maxBin,energy, energyStraggling);
- 	ES->SetParLimits(0,maxBin*0.85,maxBin);
+	ES->SetParameters(maxBin,energy,energyStraggling/2);
+ 	ES->SetParLimits(0,maxBin*0.9,maxBin);
  	ES->SetParLimits(1,energy,energy);
- 	ES->SetParLimits(2,energyStraggling,energyStraggling);
- 	hFitResults->Fit(ES,"B",0,500);
-	cout << "Tryna draw Gauss(" << maxBin << "," << meanEnergy << "," << energyStraggling << ").\n";
-	cout << "Another guess (HA): Energy straggling 2 = " << getRangeStraggling(meanEnergy) * 1.8 << endl;
+ 	ES->SetParLimits(2,energyStraggling/2,energyStraggling/2);
+ 	hFitResults->Fit(ES,"B,Q",0,500);
+	cout << "Tryna draw Gauss(" << maxBin << "," << energy << "," << energyStraggling << ").\n";
 	ES->Draw("same");
-	
 	cFitResults->Update();
+
+	TLegend *legend = new TLegend(0.65, 0.6, 0.98, 0.75);
+	legend->SetTextSize(0.03);
+	legend->AddEntry(hFitResults, "Energy fits to tracks", "F");
+	legend->AddEntry(ES, "Expected range straggling", "F");
+	legend->Draw();
+
+	cFitResults->SaveAs(Form("figures/Fitted_energies_%d_MeV_%s_%s_.pdf", energy, getMaterialChar(), getDataTypeChar(dataType)));
 	
   	delete tracks;
 }
@@ -650,11 +654,13 @@ void Draw2DProjection(Int_t Runs, Int_t dataType, Bool_t recreate, Int_t energy)
 void saveTracks(Tracks *tracks, Int_t dataType, Int_t energy) {
   	
 	// C++ / ROOT has something to learn from Python... ;)
-	TString sDataType = (dataType == 0) ? "_MC" : "_data";
+	TString sDataType = (dataType == 0) ? "_MC_" : "_data_";
 
 	TString sEnergy = Form("_%dMeV", energy);
-	TString fileName = "tracks";
+	TString fileName = "tracks/tracks";
+	TString sMaterial = getMaterialChar();
 	fileName.Append(sDataType);
+	fileName.Append(sMaterial);
 	fileName.Append(sEnergy);
 	fileName.Append(".root");
 	
@@ -668,10 +674,12 @@ void saveTracks(Tracks *tracks, Int_t dataType, Int_t energy) {
 }
 
 Tracks * loadTracks(Int_t Runs, Int_t dataType, Int_t energy) {
-  	TString sDataType = (dataType == 0) ? "_MC" : "_data";
+  	TString sDataType = (dataType == 0) ? "_MC_" : "_data_";
 	TString sEnergy = Form("_%dMeV", energy);
-	TString fileName = "tracks";
+	TString fileName = "tracks/tracks";
+	TString sMaterial = getMaterialChar();
 	fileName.Append(sDataType);
+	fileName.Append(sMaterial);
 	fileName.Append(sEnergy);
 	fileName.Append(".root");
 	
@@ -1117,4 +1125,66 @@ Bool_t getCutBraggPeakInTrack(Track *track) {
 }
 
 
+void getPValues() {
+	// create list with energies vs range
+	Int_t n = nPLEnergies;
+
+	TCanvas *cW = new TCanvas("cW", "Range fit for tungsten", 1200, 900);
+	TCanvas *cAl = new TCanvas("cAl", "Range fit for aluminum", 1200, 900);
+	TCanvas *cPMMA = new TCanvas("cPMMA", "Range fit for PMMA", 1200, 900);
+	TCanvas *cwater = new TCanvas("cwater", "Range fit for water", 1200, 900);
+
+	Float_t kPLFocal_H2O[n];
+	for (Int_t i=0; i<n; i++) {
+		kPLFocal_H2O[i] = kPLFocal_Al[i] * kWEPLRatio_Al[i];
+	}
+
+	TGraph *graph_W = new TGraph(n,kPLEnergies,kPLFocal_W);
+	TGraph *graph_Al = new TGraph(n,kPLEnergies,kPLFocal_Al);
+	TGraph *graph_PMMA = new TGraph(n,kPLEnergies,kPLFocal_PMMA);
+	TGraph *graph_water = new TGraph(n, kPLEnergies, kPLFocal_H2O);
+
+	graph_W->SetTitle("Range fit for tungsten");
+	graph_Al->SetTitle("Range fit for aluminum");
+	graph_PMMA->SetTitle("Range fit for PMMA");
+	graph_water->SetTitle("Range fit for water");
+
+
+	cW->cd();
+		graph_W->Draw("A*");
+
+	cAl->cd();
+		graph_Al->Draw("A*");
+
+	cPMMA->cd();
+		graph_PMMA->Draw("A*");
+
+	cwater->cd();
+		graph_water->Draw("A*");
+
+	TF1 *fW = new TF1("fW", "[0]*pow(x,[1])",0,400);
+	TF1 *fAl = new TF1("fAl", "[0]*pow(x,[1])",0,400);
+	TF1 *fPMMA = new TF1("fPMMA", "[0]*pow(x,[1])",0,400);
+	TF1 *fwater = new TF1("fwater", "[0]*pow(x,[1])",0,400);
+
+	graph_W->Fit("fW");
+	graph_Al->Fit("fAl");
+	graph_PMMA->Fit("fPMMA");
+	graph_water->Fit("fwater");
+
+	Float_t a1 = fW->GetParameter(0);
+	Float_t p1 = fW->GetParameter(1);
+	Float_t a2 = fAl->GetParameter(0);
+	Float_t p2 = fAl->GetParameter(1);
+	Float_t a3 = fPMMA->GetParameter(0);
+	Float_t p3 = fPMMA->GetParameter(1);
+	Float_t a4 = fwater->GetParameter(0);
+	Float_t p4 = fwater->GetParameter(1);
+
+	cout << Form("For tungsten, the range fit is R = %.4f * E ^ %.4f\n", a1, p1);
+	cout << Form("For aluminum, the range fit is R = %.4f * E ^ %.4f\n", a2, p2);
+	cout << Form("For PMMA, the range fit is R = %.4f * E ^ %.4f\n", a3, p3);
+	cout << Form("For water, the range fit is R = %.4f * E ^ %.4f\n", a4, p4);
+
+}
 

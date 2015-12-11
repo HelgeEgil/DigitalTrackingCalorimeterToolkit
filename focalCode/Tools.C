@@ -57,11 +57,15 @@ Double_t fitfunc_DBP(Double_t *v, Double_t *par) {
 	Float_t scale = par[1];
 
 // 	Float_t alpha = 0.0019;
+	Float_t alpha = 0.033; // from getPValues()
+	Float_t p = 1.6891; // from getPValues();
+	Float_t pinv = 1/p;
+	Float_t alpha_p = p * pow(alpha, pinv);
 	
 // 	Float_t R_mm = 0.0019 * pow(energy,1.8) * 10;
 	Float_t R_mm = getWEPLFromEnergy(energy);
 	
-	Double_t fitval = scale / ( 0.0554 * pow((R_mm - depth), 0.444) );
+	Double_t fitval = scale / ( alpha_p * pow((R_mm - depth), 1-pinv) );
 
 	if (isnan(fitval)) fitval = 0;
 

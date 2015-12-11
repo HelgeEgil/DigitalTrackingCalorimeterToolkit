@@ -6,28 +6,24 @@
 
 const Int_t MaxTrackLength = 40;
 
-struct Fit {
-	Float_t energy;
-	Float_t scale;
-};
-
 class Track : public TObject {
 
 	private:
 		TClonesArray track_;
-		Fit fitValues_;
+		Float_t fitEnergy_;
+		Float_t fitScale_;
 
 	public:
 
 	Track() : track_("Cluster", MaxTrackLength) {
-		fitValues_.energy = 0;
-		fitValues_.scale = 0;
+		fitEnergy_ = 0;
+		fitScale_ = 0;
 	};
 
 	Track(Cluster *cluster) : track_("Cluster", MaxTrackLength) { 
 		appendCluster(cluster);
-		fitValues_.energy = 0;
-		fitValues_.scale = 0;
+		fitEnergy_ = 0;
+		fitScale_ = 0;
 	}
 
 	virtual ~Track(); 
@@ -89,6 +85,6 @@ class Track : public TObject {
 
 	virtual void extrapolateToLayer0();
 
-   ClassDef(Track,2);
+   ClassDef(Track,3);
 };
 #endif
