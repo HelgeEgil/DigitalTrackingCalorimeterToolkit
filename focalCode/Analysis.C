@@ -476,7 +476,7 @@ void drawBraggPeakGraphFit(Int_t Runs, Int_t dataType, Bool_t recreate, Int_t en
 		Float_t fitEnergy = thisTrack->getFitParameterEnergy();
 		Float_t fitScale = thisTrack->getFitParameterScale();
 
-		hFitResults->Fill(fitEnergy);
+		if (fitEnergy < run_energy*1.245) hFitResults->Fill(fitEnergy);
 
 		Int_t n = thisTrack->GetEntriesFast();
 		Float_t x[n], y[n];
@@ -526,16 +526,28 @@ void drawBraggPeakGraphFit(Int_t Runs, Int_t dataType, Bool_t recreate, Int_t en
 	hFitResults->SetYTitle("Number of protons");
 	hFitResults->Draw();
 	
-	// draw expected energy straggling on top of histogram
 	Float_t maxBin = hFitResults->GetMaximum();
+	Int_t nBins = hFitResults->GetSize() - 2;
+	Int_t nextMaxBin = 0;
+	for (Int_t i=0; i<nBins; i++) {
+		Float_t bin = hFitResults->GetBinContent(i);
+		if (bin > nextMaxBin && bin < maxBin) {
+			nextMaxBin = bin;
+		}
+	}
+
+	if (nextMaxBin < maxBin * 0.95) {
+	//	maxBin = nextMaxBin;
+	}
+
 	Float_t meanEnergy = hFitResults->GetMean();
 	Float_t energyStraggling = getEnergyStragglingFromEnergy(meanEnergy);
-	TF1 *ES = new TF1("ES", "gaus(0)", 0, 500);
-	ES->SetParameters(maxBin,energy,energyStraggling/2);
- 	ES->SetParLimits(0,maxBin*0.9,maxBin);
+	TF1 *ES = new TF1("ES", "gaus(0)", energy*0.85, energy*1.15);
+	ES->SetParameters(maxBin,energy,energyStraggling);
+ 	ES->SetParLimits(0,maxBin,maxBin);
  	ES->SetParLimits(1,energy,energy);
- 	ES->SetParLimits(2,energyStraggling/2,energyStraggling/2);
- 	hFitResults->Fit(ES,"B,Q",0,500);
+ 	ES->SetParLimits(2,energyStraggling,energyStraggling);
+ 	hFitResults->Fit(ES,"B,Q", "", energy*0.85, energy*1.15);
 	cout << "Tryna draw Gauss(" << maxBin << "," << energy << "," << energyStraggling << ").\n";
 	ES->Draw("same");
 	cFitResults->Update();

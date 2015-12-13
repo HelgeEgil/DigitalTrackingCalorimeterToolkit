@@ -34,7 +34,7 @@ Int_t energies[nEnergies] = {122, 140, 150, 160, 170, 180, 190};
  * 
 */
 enum eMaterial {kTungsten, kAluminum, kPMMA};
-const Int_t kMaterial = kAluminum;
+const Int_t kMaterial = kTungsten;
 
 /*
  * Track reconstruction algorithms
