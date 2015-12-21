@@ -51,6 +51,10 @@ class Track : public TObject {
 	Float_t getTrackLengthmm();
 	Float_t getTrackLengthmmAt(Int_t i);	// return length between two points in mm
 	Float_t getTrackLengthWEPLmmAt(Int_t i);
+	Float_t getRangemm();
+	Float_t getRangemmAt(Int_t i);
+	Float_t getRangeWEPLAt(Int_t i);
+
 	Float_t getSinuosity();
 	Float_t getSlopeAngle();
 	Float_t getSlopeAngleAtLayer(Int_t i);

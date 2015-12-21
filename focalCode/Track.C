@@ -5,6 +5,7 @@
 #include <iostream>
 #include <cmath>
 #include <TGraph.h>
+#include <TGraphErrors.h>
 #include "Constants.h"
 #include "MaterialConstants.h"
 #include <TClonesArray.h>
@@ -86,6 +87,17 @@ Float_t Track::getTrackLengthmm() {
    return trackLength;
 }
 
+Float_t Track::getRangemm() {
+	// return range, not track length
+	
+	Float_t range = 0;
+	if (!At(0)) return 0;
+
+	range = diffmm(Last(), At(0));
+
+	return range;
+}
+
 Float_t Track::getSinuosity() {
 	Cluster *a = At(0);
 	Cluster *b = Last();
@@ -131,6 +143,14 @@ Float_t Track::getTrackLengthmmAt(Int_t i) {
 	return diffmm(At(i-1), At(i));
 }
 
+Float_t Track::getRangemmAt(Int_t i) {
+	if (i==0) return 3.15; // pre-detector material
+	if (i>GetEntriesFast()) return 0;
+
+	return diffmm(new Cluster(getX(i-1), getY(i-1), getLayer(i-1)),
+				   new Cluster(getX(i-1), getY(i-1), getLayer(i)));
+}
+
 Float_t Track::getWEPL() {
 	Float_t tl = getTrackLengthmm();
 	if (!tl) return 0;
@@ -152,6 +172,17 @@ Float_t Track::getTrackLengthWEPLmmAt(Int_t i) {
 	if (!tl) return 0;
 	
 	return getWEPLFromTL(tl);
+}
+
+Float_t Track::getRangeWEPLAt(Int_t i) {
+	Float_t range = getRangemmAt(i);
+	if (i==0) {
+		return 3.09 + 1.65 * getWEPLFactorFromEnergy(run_energy);
+	}
+
+	if (!range) return 0;
+
+	return getWEPLFromTL(range);
 }
 
 Float_t Track::getEnergyStraggling() {
@@ -466,23 +497,32 @@ Bool_t Track::doFit() {
 	if (!cut) return false;
 
 	Int_t n = GetEntriesFast();
-	Float_t x[n], y[n];
+	Float_t x[n], y[n], dx[n], dy[n];
 
 	for (Int_t i=0; i<n; i++) {
 		if (!At(i)) continue;
 		trackLengthWEPL += getTrackLengthWEPLmmAt(i);
+		//trackLengthWEPL += getRangeWEPLAt(i);
 		x[i] = trackLengthWEPL;
 		y[i] = getDepositedEnergy(i);
+		if (i>n/2) {
+			dx[i] = 0.1;
+			dy[i] = 0.1;
+		}
+		else {
+			dx[i] = 0.1;
+			dy[i] = 0.1;
+		}
 	}
 
-	TGraph *graph = new TGraph(n, x, y);
+	TGraphErrors *graph = new TGraphErrors(n, x, y, dx, dy);
 
 	TF1 *func = new TF1("fit_BP", fitfunc_DBP, 0, 500, 2);
 	func->SetParameter(0,run_energy);
 	func->SetParameter(1, 140);
 	func->SetParLimits(0, 10, run_energy*1.25);
 	func->SetParLimits(1, 100,300);
-	graph->Fit("fit_BP", "B, W,Q", "", 0, 500);
+	graph->Fit("fit_BP", "B, Q, W", "", 0, 500);
 
 	fitEnergy_ = func->GetParameter(0);
 	fitScale_ = func->GetParameter(1);
