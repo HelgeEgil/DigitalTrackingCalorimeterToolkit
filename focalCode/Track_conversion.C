@@ -68,6 +68,29 @@ Float_t getRangeStraggling(Float_t energy) {
 	}
 }
 
+Float_t getRealStraggling(Float_t rangeReal) {
+	for (Int_t i=1; i<nPLEnergies; i++) {
+		if (kPLFocal[i] < rangeReal) { continue; }
+		else {
+			Float_t ratio = ( rangeReal - kPLFocal[i-1]) / (kPLFocal[i] - kPLFocal[i-1]);
+			return kStraggling[i-1] + ratio * (kStraggling[i] - kStraggling[i-1]);
+		}
+	}
+}
+
+Float_t getRangeStragglingFromEnergy(Float_t energy) {
+	Float_t rangeReal = getRangeFromEnergy(energy);
+	Float_t stragglingReal = getRealStraggling(rangeReal);
+	Float_t upperReal = rangeReal + stragglingReal / 2;
+	Float_t lowerReal = rangeReal - stragglingReal / 2;
+	Float_t upperWEPL = getWEPLFromTL(upperReal);
+	Float_t lowerWEPL = getWEPLFromTL(lowerReal);
+	Float_t stragglingWEPL = upperWEPL - lowerWEPL;
+	cout << "straggling = " << stragglingReal << " mm, which is " << stragglingWEPL << " mm in WEPL.\n";
+	
+	return stragglingWEPL;
+}
+
 Float_t getRangeFromEnergy(Float_t energy) {
 	for (Int_t i=1; i<nPLEnergies; i++) {
 		if (kPLEnergies[i] < energy) { continue; }

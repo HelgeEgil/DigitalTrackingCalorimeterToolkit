@@ -90,7 +90,7 @@ char * getDataTypeChar(Int_t dataType) {
 	return sDataType;
 }
 
-Int_t getMinimumTrackLength(Int_t energy) {
+Int_t getMinimumTrackLength(Float_t energy) {
 	Int_t minTL = 0;
 
 	if (energy < 150) minTL = 5;

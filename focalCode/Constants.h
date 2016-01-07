@@ -8,7 +8,7 @@
 enum eFrameType {kCalorimeter, kTracker};
 enum eDataType {kMC, kData};
 
-Int_t run_energy = 0;
+Float_t run_energy = 0;
 
 // Some general run parameters
 const Int_t nx = 640;
@@ -33,6 +33,7 @@ Int_t energies[nEnergies] = {122, 140, 150, 160, 170, 180, 190};
  * loaded in WEPL-LUT.C.
  * 
 */
+
 enum eMaterial {kTungsten, kAluminum, kPMMA};
 const Int_t kMaterial = kAluminum;
 

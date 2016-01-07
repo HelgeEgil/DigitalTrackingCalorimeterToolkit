@@ -9,6 +9,8 @@ Float_t getWEPLFromEnergy(Float_t energy);
 Float_t getEnergyFromWEPL(Float_t wepl);
 Float_t getEnergyFromTL(Float_t tl);
 Float_t getEnergyStragglingFromEnergy(Float_t energy);
+Float_t getRealStraggling(Float_t rangeReal);
+Float_t getRangeStragglingFromEnergy(Float_t energy);
 Float_t getRangeStraggling ( Float_t energy );
 Float_t getRangeFromEnergy(Float_t energy);
 Float_t getEnergyStragglingFromRangeStraggling(Float_t range, Float_t rangeStraggling);

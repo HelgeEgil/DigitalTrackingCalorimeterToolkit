@@ -164,7 +164,7 @@ Focal::Focal(TTree *tree) : fChain(0)
       // The following code should be used if you want this class to access a chain
       // of trees.
       TChain * chain = new TChain("Hits","");
-      chain->Add("test.root/Hits");
+      chain->Add("rawdata/test.root/Hits");
       tree = chain;
 #endif // SINGLE_TREE
 

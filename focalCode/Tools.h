@@ -24,7 +24,7 @@ Bool_t existsEnergyFile(Int_t energy);
 Double_t fitfunc_DBP(Double_t *v, Double_t *par);
 char * getMaterialChar();
 char * getDataTypeChar(Int_t dataType);
-Int_t getMinimumTrackLength(Int_t energy);
+Int_t getMinimumTrackLength(Float_t energy);
 
 
 #endif /* FOCALCODE_TOOLS_H_ */

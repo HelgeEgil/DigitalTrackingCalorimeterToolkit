@@ -22,6 +22,7 @@
 #include <vector>
 #include <TLegend.h>
 #include <TStopwatch.h>
+#include <TPaveStats.h>
 #include <algorithm>
 #include <ctime>
 #include <TView.h>
@@ -125,7 +126,7 @@ void GetTrackerStatistics(Int_t Events, Int_t Runs) {
 
 */
 
-void getTrackStatistics(Int_t Runs, Int_t dataType, Bool_t recreate, Int_t energy) {
+void getTrackStatistics(Int_t Runs, Int_t dataType, Bool_t recreate, Float_t energy) {
 	Focal f;
 
 	Tracks * tracks = loadOrCreateTracks(recreate, Runs, dataType, energy);
@@ -291,7 +292,7 @@ void getTrackStatistics(Int_t Runs, Int_t dataType, Bool_t recreate, Int_t energ
 	delete tracks;
 }
 
-void drawClusterShapes(Int_t Runs, Bool_t dataType, Bool_t recreate, Int_t energy) {
+void drawClusterShapes(Int_t Runs, Bool_t dataType, Bool_t recreate, Float_t energy) {
 	// get vector of TH2F's, each with a hits distribution and cluster size
 	// dataType = kMC (0) or kData (1)
 
@@ -402,49 +403,142 @@ void drawClusterShapes(Int_t Runs, Bool_t dataType, Bool_t recreate, Int_t energ
 }
 
 
-void makeTracks(Int_t Runs, Int_t dataType, Bool_t recreate, Int_t energy) {
+void makeTracks(Int_t Runs, Int_t dataType, Bool_t recreate, Float_t energy) {
 	Tracks * tracks = loadOrCreateTracks(recreate, Runs, dataType, energy);
 	tracks->extrapolateToLayer0();
 }
 
-void drawBraggPeakFit(Int_t Runs, Int_t dataType, Bool_t recreate, Int_t energy) {
+void drawBraggPeakFit(Int_t Runs, Int_t dataType, Bool_t recreate, Float_t energy) {
 	run_energy = energy;
-	TStopwatch t1, t2;
-
-	char *title = Form("Fitted energy of a %d MeV beam in %s (%s)", energy, getMaterialChar(), getDataTypeChar(dataType));
-	TCanvas *c = new TCanvas("c", title, 2000, 1400);
-	TH1F *hFitResults = new TH1F("fitResult", title, 100, 80, 240);
-
-	hFitResults->SetLineColor(kBlack);
-	hFitResults->SetFillColor(kGreen-5); 
-	
-	cout << "Loading tracks...\n";
-	t1.Start(); Tracks *tracks = loadOrCreateTracks(recreate, Runs, dataType, energy); t1.Stop();
-	cout << Form("Done (%.2f s).\n", t1.RealTime());
-	tracks->extrapolateToLayer0();
-	cout << "Fitting tracks...\n";
-	t2.Start(); tracks->doFit(); t2.Stop();
-	cout << Form("Done (%.2f s).\n", t2.RealTime());
-
-	for (Int_t i=0; i<tracks->GetEntriesFast(); i++) {
-		Track *thisTrack = tracks->At(i);
-		if (!thisTrack) {	continue; }
-
-		Float_t res = thisTrack->getFitParameterEnergy();
-		if (res) { hFitResults->Fill(res); }
-	}
-
-	hFitResults->Draw();
-	
-	c->SaveAs(Form("figures/Fitted_energies_%d_MeV_%s_material_%s_datatype.pdf", energy, getMaterialChar(), getDataTypeChar(dataType)));
-}
-
-void drawBraggPeakGraphFit(Int_t Runs, Int_t dataType, Bool_t recreate, Int_t energy) {
-	run_energy = energy;
+	Bool_t useWEPL = true;
 	
 	char * sDataType = getDataTypeChar(dataType);
 	char * sMaterial = getMaterialChar();
-	char * hTitle = Form("Fitted energy of a %d MeV beam in %s (%s)", energy, sMaterial, sDataType);
+	char * hTitle = Form("Fitted energy of a %.2f MeV beam in %s (%s)", energy, sMaterial, sDataType);
+
+	Bool_t isFitOk = false;
+
+	TCanvas *cFitResults = new TCanvas("cFitResults", hTitle, 1400, 1000);
+	TH1F *hFitResults;
+	if (!useWEPL) { hFitResults = new TH1F("fitResult", hTitle, 1000, 0, 300); }
+	else { hFitResults = new TH1F("fitResult", hTitle, 1000, 0, 350); }
+		
+	hFitResults->SetLineColor(kBlack);
+	hFitResults->SetFillColor(kGreen-5);
+	
+	Tracks * tracks = loadOrCreateTracks(recreate, Runs, dataType, energy);
+	tracks->extrapolateToLayer0();
+
+	for (Int_t j=0; j<tracks->GetEntriesFast(); j++) {
+		Track *thisTrack = tracks->At(j);
+		if (!thisTrack) continue;
+	
+		isFitOk = thisTrack->doFit();
+		if (!isFitOk) continue;
+			
+		Float_t fitEnergy = thisTrack->getFitParameterEnergy();
+		Float_t fitScale = thisTrack->getFitParameterScale();
+
+		if (fitEnergy < run_energy*1.245) {
+			if (!useWEPL) 
+				hFitResults->Fill(fitEnergy);
+			else 
+				hFitResults->Fill(getWEPLFromEnergy(fitEnergy));
+		}
+	}
+	
+	if (!useWEPL) { hFitResults->SetXTitle("Fitted energy [MeV]"); }
+	else { hFitResults->SetXTitle("Range in Water Equivalent Path Length [mm]"); }
+		
+	hFitResults->SetYTitle("Number of protons");
+	hFitResults->Draw();
+	
+	Float_t maxBin = hFitResults->GetMaximum();
+	Int_t nBins = hFitResults->GetSize() - 2;
+	Int_t nextMaxBin = 0;
+	for (Int_t i=0; i<nBins; i++) {
+		Float_t bin = hFitResults->GetBinContent(i);
+		if (bin > nextMaxBin && bin < maxBin) {
+			nextMaxBin = bin;
+		}
+	}
+	
+	// Draw expected gaussian distribution of results from initial energy
+	Float_t expectedStraggling, expectedMean;
+	
+	if (!useWEPL) {
+		expectedMean = energy;
+		expectedStraggling = getEnergyStragglingFromEnergy(expectedMean);
+	}
+	else {
+		expectedMean = getWEPLFromEnergy(energy);
+		expectedStraggling = getRangeStragglingFromEnergy(energy);
+	}
+	
+	TF1 *ES = new TF1("ES", "gaus(0)", expectedMean*0.85, expectedMean*1.15);
+	ES->SetParameters(maxBin,expectedMean,expectedStraggling);
+ 	ES->SetParLimits(0,maxBin,maxBin);
+ 	ES->SetParLimits(1,expectedMean,expectedMean);
+ 	ES->SetParLimits(2,expectedStraggling,expectedStraggling);
+ 	hFitResults->Fit(ES,"B,Q", "", expectedMean*0.85, expectedMean*1.15);
+	ES->Draw("same");
+	cFitResults->Update();
+
+	TLegend *legend = new TLegend(0.65, 0.6, 0.98, 0.75);
+	legend->SetTextSize(0.03);
+	legend->AddEntry(hFitResults, "Energy fits to tracks", "F");
+	legend->AddEntry(ES, "Expected range straggling", "F");
+	legend->Draw();
+	
+	// find Full Width Half Maximum and draw it in the TPaveStats
+	Int_t bin1 = hFitResults->FindFirstBinAbove(maxBin/2);
+	Int_t bin2 = hFitResults->FindLastBinAbove(maxBin/2);
+	Float_t fwhm = hFitResults->GetBinCenter(bin2) - hFitResults->GetBinCenter(bin1);
+	
+	Int_t bin3 = hFitResults->FindFirstBinAbove(maxBin/4);
+	Int_t bin4 = hFitResults->FindLastBinAbove(maxBin/4);
+	Float_t fwqm = hFitResults->GetBinCenter(bin4) - hFitResults->GetBinCenter(bin3);
+	
+	Int_t bin5 = hFitResults->FindFirstBinAbove(maxBin/3);
+	Int_t bin6 = hFitResults->FindLastBinAbove(maxBin/3);
+	Float_t fwtm = hFitResults->GetBinCenter(bin6) - hFitResults->GetBinCenter(bin5);
+	
+	
+	TPaveStats *ps = (TPaveStats*) cFitResults->GetPrimitive("stats");
+	hFitResults->SetBit(TH1::kNoStats);
+	ps->AddText(Form("Nominal mean = %.2f", expectedMean));
+	ps->AddText(Form("Nominal straggling = %.2f", expectedStraggling));
+	//ps->AddText(Form("FWHM = %.2f", fwhm));
+	ps->AddText(Form("Straggling (from FWHM) = %.2f", fwhm/2.355));
+	ps->AddText(Form("Straggling (from FWTM) = %.2f", fwtm/2.2965));
+	ps->AddText(Form("Straggling (from FWQM) = %.2f", fwqm/3.33));
+
+	if (useWEPL) {
+		cout << "At " << energy << " MeV: FWHM = " << fwhm << " mm, sigma = " << fwhm / 2.355 << " mm.\n";
+		cout << "At " << energy << " MeV: FWQM = " << fwqm << " mm, sigma = " << fwqm / 3.33 << " mm.\n";
+	}
+	else {
+		cout << "At " << energy << " MeV: FWHM = " << fwhm << " MeV, sigma = " << fwhm / 2.355 << " MeV.\n";
+	}
+	
+// 	hFitResults->SetStats(0);
+	cFitResults->Modified();
+	
+	if (!useWEPL) 
+		cFitResults->SaveAs(Form("figures/Fitted_energies_%.2f_MeV_%s_%s_.pdf", energy, getMaterialChar(), getDataTypeChar(dataType)));
+	else 
+		cFitResults->SaveAs(Form("figures/Fitted_energies_%.2f_MeV_%s_%s_WEPL.pdf", energy, getMaterialChar(), getDataTypeChar(dataType)));
+	
+  	delete tracks;
+}
+
+void drawBraggPeakGraphFit(Int_t Runs, Int_t dataType, Bool_t recreate, Float_t energy) {
+	run_energy = energy;
+	Bool_t useWEPL = true;
+	
+	char * sDataType = getDataTypeChar(dataType);
+	char * sMaterial = getMaterialChar();
+	char * hTitle = Form("Fitted energy of a %.2f MeV beam in %s (%s)", energy, sMaterial, sDataType);
 
 	Int_t nPlotX = 4, nPlotY = 4;
 	Int_t fitIdx = 0, plotSize = nPlotX*nPlotY;
@@ -453,8 +547,11 @@ void drawBraggPeakGraphFit(Int_t Runs, Int_t dataType, Bool_t recreate, Int_t en
 	TCanvas *cGraph = new TCanvas("cGraph", "Fitted data points", 1400, 1000);
 	TCanvas *cFitResults = new TCanvas("cFitResults", hTitle, 1400, 1000);
 	cGraph->Divide(nPlotX,nPlotY, 0.000001, 0.000001, 0);
-	TH1F *hFitResults = new TH1F("fitResult", hTitle, 1000, 100, 300);
-
+	
+	TH1F *hFitResults;
+	if (!useWEPL) { hFitResults = new TH1F("fitResult", hTitle, 1000, 100, 300); }
+	else { hFitResults = new TH1F("fitResult", hTitle, 1000, 50, 350); }
+		
 	hFitResults->SetLineColor(kBlack);
 	hFitResults->SetFillColor(kGreen-5); 
 	
@@ -476,7 +573,12 @@ void drawBraggPeakGraphFit(Int_t Runs, Int_t dataType, Bool_t recreate, Int_t en
 		Float_t fitEnergy = thisTrack->getFitParameterEnergy();
 		Float_t fitScale = thisTrack->getFitParameterScale();
 
-		if (fitEnergy < run_energy*1.245) hFitResults->Fill(fitEnergy);
+		if (fitEnergy < run_energy*1.245) {
+			if (!useWEPL) 
+				hFitResults->Fill(fitEnergy);
+			else 
+				hFitResults->Fill(getWEPLFromEnergy(fitEnergy));
+		}
 
 		Int_t n = thisTrack->GetEntriesFast();
 		Float_t x[n], y[n];
@@ -522,7 +624,9 @@ void drawBraggPeakGraphFit(Int_t Runs, Int_t dataType, Bool_t recreate, Int_t en
 	}
 	
 	cFitResults->cd();
-	hFitResults->SetXTitle("Energy [MeV]");
+	if (!useWEPL) { hFitResults->SetXTitle("Energy [MeV]"); }
+	else { hFitResults->SetXTitle("Range in Water Equivalent Path Length [mm]"); }
+		
 	hFitResults->SetYTitle("Number of protons");
 	hFitResults->Draw();
 	
@@ -539,16 +643,27 @@ void drawBraggPeakGraphFit(Int_t Runs, Int_t dataType, Bool_t recreate, Int_t en
 	if (nextMaxBin < maxBin * 0.95) {
 	//	maxBin = nextMaxBin;
 	}
-
-	Float_t meanEnergy = hFitResults->GetMean();
-	Float_t energyStraggling = getEnergyStragglingFromEnergy(meanEnergy);
-	TF1 *ES = new TF1("ES", "gaus(0)", energy*0.85, energy*1.15);
-	ES->SetParameters(maxBin,energy,energyStraggling);
+	
+	// Draw expected gaussian distribution of results from initial energy
+	
+	Float_t expectedStraggling, expectedMean;
+	
+	if (!useWEPL) {
+		expectedMean = energy;
+		expectedStraggling = getEnergyStragglingFromEnergy(expectedMean);
+	}
+	else {
+		expectedMean = getWEPLFromEnergy(energy);
+		expectedStraggling = getRangeStragglingFromEnergy(energy);
+	}
+	
+	TF1 *ES = new TF1("ES", "gaus(0)", expectedMean*0.85, expectedMean*1.15);
+	ES->SetParameters(maxBin,expectedMean,expectedStraggling);
  	ES->SetParLimits(0,maxBin,maxBin);
- 	ES->SetParLimits(1,energy,energy);
- 	ES->SetParLimits(2,energyStraggling,energyStraggling);
- 	hFitResults->Fit(ES,"B,Q", "", energy*0.85, energy*1.15);
-	cout << "Tryna draw Gauss(" << maxBin << "," << energy << "," << energyStraggling << ").\n";
+ 	ES->SetParLimits(1,expectedMean,expectedMean);
+ 	ES->SetParLimits(2,expectedStraggling,expectedStraggling);
+ 	hFitResults->Fit(ES,"B,Q", "", expectedMean*0.85, expectedMean*1.15);
+	cout << "Tryna draw Gauss(" << maxBin << "," << expectedMean << "," << expectedStraggling << ").\n";
 	ES->Draw("same");
 	cFitResults->Update();
 
@@ -557,8 +672,31 @@ void drawBraggPeakGraphFit(Int_t Runs, Int_t dataType, Bool_t recreate, Int_t en
 	legend->AddEntry(hFitResults, "Energy fits to tracks", "F");
 	legend->AddEntry(ES, "Expected range straggling", "F");
 	legend->Draw();
-
-	cFitResults->SaveAs(Form("figures/Fitted_energies_%d_MeV_%s_%s_.pdf", energy, getMaterialChar(), getDataTypeChar(dataType)));
+	
+	// find Full Width Half Maximum and draw it in the TPaveStats
+	Int_t bin1 = hFitResults->FindFirstBinAbove(maxBin/2);
+	Int_t bin2 = hFitResults->FindLastBinAbove(maxBin/2);
+	Float_t fwhm = hFitResults->GetBinCenter(bin2) - hFitResults->GetBinCenter(bin1);
+	
+	TPaveStats *ps = (TPaveStats*) cFitResults->GetPrimitive("stats");
+	hFitResults->SetBit(TH1::kNoStats);
+	ps->AddText(Form("FWHM = %.2f", fwhm));
+	ps->AddText(Form("Sigma = %.2f", fwhm/2.355));
+// 	TList *list = ps->GetListOfLines();
+// 	TLatex *myt = new TLatex(0,0,Form("FWHM = %.2f", fwhm));
+// 	myt->SetTextFont(42);
+// 	myt->SetTextSize(0.03);
+// 	list->Add(myt);
+// 	
+	cout << "FWHM = " << fwhm << " mm, sigma = " << fwhm / 2.355 << " mm.\n";
+	
+// 	hFitResults->SetStats(0);
+	cFitResults->Modified();
+	
+	if (!useWEPL) 
+		cFitResults->SaveAs(Form("figures/Fitted_energies_%.2f_MeV_%s_%s_.pdf", energy, getMaterialChar(), getDataTypeChar(dataType)));
+	else 
+		cFitResults->SaveAs(Form("figures/Fitted_energies_%.2f_MeV_%s_%s_WEPL.pdf", energy, getMaterialChar(), getDataTypeChar(dataType)));
 	
   	delete tracks;
 }
@@ -609,7 +747,7 @@ void WriteClusterFile(Int_t Runs) {
 
 */
 
-void Draw2DProjection(Int_t Runs, Int_t dataType, Bool_t recreate, Int_t energy) {
+void Draw2DProjection(Int_t Runs, Int_t dataType, Bool_t recreate, Float_t energy) {
 
 	Tracks * tracks = loadOrCreateTracks(recreate, Runs, kCalorimeter, energy);
 	tracks->extrapolateToLayer0();
@@ -625,7 +763,7 @@ void Draw2DProjection(Int_t Runs, Int_t dataType, Bool_t recreate, Int_t energy)
 
 	Int_t ntracks = tracks->GetEntriesFast();
 
-	char *title = (char*) Form("2D Projection of data from %d MeV proton beam on %s type FOCAL", energy, getMaterialChar());
+	char *title = (char*) Form("2D Projection of data from %.2f MeV proton beam on %s type FOCAL", energy, getMaterialChar());
 
 	TCanvas *c1 = new TCanvas(title);
 	
@@ -663,12 +801,12 @@ void Draw2DProjection(Int_t Runs, Int_t dataType, Bool_t recreate, Int_t energy)
 
 }
 
-void saveTracks(Tracks *tracks, Int_t dataType, Int_t energy) {
+void saveTracks(Tracks *tracks, Int_t dataType, Float_t energy) {
   	
 	// C++ / ROOT has something to learn from Python... ;)
 	TString sDataType = (dataType == 0) ? "_MC_" : "_data_";
 
-	TString sEnergy = Form("_%dMeV", energy);
+	TString sEnergy = Form("_%.2fMeV", energy);
 	TString fileName = "tracks/tracks";
 	TString sMaterial = getMaterialChar();
 	fileName.Append(sDataType);
@@ -685,9 +823,9 @@ void saveTracks(Tracks *tracks, Int_t dataType, Int_t energy) {
 	f.Close();
 }
 
-Tracks * loadTracks(Int_t Runs, Int_t dataType, Int_t energy) {
+Tracks * loadTracks(Int_t Runs, Int_t dataType, Float_t energy) {
   	TString sDataType = (dataType == 0) ? "_MC_" : "_data_";
-	TString sEnergy = Form("_%dMeV", energy);
+	TString sEnergy = Form("_%.2fMeV", energy);
 	TString fileName = "tracks/tracks";
 	TString sMaterial = getMaterialChar();
 	fileName.Append(sDataType);
@@ -712,7 +850,7 @@ Tracks * loadTracks(Int_t Runs, Int_t dataType, Int_t energy) {
 	return tracks;
 }
 
-Tracks * loadOrCreateTracks(Bool_t recreate, Int_t Runs, Int_t dataType, Int_t energy) {
+Tracks * loadOrCreateTracks(Bool_t recreate, Int_t Runs, Int_t dataType, Float_t energy) {
 	Tracks * tracks;
 	
 	if (recreate) {
@@ -723,19 +861,16 @@ Tracks * loadOrCreateTracks(Bool_t recreate, Int_t Runs, Int_t dataType, Int_t e
 	else {
 		tracks = loadTracks(Runs, dataType, energy);
 	
-		cout << "Finished loading tracks\n";
-
 		if (!tracks) {
 			cout << "!tracks, creating new file\n";
 			tracks = getTracks(Runs, dataType, kCalorimeter, energy);
 			saveTracks(tracks, dataType, energy);
 		}
 	}
-	cout << "returning tracks\n";
 	return tracks;
 }
 
-Tracks * getTracks(Int_t Runs, Int_t dataType, Int_t frameType, Int_t energy) {
+Tracks * getTracks(Int_t Runs, Int_t dataType, Int_t frameType, Float_t energy) {
 	Focal *f = new Focal();
 
 	Int_t nClusters = kEventsPerRun * 5 * nLayers;
@@ -834,14 +969,14 @@ Tracks * getTracks(Int_t Runs, Int_t dataType, Int_t frameType, Int_t energy) {
 	return allTracks;
 }
 
-void drawTracks3D(Int_t Runs, Int_t dataType, Bool_t recreate, Int_t energy) {
+void drawTracks3D(Int_t Runs, Int_t dataType, Bool_t recreate, Float_t energy) {
 	// FIXME Add kTracker to loadOrCreateTracks
   
 	Tracks * tracks = loadOrCreateTracks(recreate, Runs, kCalorimeter, energy);
 	tracks->extrapolateToLayer0();
 
 	TCanvas *c1 = new TCanvas("c1");
-	c1->SetTitle(Form("Tracks from %d MeV protons on %s", energy, getMaterialChar()));
+	c1->SetTitle(Form("Tracks from %.2f MeV protons on %s", energy, getMaterialChar()));
 	TView *view = TView::CreateView(1);
 	view->SetRange(0, 0, 0, 2*nx, nLayers, 2*ny);
 
@@ -851,7 +986,6 @@ void drawTracks3D(Int_t Runs, Int_t dataType, Bool_t recreate, Int_t energy) {
    p->SetMarkerColor(kRed);
 
    for (Int_t i=0; i<restPoints->GetEntriesFast(); i++) {
-
       if (!restPoints->At(i))
       	continue;
 
@@ -1081,7 +1215,7 @@ void drawData3D(Int_t Runs) {
    Frame3D->Draw("LEGO");
 }
 
-Bool_t getCutTrackLength(int energy, Track *track) {
+Bool_t getCutTrackLength(Float_t energy, Track *track) {
 	Int_t minTL = getMinimumTrackLength(energy);
 	Float_t TL = track->getTrackLengthmm();
 

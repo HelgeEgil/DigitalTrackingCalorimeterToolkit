@@ -497,25 +497,24 @@ Bool_t Track::doFit() {
 	if (!cut) return false;
 
 	Int_t n = GetEntriesFast();
-	Float_t x[n], y[n], dx[n], dy[n];
+	Float_t x[n], y[n];
 
-	for (Int_t i=0; i<n; i++) {
+	for (Int_t i=0; i<GetEntriesFast(); i++) {
 		if (!At(i)) continue;
 		trackLengthWEPL += getTrackLengthWEPLmmAt(i);
-		//trackLengthWEPL += getRangeWEPLAt(i);
+		
 		x[i] = trackLengthWEPL;
 		y[i] = getDepositedEnergy(i);
-		if (i>n/2) {
-			dx[i] = 0.1;
-			dy[i] = 0.1;
-		}
-		else {
-			dx[i] = 0.1;
-			dy[i] = 0.1;
-		}
 	}
-
-	TGraphErrors *graph = new TGraphErrors(n, x, y, dx, dy);
+	
+	/*
+	x[n-3] = trackLengthWEPL + 4*getWEPLFromTL(dz);
+	x[n-2] = trackLengthWEPL + 5*getWEPLFromTL(dz);
+	x[n-1] = trackLengthWEPL + 6*getWEPLFromTL(dz);
+	y[n-3] = 0; y[n-2] = 0; y[n-1] = 0;
+	*/
+	
+	TGraph *graph = new TGraph(n, x, y);
 
 	TF1 *func = new TF1("fit_BP", fitfunc_DBP, 0, 500, 2);
 	func->SetParameter(0,run_energy);

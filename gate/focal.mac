@@ -188,7 +188,7 @@
 
 # Enable ROOT output
 /gate/output/root/enable
-/gate/output/root/setFileName ../focalCode/test
+/gate/output/root/setFileName ../focalCode/rawdata/test
 
 #===============#
 # START BEAMS	#
