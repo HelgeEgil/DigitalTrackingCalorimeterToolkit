@@ -491,6 +491,9 @@ void drawBraggPeakFit(Int_t Runs, Int_t dataType, Bool_t recreate, Float_t energ
 	legend->Draw();
 	
 	// find Full Width Half Maximum and draw it in the TPaveStats
+	// Also calculate Full Width Tertiary Maximum and Full Width Quarter Maximum
+	// sigma = 2 sqrt ln 2 FWHM (2.355) = 2 sqrt ln 3 FHTM (2.2965) = 2 sqrt ln 4 FHQM (3.33)
+	
 	Int_t bin1 = hFitResults->FindFirstBinAbove(maxBin/2);
 	Int_t bin2 = hFitResults->FindLastBinAbove(maxBin/2);
 	Float_t fwhm = hFitResults->GetBinCenter(bin2) - hFitResults->GetBinCenter(bin1);
@@ -503,31 +506,67 @@ void drawBraggPeakFit(Int_t Runs, Int_t dataType, Bool_t recreate, Float_t energ
 	Int_t bin6 = hFitResults->FindLastBinAbove(maxBin/3);
 	Float_t fwtm = hFitResults->GetBinCenter(bin6) - hFitResults->GetBinCenter(bin5);
 	
-	
 	TPaveStats *ps = (TPaveStats*) cFitResults->GetPrimitive("stats");
 	hFitResults->SetBit(TH1::kNoStats);
 	ps->AddText(Form("Nominal mean = %.2f", expectedMean));
 	ps->AddText(Form("Nominal straggling = %.2f", expectedStraggling));
 	//ps->AddText(Form("FWHM = %.2f", fwhm));
 	ps->AddText(Form("Straggling (from FWHM) = %.2f", fwhm/2.355));
-	ps->AddText(Form("Straggling (from FWTM) = %.2f", fwtm/2.2965));
+	ps->AddText(Form("Straggling (from FWTM) = %.2f", fwtm/2.9646));
 	ps->AddText(Form("Straggling (from FWQM) = %.2f", fwqm/3.33));
-
+	
+	// draw lines on HM, TM, QM
+	Float_t len_hm = expectedStraggling * 2.355/2;
+	Float_t len_tm = expectedStraggling * 2.9646/2;
+	Float_t len_qm = expectedStraggling * 3.330/2;
+	
+	//TLine *hm = new TLine(expectedMean - len_hm, maxBin/2, expectedMean + len_hm, maxBin/2);
+	TLine *hm = new TLine(hFitResults->GetXaxis()->GetBinLowEdge(bin1), maxBin/2, hFitResults->GetXaxis()->GetBinUpEdge(bin2), maxBin/2);
+	TLine *tm = new TLine(hFitResults->GetXaxis()->GetBinLowEdge(bin5), maxBin/3, hFitResults->GetXaxis()->GetBinUpEdge(bin6), maxBin/3);
+	TLine *qm = new TLine(hFitResults->GetXaxis()->GetBinLowEdge(bin3), maxBin/4, hFitResults->GetXaxis()->GetBinUpEdge(bin4), maxBin/4);
+	
+	hm->SetLineColor(kRed); tm->SetLineColor(kRed); qm->SetLineColor(kRed);
+	hm->SetLineWidth(3); tm->SetLineWidth(3); qm->SetLineWidth(3);
+	hm->Draw(); tm->Draw(); qm->Draw();
+	
+	/*
+	 * old = 2.2965
+	 * new = 2.9646
+	 * so old is higher than new
+	 * multiply by 2.2965 / 2.9646!
+	 * 
+	*/
+	
+	Bool_t kOutput = false;
+	
+	if (kOutput) {
+		ofstream outputFile;
+		outputFile.open("fit_result.txt", ios::out | ios::app);
+		outputFile << energy << "; " << (int) useWEPL << "; " << expectedMean << "; " << hFitResults->GetMean() << "; " 
+				<< expectedStraggling << "; " << fwhm / 2.355 << "; " << fwtm / 2.9646 << "; "
+				<< fwqm / 3.33 << endl;
+		outputFile.close();
+	}
+	
+	
 	if (useWEPL) {
 		cout << "At " << energy << " MeV: FWHM = " << fwhm << " mm, sigma = " << fwhm / 2.355 << " mm.\n";
+		cout << "At " << energy << " MeV: FWTM = " << fwtm << " mm, sigma = " << fwhm / 2.9646 << " mm.\n";
 		cout << "At " << energy << " MeV: FWQM = " << fwqm << " mm, sigma = " << fwqm / 3.33 << " mm.\n";
 	}
 	else {
 		cout << "At " << energy << " MeV: FWHM = " << fwhm << " MeV, sigma = " << fwhm / 2.355 << " MeV.\n";
+		cout << "At " << energy << " MeV: FWTM = " << fwtm << " MeV, sigma = " << fwhm / 2.9646 << " MeV.\n";
+		cout << "At " << energy << " MeV: FWQM = " << fwqm << " MeV, sigma = " << fwqm / 3.33 << " MeV.\n";
 	}
 	
 // 	hFitResults->SetStats(0);
 	cFitResults->Modified();
 	
 	if (!useWEPL) 
-		cFitResults->SaveAs(Form("figures/Fitted_energies_%.2f_MeV_%s_%s_.pdf", energy, getMaterialChar(), getDataTypeChar(dataType)));
+		cFitResults->SaveAs(Form("figures/Fitted_energies_%s_%s_%.2f_MeV.pdf", getDataTypeChar(dataType), getMaterialChar(), energy));
 	else 
-		cFitResults->SaveAs(Form("figures/Fitted_energies_%.2f_MeV_%s_%s_WEPL.pdf", energy, getMaterialChar(), getDataTypeChar(dataType)));
+		cFitResults->SaveAs(Form("figures/Fitted_energies_%s_%s_%.2f_MeV_WEPL.pdf", getDataTypeChar(dataType), getMaterialChar(), energy));
 	
   	delete tracks;
 }
@@ -678,18 +717,47 @@ void drawBraggPeakGraphFit(Int_t Runs, Int_t dataType, Bool_t recreate, Float_t 
 	Int_t bin2 = hFitResults->FindLastBinAbove(maxBin/2);
 	Float_t fwhm = hFitResults->GetBinCenter(bin2) - hFitResults->GetBinCenter(bin1);
 	
+	Int_t bin3 = hFitResults->FindFirstBinAbove(maxBin/4);
+	Int_t bin4 = hFitResults->FindLastBinAbove(maxBin/4);
+	Float_t fwqm = hFitResults->GetBinCenter(bin4) - hFitResults->GetBinCenter(bin3);
+	
+	Int_t bin5 = hFitResults->FindFirstBinAbove(maxBin/3);
+	Int_t bin6 = hFitResults->FindLastBinAbove(maxBin/3);
+	Float_t fwtm = hFitResults->GetBinCenter(bin6) - hFitResults->GetBinCenter(bin5);
+	
 	TPaveStats *ps = (TPaveStats*) cFitResults->GetPrimitive("stats");
 	hFitResults->SetBit(TH1::kNoStats);
-	ps->AddText(Form("FWHM = %.2f", fwhm));
-	ps->AddText(Form("Sigma = %.2f", fwhm/2.355));
-// 	TList *list = ps->GetListOfLines();
-// 	TLatex *myt = new TLatex(0,0,Form("FWHM = %.2f", fwhm));
-// 	myt->SetTextFont(42);
-// 	myt->SetTextSize(0.03);
-// 	list->Add(myt);
-// 	
-	cout << "FWHM = " << fwhm << " mm, sigma = " << fwhm / 2.355 << " mm.\n";
+	ps->AddText(Form("Nominal mean = %.2f", expectedMean));
+	ps->AddText(Form("Nominal straggling = %.2f", expectedStraggling));
+	//ps->AddText(Form("FWHM = %.2f", fwhm));
+	ps->AddText(Form("Straggling (from FWHM) = %.2f", fwhm/2.355));
+	ps->AddText(Form("Straggling (from FWTM) = %.2f", fwtm/2.9646));
+	ps->AddText(Form("Straggling (from FWQM) = %.2f", fwqm/3.33));
 	
+	// draw lines on HM, TM, QM
+	Float_t len_hm = expectedStraggling * 2.355/2;
+	Float_t len_tm = expectedStraggling * 2.9646/2;
+	Float_t len_qm = expectedStraggling * 3.330/2;
+	
+	//TLine *hm = new TLine(expectedMean - len_hm, maxBin/2, expectedMean + len_hm, maxBin/2);
+	TLine *hm = new TLine(hFitResults->GetXaxis()->GetBinLowEdge(bin1), maxBin/2, hFitResults->GetXaxis()->GetBinUpEdge(bin2), maxBin/2);
+	TLine *tm = new TLine(hFitResults->GetXaxis()->GetBinLowEdge(bin5), maxBin/3, hFitResults->GetXaxis()->GetBinUpEdge(bin6), maxBin/3);
+	TLine *qm = new TLine(hFitResults->GetXaxis()->GetBinLowEdge(bin3), maxBin/4, hFitResults->GetXaxis()->GetBinUpEdge(bin4), maxBin/4);
+	
+	hm->SetLineColor(kRed); tm->SetLineColor(kRed); qm->SetLineColor(kRed);
+	hm->SetLineWidth(3); tm->SetLineWidth(3); qm->SetLineWidth(3);
+	hm->Draw(); tm->Draw(); qm->Draw();
+	
+	if (useWEPL) {
+		cout << "At " << energy << " MeV: FWHM = " << fwhm << " mm, sigma = " << fwhm / 2.355 << " mm.\n";
+		cout << "At " << energy << " MeV: FWTM = " << fwtm << " mm, sigma = " << fwhm / 2.9646 << " mm.\n";
+		cout << "At " << energy << " MeV: FWQM = " << fwqm << " mm, sigma = " << fwqm / 3.33 << " mm.\n";
+	}
+	else {
+		cout << "At " << energy << " MeV: FWHM = " << fwhm << " MeV, sigma = " << fwhm / 2.355 << " MeV.\n";
+		cout << "At " << energy << " MeV: FWTM = " << fwtm << " MeV, sigma = " << fwhm / 2.9646 << " MeV.\n";
+		cout << "At " << energy << " MeV: FWQM = " << fwqm << " MeV, sigma = " << fwqm / 3.33 << " MeV.\n";
+	}	
 // 	hFitResults->SetStats(0);
 	cFitResults->Modified();
 	

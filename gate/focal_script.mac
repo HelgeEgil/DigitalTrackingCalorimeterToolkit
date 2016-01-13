@@ -38,7 +38,7 @@
 # system type 'scanner'	#
 #=======================#
 
-/control/execute geometry.mac
+/control/execute geometry_script.mac
 
 /gate/scanner/vis/setColor black
 /gate/doublelayer/vis/setColor black

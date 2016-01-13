@@ -496,7 +496,7 @@ Bool_t Track::doFit() {
 	Bool_t cut = WEPLCut * newCutBraggPeak * cutNPointsInTrack;
 	if (!cut) return false;
 
-	Int_t n = GetEntriesFast();
+	Int_t n = GetEntriesFast()+2;
 	Float_t x[n], y[n];
 
 	for (Int_t i=0; i<GetEntriesFast(); i++) {
@@ -507,12 +507,10 @@ Bool_t Track::doFit() {
 		y[i] = getDepositedEnergy(i);
 	}
 	
-	/*
-	x[n-3] = trackLengthWEPL + 4*getWEPLFromTL(dz);
-	x[n-2] = trackLengthWEPL + 5*getWEPLFromTL(dz);
-	x[n-1] = trackLengthWEPL + 6*getWEPLFromTL(dz);
-	y[n-3] = 0; y[n-2] = 0; y[n-1] = 0;
-	*/
+	x[n-2] = x[n-3] - x[n-4];
+	x[n-1] = x[n-2] - x[n-3];
+	y[n-2] = 0; y[n-1] = 0;
+	
 	
 	TGraph *graph = new TGraph(n, x, y);
 
@@ -521,7 +519,7 @@ Bool_t Track::doFit() {
 	func->SetParameter(1, 140);
 	func->SetParLimits(0, 10, run_energy*1.25);
 	func->SetParLimits(1, 100,300);
-	graph->Fit("fit_BP", "B, Q, W", "", 0, 500);
+	graph->Fit("fit_BP", "B, Q, WW, N", "", 0, 500);
 
 	fitEnergy_ = func->GetParameter(0);
 	fitScale_ = func->GetParameter(1);

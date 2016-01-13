@@ -9,7 +9,7 @@ if [ $# -ne 5 ]; then
 	exit
 fi
 
-if [ "$1" != "Aluminium" ] && [ "$1" != "Tungsten" ] && [ "$1" != "PMMA" ] ; then
+if [ "$1" != "Aluminium" ] && [ "$1" != "Tungsten" ] && [ "$1" != "myPMMA" ] ; then
 	echo Please input a valid material. Your choice: $1
 	echo "Usage: ./run.sh <material> <energy_from> <energy_increment> <energy_to>"
 	exit
