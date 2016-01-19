@@ -490,6 +490,10 @@ myEpoxy: d=1.18 g/cm3; n=3; state=Solid
         +el: name=Hydrogen   ; n=19
         +el: name=Oxygen     ; n=3
 
+myScintillator: d=1.03 g/cm3; n=2; state=Solid
+        +el: name=Carbon    ; f=0.915
+        +el: name=Hydrogen  ; f=0.085
+
 FR4:	  d=1.782 g/cm3; n=4; state=Solid
         +el: name=Hydrogen   ; f=0.1730
         +el: name=Carbon     ; f=0.1640

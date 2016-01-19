@@ -19,7 +19,6 @@
 /vis/open OGL
 #/vis/open OGLSQt
 /vis/viewer/reset
-/vis/viewer/zoom 5
 /vis/viewer/panTo 0.03 -0.05
 /vis/viewer/set/viewpointThetaPhi 90 0
 /vis/viewer/set/style surface
@@ -71,35 +70,16 @@
 # Physics	#
 #===============#
 
-# Penelope model for low energy EM
-#/gate/physics/addPhysicsList emstandard_opt1 # urban MCS model
-
-# Single scattering??
-
-# Binary cascade, precompound, de-excitation model for hadrons
-# Standard EM
-# Recommended for use at energies below 200 MeV (medical)
-
-# we test for NO HADRONIC PHYSICS
-
 #/gate/physics/addPhysicsList emstandard_opt3
-#/gate/physics/addPhysicsList QGSP_BERT_EMV
-/gate/physics/addPhysicsList QGSP_INCLXX
+/gate/physics/addPhysicsList QGSP_BERT_EMV
+#/gate/physics/addPhysicsList QGSP_INCLXX
+
 /gate/physics/addProcess SingleScattering proton
 
-# thresholds 0.05 mm ... ?
-#/gate/physics/Gamma/SetCutInRegion		   world	0.5 mm
-#/gate/physics/Electron/SetCutInRegion	   world 0.5 mm
-#/gate/physics/Positron/SetCutInRegion	   world	0.5 mm
-#/gate/physics/Proton/SetCutInRegion		   world 0.5 mm
-#/gate/physics/SetMaxStepSizeInRegion     frontabsorber 50 um
-#/gate/physics/SetMaxStepSizeInRegion     spacer 50 um
-#/gate/physics/SetMaxStepSizeInRegion     pcb 50 um
-#/gate/physics/SetMaxStepSizeInRegion     glue 50 um
 /gate/physics/SetMaxStepSizeInRegion      scanner 10 um
 
-/gate/physics/SetMaxStepSizeInRegion	   absorber 50 um
-/gate/physics/SetMaxStepSizeInRegion     filler 50 um
+/gate/physics/SetMaxStepSizeInRegion	   absorber 300 um
+/gate/physics/SetMaxStepSizeInRegion      filler 300 um
 
 /gate/physics/ActivateStepLimiter         charged
 /gate/physics/ActivateStepLimiter         gamma
@@ -110,37 +90,21 @@
 /gate/physics/Gamma/SetCutInRegion     scanner 10 um
 /gate/physics/Proton/SetCutInRegion    scanner 10 um
 
-#/gate/physics/Electron/SetCutInRegion   active 5 um
-#/gate/physics/Positron/SetCutInRegion   active 5 um
-#/gate/physics/Gamma/SetCutInRegion     active 5 um
-#
-#/gate/physics/Electron/SetCutInRegion   passive 50 um
-#/gate/physics/Positron/SetCutInRegion   passive 50 um
-#/gate/physics/Gamma/SetCutInRegion     passive 50 um
-#
-#/gate/physics/Electron/SetCutInRegion   pcb 50 um
-#/gate/physics/Positron/SetCutInRegion   pcb 50 um
-#/gate/physics/Gamma/SetCutInRegion     pcb 50 um
-#
-#/gate/physics/Electron/SetCutInRegion   glue 50 um
-#/gate/physics/Positron/SetCutInRegion   glue 50 um
-#/gate/physics/Gamma/SetCutInRegion     glue 50 um
-#
-/gate/physics/Electron/SetCutInRegion   absorber 300 um
-/gate/physics/Positron/SetCutInRegion   absorber 300 um
+/gate/physics/Electron/SetCutInRegion  absorber 300 um
+/gate/physics/Positron/SetCutInRegion  absorber 300 um
 /gate/physics/Gamma/SetCutInRegion     absorber 300 um
 #
-/gate/physics/Electron/SetCutInRegion   filler 300 um
-/gate/physics/Positron/SetCutInRegion   filler 300 um
+/gate/physics/Electron/SetCutInRegion  filler 300 um
+/gate/physics/Positron/SetCutInRegion  filler 300 um
 /gate/physics/Gamma/SetCutInRegion     filler 300 um
-#
-#/gate/physics/Electron/SetCutInRegion   frontabsorber 300 um
-#/gate/physics/Positron/SetCutInRegion   frontabsorber 300 um
-#/gate/physics/Gamma/SetCutInRegion     frontabsorber 300 um
-#
-#/gate/physics/Electron/SetCutInRegion   spacer 300 um
-#/gate/physics/Positron/SetCutInRegion   spacer 300 um
-#/gate/physics/Gamma/SetCutInRegion     spacer 300 um
+
+/gate/physics/Electron/SetCutInRegion  frontabsorber 300 um
+/gate/physics/Positron/SetCutInRegion  frontabsorber 300 um
+/gate/physics/Gamma/SetCutInRegion     frontabsorber 300 um
+
+/gate/physics/Electron/SetCutInRegion  spacer 300 um
+/gate/physics/Positron/SetCutInRegion  spacer 300 um
+/gate/physics/Gamma/SetCutInRegion     spacer 300 um
 
 /gate/run/initialize
 
@@ -151,20 +115,29 @@
 # ADD PROTON BEAM	      #
 #=======================#
 
-/gate/source/addSource PBS PencilBeam
-/gate/source/PBS/setParticleType proton
-/gate/source/PBS/setEnergy {energy} MeV
-/gate/source/PBS/setSigmaEnergy 0. MeV
-#/gate/source/PBS/setPosition 0. 0. -25. cm
-/gate/source/PBS/setPosition 0. 0. -5.2 cm
-/gate/source/PBS/setSigmaX 7. mm
-/gate/source/PBS/setSigmaY 7. mm
-/gate/source/PBS/setSigmaTheta 0.1 mrad
-/gate/source/PBS/setSigmaPhi 0.1 mrad
-/gate/source/PBS/setEllipseXThetaEmittance 1 mm*mrad
-/gate/source/PBS/setEllipseYPhiEmittance 1 mm*mrad
-/gate/source/PBS/setEllipseXThetaRotationNorm positive
-/gate/source/PBS/setEllipseYPhiRotationNorm positive
+/gate/source/addSource uniformBeam gps
+/gate/source/uniformBeam/gps/particle proton
+/gate/source/uniformBeam/gps/energytype Mono
+/gate/source/uniformBeam/gps/monoenergy {energy} MeV
+/gate/source/uniformBeam/gps/type Plane
+/gate/source/uniformBeam/gps/shape Square
+/gate/source/uniformBeam/gps/halfx 25. mm
+/gate/source/uniformBeam/gps/halfy 25. mm
+/gate/source/uniformBeam/gps/centre 0. 0. -20. cm
+
+#/gate/source/addSource PBS PencilBeam
+#/gate/source/PBS/setParticleType proton
+#/gate/source/PBS/setEnergy {energy} MeV
+#/gate/source/PBS/setSigmaEnergy 0. MeV
+#/gate/source/PBS/setPosition 0. 0. -5.2 cm
+#/gate/source/PBS/setSigmaX 7. mm
+#/gate/source/PBS/setSigmaY 7. mm
+#/gate/source/PBS/setSigmaTheta 0.1 mrad
+#/gate/source/PBS/setSigmaPhi 0.1 mrad
+#/gate/source/PBS/setEllipseXThetaEmittance 1 mm*mrad
+#/gate/source/PBS/setEllipseYPhiEmittance 1 mm*mrad
+#/gate/source/PBS/setEllipseXThetaRotationNorm positive
+#/gate/source/PBS/setEllipseYPhiRotationNorm positive
 
 #=======================#
 # Add output		#

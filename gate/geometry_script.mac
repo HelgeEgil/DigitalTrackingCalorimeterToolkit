@@ -12,37 +12,33 @@
 /gate/scanner/setMaterial Air
 /gate/scanner/vis/forceWireframe
 
-/gate/world/daughters/name phantom
-/gate/world/daughters/insert cylinder
-/gate/phantom/geometry/setRmin 0. mm
-/gate/phantom/geometry/setRmax 20. mm
-/gate/phantom/geometry/setHeight 25. mm
-/gate/phantom/geometry/setPhiStart 0 deg
-/gate/phantom/geometry/setDeltaPhi 360 deg
-/gate/phantom/placement/setTranslation 0. 0. -82.54 mm
-#/gate/phantom/setMaterial PMMA
-/gate/phantom/setMaterial Air
+# Scintillators
+/gate/scanner/daughters/name scintillator_F
+/gate/scanner/daughters/insert box
+/gate/scintillator_F/geometry/setXLength 4. cm
+/gate/scintillator_F/geometry/setYLength 4. cm
+/gate/scintillator_F/geometry/setZLength 1. cm
+/gate/scintillator_F/placement/setTranslation 0. 0. -75. mm # 50 + 65
+/gate/scintillator_F/setMaterial myScintillator
+/gate/scintillator_F/vis/forceWireframe
 
-/gate/phantom/daughters/name west
-/gate/phantom/daughters/insert cylinder
-/gate/west/geometry/setRmin 0. mm
-/gate/west/geometry/setRmax 5. mm
-/gate/west/geometry/setHeight 20. mm
-/gate/west/geometry/setPhiStart 0 deg
-/gate/west/geometry/setDeltaPhi 360 deg
-/gate/west/placement/setTranslation 10 0. 0. mm
-#/gate/west/setMaterial Aluminium
-/gate/west/setMaterial Air
+/gate/scanner/daughters/name scintillator_H
+/gate/scanner/daughters/insert box
+/gate/scintillator_H/geometry/setXLength 4. cm
+/gate/scintillator_H/geometry/setYLength 1. cm
+/gate/scintillator_H/geometry/setZLength 0.5 cm
+/gate/scintillator_F/placement/setTranslation 0. 0. -176. mm # 50 + 166
+/gate/scintillator_H/setMaterial myScintillator
+/gate/scintillator_H/vis/forceWireframe
 
-/gate/phantom/daughters/name east
-/gate/phantom/daughters/insert cylinder
-/gate/east/geometry/setRmin 0. mm
-/gate/east/geometry/setRmax 5. mm
-/gate/east/geometry/setHeight 20. mm
-/gate/east/geometry/setPhiStart 0 deg
-/gate/east/geometry/setDeltaPhi 360 deg
-/gate/east/placement/setTranslation -10 0. 0. mm
-/gate/east/setMaterial Air
+/gate/scanner/daughters/name scintillator_V
+/gate/scanner/daughters/insert box
+/gate/scintillator_V/geometry/setXLength 1. cm
+/gate/scintillator_V/geometry/setYLength 4. cm
+/gate/scintillator_V/geometry/setZLength 0.5 cm
+/gate/scintillator_F/placement/setTranslation 0. 0. -184. mm # 50 + 174
+/gate/scintillator_V/setMaterial myScintillator
+/gate/scintillator_V/vis/forceWireframe
 
 /gate/scanner/daughters/name frontabsorber
 /gate/scanner/daughters/insert box
