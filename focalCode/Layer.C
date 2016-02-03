@@ -30,6 +30,9 @@ void Layer::diffuseLayer(TRandom3 *gRandom) {
 		eDep = frame2D_.GetBinContent(x, y);
 		if (eDep == 0) continue; // not likely
 
+		// TODO: Make hits with edep, and use former edep info instead of polling histo here
+		// Because SetBinContent below will remove info from OTHER spreading events...
+
 		frame2D_.SetBinContent(x, y, 0);
 
 		repeatFactor = eDep * EnergyFactor;
