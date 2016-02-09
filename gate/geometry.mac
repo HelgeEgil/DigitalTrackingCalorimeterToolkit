@@ -1,3 +1,5 @@
+/vis/viewer/set/background white
+
 # world
 /gate/world/geometry/setXLength 100. cm
 /gate/world/geometry/setYLength 100. cm
@@ -11,38 +13,7 @@
 /gate/scanner/geometry/setZLength 80. cm
 /gate/scanner/setMaterial Air
 /gate/scanner/vis/forceWireframe
-
-/gate/world/daughters/name phantom
-/gate/world/daughters/insert cylinder
-/gate/phantom/geometry/setRmin 0. mm
-/gate/phantom/geometry/setRmax 20. mm
-/gate/phantom/geometry/setHeight 25. mm
-/gate/phantom/geometry/setPhiStart 0 deg
-/gate/phantom/geometry/setDeltaPhi 360 deg
-/gate/phantom/placement/setTranslation 0. 0. -82.54 mm
-#/gate/phantom/setMaterial PMMA
-/gate/phantom/setMaterial Air
-
-/gate/phantom/daughters/name west
-/gate/phantom/daughters/insert cylinder
-/gate/west/geometry/setRmin 0. mm
-/gate/west/geometry/setRmax 5. mm
-/gate/west/geometry/setHeight 20. mm
-/gate/west/geometry/setPhiStart 0 deg
-/gate/west/geometry/setDeltaPhi 360 deg
-/gate/west/placement/setTranslation 10 0. 0. mm
-#/gate/west/setMaterial Aluminium
-/gate/west/setMaterial Air
-
-/gate/phantom/daughters/name east
-/gate/phantom/daughters/insert cylinder
-/gate/east/geometry/setRmin 0. mm
-/gate/east/geometry/setRmax 5. mm
-/gate/east/geometry/setHeight 20. mm
-/gate/east/geometry/setPhiStart 0 deg
-/gate/east/geometry/setDeltaPhi 360 deg
-/gate/east/placement/setTranslation -10 0. 0. mm
-/gate/east/setMaterial Air
+/gate/scanner/vis/setVisible 0
 
 /gate/scanner/daughters/name frontabsorber
 /gate/scanner/daughters/insert box
@@ -51,8 +22,9 @@
 /gate/frontabsorber/geometry/setZLength 1.5 mm
 /gate/frontabsorber/placement/setTranslation 0. 0. -50. mm
 /gate/frontabsorber/setMaterial Aluminium
-/gate/frontabsorber/vis/forceWireframe
+#/gate/frontabsorber/vis/forceWireframe
 /gate/frontabsorber/vis/setColor grey
+/gate/frontabsorber/vis/setVisible 0
 
 /gate/scanner/daughters/name doublelayer
 /gate/scanner/daughters/insert box
@@ -61,9 +33,9 @@
 /gate/doublelayer/geometry/setZLength 3.84 mm
 /gate/doublelayer/placement/setTranslation 0. 0. -43.7 mm
 /gate/doublelayer/setMaterial Air
-/gate/doublelayer/vis/setColor white
-/gate/doublelayer/vis/forceWireframe
-/gate/doublelayer/disable
+/gate/doublelayer/vis/setColor black
+#/gate/doublelayer/vis/forceWireframe
+/gate/doublelayer/vis/setVisible 0 
 
 /gate/doublelayer/daughters/name layer
 /gate/doublelayer/daughters/insert box
@@ -73,8 +45,8 @@
 /gate/layer/placement/setTranslation 0. 0. 0. mm
 /gate/layer/setMaterial Air
 /gate/layer/vis/setColor white
-/gate/layer/vis/forceWireframe
-/gate/layer/disable
+#/gate/layer/vis/forceWireframe
+/gate/layer/vis/setVisible 0
 
 /gate/layer/daughters/name absorber
 /gate/layer/daughters/insert box
@@ -84,7 +56,7 @@
 /gate/absorber/placement/setTranslation 0. -5.725 -0.2 mm
 #/gate/absorber/setMaterial Tungsten
 /gate/absorber/setMaterial Aluminium
-/gate/absorber/vis/forceWireframe
+#/gate/absorber/vis/forceWireframe
 /gate/absorber/vis/setColor grey
 
 /gate/layer/daughters/name filler
@@ -95,7 +67,7 @@
 /gate/filler/placement/setTranslation 0. 9.375 0.7 mm # was 9.275
 #/gate/filler/setMaterial Tungsten
 /gate/filler/setMaterial Aluminium
-/gate/filler/vis/forceWireframe
+#/gate/filler/vis/forceWireframe
 /gate/filler/vis/setColor grey
 
 /gate/layer/daughters/name pcb
@@ -106,7 +78,7 @@
 /gate/pcb/placement/setTranslation 0. -10.05 0.625 mm
 /gate/pcb/setMaterial PCB
 /gate/pcb/vis/setColor green
-/gate/pcb/vis/forceWireframe
+#/gate/pcb/vis/forceWireframe
 
 /gate/layer/daughters/name glue
 /gate/layer/daughters/insert box
@@ -116,7 +88,7 @@
 /gate/glue/placement/setTranslation 0. -10.05 0.715 mm
 /gate/glue/setMaterial Water # fixme
 /gate/glue/vis/setColor yellow
-/gate/glue/vis/forceWireframe
+#/gate/glue/vis/forceWireframe
 
 /gate/layer/daughters/name passive
 /gate/layer/daughters/insert box
@@ -126,7 +98,7 @@
 /gate/passive/placement/setTranslation 0. -9.9 0.805 mm
 /gate/passive/setMaterial Silicon
 /gate/passive/vis/setColor white
-/gate/passive/vis/forceWireframe
+#/gate/passive/vis/forceWireframe
 
 # couple this to an SD
 /gate/layer/daughters/name active
@@ -137,6 +109,7 @@
 /gate/active/placement/setTranslation -9.65 -10.05 0.895 mm # was x -9.85
 /gate/active/vis/setColor red
 /gate/active/vis/forceWireframe
+/gate/active/vis/setVisible 0
 
 # we copy active with a linear 1x repeater
 # move x by diff(9.85, -9.85) = 19.7
@@ -165,13 +138,13 @@
 
 /gate/active/daughters/name pixels
 /gate/active/daughters/insert box
-/gate/pixels/geometry/setXLength 1.18 mm
+/gate/pixels/geometry/setXLength 1.18 mm # 1.18
 /gate/pixels/geometry/setYLength 1.18 mm
 /gate/pixels/geometry/setZLength 0.03 mm
 /gate/pixels/placement/setTranslation -9.01 9.01 0. mm 
 /gate/pixels/setMaterial Silicon
 /gate/pixels/vis/setColor red
-/gate/pixels/vis/forceWireframe
+#/gate/pixels/vis/forceWireframe
 
 # repeat pixels
 # Pixel size = 19.2 mm / NPixels
@@ -179,6 +152,7 @@
 # LOW RESOLUTION
 # WE GO FROM 640 x 640 to 16 x 16
 # Repeat vector from 0.03 to 0.03 x (640 / 16) = 0.03 x 40 = 1.2
+
 
 /gate/pixels/repeaters/insert cubicArray
 /gate/pixels/cubicArray/setRepeatNumberX 16
@@ -195,7 +169,7 @@
 /gate/spacer/placement/setTranslation -23. -16.15 0.75 mm
 /gate/spacer/setMaterial PCB # fixme
 /gate/spacer/vis/setColor green
-/gate/spacer/vis/forceWireframe
+#/gate/spacer/vis/forceWireframe
 
 /gate/spacer/repeaters/insert linear
 /gate/spacer/linear/setRepeatNumber 2
@@ -203,15 +177,8 @@
 /gate/spacer/linear/autoCenter false
 
 # repeat layer once to get 4x chip
-/gate/layer/repeaters/insert genericRepeater
-/gate/layer/genericRepeater/setPlacementsFilename layer.placements
+#/gate/layer/repeaters/insert genericRepeater
+#/gate/layer/genericRepeater/setPlacementsFilename layer.placements
 
-# repeat layers
-# FOCAL has 24 layers
-#/gate/doublelayer/repeaters/insert linear
-#/gate/doublelayer/linear/setRepeatNumber 12
-#/gate/doublelayer/linear/setRepeatVector 0. 0. 3.84 mm
-#/gate/doublelayer/linear/autoCenter false
-
-/gate/doublelayer/repeaters/insert genericRepeater
-/gate/doublelayer/genericRepeater/setPlacementsFilename doublelayer.placements
+#/gate/doublelayer/repeaters/insert genericRepeater
+#/gate/doublelayer/genericRepeater/setPlacementsFilename doublelayer_notracker.placements

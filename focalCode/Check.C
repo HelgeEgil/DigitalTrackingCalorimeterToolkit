@@ -1,6 +1,12 @@
 #define Check_cxx
 #include "Check.h"
+#include "MaterialConstants.h"
+#include "MaterialConstants.C"
+#include "Track_conversion.h"
+#include "Track_conversion.C"
+#include <TSystem.h>
 #include <TH2.h>
+#include <TF1.h>
 #include <TStyle.h>
 #include <TCanvas.h>
 #include <iostream>
@@ -10,6 +16,17 @@
 #include <THStack.h>
 #include <TPad.h>
 #include <TMath.h>
+#include <Math/SpecFunc.h>
+#include <Math/SpecFuncMathCore.h>
+#include <Math/SpecFuncMathMore.h>
+
+double hermite(unsigned n, double x);
+#ifndef __CINT__
+#include <boost/math/special_functions.hpp>
+double hermite(unsigned n, double x) {
+	return boost::math::hermite(n, x);
+}
+#endif
 
 void Check::BinLogY(TH2 *h) {
    TAxis *axis = h->GetYaxis();
@@ -29,7 +46,110 @@ void Check::BinLogY(TH2 *h) {
    delete new_bins;
 }
 
-void Check::Loop()
+Double_t parabolic_cylinder_function(Double_t nu, Double_t z) {
+	// From N. M. Temme 2000 (J of Comp and Applied Math 121 (2000) 221-246)
+	// Implementation of parabolic_cylinder_function
+	// Use Confluent Hypergeometric Functions of the first kind, in conf_hyperg in libMathMore
+	// And contiunous gamma function, also in libMathMore 
+	
+	// From the article: "Another notation found in the literature is D_nu (z) = U(-v-1/2, z)"
+	Double_t a = -nu - 0.5;
+	
+	// We use the solution U(a, z) with a = -nu - 1/2
+	
+	Double_t z2 = pow(z, 2);
+
+	Double_t y1 =     exp(-0.25 * z2) * ROOT::Math::conf_hyperg(0.5*a + 0.25, 0.5, 0.5 * z2);
+	Double_t y2 = z * exp(-0.25 * z2) * ROOT::Math::conf_hyperg(0.5*a + 0.75, 1.5, 0.5 * z2);
+
+	Double_t t1 = pow(2, -0.25) * y1 / ROOT::Math::tgamma(0.75 + 0.5*a);
+	Double_t t2 = pow(2,  0.25) * y2 / ROOT::Math::tgamma(0.25 + 0.5*a);
+
+//	cout << "z = " << z << ", t1 = " << t1 << ", t2 = " << t2 << ", sum = " << t1-t2 <<  endl;
+	
+	Double_t U = sqrt(3.14159265) * pow(2, -0.5 * a) * (t1 - t2);
+	
+	return U;
+}
+
+Double_t real_DBP(Double_t z, Double_t E0, Double_t phi0) {
+	// From Bortfeld 1997 (Med Phys 24 (2024))
+	
+//	Double_t alpha = 0.0033; // proportionality factor
+//	Double_t p = 1.6891; // exponent of range-energy relation
+	
+ 	Double_t alpha = 0.0022;
+ 	Double_t p = 1.77;
+	
+	Double_t pinv = 1. / p;
+	Double_t R0 = alpha * pow(E0, p); // range
+	
+	Double_t beta = 0.012; // slope parameter of fluence reduction relation
+	Double_t gamma = 0; // fraction of locally absorbed energy released in nonelastic nuclear interactions
+	Double_t alpha_prime = 0.087; // approx 1/(4pi epsilon_0^2) e^4 NZ, 0.087 MeV^2/cm for water
+	Double_t sigma_mono = sqrt(alpha_prime * ( pow(p,3) * pow(alpha,2*pinv)) / ( 3*p - 2)  * pow(R0, 3-2*pinv));
+	Double_t sigma_E0 = 0; // width of Gaussian energy spectrum (0.01*E0 for 1 %)
+	Double_t epsilon = 0.2; // fraction of primary fluence contribution to the tail of the energy spectrum
+	Double_t rho = 1; // density of water
+	
+	Double_t sigma = sqrt(pow(sigma_mono, 2) + pow(sigma_E0 * alpha * p * pow(E0, p-1), 2));
+
+	static bool printed_sigma = false;
+	if (!printed_sigma) {
+		cout << "Sigma from multiple scattering: " << sigma_mono *10 << " mm.\n";
+		cout << "Sigma combined with initial energy, after phenomenological correction: " << sigma *10 << "mm.\n";
+		printed_sigma = true;
+	}
+
+
+	Double_t zeta = (R0 - z) / sigma;
+	
+//  	cout << "depth = " << z << ", range = " << R0 << ", sigma = " << sigma << ", zeta = " << zeta << endl;
+	
+	Int_t limit = 10;
+	
+	if (z < R0 - limit*sigma) {
+//  	if (true) {
+		Double_t Dhat = phi0 * (pow(R0-z,pinv-1) + (beta+gamma*beta*p)*pow(R0-z,pinv)) 
+							/ (rho*p*pow(alpha,pinv) * (1+beta*R0));
+		return Dhat;
+	}
+	
+	else if (z >= R0 - limit*sigma && z < R0 + 5*sigma) {
+		Double_t t1 = (1/sigma) * parabolic_cylinder_function(-pinv, -zeta);
+		Double_t t2 = (beta * pinv + gamma * beta + epsilon / R0) * parabolic_cylinder_function(-pinv-1, -zeta);
+		Double_t nom = exp(-pow(zeta, 2) * 0.25) * pow(sigma, pinv) * ROOT::Math::tgamma(pinv);
+		Double_t denom = sqrt(2 * 3.14159265) * rho * p * pow(alpha, pinv) * (1 + beta * R0);
+		
+// 		cout << "for zeta = " << zeta << ", ";
+// 		cout << "t1 = " << t1 << ", t2 = " << t2 << ", phi nom/denom = " << phi0 * nom/denom << endl;
+		
+		Double_t D = phi0 * nom / denom * (t1 + t2);
+		return D;
+	}
+	
+	else {
+		return 0;
+	}
+	
+	return 0;
+}
+
+Double_t fitfunc_real_DBP(Double_t *v, Double_t *par) {
+	// Based on Bortfeld and Schlegel 1997
+
+	Double_t depth = v[0] / 10;
+	Double_t energy = par[0];
+	Double_t scale = par[1];
+	
+	Double_t fitval = real_DBP(depth, energy, scale);
+
+	if (isnan(fitval)) fitval = 0;
+
+	return fitval;
+}
+
+void Check::Loop(Double_t energy)
 {
 //   In a ROOT session, you can do:
 //      Root > .L Check.C
@@ -68,15 +188,21 @@ void Check::Loop()
    TCanvas *c5 = new TCanvas("c5", "c5", 800, 600);
    TCanvas *c6 = new TCanvas("c6", "c6", 800, 600);
 
-   Int_t nbinsx = 200;
-   Int_t xfrom = -60;
-   Int_t xto = 10;
-   Int_t nbinsy = 200;
+	TCanvas *c7 = new TCanvas("c7", "c7", 800, 600);
+	TCanvas *c8 = new TCanvas("c8", "c8", 800, 600);
+	TCanvas *c9 = new TCanvas("c9", "c9", 800, 600);
+
+   Int_t nbinsx = 3200;
+   Int_t xfrom = -5;
+   Int_t xto = 900;
+   Int_t nbinsy = 400;
    Int_t yfrom = 1e-3;
    Int_t yto = 3;
 
    Int_t yfromlog = -4;
    Int_t ytolog = 1;
+
+	Float_t x_compensate = 0; // was 44.8
 
    TH2I *h2DAll = new TH2I("h2DAll", "E_{dep} vs z for all processes", nbinsx, xfrom, xto, nbinsy, yfromlog, ytolog);
    TH2I *h2DMCS = new TH2I("h2DMCS", "Multiple Coulomb Scattering", nbinsx, xfrom, xto, nbinsy, yfromlog, ytolog);
@@ -85,6 +211,10 @@ void Check::Loop()
    TH2I *h2DPI = new TH2I("h2DPI", "Inelastic scattering of protons", nbinsx, xfrom, xto, nbinsy, yfromlog, ytolog);
    TH2I *h2DTransportation = new TH2I("h2DTransportation", "Transportation", nbinsx, xfrom, xto, nbinsy, yfromlog, ytolog);
    TH2I *h2DSL = new TH2I("h2DSL", "Step limiter", nbinsx, xfrom, xto, nbinsy, yfromlog, ytolog);
+
+	TH1F *hZ = new TH1F("hZ", "Z profile", nbinsx, xfrom + x_compensate, xto + x_compensate);
+	TH1F *hRange = new TH1F("hRange", "Primary ranges", nbinsx, xfrom + x_compensate, xto + x_compensate);
+	TH1F *hRange2 = new TH1F("hRange2", "Primary ranges", nbinsx, xfrom + x_compensate, xto + x_compensate);
 
    BinLogY(h2DAll); BinLogY(h2DMCS); BinLogY(h2DhIoni); BinLogY(h2DionIoni); BinLogY(h2DPI); BinLogY(h2DTransportation); BinLogY(h2DSL);
 
@@ -115,11 +245,8 @@ void Check::Loop()
 
    TH2F *h2DLP = new TH2F("h2DLP", "Local position for pixels", 1000, -20, 20, 1000, -20, 20);
 
-//   hFractionhIoni->SetFillColor(kRed);
    hFractionhIoni->SetLineColor(kBlack);
-//   hFractionProtonInelastic->SetFillColor(kRed-4);
    hFractionProtonInelastic->SetLineColor(kBlack);
-//   hFractionMCS->SetFillColor(kRed-8);
    hFractionMCS->SetLineColor(kBlack);
 
    Bool_t absorber;
@@ -142,6 +269,9 @@ void Check::Loop()
 
    Int_t lastEvent = -1;
 
+	Float_t lastRange = 0;
+	Int_t lastID = -1;
+
    cout << nentries << " entries.\n";
 
    for (Long64_t jentry=0; jentry<nentries;jentry++) {
@@ -153,11 +283,14 @@ void Check::Loop()
       }
 
       nb = fChain->GetEntry(jentry);   nbytes += nb;
-      // if (Cut(ientry) < 0) continue;
-
-//      if (volumeID[4] < 3) continue;
-      Float_t z = posZ;
+      
+		Float_t z = posZ;
       Float_t y = posY;
+		Float_t x = posX;
+
+		if (lastID < 0) {
+			lastID = eventID;
+		}
 
       if (volumeID[4] == 0) absorber = kTRUE;
       else absorber = kFALSE;
@@ -171,6 +304,18 @@ void Check::Loop()
       if (kTRUE) {
          h2DLP->Fill(posX, posY, edep);
       }
+			hZ->Fill(z + x_compensate, edep);
+
+		if (parentID == 0) {
+			if (eventID != lastID) {
+				hRange->Fill(lastRange + x_compensate);
+			}
+
+			hRange2->Fill(posZ + x_compensate);
+
+			lastRange = posZ;
+			lastID = eventID;
+		}
 
       // 2212 protons
       // 2112 neutrons
@@ -184,31 +329,15 @@ void Check::Loop()
       if (PDGEncoding != 22 && PDGEncoding != 2212 && PDGEncoding != 11 && PDGEncoding != 2112 && PDGEncoding != -11) {
         part = PDGEncoding - 1000000000;
         if (part > 10000000) {
-//           cout << "Strange particle with L = " << part/10000000 << endl;
            part -= part - (part%10000000);
         }
 
          partZ = part/10000;
          part -= partZ*10000;
-//         cout << "Z = " << partZ << ", ";
 
          partA = part/10;
          part -= partA*10;
-//         cout << "A = " << partA << endl;
       }
-
-      /*
-      if (lastEvent != eventID) {
-
-         if (parentID == 0) cout << "Primary particle? (ID = " << PDGEncoding << ")\n";
-         else cout << "Secondary particle? (ID = " << PDGEncoding << ")\n";
-
-         if (parentID != 0 && PDGEncoding == 2212) cout << "----------------- SECONDARY PROTON ---------------- \n";
-
-         lastEvent = eventID;
-
-      }
-      */
 
       // then onto the processes
 
@@ -293,7 +422,41 @@ void Check::Loop()
 
    // TPad(const char* name, const char* title, Double_t xlow, Double_t ylow, Double_t xup, Double_t yup, Color_t color = -1, Short_t bordersize = -1, Short_t bordermode = -2)
    // where 0 = leftmost and 1 = rightmost in pad dimensions
-   
+
+	// range 1: 80 % of maximum for bragg peak on distal edge
+	Double_t range_1 = hZ->GetXaxis()->GetBinCenter(hZ->FindLastBinAbove(hZ->GetMaximum() * 0.8));
+
+	// range 2: 50 % of maximum for remainding protons plots
+	Double_t range_2 = hRange2->GetXaxis()->GetBinCenter(hRange2->FindLastBinAbove(hRange2->GetMaximum() * 0.5));
+
+	Double_t range_3 = hRange->GetXaxis()->GetBinCenter(hRange->GetMaximumBin());
+
+	Double_t alpha = 0.022; //0.033; // proportionality factor
+	Double_t p = 1.77; // 6891; // exponent of range-energy relation
+	
+	Double_t energy_1 = pow(range_1 / alpha, 1/p);
+	Double_t energy_2 = pow(range_2 / alpha, 1/p);
+	Double_t energy_3 = pow(range_3 / alpha, 1/p);
+
+	cout << "Maximum from bragg peak plot, 80\% of maximum on distal edge: " << range_1 << " mm. (" << energy_1 << " MeV).\n";
+	cout << "Maximum from range plot: 50\% of maximum for remainding proton plots " << range_2 << " mm. (" << energy_2 << " MeV).\n";
+	cout << "Maximum from hRange plot: Max bin " << range_3 << " mm. (" << energy_3 << " MeV).\n";
+
+	Double_t sigma = 0.012 * pow(range_2/10, 0.935) * 10;
+
+	cout << "Estimated straggling from 0.012*pow(range plot range, 0.935): " << sigma << " mm.\n";
+
+	// fit on hZ
+	
+	TF1 *func = new TF1("fit_real_BP", fitfunc_real_DBP, 0, 900, 2);
+	func->SetParameter(0,energy); // energy
+	func->SetParameter(1, 100); // scale
+	func->SetParLimits(0, energy*0.75, energy*1.25);
+	func->SetParLimits(1, 20,400);
+	hZ->Fit("fit_real_BP", "B, WW, Q", "", 0, 900);
+
+	cout << "Estimated energy from fit: " << func->GetParameter(0) << " MeV.\n";
+
    TPad *pad1  = new TPad("pad1",  "Pad 1",       0.0, 0.0, 0.4, 1.0);
    TPad *pad2d = new TPad("pad2d", "Lower pad 2", 0.4, 0.0, 0.6, 0.5);
    TPad *pad2u = new TPad("pad2u", "Upper pad 2", 0.4, 0.5, 0.6, 1.0);
@@ -384,9 +547,7 @@ void Check::Loop()
 //   hs->Add(hFractionhIoni);
 //   hs->Add(hFractionProtonInelastic);
 //   hs->Add(hFractionMCS);
-
-   /*
-    *
+   
    
    hAllProcesses->Draw();
    hhIoni->Draw("same");
@@ -395,9 +556,6 @@ void Check::Loop()
    hMCS->Draw("same");
    
    leg->Draw();
-
-   *
-   */
 
    c3->cd(1);
       c3->SetLogz();
@@ -489,6 +647,27 @@ void Check::Loop()
       h2DLP->SetXTitle("X [mm]");
       h2DLP->SetYTitle("Y [mm]");
       h2DLP->Draw("COLZ");
+
+	c7->cd();
+		hZ->SetXTitle("Z [mm]");
+		hZ->SetYTitle("Edep [MeV]");
+		hZ->SetFillColor(kBlue-7);
+		hZ->SetLineColor(kBlack);
+		hZ->Draw();
+
+	c8->cd();
+		hRange->SetXTitle("Range [mm]");
+		hRange->SetYTitle("Number of primaries");
+		hRange->SetFillColor(kBlue-7);
+		hRange->SetLineColor(kBlack);
+		hRange->Draw();
+
+	c9->cd();
+		hRange2->SetXTitle("Range [mm]");
+		hRange2->SetYTitle("Number of primaries");
+		hRange2->SetFillColor(kBlue-7);
+		hRange2->SetLineColor(kBlack);
+		hRange2->Draw();
 
 //   c2->cd();
 //   hs->Draw();

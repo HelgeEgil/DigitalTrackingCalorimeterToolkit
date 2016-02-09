@@ -1,0 +1,22 @@
+# world
+/gate/world/geometry/setXLength 100. cm
+/gate/world/geometry/setYLength 100. cm
+/gate/world/geometry/setZLength 300. cm
+
+# system
+/gate/world/daughters/name scanner
+/gate/world/daughters/insert box
+/gate/scanner/geometry/setXLength 10. cm
+/gate/scanner/geometry/setYLength 10. cm
+/gate/scanner/geometry/setZLength 250. cm
+/gate/scanner/setMaterial Air
+/gate/scanner/vis/forceWireframe
+
+/gate/scanner/daughters/name waterbox
+/gate/scanner/daughters/insert box
+/gate/waterbox/geometry/setXLength 8. cm
+/gate/waterbox/geometry/setYLength 8. cm
+/gate/waterbox/geometry/setZLength 100. cm
+/gate/waterbox/placement/setTranslation 0. 0. 50. cm
+/gate/waterbox/setMaterial Water
+/gate/waterbox/vis/forceWireframe

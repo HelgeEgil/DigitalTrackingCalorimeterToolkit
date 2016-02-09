@@ -27,7 +27,7 @@
 /gate/scintillator_H/geometry/setXLength 4. cm
 /gate/scintillator_H/geometry/setYLength 1. cm
 /gate/scintillator_H/geometry/setZLength 0.5 cm
-/gate/scintillator_F/placement/setTranslation 0. 0. -176. mm # 50 + 166
+/gate/scintillator_H/placement/setTranslation 0. 0. -176. mm # 50 + 166
 /gate/scintillator_H/setMaterial myScintillator
 /gate/scintillator_H/vis/forceWireframe
 
@@ -36,7 +36,7 @@
 /gate/scintillator_V/geometry/setXLength 1. cm
 /gate/scintillator_V/geometry/setYLength 4. cm
 /gate/scintillator_V/geometry/setZLength 0.5 cm
-/gate/scintillator_F/placement/setTranslation 0. 0. -184. mm # 50 + 174
+/gate/scintillator_V/placement/setTranslation 0. 0. -184. mm # 50 + 174
 /gate/scintillator_V/setMaterial myScintillator
 /gate/scintillator_V/vis/forceWireframe
 

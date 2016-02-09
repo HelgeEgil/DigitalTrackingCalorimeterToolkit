@@ -14,6 +14,7 @@
 #include <TObject.h>
 #include <TAxis.h>
 #include <TGraph.h>
+#include <TH1F.h>
 
 using namespace std;
 
@@ -72,6 +73,8 @@ Double_t fitfunc_DBP(Double_t *v, Double_t *par) {
 	return fitval;
 }
 
+
+
 char * getMaterialChar() {
 	char *sMaterial;
 
@@ -88,6 +91,52 @@ char * getDataTypeChar(Int_t dataType) {
 	else if (dataType == kData) sDataType = (char*) "Exp. data";
 
 	return sDataType;
+}
+
+Int_t getFWxMInRange(TH1F* h, Float_t first, Float_t last, Int_t div) {
+	// find the full with at maximum / div (2 = FWHM, 3 = FWTM, etc.)
+	
+	Int_t firstRangeBin = h->GetBin(first);
+	Int_t lastRangeBin = h->GetBin(last);
+	
+	cout << "firstRangeBin = " << firstRangeBin << ", lastRangeBin = " << lastRangeBin << endl;
+	
+	Float_t maxBin = 0;
+	Int_t maxIdx = 0;
+	for (Int_t i=firstRangeBin; i<=lastRangeBin; i++) {
+		cout << h->GetBinContent(i) << endl;
+		if (h->GetBinContent(i) > maxBin ) {
+			maxBin = h->GetBinContent(i);
+			cout << "new max = " << maxBin << endl;
+			maxIdx = i;
+		}
+	}
+	
+	cout << "max value is " << maxBin << " at " << maxIdx << endl;
+	
+	Float_t firstCenter = 0, lastCenter = 0;
+	for (Int_t i=firstRangeBin; i<=lastRangeBin; i++) {
+		if (!firstCenter) {
+			if (h->GetBinContent(i) > maxBin/div) {
+				firstCenter = h->GetBinCenter(i);
+				cout << "firstCenter at " << firstCenter << endl;
+			}
+		}
+		
+		else {
+			if (!lastCenter) {
+				if (h->GetBinContent(i) < maxBin/div) {
+					lastCenter = h->GetBinCenter(i-1);
+					cout << "lastCenter at " << firstCenter << endl;
+				}
+			}
+		}
+	}
+	
+	if (!firstCenter || !lastCenter) return 0;	
+	Float_t width = lastCenter - firstCenter;
+
+	return width * 2 * sqrt( 2 * log(div));
 }
 
 Int_t getMinimumTrackLength(Float_t energy) {

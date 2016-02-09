@@ -53,9 +53,14 @@
 #===============================#
 
 /gate/pixels/attachCrystalSD
-#/gate/absorber/attachCrystalSD
-#/gate/filler/attachCrystalSD
-#/gate/frontabsorber/attachCrystalSD
+/gate/absorber/attachCrystalSD
+/gate/filler/attachCrystalSD
+/gate/frontabsorber/attachCrystalSD
+/gate/scintillator_F/attachCrystalSD
+/gate/scintillator_H/attachCrystalSD
+/gate/scintillator_V/attachCrystalSD
+/gate/pcb/attachCrystalSD
+/gate/glue/attachCrystalSD
 #/gate/phantom/attachCrystalSD
 
 #/gate/doublelayer/attachCrystalSD
@@ -70,41 +75,41 @@
 # Physics	#
 #===============#
 
-#/gate/physics/addPhysicsList emstandard_opt3
-/gate/physics/addPhysicsList QGSP_BERT_EMV
+/gate/geometry/setIonisationPotential Water 75 eV
+/gate/physics/addPhysicsList emstandard_opt3
+#/gate/physics/addPhysicsList QGSP_BERT_EMV
 #/gate/physics/addPhysicsList QGSP_INCLXX
 
-/gate/physics/addProcess SingleScattering proton
+#/gate/physics/addProcess SingleScattering proton
 
-/gate/physics/SetMaxStepSizeInRegion      scanner 10 um
-
-/gate/physics/SetMaxStepSizeInRegion	   absorber 300 um
-/gate/physics/SetMaxStepSizeInRegion      filler 300 um
+/gate/physics/SetMaxStepSizeInRegion      scanner {step_active} um
+/gate/physics/SetMaxStepSizeInRegion	   absorber {step_passive} um
+/gate/physics/SetMaxStepSizeInRegion      filler {step_passive} um
 
 /gate/physics/ActivateStepLimiter         charged
 /gate/physics/ActivateStepLimiter         gamma
 /gate/physics/ActivateStepLimiter         proton
 
-/gate/physics/Electron/SetCutInRegion  scanner 10 um
-/gate/physics/Positron/SetCutInRegion  scanner 10 um
-/gate/physics/Gamma/SetCutInRegion     scanner 10 um
-/gate/physics/Proton/SetCutInRegion    scanner 10 um
+/gate/physics/Electron/SetCutInRegion  scanner {step_active} um
+/gate/physics/Positron/SetCutInRegion  scanner {step_active} um
+/gate/physics/Gamma/SetCutInRegion     scanner {step_active} um
+/gate/physics/Proton/SetCutInRegion    scanner {step_active} um
 
-/gate/physics/Electron/SetCutInRegion  absorber 300 um
-/gate/physics/Positron/SetCutInRegion  absorber 300 um
-/gate/physics/Gamma/SetCutInRegion     absorber 300 um
+/gate/physics/Electron/SetCutInRegion  absorber {step_passive} um
+/gate/physics/Positron/SetCutInRegion  absorber {step_passive} um
+/gate/physics/Gamma/SetCutInRegion     absorber {step_passive} um
 #
-/gate/physics/Electron/SetCutInRegion  filler 300 um
-/gate/physics/Positron/SetCutInRegion  filler 300 um
-/gate/physics/Gamma/SetCutInRegion     filler 300 um
+/gate/physics/Electron/SetCutInRegion  filler {step_passive} um
+/gate/physics/Positron/SetCutInRegion  filler {step_passive} um
+/gate/physics/Gamma/SetCutInRegion     filler {step_passive} um
 
-/gate/physics/Electron/SetCutInRegion  frontabsorber 300 um
-/gate/physics/Positron/SetCutInRegion  frontabsorber 300 um
-/gate/physics/Gamma/SetCutInRegion     frontabsorber 300 um
+/gate/physics/Electron/SetCutInRegion  frontabsorber {step_passive} um
+/gate/physics/Positron/SetCutInRegion  frontabsorber {step_passive} um
+/gate/physics/Gamma/SetCutInRegion     frontabsorber {step_passive} um
 
-/gate/physics/Electron/SetCutInRegion  spacer 300 um
-/gate/physics/Positron/SetCutInRegion  spacer 300 um
-/gate/physics/Gamma/SetCutInRegion     spacer 300 um
+/gate/physics/Electron/SetCutInRegion  spacer {step_passive} um
+/gate/physics/Positron/SetCutInRegion  spacer {step_passive} um
+/gate/physics/Gamma/SetCutInRegion     spacer {step_passive} um
 
 /gate/run/initialize
 
@@ -121,9 +126,10 @@
 /gate/source/uniformBeam/gps/monoenergy {energy} MeV
 /gate/source/uniformBeam/gps/type Plane
 /gate/source/uniformBeam/gps/shape Square
+/gate/source/uniformBeam/gps/direction 0 0 1
 /gate/source/uniformBeam/gps/halfx 25. mm
 /gate/source/uniformBeam/gps/halfy 25. mm
-/gate/source/uniformBeam/gps/centre 0. 0. -20. cm
+/gate/source/uniformBeam/gps/centre 0. 0. -4.5 cm # -20 cm for scintillator
 
 #/gate/source/addSource PBS PencilBeam
 #/gate/source/PBS/setParticleType proton

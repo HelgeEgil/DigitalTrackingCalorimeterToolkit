@@ -126,6 +126,8 @@ void GetTrackerStatistics(Int_t Events, Int_t Runs) {
 
 */
 
+
+
 void getTrackStatistics(Int_t Runs, Int_t dataType, Bool_t recreate, Float_t energy) {
 	Focal f;
 
@@ -490,30 +492,21 @@ void drawBraggPeakFit(Int_t Runs, Int_t dataType, Bool_t recreate, Float_t energ
 	legend->AddEntry(ES, "Expected range straggling", "F");
 	legend->Draw();
 	
-	// find Full Width Half Maximum and draw it in the TPaveStats
-	// Also calculate Full Width Tertiary Maximum and Full Width Quarter Maximum
-	// sigma = 2 sqrt ln 2 FWHM (2.355) = 2 sqrt ln 3 FHTM (2.2965) = 2 sqrt ln 4 FHQM (3.33)
+	Float_t lowerRange = expectedMean - 2*expectedStraggling;
+	Float_t higherRange = expectedMean + 2*expectedStraggling;
 	
-	Int_t bin1 = hFitResults->FindFirstBinAbove(maxBin/2);
-	Int_t bin2 = hFitResults->FindLastBinAbove(maxBin/2);
-	Float_t fwhm = hFitResults->GetBinCenter(bin2) - hFitResults->GetBinCenter(bin1);
-	
-	Int_t bin3 = hFitResults->FindFirstBinAbove(maxBin/4);
-	Int_t bin4 = hFitResults->FindLastBinAbove(maxBin/4);
-	Float_t fwqm = hFitResults->GetBinCenter(bin4) - hFitResults->GetBinCenter(bin3);
-	
-	Int_t bin5 = hFitResults->FindFirstBinAbove(maxBin/3);
-	Int_t bin6 = hFitResults->FindLastBinAbove(maxBin/3);
-	Float_t fwtm = hFitResults->GetBinCenter(bin6) - hFitResults->GetBinCenter(bin5);
+	Float_t sigma_fwhm = getFWxMInRange(hFitResults, lowerRange, higherRange, 2);
+	Float_t sigma_fwtm = getFWxMInRange(hFitResults, lowerRange, higherRange, 3);
+	Float_t sigma_fwqm = getFWxMInRange(hFitResults, lowerRange, higherRange, 4);
 	
 	TPaveStats *ps = (TPaveStats*) cFitResults->GetPrimitive("stats");
 	hFitResults->SetBit(TH1::kNoStats);
 	ps->AddText(Form("Nominal mean = %.2f", expectedMean));
 	ps->AddText(Form("Nominal straggling = %.2f", expectedStraggling));
 	//ps->AddText(Form("FWHM = %.2f", fwhm));
-	ps->AddText(Form("Straggling (from FWHM) = %.2f", fwhm/2.355));
-	ps->AddText(Form("Straggling (from FWTM) = %.2f", fwtm/2.9646));
-	ps->AddText(Form("Straggling (from FWQM) = %.2f", fwqm/3.33));
+	ps->AddText(Form("Straggling (from FWHM) = %.2f", sigma_fwhm));
+	ps->AddText(Form("Straggling (from FWTM) = %.2f", sigma_fwtm));
+	ps->AddText(Form("Straggling (from FWQM) = %.2f", sigma_fwqm));
 	
 	// draw lines on HM, TM, QM
 	Float_t len_hm = expectedStraggling * 2.355/2;
@@ -521,9 +514,10 @@ void drawBraggPeakFit(Int_t Runs, Int_t dataType, Bool_t recreate, Float_t energ
 	Float_t len_qm = expectedStraggling * 3.330/2;
 	
 	//TLine *hm = new TLine(expectedMean - len_hm, maxBin/2, expectedMean + len_hm, maxBin/2);
-	TLine *hm = new TLine(hFitResults->GetXaxis()->GetBinLowEdge(bin1), maxBin/2, hFitResults->GetXaxis()->GetBinUpEdge(bin2), maxBin/2);
-	TLine *tm = new TLine(hFitResults->GetXaxis()->GetBinLowEdge(bin5), maxBin/3, hFitResults->GetXaxis()->GetBinUpEdge(bin6), maxBin/3);
-	TLine *qm = new TLine(hFitResults->GetXaxis()->GetBinLowEdge(bin3), maxBin/4, hFitResults->GetXaxis()->GetBinUpEdge(bin4), maxBin/4);
+	Float_t width = hFitResults->GetXaxis()->GetBinWidth(1)/2;
+	TLine *hm = new TLine(expectedMean-sigma_fwhm/2-width, maxBin/2, expectedMean + sigma_fwhm/2 + width, maxBin/2);
+	TLine *tm = new TLine(expectedMean-sigma_fwtm/2-width, maxBin/3, expectedMean + sigma_fwtm/2 + width, maxBin/3);
+	TLine *qm = new TLine(expectedMean-sigma_fwqm/2-width, maxBin/4, expectedMean + sigma_fwqm/2 + width, maxBin/4);
 	
 	hm->SetLineColor(kRed); tm->SetLineColor(kRed); qm->SetLineColor(kRed);
 	hm->SetLineWidth(3); tm->SetLineWidth(3); qm->SetLineWidth(3);
@@ -543,21 +537,21 @@ void drawBraggPeakFit(Int_t Runs, Int_t dataType, Bool_t recreate, Float_t energ
 		ofstream outputFile;
 		outputFile.open("fit_result.txt", ios::out | ios::app);
 		outputFile << energy << "; " << (int) useWEPL << "; " << expectedMean << "; " << hFitResults->GetMean() << "; " 
-				<< expectedStraggling << "; " << fwhm / 2.355 << "; " << fwtm / 2.9646 << "; "
-				<< fwqm / 3.33 << endl;
+				<< expectedStraggling << "; " << sigma_fwhm << "; " << sigma_fwtm << "; "
+				<< sigma_fwqm << endl;
 		outputFile.close();
 	}
 	
 	
 	if (useWEPL) {
-		cout << "At " << energy << " MeV: FWHM = " << fwhm << " mm, sigma = " << fwhm / 2.355 << " mm.\n";
-		cout << "At " << energy << " MeV: FWTM = " << fwtm << " mm, sigma = " << fwhm / 2.9646 << " mm.\n";
-		cout << "At " << energy << " MeV: FWQM = " << fwqm << " mm, sigma = " << fwqm / 3.33 << " mm.\n";
+		cout << "At " << energy << " MeV: FWHM = " << sigma_fwhm * 2.3550 << " mm, sigma = " << sigma_fwhm << " mm.\n";
+		cout << "At " << energy << " MeV: FWTM = " << sigma_fwtm * 2.9646 << " mm, sigma = " << sigma_fwtm << " mm.\n";
+		cout << "At " << energy << " MeV: FWQM = " << sigma_fwqm * 3.3300 << " mm, sigma = " << sigma_fwqm << " mm.\n";
 	}
 	else {
-		cout << "At " << energy << " MeV: FWHM = " << fwhm << " MeV, sigma = " << fwhm / 2.355 << " MeV.\n";
-		cout << "At " << energy << " MeV: FWTM = " << fwtm << " MeV, sigma = " << fwhm / 2.9646 << " MeV.\n";
-		cout << "At " << energy << " MeV: FWQM = " << fwqm << " MeV, sigma = " << fwqm / 3.33 << " MeV.\n";
+		cout << "At " << energy << " MeV: FWHM = " << sigma_fwhm * 2.3550 << " MeV, sigma = " << sigma_fwhm << " MeV.\n";
+		cout << "At " << energy << " MeV: FWTM = " << sigma_fwtm * 2.9646 << " MeV, sigma = " << sigma_fwtm << " MeV.\n";
+		cout << "At " << energy << " MeV: FWQM = " << sigma_fwqm * 3.3300 << " MeV, sigma = " << sigma_fwqm << " MeV.\n";
 	}
 	
 // 	hFitResults->SetStats(0);
@@ -769,51 +763,50 @@ void drawBraggPeakGraphFit(Int_t Runs, Int_t dataType, Bool_t recreate, Float_t 
   	delete tracks;
 }
 
-/*
+void writeClusterFile(Int_t Runs, Int_t dataType, Float_t energy) {
+	run_energy = energy;
 	
-void WriteClusterFile(Int_t Runs) {
-	// loop through hits in histogram and make a TTree branch of them
-	// Find all hits with neighbours and return a TTree of clusters 
-	// with size + center of gravity
-
-	Focal f;
-
-	vector<TH2F*> *Frame3D = new vector<TH2F*>;
-	f.GetFrame3D(0, Runs, Frame3D);
+	Int_t nClusters = kEventsPerRun * 5 * nLayers;
+	Int_t nHits = kEventsPerRun * 50;
+	Bool_t kRemoveSmallClusters = true;
+	
+	Focal *f = new Focal();
+	CalorimeterFrame *cf = new CalorimeterFrame();
+	Hits * hits = new Hits(nHits);
+	Clusters * clusters = new Clusters(nClusters);
+	
+	for (Int_t i=0; i<Runs; i++) {
+		if (dataType == kMC) {
+			f->getMCFrame(i, cf);	
+			cf->diffuseFrame(new TRandom3(0));
+			hits = cf->findHits();
+			clusters = hits->findClustersFromHits();
+		}
+		
+		else if (dataType == kData) {
+			f->getDataFrame(i, cf, energy);
+			hits = cf->findHits();
+			clusters = hits->findClustersFromHits();
+			
+			if (kRemoveSmallClusters) {
+				Int_t maxRemoveSize = 2;
+				clusters->removeSmallClusters(maxRemoveSize);
+			}
+		}
+	}
 
 	ofstream file("output_all_layers.csv");
 	file << "layer;x;y;clustersize" << endl;
-	// make list of hits
-	for (Int_t L = 0; L < nLayers; L++) { // loop over layers
-		Hits *hits = new Hits(Runs*nLayers*100);
-		Clusters *clusters = new Clusters(Runs*nLayers*20);
 
-		f.FindHits(Frame3D->at(L), hits, L);
-		Int_t nhits = hits->GetEntriesFast();
-
-		cout << "Found " << nhits << " hits." << endl;
-
-		clock_t t;
-		t = clock();
-		cout << "Finding clusters for layer " << L << "....";
-		
-		// in ClusterFinder
-		f. FindClustersFromHits(hits, clusters, Frame3D);
-
-		t = clock() - t;
-		cout << "...done (" << ((float)t)/CLOCKS_PER_SEC << " s)" << endl;
-
-		for (Int_t i = 0; i < clusters->GetEntriesFast(); i++) { // write clusters to file
-			file  << L << ";"
-					<< clusters->getX(i) << ";"
-					<< clusters->getY(i) << ";"
-					<< clusters->getSize(i) << ";" << endl;
-		} // end loop over clusters
-	} // end loop over layers
-
-} // end function FindClustersToLayers
-
-*/
+	for (Int_t i=0; i<clusters->GetEntriesFast(); i++) {
+		file << clusters->getLayer(i) << ";" 
+		     << clusters->getX(i) << ";"
+			 << clusters->getY(i) << ";" 
+			 << clusters->getSize(i) << endl;
+	}
+	
+	file.close();
+}
 
 void Draw2DProjection(Int_t Runs, Int_t dataType, Bool_t recreate, Float_t energy) {
 
@@ -837,12 +830,6 @@ void Draw2DProjection(Int_t Runs, Int_t dataType, Bool_t recreate, Float_t energ
 	
 	TH2F *Frame2D = new TH2F("Frame2D", title, hSizeX, 0, nx*2, hSizeY, 0, ny*2);
 	TH2F *normalizeFrame = new TH2F("normalizeFrame", "title", hSizeX, 0, nx*2, hSizeY, 0, ny*2);
-
-//   gPad->Update();
-
-//   TPaveText *pt = (TPaveText*) gPad->FindObject("title");
-//   pt->InsertText(Form("Angle threshold at %d degrees", angleCut));
-//   pt->InsertText(Form("Track length treshold at %d mm", TLCut));
 
 	for (Int_t i=0; i<ntracks; i++) {
 		Track *thisTrack = tracks->At(i);
@@ -1108,116 +1095,6 @@ void drawTracks3D(Int_t Runs, Int_t dataType, Bool_t recreate, Float_t energy) {
 
 /*
 
-
-void FindClusters(Int_t Runs, Int_t Layer) {
-   // loop through hits in histogram and make a TTree branch of them
-   // Find all hits with neighbours and return a TTree of clusters with size
-   //			+ center of gravity
-
-   Focal f; 
-
-   TCanvas *c1 = new TCanvas("c1", "multipads", 1400, 900);
-   gStyle->SetOptStat(0);
-   c1->Divide(2,1,0.01,0.01, 0);
-
-   TH2F *Frame2D = new TH2F("Frame2D", Form("Energy deposition in layer %i [keV]", Layer), 
-                              nx*2, 0, 2*nx, ny*2, 0, 2*ny);
-  
-   f.GetFrame2D(Runs, Layer, Frame2D);
-   f.DiffuseFrame(Frame2D);
-
-   
-   // Until layer geometry is flipped
-//   Layer = (23 - Layer);
-//
-//   Long64_t nbytes = 0, nb = 0;
-//   for (Long64_t jentry=0; jentry<nentries;jentry++) {
-//      Long64_t ientry = LoadTree(jentry);
-//      if (ientry < 0) break;
-//      nb = fChain->GetEntry(jentry);   nbytes += nb;
-//
-//      if (eventID > Runs) break;
-//
-//      if ((Layer > 0 && level1ID == Layer) || (Layer < 0)) {
-//         Int_t H = level2ID; // up or down
-//         Int_t C = level3ID; // left or right
-//         Int_t px = level4ID; // pixel number
-//         Int_t X = px % nx + nx * C;
-//         if (H == 1) px = ny*nx - px; // if H=1 (down) flip y values
-//         Int_t Y = px / nx + ny * (1 - H);
-//
-//         DiffuseTH2F(Frame2D, X, Y, edep);
-//
-//      } // end if layer is correct
-//   } // end loop over entries
-
-   
-
-   // make list of hits
-   Hits *hits = new Hits(Runs*100);
-   Clusters *clusters = new Clusters(Runs*20);
-
-   f.FindHits(Frame2D, hits, Layer);
-   Int_t nhits = hits->GetEntriesFast();
-
-   cout << "Found " << nhits << " hits." << endl;
-
-   clock_t t;
-   t = clock();
-   cout << "Finding clusters....";
-
-   f.FindClustersFromHits(hits, clusters);
-
-   t = clock() - t;
-   cout << "...done (" << ((float)t)/CLOCKS_PER_SEC << " s)" << endl;
-
-   cout << "Some statistics...." << endl;
-   cout << "From " << Runs << " primary particles, " << clusters->GetEntriesFast() 
-         << " clusters were found." << endl;
-   cout << "The efficiency is " << float(clusters->GetEntriesFast()) / float(Runs) * 100. 
-         << "%." << endl;
-
-   c1->cd(1);
-   Frame2D->Draw("COLZ");
-
-   // Draw ellipses on each cluster:
-
-   for (Int_t i = 0; i < clusters->GetEntriesFast(); i++) {
-      Float_t clusterRadius = sqrt(clusters->getSize(i) / 3.14159265);
-      TEllipse *ellipse = new TEllipse(clusters->getX(i), clusters->getY(i),
-                                       clusterRadius, clusterRadius);
-      ellipse->SetLineWidth(1);
-      ellipse->SetLineColor(2);
-      ellipse->SetFillStyle(0);
-      ellipse->Draw();
-   }
-
-   c1->Update();
-
-   TH1I *cSizeDistribution = new TH1I("cSizeDistribution", 
-         "Cluster Size Distribution using connected neighbours", 70, 0, 70);
-
-   for (Int_t i=0; i<clusters->GetEntriesFast(); i++) {
-      cSizeDistribution->Fill(clusters->getSize(i));
-   }
-
-   c1->cd(2);
-   cSizeDistribution->Draw();
-   c1->Update();
-   
-   // Write information to CSV file
-
-   ofstream csvfile("pixels.csv");
-   csvfile << "Size; x; y" << endl;
-   for (Int_t i = 0; i < clusters->GetEntriesFast();  i++) {
-      csvfile << clusters->getSize(i) << ";" <<
-               clusters->getX(i) << ";" <<
-               clusters->getY(i) << endl;
-   } // end draw first nout clusters
-   csvfile.close();
-
-} // end function FindClusters
-
 void DrawDiffusionCheck(Int_t Runs, Int_t Layer) {
    Focal f;
 
@@ -1249,22 +1126,28 @@ void DrawDiffusionCheck(Int_t Runs, Int_t Layer) {
    c1->Update();
 } // end function Frame2DWithDiffusion
 
+*/
 
 void DrawFrame2D(Int_t Runs, Int_t Layer) {
    // Draw one layer using GetFrame2D
 
-   Focal f;
-
-   TH2F *Frame2D = new TH2F("Frame2D", "Energy deposition in all layers [keV]",
+   Focal *f = new Focal();
+   CalorimeterFrame *cf = new CalorimeterFrame();
+   
+   TList *histogramList = new TList;
+   
+   for (Int_t i=0; i<Runs; i++) {
+	   f->getMCData(i, cf);
+	   histogramList->Add(cf->getTH2F(Layer));
+   }
+ 
+   TH2F *Frame2D = new TH2F("Frame2D", Form("Hit distribution in layer %i", Layer),
                               nx*2, 0, nx*2, ny*2, 0, ny*2);
 
-   f.GetFrame2D(Runs, Layer, Frame2D);
-
+   Frame2D->Merge(histogramList);
    Frame2D->Draw("COLZ");
    gStyle->SetOptStat(0);
 }
-
-*/
 
 void drawData3D(Int_t Runs) {
    Focal *f = new Focal();

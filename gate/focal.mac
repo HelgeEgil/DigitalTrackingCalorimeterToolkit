@@ -16,17 +16,25 @@
 /control/alias chip0 /vis/viewer/panTo -0.02 -0.01
 
 
-/vis/open OGL
+/vis/open OGLIX
 #/vis/open OGLSQt
 /vis/viewer/reset
-/vis/viewer/zoom 5
-/vis/viewer/panTo 0.03 -0.05
-/vis/viewer/set/viewpointThetaPhi 90 0
+/vis/viewer/zoom 8
+/vis/viewer/set/viewpointThetaPhi 160 30
 /vis/viewer/set/style surface
 /vis/drawVolume
-/tracking/storeTrajectory 1
-/vis/scene/endOfEventAction accumulate 25
+/vis/viewer/flush
+#/tracking/storeTrajectory 1
+#/vis/scene/endOfEventAction accumulate 25
 #/vis/scene/add/trajectories
+
+/vis/open DAWNFILE
+/vis/viewer/panTo -0.03 0.02
+/vis/viewer/set/viewpointThetaPhi 160 30
+
+/vis/drawVolume
+/vis/viewer/flush
+
 /vis/viewer/update
 
 /gate/geometry/setMaterialDatabase GateMaterials.db
@@ -42,6 +50,7 @@
 
 /gate/scanner/vis/setColor black
 /gate/doublelayer/vis/setColor black
+
 
 /gate/systems/scanner/level1/attach doublelayer
 /gate/systems/scanner/level2/attach layer
@@ -196,5 +205,5 @@
 
 /gate/random/setEngineName MersenneTwister
 /gate/random/setEngineSeed auto
-/gate/application/setTotalNumberOfPrimaries 150000
+/gate/application/setTotalNumberOfPrimaries 15
 /gate/application/start

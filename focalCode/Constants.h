@@ -19,11 +19,11 @@ const Int_t nTrackers = 4;
 const Float_t dx = 0.03; // mm
 const Float_t dy = 0.03; // mm
 const Float_t dz = 3.84; // mm
-const Int_t kEventsPerRun = 150;
+const Int_t kEventsPerRun = 1000;
 
 // Used for treatment of available experimental data files
-const Int_t nEnergies = 7;
-Int_t energies[nEnergies] = {122, 140, 150, 160, 170, 180, 190};
+const Int_t nEnergies = 8;
+Int_t energies[nEnergies] = {122, 140, 150, 160, 170, 180, 188, 190};
 
 /*
  * Material used for the conversion between the absorber material and the energy
@@ -35,7 +35,7 @@ Int_t energies[nEnergies] = {122, 140, 150, 160, 170, 180, 190};
 */
 
 enum eMaterial {kTungsten, kAluminum, kPMMA};
-const Int_t kMaterial = kPMMA;
+const Int_t kMaterial = kTungsten;
 
 /*
  * Track reconstruction algorithms

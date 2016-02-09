@@ -14,6 +14,7 @@
 #include "Cluster.h"
 
 class TGraph;
+class TH1F;
 
 using namespace std;
 
@@ -25,6 +26,7 @@ Double_t fitfunc_DBP(Double_t *v, Double_t *par);
 char * getMaterialChar();
 char * getDataTypeChar(Int_t dataType);
 Int_t getMinimumTrackLength(Float_t energy);
+Int_t getFWxMInRange(TH1F* h, Float_t first, Float_t last, Int_t div);
 
 
 #endif /* FOCALCODE_TOOLS_H_ */
