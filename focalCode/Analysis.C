@@ -1137,7 +1137,7 @@ void DrawFrame2D(Int_t Runs, Int_t Layer) {
    TList *histogramList = new TList;
    
    for (Int_t i=0; i<Runs; i++) {
-	   f->getMCData(i, cf);
+	   f->getMCFrame(i, cf);
 	   histogramList->Add(cf->getTH2F(Layer));
    }
  
