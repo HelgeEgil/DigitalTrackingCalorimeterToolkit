@@ -1,10 +1,10 @@
 #!/bin/bash
 # Usage: run.sh material energy_from energy_increment energy_to
 
-echo "Usage: ./run.sh <material> <energy_from> <energy_increment> <energy_to> <npart>"
-echo Material: $1, energy_from: $2, energy_increment: $3, energy_to: $4, npart: $5
+echo "Usage: ./run.sh <material> <energy_from> <energy_increment> <energy_to> <npart> <sigma_um>"
+echo Material: $1, energy_from: $2, energy_increment: $3, energy_to: $4, npart: $5, sigma_um: $6
 
-if [ $# -ne 5 ]; then
+if [ $# -ne 6 ]; then
 	echo Invalid number of arguments: $#
 	exit
 fi
@@ -23,5 +23,5 @@ fi
 
 for i in `seq $2 $3 $4`;
 do
-	Gate -a "'[material,$1] [energy,$i] [npart,$5] [step_active,10] [step_passive,10]'" focal_script.mac > terminal_output.txt &
+	Gate -a "'[material,$1] [energy,$i] [npart,$5] [step_active,80] [step_passive,80] [sigma,$6]'" focal_script.mac > terminal_output.txt &
 done

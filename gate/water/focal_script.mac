@@ -41,8 +41,8 @@
 #===============#
 
 /gate/geometry/setIonisationPotential Water 75 eV
-#/gate/physics/addPhysicsList emstandard_opt3
-/gate/physics/addPhysicsList QGSP_BIC
+/gate/physics/addPhysicsList emstandard_opt3
+#/gate/physics/addPhysicsList QGSP_BIC
 
 #/gate/physics/addProcess SingleScattering proton
 
@@ -68,8 +68,9 @@
 
 /gate/source/addSource uniformBeam gps
 /gate/source/uniformBeam/gps/particle proton
-/gate/source/uniformBeam/gps/energytype Mono
-/gate/source/uniformBeam/gps/monoenergy {energy} MeV
+/gate/source/uniformBeam/gps/ene/type Gauss
+/gate/source/uniformBeam/gps/ene/mono {energy} MeV
+/gate/source/uniformBeam/gps/ene/sigma {sigma} MeV
 /gate/source/uniformBeam/gps/type Plane
 /gate/source/uniformBeam/gps/shape Square
 /gate/source/uniformBeam/gps/direction 0 0 1
@@ -78,7 +79,7 @@
 /gate/source/uniformBeam/gps/centre 0. 0. -15. cm # -20 cm for scintillator
 
 /gate/output/root/enable
-/gate/output/root/setFileName ../../focalCode/rawdata/test_waterbox_{energy}MeV
+/gate/output/root/setFileName ../../focalCode/rawdata/test_tungstenbox_{sigma}MeVsigma_pst{energy}MeV
 
 /gate/random/setEngineName MersenneTwister
 /gate/random/setEngineSeed auto

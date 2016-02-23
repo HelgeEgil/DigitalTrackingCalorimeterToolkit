@@ -9,6 +9,12 @@ enum eFrameType {kCalorimeter, kTracker};
 enum eDataType {kMC, kData};
 
 Float_t run_energy = 0;
+Bool_t kIsAluminumPlate = kTRUE;
+
+// natural unit is mm
+const Float_t cm = 0.1;
+const Float_t um = 1000;
+
 
 // Some general run parameters
 const Int_t nx = 640;
@@ -19,7 +25,7 @@ const Int_t nTrackers = 4;
 const Float_t dx = 0.03; // mm
 const Float_t dy = 0.03; // mm
 const Float_t dz = 3.84; // mm
-const Int_t kEventsPerRun = 1000;
+const Int_t kEventsPerRun = 100;
 
 // Used for treatment of available experimental data files
 const Int_t nEnergies = 8;
@@ -34,7 +40,7 @@ Int_t energies[nEnergies] = {122, 140, 150, 160, 170, 180, 188, 190};
  * 
 */
 
-enum eMaterial {kTungsten, kAluminum, kPMMA};
+enum eMaterial {kTungsten, kAluminum, kPMMA, kWater, kFocalTungsten, kFocalAluminum};
 const Int_t kMaterial = kTungsten;
 
 /*

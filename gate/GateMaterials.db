@@ -506,3 +506,26 @@ PCB:    d=3.566 g/cm3; n=5; state=Solid
         +el: name=Oxygen     ; f=0.3910
         +el: name=Silicon    ; f=0.1836
         +el: name=Copper     ; f=0.1329
+
+focalTungsten: d=17.7715 g/cm3; n=6; state=Solid
+		  +el: name=Hydrogen	  ; f=0.0191
+		  +el: name=Carbon	  ; f=0.0101
+		  +el: name=Oxygen	  ; f=0.0291
+		  +el: name=Silicon	  ; f=0.0493
+		  +el: name=Copper	  ; f=0.0133
+		  +el: name=Tungsten	  ; f=0.8791
+
+focalAluminium: d=2.70 g/cm3; n=6; state=Solid
+		  +el: name=Hydrogen	  ; f=0.0199
+		  +el: name=Carbon	  ; f=0.0105
+		  +el: name=Oxygen	  ; f=0.0304
+		  +el: name=Silicon	  ; f=0.0515
+		  +el: name=Copper	  ; f=0.0139
+		  +el: name=Aluminium  ; f=0.8737
+
+focalPMMA: d=1.125 g/cm3; n=5; state=Solid
+		  +el: name=Hydrogen	  ; f=0.4987
+		  +el: name=Carbon	  ; f=0.3103
+		  +el: name=Oxygen	  ; f=0.1433
+		  +el: name=Silicon	  ; f=0.0376
+		  +el: name=Copper	  ; f=0.0102

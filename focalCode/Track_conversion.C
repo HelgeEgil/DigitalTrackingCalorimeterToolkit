@@ -9,112 +9,63 @@
 using namespace std;
 
 Float_t getEnergyFromTL(Float_t tl) {
-	// TODO: optimize via stackoverflow.com/questions/11396860
-	// (and create bigger table for tungsten....)
+	return pow(tl / alpha, pinv);
+}
 
-	for (Int_t i=1; i<nPLEnergies; i++) {
-		if (kPLFocal[i] < tl) { continue; }
-		else {
-			Float_t ratio = (tl - kPLFocal[i-1]) / (kPLFocal[i] - kPLFocal[i-1]);
-			return kPLEnergies[i-1] + ratio * (kPLEnergies[i] - kPLEnergies[i-1]);
-		}
-	}
+Float_t getTLFromWEPL(Float_t wepl) {
+	return alpha * pow(wepl / alpha_water, p / p_water);
+}
+
+Float_t getTLFromEnergy(Float_t energy) {
+	return alpha * pow(energy, p);
 }
 
 Float_t getEnergyFromWEPL(Float_t wepl) {
-
-	for (Int_t i=1; i<nPLEnergies; i++) {
-		if (kPLFocal[i] * kWEPLRatio[i] < wepl) { continue; }
-		else {
-			Float_t ratio = (wepl - kPLFocal[i-1] * kWEPLRatio[i-1]) / (kPLFocal[i]* kWEPLRatio[i] - kPLFocal[i-1]* kWEPLRatio[i-1]);
-			return kPLEnergies[i-1] + ratio * (kPLEnergies[i] - kPLEnergies[i-1]);
-		}
-	}
+	return pow(wepl / alpha_water, 1/(p_water));
 }
 
 Float_t getWEPLFactorFromEnergy(Float_t energy) {
-	for (Int_t i=1; i<nPLEnergies; i++) {
-		if (kPLEnergies[i] < energy) { continue; }
-		else {
-			Float_t ratio = (energy - kPLEnergies[i-1]) / (kPLEnergies[i] - kPLEnergies[i-1]);
-			return kWEPLRatio[i-1] + ratio * (kWEPLRatio[i] - kWEPLRatio[i-1]);
-		}
-	}
+	return (alpha_water / alpha) * pow(energy, p_water - p);
 }
 
 Float_t getWEPLFromTL(Float_t tl) {
-
-	for (Int_t i=1; i<nPLEnergies; i++) {
-		if (kPLFocal[i] < tl) { continue; }
-		else {
-			Float_t ratio = (tl - kPLFocal[i-1]) / (kPLFocal[i] - kPLFocal[i-1]);
-			return tl * (kWEPLRatio[i-1] + ratio * (kWEPLRatio[i] - kWEPLRatio[i-1]));
-		}
-	}
+	return alpha_water * pow(tl / alpha, p_water / p);
 }
 
 Float_t getWEPLFromEnergy(Float_t energy) {
-	Float_t tl = getRangeFromEnergy(energy);
-	return getWEPLFromTL(tl);
+	return alpha_water * pow(energy, p_water);
 }
 
-Float_t getRangeStraggling(Float_t energy) {
-	for (Int_t i=1; i<nPLEnergies; i++) {
-		if (kPLEnergies[i] < energy) { continue; }
-		else {
-			Float_t ratio = (energy - kPLEnergies[i-1]) / (kPLEnergies[i] - kPLEnergies[i-1]);
-			return kStraggling[i-1] + ratio * (kStraggling[i] - kStraggling[i-1]);
-		}
-	}
-}
-
-Float_t getRealStraggling(Float_t rangeReal) {
-	for (Int_t i=1; i<nPLEnergies; i++) {
-		if (kPLFocal[i] < rangeReal) { continue; }
-		else {
-			Float_t ratio = ( rangeReal - kPLFocal[i-1]) / (kPLFocal[i] - kPLFocal[i-1]);
-			return kStraggling[i-1] + ratio * (kStraggling[i] - kStraggling[i-1]);
-		}
-	}
+Float_t getRangeStragglingFromRange(Float_t range) {
+	Float_t sigma = sqrt(alpha_prime * (pow(p, 2) * pow(alpha, 2*pinv) / (3-2*pinv) * pow(range, 3-2*pinv))) ;
+	return sigma;
 }
 
 Float_t getRangeStragglingFromEnergy(Float_t energy) {
-	Float_t rangeReal = getRangeFromEnergy(energy);
-	Float_t stragglingReal = getRealStraggling(rangeReal);
-	Float_t upperReal = rangeReal + stragglingReal / 2;
-	Float_t lowerReal = rangeReal - stragglingReal / 2;
-	Float_t upperWEPL = getWEPLFromTL(upperReal);
-	Float_t lowerWEPL = getWEPLFromTL(lowerReal);
-	Float_t stragglingWEPL = upperWEPL - lowerWEPL;
-	cout << "straggling = " << stragglingReal << " mm, which is " << stragglingWEPL << " mm in WEPL.\n";
-	
-	return stragglingWEPL;
+	Float_t range = getTLFromEnergy(energy);
+	return getRangeStragglingFromRange(range);
 }
 
-Float_t getRangeFromEnergy(Float_t energy) {
-	for (Int_t i=1; i<nPLEnergies; i++) {
-		if (kPLEnergies[i] < energy) { continue; }
-		else {
-			Float_t ratio = (energy - kPLEnergies[i-1]) / (kPLEnergies[i] - kPLEnergies[i-1]);
-			return kPLFocal[i-1] + ratio * (kPLFocal[i] - kPLFocal[i-1]);
-		}
-	}
-}
-
-Float_t getEnergyStragglingFromRangeStraggling(Float_t range, Float_t rangeStraggling) {
-	Float_t upperEnergy = getEnergyFromTL(range + rangeStraggling / 2);
-	Float_t lowerEnergy = getEnergyFromTL(range - rangeStraggling / 2);
-	return upperEnergy - lowerEnergy;
+Float_t getWEPLStragglingFromWEPL(Float_t wepl) {
+	Float_t sigma = sqrt(alpha_prime_water * (pow(p_water, 2) * pow(alpha_water, 2*pinv_water) / (3-2*pinv_water) * pow(wepl, 3-2*pinv_water))) ;
+	return sigma;
 }
 
 Float_t getEnergyStragglingFromEnergy(Float_t energy) {
-	Float_t range = getRangeFromEnergy(energy);
-	if (!range) return 0;
-	
-	Float_t rangeStraggling = getRangeStraggling(energy);
-	if (!rangeStraggling) return 0;
-	
-	Float_t energyStraggling = getEnergyStragglingFromRangeStraggling(range, rangeStraggling);
-	
-	return energyStraggling;
+	Float_t range = getTLFromEnergy(energy);
+	return getEnergyStragglingFromRange(range);
+}
+
+Float_t getEnergyStragglingFromRange(Float_t range) {
+	Float_t straggling = getRangeStragglingFromRange (range);
+
+	Float_t upper = range + straggling / 2;
+	Float_t lower = range - straggling / 2;
+
+	Float_t upper_energy = getEnergyFromTL(upper);
+	Float_t lower_energy = getEnergyFromTL(lower);
+
+	Float_t energy_straggling = (upper_energy - lower_energy);
+
+	return energy_straggling;
 }

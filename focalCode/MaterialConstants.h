@@ -10,6 +10,9 @@ Float_t kWEPLRatio[nPLEnergies];
 Float_t kStraggling[nPLEnergies];
 Int_t nLayers;
 
+Double_t p, pinv, alpha, alpha_prime;
+Double_t p_water, alpha_water, alpha_prime_water, pinv_water;
+
 Float_t kPLEnergies[nPLEnergies] =
 			{0.1, 0.11, 0.12, 0.13, 0.14, 0.15, 0.16, 0.17, 0.18, 0.2, 0.225, 0.25,
 			 0.275, 0.3, 0.325, 0.35, 0.375, 0.4, 0.45, 0.5, 0.55, 0.6, 0.65, 0.7,

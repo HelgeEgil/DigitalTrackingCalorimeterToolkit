@@ -13,7 +13,7 @@
 
 
 Double_t fitfunc_real_DBP(Double_t *v, Double_t *par);
-Double_t real_DBP(Double_t z, Double_t E0, Double_t phi0);
+Double_t real_DBP(Double_t z, Double_t E0, Double_t phi0, Double_t sigma_mev, Double_t sigma_scale);
 Double_t parabolic_cylinder_function(Double_t nu, Double_t z);
 
 class TH2;
@@ -109,7 +109,7 @@ public :
    virtual Int_t    GetEntry(Long64_t entry);
    virtual Long64_t LoadTree(Long64_t entry);
    virtual void     Init(TTree *tree);
-   virtual void     Loop(Double_t energy);
+   virtual void     Loop(Double_t energy = 100, Double_t sigma_mev = 0);
    virtual void     BinLogY(TH2 *h);
    virtual Bool_t   Notify();
    virtual void     Show(Long64_t entry = -1);

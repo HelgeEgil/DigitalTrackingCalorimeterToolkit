@@ -13,42 +13,42 @@
 /gate/scanner/vis/forceWireframe
 
 # Scintillators
-/gate/scanner/daughters/name scintillator_F
-/gate/scanner/daughters/insert box
-/gate/scintillator_F/geometry/setXLength 4. cm
-/gate/scintillator_F/geometry/setYLength 4. cm
-/gate/scintillator_F/geometry/setZLength 1. cm
-/gate/scintillator_F/placement/setTranslation 0. 0. -75. mm # 50 + 65
-/gate/scintillator_F/setMaterial myScintillator
-/gate/scintillator_F/vis/forceWireframe
+#/gate/scanner/daughters/name scintillator_F
+#/gate/scanner/daughters/insert box
+#/gate/scintillator_F/geometry/setXLength 4. cm
+#/gate/scintillator_F/geometry/setYLength 4. cm
+#/gate/scintillator_F/geometry/setZLength 1. cm
+#/gate/scintillator_F/placement/setTranslation 0. 0. -75. mm # 50 + 65
+#/gate/scintillator_F/setMaterial myScintillator
+#/gate/scintillator_F/vis/forceWireframe
+#
+#/gate/scanner/daughters/name scintillator_H
+#/gate/scanner/daughters/insert box
+#/gate/scintillator_H/geometry/setXLength 4. cm
+#/gate/scintillator_H/geometry/setYLength 1. cm
+#/gate/scintillator_H/geometry/setZLength 0.5 cm
+#/gate/scintillator_H/placement/setTranslation 0. 0. -176. mm # 50 + 166
+#/gate/scintillator_H/setMaterial myScintillator
+#/gate/scintillator_H/vis/forceWireframe
+#
+#/gate/scanner/daughters/name scintillator_V
+#/gate/scanner/daughters/insert box
+#/gate/scintillator_V/geometry/setXLength 1. cm
+#/gate/scintillator_V/geometry/setYLength 4. cm
+#/gate/scintillator_V/geometry/setZLength 0.5 cm
+#/gate/scintillator_V/placement/setTranslation 0. 0. -184. mm # 50 + 174
+#/gate/scintillator_V/setMaterial myScintillator
+#/gate/scintillator_V/vis/forceWireframe
 
-/gate/scanner/daughters/name scintillator_H
-/gate/scanner/daughters/insert box
-/gate/scintillator_H/geometry/setXLength 4. cm
-/gate/scintillator_H/geometry/setYLength 1. cm
-/gate/scintillator_H/geometry/setZLength 0.5 cm
-/gate/scintillator_H/placement/setTranslation 0. 0. -176. mm # 50 + 166
-/gate/scintillator_H/setMaterial myScintillator
-/gate/scintillator_H/vis/forceWireframe
-
-/gate/scanner/daughters/name scintillator_V
-/gate/scanner/daughters/insert box
-/gate/scintillator_V/geometry/setXLength 1. cm
-/gate/scintillator_V/geometry/setYLength 4. cm
-/gate/scintillator_V/geometry/setZLength 0.5 cm
-/gate/scintillator_V/placement/setTranslation 0. 0. -184. mm # 50 + 174
-/gate/scintillator_V/setMaterial myScintillator
-/gate/scintillator_V/vis/forceWireframe
-
-/gate/scanner/daughters/name frontabsorber
-/gate/scanner/daughters/insert box
-/gate/frontabsorber/geometry/setXLength 50. mm
-/gate/frontabsorber/geometry/setYLength 50. mm
-/gate/frontabsorber/geometry/setZLength 1.5 mm
-/gate/frontabsorber/placement/setTranslation 0. 0. -50. mm
-/gate/frontabsorber/setMaterial Aluminium
-/gate/frontabsorber/vis/forceWireframe
-/gate/frontabsorber/vis/setColor grey
+#/gate/scanner/daughters/name frontabsorber
+#/gate/scanner/daughters/insert box
+#/gate/frontabsorber/geometry/setXLength 50. mm
+#/gate/frontabsorber/geometry/setYLength 50. mm
+#/gate/frontabsorber/geometry/setZLength 1.5 mm
+#/gate/frontabsorber/placement/setTranslation 0. 0. -50. mm
+#/gate/frontabsorber/setMaterial Aluminium
+#/gate/frontabsorber/vis/forceWireframe
+#/gate/frontabsorber/vis/setColor grey
 
 /gate/scanner/daughters/name doublelayer
 /gate/scanner/daughters/insert box
@@ -59,7 +59,7 @@
 /gate/doublelayer/setMaterial Air
 /gate/doublelayer/vis/setColor white
 /gate/doublelayer/vis/forceWireframe
-/gate/doublelayer/disable
+#/gate/doublelayer/disable
 
 /gate/doublelayer/daughters/name layer
 /gate/doublelayer/daughters/insert box
@@ -70,7 +70,7 @@
 /gate/layer/setMaterial Air
 /gate/layer/vis/setColor white
 /gate/layer/vis/forceWireframe
-/gate/layer/disable
+#/gate/layer/disable
 
 /gate/layer/daughters/name absorber
 /gate/layer/daughters/insert box

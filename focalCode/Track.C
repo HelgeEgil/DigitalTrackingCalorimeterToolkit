@@ -60,8 +60,12 @@ void Track::appendPoint(Float_t x, Float_t y, Int_t layer, Int_t size) {
 
 Float_t Track::getTrackLengthmm() {
    // return geometrical track length
+	
+	Float_t preMaterial = 3.09 * kIsAluminumPlate;
+	Float_t firstHalfLayer = 1.65;
 
-   Float_t trackLength = 0;
+   Float_t trackLength = preMaterial + firstHalfLayer;
+
    Float_t x = -1; Float_t xp = -1;
    Float_t y = -1; Float_t yp = -1;
    Float_t z = -1; Float_t zp = -1;
@@ -89,11 +93,14 @@ Float_t Track::getTrackLengthmm() {
 
 Float_t Track::getRangemm() {
 	// return range, not track length
+	//
+	Float_t preMaterial = 3.09 * kIsAluminumPlate;
+	Float_t firstHalfLayer = 1.65;
 	
 	Float_t range = 0;
 	if (!At(0)) return 0;
 
-	range = diffmm(Last(), At(0));
+	range = diffmm(Last(), At(0)) + preMaterial + firstHalfLayer;
 
 	return range;
 }
@@ -136,15 +143,20 @@ Float_t Track::getSlopeAngleAtLayer(Int_t i) {
 
 Float_t Track::getTrackLengthmmAt(Int_t i) {
 	// returns geometrical track length at point i
+	Float_t preMaterial = 3.09 * kIsAluminumPlate;
+	Float_t firstHalfLayer = 1.65;
 	
-	if (i==0) return 3.15; // pre-detector material
+	if (i==0) return preMaterial + firstHalfLayer; // pre-detector material
 	if (i>GetEntriesFast()) return 0;
 
 	return diffmm(At(i-1), At(i));
 }
 
 Float_t Track::getRangemmAt(Int_t i) {
-	if (i==0) return 3.15; // pre-detector material
+	Float_t preMaterial = 3.09 * kIsAluminumPlate;
+	Float_t firstHalfLayer = 1.65;
+	
+	if (i==0) return preMaterial + firstHalfLayer; // pre-detector material
 	if (i>GetEntriesFast()) return 0;
 
 	return diffmm(new Cluster(getX(i-1), getY(i-1), getLayer(i-1)),
@@ -154,7 +166,10 @@ Float_t Track::getRangemmAt(Int_t i) {
 Float_t Track::getWEPL() {
 	Float_t tl = getTrackLengthmm();
 	if (!tl) return 0;
-	return getWEPLFromTL(tl) + 3.09 + 1.65 * getWEPLFactorFromEnergy(run_energy);
+
+	Float_t preMaterial = 3.09 * kIsAluminumPlate;
+	Float_t firstHalfLayer = 1.65;
+	return getWEPLFromTL(tl + firstHalfLayer) + preMaterial;
 }
 
 Float_t Track::getTrackLengthWEPLmmAt(Int_t i) {
@@ -162,11 +177,14 @@ Float_t Track::getTrackLengthWEPLmmAt(Int_t i) {
 	// the WEPL conversion is a LUT calculated from the bethe equation
 	// (see rangeCalculator.py)
 	
+	Float_t preMaterial = 3.09 * kIsAluminumPlate;
+	Float_t firstHalfLayer = 1.65;
+	
 	Float_t tl = getTrackLengthmmAt(i);
 	
 	if (i==0) {
 		// WEPL of 1.5 mm Al + WEPL of 1.65 (avg) detector materal
-		return 3.09 + 1.65 * getWEPLFactorFromEnergy(run_energy);
+		return preMaterial + getWEPLFromTL(firstHalfLayer);
 	}
 	
 	if (!tl) return 0;
@@ -175,9 +193,12 @@ Float_t Track::getTrackLengthWEPLmmAt(Int_t i) {
 }
 
 Float_t Track::getRangeWEPLAt(Int_t i) {
+	Float_t preMaterial = 3.09 * kIsAluminumPlate;
+	Float_t firstHalfLayer = 1.65;
+	
 	Float_t range = getRangemmAt(i);
 	if (i==0) {
-		return 3.09 + 1.65 * getWEPLFactorFromEnergy(run_energy);
+		return preMaterial + getWEPLFromTL(firstHalfLayer);
 	}
 
 	if (!range) return 0;
@@ -189,15 +210,10 @@ Float_t Track::getEnergyStraggling() {
 	Float_t energy = getEnergy();
 	if (!energy) return 0;
 	
-	Float_t range = getRangeFromEnergy(energy);
-	if (!range) return 0;
+	Float_t tl = getTLFromEnergy(energy);
+	if (!tl) return 0;
 	
-	Float_t rangeStraggling = getRangeStraggling(energy);
-	if (!rangeStraggling) return 0;
-	
-	Float_t energyStraggling = getEnergyStragglingFromRangeStraggling(range, rangeStraggling);
-	
-	return energyStraggling;
+	return getEnergyStragglingFromRange(tl);
 }
 
 Float_t Track::getEnergy() {

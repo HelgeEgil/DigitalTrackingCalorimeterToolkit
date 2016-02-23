@@ -474,18 +474,28 @@ void drawBraggPeakFit(Int_t Runs, Int_t dataType, Bool_t recreate, Float_t energ
 	}
 	else {
 		expectedMean = getWEPLFromEnergy(energy);
-		expectedStraggling = getRangeStragglingFromEnergy(energy);
+		expectedStraggling = getWEPLStragglingFromWEPL(expectedMean);
 	}
+	
+	cout << "Expected mean = " << expectedMean << endl;
+	cout << "Expected stragglig = " << expectedStraggling << endl;
+	
 	
 	TF1 *ES = new TF1("ES", "gaus(0)", expectedMean*0.85, expectedMean*1.15);
 	ES->SetParameters(maxBin,expectedMean,expectedStraggling);
  	ES->SetParLimits(0,maxBin,maxBin);
- 	ES->SetParLimits(1,expectedMean,expectedMean);
+ 	ES->SetParLimits(1,expectedMean*0.85,expectedMean*1.15);
  	ES->SetParLimits(2,expectedStraggling,expectedStraggling);
  	hFitResults->Fit(ES,"B,Q", "", expectedMean*0.85, expectedMean*1.15);
 	ES->Draw("same");
 	cFitResults->Update();
 
+	if (useWEPL) {
+		Float_t fittedMean = ES->GetParameter(1);
+		cout << "Fitted mean WEPL is " << fittedMean << " mm.\n";
+		cout << "This corresponds to " << getTLFromWEPL(fittedMean) << " mm in tungsten.\n";
+	}
+	
 	TLegend *legend = new TLegend(0.65, 0.6, 0.98, 0.75);
 	legend->SetTextSize(0.03);
 	legend->AddEntry(hFitResults, "Energy fits to tracks", "F");
@@ -1037,8 +1047,8 @@ void drawTracks3D(Int_t Runs, Int_t dataType, Bool_t recreate, Float_t energy) {
 
 	TClonesArray *restPoints = tracks->getClustersWithoutTrack();
 
-	TPolyMarker3D *p = new TPolyMarker3D(restPoints->GetEntriesFast(), 7);
-   p->SetMarkerColor(kRed);
+	TPolyMarker3D *pMarker = new TPolyMarker3D(restPoints->GetEntriesFast(), 7);
+   pMarker->SetMarkerColor(kRed);
 
    for (Int_t i=0; i<restPoints->GetEntriesFast(); i++) {
       if (!restPoints->At(i))
@@ -1050,10 +1060,10 @@ void drawTracks3D(Int_t Runs, Int_t dataType, Bool_t recreate, Float_t energy) {
       Float_t z = thisCluster->getY();
       Float_t y = thisCluster->getLayer();
 
-      p->SetPoint(i, x, y, z);
+      pMarker->SetPoint(i, x, y, z);
    }
 
-   p->Draw();
+   pMarker->Draw();
    
 	Int_t ntracks = tracks->GetEntriesFast();
 
@@ -1137,7 +1147,7 @@ void DrawFrame2D(Int_t Runs, Int_t Layer) {
    TList *histogramList = new TList;
    
    for (Int_t i=0; i<Runs; i++) {
-	   f->getMCData(i, cf);
+	   f->getMCFrame(i, cf);
 	   histogramList->Add(cf->getTH2F(Layer));
    }
  
@@ -1230,21 +1240,54 @@ void getPValues() {
 	TCanvas *cAl = new TCanvas("cAl", "Range fit for aluminum", 1200, 900);
 	TCanvas *cPMMA = new TCanvas("cPMMA", "Range fit for PMMA", 1200, 900);
 	TCanvas *cwater = new TCanvas("cwater", "Range fit for water", 1200, 900);
+	TCanvas *cCustom = new TCanvas("cCustom", "Range fit for custom range-energy list", 1200, 900);
 
 	Float_t kPLFocal_H2O[n];
 	for (Int_t i=0; i<n; i++) {
 		kPLFocal_H2O[i] = kPLFocal_Al[i] * kWEPLRatio_Al[i];
 	}
 
+	const Int_t n2 = 16;
+	Float_t energies[n2] =
+				{70, 90, 110, 130, 150, 170, 180, 200,
+				 225, 250, 275, 300, 325, 350, 375, 400};
+
+// G4 ranges for pure Tungsten
+//	Float_t ranges[n2] = 
+//				{4.42, 6.83, 9.62, 12.8, 16.3, 20.1,
+//				 22.1, 26.3, 32.0, 38.0, 44.4, 51.0, 58.2, 65.3, 72.9, 80.6};
+
+// G4 ranges for pure Aluminium
+//	Float_t ranges[n2] = 
+//				{19.74, 30.788, 43.7312, 58.546, 75.122, 93.277, 102.893, 123.255,
+//					150.405, 180.101, 210.362, 242.602, 276.825, 312.74, 350.071, 387.685};
+
+	// PSTAR CSDA ranges water
+	Float_t ranges[n2] = 
+		{40.8, 63.98, 91.4, 122.8, 157.7, 196.1, 216.5, 259.6, 317.4, 379.4, 445.2, 514.5, 587.1, 662.8, 741.3, 822.5};
+
+	// G4 ranges for pure Aluminium
+//	Float_t ranges[n2] = 
+//		{40.48, 65.8, 91.22, 122.74, 157.334, 195.919, 216.203, 259.057, 316.699,
+//		 381.18, 446.793, 513.254, 586.785, 656.357, 739.504, 827.741};
+
+// PSTAR CSDA ranges for pure Tungsten
+//	Float_t ranges[n2] = 
+//				{0.18, 1.08, 2.56, 4.52, 6.92, 9.72, 12.9, 16.4, 20.2,
+//				 22.3, 26.5, 32.2, 38.3, 44.7, 51.5, 58.5, 65.9, 72.4, 81.2};
+
+
 	TGraph *graph_W = new TGraph(n,kPLEnergies,kPLFocal_W);
 	TGraph *graph_Al = new TGraph(n,kPLEnergies,kPLFocal_Al);
 	TGraph *graph_PMMA = new TGraph(n,kPLEnergies,kPLFocal_PMMA);
-	TGraph *graph_water = new TGraph(n, kPLEnergies, kPLFocal_H2O);
+	TGraph *graph_water = new TGraph(n,kPLEnergies, kPLFocal_H2O);
+	TGraph *graph_custom = new TGraph(7, energies, ranges);
 
 	graph_W->SetTitle("Range fit for tungsten");
 	graph_Al->SetTitle("Range fit for aluminum");
 	graph_PMMA->SetTitle("Range fit for PMMA");
 	graph_water->SetTitle("Range fit for water");
+	graph_custom->SetTitle("Range fit for custom range-energy list");
 
 
 	cW->cd();
@@ -1259,15 +1302,26 @@ void getPValues() {
 	cwater->cd();
 		graph_water->Draw("A*");
 
+	cCustom->cd();
+		graph_custom->Draw("A*");
+
 	TF1 *fW = new TF1("fW", "[0]*pow(x,[1])",0,400);
 	TF1 *fAl = new TF1("fAl", "[0]*pow(x,[1])",0,400);
 	TF1 *fPMMA = new TF1("fPMMA", "[0]*pow(x,[1])",0,400);
 	TF1 *fwater = new TF1("fwater", "[0]*pow(x,[1])",0,400);
+	TF1 *fCustom = new TF1("fCustom", "[0]*pow(x, [1])",0,400);
+
+	fW->SetParameter(0, 0.01); fW->SetParameter(1, 1.7);
+	fAl->SetParameter(0, 0.01); fAl->SetParameter(1, 1.7);
+	fPMMA->SetParameter(0, 0.01); fPMMA->SetParameter(1, 1.7);
+	fwater->SetParameter(0, 0.01); fwater->SetParameter(1, 1.7);
+	fCustom->SetParameter(0, 0.01); fCustom->SetParameter(1, 1.7);
 
 	graph_W->Fit("fW");
 	graph_Al->Fit("fAl");
 	graph_PMMA->Fit("fPMMA");
 	graph_water->Fit("fwater");
+	graph_custom->Fit("fCustom");
 
 	Float_t a1 = fW->GetParameter(0);
 	Float_t p1 = fW->GetParameter(1);
@@ -1277,11 +1331,14 @@ void getPValues() {
 	Float_t p3 = fPMMA->GetParameter(1);
 	Float_t a4 = fwater->GetParameter(0);
 	Float_t p4 = fwater->GetParameter(1);
+	Float_t a5 = fCustom->GetParameter(0);
+	Float_t p5 = fCustom->GetParameter(1);
 
-	cout << Form("For tungsten, the range fit is R = %.4f * E ^ %.4f\n", a1, p1);
-	cout << Form("For aluminum, the range fit is R = %.4f * E ^ %.4f\n", a2, p2);
-	cout << Form("For PMMA, the range fit is R = %.4f * E ^ %.4f\n", a3, p3);
-	cout << Form("For water, the range fit is R = %.4f * E ^ %.4f\n", a4, p4);
+	cout << Form("For tungsten, the range fit is R = %.6f * E ^ %.6f\n", a1, p1);
+	cout << Form("For aluminum, the range fit is R = %.6f * E ^ %.6f\n", a2, p2);
+	cout << Form("For PMMA, the range fit is R = %.6f * E ^ %.6f\n", a3, p3);
+	cout << Form("For water, the range fit is R = %.6f * E ^ %.6f\n", a4, p4);
+	cout << Form("For custom, the range fit is R = %.6f * E ^ %.6f\n", a5, p5);
 
 }
 

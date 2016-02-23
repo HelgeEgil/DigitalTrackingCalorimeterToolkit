@@ -20,6 +20,7 @@
 #/vis/open OGLSQt
 /vis/viewer/reset
 /vis/viewer/panTo 0.03 -0.05
+/vis/viewer/zoom 5
 /vis/viewer/set/viewpointThetaPhi 90 0
 /vis/viewer/set/style surface
 /vis/drawVolume
@@ -53,17 +54,6 @@
 #===============================#
 
 /gate/pixels/attachCrystalSD
-/gate/absorber/attachCrystalSD
-/gate/filler/attachCrystalSD
-/gate/frontabsorber/attachCrystalSD
-/gate/scintillator_F/attachCrystalSD
-/gate/scintillator_H/attachCrystalSD
-/gate/scintillator_V/attachCrystalSD
-/gate/pcb/attachCrystalSD
-/gate/glue/attachCrystalSD
-#/gate/phantom/attachCrystalSD
-
-#/gate/doublelayer/attachCrystalSD
 
 #/gate/digitizer/Singles/insert adder
 #/gate/digitizer/Singles/insert readout
@@ -77,36 +67,34 @@
 
 /gate/geometry/setIonisationPotential Water 75 eV
 /gate/physics/addPhysicsList emstandard_opt3
-#/gate/physics/addPhysicsList QGSP_BERT_EMV
-#/gate/physics/addPhysicsList QGSP_INCLXX
 
 #/gate/physics/addProcess SingleScattering proton
 
 /gate/physics/SetMaxStepSizeInRegion      scanner {step_active} um
 /gate/physics/SetMaxStepSizeInRegion	   absorber {step_passive} um
 /gate/physics/SetMaxStepSizeInRegion      filler {step_passive} um
-
+#
 /gate/physics/ActivateStepLimiter         charged
 /gate/physics/ActivateStepLimiter         gamma
 /gate/physics/ActivateStepLimiter         proton
-
+#
 /gate/physics/Electron/SetCutInRegion  scanner {step_active} um
 /gate/physics/Positron/SetCutInRegion  scanner {step_active} um
 /gate/physics/Gamma/SetCutInRegion     scanner {step_active} um
 /gate/physics/Proton/SetCutInRegion    scanner {step_active} um
-
+#
 /gate/physics/Electron/SetCutInRegion  absorber {step_passive} um
 /gate/physics/Positron/SetCutInRegion  absorber {step_passive} um
 /gate/physics/Gamma/SetCutInRegion     absorber {step_passive} um
-#
+##
 /gate/physics/Electron/SetCutInRegion  filler {step_passive} um
 /gate/physics/Positron/SetCutInRegion  filler {step_passive} um
 /gate/physics/Gamma/SetCutInRegion     filler {step_passive} um
 
-/gate/physics/Electron/SetCutInRegion  frontabsorber {step_passive} um
-/gate/physics/Positron/SetCutInRegion  frontabsorber {step_passive} um
-/gate/physics/Gamma/SetCutInRegion     frontabsorber {step_passive} um
-
+#/gate/physics/Electron/SetCutInRegion  frontabsorber {step_passive} um
+#/gate/physics/Positron/SetCutInRegion  frontabsorber {step_passive} um
+#/gate/physics/Gamma/SetCutInRegion     frontabsorber {step_passive} um
+#
 /gate/physics/Electron/SetCutInRegion  spacer {step_passive} um
 /gate/physics/Positron/SetCutInRegion  spacer {step_passive} um
 /gate/physics/Gamma/SetCutInRegion     spacer {step_passive} um
@@ -122,14 +110,15 @@
 
 /gate/source/addSource uniformBeam gps
 /gate/source/uniformBeam/gps/particle proton
-/gate/source/uniformBeam/gps/energytype Mono
-/gate/source/uniformBeam/gps/monoenergy {energy} MeV
+/gate/source/uniformBeam/gps/ene/type Gauss
+/gate/source/uniformBeam/gps/ene/mono {energy} MeV
+/gate/source/uniformBeam/gps/ene/sigma {sigma} MeV
 /gate/source/uniformBeam/gps/type Plane
 /gate/source/uniformBeam/gps/shape Square
 /gate/source/uniformBeam/gps/direction 0 0 1
-/gate/source/uniformBeam/gps/halfx 25. mm
-/gate/source/uniformBeam/gps/halfy 25. mm
-/gate/source/uniformBeam/gps/centre 0. 0. -4.5 cm # -20 cm for scintillator
+/gate/source/uniformBeam/gps/halfx 20. mm
+/gate/source/uniformBeam/gps/halfy 20. mm
+/gate/source/uniformBeam/gps/centre 0. 0. -6.0 cm # -20 cm for scintillator
 
 #/gate/source/addSource PBS PencilBeam
 #/gate/source/PBS/setParticleType proton
@@ -165,7 +154,7 @@
 
 # Enable ROOT output
 /gate/output/root/enable
-/gate/output/root/setFileName ../focalCode/rawdata/test_{material}_{energy}MeV
+/gate/output/root/setFileName ../focalCode/rawdata/test_tracks_sigma{sigma}_{material}_{energy}MeV
 
 #===============#
 # START BEAMS	#

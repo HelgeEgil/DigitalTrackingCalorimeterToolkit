@@ -99,27 +99,27 @@ Int_t getFWxMInRange(TH1F* h, Float_t first, Float_t last, Int_t div) {
 	Int_t firstRangeBin = h->GetBin(first);
 	Int_t lastRangeBin = h->GetBin(last);
 	
-	cout << "firstRangeBin = " << firstRangeBin << ", lastRangeBin = " << lastRangeBin << endl;
+//	cout << "firstRangeBin = " << firstRangeBin << ", lastRangeBin = " << lastRangeBin << endl;
 	
 	Float_t maxBin = 0;
 	Int_t maxIdx = 0;
 	for (Int_t i=firstRangeBin; i<=lastRangeBin; i++) {
-		cout << h->GetBinContent(i) << endl;
+// 		cout << h->GetBinContent(i) << endl;
 		if (h->GetBinContent(i) > maxBin ) {
 			maxBin = h->GetBinContent(i);
-			cout << "new max = " << maxBin << endl;
+// 			cout << "new max = " << maxBin << endl;
 			maxIdx = i;
 		}
 	}
 	
-	cout << "max value is " << maxBin << " at " << maxIdx << endl;
+// 	cout << "max value is " << maxBin << " at " << maxIdx << endl;
 	
 	Float_t firstCenter = 0, lastCenter = 0;
 	for (Int_t i=firstRangeBin; i<=lastRangeBin; i++) {
 		if (!firstCenter) {
 			if (h->GetBinContent(i) > maxBin/div) {
 				firstCenter = h->GetBinCenter(i);
-				cout << "firstCenter at " << firstCenter << endl;
+// 				cout << "firstCenter at " << firstCenter << endl;
 			}
 		}
 		
@@ -127,7 +127,7 @@ Int_t getFWxMInRange(TH1F* h, Float_t first, Float_t last, Int_t div) {
 			if (!lastCenter) {
 				if (h->GetBinContent(i) < maxBin/div) {
 					lastCenter = h->GetBinCenter(i-1);
-					cout << "lastCenter at " << firstCenter << endl;
+// 					cout << "lastCenter at " << firstCenter << endl;
 				}
 			}
 		}

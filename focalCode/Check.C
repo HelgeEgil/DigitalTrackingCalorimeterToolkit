@@ -20,6 +20,8 @@
 #include <Math/SpecFuncMathCore.h>
 #include <Math/SpecFuncMathMore.h>
 
+Double_t alpha, p, alpha_prime, beta, gamma_p;
+
 double hermite(unsigned n, double x);
 #ifndef __CINT__
 #include <boost/math/special_functions.hpp>
@@ -72,32 +74,24 @@ Double_t parabolic_cylinder_function(Double_t nu, Double_t z) {
 	return U;
 }
 
-Double_t real_DBP(Double_t z, Double_t E0, Double_t phi0) {
+Double_t real_DBP(Double_t z, Double_t E0, Double_t phi0, Double_t sigma_mev, Double_t sigma_scale) {
 	// From Bortfeld 1997 (Med Phys 24 (2024))
 	
-//	Double_t alpha = 0.0033; // proportionality factor
-//	Double_t p = 1.6891; // exponent of range-energy relation
-	
- 	Double_t alpha = 0.0022;
- 	Double_t p = 1.77;
-	
+
 	Double_t pinv = 1. / p;
 	Double_t R0 = alpha * pow(E0, p); // range
 	
-	Double_t beta = 0.012; // slope parameter of fluence reduction relation
-	Double_t gamma = 0; // fraction of locally absorbed energy released in nonelastic nuclear interactions
-	Double_t alpha_prime = 0.087; // approx 1/(4pi epsilon_0^2) e^4 NZ, 0.087 MeV^2/cm for water
 	Double_t sigma_mono = sqrt(alpha_prime * ( pow(p,3) * pow(alpha,2*pinv)) / ( 3*p - 2)  * pow(R0, 3-2*pinv));
-	Double_t sigma_E0 = 0; // width of Gaussian energy spectrum (0.01*E0 for 1 %)
-	Double_t epsilon = 0.2; // fraction of primary fluence contribution to the tail of the energy spectrum
+	Double_t sigma_E0 = sigma_mev; // width of Gaussian energy spectrum (0.01*E0 for 1 %)
+	Double_t epsilon = 0.1; // fraction of primary fluence contribution to the tail of the energy spectrum
 	Double_t rho = 1; // density of water
 	
-	Double_t sigma = sqrt(pow(sigma_mono, 2) + pow(sigma_E0 * alpha * p * pow(E0, p-1), 2));
+	Double_t sigma = sigma_scale * sqrt(pow(sigma_mono, 2) + pow(sigma_E0 * alpha * p * pow(E0, p-1), 2));
 
 	static bool printed_sigma = false;
 	if (!printed_sigma) {
 		cout << "Sigma from multiple scattering: " << sigma_mono *10 << " mm.\n";
-		cout << "Sigma combined with initial energy, after phenomenological correction: " << sigma *10 << "mm.\n";
+		cout << "Sigma combined with initial energy, after phenomenological correction: " << sigma *10 << " mm.\n";
 		printed_sigma = true;
 	}
 
@@ -110,14 +104,14 @@ Double_t real_DBP(Double_t z, Double_t E0, Double_t phi0) {
 	
 	if (z < R0 - limit*sigma) {
 //  	if (true) {
-		Double_t Dhat = phi0 * (pow(R0-z,pinv-1) + (beta+gamma*beta*p)*pow(R0-z,pinv)) 
+		Double_t Dhat = phi0 * (pow(R0-z,pinv-1) + (beta+gamma_p*beta*p)*pow(R0-z,pinv)) 
 							/ (rho*p*pow(alpha,pinv) * (1+beta*R0));
 		return Dhat;
 	}
 	
 	else if (z >= R0 - limit*sigma && z < R0 + 5*sigma) {
 		Double_t t1 = (1/sigma) * parabolic_cylinder_function(-pinv, -zeta);
-		Double_t t2 = (beta * pinv + gamma * beta + epsilon / R0) * parabolic_cylinder_function(-pinv-1, -zeta);
+		Double_t t2 = (beta * pinv + gamma_p * beta + epsilon / R0) * parabolic_cylinder_function(-pinv-1, -zeta);
 		Double_t nom = exp(-pow(zeta, 2) * 0.25) * pow(sigma, pinv) * ROOT::Math::tgamma(pinv);
 		Double_t denom = sqrt(2 * 3.14159265) * rho * p * pow(alpha, pinv) * (1 + beta * R0);
 		
@@ -141,39 +135,54 @@ Double_t fitfunc_real_DBP(Double_t *v, Double_t *par) {
 	Double_t depth = v[0] / 10;
 	Double_t energy = par[0];
 	Double_t scale = par[1];
+	Double_t sigma_mev = par[2];
+	Double_t sigma_scale = par[3];
 	
-	Double_t fitval = real_DBP(depth, energy, scale);
+	Double_t fitval = real_DBP(depth, energy, scale, sigma_mev, sigma_scale);
 
 	if (isnan(fitval)) fitval = 0;
 
 	return fitval;
 }
 
-void Check::Loop(Double_t energy)
+void Check::Loop(Double_t energy, Double_t sigma_mev)
 {
-//   In a ROOT session, you can do:
-//      Root > .L Check.C
-//      Root > Check t
-//      Root > t.GetEntry(12); // Fill t data members with entry number 12
-//      Root > t.Show();       // Show values of entry 12
-//      Root > t.Show(16);     // Read and show values of entry 16
-//      Root > t.Loop();       // Loop on all entries
-//
+	if (energy < 250) {
+		gamma_p = 0;
+	}
+	else if (energy >= 250 && energy <= 325) {
+		gamma_p = 0.5 * (energy-250)/75;
+	}
+	else if (energy > 325){
+		gamma_p = 0.5;
+	}
 
-//     This is the loop skeleton where:
-//    jentry is the global entry number in the chain
-//    ientry is the entry number in the current Tree
-//  Note that the argument to GetEntry must be:
-//    jentry for TChain::GetEntry
-//    ientry for TTree::GetEntry and TBranch::GetEntry
-//
-//       To read only selected branches, Insert statements like:
-// METHOD1:
-//    fChain->SetBranchStatus("*",0);  // disable all branches
-//    fChain->SetBranchStatus("branchname",1);  // activate branchname
-// METHOD2: replace line
-//    fChain->GetEntry(jentry);       //read all branches
-//by  b_branchname->GetEntry(ientry); //read only this branch
+	if (kMaterial == kWater) {
+		alpha = 0.0027681;
+		alpha_prime = 0.087;
+		beta = 0.012;
+		p = 1.725517;
+	}
+	else if (kMaterial == kAluminum) {
+		alpha = 0.0014467;
+		alpha_prime = 0.203815;
+		beta = 0.08; // validate!
+		p = 1.707283;
+	}
+	else if (kMaterial == kTungsten) {
+		alpha_prime = 1.214424;
+		beta = 0.012; // 0.18
+		alpha = 0.0003935;
+		p = 1.661805;
+	}
+
+	else if (kMaterial == kFocalTungsten) {
+		alpha_prime = 1.0868; // calculated with effective Z (sqrt(sum_i (f_i Z_i) ^2) and effective A
+		beta = 0.012;
+		alpha = 0.000495;
+		p = 1.6413;
+	}
+
    if (fChain == 0) return;
 
    Long64_t nentries = fChain->GetEntriesFast();
@@ -192,9 +201,12 @@ void Check::Loop(Double_t energy)
 	TCanvas *c8 = new TCanvas("c8", "c8", 800, 600);
 	TCanvas *c9 = new TCanvas("c9", "c9", 800, 600);
 
-   Int_t nbinsx = 3200;
-   Int_t xfrom = -5;
-   Int_t xto = 900;
+//	TCanvas *c10 = new TCanvas("c10", "c10", 800, 600);
+//	TCanvas *c11 = new TCanvas("c11", "c11", 800, 600);
+
+   Int_t nbinsx = 1000;
+   Int_t xfrom = -50;
+   Int_t xto = 90;
    Int_t nbinsy = 400;
    Int_t yfrom = 1e-3;
    Int_t yto = 3;
@@ -202,7 +214,21 @@ void Check::Loop(Double_t energy)
    Int_t yfromlog = -4;
    Int_t ytolog = 1;
 
-	Float_t x_compensate = 0; // was 44.8
+	Float_t x_compensate = 45.7; // was 45.7
+
+	const Int_t indN = 5000;
+	Float_t indX[indN];
+	Float_t indY[indN];
+	Float_t indZ[indN];
+	Float_t indEdep[indN];
+	Float_t indRange[indN];
+
+	for (Int_t i=0; i<indN; i++) {
+		indX[i] = 0; indY[i] = 0; indZ[i] = 0;
+		indEdep[i] = 0; indRange[i] = 0;
+	}
+
+	Int_t indIdx = 0;
 
    TH2I *h2DAll = new TH2I("h2DAll", "E_{dep} vs z for all processes", nbinsx, xfrom, xto, nbinsy, yfromlog, ytolog);
    TH2I *h2DMCS = new TH2I("h2DMCS", "Multiple Coulomb Scattering", nbinsx, xfrom, xto, nbinsy, yfromlog, ytolog);
@@ -213,8 +239,9 @@ void Check::Loop(Double_t energy)
    TH2I *h2DSL = new TH2I("h2DSL", "Step limiter", nbinsx, xfrom, xto, nbinsy, yfromlog, ytolog);
 
 	TH1F *hZ = new TH1F("hZ", "Z profile", nbinsx, xfrom + x_compensate, xto + x_compensate);
-	TH1F *hRange = new TH1F("hRange", "Primary ranges", nbinsx, xfrom + x_compensate, xto + x_compensate);
-	TH1F *hRange2 = new TH1F("hRange2", "Primary ranges", nbinsx, xfrom + x_compensate, xto + x_compensate);
+	TH1F *hRange = new TH1F("hRange", "Primary ranges", nbinsx*3, xfrom + x_compensate, xto + x_compensate);
+	TH1F *hRange2 = new TH1F("hRange2", "Primary ranges", nbinsx*3, xfrom + x_compensate, xto + x_compensate);
+//	TH1F *hRange3 = new TH1F("hRange3", "Ranges from individual fitting", nbinsx, xfrom + x_compensate, xto + x_compensate);
 
    BinLogY(h2DAll); BinLogY(h2DMCS); BinLogY(h2DhIoni); BinLogY(h2DionIoni); BinLogY(h2DPI); BinLogY(h2DTransportation); BinLogY(h2DSL);
 
@@ -301,9 +328,8 @@ void Check::Loop(Double_t energy)
       if (!pixel)     hEdepAbsorb->Fill(z, edep);
       else           hEdepSample->Fill(z, edep);
 
-      if (kTRUE) {
-         h2DLP->Fill(posX, posY, edep);
-      }
+		h2DLP->Fill(posX, posY, edep);
+		if (x>-20&&x<20&&y>-20&&y<20)
 			hZ->Fill(z + x_compensate, edep);
 
 		if (parentID == 0) {
@@ -312,12 +338,87 @@ void Check::Loop(Double_t energy)
 			}
 
 			hRange2->Fill(posZ + x_compensate);
-
+			
 			lastRange = posZ;
 			lastID = eventID;
-		}
+		} 
+			
+		/*
+			if (eventID == lastID) {
+				if (edep > 0.2) { // find good number {
+					indX[indIdx] = posX;
+					indY[indIdx] = posY;
+					indZ[indIdx] = posZ;
+					indEdep[indIdx] = edep;
+					indIdx++;
+				}
+			}
 
-      // 2212 protons
+				// same particle
+			else {
+				if (lastID != -1) {
+					// first event of new track, fit
+					indRange[0] = 0;
+					for (Int_t i=1; i<indIdx; i++) {
+						Float_t posDiff = sqrt(pow(indX[i-1] - indX[i], 2) +
+													  pow(indY[i-1] - indY[i], 2) +
+													  pow(indZ[i-1] - indZ[i], 2));
+						indRange[i] = indRange[i-1] + posDiff;
+					}
+
+					static Bool_t first = true;
+					TGraph *indGraph = new TGraph(indIdx, indRange, indEdep);
+					
+					TF1 *fIndFit = new TF1("fIndFit", fitfunc_real_DBP, 0, 900, 4);
+					fIndFit->SetParameter(0,energy); // energy
+					fIndFit->SetParameter(1, 100); // scale
+					fIndFit->SetParameter(2, 0); // energy resolution
+					fIndFit->SetParameter(3, 0); // multiple scattering smearing
+					fIndFit->SetParLimits(0, energy*0.75, energy*1.25);
+					fIndFit->SetParLimits(1, 20,400);
+					fIndFit->SetParLimits(2, 0, 0);
+					fIndFit->SetParLimits(3, 0, 0);
+
+					if (first) {
+						indGraph->Fit("fIndFit", "B, WW, Q", "", 0, 300);
+					}
+
+					else {
+						indGraph->Fit("fIndFit", "B, WW, Q, N", "", 0, 300);
+					}
+									
+					Float_t energy = fIndFit->GetParameter(0);
+					Float_t range = 0.03935 * pow(energy, 1.661805);
+
+
+					hRange3->Fill(range);
+
+					// cleanup
+					if (first) {
+						c11->cd();
+						indGraph->Draw("A*");
+						first = false;
+
+						for (Int_t i=0; i<indIdx; i++) {
+							cout << "[" << indRange[i] << ", " << indEdep[i] << "], ";
+						}
+						cout << endl;
+
+					}
+
+					else {
+						delete fIndFit;
+						delete indGraph;
+					}
+
+					for (Int_t i=0; i<indIdx; i++) {
+						indX[i] = 0; indY[i] = 0; indZ[i] = 0; indEdep[i] = 0; indRange[i] = 0;
+					}
+					
+					indIdx = 0;		
+				}  */
+
+		// 2212 protons
       // 2112 neutrons
       // 11 electrons (-11 positrons)
       // 22 photons
@@ -430,32 +531,43 @@ void Check::Loop(Double_t energy)
 	Double_t range_2 = hRange2->GetXaxis()->GetBinCenter(hRange2->FindLastBinAbove(hRange2->GetMaximum() * 0.5));
 
 	Double_t range_3 = hRange->GetXaxis()->GetBinCenter(hRange->GetMaximumBin());
-
-	Double_t alpha = 0.022; //0.033; // proportionality factor
-	Double_t p = 1.77; // 6891; // exponent of range-energy relation
 	
 	Double_t energy_1 = pow(range_1 / alpha, 1/p);
 	Double_t energy_2 = pow(range_2 / alpha, 1/p);
 	Double_t energy_3 = pow(range_3 / alpha, 1/p);
 
-	cout << "Maximum from bragg peak plot, 80\% of maximum on distal edge: " << range_1 << " mm. (" << energy_1 << " MeV).\n";
-	cout << "Maximum from range plot: 50\% of maximum for remainding proton plots " << range_2 << " mm. (" << energy_2 << " MeV).\n";
+//	cout << "Maximum from bragg peak plot, 80\% of maximum on distal edge: " << range_1 << " mm. (" << energy_1 << " MeV).\n";
+//	cout << "Maximum from range plot: 50\% of maximum for remainding proton plots " << range_2 << " mm. (" << energy_2 << " MeV).\n";
 	cout << "Maximum from hRange plot: Max bin " << range_3 << " mm. (" << energy_3 << " MeV).\n";
 
-	Double_t sigma = 0.012 * pow(range_2/10, 0.935) * 10;
+	Double_t sigma = 0.012 * pow(range_3/10, 0.935) * 10;
 
 	cout << "Estimated straggling from 0.012*pow(range plot range, 0.935): " << sigma << " mm.\n";
 
 	// fit on hZ
-	
-	TF1 *func = new TF1("fit_real_BP", fitfunc_real_DBP, 0, 900, 2);
+ 	
+	TF1 *func = new TF1("fit_real_BP", fitfunc_real_DBP, 0, 900, 4);
 	func->SetParameter(0,energy); // energy
 	func->SetParameter(1, 100); // scale
+	func->SetParameter(2, sigma_mev);
+	func->SetParameter(3, 1); // sigma scale
 	func->SetParLimits(0, energy*0.75, energy*1.25);
-	func->SetParLimits(1, 20,400);
+	func->SetParLimits(1, 20,600);
+	func->SetParLimits(2, sigma_mev, sigma_mev);
+	func->SetParLimits(3, 1, 1);
 	hZ->Fit("fit_real_BP", "B, WW, Q", "", 0, 900);
 
 	cout << "Estimated energy from fit: " << func->GetParameter(0) << " MeV.\n";
+
+	// fit on hRange to get both mean and sigma
+	TF1 *fRange = new TF1("fit_range", "gaus", 0, 900);
+//	fRange->SetParameter(1, range_3);
+//	fRange->SetParLimits(1, range_3*0.2, range_3*10);
+//	fRange->SetParameter(2, sigma);
+	hRange->Fit("fit_range", "Q, W", "", 0, 900);
+
+	cout << "Mean range from individual range distribution: " << fRange->GetParameter(1) << " mm.\n";
+	cout << "Sigma from individual range distribution: " << fRange->GetParameter(2) << " mm.\n";
 
    TPad *pad1  = new TPad("pad1",  "Pad 1",       0.0, 0.0, 0.4, 1.0);
    TPad *pad2d = new TPad("pad2d", "Lower pad 2", 0.4, 0.0, 0.6, 0.5);
@@ -648,6 +760,8 @@ void Check::Loop(Double_t energy)
       h2DLP->SetYTitle("Y [mm]");
       h2DLP->Draw("COLZ");
 
+
+
 	c7->cd();
 		hZ->SetXTitle("Z [mm]");
 		hZ->SetYTitle("Edep [MeV]");
@@ -668,6 +782,16 @@ void Check::Loop(Double_t energy)
 		hRange2->SetFillColor(kBlue-7);
 		hRange2->SetLineColor(kBlack);
 		hRange2->Draw();
+
+	/*
+	c10->cd();
+		hRange3->SetXTitle("Range [mm]");
+		hRange3->SetYTitle("Number of primaries");
+		hRange3->SetFillColor(kBlue-7);
+		hRange3->SetLineColor(kBlack);
+		hRange3->Draw();
+
+	*/
 
 //   c2->cd();
 //   hs->Draw();
