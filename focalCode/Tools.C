@@ -9,6 +9,7 @@
 #include "Hit.h"
 #include "Constants.h"
 #include "Track_conversion.h"
+#include "MaterialConstants.h"
 #include <vector>
 #include <algorithm>
 #include <TObject.h>
@@ -57,23 +58,23 @@ Double_t fitfunc_DBP(Double_t *v, Double_t *par) {
 	Float_t energy = par[0];
 	Float_t scale = par[1];
 
-// 	Float_t alpha = 0.0019;
-	Float_t alpha = 0.033; // from getPValues()
-	Float_t p = 1.6891; // from getPValues();
-	Float_t pinv = 1/p;
-	Float_t alpha_p = p * pow(alpha, pinv);
+	// alpha, p and pinv are values from MaterialConstants.C
 	
-// 	Float_t R_mm = 0.0019 * pow(energy,1.8) * 10;
-	Float_t R_mm = getWEPLFromEnergy(energy);
+	Double_t fitval = 0;
 	
-	Double_t fitval = scale / ( alpha_p * pow((R_mm - depth), 1-pinv) );
-
+	if (kOutputUnit == kWEPL || kOutputUnit == kEnergy) {
+		Float_t range = getWEPLFromEnergy(energy);
+		fitval = scale / ( p_water * pow(alpha_water, pinv_water) * pow((range - depth), 1-pinv_water) );
+	}
+	else if (kOutputUnit == kPhysical) {
+		Float_t range = getTLFromEnergy(energy);
+		fitval = scale / ( p * pow(alpha, pinv) * pow((range - depth), 1-pinv) );
+	}
+	
 	if (isnan(fitval)) fitval = 0;
 
 	return fitval;
 }
-
-
 
 char * getMaterialChar() {
 	char *sMaterial;

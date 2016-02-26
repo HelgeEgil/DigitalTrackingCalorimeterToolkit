@@ -503,38 +503,55 @@ Float_t Track::getAverageCSLastN(Int_t last_n) {
 }
 
 Bool_t Track::doFit() {
-	Float_t trackLengthWEPL = 0;
+	Float_t trackLength = 0;
 
 	Bool_t newCutBraggPeak = (getAverageCSLastN(2) > getAverageCS()*kBPFactorAboveAverage);
-	Bool_t WEPLCut = true; // (getWEPL() > 150);
 	Bool_t cutNPointsInTrack = (GetEntries()>3);
 	
-	Bool_t cut = WEPLCut * newCutBraggPeak * cutNPointsInTrack;
+	Bool_t cut = newCutBraggPeak * cutNPointsInTrack;
 	if (!cut) return false;
 
 	Int_t n = GetEntriesFast()+2;
 	Float_t x[n], y[n];
-
-	for (Int_t i=0; i<GetEntriesFast(); i++) {
-		if (!At(i)) continue;
-		trackLengthWEPL += getTrackLengthWEPLmmAt(i);
-		
-		x[i] = trackLengthWEPL;
-		y[i] = getDepositedEnergy(i);
+	
+	if (kOutputUnit == kWEPL || kOutputUnit == kEnergy) {
+		for (Int_t i=0; i<GetEntriesFast(); i++) {
+			if (!At(i)) continue;
+			
+			trackLength += getTrackLengthWEPLmmAt(i);
+			x[i] = trackLength;
+			y[i] = getDepositedEnergy(i);
+		}
 	}
 	
+	else if (kOutputUnit == kPhysical) {
+		for (Int_t i=0; i<GetEntriesFast(); i++) {
+			if (!At(i)) continue;
+			
+			trackLength += getTrackLengthmmAt(i);
+			x[i] = trackLength;
+			y[i] = getDepositedEnergy(i);
+		}
+	}
+	
+	cout << "Tracklength: " << trackLength << endl;
+	
+	// Set the last two bins to zero, to improve fitting
 	x[n-2] = x[n-3] - x[n-4];
 	x[n-1] = x[n-2] - x[n-3];
 	y[n-2] = 0; y[n-1] = 0;
 	
-	
 	TGraph *graph = new TGraph(n, x, y);
 
+	Float_t scaleParameter = 0;
+	if (kMaterial == kTungsten) scaleParameter = 101;
+	if (kMaterial == kAluminum) scaleParameter = 66;
+	
 	TF1 *func = new TF1("fit_BP", fitfunc_DBP, 0, 500, 2);
 	func->SetParameter(0,run_energy);
-	func->SetParameter(1, 140);
+	func->SetParameter(1, scaleParameter);
 	func->SetParLimits(0, 10, run_energy*1.25);
-	func->SetParLimits(1, 100,300);
+	func->SetParLimits(1, scaleParameter,scaleParameter);
 	graph->Fit("fit_BP", "B, Q, WW, N", "", 0, 500);
 
 	fitEnergy_ = func->GetParameter(0);

@@ -75,6 +75,10 @@ void Clusters::findTracksFromLayer(Tracks * tracks, Int_t layer, Int_t trackFind
 	
 	Clusters * seeds = findSeeds(layer);
 	
+	if (kDebug) {
+		cout << "Number of seeds in layer " << layer << ": " << seeds->GetEntriesFast() << endl;
+	}
+	
 	for (Int_t i=0; i<seeds->GetEntriesFast(); i++) {
 		if (!seeds->At(i))
 			continue;
@@ -102,9 +106,14 @@ void Clusters::findTracksFromLayer(Tracks * tracks, Int_t layer, Int_t trackFind
 
 Clusters * Clusters::findSeeds(Int_t layer) {
 	Clusters *seeds = new Clusters(1000);
+	
 	Int_t layerIdxFrom = getFirstIndexOfLayer(layer);
 	Int_t layerIdxTo = getLastIndexOfLayer(layer);
 
+	if (kDebug) {
+		cout << "Layer Index From , To: (" << layerIdxFrom << "," << layerIdxTo << ")\n";
+	}
+	
 	if (layerIdxFrom<0)
 		return seeds;
 
@@ -189,6 +198,10 @@ Track * Clusters::nearestClusterTrackPropagation(Cluster *seed) {
 		currentTrack->clearTrack();
 	}
 
+	if (kDebug) {
+		cout << "Found " << seedTracks->GetEntriesFast() << " potential tracks from seed.\n";
+	}
+	
 	if (seedTracks->GetEntriesFast())
 		longestTrack = findLongestTrack(seedTracks);
 

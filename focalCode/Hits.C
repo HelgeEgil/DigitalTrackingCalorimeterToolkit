@@ -21,10 +21,10 @@ void Hits::Clear(Option_t *) {
 	hits_.Clear("C");
 }
 
-void Hits::appendPoint(Int_t x, Int_t y, Int_t layer, Int_t event) {
+void Hits::appendPoint(Int_t x, Int_t y, Int_t layer, Int_t event, Float_t edep) {
    Int_t i = GetEntriesFast();
    Hit *hit = (Hit*) hits_.ConstructedAt(i);
-   hit->set(x,y,layer,event);
+   hit->set(x,y,layer,event, edep);
 }
 
 void Hits::appendHits(Hits *hits) {

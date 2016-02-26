@@ -58,6 +58,9 @@ void Focal::getMCData(Int_t runNo, TH3F* Frame3D) {
 
 		Frame3D->Fill(posZ, x, y, edep*1000);
 	}
+	
+	if (kDebug) cout << "From runNo " << runNo << ", nentries = " << nentries << endl;
+	
 } // end function GetData3D
 
 /*
@@ -396,37 +399,42 @@ void Focal::getMCTrackerFrame(Int_t runNo, TrackerFrame *tf) {
 void Focal::getMCFrame(Int_t runNo, CalorimeterFrame *cf) {
 	// Retrieve kEventsPerRun events and put them into CalorimeterFrame*
 	
-   Int_t eventIdFrom = runNo * kEventsPerRun;
-   Int_t eventIdTo = eventIdFrom + kEventsPerRun;
+	Int_t eventIdFrom = runNo * kEventsPerRun;
+	Int_t eventIdTo = eventIdFrom + kEventsPerRun;
 
-   if (runNo == 0) lastJentry_ = 0;
+	if (runNo == 0) lastJentry_ = 0;
 
-   Float_t offsetX = (nx+2) * dx;
-   Float_t offsetY = (ny) * dy;
-   Float_t x,y;
-   Int_t calorimeterLayer;
+	Float_t offsetX = (nx+2) * dx;
+	Float_t offsetY = (ny) * dy;
+	Float_t x,y;
+	Int_t calorimeterLayer;
 
-	if (fChain == 0) return;
-   Long64_t nentries = fChain->GetEntriesFast();
-   Long64_t nbytes = 0, nb = 0;
-   for (Long64_t jentry=lastJentry_; jentry<nentries; jentry++) {
-		Long64_t ientry = LoadTree(jentry);
-      if (ientry<0) break;
-      nb = fChain->GetEntry(jentry);
-      nbytes += nb;
+		if (fChain == 0) return;
+	Long64_t nentries = fChain->GetEntriesFast();
+	Long64_t nbytes = 0, nb = 0;
+	for (Long64_t jentry=lastJentry_; jentry<nentries; jentry++) {
+			Long64_t ientry = LoadTree(jentry);
+		if (ientry<0) break;
+		nb = fChain->GetEntry(jentry);
+		nbytes += nb;
 
-		if (eventID < eventIdFrom) continue;
+		if (eventID < eventIdFrom) {
+			continue;
+		}
+		
 		else if (eventID >= eventIdTo) {
 			lastJentry_ = jentry;
 			break;
 		}
+		
+		calorimeterLayer = level1ID; // level1ID - 4 i trackers are present
+		if (calorimeterLayer<0) {
+			continue;
+		}
 
-      calorimeterLayer = level1ID - 4;
-      if (calorimeterLayer<0) continue;
+		x = (posX + offsetX) * nx / (offsetX);
+		y = (posY + offsetY) * ny / (offsetY);
 
-      x = (posX + offsetX) * nx / (offsetX);
-      y = (posY + offsetY) * ny / (offsetY);
-
-	   cf->fillAt(calorimeterLayer, x, y, edep*1000);
-   }
+		cf->fillAt(calorimeterLayer, x, y, edep*1000);
+	}
 }

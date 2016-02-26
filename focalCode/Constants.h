@@ -9,7 +9,9 @@ enum eFrameType {kCalorimeter, kTracker};
 enum eDataType {kMC, kData};
 
 Float_t run_energy = 0;
-Bool_t kIsAluminumPlate = kTRUE;
+Bool_t kIsAluminumPlate = false;
+
+Bool_t kDebug = false;
 
 // natural unit is mm
 const Float_t cm = 0.1;
@@ -41,7 +43,10 @@ Int_t energies[nEnergies] = {122, 140, 150, 160, 170, 180, 188, 190};
 */
 
 enum eMaterial {kTungsten, kAluminum, kPMMA, kWater, kFocalTungsten, kFocalAluminum};
-const Int_t kMaterial = kTungsten;
+const Int_t kMaterial = kAluminum;
+
+enum eOutputUnit {kPhysical, kWEPL, kEnergy};
+Int_t kOutputUnit = kPhysical;
 
 /*
  * Track reconstruction algorithms

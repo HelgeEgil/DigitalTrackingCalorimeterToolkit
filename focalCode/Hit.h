@@ -7,12 +7,13 @@
 class Hit : public TObject {
   private:
       Int_t x_, y_;
+	  Float_t edep_;
       Int_t layerNo_;
       Int_t eventNo_;
 
   public:
       Hit();
-      Hit(Int_t x, Int_t y, Int_t layer = -1, Int_t event = -1);
+      Hit(Int_t x, Int_t y, Int_t layer = -1, Int_t event = -1, Float_t edep_ = 0);
       Hit(Hit* hit);
       virtual ~Hit(); 
 
@@ -20,13 +21,15 @@ class Hit : public TObject {
       Int_t getY() { return y_; }
       Int_t getLayer() { return layerNo_; }
       Int_t getEvent() { return eventNo_; }
+      Float_t getEdep() { return edep_; }
 
       Double_t getXmm() { return x_ * dx; }
       Double_t getYmm() { return y_ * dy; }
 
-      void set(Int_t x, Int_t y, Int_t layerNo = -1, Int_t eventNo = -1);
+      void set(Int_t x, Int_t y, Int_t layerNo = -1, Int_t eventNo = -1, Float_t edep = 0);
       void set(Hit* hit);
       void setEvent(Int_t event) { eventNo_ = event; }
+      void setEdep(Float_t edep) { edep_ = edep; }
 
       friend ostream &operator<< (ostream &os, Hit &h);
 

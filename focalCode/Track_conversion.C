@@ -51,6 +51,11 @@ Float_t getWEPLStragglingFromWEPL(Float_t wepl) {
 	return sigma;
 }
 
+Float_t getWEPLStragglingFromEnergy(Float_t energy) {
+	Float_t wepl = getWEPLFromEnergy(energy);
+	return getWEPLStragglingFromWEPL(wepl);
+}	
+
 Float_t getEnergyStragglingFromEnergy(Float_t energy) {
 	Float_t range = getTLFromEnergy(energy);
 	return getEnergyStragglingFromRange(range);

@@ -23,17 +23,20 @@ void Layer::diffuseLayer(TRandom3 *gRandom) {
 	Hits *hits = new Hits();
 	Bool_t isHits = findHits(hits);
 	Int_t nHits = hits->GetEntriesFast();
+	
+	frame2D_.Reset();
+	
+	if (kDebug) {
+		cout << "Diffusing layer  " << layerNo_ << ". Number of hits = " << nHits << endl;
+	}
 
 	for (Int_t h=0; h<nHits; h++) {
 		x = hits->getX(h);
 		y = hits->getY(h);
-		eDep = frame2D_.GetBinContent(x, y);
-		if (eDep == 0) continue; // not likely
-
-		// TODO: Make hits with edep, and use former edep info instead of polling histo here
-		// Because SetBinContent below will remove info from OTHER spreading events...
-
-		frame2D_.SetBinContent(x, y, 0);
+		eDep = hits->getEdep(h);
+		
+//		eDep = frame2D_.GetBinContent(x, y);
+//		frame2D_.SetBinContent(x, y, 0);
 
 		repeatFactor = eDep * EnergyFactor;
 		newSigma = pow(repeatFactor, 0.25) / 6;
@@ -44,7 +47,6 @@ void Layer::diffuseLayer(TRandom3 *gRandom) {
 			frame2D_.Fill(randX, randY, EnergyFactor);
 		}
 	}
-
 	delete hits;
 }
 
@@ -82,12 +84,14 @@ void Layer::oldDiffuseLayer() {
 Bool_t Layer::findHits(Hits* hits) {
 	Int_t x, y, z;
 	Bool_t isHits = false;
+	Float_t edep;
 
 	Int_t nBins = frame2D_.GetBin(frame2D_.GetNbinsX(), frame2D_.GetNbinsY());
 	for (int i=1; i<nBins+1; i++) {
-		if (frame2D_.GetBinContent(i)) {
+		edep = frame2D_.GetBinContent(i);
+		if (edep) {
 			frame2D_.GetBinXYZ(i,x,y,z);			
-			hits->appendPoint(x,y,layerNo_);
+			hits->appendPoint(x,y,layerNo_, -1, edep);
 			isHits = true;
 		}
 	}

@@ -28,9 +28,9 @@ void MaterialConstants() {
 		memcpy(kStraggling, kStraggling_Al, sizeof(kStraggling_Al));	
 		nLayers = 41;
 
-		p = 1.7; // MUST VERIFY
-		alpha = 0.014467; // MUST VERIFY
-		alpha_prime = 0.0203815; // MUST VERIFY
+		p = 1.677; // MUST VERIFY
+		alpha = 0.0168; // MUST VERIFY
+		alpha_prime = 0.017102; // MUST VERIFY
 
 	}
 
