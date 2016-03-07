@@ -16,6 +16,7 @@
 #include <TAxis3D.h>
 #include <TCanvas.h>
 #include <TGraph.h>
+#include <TGraphErrors.h>
 #include <iostream>
 #include <fstream>
 #include <TEllipse.h>
@@ -572,6 +573,8 @@ void drawBraggPeakFit(Int_t Runs, Int_t dataType, Bool_t recreate, Float_t energ
 void drawBraggPeakGraphFit(Int_t Runs, Int_t dataType, Bool_t recreate, Float_t energy) {
 	run_energy = energy;
 //	kOutputUnit = kEnergy;
+	Bool_t kDrawHorizontalLines = false;
+	Bool_t drawScale = false;
 	
 	char * sDataType = getDataTypeChar(dataType);
 	char * sMaterial = getMaterialChar();
@@ -579,7 +582,7 @@ void drawBraggPeakGraphFit(Int_t Runs, Int_t dataType, Bool_t recreate, Float_t 
 
 	Int_t nPlotX = 4, nPlotY = 4;
 	Int_t fitIdx = 0, plotSize = nPlotX*nPlotY;
-	Bool_t isFitOk = false;
+	TGraphErrors *outputGraph;
 
 	TCanvas *cGraph = new TCanvas("cGraph", "Fitted data points", 1400, 1000);
 	TCanvas *cFitResults = new TCanvas("cFitResults", hTitle, 1400, 1000);
@@ -589,18 +592,18 @@ void drawBraggPeakGraphFit(Int_t Runs, Int_t dataType, Bool_t recreate, Float_t 
 	TH1F *hFitResults = 0;
 	if (kOutputUnit == kPhysical) {
 		if (kMaterial == kTungsten) 
-			hFitResults = new TH1F("fitResult", hTitle, 1000, 0, 60);
+			hFitResults = new TH1F("fitResult", hTitle, 1000, getTLFromEnergy(energy*0.6), getTLFromEnergy(energy*1.2));
 		else if (kMaterial == kAluminum)
-			hFitResults = new TH1F("fitResult", hTitle, 1000, 0, 200);
+			hFitResults = new TH1F("fitResult", hTitle, 1000, getTLFromEnergy(energy*0.6), getTLFromEnergy(energy*1.2));
 		else
-			hFitResults = new TH1F("fitResult", hTitle, 1000, 0, 400);
-
+			hFitResults = new TH1F("fitResult", hTitle, 1000, getTLFromEnergy(energy*0.6), getTLFromEnergy(energy*1.2));
 	}
+	
 	else if (kOutputUnit == kWEPL) {
-		hFitResults = new TH1F("fitResult", hTitle, 1000, 50, 350);
+		hFitResults = new TH1F("fitResult", hTitle, 1000, 50, getWEPLFromEnergy(energy*1.2));
 	}
 	else if (kOutputUnit == kEnergy) {
-		hFitResults = new TH1F("fitResult", hTitle, 1000, 100, 300);
+		hFitResults = new TH1F("fitResult", hTitle, 1000, energy*0.6, energy*1.2);
 	}
 	else {
 		cout << "Unknown output unit!\n";
@@ -623,8 +626,8 @@ void drawBraggPeakGraphFit(Int_t Runs, Int_t dataType, Bool_t recreate, Float_t 
 		Track *thisTrack = tracks->At(j);
 		if (!thisTrack) continue;
 	
-		isFitOk = thisTrack->doFit();
-		if (!isFitOk) continue;
+		outputGraph = (TGraphErrors*) thisTrack->doFit();
+		if (!outputGraph) continue;
 			
 		Float_t fitEnergy = thisTrack->getFitParameterEnergy();
 		Float_t fitScale = thisTrack->getFitParameterScale();
@@ -643,57 +646,58 @@ void drawBraggPeakGraphFit(Int_t Runs, Int_t dataType, Bool_t recreate, Float_t 
 			}
 		}
 
-		Int_t n = thisTrack->GetEntriesFast();
-		Float_t x[n], y[n];
-
 		if (fitIdx < plotSize) {
 			cGraph->cd(fitIdx+1);
 			
+			outputGraph->SetMinimum(0);
+			outputGraph->SetMaximum(700);
+			outputGraph->SetTitle("");
 			if (kOutputUnit == kWEPL || kOutputUnit == kEnergy) {
-				Float_t trackLengthWEPL = 0;
-				for (Int_t k=0; k<n; k++) {
-					if (!thisTrack->At(k)) continue;
-					trackLengthWEPL += thisTrack->getTrackLengthWEPLmmAt(k);
-					x[k] = trackLengthWEPL;
-					y[k] = thisTrack->getDepositedEnergy(k);
-				}
+				outputGraph->GetXaxis()->SetTitle("Water Equivalent Path Length [mm]");
 			}
-			
 			else if (kOutputUnit == kPhysical) {
-				Float_t trackLength = 0;
-				for (Int_t k=0; k<n; k++) {
-					if (!thisTrack->At(k)) continue;
-					trackLength += thisTrack->getTrackLengthmmAt(k);
-					x[k] = trackLength;
-					y[k] = thisTrack->getDepositedEnergy(k);
-				}
+				outputGraph->GetXaxis()->SetTitle("Physical path length [mm]");
+			}
+
+			outputGraph->GetYaxis()->SetTitle("Deposited energy per layer [keV]");
+			outputGraph->GetXaxis()->SetTitleSize(0.05);
+			outputGraph->GetYaxis()->SetTitleSize(0.05);
+			outputGraph->GetXaxis()->SetLabelSize(0.04);
+			outputGraph->GetYaxis()->SetLabelSize(0.04);
+			
+			Float_t low = 0;
+			Float_t high = 0;
+			
+			if (kOutputUnit == kPhysical) {
+				low = getTLFromEnergy(0);
+				high = getTLFromEnergy(energy*1.2);
 			}
 			
-			TGraph *graph = new TGraph(n,x,y);
+			else if (kOutputUnit == kWEPL || kOutputUnit == kEnergy) {
+				low = getWEPLFromEnergy(0);
+				high = getWEPLFromEnergy(energy*1.2);
+			}
 
-			graph->SetMinimum(0);
-			graph->SetMaximum(700);
-			graph->SetTitle("");
-			graph->GetXaxis()->SetTitle("Water Equivalent Path Length [mm]");
-			graph->GetYaxis()->SetTitle("Deposited energy per layer [keV]");
-			graph->GetXaxis()->SetTitleSize(0.05);
-			graph->GetYaxis()->SetTitleSize(0.05);
-			graph->GetXaxis()->SetLabelSize(0.04);
-			graph->GetYaxis()->SetLabelSize(0.04);
-			graph->GetXaxis()->SetLimits(0, 350);
-			
-			graph->Draw("A*");
+			outputGraph->GetXaxis()->SetLimits(low, high);
+
+			outputGraph->SetMarkerColor(4);
+			outputGraph->SetMarkerStyle(21);
+			outputGraph->Draw("AP");
 			
 			TF1 *func = new TF1("fit_BP", fitfunc_DBP, 0, 500, 2);
 			func->SetParameters(fitEnergy, fitScale);
 			func->Draw("same");
 
-			TLatex *text = new TLatex(20, 600, Form("Fitted energy: %.1f MeV", fitEnergy));
+			TLatex *text = new TLatex(low*1.2, 600, Form("Fitted energy: %.1f MeV", fitEnergy));
 			text->SetTextSize(0.06);
 			text->Draw();
 		
 			cGraph->Update();
 			fitIdx++;
+		}
+		
+		else {
+			delete outputGraph;
 		}
 	}
 	
@@ -701,6 +705,11 @@ void drawBraggPeakGraphFit(Int_t Runs, Int_t dataType, Bool_t recreate, Float_t 
 	hScale->SetYTitle("Number of protons");
 	hScale->SetXTitle("Parameter 1 of fit (SCALE)");
 	hScale->Draw();
+	
+	if (!drawScale) {
+		delete hScale;
+		delete cScale;
+	}
 	
 	cFitResults->cd();
 	if (kOutputUnit == kPhysical) hFitResults->SetXTitle("Physical range [mm]");
@@ -722,28 +731,103 @@ void drawBraggPeakGraphFit(Int_t Runs, Int_t dataType, Bool_t recreate, Float_t 
 	
 	// Draw expected gaussian distribution of results from initial energy
 	
-	Float_t expectedStraggling = 0, expectedMean = 0;
+	Float_t expectedStraggling = 0, expectedMean = 0, dlayer_down = 0, dlayer = 0;
+	
+	Float_t separationFactor = 1;
+	if (kMaterial == kAluminum)
+		separationFactor = 0.7; // don't ask why...
 	
 	if (kOutputUnit == kPhysical) {
 		expectedMean = getTLFromEnergy(energy);
 		expectedStraggling = getRangeStragglingFromEnergy(energy);
+		dlayer = dz*separationFactor;
 	}
+	
 	else if (kOutputUnit == kEnergy) {
 		expectedMean = energy;
 		expectedStraggling = getEnergyStragglingFromEnergy(expectedMean);
+		dlayer = getEnergyFromTL(getTLFromEnergy(energy) + dz*separationFactor) - expectedMean;
 	}
 	else if (kOutputUnit == kWEPL) {
 		expectedMean = getWEPLFromEnergy(energy);
 		expectedStraggling = getWEPLStragglingFromEnergy(energy);
+		dlayer = getWEPLFromTL(getTLFromEnergy(energy) + dz*separationFactor) - expectedMean;
 	}
 	
-	TF1 *ES = new TF1("ES", "gaus(0)", expectedMean*0.85, expectedMean*1.15);
-	ES->SetParameters(maxBin,expectedMean,expectedStraggling);
- 	ES->SetParLimits(0,maxBin,maxBin);
- 	ES->SetParLimits(1,expectedMean,expectedMean);
+	Int_t meanBin = hFitResults->GetMean();
+	
+	// three gaussians with a x0 at dlayer_down, 0, dlayer_up
+	// same sigma, same x, different scaling
+	
+	TF1 *ES = new TF1("ES", 
+		Form("[0]*exp(-0.5*((x-[1])/[2])**2) + [3]*exp(-0.5*((x-[1]-%.2f)/[2])**2)", dlayer), 
+		expectedMean*0.9, expectedMean*1.15);
+	ES->SetParameters(maxBin*0.5,meanBin,expectedStraggling, maxBin*0.5);
+ 	ES->SetParLimits(0,0,maxBin);
+ 	ES->SetParLimits(1,meanBin*0.9,meanBin*1.15);
  	ES->SetParLimits(2,expectedStraggling,expectedStraggling);
- 	hFitResults->Fit(ES,"B,Q", "", expectedMean*0.85, expectedMean*1.15);
-	cout << "Tryna draw Gauss(" << maxBin << "," << expectedMean << "," << expectedStraggling << ").\n";
+ 	ES->SetParLimits(3,0,maxBin);
+	
+	hFitResults->Fit(ES,"B,Q,M", "", expectedMean*0.85, expectedMean*1.15);
+	
+	Float_t p1 = ES->GetParameter(0);
+	Float_t p2 = ES->GetParameter(3);
+		
+	Float_t p1_n = p1 / (p1 + p2);
+	Float_t p2_n = p2 / (p1 + p2);
+	
+	Float_t peak_x = ES->GetParameter(1);
+	Float_t mu1 = peak_x;
+	Float_t mu2 = peak_x + dlayer;
+	
+	Float_t weighted = p1_n * mu1 + p2_n * mu2;
+	Float_t w_tl = 0, w_wepl = 0, w_en = 0, max_en = 0, max_tl = 0;
+	
+	Float_t max_mu = (p2_n > 0.2) ? mu2 : mu1;
+	
+	if (kOutputUnit == kPhysical) {
+		w_en = getEnergyFromTL(weighted);
+		w_wepl = getWEPLFromTL(weighted);
+		w_tl = weighted;
+		max_en = getEnergyFromTL(max_mu);
+		max_tl = getWEPLFromTL(max_mu);
+	}
+	else if (kOutputUnit == kWEPL) {
+		w_en = getEnergyFromWEPL(weighted);
+		w_tl = getTLFromWEPL(weighted);
+		w_wepl = weighted;
+		max_en = getEnergyFromWEPL(max_mu);
+		max_tl = max_mu;
+	}
+	else { // kEnergy
+		w_en = weighted;
+		w_tl = getTLFromEnergy(weighted);
+		w_wepl = getWEPLFromEnergy(weighted);
+		max_en = max_mu;
+		max_tl = getWEPLFromEnergy(max_mu);
+	}
+
+	if (p2_n < 0.2) {
+		cout << "mu2 @ (" << getEnergyFromTL(mu2) << " MeV, f=" << p2_n << ") too small, choosing mu1\n";
+	}
+	
+// 	cout << "Three Gaussian peaks at: " << 100 * p1_n << "% " << mu1 << " mm, " 
+// 										<< 100 * p2_n << "% " << mu2 << " mm\n";
+// 										
+// 	cout << "---> The expected mean tracklength is " << w_tl << " mm\n";
+// 	cout << "---> The expected mean WEPL is " << w_wepl << " mm\n";
+// 	cout << "---> With an energy of " << w_en << " MeV\n";
+// 	
+// 	cout << "WEPL range: " << ES->GetParameter(1) << endl;
+// 	cout << "Estimated energy: " << getEnergyFromWEPL(ES->GetParameter(1)) << endl;
+// 	cout << "Fitted sigma: " << ES->GetParameter(2) << endl;
+// 	cout << "Expected sigma: " << expectedStraggling << endl;
+// 	cout << "(expected range: " << expectedMean << ")\n";
+
+	cout << endl;
+	cout << "Estimated WEPL = " << max_tl << " mm.\n";
+	cout << "Estimated energy = " << max_en << " MeV.\n";
+	
 	ES->Draw("same");
 	cFitResults->Update();
 
@@ -753,43 +837,38 @@ void drawBraggPeakGraphFit(Int_t Runs, Int_t dataType, Bool_t recreate, Float_t 
 	legend->AddEntry(ES, "Expected range straggling", "F");
 	legend->Draw();
 	
-	// find Full Width Half Maximum and draw it in the TPaveStats
-	Int_t bin1 = hFitResults->FindFirstBinAbove(maxBin/2);
-	Int_t bin2 = hFitResults->FindLastBinAbove(maxBin/2);
-	Float_t fwhm = hFitResults->GetBinCenter(bin2) - hFitResults->GetBinCenter(bin1);
+	Float_t lowerRange = expectedMean - expectedStraggling;
+	Float_t higherRange = expectedMean + expectedStraggling;
 	
-	Int_t bin3 = hFitResults->FindFirstBinAbove(maxBin/4);
-	Int_t bin4 = hFitResults->FindLastBinAbove(maxBin/4);
-	Float_t fwqm = hFitResults->GetBinCenter(bin4) - hFitResults->GetBinCenter(bin3);
-	
-	Int_t bin5 = hFitResults->FindFirstBinAbove(maxBin/3);
-	Int_t bin6 = hFitResults->FindLastBinAbove(maxBin/3);
-	Float_t fwtm = hFitResults->GetBinCenter(bin6) - hFitResults->GetBinCenter(bin5);
+	Float_t sigma_fwhm = getFWxMInRange(hFitResults, lowerRange, higherRange, 2);
+	Float_t sigma_fwtm = getFWxMInRange(hFitResults, lowerRange, higherRange, 3);
+	Float_t sigma_fwqm = getFWxMInRange(hFitResults, lowerRange, higherRange, 4);
 	
 	TPaveStats *ps = (TPaveStats*) cFitResults->GetPrimitive("stats");
 	hFitResults->SetBit(TH1::kNoStats);
 	ps->AddText(Form("Nominal mean = %.2f", expectedMean));
 	ps->AddText(Form("Nominal straggling = %.2f", expectedStraggling));
-	//ps->AddText(Form("FWHM = %.2f", fwhm));
-	ps->AddText(Form("Straggling (from FWHM) = %.2f", fwhm/2.355));
-	ps->AddText(Form("Straggling (from FWTM) = %.2f", fwtm/2.9646));
-	ps->AddText(Form("Straggling (from FWQM) = %.2f", fwqm/3.33));
+	ps->AddText(Form("Straggling (from FWHM) = %.2f", sigma_fwhm));
+	ps->AddText(Form("Straggling (from FWTM) = %.2f", sigma_fwtm));
+	ps->AddText(Form("Straggling (from FWQM) = %.2f", sigma_fwqm));
 	
 	// draw lines on HM, TM, QM
-	Float_t len_hm = expectedStraggling * 2.355/2;
-	Float_t len_tm = expectedStraggling * 2.9646/2;
-	Float_t len_qm = expectedStraggling * 3.330/2;
+	if (kDrawHorizontalLines) {
+		Float_t len_hm = expectedStraggling * 2.355/2;
+		Float_t len_tm = expectedStraggling * 2.9646/2;
+		Float_t len_qm = expectedStraggling * 3.330/2;
+		
+		Float_t width = hFitResults->GetXaxis()->GetBinWidth(1)/2;
+		TLine *hm = new TLine(expectedMean-sigma_fwhm/2-width, maxBin/2, expectedMean + sigma_fwhm/2 + width, maxBin/2);
+		TLine *tm = new TLine(expectedMean-sigma_fwtm/2-width, maxBin/3, expectedMean + sigma_fwtm/2 + width, maxBin/3);
+		TLine *qm = new TLine(expectedMean-sigma_fwqm/2-width, maxBin/4, expectedMean + sigma_fwqm/2 + width, maxBin/4);
 	
-	//TLine *hm = new TLine(expectedMean - len_hm, maxBin/2, expectedMean + len_hm, maxBin/2);
-	TLine *hm = new TLine(hFitResults->GetXaxis()->GetBinLowEdge(bin1), maxBin/2, hFitResults->GetXaxis()->GetBinUpEdge(bin2), maxBin/2);
-	TLine *tm = new TLine(hFitResults->GetXaxis()->GetBinLowEdge(bin5), maxBin/3, hFitResults->GetXaxis()->GetBinUpEdge(bin6), maxBin/3);
-	TLine *qm = new TLine(hFitResults->GetXaxis()->GetBinLowEdge(bin3), maxBin/4, hFitResults->GetXaxis()->GetBinUpEdge(bin4), maxBin/4);
-	
-	hm->SetLineColor(kRed); tm->SetLineColor(kRed); qm->SetLineColor(kRed);
-	hm->SetLineWidth(3); tm->SetLineWidth(3); qm->SetLineWidth(3);
-	hm->Draw(); tm->Draw(); qm->Draw();
-	
-	cFitResults->Modified();
+		hm->SetLineColor(kRed); tm->SetLineColor(kRed); qm->SetLineColor(kRed);
+		hm->SetLineWidth(3); tm->SetLineWidth(3); qm->SetLineWidth(3);
+		hm->Draw(); tm->Draw(); qm->Draw();
+		
+		cFitResults->Modified();
+	}
 	
 	if (kOutputUnit == kPhysical) {
 		cFitResults->SaveAs(Form("figures/Fitted_energies_%.2f_MeV_%s_%s_physical.pdf", energy, getMaterialChar(), getDataTypeChar(dataType)));

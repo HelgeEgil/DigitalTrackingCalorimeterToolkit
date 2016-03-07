@@ -48,9 +48,17 @@ Float_t Cluster::getRadiusmm() {
 Float_t Cluster::getDepositedEnergy() {
 	// An inverse fit to the charge diffusion algorithm defined in Layer.C
 	// Returns the local dEdx value in keV.
+	
 	return -13.6 + 7.524*clusterSize_ + 0.248 * pow(clusterSize_,2);
 }
 
+Float_t Cluster::getDepositedEnergyError() {
+	// sigma_E = sigma_N (dE / dN)
+	
+	Float_t sigma_n = sqrt(clusterSize_);
+	
+	return sigma_n * (7.524 + 2*0.248 *  clusterSize_);
+}
 
 void Cluster::set(Cluster* copyCluster) {
    x_ = copyCluster->getX();

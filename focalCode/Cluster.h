@@ -3,6 +3,7 @@
 
 #include "TObject.h"
 #include "Constants.h"
+#include "math.h"
 #include <iostream>
 
 class Cluster : public TObject {
@@ -21,8 +22,10 @@ public:
 	Float_t getY() { return y_; }
 	Int_t getLayer() { return layerNo_; }
 	Int_t getSize() { return clusterSize_; }
+	Int_t getError() { return sqrt(clusterSize_); }
 	Float_t getRadiusmm();
 	Float_t getDepositedEnergy();
+	Float_t getDepositedEnergyError();
 
 	Double_t getXmm() { return x_ * dx; }
 	Double_t getYmm() { return y_ * dy; }

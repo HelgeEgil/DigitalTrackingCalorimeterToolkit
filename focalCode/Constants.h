@@ -10,13 +10,13 @@ enum eDataType {kMC, kData};
 
 Float_t run_energy = 0;
 Bool_t kIsAluminumPlate = false;
+Bool_t kIsScintillator = false;
 
 Bool_t kDebug = false;
 
 // natural unit is mm
 const Float_t cm = 0.1;
 const Float_t um = 1000;
-
 
 // Some general run parameters
 const Int_t nx = 640;

@@ -9,6 +9,7 @@ Float_t getEnergyFromTL(Float_t tl);
 Float_t getRangeFromEnergy(Float_t energy);
 Float_t getTLFromEnergy(Float_t energy);
 Float_t getTLFromWEPL(Float_t wepl);
+Float_t getTLFromMaterial(Float_t tl_mat, Int_t material);
 Float_t getWEPLFromEnergy(Float_t energy);
 Float_t getWEPLFactorFromEnergy ( Float_t energy );
 Float_t getWEPLFromTL(Float_t tl);

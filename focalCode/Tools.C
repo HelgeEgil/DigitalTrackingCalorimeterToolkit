@@ -151,3 +151,19 @@ Int_t getMinimumTrackLength(Float_t energy) {
 
 	return minTL;
 }
+
+Float_t getPreMaterial() {
+	Float_t preScintillator = 0;
+	Float_t preAluminumPlate = 0;
+	
+	if (kIsScintillator) {
+		preScintillator = 2; // find number for this
+	}
+	
+	if (kIsAluminumPlate) {
+		preAluminumPlate = getTLFromMaterial(1.5, kAluminum);
+	}
+	
+	Float_t preMaterial = preScintillator + preAluminumPlate;	
+	return preMaterial;
+}

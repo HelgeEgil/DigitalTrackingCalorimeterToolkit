@@ -5,6 +5,8 @@
 #include "Track_conversion.h"
 
 const Int_t MaxTrackLength = 40;
+class TGraph;
+class TGraphErrors;
 
 class Track : public TObject {
 
@@ -42,7 +44,9 @@ class Track : public TObject {
 	virtual Float_t getY(Int_t i) { return At(i)->getY(); }
 	virtual Int_t getLayer(Int_t i) { return At(i)->getLayer(); }
 	virtual Int_t getSize(Int_t i) { return At(i)->getSize(); }
+	virtual Int_t getError(Int_t i) { return At(i)->getError(); } 
 	virtual Float_t getDepositedEnergy(Int_t i) {return At(i)->getDepositedEnergy(); }
+	virtual Float_t getDepositedEnergyError(Int_t i) {return At(i)->getDepositedEnergyError(); }
 
 	// with dimensions
 	Float_t getXmm(Int_t i) { return At(i)->getXmm(); }
@@ -77,7 +81,7 @@ class Track : public TObject {
 	Float_t getAverageCS();
 	Float_t getAverageCSLastN(Int_t i);
 
-	Bool_t doFit();
+	TGraphErrors * doFit();
 	
 	virtual Cluster* At(Int_t i) { return ((Cluster*) track_.At(i)); }
 	Int_t getClusterFromLayer(Int_t layer);

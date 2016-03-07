@@ -12,6 +12,9 @@ Int_t nLayers;
 
 Double_t p, pinv, alpha, alpha_prime;
 Double_t p_water, alpha_water, alpha_prime_water, pinv_water;
+Double_t p_aluminum, alpha_aluminum, alpha_prime_aluminum;
+Double_t p_tungsten, alpha_tungsten, alpha_prime_tungsten;
+Double_t firstHalfLayer;
 
 Float_t kPLEnergies[nPLEnergies] =
 			{0.1, 0.11, 0.12, 0.13, 0.14, 0.15, 0.16, 0.17, 0.18, 0.2, 0.225, 0.25,

@@ -16,6 +16,20 @@ Float_t getTLFromWEPL(Float_t wepl) {
 	return alpha * pow(wepl / alpha_water, p / p_water);
 }
 
+Float_t getTLFromMaterial(Float_t tl_mat, Int_t material) {
+	Float_t tl = 0;
+	if (material == kTungsten) {
+		tl = alpha * pow(tl_mat / alpha_tungsten, p / p_tungsten);
+	}
+	else if (material == kAluminum) {
+		tl = alpha * pow(tl_mat / alpha_aluminum, p / p_aluminum);
+	}
+	else {
+		cout << "MATERIAL" << material << " NOT FOUND! Reverting to input TL\n";
+		tl = tl_mat;
+	}
+}
+
 Float_t getTLFromEnergy(Float_t energy) {
 	return alpha * pow(energy, p);
 }

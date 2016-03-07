@@ -59,44 +59,40 @@ void Track::appendPoint(Float_t x, Float_t y, Int_t layer, Int_t size) {
 }
 
 Float_t Track::getTrackLengthmm() {
-   // return geometrical track length
+// return geometrical track length
 	
-	Float_t preMaterial = 3.09 * kIsAluminumPlate;
-	Float_t firstHalfLayer = 1.65;
+	Float_t preMaterial = getPreMaterial();
+	Float_t trackLength = preMaterial + firstHalfLayer;
 
-   Float_t trackLength = preMaterial + firstHalfLayer;
+	Float_t x = -1; Float_t xp = -1;
+	Float_t y = -1; Float_t yp = -1;
+	Float_t z = -1; Float_t zp = -1;
 
-   Float_t x = -1; Float_t xp = -1;
-   Float_t y = -1; Float_t yp = -1;
-   Float_t z = -1; Float_t zp = -1;
+	if (!At(0)) return 0;
 
-   if (!At(0)) return 0;
+	xp = getXmm(0);
+	yp = getYmm(0);
+	zp = getLayermm(0);
 
-   xp = getXmm(0);
-   yp = getYmm(0);
-   zp = getLayermm(0);
-
-   for (Int_t i=1; i<GetEntriesFast(); i++) {
+	for (Int_t i=1; i<GetEntriesFast(); i++) {
 
 		if (!At(i)) continue;
 
-      x = getXmm(i);
-      y = getYmm(i);
-      z = getLayermm(i);
-		
-      trackLength += sqrt((xp-x)*(xp-x) + (yp-y)*(yp-y) + (zp-z)*(zp-z));
+		x = getXmm(i);
+		y = getYmm(i);
+		z = getLayermm(i);
+			
+		trackLength += sqrt((xp-x)*(xp-x) + (yp-y)*(yp-y) + (zp-z)*(zp-z));
 
-      xp = x; yp = y; zp = z;
-   }
-   return trackLength;
+		xp = x; yp = y; zp = z;
+	}
+	return trackLength;
 }
 
 Float_t Track::getRangemm() {
-	// return range, not track length
-	//
-	Float_t preMaterial = 3.09 * kIsAluminumPlate;
-	Float_t firstHalfLayer = 1.65;
+	// return range (z2 - z1), not track length
 	
+	Float_t preMaterial = getPreMaterial();
 	Float_t range = 0;
 	if (!At(0)) return 0;
 
@@ -143,8 +139,7 @@ Float_t Track::getSlopeAngleAtLayer(Int_t i) {
 
 Float_t Track::getTrackLengthmmAt(Int_t i) {
 	// returns geometrical track length at point i
-	Float_t preMaterial = 3.09 * kIsAluminumPlate;
-	Float_t firstHalfLayer = 1.65;
+	Float_t preMaterial = getPreMaterial();
 	
 	if (i==0) return preMaterial + firstHalfLayer; // pre-detector material
 	if (i>GetEntriesFast()) return 0;
@@ -153,10 +148,9 @@ Float_t Track::getTrackLengthmmAt(Int_t i) {
 }
 
 Float_t Track::getRangemmAt(Int_t i) {
-	Float_t preMaterial = 3.09 * kIsAluminumPlate;
-	Float_t firstHalfLayer = 1.65;
-	
-	if (i==0) return preMaterial + firstHalfLayer; // pre-detector material
+	Float_t preMaterial = getPreMaterial();
+
+	if (i==0) return preMaterial  + firstHalfLayer; // pre-detector material
 	if (i>GetEntriesFast()) return 0;
 
 	return diffmm(new Cluster(getX(i-1), getY(i-1), getLayer(i-1)),
@@ -165,36 +159,28 @@ Float_t Track::getRangemmAt(Int_t i) {
 
 Float_t Track::getWEPL() {
 	Float_t tl = getTrackLengthmm();
+	Float_t preMaterial = getPreMaterial();
+	
 	if (!tl) return 0;
-
-	Float_t preMaterial = 3.09 * kIsAluminumPlate;
-	Float_t firstHalfLayer = 1.65;
-	return getWEPLFromTL(tl + firstHalfLayer) + preMaterial;
+	
+	return getWEPLFromTL(tl + firstHalfLayer + preMaterial);
 }
 
 Float_t Track::getTrackLengthWEPLmmAt(Int_t i) {
-	// Returns geometrical track length in WEPL at point i
-	// the WEPL conversion is a LUT calculated from the bethe equation
-	// (see rangeCalculator.py)
-	
-	Float_t preMaterial = 3.09 * kIsAluminumPlate;
-	Float_t firstHalfLayer = 1.65;
-	
-	Float_t tl = getTrackLengthmmAt(i);
-	
 	if (i==0) {
 		// WEPL of 1.5 mm Al + WEPL of 1.65 (avg) detector materal
-		return preMaterial + getWEPLFromTL(firstHalfLayer);
+		Float_t preMaterial = getPreMaterial();	
+		return getWEPLFromTL(firstHalfLayer + preMaterial);
 	}
-	
+
+	Float_t tl = getTrackLengthmmAt(i);
 	if (!tl) return 0;
 	
 	return getWEPLFromTL(tl);
 }
 
 Float_t Track::getRangeWEPLAt(Int_t i) {
-	Float_t preMaterial = 3.09 * kIsAluminumPlate;
-	Float_t firstHalfLayer = 1.65;
+	Float_t preMaterial = getPreMaterial();
 	
 	Float_t range = getRangemmAt(i);
 	if (i==0) {
@@ -502,64 +488,64 @@ Float_t Track::getAverageCSLastN(Int_t last_n) {
 	return avg;
 }
 
-Bool_t Track::doFit() {
-	Float_t trackLength = 0;
-
+TGraphErrors * Track::doFit() {
 	Bool_t newCutBraggPeak = (getAverageCSLastN(2) > getAverageCS()*kBPFactorAboveAverage);
 	Bool_t cutNPointsInTrack = (GetEntries()>3);
-	
 	Bool_t cut = newCutBraggPeak * cutNPointsInTrack;
-	if (!cut) return false;
+	if (!cut) return 0;
 
-	Int_t n = GetEntriesFast()+2;
+	Int_t n = GetEntriesFast();
 	Float_t x[n], y[n];
+	Float_t erx[n], ery[n];
+	Float_t trackLength = 0;
+	
+	for (Int_t i=0; i<n; i++) {
+		if (!At(i)) continue;
+		trackLength += getTrackLengthmmAt(i);
+		x[i] = trackLength;
+		y[i] = getDepositedEnergy(i);
+		ery[i] = getDepositedEnergyError(i);
+		erx[i] = 0;
+	}
+	
+	Float_t max_energy = getEnergyFromTL(trackLength + 1.2*dz);
+	Float_t estimated_energy = getEnergyFromTL(trackLength + 0.5*dz);
 	
 	if (kOutputUnit == kWEPL || kOutputUnit == kEnergy) {
-		for (Int_t i=0; i<GetEntriesFast(); i++) {
-			if (!At(i)) continue;
-			
-			trackLength += getTrackLengthWEPLmmAt(i);
-			x[i] = trackLength;
-			y[i] = getDepositedEnergy(i);
+		Float_t WEPLFactor = getWEPLFactorFromEnergy(estimated_energy);
+		for (Int_t i=0; i<n; i++) {
+			x[i] = x[i] * WEPLFactor;
 		}
 	}
 	
-	else if (kOutputUnit == kPhysical) {
-		for (Int_t i=0; i<GetEntriesFast(); i++) {
-			if (!At(i)) continue;
-			
-			trackLength += getTrackLengthmmAt(i);
-			x[i] = trackLength;
-			y[i] = getDepositedEnergy(i);
-		}
-	}
-	
-	cout << "Tracklength: " << trackLength << endl;
-	
-	// Set the last two bins to zero, to improve fitting
-	x[n-2] = x[n-3] - x[n-4];
-	x[n-1] = x[n-2] - x[n-3];
-	y[n-2] = 0; y[n-1] = 0;
-	
-	TGraph *graph = new TGraph(n, x, y);
-
+	TGraphErrors *graph = new TGraphErrors(n, x, y, erx, ery);
 	Float_t scaleParameter = 0;
-	if (kMaterial == kTungsten) scaleParameter = 101;
-	if (kMaterial == kAluminum) scaleParameter = 66;
 	
-	TF1 *func = new TF1("fit_BP", fitfunc_DBP, 0, 500, 2);
-	func->SetParameter(0,run_energy);
-	func->SetParameter(1, scaleParameter);
-	func->SetParLimits(0, 10, run_energy*1.25);
-	func->SetParLimits(1, scaleParameter,scaleParameter);
-	graph->Fit("fit_BP", "B, Q, WW, N", "", 0, 500);
+	if (kOutputUnit == kPhysical) {
+		if (kMaterial == kTungsten) scaleParameter = 14; // was 101, what...
+		if (kMaterial == kAluminum) scaleParameter = 65;
+	}
+	
+	else if (kOutputUnit == kWEPL || kOutputUnit == kEnergy) {
+		if (kMaterial == kTungsten) scaleParameter = 100; // ?? fix
+		if (kMaterial == kAluminum) scaleParameter = 126;
+	}
 
+	//if (run_energy > max_energy) {
+		//max_energy = run_energy;
+//	}
+		
+	TF1 *func = new TF1("fit_BP", fitfunc_DBP, 0, 500, 2);
+	func->SetParameter(0, estimated_energy);
+	func->SetParameter(1, scaleParameter);
+	func->SetParLimits(0, 0, max_energy);
+	func->SetParLimits(1, scaleParameter,scaleParameter);
+	graph->Fit("fit_BP", "B, Q, N", "", 0, 500);
+	
 	fitEnergy_ = func->GetParameter(0);
 	fitScale_ = func->GetParameter(1);
 
-	delete graph;
-	
-	return true;
+	return graph;
 }
 
 Float_t Track::getFitParameterEnergy() {

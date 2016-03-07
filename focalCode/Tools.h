@@ -27,6 +27,7 @@ char * getMaterialChar();
 char * getDataTypeChar(Int_t dataType);
 Int_t getMinimumTrackLength(Float_t energy);
 Int_t getFWxMInRange(TH1F* h, Float_t first, Float_t last, Int_t div);
+Float_t getPreMaterial();
 
 
 #endif /* FOCALCODE_TOOLS_H_ */
