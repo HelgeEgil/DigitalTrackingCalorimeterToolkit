@@ -1210,7 +1210,6 @@ void drawTracks3D(Int_t Runs, Int_t dataType, Bool_t recreate, Float_t energy) {
    tracks->checkLayerOrientation();
 
    delete tracks;
-
 }
 
 void drawDiffusionCheck(Int_t Runs, Int_t Layer) {
@@ -1218,19 +1217,19 @@ void drawDiffusionCheck(Int_t Runs, Int_t Layer) {
    CalorimeterFrame *cf = new CalorimeterFrame();
    
    for (Int_t i=0; i<=Runs; i++) {
-   	f->GetMCFrame(i, cf); // Remember to have MC data available at ./test.root
+   	f->getMCFrame(i, cf); // Remember to have MC data available at ./test.root
    }
 
    TCanvas *c1 = new TCanvas("c1", "multipads", 1400, 900);
    gStyle->SetOptStat(0);
    c1->Divide(2,1,0.01,0.01,0);
    
-   TH2F *undiffusedTH2F = (TH2F*) cf->GetTH2F(Layer)->Clone();
+   TH2F *undiffusedTH2F = (TH2F*) cf->getTH2F(Layer)->Clone();
    undiffusedTH2F->SetName("undiffusedTH2F");
    
-   cf->DiffuseFrame(new TRandom3(0));
+   cf->diffuseFrame(new TRandom3(0));
    
-   TH2F *diffusedTH2F = (TH2F*) cf->GetTH2F(Layer)->Clone();
+   TH2F *diffusedTH2F = (TH2F*) cf->getTH2F(Layer)->Clone();
    diffusedTH2F->SetName("diffusedTH2F");
 
    c1->cd(1);
