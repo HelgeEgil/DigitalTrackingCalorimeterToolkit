@@ -12,7 +12,7 @@ Tracks * loadOrCreateTracks(Bool_t recreate, Int_t Runs, Int_t dataType, Float_t
 void		DrawFrame2D(Int_t Runs, Int_t Layer);
 //void		DrawData3D(Int_t RunFrom, Int_t RunTo);
 //void		DrawRealData3D(Int_t RunFrom, Int_t RunTo);
-//void		DrawDiffusionCheck(Int_t Runs, Int_t Layer);
+void		drawDiffusionCheck(Int_t Runs, Int_t Layer);
 void		drawTracks3D(Int_t Runs, Int_t dataType = kMC, Bool_t recreate = false, Float_t energy = 188);
 void		drawData3D(Int_t Runs);
 //void		DrawRealTracks3D(Int_t Runs);

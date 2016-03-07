@@ -1213,40 +1213,34 @@ void drawTracks3D(Int_t Runs, Int_t dataType, Bool_t recreate, Float_t energy) {
 
 }
 
-/*
-
-void DrawDiffusionCheck(Int_t Runs, Int_t Layer) {
-   Focal f;
+void drawDiffusionCheck(Int_t Runs, Int_t Layer) {
+   Focal *f = new Focal();
+   CalorimeterFrame *cf = new CalorimeterFrame();
+   
+   for (Int_t i=0; i<=Runs; i++) {
+   	f->GetMCFrame(i, cf); // Remember to have MC data available at ./test.root
+   }
 
    TCanvas *c1 = new TCanvas("c1", "multipads", 1400, 900);
    gStyle->SetOptStat(0);
    c1->Divide(2,1,0.01,0.01,0);
-
-   c1->cd(2);
-   TH2F *Frame2D = new TH2F("Frame2D", "Diffused hitsmap in all layers", 
-                              nx*2, 0, nx*2, ny*2, 0, ny*2);
-   Frame2D->SetXTitle("Pixel number");
-   Frame2D->SetYTitle("Pixel number");
    
-   c1->cd(1);
-
-   f.GetFrame2D(Runs, Layer, Frame2D);
-   TH2F *DiffusedFrame2D = (TH2F*) Frame2D->Clone();
+   TH2F *undiffusedTH2F = (TH2F*) cf->GetTH2F(Layer)->Clone();
+   undiffusedTH2F->SetName("undiffusedTH2F");
    
-   f.DiffuseFrame(DiffusedFrame2D);
+   cf->DiffuseFrame(new TRandom3(0));
    
-   DiffusedFrame2D->SetName("DiffusedFrame2D");
-   DiffusedFrame2D->SetTitle("Original hitsmap in all layers");
+   TH2F *diffusedTH2F = (TH2F*) cf->GetTH2F(Layer)->Clone();
+   diffusedTH2F->SetName("diffusedTH2F");
 
    c1->cd(1);
-   Frame2D->Draw("COLZ");
-   c1->cd(2);
-   DiffusedFrame2D->Draw("COLZ");
-
+   undiffusedTH2F->Draw("COLZ");
+   
+   c1->cd(1);
+   diffusedTH2F->Draw("COLZ");
+   
    c1->Update();
-} // end function Frame2DWithDiffusion
-
-*/
+}
 
 void DrawFrame2D(Int_t Runs, Int_t Layer) {
    // Draw one layer using GetFrame2D
