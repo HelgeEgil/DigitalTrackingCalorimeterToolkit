@@ -6,10 +6,16 @@
 using namespace std;
 
 void MaterialConstants() {
-	p_water = 1.725517;
-	alpha_water = 0.027681;
+	p_water_high = 1.725517; 		// above 150 MeV
+	alpha_water_high = 0.027681;	// above 150 Mev
+	
+	p_water_low = 1.77251; 			// below 150 MeV
+	alpha_water_low = 0.02195; 		// below 150 MeV
+
+	p_water = p_water_high;
+	alpha_water = alpha_water_high;
+	pinv_water = 1/p_water_high;
 	alpha_prime_water = 0.0087;
-	pinv_water = 1/p_water;
 	
 	p_aluminum = 1.677;
 	alpha_aluminum = 0.01738;
@@ -55,3 +61,17 @@ void MaterialConstants() {
 	pinv = 1./p;
 	firstHalfLayer = 1.65;
 }
+
+void setWaterPValues(Int_t setting) {
+	if (setting == kLow) {
+		p_water = p_water_low;
+		alpha_water = alpha_water_low;
+	}
+	else if (setting == kHigh) {
+		p_water = p_water_high;
+		alpha_water = alpha_water_high;
+	}
+	
+	pinv_water = 1/p_water;
+}	
+	

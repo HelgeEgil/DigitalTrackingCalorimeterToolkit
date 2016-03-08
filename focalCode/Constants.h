@@ -27,7 +27,7 @@ const Int_t nTrackers = 4;
 const Float_t dx = 0.03; // mm
 const Float_t dy = 0.03; // mm
 const Float_t dz = 3.84; // mm
-const Int_t kEventsPerRun = 100;
+const Int_t kEventsPerRun = 500;
 
 // Used for treatment of available experimental data files
 const Int_t nEnergies = 8;
@@ -46,7 +46,7 @@ enum eMaterial {kTungsten, kAluminum, kPMMA, kWater, kFocalTungsten, kFocalAlumi
 const Int_t kMaterial = kAluminum;
 
 enum eOutputUnit {kPhysical, kWEPL, kEnergy};
-Int_t kOutputUnit = kPhysical;
+Int_t kOutputUnit = kWEPL;
 
 /*
  * Track reconstruction algorithms

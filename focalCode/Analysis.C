@@ -572,6 +572,25 @@ void drawBraggPeakFit(Int_t Runs, Int_t dataType, Bool_t recreate, Float_t energ
 
 void drawBraggPeakGraphFit(Int_t Runs, Int_t dataType, Bool_t recreate, Float_t energy) {
 	run_energy = energy;
+	
+	if (run_energy < 150) {
+		cout << "Energy = " << run_energy << ", setting waterPValues -> low\n";
+		setWaterPValues(kLow);
+	}
+	else {
+		cout << "Energy = " << run_energy << ", setting waterPValues -> high\n";
+		setWaterPValues(kHigh);
+		cout << "p = " << p_water << ", alpha = " << alpha_water << endl;
+	}
+	
+	cout << "Using aluminum plate: ";
+	if (kIsAluminumPlate) cout << "TRUE\n";
+	else cout << "FALSE\n";
+	
+	cout << "Using scintillators: ";
+	if (kIsScintillator) cout << "TRUE\n";
+	else cout << "FALSE\n";
+	
 //	kOutputUnit = kEnergy;
 	Bool_t kDrawHorizontalLines = false;
 	Bool_t drawScale = false;
@@ -600,7 +619,7 @@ void drawBraggPeakGraphFit(Int_t Runs, Int_t dataType, Bool_t recreate, Float_t 
 	}
 	
 	else if (kOutputUnit == kWEPL) {
-		hFitResults = new TH1F("fitResult", hTitle, 1000, 50, getWEPLFromEnergy(energy*1.2));
+		hFitResults = new TH1F("fitResult", hTitle, 1000, getWEPLFromEnergy(energy*0.6), getWEPLFromEnergy(energy*1.2));
 	}
 	else if (kOutputUnit == kEnergy) {
 		hFitResults = new TH1F("fitResult", hTitle, 1000, energy*0.6, energy*1.2);
@@ -735,7 +754,7 @@ void drawBraggPeakGraphFit(Int_t Runs, Int_t dataType, Bool_t recreate, Float_t 
 	
 	Float_t separationFactor = 1;
 	if (kMaterial == kAluminum)
-		separationFactor = 0.7; // don't ask why...
+		separationFactor = 1; // don't ask why...
 	
 	if (kOutputUnit == kPhysical) {
 		expectedMean = getTLFromEnergy(energy);
@@ -756,25 +775,42 @@ void drawBraggPeakGraphFit(Int_t Runs, Int_t dataType, Bool_t recreate, Float_t 
 	
 	Int_t meanBin = hFitResults->GetMean();
 	
+	if (kMaterial == kTungsten) {
+		expectedStraggling *= 2;
+	}
+	
+	Float_t expectedStragglingTo = expectedStraggling;
+	if (kMaterial == kAluminum && run_energy < 110) {
+		// empirical factor... 
+		expectedStragglingTo = expectedStraggling * 2;
+	}
+	
 	// three gaussians with a x0 at dlayer_down, 0, dlayer_up
 	// same sigma, same x, different scaling
 	
 	TF1 *ES = new TF1("ES", 
-		Form("[0]*exp(-0.5*((x-[1])/[2])**2) + [3]*exp(-0.5*((x-[1]-%.2f)/[2])**2)", dlayer), 
-		expectedMean*0.9, expectedMean*1.15);
+		Form("[0]*exp(-0.5*((x-[1])/[2])**2) + [3]*exp(-0.5*((x-[1]-%.5f)/[2])**2)", dlayer), 
+		expectedMean*0.9, expectedMean*1.25);
 	ES->SetParameters(maxBin*0.5,meanBin,expectedStraggling, maxBin*0.5);
  	ES->SetParLimits(0,0,maxBin);
- 	ES->SetParLimits(1,meanBin*0.9,meanBin*1.15);
- 	ES->SetParLimits(2,expectedStraggling,expectedStraggling);
+ 	ES->SetParLimits(1,meanBin*0.75,meanBin*1.1);
+ 	ES->SetParLimits(2,expectedStraggling,expectedStragglingTo);
  	ES->SetParLimits(3,0,maxBin);
 	
-	hFitResults->Fit(ES,"B,Q,M", "", expectedMean*0.85, expectedMean*1.15);
+	hFitResults->Fit(ES,"B,Q,M,WW", "", expectedMean*0.85, expectedMean*1.25);
 	
 	Float_t p1 = ES->GetParameter(0);
 	Float_t p2 = ES->GetParameter(3);
 		
-	Float_t p1_n = p1 / (p1 + p2);
-	Float_t p2_n = p2 / (p1 + p2);
+	Float_t old_p1_n = p1 / (p1 + p2);
+	Float_t old_p2_n = p2 / (p1 + p2);
+	
+	Float_t shiftFactor = 1.65974; // determined from parameter scan in W
+	if (kMaterial == kAluminum) shiftFactor = 1;
+	
+	Float_t norm = p1/shiftFactor + p2 * shiftFactor;
+	Float_t p1_n = ( p1 / shiftFactor ) / norm;
+	Float_t p2_n = ( p2 * shiftFactor ) / norm;
 	
 	Float_t peak_x = ES->GetParameter(1);
 	Float_t mu1 = peak_x;
@@ -811,18 +847,18 @@ void drawBraggPeakGraphFit(Int_t Runs, Int_t dataType, Bool_t recreate, Float_t 
 		cout << "mu2 @ (" << getEnergyFromTL(mu2) << " MeV, f=" << p2_n << ") too small, choosing mu1\n";
 	}
 	
-// 	cout << "Three Gaussian peaks at: " << 100 * p1_n << "% " << mu1 << " mm, " 
-// 										<< 100 * p2_n << "% " << mu2 << " mm\n";
-// 										
-// 	cout << "---> The expected mean tracklength is " << w_tl << " mm\n";
-// 	cout << "---> The expected mean WEPL is " << w_wepl << " mm\n";
-// 	cout << "---> With an energy of " << w_en << " MeV\n";
-// 	
-// 	cout << "WEPL range: " << ES->GetParameter(1) << endl;
-// 	cout << "Estimated energy: " << getEnergyFromWEPL(ES->GetParameter(1)) << endl;
-// 	cout << "Fitted sigma: " << ES->GetParameter(2) << endl;
-// 	cout << "Expected sigma: " << expectedStraggling << endl;
-// 	cout << "(expected range: " << expectedMean << ")\n";
+	cout << "Three Gaussian peaks at: " << 100 * old_p1_n << "% " << mu1 << " mm, " 
+										<< 100 * old_p2_n << "% " << mu2 << " mm\n";
+										
+	cout << "---> The expected mean tracklength is " << w_tl << " mm\n";
+	cout << "---> The expected mean WEPL is " << w_wepl << " mm\n";
+	cout << "---> With an energy of " << w_en << " MeV\n";
+	
+	cout << "WEPL range: " << ES->GetParameter(1) << endl;
+	cout << "Estimated energy: " << getEnergyFromWEPL(ES->GetParameter(1)) << endl;
+	cout << "Fitted sigma: " << ES->GetParameter(2) << endl;
+	cout << "Expected sigma: " << expectedStraggling << endl;
+	cout << "(expected range: " << expectedMean << ")\n";
 
 	cout << endl;
 	cout << "Estimated WEPL = " << max_tl << " mm.\n";
@@ -1350,9 +1386,9 @@ void getPValues() {
 		kPLFocal_H2O[i] = kPLFocal_Al[i] * kWEPLRatio_Al[i];
 	}
 
-	const Int_t n2 = 16;
+	const Int_t n2 = 18;
 	Float_t energies[n2] =
-				{70, 90, 110, 130, 150, 170, 180, 200,
+				{30, 50, 70, 90, 110, 130, 150, 170, 180, 200,
 				 225, 250, 275, 300, 325, 350, 375, 400};
 
 // G4 ranges for pure Tungsten
@@ -1367,7 +1403,7 @@ void getPValues() {
 
 	// PSTAR CSDA ranges water
 	Float_t ranges[n2] = 
-		{40.8, 63.98, 91.4, 122.8, 157.7, 196.1, 216.5, 259.6, 317.4, 379.4, 445.2, 514.5, 587.1, 662.8, 741.3, 822.5};
+		{8.85, 22.27, 40.8, 63.98, 91.4, 122.8, 157.7, 196.1, 216.5, 259.6, 317.4, 379.4, 445.2, 514.5, 587.1, 662.8, 741.3, 822.5};
 
 	// G4 ranges for pure Aluminium
 //	Float_t ranges[n2] = 
@@ -1384,7 +1420,7 @@ void getPValues() {
 	TGraph *graph_Al = new TGraph(n,kPLEnergies,kPLFocal_Al);
 	TGraph *graph_PMMA = new TGraph(n,kPLEnergies,kPLFocal_PMMA);
 	TGraph *graph_water = new TGraph(n,kPLEnergies, kPLFocal_H2O);
-	TGraph *graph_custom = new TGraph(7, energies, ranges);
+	TGraph *graph_custom = new TGraph(4, energies, ranges);
 
 	graph_W->SetTitle("Range fit for tungsten");
 	graph_Al->SetTitle("Range fit for aluminum");
