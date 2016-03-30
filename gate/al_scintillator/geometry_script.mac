@@ -1,0 +1,40 @@
+# world
+/gate/world/geometry/setXLength 100. cm
+/gate/world/geometry/setYLength 100. cm
+/gate/world/geometry/setZLength 300. cm
+
+# system
+/gate/world/daughters/name scanner
+/gate/world/daughters/insert box
+/gate/scanner/geometry/setXLength 10. cm
+/gate/scanner/geometry/setYLength 10. cm
+/gate/scanner/geometry/setZLength 250. cm
+/gate/scanner/setMaterial Vacuum
+/gate/scanner/vis/forceWireframe
+
+/gate/scanner/daughters/name filter1
+/gate/scanner/daughters/insert box
+/gate/filter1/geometry/setXLength 4. cm
+/gate/filter1/geometry/setYLength 4. cm
+/gate/filter1/geometry/setZLength 1. cm
+/gate/filter1/placement/setTranslation 0. 0. 6.5 cm
+/gate/filter1/setMaterial myScintillator
+/gate/filter1/vis/forceWireframe
+
+/gate/scanner/daughters/name filter2
+/gate/scanner/daughters/insert box
+/gate/filter2/geometry/setXLength 4. cm
+/gate/filter2/geometry/setYLength 1. cm
+/gate/filter2/geometry/setZLength 0.5 cm
+/gate/filter2/placement/setTranslation 0. 0. 16.6 cm
+/gate/filter2/setMaterial myScintillator
+/gate/filter2/vis/forceWireframe
+
+/gate/scanner/daughters/name filter3
+/gate/scanner/daughters/insert box
+/gate/filter3/geometry/setXLength 1. cm
+/gate/filter3/geometry/setYLength 4. cm
+/gate/filter3/geometry/setZLength 0.5 cm
+/gate/filter3/placement/setTranslation 0. 0. 17.4 cm
+/gate/filter3/setMaterial myScintillator
+/gate/filter3/vis/forceWireframe

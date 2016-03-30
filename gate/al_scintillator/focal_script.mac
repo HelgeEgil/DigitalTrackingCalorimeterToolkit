@@ -1,0 +1,83 @@
+#===============================#
+# FOCAL prototype		#
+# First try at doing the	#
+# simulation in GATE.		#
+# Based on technical drawings	#
+# and different MSc theses.	#
+#				#
+#            Helge Pettersen	#
+#         me@helgepettersen.no	#
+#     FEB 2015			#
+#===============================#
+
+#=======================#
+#   Some aliases	#
+#=======================#
+#/control/alias chip0 /vis/viewer/panTo -0.02 -0.01
+
+
+/vis/open OGL
+#/vis/open OGLSQt
+/vis/viewer/reset
+/vis/viewer/panTo 0.03 -0.05
+/vis/viewer/set/viewpointThetaPhi 90 0
+/vis/viewer/set/style surface
+/vis/drawVolume
+/tracking/storeTrajectory 1
+/vis/scene/endOfEventAction accumulate 25
+#/vis/scene/add/trajectories
+/vis/viewer/update
+
+/gate/geometry/setMaterialDatabase ../GateMaterials.db
+
+/control/execute geometry_script.mac
+/gate/scanner/vis/setColor black
+
+#/gate/systems/scanner/level1/attach filter
+/gate/filter1/attachCrystalSD
+/gate/filter2/attachCrystalSD
+/gate/filter3/attachCrystalSD
+
+#===============#
+# Physics	#
+#===============#
+
+/gate/geometry/setIonisationPotential Water 75 eV
+/gate/physics/addPhysicsList emstandard_opt3
+#/gate/physics/addPhysicsList QGSP_BIC
+
+#/gate/physics/addProcess SingleScattering proton
+
+/gate/physics/SetMaxStepSizeInRegion      filter1 {step_active} um
+/gate/physics/SetMaxStepSizeInRegion      filter2 {step_active} um
+/gate/physics/SetMaxStepSizeInRegion      filter3 {step_active} um
+
+/gate/run/initialize
+
+# Geometry is unaltered since last time
+#/geometry/test/recursive_test
+
+#=======================#
+# ADD PROTON BEAM	      #
+#=======================#
+
+/gate/source/addSource uniformBeam gps
+/gate/source/uniformBeam/gps/particle proton
+/gate/source/uniformBeam/gps/ene/type Gauss
+/gate/source/uniformBeam/gps/ene/mono {energy} MeV
+/gate/source/uniformBeam/gps/ene/sigma {sigma} MeV
+/gate/source/uniformBeam/gps/type Plane
+/gate/source/uniformBeam/gps/shape Square
+/gate/source/uniformBeam/gps/direction 0 0 1
+/gate/source/uniformBeam/gps/halfx 25. mm
+/gate/source/uniformBeam/gps/halfy 25. mm
+/gate/source/uniformBeam/gps/centre 0. 0. -15. cm # -20 cm for scintillator
+
+/gate/output/root/enable
+/gate/output/root/setFileName ../../focalCode/rawdata/test_scintillatorfilter_{energy}MeV
+
+/gate/random/setEngineName MersenneTwister
+/gate/random/setEngineSeed auto
+/gate/application/setTotalNumberOfPrimaries {npart}
+/gate/application/start
+exit

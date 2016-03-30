@@ -427,7 +427,16 @@ void Focal::getMCFrame(Int_t runNo, CalorimeterFrame *cf) {
 			break;
 		}
 		
-		calorimeterLayer = level1ID; // level1ID - 4 i trackers are present
+		if (abs(posZ + 44) < 1) { // [-45, -43]
+			calorimeterLayer = 0;
+		}
+		
+		else {
+			calorimeterLayer = level1ID + 1;
+		}
+		
+		cout << "z = " << posZ << " -> layer = " << calorimeterLayer << endl;
+		
 		if (calorimeterLayer<0) {
 			continue;
 		}

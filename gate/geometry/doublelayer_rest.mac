@@ -1,76 +1,22 @@
-# world
-/gate/world/geometry/setXLength 100. cm
-/gate/world/geometry/setYLength 100. cm
-/gate/world/geometry/setZLength 100. cm
-
-# system
-/gate/world/daughters/name scanner
-/gate/world/daughters/insert box
-/gate/scanner/geometry/setXLength 10. cm
-/gate/scanner/geometry/setYLength 10. cm
-/gate/scanner/geometry/setZLength 80. cm
-/gate/scanner/setMaterial Air
-/gate/scanner/vis/forceWireframe
-
-# Scintillators
-#/gate/scanner/daughters/name scintillator_F
-#/gate/scanner/daughters/insert box
-#/gate/scintillator_F/geometry/setXLength 4. cm
-#/gate/scintillator_F/geometry/setYLength 4. cm
-#/gate/scintillator_F/geometry/setZLength 1. cm
-#/gate/scintillator_F/placement/setTranslation 0. 0. -75. mm # 50 + 65
-#/gate/scintillator_F/setMaterial myScintillator
-#/gate/scintillator_F/vis/forceWireframe
-#
-#/gate/scanner/daughters/name scintillator_H
-#/gate/scanner/daughters/insert box
-#/gate/scintillator_H/geometry/setXLength 4. cm
-#/gate/scintillator_H/geometry/setYLength 1. cm
-#/gate/scintillator_H/geometry/setZLength 0.5 cm
-#/gate/scintillator_H/placement/setTranslation 0. 0. -176. mm # 50 + 166
-#/gate/scintillator_H/setMaterial myScintillator
-#/gate/scintillator_H/vis/forceWireframe
-#
-#/gate/scanner/daughters/name scintillator_V
-#/gate/scanner/daughters/insert box
-#/gate/scintillator_V/geometry/setXLength 1. cm
-#/gate/scintillator_V/geometry/setYLength 4. cm
-#/gate/scintillator_V/geometry/setZLength 0.5 cm
-#/gate/scintillator_V/placement/setTranslation 0. 0. -184. mm # 50 + 174
-#/gate/scintillator_V/setMaterial myScintillator
-#/gate/scintillator_V/vis/forceWireframe
-
-#/gate/scanner/daughters/name frontabsorber
-#/gate/scanner/daughters/insert box
-#/gate/frontabsorber/geometry/setXLength 50. mm
-#/gate/frontabsorber/geometry/setYLength 50. mm
-#/gate/frontabsorber/geometry/setZLength 1.5 mm
-#/gate/frontabsorber/placement/setTranslation 0. 0. -50. mm
-#/gate/frontabsorber/setMaterial Aluminium
-#/gate/frontabsorber/vis/forceWireframe
-#/gate/frontabsorber/vis/setColor grey
-
-/gate/scanner/daughters/name doublelayer
+/gate/scanner/daughters/name doublelayer_rest
 /gate/scanner/daughters/insert box
-/gate/doublelayer/geometry/setXLength 70. mm
-/gate/doublelayer/geometry/setYLength 80. mm
-/gate/doublelayer/geometry/setZLength 3.84 mm
-/gate/doublelayer/placement/setTranslation 0. 0. -43.7 mm
-/gate/doublelayer/setMaterial Air
-/gate/doublelayer/vis/setColor white
-/gate/doublelayer/vis/forceWireframe
-#/gate/doublelayer/disable
+/gate/doublelayer_rest/geometry/setXLength 70. mm
+/gate/doublelayer_rest/geometry/setYLength 80. mm
+/gate/doublelayer_rest/geometry/setZLength 3.84 mm
+/gate/doublelayer_rest/placement/setTranslation 0. 0. -39.85 mm
+/gate/doublelayer_rest/setMaterial Air
+/gate/doublelayer_rest/vis/setColor black
+/gate/doublelayer_rest/vis/forceWireframe
 
-/gate/doublelayer/daughters/name layer
-/gate/doublelayer/daughters/insert box
+/gate/doublelayer_rest/daughters/name layer
+/gate/doublelayer_rest/daughters/insert box
 /gate/layer/geometry/setXLength 60. mm
 /gate/layer/geometry/setYLength 70. mm
 /gate/layer/geometry/setZLength 1.9 mm
 /gate/layer/placement/setTranslation 0. 0. 0. mm
 /gate/layer/setMaterial Air
-/gate/layer/vis/setColor white
+/gate/layer/vis/setColor black
 /gate/layer/vis/forceWireframe
-#/gate/layer/disable
 
 /gate/layer/daughters/name absorber
 /gate/layer/daughters/insert box
@@ -78,20 +24,28 @@
 /gate/absorber/geometry/setYLength 49.85 mm
 /gate/absorber/geometry/setZLength 1.5 mm
 /gate/absorber/placement/setTranslation 0. -5.725 -0.2 mm
-#/gate/absorber/setMaterial Tungsten
 /gate/absorber/setMaterial {material}
-/gate/absorber/vis/forceWireframe
+#/gate/absorber/vis/forceWireframe
 /gate/absorber/vis/setColor grey
+
+/gate/layer/daughters/name fillerglue
+/gate/layer/daughters/insert box
+/gate/fillerglue/geometry/setXLength 39.35 mm
+/gate/fillerglue/geometry/setYLength 18.85 mm
+/gate/fillerglue/geometry/setZLength 0.07 mm
+/gate/fillerglue/placement/setTranslation 0. 9.375 0.585 mm
+/gate/fillerglue/setMaterial Glue
+#/gate/fillerglue/vis/forceWireframe
+/gate/fillerglue/vis/setColor yellow
 
 /gate/layer/daughters/name filler
 /gate/layer/daughters/insert box
 /gate/filler/geometry/setXLength 39.35 mm
 /gate/filler/geometry/setYLength 18.85 mm
 /gate/filler/geometry/setZLength 0.3 mm
-/gate/filler/placement/setTranslation 0. 9.375 0.7 mm # was 9.275
-#/gate/filler/setMaterial Tungsten
+/gate/filler/placement/setTranslation 0. 9.375 0.77 mm # was 9.275
 /gate/filler/setMaterial {material}
-/gate/filler/vis/forceWireframe
+#/gate/filler/vis/forceWireframe
 /gate/filler/vis/setColor grey
 
 /gate/layer/daughters/name pcb
@@ -102,7 +56,7 @@
 /gate/pcb/placement/setTranslation 0. -10.05 0.625 mm
 /gate/pcb/setMaterial PCB
 /gate/pcb/vis/setColor green
-/gate/pcb/vis/forceWireframe
+#/gate/pcb/vis/forceWireframe
 
 /gate/layer/daughters/name glue
 /gate/layer/daughters/insert box
@@ -110,9 +64,9 @@
 /gate/glue/geometry/setYLength 20. mm
 /gate/glue/geometry/setZLength 0.03 mm
 /gate/glue/placement/setTranslation 0. -10.05 0.715 mm
-/gate/glue/setMaterial Water # fixme
+/gate/glue/setMaterial Glue
 /gate/glue/vis/setColor yellow
-/gate/glue/vis/forceWireframe
+#/gate/glue/vis/forceWireframe
 
 /gate/layer/daughters/name passive
 /gate/layer/daughters/insert box
@@ -122,7 +76,7 @@
 /gate/passive/placement/setTranslation 0. -9.9 0.805 mm
 /gate/passive/setMaterial Silicon
 /gate/passive/vis/setColor white
-/gate/passive/vis/forceWireframe
+#/gate/passive/vis/forceWireframe
 
 # couple this to an SD
 /gate/layer/daughters/name active
@@ -167,7 +121,7 @@
 /gate/pixels/placement/setTranslation -9.01 9.01 0. mm 
 /gate/pixels/setMaterial Silicon
 /gate/pixels/vis/setColor red
-/gate/pixels/vis/forceWireframe
+#/gate/pixels/vis/forceWireframe
 
 # repeat pixels
 # Pixel size = 19.2 mm / NPixels
@@ -191,7 +145,7 @@
 /gate/spacer/placement/setTranslation -23. -16.15 0.75 mm
 /gate/spacer/setMaterial PCB # fixme
 /gate/spacer/vis/setColor green
-/gate/spacer/vis/forceWireframe
+#/gate/spacer/vis/forceWireframe
 
 /gate/spacer/repeaters/insert linear
 /gate/spacer/linear/setRepeatNumber 2
@@ -200,14 +154,7 @@
 
 # repeat layer once to get 4x chip
 /gate/layer/repeaters/insert genericRepeater
-/gate/layer/genericRepeater/setPlacementsFilename layer.placements
+/gate/layer/genericRepeater/setPlacementsFilename geometry/layer.placements
 
-# repeat layers
-# FOCAL has 24 layers
-#/gate/doublelayer/repeaters/insert linear
-#/gate/doublelayer/linear/setRepeatNumber 12
-#/gate/doublelayer/linear/setRepeatVector 0. 0. 3.84 mm
-#/gate/doublelayer/linear/autoCenter false
-
-/gate/doublelayer/repeaters/insert genericRepeater
-/gate/doublelayer/genericRepeater/setPlacementsFilename doublelayer.placements
+/gate/doublelayer_rest/repeaters/insert genericRepeater
+/gate/doublelayer_rest/genericRepeater/setPlacementsFilename geometry/doublelayer_rest.placements

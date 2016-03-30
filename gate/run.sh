@@ -23,5 +23,5 @@ fi
 
 for i in `seq $2 $3 $4`;
 do
-	Gate -a "'[material,$1] [energy,$i] [npart,$5] [step_active,80] [step_passive,80] [sigma,$6]'" focal_script.mac > terminal_output.txt &
+	Gate -a "'[material,$1] [energy,$i] [npart,$5] [step_active,80] [step_passive,80] [sigma,$6]'" focal.mac > terminal_output.txt &
 done

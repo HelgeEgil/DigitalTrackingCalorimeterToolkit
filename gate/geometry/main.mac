@@ -1,0 +1,12 @@
+# Setup
+# First doublelayer consist of two layers 180 degrees turned
+# 1) (upstream) Al absorber
+# 2) (downstream) Vvariable absorber, such as Al, W, ...
+# All the rest doublelayers consist of two similar layers 180 degrees turned
+# 1+2) variable absorber
+
+/control/execute geometry/world.mac
+/control/execute geometry/simplified.mac
+# /control/execute geometry/scintillators.mac
+#/control/execute geometry/doublelayer_first.mac
+#/control/execute geometry/doublelayer_rest.mac

@@ -9,7 +9,7 @@ enum eFrameType {kCalorimeter, kTracker};
 enum eDataType {kMC, kData};
 
 Float_t run_energy = 0;
-Bool_t kIsAluminumPlate = false;
+Bool_t kIsAluminumPlate = true;
 Bool_t kIsScintillator = false;
 
 Bool_t kDebug = false;
@@ -43,7 +43,7 @@ Int_t energies[nEnergies] = {122, 140, 150, 160, 170, 180, 188, 190};
 */
 
 enum eMaterial {kTungsten, kAluminum, kPMMA, kWater, kFocalTungsten, kFocalAluminum};
-const Int_t kMaterial = kAluminum;
+const Int_t kMaterial = kTungsten;
 
 enum eOutputUnit {kPhysical, kWEPL, kEnergy};
 Int_t kOutputUnit = kWEPL;

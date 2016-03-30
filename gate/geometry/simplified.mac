@@ -1,0 +1,136 @@
+/gate/scanner/daughters/name absorber_pre
+/gate/scanner/daughters/insert box
+/gate/absorber_pre/geometry/setXLength 38900.  um
+/gate/absorber_pre/geometry/setYLength 38299.9 um
+/gate/absorber_pre/geometry/setZLength 14999.9 um
+/gate/absorber_pre/placement/setTranslation 0. 0. -2737.5 um
+/gate/absorber_pre/setMaterial Aluminium
+/gate/absorber_pre/vis/setColor white
+/gate/absorber_pre/vis/forceWireframe
+
+/gate/scanner/daughters/name simplified
+/gate/scanner/daughters/insert box
+/gate/simplified/geometry/setXLength 40000.  um
+/gate/simplified/geometry/setYLength 40000.  um
+/gate/simplified/geometry/setZLength 39749.9 um
+/gate/simplified/placement/setTranslation 0. 0. 0. mm
+/gate/simplified/setMaterial Vacuum
+/gate/simplified/vis/setColor black
+/gate/simplified/vis/forceWireframe
+
+/gate/simplified/daughters/name layer
+/gate/simplified/daughters/insert box
+/gate/layer/geometry/setXLength 38900.  um
+/gate/layer/geometry/setYLength 19149.7 um
+/gate/layer/geometry/setZLength 2400.  um
+/gate/layer/placement/setTranslation 0. 9574.75 -778.5 um # center on left side
+/gate/layer/setMaterial Vacuum
+/gate/layer/vis/setColor black
+/gate/layer/vis/forceWireframe
+
+/gate/layer/daughters/name glue_1
+/gate/layer/daughters/insert box
+/gate/glue_1/geometry/setXLength 38900.  um
+/gate/glue_1/geometry/setYLength 19149.5 um
+/gate/glue_1/geometry/setZLength   39.9 um
+/gate/glue_1/placement/setTranslation 0. 0. 20. um
+/gate/glue_1/setMaterial Glue
+/gate/glue_1/vis/setColor yellow
+/gate/glue_1/vis/forceWireframe
+
+/gate/layer/daughters/name pcb
+/gate/layer/daughters/insert box
+/gate/pcb/geometry/setXLength 38900.  um
+/gate/pcb/geometry/setYLength 19149.5 um
+/gate/pcb/geometry/setZLength  159.9  um
+/gate/pcb/placement/setTranslation 0. 957.25 120. um
+/gate/pcb/setMaterial PCB
+/gate/pcb/vis/setColor green
+/gate/pcb/vis/forceWireframe
+
+/gate/layer/daughters/name glue_2
+/gate/layer/daughters/insert box
+/gate/glue_2/geometry/setXLength 38900.  um
+/gate/glue_2/geometry/setYLength 19149.5 um
+/gate/glue_2/geometry/setZLength   39.9 um
+/gate/glue_2/placement/setTranslation 0. 957.25 220. um
+/gate/glue_2/setMaterial Glue
+/gate/glue_2/vis/setColor yellow
+/gate/glue_2/vis/forceWireframe
+
+/gate/layer/daughters/name chip
+/gate/layer/daughters/insert box
+/gate/chip/geometry/setXLength 38900.  um
+/gate/chip/geometry/setYLength 19149.5 um
+/gate/chip/geometry/setZLength  119.9 um
+/gate/chip/placement/setTranslation 0. 957.25 300. um
+/gate/chip/setMaterial Silicon
+/gate/chip/vis/setColor red
+/gate/chip/vis/forceWireframe
+
+/gate/layer/daughters/name gap_1
+/gate/layer/daughters/insert box
+/gate/gap_1/geometry/setXLength 38900.  um
+/gate/gap_1/geometry/setYLength 19149.5 um
+/gate/gap_1/geometry/setZLength  169.9 um
+/gate/gap_1/placement/setTranslation 0. 957.25 445. um
+/gate/gap_1/setMaterial Air
+/gate/gap_1/vis/setColor blue
+/gate/gap_1/vis/forceWireframe
+
+/gate/layer/daughters/name filler
+/gate/layer/daughters/insert box
+/gate/filler/geometry/setXLength 38900.  um
+/gate/filler/geometry/setYLength 19149.5 um
+/gate/filler/geometry/setZLength  299.9 um
+/gate/filler/placement/setTranslation 0. 957.25 680. um
+/gate/filler/setMaterial {material}
+/gate/filler/vis/setColor blue
+/gate/filler/vis/forceWireframe
+
+/gate/layer/daughters/name glue_3
+/gate/layer/daughters/insert box
+/gate/glue_3/geometry/setXLength 38900.  um
+/gate/glue_3/geometry/setYLength 19149.5 um
+/gate/glue_3/geometry/setZLength  69.9  um
+/gate/glue_3/placement/setTranslation 0. 957.25 865. um
+/gate/glue_3/setMaterial Glue
+/gate/glue_3/vis/setColor yellow
+/gate/glue_3/vis/forceWireframe
+
+/gate/simplified/daughters/name absorber_1
+/gate/simplified/daughters/insert box
+/gate/absorber_1/geometry/setXLength 38900.  um
+/gate/absorber_1/geometry/setYLength 38299.9 um
+/gate/absorber_1/geometry/setZLength 14999.9 um
+/gate/absorber_1/placement/setTranslation 0. 0. 1650. um
+/gate/absorber_1/setMaterial {material}
+/gate/absorber_1/vis/setColor grey
+/gate/absorber_1/vis/forceWireframe
+
+/gate/simplified/daughters/name gap_2
+/gate/simplified/daughters/insert box
+/gate/gap_2/geometry/setXLength 38900.  um
+/gate/gap_2/geometry/setYLength 38299.9 um
+/gate/gap_2/geometry/setZLength   749.9 um
+/gate/gap_2/placement/setTranslation 0. 0. 2437.5 um
+/gate/gap_2/setMaterial Air
+/gate/gap_2/vis/setColor blue
+/gate/gap_2/vis/forceWireframe
+
+/gate/simplified/daughters/name absorber_2
+/gate/simplified/daughters/insert box
+/gate/absorber_2/geometry/setXLength 38900.  um
+/gate/absorber_2/geometry/setYLength 38299.9 um
+/gate/absorber_2/geometry/setZLength 14999.9 um
+/gate/absorber_2/placement/setTranslation 0. 0. 3225. um
+/gate/absorber_2/setMaterial {material}
+/gate/absorber_2/vis/setColor grey
+/gate/absorber_2/vis/forceWireframe
+
+/gate/layer/repeaters/insert genericRepeater
+/gate/layer/genericRepeater/setPlacementsFilename geometry/simplified.placements
+
+/gate/simplified/repeaters/insert linear
+/gate/simplified/linear/setRepeatNumber 1
+/gate/simplified/linear/setRepeatVector 0. 0. 3975. um

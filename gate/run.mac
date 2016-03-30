@@ -1,3 +1,7 @@
+/control/alias material Tungsten
+/control/alias energy 180
+/control/alias npart 100
+/control/alias step_active 80
+/control/alias step_passive 105
+/control/alias sigma 0
 /control/execute focal.mac
-/vis/viewer/zoom 300
-/vis/viewer/set/viewpointThetaPhi 90 0
