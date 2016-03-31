@@ -26,7 +26,7 @@ const Int_t nTrackers = 4;
 // nLayers are loaded in WEPL-LUT.C according to the detector geometry
 const Float_t dx = 0.03; // mm
 const Float_t dy = 0.03; // mm
-const Float_t dz = 3.84; // mm
+const Float_t dz = 3.975; // mm // was 3.84
 const Int_t kEventsPerRun = 500;
 
 // Used for treatment of available experimental data files

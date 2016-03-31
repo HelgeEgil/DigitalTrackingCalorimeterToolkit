@@ -52,7 +52,7 @@ void findFilterEnergyLoss::Loop()
 
 	TCanvas *c1 = new TCanvas("c1", "c1", 800, 600);
 	TCanvas *c2 = new TCanvas("c2", "c2", 800, 600);
-	TH1F *hEnergyLoss = new TH1F("hEnergyLoss", Form("Energy loss for a %d MeV proton beam on a 1.5 mm aluminum foil", energy), 5000, 0, 250);
+	TH1F *hEnergyLoss = new TH1F("hEnergyLoss", Form("Energy loss for a %d MeV proton beam on a 1.5 mm aluminum foil", energy), 1000, 0, 10);
 	TH1F *hEnergy= new TH1F("hEnergy", Form("Final energy for a %d MeV proton beam on a 1.5 mm aluminum foil", energy), 5000, 0, 250);
 
 	Int_t lastID = -1;
@@ -100,20 +100,27 @@ void findFilterEnergyLoss::Loop()
 	Double_t *x = pm->GetX();
 	Double_t *xLoss = pmLoss->GetX();
 	
+	Double_t finalLoss = 0;
+
 	for (Int_t i=0; i<n; i++) {
 		cout << "Final energy peak " << i + 1 << " at " << x[i] << endl;
 	}
 	
 	for (Int_t i=0; i<nLoss; i++) {
 		cout << "Energy loss peak " << i + 1 << " at " << xLoss[i] << endl;
+		finalLoss = xLoss[i];
 	}
 	
 	TF1 *fEnergy = new TF1("fEnergy", "gaus(0)", energy-50, energy+15);
-	TF1 *fEnergyLoss = new TF1("fEnergyLoss", "gaus(0)", 0, 15);
+	TF1 *fEnergyLoss = new TF1("fEnergyLoss", "gaus(0)", 0, 30);
 	
-	fEnergy->SetParameters(100, energy-5, 0.3);
-	fEnergyLoss->SetParameters(100, 5, 0.3);
+	fEnergy->SetParameters(100, energy-finalLoss, 0.3);
+	fEnergyLoss->SetParameters(160, finalLoss, 0.3);
 	
+	fEnergyLoss->SetParLimits(0, 10, 500);
+	fEnergyLoss->SetParLimits(1, finalLoss*0.8, finalLoss*1.2);
+	fEnergyLoss->SetParLimits(2, 0.05, 0.5);
+
 	c1->cd();
 	hEnergy->SetXTitle("Final energy");
 	hEnergy->SetYTitle("Number of particles");
@@ -124,10 +131,10 @@ void findFilterEnergyLoss::Loop()
 	hEnergyLoss->SetYTitle("Number of particles");
 	hEnergyLoss->Draw();
 	
-	hEnergy->Fit("fEnergy", "B, Q", "", 0, energy+50);
-	hEnergyLoss->Fit("fEnergyLoss", "B, Q", "", 0, 15);
+	//hEnergy->Fit("fEnergy", "B, Q", "", 0, energy+50);
+	hEnergyLoss->Fit("fEnergyLoss", "B, Q", "", 0, 30);
 	
-	cout << "For a " << energy << " MeV beam, the final energy is " << fEnergy->GetParameter(1) 
-		 << " MeV, with a total energy loss of " << fEnergyLoss->GetParameter(1) << " +- " << fEnergy->GetParameter(2) << " MeV.\n";
-	
+	fEnergyLoss->Draw("same");
+
+	cout << "For a " << energy << " MeV beam, the energy loss is " << Form("%.2f", fEnergyLoss->GetParameter(1)) << " +- " << Form("%.2f", fEnergyLoss->GetParameter(2)) << " MeV.\n";
 }

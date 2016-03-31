@@ -1,7 +1,7 @@
 /control/alias material Tungsten
-/control/alias energy 180
-/control/alias npart 100
+/control/alias energy 188
+/control/alias npart 25000
 /control/alias step_active 80
-/control/alias step_passive 105
+/control/alias step_passive 150
 /control/alias sigma 0
 /control/execute focal.mac

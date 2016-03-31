@@ -1,1 +1,0 @@
-{ gSystem->Load("libMathMore"); }

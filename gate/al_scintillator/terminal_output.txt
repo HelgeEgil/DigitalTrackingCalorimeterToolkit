@@ -22,15 +22,19 @@ http://wiki.opengatecollaboration.org/index.php/Users_Guide_V7.0:Setting_up_the_
 [Core-0] **********************************************************************
 [Core-0] 
 [Core-0] You are using Geant4 version 9.6.4
-/control/alias energy 120
-/control/alias npart 10000
-/control/alias step_active 50
+/control/alias energy 40
+/control/alias npart 5000
+/control/alias step_active 200
 /control/alias sigma 0
-[Core-0] Starting macro focal_script.macWWARNING: The vis manager will keep up to 25 events.
+[Core-0] Starting macro focal.mac
+WARNING: G4VisCommandSceneHandlerCreate::SetNewValue: using fallback graphics system.
+WARNING: The vis manager will keep up to 25 events.
   This may use a lot of memory.
   It may be changed with, e.g., "/vis/scene/endOfEventAction accumulate 10".
-[Physic-0] The following Geant4's physic-list is enabled :emstandard_opt3
-[Core-0] Initialization of geometry
+===== XML PATH ====: ./Materials.xml
+===== XML PATH ====: 0x2a958e0
+====== XML PATH ====: ./Materials.xml===== XML PATH ====: 0x2b6ed90
+[[Physic-0] The following Geant4's physic-list is enabled :emstandard_opt3[Core-0] Initialization of geometry
 G4PhysicalVolumeModel::Validate(): A volume of the same name and
   copy number ("world_phys", copy 0) still exists and is being used.
   But it is not the same volume you originally specified
@@ -39,7 +43,8 @@ G4PhysicalVolumeModel::Validate(): A volume of the same name and
 [Physic-0] WARNING: manual physic lists are being deprecated.
 Please, use physic list builder mechanism instead. Related documentation can be found at:
 http://wiki.opengatecollaboration.org/index.php/Users_Guide_V7.0:Setting_up_the_physics
-[Core-0] Initialization of actors[[Acquisition-0]                                      
+[Core-0] Initialization of actors
+[[Acquisition-0]                                      
 [Acquisition-0] ============= Source initialization =============
 [Acquisition-0]                                      
 [Acquisition-0] ============= Acquisition starts! =============
@@ -76,10 +81,8 @@ msc:   for e-    SubType= 10
       ===== EM models for the G4Region  DefaultRegionForTheWorld ======
           UrbanMsc95 :  Emin=        0 eV    Emax=       10 TeV  Table with 220 bins Emin=    100 eV    Emax=     10 TeV
 
-### ===  Deexcitation model UAtomDeexcitation is activated for 5 regions:
-          filter1
-          filter2
-          filter3
+### ===  Deexcitation model UAtomDeexcitation is activated for 3 regions:
+          filter
           scanner
           DefaultRegionForTheWorld
 
@@ -382,10 +385,8 @@ hPairProd:   for  pi-    SubType= 4
       ===== EM models for the G4Region  DefaultRegionForTheWorld ======
            hPairProd :  Emin=        0 eV    Emax=       10 TeV
 
-### ===  Deexcitation model UAtomDeexcitation is activated for 5 regions:
-          filter1
-          filter2
-          filter3
+### ===  Deexcitation model UAtomDeexcitation is activated for 3 regions:
+          filter
           scanner
           DefaultRegionForTheWorld
 
@@ -393,17 +394,16 @@ hPairProd:   for  pi-    SubType= 4
 ### ===  PIXE model for hadrons: Empirical  1
 ### ===  PIXE model for e+-:     Livermore  1
 WARNING: G4VisManager::EndOfEvent: Automatic event keeping suspended.
-  The number of events exceeds the maximum, 25, that can be kept by the vis manager.WARNING: G4VisManager::EndOfRun: Automatic event keeping has been suspended.
+  The number of events exceeds the maximum, 25, that can be kept by the vis manager.WWARNING: G4VisManager::EndOfRun: Automatic event keeping has been suspended.
   The number of events in the run exceeded the maximum, 25, that can be kept by the vis manager.
   The number of events kept by the vis manager can be changed with
   "/vis/scene/endOfEventAction accumulate <N>", where N is the
   maximum number you wish to allow.  N < 0 means "unlimited".
 25 events have been kept for refreshing and/or reviewing.
-[Core-0] End of macro focal_script.mac
+[Core-0] End of macro focal.mac
 Graphics systems deleted.
 Visualization Manager deleting...
 WARNING - Attempt to delete the physical volume store while geometry closed !
 WARNING - Attempt to delete the logical volume store while geometry closed !
 WARNING - Attempt to delete the solid store while geometry closed !
 WARNING - Attempt to delete the region store while geometry closed !
-

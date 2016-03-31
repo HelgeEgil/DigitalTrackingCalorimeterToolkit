@@ -1,12 +1,12 @@
 /vis/open OGL
 /vis/viewer/reset
-/vis/viewer/panTo 0.04 -0.05
+# /vis/viewer/panTo 0.04 -0.05
 /vis/viewer/zoom 8
 /vis/viewer/set/viewpointThetaPhi 90 0
 /vis/viewer/set/style surface
 /vis/drawVolume
-/tracking/storeTrajectory 1
-/vis/scene/endOfEventAction accumulate 25
+#/tracking/storeTrajectory 1
+#/vis/scene/endOfEventAction accumulate 25
 #/vis/scene/add/trajectories
 /vis/viewer/update
 
@@ -14,12 +14,9 @@
 
 /control/execute geometry/main.mac
 
-#/gate/scanner/vis/setColor black
+/gate/systems/scanner/level1/attach simplified
+/gate/systems/scanner/level2/attach layer
 
-# Check z value to obtain first layer
-/gate/systems/scanner/level1/attach chip
-
-#/gate/pixels/attachCrystalSD
 /gate/chip/attachCrystalSD
 
 #=================#
@@ -32,7 +29,7 @@
 #/gate/physics/addProcess SingleScattering proton
 
 /gate/physics/SetMaxStepSizeInRegion      scanner {step_passive} um
-#/gate/physics/SetMaxStepSizeInRegion	   pixels {step_active} um
+/gate/physics/SetMaxStepSizeInRegion	   chip {step_active} um
 
 /gate/physics/ActivateStepLimiter         charged
 /gate/physics/ActivateStepLimiter         gamma
@@ -43,10 +40,10 @@
 /gate/physics/Gamma/SetCutInRegion     scanner {step_passive} um
 /gate/physics/Proton/SetCutInRegion    scanner {step_passive} um
 
-#/gate/physics/Electron/SetCutInRegion  pixels {step_active} um
-#/gate/physics/Positron/SetCutInRegion  pixels {step_active} um
-#/gate/physics/Gamma/SetCutInRegion     pixels {step_active} um
-#/gate/physics/Proton/SetCutInRegion    pixels {step_active} um
+/gate/physics/Electron/SetCutInRegion  chip {step_active} um
+/gate/physics/Positron/SetCutInRegion  chip {step_active} um
+/gate/physics/Gamma/SetCutInRegion     chip {step_active} um
+/gate/physics/Proton/SetCutInRegion    chip {step_active} um
 
 /gate/run/initialize
 
@@ -66,7 +63,7 @@
 /gate/source/uniformBeam/gps/direction 0 0 1
 /gate/source/uniformBeam/gps/halfx 20. mm
 /gate/source/uniformBeam/gps/halfy 20. mm
-/gate/source/uniformBeam/gps/centre 0. 0. -6.0 cm # -20 cm for scintillator
+/gate/source/uniformBeam/gps/centre 0. 0. -20.0 cm # -20 cm for scintillator
 
 #/gate/source/addSource PBS PencilBeam
 #/gate/source/PBS/setParticleType proton

@@ -427,14 +427,7 @@ void Focal::getMCFrame(Int_t runNo, CalorimeterFrame *cf) {
 			break;
 		}
 		
-		if (abs(posZ + 44) < 1) { // [-45, -43]
-			calorimeterLayer = 0;
-		}
-		
-		else {
-			calorimeterLayer = level1ID + 1;
-		}
-		
+		calorimeterLayer = level1ID;
 		cout << "z = " << posZ << " -> layer = " << calorimeterLayer << endl;
 		
 		if (calorimeterLayer<0) {
