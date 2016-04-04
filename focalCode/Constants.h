@@ -10,7 +10,7 @@ enum eDataType {kMC, kData};
 
 Float_t run_energy = 0;
 Bool_t kIsAluminumPlate = true;
-Bool_t kIsScintillator = false;
+Bool_t kIsScintillator = true;
 
 Bool_t kDebug = false;
 

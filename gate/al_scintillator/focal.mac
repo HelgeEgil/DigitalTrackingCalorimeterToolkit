@@ -66,10 +66,10 @@
 /gate/source/uniformBeam/gps/direction 0 0 1
 /gate/source/uniformBeam/gps/halfx 25. mm
 /gate/source/uniformBeam/gps/halfy 25. mm
-/gate/source/uniformBeam/gps/centre 0. 0. -5. cm # -20 cm for scintillator
+/gate/source/uniformBeam/gps/centre 0. 0. -1.7 m # -20 cm for scintillator
 
 /gate/output/root/enable
-/gate/output/root/setFileName ../../focalCode/rawdata/test_scintillatorfilter_{energy}MeV
+/gate/output/root/setFileName ../../focalCode/rawdata/test_scintillatorfilter_{energy}_thickness-{thick}MeV
 
 /gate/random/setEngineName MersenneTwister
 /gate/random/setEngineSeed auto

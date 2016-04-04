@@ -2,10 +2,15 @@
 #include "MaterialConstants.h"
 #include "Constants.h"
 #include <vector>
+#include <iostream>
+#include <cmath>
 
 using namespace std;
 
 void MaterialConstants() {
+	firstUpperLayerZ = 0.3;
+	firstLowerLayerZ = 0.6;
+
 	p_water_high = 1.725517; 		// above 150 MeV
 	alpha_water_high = 0.027681;	// above 150 Mev
 	
@@ -39,7 +44,7 @@ void MaterialConstants() {
 	else if (kMaterial == kAluminum) {
 		memcpy(kPLFocal, kPLFocal_Al, sizeof(kPLFocal_Al));
 		memcpy(kWEPLRatio, kWEPLRatio_Al, sizeof(kWEPLRatio_Al));
-		memcpy(kStraggling, kStraggling_Al, sizeof(kStraggling_Al));	
+		memcpy(kStraggling, kStraggling_Al, sizeof(kStraggling_Al));
 		nLayers = 41;
 
 		p = p_aluminum;
@@ -74,4 +79,62 @@ void setWaterPValues(Int_t setting) {
 	
 	pinv_water = 1/p_water;
 }	
+
+Float_t getEnergyLossFromScintillators(Float_t energy, Int_t nScintillators) {
+	Float_t energyLoss = 0;
 	
+	if (nScintillators == 0) {
+		energyLoss = 0;
+	}
+
+	else if (nScintillators == 1) {
+		// only 4x4 scintillator
+		energyLoss = 439.79 * pow(energy, -0.87);
+	}
+	else if (nScintillators == 2) {
+		// 4x4 plus one of the other .. They are equal in thickness and material
+		energyLoss = 530.5 * pow(energy, -0.822);
+	}
+	else if (nScintillators == 3) {
+		// 4x4 plus both 1x4 and 4x1 scintillators
+		energyLoss = 650.42 * pow(energy, -0.804);
+	}
+
+	else {
+		cout << "ASSERTION ERROR ON NUMBER OF SCINTILLATORS!\n";
+		energyLoss = 0;
+	}
+
+	return energyLoss;
+}
+
+Float_t getEnergyLossErrorFromScintillators(Int_t nScintillators) {
+	Float_t energyLossError = 0;
+
+	if (nScintillators == 0) {
+		energyLossError = 0;
+	}
+
+	else if (nScintillators == 1) {
+		energyLossError = 0.31;
+	}
+
+	else if (nScintillators == 2) {
+		energyLossError = 0.37;
+	}
+
+	else if (nScintillators == 3) {
+		energyLossError = 0.44;
+	}
+
+	return energyLossError;
+}
+
+Float_t getEnergyLossFromAluminumAbsorber(Float_t energy) {
+	Float_t energyLoss = 92.135 * pow(energy, -0.8);
+	return energyLoss;
+}
+
+Float_t getEnergyLossErrorFromAluminumAbsorber() {
+	return 0.16;
+}

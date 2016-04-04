@@ -32,7 +32,14 @@ Double_t Cluster::getLayermm() {
 	if (layerNo_==-2) z = -13.84;
 	if (layerNo_==-1) z = -10;
 
-	if (layerNo_>0) z = layerNo_*dz;
+	if (layerNo_>0) {
+		if (getYmm()>0) {
+			z = firstUpperLayerZ + layerNo_*dz;
+		}
+		else {
+			z = firstLowerLayerZ + layerNo_*dz;
+		}
+	}
 
 	return z;
 }

@@ -61,8 +61,8 @@ void Track::appendPoint(Float_t x, Float_t y, Int_t layer, Int_t size) {
 Float_t Track::getTrackLengthmm() {
 // return geometrical track length
 	
-	Float_t preMaterial = getPreMaterial();
-	Float_t trackLength = preMaterial + firstHalfLayer;
+//	Float_t preMaterial = getPreMaterial();
+	Float_t trackLength = 0; // preMaterial + firstHalfLayer;
 
 	Float_t x = -1; Float_t xp = -1;
 	Float_t y = -1; Float_t yp = -1;
@@ -92,11 +92,11 @@ Float_t Track::getTrackLengthmm() {
 Float_t Track::getRangemm() {
 	// return range (z2 - z1), not track length
 	
-	Float_t preMaterial = getPreMaterial();
+	//Float_t preMaterial = getPreMaterial();
 	Float_t range = 0;
 	if (!At(0)) return 0;
 
-	range = diffmm(Last(), At(0)) + preMaterial + firstHalfLayer;
+	range = diffmm(Last(), At(0)); // + preMaterial + firstHalfLayer;
 
 	return range;
 }
@@ -139,18 +139,18 @@ Float_t Track::getSlopeAngleAtLayer(Int_t i) {
 
 Float_t Track::getTrackLengthmmAt(Int_t i) {
 	// returns geometrical track length at point i
-	Float_t preMaterial = getPreMaterial();
+//	Float_t preMaterial = getPreMaterial();
 	
-	if (i==0) return preMaterial + firstHalfLayer; // pre-detector material
+	if (i==0) return 0; //preMaterial + firstHalfLayer; // pre-detector material
 	if (i>GetEntriesFast()) return 0;
 
 	return diffmm(At(i-1), At(i));
 }
 
 Float_t Track::getRangemmAt(Int_t i) {
-	Float_t preMaterial = getPreMaterial();
+//	Float_t preMaterial = getPreMaterial();
 
-	if (i==0) return preMaterial  + firstHalfLayer; // pre-detector material
+	if (i==0) return 0; //preMaterial  + firstHalfLayer; // pre-detector material
 	if (i>GetEntriesFast()) return 0;
 
 	return diffmm(new Cluster(getX(i-1), getY(i-1), getLayer(i-1)),
@@ -159,18 +159,18 @@ Float_t Track::getRangemmAt(Int_t i) {
 
 Float_t Track::getWEPL() {
 	Float_t tl = getTrackLengthmm();
-	Float_t preMaterial = getPreMaterial();
+//	Float_t preMaterial = getPreMaterial();
 	
 	if (!tl) return 0;
 	
-	return getWEPLFromTL(tl + firstHalfLayer + preMaterial);
+	return getWEPLFromTL(tl); // + firstHalfLayer + preMaterial);
 }
 
 Float_t Track::getTrackLengthWEPLmmAt(Int_t i) {
 	if (i==0) {
 		// WEPL of 1.5 mm Al + WEPL of 1.65 (avg) detector materal
-		Float_t preMaterial = getPreMaterial();	
-		return getWEPLFromTL(firstHalfLayer + preMaterial);
+//		Float_t preMaterial = getPreMaterial();
+		return 0; //getWEPLFromTL(firstHalfLayer + preMaterial);
 	}
 
 	Float_t tl = getTrackLengthmmAt(i);
@@ -180,11 +180,11 @@ Float_t Track::getTrackLengthWEPLmmAt(Int_t i) {
 }
 
 Float_t Track::getRangeWEPLAt(Int_t i) {
-	Float_t preMaterial = getPreMaterial();
+//	Float_t preMaterial = getPreMaterial();
 	
 	Float_t range = getRangemmAt(i);
 	if (i==0) {
-		return preMaterial + getWEPLFromTL(firstHalfLayer);
+		return 0; // preMaterial + getWEPLFromTL(firstHalfLayer);
 	}
 
 	if (!range) return 0;
@@ -443,6 +443,35 @@ Cluster * Track::getInterpolatedClusterAt(Int_t layer) {
 	return new Cluster(x, y, layer);
 }
 
+Cluster * Track::getExtrapolatedClusterAt(Float_t mmBeforeDetector) {
+	Int_t firstLayer = getFirstLayer();
+	Int_t firstIdx = getClusterFromLayer(firstLayer);
+	Int_t nextIdx = 0;
+
+	Float_t extra_mm = getLayermm(firstLayer);
+
+	for (Int_t i=firstIdx+1; i<GetEntriesFast(); i++) {
+		if (!At(i)) continue;
+
+		nextIdx = i;
+		break;
+	}
+
+	Cluster *first = At(firstIdx);
+	Cluster *next = At(nextIdx);
+
+	Float_t diff_z = (next->getLayermm() - first->getLayermm());
+	Float_t diff_x = (first->getX() - next->getX()) / diff_z;
+	Float_t diff_y = (first->getY() - next->getY()) / diff_z;
+
+	Float_t new_x = first->getX() + diff_x * (mmBeforeDetector + extra_mm);
+	Float_t new_y = first->getY() + diff_y * (mmBeforeDetector + extra_mm);
+
+	Cluster *extrapolated = new Cluster(new_x, new_y);
+
+	return extrapolated;
+}
+
 Float_t Track::getAverageCS() {
 	Int_t n = GetEntries();
 	if (!n) return 0;
@@ -508,8 +537,8 @@ TGraphErrors * Track::doFit() {
 		erx[i] = 0;
 	}
 	
-	Float_t max_energy = getEnergyFromTL(trackLength + 1.2*dz);
-	Float_t estimated_energy = getEnergyFromTL(trackLength + 0.5*dz);
+	Float_t max_energy = getEnergyFromTL(trackLength + 0.50*dz);
+	Float_t estimated_energy = getEnergyFromTL(trackLength + dz);
 	
 	if (kOutputUnit == kWEPL || kOutputUnit == kEnergy) {
 		Float_t WEPLFactor = getWEPLFactorFromEnergy(estimated_energy);
@@ -522,12 +551,12 @@ TGraphErrors * Track::doFit() {
 	Float_t scaleParameter = 0;
 	
 	if (kOutputUnit == kPhysical) {
-		if (kMaterial == kTungsten) scaleParameter = 14; // was 101, what...
+		if (kMaterial == kTungsten) scaleParameter = 14;
 		if (kMaterial == kAluminum) scaleParameter = 65;
 	}
 	
 	else if (kOutputUnit == kWEPL || kOutputUnit == kEnergy) {
-		if (kMaterial == kTungsten) scaleParameter = 100; // ?? fix
+		if (kMaterial == kTungsten) scaleParameter = 100;
 		if (kMaterial == kAluminum) scaleParameter = 126;
 	}
 
@@ -573,3 +602,76 @@ Float_t Track::getFitParameterScale() {
 	return fitScale_;
 }
 
+Float_t Track::getPreEnergyLoss() {
+
+	Float_t energyLoss = 0;
+	Float_t energyLossError = 0;
+	Float_t energy = run_energy;
+	Float_t nScintillators = 0;
+
+	Bool_t scintillatorH = isHitOnScintillatorH();
+	Bool_t scintillatorV = isHitOnScintillatorV();
+	Bool_t scintillatorF = true; // 4x4 cm scintillator, full field
+
+	if (kIsScintillator) {
+		nScintillators = scintillatorF + scintillatorH + scintillatorV;
+		energyLoss = getEnergyLossFromScintillators(energy, nScintillators);
+		energyLossError = getEnergyLossErrorFromScintillators(nScintillators);
+	}
+
+	cout << "Track is on " << nScintillators << " scintillators, and the energy loss is " << energyLoss << " MeV += " << energyLossError << endl;
+
+	if (kIsAluminumPlate) {
+		energyLoss += getEnergyLossFromAluminumAbsorber(energy);
+		energyLossError = quadratureAdd(energyLossError, getEnergyLossErrorFromAluminumAbsorber());
+	}
+
+	cout << "The energy loss after the aluminum absorber is is " << energyLoss << " MeV += " << energyLossError << endl;
+
+	return energyLoss;
+}
+
+Float_t Track::getPreEnergyLossError() {
+	Float_t energyLossError = 0;
+
+	Bool_t scintillatorH = isHitOnScintillatorH();
+	Bool_t scintillatorV = isHitOnScintillatorV();
+	Bool_t scintillatorF = true; // 4x4 cm scintillator, full field
+
+	Int_t nScintillators = scintillatorF + scintillatorH + scintillatorV;
+
+	energyLossError = quadratureAdd(getEnergyLossErrorFromScintillators(nScintillators),
+											  getEnergyLossErrorFromAluminumAbsorber());
+
+	return energyLossError;
+}
+
+Bool_t Track::isHitOnScintillatorH() {
+	// (dx, dy, dz) = (4, 1, 0.5) cm @ -174 mm
+	Float_t scintillatorMeanDepth = 174;
+	Bool_t isOnScintillator = false;
+
+	Cluster *extrapolatedCluster = getExtrapolatedClusterAt(scintillatorMeanDepth);
+	Float_t y = extrapolatedCluster->getYmm();
+
+	if (-5 < y && y < 5) {
+		isOnScintillator = true;
+	}
+
+	return isOnScintillator;
+}
+
+Bool_t Track::isHitOnScintillatorV() {
+	// (dx, dy, dz) = (1, 4, 0.5) cm @ -166 mm
+	Float_t scintillatorMeanDepth = 166;
+	Bool_t isOnScintillator = false;
+
+	Cluster *extrapolatedCluster = getExtrapolatedClusterAt(scintillatorMeanDepth);
+	Float_t x = extrapolatedCluster->getXmm();
+
+	if (-5 < x && x < 5) {
+		isOnScintillator = true;
+	}
+
+	return isOnScintillator;
+}

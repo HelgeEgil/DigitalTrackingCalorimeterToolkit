@@ -1,22 +1,22 @@
 # world
 /gate/world/geometry/setXLength 100. cm
 /gate/world/geometry/setYLength 100. cm
-/gate/world/geometry/setZLength 300. cm
+/gate/world/geometry/setZLength 100. cm
 
 # system
 /gate/world/daughters/name scanner
 /gate/world/daughters/insert box
-/gate/scanner/geometry/setXLength 10. cm
-/gate/scanner/geometry/setYLength 10. cm
-/gate/scanner/geometry/setZLength 250. cm
+/gate/scanner/geometry/setXLength 80. cm
+/gate/scanner/geometry/setYLength 80. cm
+/gate/scanner/geometry/setZLength 80. cm
 /gate/scanner/setMaterial Vacuum
 /gate/scanner/vis/forceWireframe
 
 /gate/scanner/daughters/name filter
 /gate/scanner/daughters/insert box
-/gate/filter/geometry/setXLength 4. cm
-/gate/filter/geometry/setYLength 4. cm
-/gate/filter/geometry/setZLength 1.5 mm
-/gate/filter/placement/setTranslation 0. 0. 0.75 mm
+/gate/filter/geometry/setXLength 75. cm
+/gate/filter/geometry/setYLength 75. cm
+/gate/filter/geometry/setZLength {thick} cm
+/gate/filter/placement/setTranslation 0. 0. 0. m
 /gate/filter/setMaterial Aluminium
 /gate/filter/vis/forceWireframe

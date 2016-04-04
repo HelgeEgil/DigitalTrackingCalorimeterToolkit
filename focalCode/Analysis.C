@@ -450,15 +450,17 @@ void drawBraggPeakFit(Int_t Runs, Int_t dataType, Bool_t recreate, Float_t energ
 		Float_t fitEnergy = thisTrack->getFitParameterEnergy();
 		Float_t fitScale = thisTrack->getFitParameterScale();
 
+		Float_t finalEnergy = fitEnergy + thisTrack->getPreEnergyLoss();
+
 		if (fitEnergy < run_energy*1.245) {
 			if (kOutputUnit == kPhysical) {
-				hFitResults->Fill(getTLFromEnergy(fitEnergy));
+				hFitResults->Fill(getTLFromEnergy(finalEnergy));
 			}
 			else if (kOutputUnit == kWEPL) {
-				hFitResults->Fill(getWEPLFromEnergy(fitEnergy));
+				hFitResults->Fill(getWEPLFromEnergy(finalEnergy));
 			}
 			else if (kOutputUnit == kEnergy) {
-				hFitResults->Fill(fitEnergy);
+				hFitResults->Fill(finalEnergy);
 			}
 		}
 	}
@@ -481,7 +483,7 @@ void drawBraggPeakFit(Int_t Runs, Int_t dataType, Bool_t recreate, Float_t energ
 	}
 	
 	// Draw expected gaussian distribution of results from initial energy
-	Float_t expectedStraggling, expectedMean;
+	Float_t expectedStraggling = 0, expectedMean = 0;
 	
 	if (kOutputUnit == kPhysical) {
 		expectedMean = getTLFromEnergy(energy);
@@ -497,8 +499,7 @@ void drawBraggPeakFit(Int_t Runs, Int_t dataType, Bool_t recreate, Float_t energ
 	}
 	
 	cout << "Expected mean = " << expectedMean << endl;
-	cout << "Expected stragglig = " << expectedStraggling << endl;
-	
+	cout << "Expected straggling = " << expectedStraggling << endl;
 	
 	TF1 *ES = new TF1("ES", "gaus(0)", expectedMean*0.85, expectedMean*1.15);
 	ES->SetParameters(maxBin,expectedMean,expectedStraggling);
@@ -512,7 +513,7 @@ void drawBraggPeakFit(Int_t Runs, Int_t dataType, Bool_t recreate, Float_t energ
 	TLegend *legend = new TLegend(0.65, 0.6, 0.98, 0.75);
 	legend->SetTextSize(0.03);
 	legend->AddEntry(hFitResults, "Energy fits to tracks", "F");
-	legend->AddEntry(ES, "Expected range straggling", "F");
+	legend->AddEntry(ES, "Theoretical curve with range straggling", "F");
 	legend->Draw();
 	
 	Float_t lowerRange = expectedMean - 2*expectedStraggling;
@@ -628,7 +629,7 @@ void drawBraggPeakGraphFit(Int_t Runs, Int_t dataType, Bool_t recreate, Float_t 
 		cout << "Unknown output unit!\n";
 	}
 
-	TH1F *hScale = new TH1F("hScale", "Scale histogram", 400, 0, 400);
+	TH1F *hScale = new TH1F("hScale", "Scale histogram", 800, 0, 800);
 	
 	hFitResults->SetLineColor(kBlack);
 	hFitResults->SetFillColor(kGreen-5); 
@@ -651,17 +652,20 @@ void drawBraggPeakGraphFit(Int_t Runs, Int_t dataType, Bool_t recreate, Float_t 
 		Float_t fitEnergy = thisTrack->getFitParameterEnergy();
 		Float_t fitScale = thisTrack->getFitParameterScale();
 		
+		Float_t finalEnergy = fitEnergy + thisTrack->getPreEnergyLoss();
+
+
 		hScale->Fill(fitScale);
 
 		if (fitEnergy < run_energy*1.245) {
 			if (kOutputUnit == kPhysical) {
-				hFitResults->Fill(getTLFromEnergy(fitEnergy));
+				hFitResults->Fill(getTLFromEnergy(finalEnergy));
 			}
 			else if (kOutputUnit == kWEPL) {
-				hFitResults->Fill(getWEPLFromEnergy(fitEnergy));
+				hFitResults->Fill(getWEPLFromEnergy(finalEnergy));
 			}
 			else if (kOutputUnit == kEnergy) {
-				hFitResults->Fill(fitEnergy);
+				hFitResults->Fill(finalEnergy);
 			}
 		}
 
@@ -669,7 +673,7 @@ void drawBraggPeakGraphFit(Int_t Runs, Int_t dataType, Bool_t recreate, Float_t 
 			cGraph->cd(fitIdx+1);
 			
 			outputGraph->SetMinimum(0);
-			outputGraph->SetMaximum(700);
+			outputGraph->SetMaximum(1200);
 			outputGraph->SetTitle("");
 			if (kOutputUnit == kWEPL || kOutputUnit == kEnergy) {
 				outputGraph->GetXaxis()->SetTitle("Water Equivalent Path Length [mm]");
@@ -707,7 +711,7 @@ void drawBraggPeakGraphFit(Int_t Runs, Int_t dataType, Bool_t recreate, Float_t 
 			func->SetParameters(fitEnergy, fitScale);
 			func->Draw("same");
 
-			TLatex *text = new TLatex(low*1.2, 600, Form("Fitted energy: %.1f MeV", fitEnergy));
+			TLatex *text = new TLatex(low*1.2, 900, Form("Fitted energy: %.1f MeV", finalEnergy));
 			text->SetTextSize(0.06);
 			text->Draw();
 		
@@ -752,7 +756,7 @@ void drawBraggPeakGraphFit(Int_t Runs, Int_t dataType, Bool_t recreate, Float_t 
 	
 	Float_t expectedStraggling = 0, expectedMean = 0, dlayer_down = 0, dlayer = 0;
 	
-	Float_t separationFactor = 1;
+	Float_t separationFactor = 0.9;
 	if (kMaterial == kAluminum)
 		separationFactor = 1; // don't ask why...
 	
@@ -775,9 +779,21 @@ void drawBraggPeakGraphFit(Int_t Runs, Int_t dataType, Bool_t recreate, Float_t 
 	
 	Int_t meanBin = hFitResults->GetMean();
 	
+	Float_t initial_straggling = 0;
+
 	if (kMaterial == kTungsten) {
-		expectedStraggling *= 2;
+		if (dataType == kData) {
+			if (energy == 188) initial_straggling = 1; // ish
+			else if (energy == 180) initial_straggling = 2.5;
+			else if (energy == 170) initial_straggling = 4.5;
+
+			// Definitly not monoenergetic
+			if (kOutputUnit == kEnergy) { // FIX THIS.. IS NOT JUST ADDED IN QUADRATURE
+				expectedStraggling = quadratureAdd(expectedStraggling,  initial_straggling);
+			}
+		}
 	}
+
 	
 	Float_t expectedStragglingTo = expectedStraggling;
 	if (kMaterial == kAluminum && run_energy < 110) {
@@ -807,6 +823,7 @@ void drawBraggPeakGraphFit(Int_t Runs, Int_t dataType, Bool_t recreate, Float_t 
 	
 	Float_t shiftFactor = 1.65974; // determined from parameter scan in W
 	if (kMaterial == kAluminum) shiftFactor = 1;
+	else if (kMaterial == kTungsten) shiftFactor = 1;
 	
 	Float_t norm = p1/shiftFactor + p2 * shiftFactor;
 	Float_t p1_n = ( p1 / shiftFactor ) / norm;
@@ -868,9 +885,9 @@ void drawBraggPeakGraphFit(Int_t Runs, Int_t dataType, Bool_t recreate, Float_t 
 	cFitResults->Update();
 
 	TLegend *legend = new TLegend(0.65, 0.6, 0.98, 0.75);
-	legend->SetTextSize(0.03);
+	legend->SetTextSize(0.02);
 	legend->AddEntry(hFitResults, "Energy fits to tracks", "F");
-	legend->AddEntry(ES, "Expected range straggling", "F");
+	legend->AddEntry(ES, "Theoretical curve with range straggling", "F");
 	legend->Draw();
 	
 	Float_t lowerRange = expectedMean - expectedStraggling;
@@ -1369,7 +1386,6 @@ Bool_t getCutBraggPeakInTrack(Track *track) {
 		else return false;
 	}
 }
-
 
 void getPValues() {
 	// create list with energies vs range

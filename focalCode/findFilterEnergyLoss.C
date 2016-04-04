@@ -52,8 +52,8 @@ void findFilterEnergyLoss::Loop()
 
 	TCanvas *c1 = new TCanvas("c1", "c1", 800, 600);
 	TCanvas *c2 = new TCanvas("c2", "c2", 800, 600);
-	TH1F *hEnergyLoss = new TH1F("hEnergyLoss", Form("Energy loss for a %d MeV proton beam on a 1.5 mm aluminum foil", energy), 1000, 0, 10);
-	TH1F *hEnergy= new TH1F("hEnergy", Form("Final energy for a %d MeV proton beam on a 1.5 mm aluminum foil", energy), 5000, 0, 250);
+	TH1F *hEnergyLoss = new TH1F("hEnergyLoss", Form("Energy loss for a %d MeV proton beam on a %.1f mm aluminum foil", energy, run_thickness), 1000, 0, 40);
+	TH1F *hEnergy= new TH1F("hEnergy", Form("Final energy for a %d MeV proton beam on a %.1f mm aluminum foil", energy, run_thickness), 5000, 0, 250);
 
 	Int_t lastID = -1;
 	Float_t sum_edep = 0;
@@ -83,47 +83,49 @@ void findFilterEnergyLoss::Loop()
 	
 	Int_t res;
 	
-	TSpectrum *s = new TSpectrum(6);
-	TSpectrum *sLoss = new TSpectrum(6);
-	
-	res = s->Search(hEnergy);
-	TList *functions = hEnergy->GetListOfFunctions();
-	TPolyMarker *pm = (TPolyMarker*) functions->FindObject("TPolyMarker");
-	
-	res = sLoss->Search(hEnergyLoss);
-	TList *functionsLoss = hEnergyLoss->GetListOfFunctions();
-	TPolyMarker *pmLoss = (TPolyMarker*) functionsLoss->FindObject("TPolyMarker");
-	
-	Int_t n = pm->GetN();
-	Int_t nLoss = pmLoss->GetN();
-	
-	Double_t *x = pm->GetX();
-	Double_t *xLoss = pmLoss->GetX();
-	
-	Double_t finalLoss = 0;
-
-	for (Int_t i=0; i<n; i++) {
-		cout << "Final energy peak " << i + 1 << " at " << x[i] << endl;
-	}
-	
-	for (Int_t i=0; i<nLoss; i++) {
-		cout << "Energy loss peak " << i + 1 << " at " << xLoss[i] << endl;
-		finalLoss = xLoss[i];
-	}
+//	TSpectrum *s = new TSpectrum(6);
+//	TSpectrum *sLoss = new TSpectrum(6);
+//
+//	res = s->Search(hEnergy);
+//	TList *functions = hEnergy->GetListOfFunctions();
+//	TPolyMarker *pm = (TPolyMarker*) functions->FindObject("TPolyMarker");
+//
+//	res = sLoss->Search(hEnergyLoss);
+//	TList *functionsLoss = hEnergyLoss->GetListOfFunctions();
+//	TPolyMarker *pmLoss = (TPolyMarker*) functionsLoss->FindObject("TPolyMarker");
+//
+//	Int_t n = pm->GetN();
+//	Int_t nLoss = pmLoss->GetN();
+//
+//	Double_t *x = pm->GetX();
+//	Double_t *xLoss = pmLoss->GetX();
+//
+//	Double_t finalLoss = 0;
+//
+//	for (Int_t i=0; i<n; i++) {
+//		cout << "Final energy peak " << i + 1 << " at " << x[i] << endl;
+//	}
+//
+//	for (Int_t i=0; i<nLoss; i++) {
+//		cout << "Energy loss peak " << i + 1 << " at " << xLoss[i] << endl;
+//		finalLoss = xLoss[i];
+//	}
 	
 	TF1 *fEnergy = new TF1("fEnergy", "gaus(0)", energy-50, energy+15);
-	TF1 *fEnergyLoss = new TF1("fEnergyLoss", "gaus(0)", 0, 30);
+	TF1 *fEnergyLoss = new TF1("fEnergyLoss", "gaus(0)", 0, 40);
 	
-	fEnergy->SetParameters(100, energy-finalLoss, 0.3);
-	fEnergyLoss->SetParameters(160, finalLoss, 0.3);
+	fEnergy->SetParameters(100, energy-10, 0.3);
+	fEnergyLoss->SetParameters(160, 10, 0.3);
 	
-	fEnergyLoss->SetParLimits(0, 10, 500);
-	fEnergyLoss->SetParLimits(1, finalLoss*0.8, finalLoss*1.2);
-	fEnergyLoss->SetParLimits(2, 0.05, 0.5);
+//	fEnergyLoss->SetParLimits(0, 10, 500);
+//	fEnergyLoss->SetParLimits(1, finalLoss*0.8, finalLoss*1.2);
+//	fEnergyLoss->SetParLimits(2, 0.05, 0.5);
 
 	c1->cd();
 	hEnergy->SetXTitle("Final energy");
 	hEnergy->SetYTitle("Number of particles");
+	hEnergy->SetFillColor(kYellow - 10);
+	hEnergy->SetLineColor(kBlack);
 	hEnergy->Draw();
 	
 	c2->cd();

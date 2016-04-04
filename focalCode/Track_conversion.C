@@ -28,6 +28,8 @@ Float_t getTLFromMaterial(Float_t tl_mat, Int_t material) {
 		cout << "MATERIAL" << material << " NOT FOUND! Reverting to input TL\n";
 		tl = tl_mat;
 	}
+
+	return tl;
 }
 
 Float_t getTLFromEnergy(Float_t energy) {

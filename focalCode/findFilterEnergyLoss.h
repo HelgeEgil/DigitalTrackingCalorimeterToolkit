@@ -13,6 +13,7 @@
 
 class TH2;
 Int_t run_energy;
+Float_t run_thickness;
 
 // Header file for the classes stored in the TTree if any.
 
@@ -99,7 +100,7 @@ public :
    TBranch        *b_comptVolName;   //!
    TBranch        *b_RayleighVolName;   //!
 
-   findFilterEnergyLoss(Int_t energy, TTree *tree=0);
+   findFilterEnergyLoss(Int_t energy, Float_t thickness, TTree *tree=0);
    virtual ~findFilterEnergyLoss();
    virtual Int_t    Cut(Long64_t entry);
    virtual Int_t    GetEntry(Long64_t entry);
@@ -115,9 +116,10 @@ public :
 #endif
 
 #ifdef findFilterEnergyLoss_cxx
-findFilterEnergyLoss::findFilterEnergyLoss(Int_t energy, TTree *tree) : fChain(0) 
+findFilterEnergyLoss::findFilterEnergyLoss(Int_t energy, Float_t thickness, TTree *tree) : fChain(0)
 {
 	run_energy = energy;
+	run_thickness = thickness;
 // if parameter tree is not specified (or zero), connect the file
 // used to generate this class and read the Tree.
    if (tree == 0) {
@@ -136,7 +138,7 @@ findFilterEnergyLoss::findFilterEnergyLoss(Int_t energy, TTree *tree) : fChain(0
       // The following code should be used if you want this class to access a chain
       // of trees.
       TChain * chain = new TChain("Hits","");
-      chain->Add(Form("rawdata/test_scintillatorfilter_%dMeV.root/Hits", energy));
+      chain->Add(Form("rawdata/test_scintillatorfilter_%d_thickness-%.1fMeV.root/Hits", energy, thickness));
       tree = chain;
 #endif // SINGLE_TREE
 

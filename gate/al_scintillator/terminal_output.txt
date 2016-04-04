@@ -22,19 +22,22 @@ http://wiki.opengatecollaboration.org/index.php/Users_Guide_V7.0:Setting_up_the_
 [Core-0] **********************************************************************
 [Core-0] 
 [Core-0] You are using Geant4 version 9.6.4
-/control/alias energy 40
-/control/alias npart 5000
-/control/alias step_active 200
-/control/alias sigma 0
+/control/alias energy 188
+/control/alias npart 50000
+/control/alias step_active 0
+/control/alias sigma 100
+/control/alias thick 6.0
 [Core-0] Starting macro focal.mac
 WARNING: G4VisCommandSceneHandlerCreate::SetNewValue: using fallback graphics system.
 WARNING: The vis manager will keep up to 25 events.
   This may use a lot of memory.
   It may be changed with, e.g., "/vis/scene/endOfEventAction accumulate 10".
 ===== XML PATH ====: ./Materials.xml
-===== XML PATH ====: 0x2a958e0
-====== XML PATH ====: ./Materials.xml===== XML PATH ====: 0x2b6ed90
-[[Physic-0] The following Geant4's physic-list is enabled :emstandard_opt3[Core-0] Initialization of geometry
+===== XML PATH ====: 0x236da30
+===== XML PATH ====: ./Materials.xml
+===== XML PATH ====: 0x2446f50
+[Physic-0] The following Geant4's physic-list is enabled :emstandard_opt3
+[Core-0] Initialization of geometry
 G4PhysicalVolumeModel::Validate(): A volume of the same name and
   copy number ("world_phys", copy 0) still exists and is being used.
   But it is not the same volume you originally specified
@@ -44,7 +47,7 @@ G4PhysicalVolumeModel::Validate(): A volume of the same name and
 Please, use physic list builder mechanism instead. Related documentation can be found at:
 http://wiki.opengatecollaboration.org/index.php/Users_Guide_V7.0:Setting_up_the_physics
 [Core-0] Initialization of actors
-[[Acquisition-0]                                      
+[Acquisition-0]                                      
 [Acquisition-0] ============= Source initialization =============
 [Acquisition-0]                                      
 [Acquisition-0] ============= Acquisition starts! =============
@@ -394,7 +397,7 @@ hPairProd:   for  pi-    SubType= 4
 ### ===  PIXE model for hadrons: Empirical  1
 ### ===  PIXE model for e+-:     Livermore  1
 WARNING: G4VisManager::EndOfEvent: Automatic event keeping suspended.
-  The number of events exceeds the maximum, 25, that can be kept by the vis manager.WWARNING: G4VisManager::EndOfRun: Automatic event keeping has been suspended.
+  The number of events exceeds the maximum, 25, that can be WARNING: G4VisManager::EnWARNING: G4VisManager::EndOfRun: Automatic event keeping has been suspended.
   The number of events in the run exceeded the maximum, 25, that can be kept by the vis manager.
   The number of events kept by the vis manager can be changed with
   "/vis/scene/endOfEventAction accumulate <N>", where N is the

@@ -47,6 +47,8 @@ class Track : public TObject {
 	virtual Int_t getError(Int_t i) { return At(i)->getError(); } 
 	virtual Float_t getDepositedEnergy(Int_t i) {return At(i)->getDepositedEnergy(); }
 	virtual Float_t getDepositedEnergyError(Int_t i) {return At(i)->getDepositedEnergyError(); }
+	virtual Float_t getPreEnergyLoss();
+	virtual Float_t getPreEnergyLossError();
 
 	// with dimensions
 	Float_t getXmm(Int_t i) { return At(i)->getXmm(); }
@@ -71,6 +73,8 @@ class Track : public TObject {
 	Float_t getFitParameterScale();
 	Float_t getWEPL();
 	Float_t getEnergyStraggling();
+	Bool_t isHitOnScintillatorH();
+	Bool_t isHitOnScintillatorV();
 
 	Int_t getNMissingLayers();
 	Int_t getLastLayer();
@@ -86,6 +90,7 @@ class Track : public TObject {
 	virtual Cluster* At(Int_t i) { return ((Cluster*) track_.At(i)); }
 	Int_t getClusterFromLayer(Int_t layer);
 	Cluster * getInterpolatedClusterAt(Int_t layer);
+	Cluster * getExtrapolatedClusterAt(Float_t mmBeforeDetector);
 	virtual Cluster* Last() { return ((Cluster*) track_.At(GetEntriesFast()-1)); }
 
 	virtual TObject* removeClusterAt(Int_t i) { return track_.RemoveAt(i); }

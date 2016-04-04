@@ -52,7 +52,8 @@ class Tracks : public TObject {
       virtual TObject* removeTrackAt(Int_t i) { return tracks_.RemoveAt(i); }
       void sortTrackByLayer(Int_t track);
 
-      Float_t getPreMaterial();
+//      Float_t getPreMaterial();
+//      Float_t getPreEnergyLoss();
       void checkLayerOrientation();
       void doFit();
 

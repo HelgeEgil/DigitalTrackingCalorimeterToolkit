@@ -428,7 +428,7 @@ void Focal::getMCFrame(Int_t runNo, CalorimeterFrame *cf) {
 		}
 		
 		calorimeterLayer = level1ID;
-		cout << "z = " << posZ << " -> layer = " << calorimeterLayer << endl;
+
 		
 		if (calorimeterLayer<0) {
 			continue;
@@ -437,6 +437,6 @@ void Focal::getMCFrame(Int_t runNo, CalorimeterFrame *cf) {
 		x = (posX + offsetX) * nx / (offsetX);
 		y = (posY + offsetY) * ny / (offsetY);
 
-		cf->fillAt(calorimeterLayer, x, y, edep*1000);
+		cf->fillAt(calorimeterLayer, x, y, edep*1000); // /4 to account for longer chip
 	}
 }

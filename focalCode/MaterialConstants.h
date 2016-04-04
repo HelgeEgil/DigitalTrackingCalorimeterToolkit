@@ -20,7 +20,16 @@ Double_t p_aluminum, alpha_aluminum, alpha_prime_aluminum;
 Double_t p_tungsten, alpha_tungsten, alpha_prime_tungsten;
 Double_t firstHalfLayer;
 
+Double_t firstUpperLayerZ;
+Double_t firstLowerLayerZ;
+
 void setWaterPValues(Int_t setting);
+
+Float_t getEnergyLossFromScintillators(Float_t energy, Int_t nScintillators);
+Float_t getEnergyLossErrorFromScintillators(Int_t nScintillators);
+Float_t getEnergyLossFromAluminumAbsorber(Float_t energy);
+Float_t getEnergyLossErrorFromAluminumAbsorber();
+
 
 Float_t kPLEnergies[nPLEnergies] =
 			{0.1, 0.11, 0.12, 0.13, 0.14, 0.15, 0.16, 0.17, 0.18, 0.2, 0.225, 0.25,
@@ -156,5 +165,6 @@ Float_t kStraggling_PMMA[nPLEnergies] = // PMMA, in mm
 			 1.080000, 1.240000, 1.410000, 1.580000, 2.180000, 2.740000, 3.290000, 3.830000, 
 			 4.360000, 4.900000, 5.440000, 5.980000, 6.530000, 7.070000, 7.620000, 9.640000, 
 			 12.46000, 15.07000, 17.56000, 19.98000, 22.34000, 24.65000, 26.93000, 29.17000};
+
 
 #endif
