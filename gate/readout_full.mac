@@ -1,0 +1,14 @@
+/gate/scintillator_F/attachCrystalSD
+/gate/scintillator_H/attachCrystalSD
+/gate/scintillator_V/attachCrystalSD
+/gate/chip/attachCrystalSD
+/gate/glue_1/attachCrystalSD
+/gate/pcb/attachCrystalSD
+/gate/glue_2/attachCrystalSD
+/gate/passive/attachCrystalSD
+/gate/gap_1/attachCrystalSD
+/gate/filler/attachCrystalSD
+/gate/glue_3/attachCrystalSD
+/gate/absorber_1/attachCrystalSD
+/gate/gap_2/attachCrystalSD
+/gate/absorber_2/attachCrystalSD

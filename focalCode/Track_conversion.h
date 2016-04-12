@@ -14,12 +14,13 @@ Float_t getWEPLFromEnergy(Float_t energy);
 Float_t getWEPLFactorFromEnergy ( Float_t energy );
 Float_t getWEPLFromTL(Float_t tl);
 
-Float_t getRangeStragglingFromEnergy(Float_t energy);
-Float_t getRangeStragglingFromRange ( Float_t range );
-Float_t getWEPLStragglingFromWEPL(Float_t wepl);
-Float_t getWEPLStragglingFromEnergy(Float_t energy);
-Float_t getEnergyStragglingFromRange(Float_t range);
-Float_t getEnergyStragglingFromEnergy(Float_t energy);
-
+Float_t getTLStragglingFromEnergy(Float_t energy, Float_t sigma_energy);
+Float_t getEnergyStragglingFromTLStraggling(Float_t range, Float_t rangeStraggling);
+Float_t getEnergyStragglingFromWEPLStraggling(Float_t range, Float_t rangeStraggling);
+Float_t getTLStragglingFromTL ( Float_t range, Float_t sigma_energy);
+Float_t getWEPLStragglingFromWEPL(Float_t wepl, Float_t sigma_energy);
+Float_t getWEPLStragglingFromEnergy(Float_t energy, Float_t sigma_energy);
+Float_t getEnergyStragglingFromTL(Float_t range, Float_t sigma_energy);
+Float_t getEnergyStragglingFromEnergy(Float_t energy, Float_t sigma_energy);
 
 #endif

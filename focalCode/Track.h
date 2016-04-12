@@ -48,6 +48,8 @@ class Track : public TObject {
 	virtual Float_t getDepositedEnergy(Int_t i) {return At(i)->getDepositedEnergy(); }
 	virtual Float_t getDepositedEnergyError(Int_t i) {return At(i)->getDepositedEnergyError(); }
 	virtual Float_t getPreEnergyLoss();
+	virtual Float_t getPreWEPL();
+	virtual Float_t getPreTL();
 	virtual Float_t getPreEnergyLossError();
 
 	// with dimensions
@@ -62,9 +64,13 @@ class Track : public TObject {
 	Float_t getRangeWEPLAt(Int_t i);
 
 	Float_t getSinuosity();
+	Float_t getProjectedRatio();
 	Float_t getSlopeAngle();
 	Float_t getSlopeAngleAtLayer(Int_t i);
+	Float_t getSlopeAngleBetweenLayers(Int_t i);
+	Float_t getAbsorberLength(Int_t i);
 	Float_t getSnakeness();
+	Int_t	getNScintillators();
 	Float_t getTrackScore();
 	Float_t getMeanSizeToIdx(Int_t i);
 	Float_t getStdSizeToIdx(Int_t toIdx);
@@ -76,6 +82,10 @@ class Track : public TObject {
 	Bool_t isHitOnScintillatorH();
 	Bool_t isHitOnScintillatorV();
 
+	Bool_t doesTrackEndAbruptly();
+	Float_t getRiseFactor();
+
+	
 	Int_t getNMissingLayers();
 	Int_t getLastLayer();
 	Int_t getFirstLayer();
@@ -86,6 +96,7 @@ class Track : public TObject {
 	Float_t getAverageCSLastN(Int_t i);
 
 	TGraphErrors * doFit();
+	TGraphErrors * doRangeFit();
 	
 	virtual Cluster* At(Int_t i) { return ((Cluster*) track_.At(i)); }
 	Int_t getClusterFromLayer(Int_t layer);

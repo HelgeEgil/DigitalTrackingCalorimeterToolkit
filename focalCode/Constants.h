@@ -17,6 +17,7 @@ Bool_t kDebug = false;
 // natural unit is mm
 const Float_t cm = 0.1;
 const Float_t um = 1000;
+const Float_t kRad = 3.14159265/180.;
 
 // Some general run parameters
 const Int_t nx = 640;

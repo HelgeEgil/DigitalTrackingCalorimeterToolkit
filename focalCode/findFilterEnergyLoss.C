@@ -52,12 +52,17 @@ void findFilterEnergyLoss::Loop()
 
 	TCanvas *c1 = new TCanvas("c1", "c1", 800, 600);
 	TCanvas *c2 = new TCanvas("c2", "c2", 800, 600);
+	TCanvas *c3 = new TCanvas("c3", "c3", 800, 600);
+	
 	TH1F *hEnergyLoss = new TH1F("hEnergyLoss", Form("Energy loss for a %d MeV proton beam on a %.1f mm aluminum foil", energy, run_thickness), 1000, 0, 40);
 	TH1F *hEnergy= new TH1F("hEnergy", Form("Final energy for a %d MeV proton beam on a %.1f mm aluminum foil", energy, run_thickness), 5000, 0, 250);
-
+	TH2F *hEnergy2D = new TH2F("hEnergy2D", Form("Final energy for a %d MeV proton beam on focal vs x", energy), 128, -20, 20, 200, 0, 200);
+	
 	Int_t lastID = -1;
 	Float_t sum_edep = 0;
 
+	Float_t lastX = 0;
+	
 	for (Long64_t jentry=0; jentry<nentries;jentry++) {
 		Long64_t ientry = LoadTree(jentry);
 	
@@ -68,17 +73,19 @@ void findFilterEnergyLoss::Loop()
 
 		nb = fChain->GetEntry(jentry);   nbytes += nb;
 
-		if (abs(posX) < 1 && abs(posY) < 1) {
-			continue;
-		}
+// 		if (abs(posX) < 1 && abs(posY) < 1) {
+// 			continue;
+// 		}
 		
 		sum_edep += edep;
 		if (eventID != lastID) {
 			hEnergyLoss->Fill(sum_edep);
 			hEnergy->Fill(energy - sum_edep);
+			hEnergy2D->Fill(lastX, energy - sum_edep);
 			sum_edep = 0;
 		}
 		lastID = eventID;
+		lastX = posX;
 	}
 	
 	Int_t res;
@@ -132,11 +139,16 @@ void findFilterEnergyLoss::Loop()
 	hEnergyLoss->SetXTitle("Total energy loss");
 	hEnergyLoss->SetYTitle("Number of particles");
 	hEnergyLoss->Draw();
-	
-	//hEnergy->Fit("fEnergy", "B, Q", "", 0, energy+50);
 	hEnergyLoss->Fit("fEnergyLoss", "B, Q", "", 0, 30);
 	
 	fEnergyLoss->Draw("same");
+	
+	c3->cd();
+	hEnergy2D->SetXTitle("X position [mm]");
+	hEnergy2D->SetYTitle("Final energy [MeV]");
+	hEnergy2D->Draw("COLZ");
+	
+	//hEnergy->Fit("fEnergy", "B, Q", "", 0, energy+50);
 
 	cout << "For a " << energy << " MeV beam, the energy loss is " << Form("%.2f", fEnergyLoss->GetParameter(1)) << " +- " << Form("%.2f", fEnergyLoss->GetParameter(2)) << " MeV.\n";
 }

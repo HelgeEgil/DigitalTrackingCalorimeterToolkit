@@ -16,6 +16,8 @@
 #include <TAxis.h>
 #include <TGraph.h>
 #include <TH1F.h>
+#include <TMath.h>
+
 
 using namespace std;
 
@@ -74,6 +76,18 @@ Double_t fitfunc_DBP(Double_t *v, Double_t *par) {
 	if (isnan(fitval)) fitval = 0;
 
 	return fitval;
+}
+
+Double_t double_landau(Double_t *v, Double_t *par) {
+	Double_t x = v[0];
+	Double_t sigma1 = par[1];
+	Double_t sigma2 = par[2];
+	Double_t mpv1 = par[0];
+	Double_t mpv2 = mpv1 + dz;	
+	if (kOutputUnit == kWEPL || kOutputUnit == kEnergy)
+		mpv2 = mpv1 + getWEPLFactorFromEnergy(run_energy) * dz;
+	
+	return TMath::Landau(x, mpv1, sigma1, 0) + TMath::Landau(x, mpv2, sigma2, 0);
 }
 
 char * getMaterialChar() {

@@ -23,146 +23,261 @@ http://wiki.opengatecollaboration.org/index.php/Users_Guide_V7.0:Setting_up_the_
 [Core-0] 
 [Core-0] You are using Geant4 version 9.6.4
 /control/alias material Tungsten
-/control/alias energy 180
-/control/alias npart 1500
-[Core-0] Starting macro focal_script.mac
-WARNING: G4VisCommandSceneHandlerCreate::SetNewValue: using fallback graphics system.
-WARNING: The vis manager will keep up to 25 events.
-  This may use a lot of memory.
-  It may be changed with, e.g., "/vis/scene/endOfEventAction accumulate 10".
-===== XML PATH ====: ./Materials.xml
-===== XML PATH ====: 0x1afd700
-===== XML PATH ====: ./Materials.xml
-===== XML PATH ====: 0x1bc5ff0
-ABSLENGTH
-1.84e-06	50000
-4.08e-06	50000
-RINDEX
-1.84e-06	1.00028
-4.08e-06	1.00028
-===== XML PATH ====: ./Materials.xml
-===== XML PATH ====: 0x1c7d160
-===== XML PATH ====: ./Materials.xml
-===== XML PATH ====: 0x1d6d560
-===== XML PATH ====: ./Materials.xml
-===== XML PATH ====: 0x1e493a0
-===== XML PATH ====: ./Materials.xml
-===== XML PATH ====: 0x1f274b0
-===== XML PATH ====: ./Materials.xml
-===== XML PATH ====: 0x1fe8950
-MIEHG
-1e-06	2.3
-5e-06	1.3
-6e-06	3.2
-7e-06	6.7
-RINDEX
-1e-06	1.33
-5e-06	1.33
-6e-06	1.33
-7e-06	1.33
-MIEHG_BACKWARD
-0.6
-MIEHG_FORWARD
-0.6
-MIEHG_FORWARD_RATIO
-1
-===== XML PATH ====: ./Materials.xml
-===== XML PATH ====: 0x20ab0d0
-[Physic-0] The following Geant4's physic-list is enabled :QGSP_BERT_EMV
+/control/alias energy 200
+/control/alias npart 1000
+/control/alias step_active 80
+/control/alias step_passive 80
+/control/alias sigma 0
+[Core-0] Starting macro focal.mac
+[Physic-0] The following Geant4's physic-list is enabled :emstandard_opt3
 [Core-0] Initialization of geometry
 G4PhysicalVolumeModel::Validate(): A volume of the same name and
   copy number ("world_phys", copy 0) still exists and is being used.
   But it is not the same volume you originally specified
   in /vis/scene/add/.
 [Core-0] Initialization of physics
-G4PhysListFactory::GetReferencePhysList <QGSP_BERT_EMV>  EMoption= 1
-<<< Geant4 Physics List simulation engine: QGSP_BERT 4.0
-
-<<< Reference Physics List QGSP_BERT_EMV is built
-
-G4VUserPhysicsList::SetDefaultCutValue: negative cut values  :-1[mm]
-WARNING: model G4LENeutronInelastic is being deprecated and will
-disappear in Geant4 version 10.0
-WARNING: model G4LEProtonInelastic is being deprecated and will
-disappear in Geant4 version 10.0
-WARNING: model G4LEPionPlusInelastic is being deprecated and will
-disappear in Geant4 version 10.0
-WARNING: model G4LEPionMinusInelastic is being deprecated and will
-disappear in Geant4 version 10.0
-WARNING: model G4LEKaonPlusInelastic is being deprecated and will
-disappear in Geant4 version 10.0
-WARNING: model G4LEKaonMinusInelastic is being deprecated and will
-disappear in Geant4 version 10.0
-WARNING: model G4LEKaonZeroInelastic is being deprecated and will
-disappear in Geant4 version 10.0
-WARNING: model G4LEAntiKaonZeroInelastic is being deprecated and will
-disappear in Geant4 version 10.0
-WARNING: model G4LEKaonZeroLInelastic is being deprecated and will
-disappear in Geant4 version 10.0
-WARNING: model G4LEKaonZeroInelastic is being deprecated and will
-disappear in Geant4 version 10.0
-WARNING: model G4LEAntiKaonZeroInelastic is being deprecated and will
-disappear in Geant4 version 10.0
-WARNING: model G4LEKaonZeroSInelastic is being deprecated and will
-disappear in Geant4 version 10.0
-WARNING: model G4LEAntiProtonInelastic is being deprecated and will
-disappear in Geant4 version 10.0
-WARNING: model G4HEAntiProtonInelastic is being deprecated and will
-disappear in Geant4 version 10.0
-WARNING: model G4LEAntiNeutronInelastic is being deprecated and will
-disappear in Geant4 version 10.0
-WARNING: model G4HEAntiNeutronInelastic is being deprecated and will
-disappear in Geant4 version 10.0
-WARNING: model G4LELambdaInelastic is being deprecated and will
-disappear in Geant4 version 10.0
-WARNING: model G4HELambdaInelastic is being deprecated and will
-disappear in Geant4 version 10.0
-WARNING: model G4LEAntiLambdaInelastic is being deprecated and will
-disappear in Geant4 version 10.0
-WARNING: model G4HEAntiLambdaInelastic is being deprecated and will
-disappear in Geant4 version 10.0
-WARNING: model G4LESigmaMinusInelastic is being deprecated and will
-disappear in Geant4 version 10.0
-WARNING: model G4HESigmaMinusInelastic is being deprecated and will
-disappear in Geant4 version 10.0
-WARNING: model G4LEAntiSigmaMinusInelastic is being deprecated and will
-disappear in Geant4 version 10.0
-WARNING: model G4HEAntiSigmaMinusInelastic is being deprecated and will
-disappear in Geant4 version 10.0
-WARNING: model G4LESigmaPlusInelastic is being deprecated and will
-disappear in Geant4 version 10.0
-WARNING: model G4HESigmaPlusInelastic is being deprecated and will
-disappear in Geant4 version 10.0
-WARNING: model G4LEAntiSigmaPlusInelastic is being deprecated and will
-disappear in Geant4 version 10.0
-WARNING: model G4HEAntiSigmaPlusInelastic is being deprecated and will
-disappear in Geant4 version 10.0
-WARNING: model G4LEXiMinusInelastic is being deprecated and will
-disappear in Geant4 version 10.0
-WARNING: model G4HEXiMinusInelastic is being deprecated and will
-disappear in Geant4 version 10.0
-WARNING: model G4LEAntiXiMinusInelastic is being deprecated and will
-disappear in Geant4 version 10.0
-WARNING: model G4HEAntiXiMinusInelastic is being deprecated and will
-disappear in Geant4 version 10.0
-WARNING: model G4LEXiZeroInelastic is being deprecated and will
-disappear in Geant4 version 10.0
-WARNING: model G4HEXiZeroInelastic is being deprecated and will
-disappear in Geant4 version 10.0
-WARNING: model G4LEAntiXiZeroInelastic is being deprecated and will
-disappear in Geant4 version 10.0
-WARNING: model G4HEAntiXiZeroInelastic is being deprecated and will
-disappear in Geant4 version 10.0
-WARNING: model G4LEOmegaMinusInelastic is being deprecated and will
-disappear in Geant4 version 10.0
-WARNING: model G4HEOmegaMinusInelastic is being deprecated and will
-disappear in Geant4 version 10.0
-WARNING: model G4LEAntiOmegaMinusInelastic is being deprecated and will
-disappear in Geant4 version 10.0
-WARNING: model G4HEAntiOmegaMinusInelastic is being deprecated and will
-disappear in Geant4 version 10.0
-### Adding tracking cuts for neutron  TimeCut(ns)= 10000  KinEnergyCut(MeV)= 0
+[Physic-0] WARNING: manual physic lists are being deprecated.
+Please, use physic list builder mechanism instead. Related documentation can be found at:
+http://wiki.opengatecollaboration.org/index.php/Users_Guide_V7.0:Setting_up_the_physics
 [Core-0] Initialization of actors
+GeomTest: no daughter volume extending outside mother detected.
+GeomTest: no overlapping daughters detected.
+GeomTest: no daughter volume extending outside mother detected.
+GeomTest: no overlapping daughters detected.
+GeomTest Error: Overshooting daughter volume
+    The volume layer_phys[0] appears to extend outside the mother volume simplified_phys[0]
+    at the following points in global coordinates: (list truncated)
+       length (cm)    ---------- start position (cm) -----------   ----------- end position (cm) ------------
+             1.945                 0             0     -0.198745            1.945             0     -0.198745
+             1.945                 0          0.28     -0.198745            1.945          0.28     -0.198745
+             1.945                 0          0.56     -0.198745            1.945          0.56     -0.198745
+             1.945                 0          0.84     -0.198745            1.945          0.84     -0.198745
+             1.945                 0          1.12     -0.198745            1.945          1.12     -0.198745
+             1.945                 0           1.4     -0.198745            1.945           1.4     -0.198745
+             1.945                 0          1.68     -0.198745            1.945          1.68     -0.198745
+           1.91496             -1.88             0     -0.198745            -1.88       1.91496     -0.198745
+           1.91496              -1.6             0     -0.198745             -1.6       1.91496     -0.198745
+           1.91496             -1.32             0     -0.198745            -1.32       1.91496     -0.198745
+           1.91496             -1.04             0     -0.198745            -1.04       1.91496     -0.198745
+           1.91496             -0.76             0     -0.198745            -0.76       1.91496     -0.198745
+           1.91496             -0.48             0     -0.198745            -0.48       1.91496     -0.198745
+           1.91496              -0.2             0     -0.198745             -0.2       1.91496     -0.198745
+           1.91496              0.08             0     -0.198745             0.08       1.91496     -0.198745
+           1.91496              0.36             0     -0.198745             0.36       1.91496     -0.198745
+           1.91496              0.64             0     -0.198745             0.64       1.91496     -0.198745
+           1.91496              0.92             0     -0.198745             0.92       1.91496     -0.198745
+           1.91496               1.2             0     -0.198745              1.2       1.91496     -0.198745
+           1.91496              1.48             0     -0.198745             1.48       1.91496     -0.198745
+    Which in the mother coordinate system are:
+       length (cm)    ---------- start position (cm) -----------   ----------- end position (cm) ------------
+             1.945                 0             0     -0.198745            1.945             0     -0.198745
+             1.945                 0          0.28     -0.198745            1.945          0.28     -0.198745
+             1.945                 0          0.56     -0.198745            1.945          0.56     -0.198745
+             1.945                 0          0.84     -0.198745            1.945          0.84     -0.198745
+             1.945                 0          1.12     -0.198745            1.945          1.12     -0.198745
+             1.945                 0           1.4     -0.198745            1.945           1.4     -0.198745
+             1.945                 0          1.68     -0.198745            1.945          1.68     -0.198745
+           1.91496             -1.88             0     -0.198745            -1.88       1.91496     -0.198745
+           1.91496              -1.6             0     -0.198745             -1.6       1.91496     -0.198745
+           1.91496             -1.32             0     -0.198745            -1.32       1.91496     -0.198745
+           1.91496             -1.04             0     -0.198745            -1.04       1.91496     -0.198745
+           1.91496             -0.76             0     -0.198745            -0.76       1.91496     -0.198745
+           1.91496             -0.48             0     -0.198745            -0.48       1.91496     -0.198745
+           1.91496              -0.2             0     -0.198745             -0.2       1.91496     -0.198745
+           1.91496              0.08             0     -0.198745             0.08       1.91496     -0.198745
+           1.91496              0.36             0     -0.198745             0.36       1.91496     -0.198745
+           1.91496              0.64             0     -0.198745             0.64       1.91496     -0.198745
+           1.91496              0.92             0     -0.198745             0.92       1.91496     -0.198745
+           1.91496               1.2             0     -0.198745              1.2       1.91496     -0.198745
+           1.91496              1.48             0     -0.198745             1.48       1.91496     -0.198745
+    Which in the coordinate system of layer_phys[0] are:
+       length (cm)    ---------- start position (cm) -----------   ----------- end position (cm) ------------
+             1.945                 0     -0.957475     -0.044995            1.945     -0.957475     -0.044995
+             1.945                 0     -0.677475     -0.044995            1.945     -0.677475     -0.044995
+             1.945                 0     -0.397475     -0.044995            1.945     -0.397475     -0.044995
+             1.945                 0     -0.117475     -0.044995            1.945     -0.117475     -0.044995
+             1.945                 0      0.162525     -0.044995            1.945      0.162525     -0.044995
+             1.945                 0      0.442525     -0.044995            1.945      0.442525     -0.044995
+             1.945                 0      0.722525     -0.044995            1.945      0.722525     -0.044995
+           1.91496             -1.88     -0.957475     -0.044995            -1.88      0.957485     -0.044995
+           1.91496              -1.6     -0.957475     -0.044995             -1.6      0.957485     -0.044995
+           1.91496             -1.32     -0.957475     -0.044995            -1.32      0.957485     -0.044995
+           1.91496             -1.04     -0.957475     -0.044995            -1.04      0.957485     -0.044995
+           1.91496             -0.76     -0.957475     -0.044995            -0.76      0.957485     -0.044995
+           1.91496             -0.48     -0.957475     -0.044995            -0.48      0.957485     -0.044995
+           1.91496              -0.2     -0.957475     -0.044995             -0.2      0.957485     -0.044995
+           1.91496              0.08     -0.957475     -0.044995             0.08      0.957485     -0.044995
+           1.91496              0.36     -0.957475     -0.044995             0.36      0.957485     -0.044995
+           1.91496              0.64     -0.957475     -0.044995             0.64      0.957485     -0.044995
+           1.91496              0.92     -0.957475     -0.044995             0.92      0.957485     -0.044995
+           1.91496               1.2     -0.957475     -0.044995              1.2      0.957485     -0.044995
+           1.91496              1.48     -0.957475     -0.044995             1.48      0.957485     -0.044995
+
+GeomTest Error: Overshooting daughter volume
+    The volume layer_phys[1] appears to extend outside the mother volume simplified_phys[0]
+    at the following points in global coordinates: (list truncated)
+       length (cm)    ---------- start position (cm) -----------   ----------- end position (cm) ------------
+             1.945                 0         -1.88     -0.198745            1.945         -1.88     -0.198745
+             1.945                 0          -1.8     -0.198745            1.945          -1.8     -0.198745
+             1.945                 0         -1.72     -0.198745            1.945         -1.72     -0.198745
+             1.945                 0         -1.64     -0.198745            1.945         -1.64     -0.198745
+             1.945                 0         -1.56     -0.198745            1.945         -1.56     -0.198745
+             1.945                 0         -1.48     -0.198745            1.945         -1.48     -0.198745
+             1.945                 0          -1.4     -0.198745            1.945          -1.4     -0.198745
+             1.945                 0         -1.32     -0.198745            1.945         -1.32     -0.198745
+             1.945                 0         -1.24     -0.198745            1.945         -1.24     -0.198745
+             1.945                 0         -1.16     -0.198745            1.945         -1.16     -0.198745
+             1.945                 0         -1.08     -0.198745            1.945         -1.08     -0.198745
+             1.945                 0            -1     -0.198745            1.945            -1     -0.198745
+             1.945                 0         -0.92     -0.198745            1.945         -0.92     -0.198745
+             1.945                 0         -0.84     -0.198745            1.945         -0.84     -0.198745
+             1.945                 0         -0.76     -0.198745            1.945         -0.76     -0.198745
+             1.945                 0         -0.68     -0.198745            1.945         -0.68     -0.198745
+             1.945                 0          -0.6     -0.198745            1.945          -0.6     -0.198745
+             1.945                 0         -0.52     -0.198745            1.945         -0.52     -0.198745
+             1.945                 0         -0.44     -0.198745            1.945         -0.44     -0.198745
+             1.945                 0         -0.36     -0.198745            1.945         -0.36     -0.198745
+    Which in the mother coordinate system are:
+       length (cm)    ---------- start position (cm) -----------   ----------- end position (cm) ------------
+             1.945                 0         -1.88     -0.198745            1.945         -1.88     -0.198745
+             1.945                 0          -1.8     -0.198745            1.945          -1.8     -0.198745
+             1.945                 0         -1.72     -0.198745            1.945         -1.72     -0.198745
+             1.945                 0         -1.64     -0.198745            1.945         -1.64     -0.198745
+             1.945                 0         -1.56     -0.198745            1.945         -1.56     -0.198745
+             1.945                 0         -1.48     -0.198745            1.945         -1.48     -0.198745
+             1.945                 0          -1.4     -0.198745            1.945          -1.4     -0.198745
+             1.945                 0         -1.32     -0.198745            1.945         -1.32     -0.198745
+             1.945                 0         -1.24     -0.198745            1.945         -1.24     -0.198745
+             1.945                 0         -1.16     -0.198745            1.945         -1.16     -0.198745
+             1.945                 0         -1.08     -0.198745            1.945         -1.08     -0.198745
+             1.945                 0            -1     -0.198745            1.945            -1     -0.198745
+             1.945                 0         -0.92     -0.198745            1.945         -0.92     -0.198745
+             1.945                 0         -0.84     -0.198745            1.945         -0.84     -0.198745
+             1.945                 0         -0.76     -0.198745            1.945         -0.76     -0.198745
+             1.945                 0         -0.68     -0.198745            1.945         -0.68     -0.198745
+             1.945                 0          -0.6     -0.198745            1.945          -0.6     -0.198745
+             1.945                 0         -0.52     -0.198745            1.945         -0.52     -0.198745
+             1.945                 0         -0.44     -0.198745            1.945         -0.44     -0.198745
+             1.945                 0         -0.36     -0.198745            1.945         -0.36     -0.198745
+    Which in the coordinate system of layer_phys[1] are:
+       length (cm)    ---------- start position (cm) -----------   ----------- end position (cm) ------------
+             1.945                 0      0.922475      0.044995            1.945      0.922475      0.044995
+             1.945                 0      0.842475      0.044995            1.945      0.842475      0.044995
+             1.945                 0      0.762475      0.044995            1.945      0.762475      0.044995
+             1.945                 0      0.682475      0.044995            1.945      0.682475      0.044995
+             1.945                 0      0.602475      0.044995            1.945      0.602475      0.044995
+             1.945                 0      0.522475      0.044995            1.945      0.522475      0.044995
+             1.945                 0      0.442475      0.044995            1.945      0.442475      0.044995
+             1.945                 0      0.362475      0.044995            1.945      0.362475      0.044995
+             1.945                 0      0.282475      0.044995            1.945      0.282475      0.044995
+             1.945                 0      0.202475      0.044995            1.945      0.202475      0.044995
+             1.945                 0      0.122475      0.044995            1.945      0.122475      0.044995
+             1.945                 0      0.042475      0.044995            1.945      0.042475      0.044995
+             1.945                 0     -0.037525      0.044995            1.945     -0.037525      0.044995
+             1.945                 0     -0.117525      0.044995            1.945     -0.117525      0.044995
+             1.945                 0     -0.197525      0.044995            1.945     -0.197525      0.044995
+             1.945                 0     -0.277525      0.044995            1.945     -0.277525      0.044995
+             1.945                 0     -0.357525      0.044995            1.945     -0.357525      0.044995
+             1.945                 0     -0.437525      0.044995            1.945     -0.437525      0.044995
+             1.945                 0     -0.517525      0.044995            1.945     -0.517525      0.044995
+             1.945                 0     -0.597525      0.044995            1.945     -0.597525      0.044995
+
+GeomTest Error: Overlapping daughter volumes
+    The volumes absorber_1_phys[0] and gap_2_phys[0],
+    both daughters of volume simplified_phys[0],
+    appear to overlap at the following points in global coordinates: (list truncated)
+       length (cm)    ---------- start position (cm) -----------   ----------- end position (cm) ------------
+              3.89            -1.945         -1.88     0.0357741            1.945         -1.88     0.0357741
+           0.14849              -1.8          1.48     -0.108745             -1.8          1.48      0.039745
+           0.00899              -1.6          1.12      0.032255             -1.6          1.12      0.041245
+           0.14849              -1.4          0.72     -0.108745             -1.4          0.72      0.039745
+           0.00899              -1.2          0.36      0.032255             -1.2          0.36      0.041245
+           0.14849                -1         -0.04     -0.108745               -1         -0.04      0.039745
+           0.00899              -0.8          -0.4      0.032255             -0.8          -0.4      0.041245
+           0.14849              -0.6          -0.8     -0.108745             -0.6          -0.8      0.039745
+           0.00899              -0.4         -1.16      0.032255             -0.4         -1.16      0.041245
+           0.14849              -0.2         -1.56     -0.108745             -0.2         -1.56      0.039745
+           0.00899             -0.04          1.88      0.032255            -0.04          1.88      0.041245
+           0.14849              0.16          1.48     -0.108745             0.16          1.48      0.039745
+           0.00899              0.36          1.12      0.032255             0.36          1.12      0.041245
+           0.14849              0.56          0.72     -0.108745             0.56          0.72      0.039745
+           0.00899              0.76          0.36      0.032255             0.76          0.36      0.041245
+           0.14849              0.96         -0.04     -0.108745             0.96         -0.04      0.039745
+           0.00899              1.16          -0.4      0.032255             1.16          -0.4      0.041245
+           0.14849              1.36          -0.8     -0.108745             1.36          -0.8      0.039745
+           0.00899              1.56         -1.16      0.032255             1.56         -1.16      0.041245
+           0.14849              1.76         -1.56     -0.108745             1.76         -1.56      0.039745
+    Which in the mother coordinate system are:
+       length (cm)    ---------- start position (cm) -----------   ----------- end position (cm) ------------
+              3.89            -1.945         -1.88     0.0357741            1.945         -1.88     0.0357741
+           0.14849              -1.8          1.48     -0.108745             -1.8          1.48      0.039745
+           0.00899              -1.6          1.12      0.032255             -1.6          1.12      0.041245
+           0.14849              -1.4          0.72     -0.108745             -1.4          0.72      0.039745
+           0.00899              -1.2          0.36      0.032255             -1.2          0.36      0.041245
+           0.14849                -1         -0.04     -0.108745               -1         -0.04      0.039745
+           0.00899              -0.8          -0.4      0.032255             -0.8          -0.4      0.041245
+           0.14849              -0.6          -0.8     -0.108745             -0.6          -0.8      0.039745
+           0.00899              -0.4         -1.16      0.032255             -0.4         -1.16      0.041245
+           0.14849              -0.2         -1.56     -0.108745             -0.2         -1.56      0.039745
+           0.00899             -0.04          1.88      0.032255            -0.04          1.88      0.041245
+           0.14849              0.16          1.48     -0.108745             0.16          1.48      0.039745
+           0.00899              0.36          1.12      0.032255             0.36          1.12      0.041245
+           0.14849              0.56          0.72     -0.108745             0.56          0.72      0.039745
+           0.00899              0.76          0.36      0.032255             0.76          0.36      0.041245
+           0.14849              0.96         -0.04     -0.108745             0.96         -0.04      0.039745
+           0.00899              1.16          -0.4      0.032255             1.16          -0.4      0.041245
+           0.14849              1.36          -0.8     -0.108745             1.36          -0.8      0.039745
+           0.00899              1.56         -1.16      0.032255             1.56         -1.16      0.041245
+           0.14849              1.76         -1.56     -0.108745             1.76         -1.56      0.039745
+    Which in the coordinate system of absorber_1_phys[0] are:
+       length (cm)    ---------- start position (cm) -----------   ----------- end position (cm) ------------
+              3.89            -1.945         -1.88     0.0695241            1.945         -1.88     0.0695241
+           0.14849              -1.8          1.48     -0.074995             -1.8          1.48      0.073495
+           0.00899              -1.6          1.12      0.066005             -1.6          1.12      0.074995
+           0.14849              -1.4          0.72     -0.074995             -1.4          0.72      0.073495
+           0.00899              -1.2          0.36      0.066005             -1.2          0.36      0.074995
+           0.14849                -1         -0.04     -0.074995               -1         -0.04      0.073495
+           0.00899              -0.8          -0.4      0.066005             -0.8          -0.4      0.074995
+           0.14849              -0.6          -0.8     -0.074995             -0.6          -0.8      0.073495
+           0.00899              -0.4         -1.16      0.066005             -0.4         -1.16      0.074995
+           0.14849              -0.2         -1.56     -0.074995             -0.2         -1.56      0.073495
+           0.00899             -0.04          1.88      0.066005            -0.04          1.88      0.074995
+           0.14849              0.16          1.48     -0.074995             0.16          1.48      0.073495
+           0.00899              0.36          1.12      0.066005             0.36          1.12      0.074995
+           0.14849              0.56          0.72     -0.074995             0.56          0.72      0.073495
+           0.00899              0.76          0.36      0.066005             0.76          0.36      0.074995
+           0.14849              0.96         -0.04     -0.074995             0.96         -0.04      0.073495
+           0.00899              1.16          -0.4      0.066005             1.16          -0.4      0.074995
+           0.14849              1.36          -0.8     -0.074995             1.36          -0.8      0.073495
+           0.00899              1.56         -1.16      0.066005             1.56         -1.16      0.074995
+           0.14849              1.76         -1.56     -0.074995             1.76         -1.56      0.073495
+    Which in the coordinate system of gap_2_phys[0] are:
+       length (cm)    ---------- start position (cm) -----------   ----------- end position (cm) ------------
+              3.89            -1.945         -1.88    -0.0002259            1.945         -1.88    -0.0002259
+           0.14849              -1.8          1.48     -0.144745             -1.8          1.48      0.003745
+           0.00899              -1.6          1.12     -0.003745             -1.6          1.12      0.005245
+           0.14849              -1.4          0.72     -0.144745             -1.4          0.72      0.003745
+           0.00899              -1.2          0.36     -0.003745             -1.2          0.36      0.005245
+           0.14849                -1         -0.04     -0.144745               -1         -0.04      0.003745
+           0.00899              -0.8          -0.4     -0.003745             -0.8          -0.4      0.005245
+           0.14849              -0.6          -0.8     -0.144745             -0.6          -0.8      0.003745
+           0.00899              -0.4         -1.16     -0.003745             -0.4         -1.16      0.005245
+           0.14849              -0.2         -1.56     -0.144745             -0.2         -1.56      0.003745
+           0.00899             -0.04          1.88     -0.003745            -0.04          1.88      0.005245
+           0.14849              0.16          1.48     -0.144745             0.16          1.48      0.003745
+           0.00899              0.36          1.12     -0.003745             0.36          1.12      0.005245
+           0.14849              0.56          0.72     -0.144745             0.56          0.72      0.003745
+           0.00899              0.76          0.36     -0.003745             0.76          0.36      0.005245
+           0.14849              0.96         -0.04     -0.144745             0.96         -0.04      0.003745
+           0.00899              1.16          -0.4     -0.003745             1.16          -0.4      0.005245
+           0.14849              1.36          -0.8     -0.144745             1.36          -0.8      0.003745
+           0.00899              1.56         -1.16     -0.003745             1.56         -1.16      0.005245
+           0.14849              1.76         -1.56     -0.144745             1.76         -1.56      0.003745
+
+GeomTest: no daughter volume extending outside mother detected.
+GeomTest: no overlapping daughters detected.
+GeomTest: no daughter volume extending outside mother detected.
+GeomTest: no overlapping daughters detected.
 [Acquisition-0]                                      
 [Acquisition-0] ============= Source initialization =============
 [Acquisition-0]                                      
@@ -173,65 +288,88 @@ disappear in Geant4 version 10.0
 [Acquisition-0] Slice 0 from 0 to 1 s [slice=1 s], final stop at 1 s.
 
 phot:   for  gamma, applyCuts: 1     SubType= 12
-      LambdaPrime table from 200 keV to 10 TeV in 54 bins 
+      LambdaPrime table from 200 keV to 10 TeV in 154 bins 
       ===== EM models for the G4Region  DefaultRegionForTheWorld ======
        PhotoElectric :  Emin=        0 eV    Emax=       10 TeV   AngularGenSauterGavrila  FluoActive
 
 compt:   for  gamma, applyCuts: 1     SubType= 13
-      Lambda table from 100 eV  to 1 MeV in 28 bins, spline: 1
-      LambdaPrime table from 1 MeV to 10 TeV in 49 bins 
+      Lambda table from 10 eV  to 1 MeV in 100 bins, spline: 1
+      LambdaPrime table from 1 MeV to 10 TeV in 140 bins 
       ===== EM models for the G4Region  DefaultRegionForTheWorld ======
-       Klein-Nishina :  Emin=        0 eV    Emax=       10 TeV
+        KleinNishina :  Emin=        0 eV    Emax=       10 TeV  FluoActive
 
 conv:   for  gamma, applyCuts: 1     SubType= 14
-      Lambda table from 1.022 MeV to 10 TeV in 49 bins, spline: 1
+      Lambda table from 1.022 MeV to 10 TeV in 140 bins, spline: 1
       ===== EM models for the G4Region  DefaultRegionForTheWorld ======
         BetheHeitler :  Emin=        0 eV    Emax=       80 GeV
      BetheHeitlerLPM :  Emin=       80 GeV   Emax=       10 TeV
 
-msc:   for e-    SubType= 10
-      RangeFactor= 0.2, stepLimitType: 0, latDisplacement: 1
+Rayl:   for  gamma, applyCuts: 1     SubType= 11
+      Lambda table from 10 eV  to 100 keV in 80 bins, spline: 0
+      LambdaPrime table from 100 keV to 10 TeV in 160 bins 
       ===== EM models for the G4Region  DefaultRegionForTheWorld ======
-          UrbanMsc93 :  Emin=        0 eV    Emax=      100 MeV  Table with 42 bins Emin=    100 eV    Emax=    100 MeV
-        WentzelVIUni :  Emin=      100 MeV   Emax=       10 TeV  Table with 35 bins Emin=    100 MeV   Emax=     10 TeV
+   LivermoreRayleigh :  Emin=        0 eV    Emax=       10 TeV   CullenGenerator
+
+msc:   for e-    SubType= 10
+      RangeFactor= 0.01, stepLimitType: 2, latDisplacement: 1, skin= 1, geomFactor= 2.5
+      ===== EM models for the G4Region  DefaultRegionForTheWorld ======
+          UrbanMsc95 :  Emin=        0 eV    Emax=       10 TeV  Table with 220 bins Emin=    100 eV    Emax=     10 TeV
+
+### ===  Deexcitation model UAtomDeexcitation is activated for 19 regions:
+          absorber_1
+          absorber_2
+          absorber_pre
+          chip
+          filler
+          gap_1
+          gap_2
+          glue_1
+          glue_2
+          glue_3
+          layer
+          passive
+          pcb
+          scanner
+          scintillator_F
+          scintillator_H
+          scintillator_V
+          simplified
+          DefaultRegionForTheWorld
+
+### === G4UAtomicDeexcitation::InitialiseForNewRun()
+### ===  PIXE model for hadrons: Empirical  1
+### ===  PIXE model for e+-:     Livermore  1
 
 eIoni:   for  e-    SubType= 2
-      dE/dx and range tables from 100 eV  to 10 TeV in 77 bins
-      Lambda tables from threshold to 10 TeV in 77 bins, spline: 1
-      finalRange(mm)= 1, dRoverRange= 0.8, integral: 1, fluct: 1, linLossLimit= 0.01
+      dE/dx and range tables from 10 eV  to 10 TeV in 240 bins
+      Lambda tables from threshold to 10 TeV in 240 bins, spline: 1
+      finalRange(mm)= 0.1, dRoverRange= 0.2, integral: 1, fluct: 1, linLossLimit= 0.01
       ===== EM models for the G4Region  DefaultRegionForTheWorld ======
         MollerBhabha :  Emin=        0 eV    Emax=       10 TeV
 
 eBrem:   for  e-    SubType= 3
-      dE/dx and range tables from 100 eV  to 10 TeV in 77 bins
-      Lambda tables from threshold to 10 TeV in 77 bins, spline: 1
+      dE/dx and range tables from 10 eV  to 10 TeV in 240 bins
+      Lambda tables from threshold to 10 TeV in 240 bins, spline: 1
       LPM flag: 1 for E > 1 GeV
       ===== EM models for the G4Region  DefaultRegionForTheWorld ======
              eBremSB :  Emin=        0 eV    Emax=        1 GeV   DipBustGen
             eBremLPM :  Emin=        1 GeV   Emax=       10 TeV   DipBustGen
 
-CoulombScat:   for  e-, applyCuts: 1     SubType= 1
-      Lambda table from 100 MeV to 10 TeV in 35 bins, spline: 1
-      180 < Theta(degree) < 180; pLimit(GeV^1)= 0.139531
-      ===== EM models for the G4Region  DefaultRegionForTheWorld ======
-  eCoulombScattering :  Emin=      100 MeV   Emax=       10 TeV
-
 msc:   for e+    SubType= 10
-      RangeFactor= 0.2, stepLimitType: 0, latDisplacement: 1
+      RangeFactor= 0.01, stepLimitType: 2, latDisplacement: 1, skin= 1, geomFactor= 2.5
       ===== EM models for the G4Region  DefaultRegionForTheWorld ======
-          UrbanMsc93 :  Emin=        0 eV    Emax=      100 MeV  Table with 42 bins Emin=    100 eV    Emax=    100 MeV
-        WentzelVIUni :  Emin=      100 MeV   Emax=       10 TeV  Table with 35 bins Emin=    100 MeV   Emax=     10 TeV
+          UrbanMsc95 :  Emin=        0 eV    Emax=       10 TeV  Table with 220 bins Emin=    100 eV    Emax=     10 TeV
 
 eIoni:   for  e+    SubType= 2
-      dE/dx and range tables from 100 eV  to 10 TeV in 77 bins
-      Lambda tables from threshold to 10 TeV in 77 bins, spline: 1
-      finalRange(mm)= 1, dRoverRange= 0.8, integral: 1, fluct: 1, linLossLimit= 0.01
+      dE/dx and range tables from 10 eV  to 10 TeV in 240 bins
+      Lambda tables from threshold to 10 TeV in 240 bins, spline: 1
+      finalRange(mm)= 0.1, dRoverRange= 0.2, integral: 1, fluct: 1, linLossLimit= 0.01
       ===== EM models for the G4Region  DefaultRegionForTheWorld ======
         MollerBhabha :  Emin=        0 eV    Emax=       10 TeV
 
 eBrem:   for  e+    SubType= 3
-      dE/dx and range tables from 100 eV  to 10 TeV in 77 bins
-      Lambda tables from threshold to 10 TeV in 77 bins, spline: 1
+      dE/dx and range tables from 10 eV  to 10 TeV in 240 bins
+      Lambda tables from threshold to 10 TeV in 240 bins, spline: 1
       LPM flag: 1 for E > 1 GeV
       ===== EM models for the G4Region  DefaultRegionForTheWorld ======
              eBremSB :  Emin=        0 eV    Emax=        1 GeV   DipBustGen
@@ -241,36 +379,34 @@ annihil:   for  e+, applyCuts: 1     SubType= 5
       ===== EM models for the G4Region  DefaultRegionForTheWorld ======
             eplus2gg :  Emin=        0 eV    Emax=       10 TeV
 
-CoulombScat:   for  e+, applyCuts: 1     SubType= 1
-      Lambda table from 100 MeV to 10 TeV in 35 bins, spline: 1
-      180 < Theta(degree) < 180; pLimit(GeV^1)= 0.139531
-      ===== EM models for the G4Region  DefaultRegionForTheWorld ======
-  eCoulombScattering :  Emin=      100 MeV   Emax=       10 TeV
-
 msc:   for proton    SubType= 10
-      RangeFactor= 0.2, step limit type: 0, lateralDisplacement: 1, polarAngleLimit(deg)= 180
+      RangeFactor= 0.2, stepLimitType: 0, latDisplacement: 1
       ===== EM models for the G4Region  DefaultRegionForTheWorld ======
-        WentzelVIUni :  Emin=        0 eV    Emax=       10 TeV  Table with 77 bins Emin=    100 eV    Emax=     10 TeV
+          UrbanMsc95 :  Emin=        0 eV    Emax=       10 TeV  Table with 220 bins Emin=    100 eV    Emax=     10 TeV
 
 hIoni:   for  proton    SubType= 2
-      dE/dx and range tables from 100 eV  to 10 TeV in 77 bins
-      Lambda tables from threshold to 10 TeV in 77 bins, spline: 1
-      finalRange(mm)= 0.1, dRoverRange= 0.2, integral: 1, fluct: 1, linLossLimit= 0.01
+      dE/dx and range tables from 10 eV  to 10 TeV in 240 bins
+      Lambda tables from threshold to 10 TeV in 240 bins, spline: 1
+      finalRange(mm)= 0.05, dRoverRange= 0.2, integral: 1, fluct: 1, linLossLimit= 0.01
       ===== EM models for the G4Region  DefaultRegionForTheWorld ======
                Bragg :  Emin=        0 eV    Emax=        2 MeV
           BetheBloch :  Emin=        2 MeV   Emax=       10 TeV
 
 hBrems:   for  proton    SubType= 3
-      dE/dx and range tables from 100 eV  to 10 TeV in 77 bins
-      Lambda tables from threshold to 10 TeV in 77 bins, spline: 1
+      dE/dx and range tables from 10 eV  to 10 TeV in 240 bins
+      Lambda tables from threshold to 10 TeV in 240 bins, spline: 1
       ===== EM models for the G4Region  DefaultRegionForTheWorld ======
                hBrem :  Emin=        0 eV    Emax=       10 TeV
 
 hPairProd:   for  proton    SubType= 4
-      dE/dx and range tables from 100 eV  to 10 TeV in 77 bins
-      Lambda tables from threshold to 10 TeV in 77 bins, spline: 1
+      dE/dx and range tables from 10 eV  to 10 TeV in 240 bins
+      Lambda tables from threshold to 10 TeV in 240 bins, spline: 1
       ===== EM models for the G4Region  DefaultRegionForTheWorld ======
            hPairProd :  Emin=        0 eV    Emax=       10 TeV
+
+nuclearStopping:   for  proton, applyCuts: 1     SubType= 8
+      ===== EM models for the G4Region  DefaultRegionForTheWorld ======
+   ICRU49NucStopping :  Emin=        0 eV    Emax=        1 MeV
 
 msc:   for GenericIon    SubType= 10
       RangeFactor= 0.2, stepLimitType: 0, latDisplacement: 0
@@ -278,130 +414,141 @@ msc:   for GenericIon    SubType= 10
           UrbanMsc95 :  Emin=        0 eV    Emax=       10 TeV
 
 ionIoni:   for  GenericIon    SubType= 2
-      dE/dx and range tables from 100 eV  to 10 TeV in 77 bins
-      Lambda tables from threshold to 10 TeV in 77 bins, spline: 1
-      finalRange(mm)= 0.01, dRoverRange= 0.1, integral: 1, fluct: 1, linLossLimit= 0.02
+      dE/dx and range tables from 10 eV  to 10 TeV in 240 bins
+      Lambda tables from threshold to 10 TeV in 240 bins, spline: 1
+      finalRange(mm)= 0.001, dRoverRange= 0.1, integral: 1, fluct: 1, linLossLimit= 0.02
       Stopping Power data for 17 ion/material pairs 
       ===== EM models for the G4Region  DefaultRegionForTheWorld ======
-            BraggIon :  Emin=        0 eV    Emax=        2 MeV
-          BetheBloch :  Emin=        2 MeV   Emax=       10 TeV
+         ParamICRU73 :  Emin=        0 eV    Emax=       10 TeV
+
+nuclearStopping:   for  GenericIon, applyCuts: 1     SubType= 8
+      ===== EM models for the G4Region  DefaultRegionForTheWorld ======
+   ICRU49NucStopping :  Emin=        0 eV    Emax=       10 TeV
 
 msc:   for alpha    SubType= 10
       RangeFactor= 0.2, stepLimitType: 0, latDisplacement: 0
       ===== EM models for the G4Region  DefaultRegionForTheWorld ======
-          UrbanMsc95 :  Emin=        0 eV    Emax=       10 TeV  Table with 77 bins Emin=    100 eV    Emax=     10 TeV
+          UrbanMsc95 :  Emin=        0 eV    Emax=       10 TeV  Table with 220 bins Emin=    100 eV    Emax=     10 TeV
 
 ionIoni:   for  alpha    SubType= 2
-      dE/dx and range tables from 100 eV  to 10 TeV in 77 bins
-      Lambda tables from threshold to 10 TeV in 77 bins, spline: 1
+      dE/dx and range tables from 10 eV  to 10 TeV in 240 bins
+      Lambda tables from threshold to 10 TeV in 240 bins, spline: 1
       finalRange(mm)= 0.01, dRoverRange= 0.1, integral: 1, fluct: 1, linLossLimit= 0.02
       ===== EM models for the G4Region  DefaultRegionForTheWorld ======
             BraggIon :  Emin=        0 eV    Emax=   7.9452 MeV
           BetheBloch :  Emin=   7.9452 MeV   Emax=       10 TeV
 
-msc:   for anti_proton    SubType= 10
-      RangeFactor= 0.2, step limit type: 0, lateralDisplacement: 1, polarAngleLimit(deg)= 180
+nuclearStopping:   for  alpha, applyCuts: 1     SubType= 8
       ===== EM models for the G4Region  DefaultRegionForTheWorld ======
-        WentzelVIUni :  Emin=        0 eV    Emax=       10 TeV  Table with 77 bins Emin=    100 eV    Emax=     10 TeV
+   ICRU49NucStopping :  Emin=        0 eV    Emax=       10 TeV
+
+msc:   for anti_proton    SubType= 10
+      RangeFactor= 0.2, stepLimitType: 0, latDisplacement: 1
+      ===== EM models for the G4Region  DefaultRegionForTheWorld ======
+          UrbanMsc95 :  Emin=        0 eV    Emax=       10 TeV  Table with 220 bins Emin=    100 eV    Emax=     10 TeV
 
 hIoni:   for  anti_proton    SubType= 2
-      dE/dx and range tables from 100 eV  to 10 TeV in 77 bins
-      Lambda tables from threshold to 10 TeV in 77 bins, spline: 1
-      finalRange(mm)= 0.1, dRoverRange= 0.2, integral: 1, fluct: 1, linLossLimit= 0.01
+      dE/dx and range tables from 10 eV  to 10 TeV in 240 bins
+      Lambda tables from threshold to 10 TeV in 240 bins, spline: 1
+      finalRange(mm)= 0.05, dRoverRange= 0.2, integral: 1, fluct: 1, linLossLimit= 0.01
       ===== EM models for the G4Region  DefaultRegionForTheWorld ======
             ICRU73QO :  Emin=        0 eV    Emax=        2 MeV
           BetheBloch :  Emin=        2 MeV   Emax=       10 TeV
 
 hBrems:   for  anti_proton    SubType= 3
-      dE/dx and range tables from 100 eV  to 10 TeV in 77 bins
-      Lambda tables from threshold to 10 TeV in 77 bins, spline: 1
+      dE/dx and range tables from 10 eV  to 10 TeV in 240 bins
+      Lambda tables from threshold to 10 TeV in 240 bins, spline: 1
       ===== EM models for the G4Region  DefaultRegionForTheWorld ======
                hBrem :  Emin=        0 eV    Emax=       10 TeV
 
 hPairProd:   for  anti_proton    SubType= 4
-      dE/dx and range tables from 100 eV  to 10 TeV in 77 bins
-      Lambda tables from threshold to 10 TeV in 77 bins, spline: 1
+      dE/dx and range tables from 10 eV  to 10 TeV in 240 bins
+      Lambda tables from threshold to 10 TeV in 240 bins, spline: 1
       ===== EM models for the G4Region  DefaultRegionForTheWorld ======
            hPairProd :  Emin=        0 eV    Emax=       10 TeV
 
-msc:   for kaon+    SubType= 10
-      RangeFactor= 0.2, step limit type: 0, lateralDisplacement: 1, polarAngleLimit(deg)= 180
+nuclearStopping:   for  anti_proton, applyCuts: 1     SubType= 8
       ===== EM models for the G4Region  DefaultRegionForTheWorld ======
-        WentzelVIUni :  Emin=        0 eV    Emax=       10 TeV  Table with 77 bins Emin=    100 eV    Emax=     10 TeV
+   ICRU49NucStopping :  Emin=        0 eV    Emax=        1 MeV
+
+msc:   for kaon+    SubType= 10
+      RangeFactor= 0.2, stepLimitType: 0, latDisplacement: 1
+      ===== EM models for the G4Region  DefaultRegionForTheWorld ======
+          UrbanMsc95 :  Emin=        0 eV    Emax=       10 TeV  Table with 220 bins Emin=    100 eV    Emax=     10 TeV
 
 hIoni:   for  kaon+    SubType= 2
-      dE/dx and range tables from 100 eV  to 10 TeV in 77 bins
-      Lambda tables from threshold to 10 TeV in 77 bins, spline: 1
-      finalRange(mm)= 0.1, dRoverRange= 0.2, integral: 1, fluct: 1, linLossLimit= 0.01
+      dE/dx and range tables from 10 eV  to 10 TeV in 240 bins
+      Lambda tables from threshold to 10 TeV in 240 bins, spline: 1
+      finalRange(mm)= 0.05, dRoverRange= 0.2, integral: 1, fluct: 1, linLossLimit= 0.01
       ===== EM models for the G4Region  DefaultRegionForTheWorld ======
                Bragg :  Emin=        0 eV    Emax=  1.05231 MeV
           BetheBloch :  Emin=  1.05231 MeV   Emax=       10 TeV
 
 hBrems:   for  kaon+    SubType= 3
-      dE/dx and range tables from 100 eV  to 10 TeV in 77 bins
-      Lambda tables from threshold to 10 TeV in 77 bins, spline: 1
+      dE/dx and range tables from 10 eV  to 10 TeV in 240 bins
+      Lambda tables from threshold to 10 TeV in 240 bins, spline: 1
       ===== EM models for the G4Region  DefaultRegionForTheWorld ======
                hBrem :  Emin=        0 eV    Emax=       10 TeV
 
 hPairProd:   for  kaon+    SubType= 4
-      dE/dx and range tables from 100 eV  to 10 TeV in 77 bins
-      Lambda tables from threshold to 10 TeV in 77 bins, spline: 1
+      dE/dx and range tables from 10 eV  to 10 TeV in 240 bins
+      Lambda tables from threshold to 10 TeV in 240 bins, spline: 1
       ===== EM models for the G4Region  DefaultRegionForTheWorld ======
            hPairProd :  Emin=        0 eV    Emax=       10 TeV
 
 msc:   for kaon-    SubType= 10
-      RangeFactor= 0.2, step limit type: 0, lateralDisplacement: 1, polarAngleLimit(deg)= 180
+      RangeFactor= 0.2, stepLimitType: 0, latDisplacement: 1
       ===== EM models for the G4Region  DefaultRegionForTheWorld ======
-        WentzelVIUni :  Emin=        0 eV    Emax=       10 TeV  Table with 77 bins Emin=    100 eV    Emax=     10 TeV
+          UrbanMsc95 :  Emin=        0 eV    Emax=       10 TeV  Table with 220 bins Emin=    100 eV    Emax=     10 TeV
 
 hIoni:   for  kaon-    SubType= 2
-      dE/dx and range tables from 100 eV  to 10 TeV in 77 bins
-      Lambda tables from threshold to 10 TeV in 77 bins, spline: 1
-      finalRange(mm)= 0.1, dRoverRange= 0.2, integral: 1, fluct: 1, linLossLimit= 0.01
+      dE/dx and range tables from 10 eV  to 10 TeV in 240 bins
+      Lambda tables from threshold to 10 TeV in 240 bins, spline: 1
+      finalRange(mm)= 0.05, dRoverRange= 0.2, integral: 1, fluct: 1, linLossLimit= 0.01
       ===== EM models for the G4Region  DefaultRegionForTheWorld ======
             ICRU73QO :  Emin=        0 eV    Emax=  1.05231 MeV
           BetheBloch :  Emin=  1.05231 MeV   Emax=       10 TeV
 
 hBrems:   for  kaon-    SubType= 3
-      dE/dx and range tables from 100 eV  to 10 TeV in 77 bins
-      Lambda tables from threshold to 10 TeV in 77 bins, spline: 1
+      dE/dx and range tables from 10 eV  to 10 TeV in 240 bins
+      Lambda tables from threshold to 10 TeV in 240 bins, spline: 1
       ===== EM models for the G4Region  DefaultRegionForTheWorld ======
                hBrem :  Emin=        0 eV    Emax=       10 TeV
 
 hPairProd:   for  kaon-    SubType= 4
-      dE/dx and range tables from 100 eV  to 10 TeV in 77 bins
-      Lambda tables from threshold to 10 TeV in 77 bins, spline: 1
+      dE/dx and range tables from 10 eV  to 10 TeV in 240 bins
+      Lambda tables from threshold to 10 TeV in 240 bins, spline: 1
       ===== EM models for the G4Region  DefaultRegionForTheWorld ======
            hPairProd :  Emin=        0 eV    Emax=       10 TeV
 
 msc:   for mu+    SubType= 10
       RangeFactor= 0.2, step limit type: 0, lateralDisplacement: 1, polarAngleLimit(deg)= 180
       ===== EM models for the G4Region  DefaultRegionForTheWorld ======
-        WentzelVIUni :  Emin=        0 eV    Emax=       10 TeV  Table with 77 bins Emin=    100 eV    Emax=     10 TeV
+        WentzelVIUni :  Emin=        0 eV    Emax=       10 TeV  Table with 220 bins Emin=    100 eV    Emax=     10 TeV
 
 muIoni:   for  mu+    SubType= 2
-      dE/dx and range tables from 100 eV  to 10 TeV in 77 bins
-      Lambda tables from threshold to 10 TeV in 77 bins, spline: 1
-      finalRange(mm)= 1, dRoverRange= 0.2, integral: 1, fluct: 1, linLossLimit= 0.01
+      dE/dx and range tables from 10 eV  to 10 TeV in 240 bins
+      Lambda tables from threshold to 10 TeV in 240 bins, spline: 1
+      finalRange(mm)= 0.05, dRoverRange= 0.2, integral: 1, fluct: 1, linLossLimit= 0.01
       ===== EM models for the G4Region  DefaultRegionForTheWorld ======
                Bragg :  Emin=        0 eV    Emax=      200 keV
           BetheBloch :  Emin=      200 keV   Emax=        1 GeV
         MuBetheBloch :  Emin=        1 GeV   Emax=       10 TeV
 
 muBrems:   for  mu+    SubType= 3
-      dE/dx and range tables from 100 eV  to 10 TeV in 77 bins
-      Lambda tables from threshold to 10 TeV in 77 bins, spline: 1
+      dE/dx and range tables from 10 eV  to 10 TeV in 240 bins
+      Lambda tables from threshold to 10 TeV in 240 bins, spline: 1
       ===== EM models for the G4Region  DefaultRegionForTheWorld ======
               MuBrem :  Emin=        0 eV    Emax=       10 TeV
 
 muPairProd:   for  mu+    SubType= 4
-      dE/dx and range tables from 100 eV  to 10 TeV in 77 bins
-      Lambda tables from threshold to 10 TeV in 77 bins, spline: 1
+      dE/dx and range tables from 10 eV  to 10 TeV in 240 bins
+      Lambda tables from threshold to 10 TeV in 240 bins, spline: 1
       ===== EM models for the G4Region  DefaultRegionForTheWorld ======
           muPairProd :  Emin=        0 eV    Emax=       10 TeV
 
 CoulombScat:   for  mu+, applyCuts: 1     SubType= 1
-      Lambda table from 100 eV  to 10 TeV in 43 bins, spline: 1
+      Lambda table from 10 eV  to 10 TeV in 123 bins, spline: 1
       180 < Theta(degree) < 180; pLimit(GeV^1)= 0.139531
       ===== EM models for the G4Region  DefaultRegionForTheWorld ======
   eCoulombScattering :  Emin=        0 eV    Emax=       10 TeV
@@ -409,279 +556,110 @@ CoulombScat:   for  mu+, applyCuts: 1     SubType= 1
 msc:   for mu-    SubType= 10
       RangeFactor= 0.2, step limit type: 0, lateralDisplacement: 1, polarAngleLimit(deg)= 180
       ===== EM models for the G4Region  DefaultRegionForTheWorld ======
-        WentzelVIUni :  Emin=        0 eV    Emax=       10 TeV  Table with 77 bins Emin=    100 eV    Emax=     10 TeV
+        WentzelVIUni :  Emin=        0 eV    Emax=       10 TeV  Table with 220 bins Emin=    100 eV    Emax=     10 TeV
 
 muIoni:   for  mu-    SubType= 2
-      dE/dx and range tables from 100 eV  to 10 TeV in 77 bins
-      Lambda tables from threshold to 10 TeV in 77 bins, spline: 1
-      finalRange(mm)= 1, dRoverRange= 0.2, integral: 1, fluct: 1, linLossLimit= 0.01
+      dE/dx and range tables from 10 eV  to 10 TeV in 240 bins
+      Lambda tables from threshold to 10 TeV in 240 bins, spline: 1
+      finalRange(mm)= 0.05, dRoverRange= 0.2, integral: 1, fluct: 1, linLossLimit= 0.01
       ===== EM models for the G4Region  DefaultRegionForTheWorld ======
             ICRU73QO :  Emin=        0 eV    Emax=      200 keV
           BetheBloch :  Emin=      200 keV   Emax=        1 GeV
         MuBetheBloch :  Emin=        1 GeV   Emax=       10 TeV
 
 muBrems:   for  mu-    SubType= 3
-      dE/dx and range tables from 100 eV  to 10 TeV in 77 bins
-      Lambda tables from threshold to 10 TeV in 77 bins, spline: 1
+      dE/dx and range tables from 10 eV  to 10 TeV in 240 bins
+      Lambda tables from threshold to 10 TeV in 240 bins, spline: 1
       ===== EM models for the G4Region  DefaultRegionForTheWorld ======
               MuBrem :  Emin=        0 eV    Emax=       10 TeV
 
 muPairProd:   for  mu-    SubType= 4
-      dE/dx and range tables from 100 eV  to 10 TeV in 77 bins
-      Lambda tables from threshold to 10 TeV in 77 bins, spline: 1
+      dE/dx and range tables from 10 eV  to 10 TeV in 240 bins
+      Lambda tables from threshold to 10 TeV in 240 bins, spline: 1
       ===== EM models for the G4Region  DefaultRegionForTheWorld ======
           muPairProd :  Emin=        0 eV    Emax=       10 TeV
 
 CoulombScat:   for  mu-, applyCuts: 1     SubType= 1
-      Lambda table from 100 eV  to 10 TeV in 43 bins, spline: 1
+      Lambda table from 10 eV  to 10 TeV in 123 bins, spline: 1
       180 < Theta(degree) < 180; pLimit(GeV^1)= 0.139531
       ===== EM models for the G4Region  DefaultRegionForTheWorld ======
   eCoulombScattering :  Emin=        0 eV    Emax=       10 TeV
 
 msc:   for pi+    SubType= 10
-      RangeFactor= 0.2, step limit type: 0, lateralDisplacement: 1, polarAngleLimit(deg)= 180
+      RangeFactor= 0.2, stepLimitType: 0, latDisplacement: 1
       ===== EM models for the G4Region  DefaultRegionForTheWorld ======
-        WentzelVIUni :  Emin=        0 eV    Emax=       10 TeV  Table with 77 bins Emin=    100 eV    Emax=     10 TeV
+          UrbanMsc95 :  Emin=        0 eV    Emax=       10 TeV  Table with 220 bins Emin=    100 eV    Emax=     10 TeV
 
 hIoni:   for  pi+    SubType= 2
-      dE/dx and range tables from 100 eV  to 10 TeV in 77 bins
-      Lambda tables from threshold to 10 TeV in 77 bins, spline: 1
-      finalRange(mm)= 0.1, dRoverRange= 0.2, integral: 1, fluct: 1, linLossLimit= 0.01
+      dE/dx and range tables from 10 eV  to 10 TeV in 240 bins
+      Lambda tables from threshold to 10 TeV in 240 bins, spline: 1
+      finalRange(mm)= 0.05, dRoverRange= 0.2, integral: 1, fluct: 1, linLossLimit= 0.01
       ===== EM models for the G4Region  DefaultRegionForTheWorld ======
                Bragg :  Emin=        0 eV    Emax=  297.505 keV
           BetheBloch :  Emin=  297.505 keV   Emax=       10 TeV
 
 hBrems:   for  pi+    SubType= 3
-      dE/dx and range tables from 100 eV  to 10 TeV in 77 bins
-      Lambda tables from threshold to 10 TeV in 77 bins, spline: 1
+      dE/dx and range tables from 10 eV  to 10 TeV in 240 bins
+      Lambda tables from threshold to 10 TeV in 240 bins, spline: 1
       ===== EM models for the G4Region  DefaultRegionForTheWorld ======
                hBrem :  Emin=        0 eV    Emax=       10 TeV
 
 hPairProd:   for  pi+    SubType= 4
-      dE/dx and range tables from 100 eV  to 10 TeV in 77 bins
-      Lambda tables from threshold to 10 TeV in 77 bins, spline: 1
+      dE/dx and range tables from 10 eV  to 10 TeV in 240 bins
+      Lambda tables from threshold to 10 TeV in 240 bins, spline: 1
       ===== EM models for the G4Region  DefaultRegionForTheWorld ======
            hPairProd :  Emin=        0 eV    Emax=       10 TeV
 
 msc:   for pi-    SubType= 10
-      RangeFactor= 0.2, step limit type: 0, lateralDisplacement: 1, polarAngleLimit(deg)= 180
+      RangeFactor= 0.2, stepLimitType: 0, latDisplacement: 1
       ===== EM models for the G4Region  DefaultRegionForTheWorld ======
-        WentzelVIUni :  Emin=        0 eV    Emax=       10 TeV  Table with 77 bins Emin=    100 eV    Emax=     10 TeV
+          UrbanMsc95 :  Emin=        0 eV    Emax=       10 TeV  Table with 220 bins Emin=    100 eV    Emax=     10 TeV
 
 hIoni:   for  pi-    SubType= 2
-      dE/dx and range tables from 100 eV  to 10 TeV in 77 bins
-      Lambda tables from threshold to 10 TeV in 77 bins, spline: 1
-      finalRange(mm)= 0.1, dRoverRange= 0.2, integral: 1, fluct: 1, linLossLimit= 0.01
+      dE/dx and range tables from 10 eV  to 10 TeV in 240 bins
+      Lambda tables from threshold to 10 TeV in 240 bins, spline: 1
+      finalRange(mm)= 0.05, dRoverRange= 0.2, integral: 1, fluct: 1, linLossLimit= 0.01
       ===== EM models for the G4Region  DefaultRegionForTheWorld ======
             ICRU73QO :  Emin=        0 eV    Emax=  297.505 keV
           BetheBloch :  Emin=  297.505 keV   Emax=       10 TeV
 
 hBrems:   for  pi-    SubType= 3
-      dE/dx and range tables from 100 eV  to 10 TeV in 77 bins
-      Lambda tables from threshold to 10 TeV in 77 bins, spline: 1
+      dE/dx and range tables from 10 eV  to 10 TeV in 240 bins
+      Lambda tables from threshold to 10 TeV in 240 bins, spline: 1
       ===== EM models for the G4Region  DefaultRegionForTheWorld ======
                hBrem :  Emin=        0 eV    Emax=       10 TeV
 
 hPairProd:   for  pi-    SubType= 4
-      dE/dx and range tables from 100 eV  to 10 TeV in 77 bins
-      Lambda tables from threshold to 10 TeV in 77 bins, spline: 1
+      dE/dx and range tables from 10 eV  to 10 TeV in 240 bins
+      Lambda tables from threshold to 10 TeV in 240 bins, spline: 1
       ===== EM models for the G4Region  DefaultRegionForTheWorld ======
            hPairProd :  Emin=        0 eV    Emax=       10 TeV
-============================================================================================
-             HADRONIC PROCESSES SUMMARY (verbose level 1)
 
-                                  Hadronic Processes for <GenericIon>
-                                  -----------------------------------
-        ionInelastic  Models:     Binary Light Ion Cascade: Emin(GeV)=    0  Emax(GeV)= 4
-                                                      FTFP: Emin(GeV)=    2  Emax(GeV)= 100000
+### ===  Deexcitation model UAtomDeexcitation is activated for 19 regions:
+          absorber_1
+          absorber_2
+          absorber_pre
+          chip
+          filler
+          gap_1
+          gap_2
+          glue_1
+          glue_2
+          glue_3
+          layer
+          passive
+          pcb
+          scanner
+          scintillator_F
+          scintillator_H
+          scintillator_V
+          simplified
+          DefaultRegionForTheWorld
 
-        ionInelastic  Crs sctns: Glauber-Gribov nucleus nucleus: Emin(GeV)=    0  Emax(GeV)= 100000
-                                          GheishaInelastic: Emin(GeV)=    0  Emax(GeV)= 100000
-
-
-                                  Hadronic Processes for <anti_neutron>
-                                  -----------------------------------
-          hadElastic  Models:                 hElasticLHEP: Emin(GeV)=    0  Emax(GeV)= 100000
-
-          hadElastic  Crs sctns:            GheishaElastic: Emin(GeV)=    0  Emax(GeV)= 100000
-
-AntiNeutronInelastic  Models:     G4LEAntiNeutronInelastic: Emin(GeV)=    0  Emax(GeV)= 25
-                                  G4HEAntiNeutronInelastic: Emin(GeV)=   20  Emax(GeV)= 100000
-
-AntiNeutronInelastic  Crs sctns:              AntiAGlauber: Emin(GeV)=    0  Emax(GeV)= 1.79769e+305
-                                          GheishaInelastic: Emin(GeV)=    0  Emax(GeV)= 100000
-
-
-                                  Hadronic Processes for <anti_proton>
-                                  -----------------------------------
-          hadElastic  Models:                 hElasticLHEP: Emin(GeV)=    0  Emax(GeV)= 0.1
-                                              AntiAElastic: Emin(GeV)=  0.1  Emax(GeV)= 100000
-
-          hadElastic  Crs sctns:              AntiAGlauber: Emin(GeV)=    0  Emax(GeV)= 1.79769e+305
-                                            GheishaElastic: Emin(GeV)=    0  Emax(GeV)= 100000
-
- AntiProtonInelastic  Models:      G4LEAntiProtonInelastic: Emin(GeV)=    0  Emax(GeV)= 25
-                                   G4HEAntiProtonInelastic: Emin(GeV)=   20  Emax(GeV)= 100000
-
- AntiProtonInelastic  Crs sctns:              AntiAGlauber: Emin(GeV)=    0  Emax(GeV)= 1.79769e+305
-                                          GheishaInelastic: Emin(GeV)=    0  Emax(GeV)= 100000
-
-          hFritiofCaptureAtRest
-
-                                  Hadronic Processes for <e+>
-                                  -----------------------------------
-     PositronNuclear  Models:      G4ElectroVDNuclearModel: Emin(GeV)=    0  Emax(GeV)= 1e+06
-
-     PositronNuclear  Crs sctns:          ElectroNuclearXS: Emin(GeV)=    0  Emax(GeV)= 100000
-                                          GheishaInelastic: Emin(GeV)=    0  Emax(GeV)= 100000
-
-
-                                  Hadronic Processes for <e->
-                                  -----------------------------------
-      ElectroNuclear  Models:      G4ElectroVDNuclearModel: Emin(GeV)=    0  Emax(GeV)= 1e+06
-
-      ElectroNuclear  Crs sctns:          ElectroNuclearXS: Emin(GeV)=    0  Emax(GeV)= 100000
-                                          GheishaInelastic: Emin(GeV)=    0  Emax(GeV)= 100000
-
-
-                                  Hadronic Processes for <gamma>
-                                  -----------------------------------
-     PhotonInelastic  Models:               BertiniCascade: Emin(GeV)=    0  Emax(GeV)= 3.5
-                                           TheoFSGenerator: Emin(GeV)=    3  Emax(GeV)= 100000
-
-     PhotonInelastic  Crs sctns:            PhotoNuclearXS: Emin(GeV)=    0  Emax(GeV)= 100000
-                                          GheishaInelastic: Emin(GeV)=    0  Emax(GeV)= 100000
-
-
-                                  Hadronic Processes for <kaon+>
-                                  -----------------------------------
-          hadElastic  Models:                 hElasticLHEP: Emin(GeV)=    0  Emax(GeV)= 100000
-
-          hadElastic  Crs sctns:            GheishaElastic: Emin(GeV)=    0  Emax(GeV)= 100000
-
-   KaonPlusInelastic  Models:                         QGSP: Emin(GeV)=   12  Emax(GeV)= 100000
-                                     G4LEKaonPlusInelastic: Emin(GeV)=  9.5  Emax(GeV)= 25
-                                            BertiniCascade: Emin(GeV)=    0  Emax(GeV)= 9.9
-
-   KaonPlusInelastic  Crs sctns:  ChipsKaonPlusInelasticXS: Emin(GeV)=    0  Emax(GeV)= 100000
-                                          GheishaInelastic: Emin(GeV)=    0  Emax(GeV)= 100000
-
-
-                                  Hadronic Processes for <kaon->
-                                  -----------------------------------
-          hadElastic  Models:                 hElasticLHEP: Emin(GeV)=    0  Emax(GeV)= 100000
-
-          hadElastic  Crs sctns:            GheishaElastic: Emin(GeV)=    0  Emax(GeV)= 100000
-
-  KaonMinusInelastic  Models:                         QGSP: Emin(GeV)=   12  Emax(GeV)= 100000
-                                    G4LEKaonMinusInelastic: Emin(GeV)=  9.5  Emax(GeV)= 25
-                                            BertiniCascade: Emin(GeV)=    0  Emax(GeV)= 9.9
-
-  KaonMinusInelastic  Crs sctns: ChipsKaonMinusInelasticXS: Emin(GeV)=    0  Emax(GeV)= 100000
-                                          GheishaInelastic: Emin(GeV)=    0  Emax(GeV)= 100000
-
-          hBertiniCaptureAtRest
-
-                                  Hadronic Processes for <lambda>
-                                  -----------------------------------
-          hadElastic  Models:                 hElasticLHEP: Emin(GeV)=    0  Emax(GeV)= 100000
-
-          hadElastic  Crs sctns:            GheishaElastic: Emin(GeV)=    0  Emax(GeV)= 100000
-
-     LambdaInelastic  Models:          G4LELambdaInelastic: Emin(GeV)=    0  Emax(GeV)= 25
-                                       G4HELambdaInelastic: Emin(GeV)=   20  Emax(GeV)= 100000
-
-     LambdaInelastic  Crs sctns:   ChipsHyperonInelasticXS: Emin(GeV)=    0  Emax(GeV)= 100000
-                                          GheishaInelastic: Emin(GeV)=    0  Emax(GeV)= 100000
-
-
-                     Hadronic Processes for <mu->
-          muMinusCaptureAtRest
-
-                                  Hadronic Processes for <neutron>
-                                  -----------------------------------
-          hadElastic  Models:                hElasticCHIPS: Emin(GeV)=    0  Emax(GeV)= 100000
-
-          hadElastic  Crs sctns:     ChipsNeutronElasticXS: Emin(GeV)=    0  Emax(GeV)= 100000
-                                            GheishaElastic: Emin(GeV)=    0  Emax(GeV)= 100000
-
-    NeutronInelastic  Models:                         QGSP: Emin(GeV)=   12  Emax(GeV)= 100000
-                                      G4LENeutronInelastic: Emin(GeV)=  9.5  Emax(GeV)= 25
-                                            BertiniCascade: Emin(GeV)=    0  Emax(GeV)= 9.9
-
-    NeutronInelastic  Crs sctns:       Barashenkov-Glauber: Emin(GeV)=    0  Emax(GeV)= 100000
-                                          GheishaInelastic: Emin(GeV)=    0  Emax(GeV)= 100000
-
-            nCapture  Models:                   G4LCapture: Emin(GeV)=    0  Emax(GeV)= 20000
-
-            nCapture  Crs sctns:          GheishaCaptureXS: Emin(GeV)=    0  Emax(GeV)= 100000
-
-            nFission  Models:                   G4LFission: Emin(GeV)=    0  Emax(GeV)= 20000
-
-            nFission  Crs sctns:          GheishaFissionXS: Emin(GeV)=    0  Emax(GeV)= 100000
-
-
-                                  Hadronic Processes for <pi+>
-                                  -----------------------------------
-          hadElastic  Models:                 hElasticLHEP: Emin(GeV)=    0  Emax(GeV)= 1
-                                           hElasticGlauber: Emin(GeV)=    1  Emax(GeV)= 100000
-
-          hadElastic  Crs sctns:       Barashenkov-Glauber: Emin(GeV)=    0  Emax(GeV)= 100000
-                                            GheishaElastic: Emin(GeV)=    0  Emax(GeV)= 100000
-
-   PionPlusInelastic  Models:                         QGSP: Emin(GeV)=   12  Emax(GeV)= 100000
-                                     G4LEPionPlusInelastic: Emin(GeV)=  9.5  Emax(GeV)= 25
-                                            BertiniCascade: Emin(GeV)=    0  Emax(GeV)= 9.9
-
-   PionPlusInelastic  Crs sctns:      G4CrossSectionPairGG: Emin(GeV)=    0  Emax(GeV)= 100000
-                         G4CrossSectionPairGG: G4PiNuclearCrossSection cross sections 
-                           below 91 GeV, Glauber-Gribov above 
-                                          GheishaInelastic: Emin(GeV)=    0  Emax(GeV)= 100000
-
-
-                                  Hadronic Processes for <pi->
-                                  -----------------------------------
-          hadElastic  Models:                 hElasticLHEP: Emin(GeV)=    0  Emax(GeV)= 1
-                                           hElasticGlauber: Emin(GeV)=    1  Emax(GeV)= 100000
-
-          hadElastic  Crs sctns:       Barashenkov-Glauber: Emin(GeV)=    0  Emax(GeV)= 100000
-                                            GheishaElastic: Emin(GeV)=    0  Emax(GeV)= 100000
-
-  PionMinusInelastic  Models:                         QGSP: Emin(GeV)=   12  Emax(GeV)= 100000
-                                    G4LEPionMinusInelastic: Emin(GeV)=  9.5  Emax(GeV)= 25
-                                            BertiniCascade: Emin(GeV)=    0  Emax(GeV)= 9.9
-
-  PionMinusInelastic  Crs sctns:      G4CrossSectionPairGG: Emin(GeV)=    0  Emax(GeV)= 100000
-                         G4CrossSectionPairGG: G4PiNuclearCrossSection cross sections 
-                           below 91 GeV, Glauber-Gribov above 
-                                          GheishaInelastic: Emin(GeV)=    0  Emax(GeV)= 100000
-
-          hBertiniCaptureAtRest
-
-                                  Hadronic Processes for <proton>
-                                  -----------------------------------
-          hadElastic  Models:                hElasticCHIPS: Emin(GeV)=    0  Emax(GeV)= 100000
-
-          hadElastic  Crs sctns:      ChipsProtonElasticXS: Emin(GeV)=    0  Emax(GeV)= 100000
-                                            GheishaElastic: Emin(GeV)=    0  Emax(GeV)= 100000
-
-     ProtonInelastic  Models:                         QGSP: Emin(GeV)=   12  Emax(GeV)= 100000
-                                       G4LEProtonInelastic: Emin(GeV)=  9.5  Emax(GeV)= 25
-                                            BertiniCascade: Emin(GeV)=    0  Emax(GeV)= 9.9
-
-     ProtonInelastic  Crs sctns:       Barashenkov-Glauber: Emin(GeV)=    0  Emax(GeV)= 100000
-                                          GheishaInelastic: Emin(GeV)=    0  Emax(GeV)= 100000
-
-============================================================================================
-WARNING: G4VisManager::EndOfEvent: Automatic event keeping suspended.
-  The number of events exceeds the maximum, 25, that can be kept by the vis manager.
-WARNING: G4VisManager::EndOfRun: Automatic event keeping has been suspended.
-  The number of events in the run exceeded the maximum, 25, that can be kept by the vis manager.
-  The number of events kept by the vis manager can be changed with
-  "/vis/scene/endOfEventAction accumulate <N>", where N is the
-  maximum number you wish to allow.  N < 0 means "unlimited".
-25 events have been kept for refreshing and/or reviewing.
-[Core-0] End of macro focal_script.mac
+### === G4UAtomicDeexcitation::InitialiseForNewRun()
+### ===  PIXE model for hadrons: Empirical  1
+### ===  PIXE model for e+-:     Livermore  1
+[Core-0] End of macro focal.mac
 Graphics systems deleted.
 Visualization Manager deleting...
 WARNING - Attempt to delete the physical volume store while geometry closed !

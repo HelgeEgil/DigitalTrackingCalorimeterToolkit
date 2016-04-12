@@ -23,9 +23,9 @@ http://wiki.opengatecollaboration.org/index.php/Users_Guide_V7.0:Setting_up_the_
 [Core-0] 
 [Core-0] You are using Geant4 version 9.6.4
 /control/alias energy 200
-/control/alias npart 2500
-/control/alias step_active 80
-/control/alias sigma 20
+/control/alias npart 25000
+/control/alias step_active 50
+/control/alias sigma 0
 [Core-0] Starting macro focal_script.mac
 WARNING: The vis manager will keep up to 25 events.
   This may use a lot of memory.
@@ -391,7 +391,8 @@ hPairProd:   for  pi-    SubType= 4
 ### ===  PIXE model for hadrons: Empirical  1
 ### ===  PIXE model for e+-:     Livermore  1
 WARNING: G4VisManager::EndOfEvent: Automatic event keeping suspended.
-  The number of events exceeds the maximum, 25, that can be kept by the vis manager.WWARNING: G4VisManager::EndOfRun: Automatic event keeping has been suspended.
+  The number of events exceeds the maximum, 25, that can be kept by the vis manager.
+WARNING: G4VisManager::EndOfRun: Automatic event keeping has been suspended.
   The number of events in the run exceeded the maximum, 25, that can be kept by the vis manager.
   The number of events kept by the vis manager can be changed with
   "/vis/scene/endOfEventAction accumulate <N>", where N is the

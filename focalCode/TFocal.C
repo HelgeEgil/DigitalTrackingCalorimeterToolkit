@@ -418,6 +418,11 @@ void Focal::getMCFrame(Int_t runNo, CalorimeterFrame *cf) {
 		nb = fChain->GetEntry(jentry);
 		nbytes += nb;
 
+		if (parentID != 0) {
+			// a secondary particle
+			continue;
+		}
+		
 		if (eventID < eventIdFrom) {
 			continue;
 		}

@@ -312,7 +312,7 @@ void Check::Loop(Double_t energy, Double_t sigma_mev)
       nb = fChain->GetEntry(jentry);   nbytes += nb;
       
 		Float_t z = posZ;
-      Float_t y = posY;
+		Float_t y = posY;
 		Float_t x = posX;
 
 		if (lastID < 0) {

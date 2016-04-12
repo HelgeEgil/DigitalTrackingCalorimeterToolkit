@@ -52,10 +52,10 @@
 /gate/physics/ActivateStepLimiter         gamma
 /gate/physics/ActivateStepLimiter         proton
 
-/gate/physics/Electron/SetCutInRegion  waterbox 0.4 mm
-/gate/physics/Positron/SetCutInRegion  waterbox 0.4 mm
-/gate/physics/Gamma/SetCutInRegion     waterbox 0.4 mm
-/gate/physics/Proton/SetCutInRegion    waterbox 0.4 mm
+/gate/physics/Electron/SetCutInRegion  waterbox 1 m
+/gate/physics/Positron/SetCutInRegion  waterbox 1 m
+/gate/physics/Gamma/SetCutInRegion     waterbox 1 m
+/gate/physics/Proton/SetCutInRegion    waterbox 1 m
 
 /gate/run/initialize
 
@@ -79,7 +79,7 @@
 /gate/source/uniformBeam/gps/centre 0. 0. -15. cm # -20 cm for scintillator
 
 /gate/output/root/enable
-/gate/output/root/setFileName ../../focalCode/rawdata/test_tungstenbox_{sigma}MeVsigma_pst{energy}MeV
+/gate/output/root/setFileName ../../focalCode/rawdata/test_waterbox_{energy}MeV
 
 /gate/random/setEngineName MersenneTwister
 /gate/random/setEngineSeed auto

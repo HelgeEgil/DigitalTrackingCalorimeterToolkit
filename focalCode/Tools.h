@@ -23,6 +23,7 @@ Float_t diffmm(Cluster *p1, Cluster *p2);
 Float_t diffmm(Hit *h1, Hit *h2);
 Bool_t existsEnergyFile(Int_t energy);
 Double_t fitfunc_DBP(Double_t *v, Double_t *par);
+Double_t double_landau(Double_t *v, Double_t *par);
 char * getMaterialChar();
 char * getDataTypeChar(Int_t dataType);
 Int_t getMinimumTrackLength(Float_t energy);

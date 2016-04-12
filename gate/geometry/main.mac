@@ -6,7 +6,6 @@
 # 1+2) variable absorber
 
 /control/execute geometry/world.mac
+/control/execute geometry/preabsorber.mac
 /control/execute geometry/simplified.mac
 /control/execute geometry/scintillators.mac
-#/control/execute geometry/doublelayer_first.mac
-#/control/execute geometry/doublelayer_rest.mac

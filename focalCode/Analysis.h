@@ -6,6 +6,7 @@
 Tracks * getTracks(Int_t Runs, Int_t dataType = kMC, Int_t frameType = kCalorimeter, Float_t energy = 188);
 void		drawBraggPeakFit(Int_t Runs, Int_t dataType = kMC, Bool_t recreate = 0, Float_t energy = 188);
 void 		drawBraggPeakGraphFit(Int_t Runs, Int_t dataType = kMC, Bool_t recreate = 0, Float_t energy = 188);
+void	drawTungstenSpectrum(Int_t Runs, Int_t dataType = kMC, Bool_t recreate = 0, Float_t energy = 188);
 void saveTracks(Tracks* tracks, Int_t dataType, Float_t energy);
 Tracks* loadTracks(Int_t Runs, Int_t dataType, Float_t energy);
 Tracks * loadOrCreateTracks(Bool_t recreate, Int_t Runs, Int_t dataType, Float_t energy);
@@ -22,6 +23,7 @@ void		drawClusterShapes(Int_t Runs, Bool_t dataType = kMC, Bool_t recreate = 0, 
 //void		CompareDataAndMC(Int_t Runs, Int_t DataRuns);
 void 		Draw2DProjection(Int_t Runs, Int_t dataType, Bool_t recreate, Float_t energy);
 //void		GetTrackerStatistics(Int_t Events, Int_t Runs);
+void 		drawTrackRanges(Int_t Runs, Int_t dataType, Bool_t recreate, Float_t energy);
 void		getTrackStatistics(Int_t Runs, Int_t dataType = kMC, Bool_t recreate = 0, Float_t energy = 188);
 // void   EdepHistogram();
 Bool_t getCutTrackLength(Float_t energy, Track *track);

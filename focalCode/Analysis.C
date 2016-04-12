@@ -484,18 +484,29 @@ void drawBraggPeakFit(Int_t Runs, Int_t dataType, Bool_t recreate, Float_t energ
 	
 	// Draw expected gaussian distribution of results from initial energy
 	Float_t expectedStraggling = 0, expectedMean = 0;
+	Float_t sigma_energy = 0;
+	
+	//if (dataType == kData) {
+	
+	if 		(energy == 188) sigma_energy = 0.3; // approx
+	else if (energy == 180) sigma_energy = 2.3;
+	else if (energy == 170) sigma_energy = 4.5;
+	else if (energy == 160) sigma_energy = 8.3;
+	else if (energy == 150) sigma_energy = 20;
+	
+	//}
 	
 	if (kOutputUnit == kPhysical) {
 		expectedMean = getTLFromEnergy(energy);
-		expectedStraggling = getRangeStragglingFromEnergy(energy);
+		expectedStraggling = getTLStragglingFromEnergy(energy, sigma_energy);
 	}
 	else if (kOutputUnit == kEnergy) {
 		expectedMean = energy;
-		expectedStraggling = getEnergyStragglingFromEnergy(expectedMean);
+		expectedStraggling = getEnergyStragglingFromEnergy(expectedMean, sigma_energy);
 	}
 	else if (kOutputUnit == kWEPL) {
 		expectedMean = getWEPLFromEnergy(energy);
-		expectedStraggling = getWEPLStragglingFromEnergy(energy);
+		expectedStraggling = getWEPLStragglingFromEnergy(energy, sigma_energy);
 	}
 	
 	cout << "Expected mean = " << expectedMean << endl;
@@ -571,6 +582,137 @@ void drawBraggPeakFit(Int_t Runs, Int_t dataType, Bool_t recreate, Float_t energ
   	delete tracks;
 }
 
+void drawTrackRanges(Int_t Runs, Int_t dataType, Bool_t recreate, Float_t energy) {
+	run_energy = energy;
+	setWaterPValues(kHigh);
+	
+	char * sDataType = getDataTypeChar(dataType);
+	char * sMaterial = getMaterialChar();
+	char * hTitle = Form("Fitted energy of a %.2f MeV beam in %s (%s)", energy, sMaterial, sDataType);
+	TCanvas *cFitResults = new TCanvas("cFitResults", hTitle, 1400, 1000);
+	
+	gStyle->SetPadBorderMode(0);
+	gStyle->SetFrameBorderMode(0);
+	gStyle->SetTitleH(0.06);
+	gStyle->SetTitleYOffset(1);
+	
+	TGraphErrors *outputGraph;
+	TH1F *hFitResults = new TH1F("fitResult", hTitle, 500, getWEPLFromEnergy(0), getWEPLFromEnergy(energy*1.2));
+	hFitResults->SetLineColor(kBlack);
+	hFitResults->SetFillColor(kGreen-5);
+	hFitResults->SetXTitle("Range in Water Equivalent Path Length [mm]");
+	hFitResults->SetYTitle("Number of protons");
+	hFitResults->Draw();
+
+	Tracks * tracks = loadOrCreateTracks(recreate, Runs, dataType, energy);
+	tracks->extrapolateToLayer0();
+
+	for (Int_t j=0; j<tracks->GetEntriesFast(); j++) {
+		Track *thisTrack = tracks->At(j);
+		if (!thisTrack) continue;
+		Float_t preEnergyLoss = thisTrack->getPreEnergyLoss();
+
+		hFitResults->Fill(getWEPLFromEnergy(thisTrack->getEnergy() + preEnergyLoss));	
+	}
+}
+
+//////////////////////////////////////////////////////////////////////////////////////////////////
+//////////////////////////////////////////////////////////////////////////////////////////////////
+//////////////////////////////////////////////////////////////////////////////////////////////////
+//////////////////////////////////////////////////////////////////////////////////////////////////
+
+void drawTungstenSpectrum(Int_t Runs, Int_t dataType, Bool_t recreate, Float_t energy) {
+	run_energy = energy;
+	setWaterPValues(kHigh);
+	
+	char * sDataType = getDataTypeChar(dataType);
+	char * sMaterial = getMaterialChar();
+	char * hTitle = Form("Fitted energy of a %.2f MeV beam in %s (%s)", energy, sMaterial, sDataType);
+	TCanvas *cFitResults = new TCanvas("cFitResults", hTitle, 1400, 1000);
+	
+	gStyle->SetPadBorderMode(0);
+	gStyle->SetFrameBorderMode(0);
+	gStyle->SetTitleH(0.06);
+	gStyle->SetTitleYOffset(1);
+	
+	
+	TGraphErrors *outputGraph;
+	TH1F *hFitResults = new TH1F("fitResult", hTitle, 500, getWEPLFromEnergy(0), getWEPLFromEnergy(energy*1.2));
+	hFitResults->SetLineColor(kBlack);
+	hFitResults->SetFillColor(kGreen-5);
+	hFitResults->SetXTitle("Range in Water Equivalent Path Length [mm]");
+	hFitResults->SetYTitle("Number of protons");
+	hFitResults->Draw();
+
+	Tracks * tracks = loadOrCreateTracks(recreate, Runs, dataType, energy);
+	tracks->extrapolateToLayer0();
+
+	for (Int_t j=0; j<tracks->GetEntriesFast(); j++) {
+		Track *thisTrack = tracks->At(j);
+		if (!thisTrack) continue;
+		
+// 		if (thisTrack->doesTrackEndAbruptly()) {
+// 			hFitResults->Fill(getWEPLFromEnergy(thisTrack->getEnergy()));
+// 			continue;
+// 		}
+		
+		outputGraph = (TGraphErrors*) thisTrack->doRangeFit();
+		if (!outputGraph) continue;
+		
+// 		Float_t TL = getTLFromEnergy(thisTrack->getFitParameterEnergy());
+// 		Float_t finalTL = TL / thisTrack->getProjectedRatio();
+// 		Float_t finalEnergy = getEnergyFromTL(TL);
+		
+		hFitResults->Fill(getWEPLFromEnergy(thisTrack->getFitParameterEnergy()));	
+	}
+	
+	Float_t sigma_energy = 4.5;
+	Float_t expectedMean = getWEPLFromEnergy(energy);
+	Float_t expectedStraggling = getWEPLStragglingFromEnergy(energy, sigma_energy);
+}
+
+//////////////////////////////////////////////////////////////////////////////////////////////////
+//////////////////////////////////////////////////////////////////////////////////////////////////
+//////////////////////////////////////////////////////////////////////////////////////////////////
+//////////////////////////////////////////////////////////////////////////////////////////////////	
+
+void drawScintillatorStatistics(Int_t Runs, Int_t dataType, Bool_t recreate, Float_t energy) {
+	run_energy = energy;
+	setWaterPValues(kHigh);
+	
+	char * sDataType = getDataTypeChar(dataType);
+	char * sMaterial = getMaterialChar();
+	char * hTitle = Form("Number of scintillators hit with a %.2f MeV beam in %s (%s)", energy, sMaterial, sDataType);
+	TCanvas *cFitResults = new TCanvas("cFitResults", hTitle, 1400, 1000);
+	
+	gStyle->SetPadBorderMode(0);
+	gStyle->SetFrameBorderMode(0);
+	gStyle->SetTitleH(0.06);
+	gStyle->SetTitleYOffset(1);
+	
+	TGraphErrors *outputGraph;
+	TH1I *hFitResults = new TH1I("fitResult", hTitle, 5, 0, 4);
+	hFitResults->SetLineColor(kBlack);
+	hFitResults->SetFillColor(kGreen-5);
+	hFitResults->SetXTitle("Number of scintillators hit");
+	hFitResults->SetYTitle("Number of protons");
+	hFitResults->Draw();
+
+	Tracks * tracks = loadOrCreateTracks(recreate, Runs, dataType, energy);
+	tracks->extrapolateToLayer0();
+
+	Float_t nScintillators = 0;
+	
+	for (Int_t j=0; j<tracks->GetEntriesFast(); j++) {
+		Track *thisTrack = tracks->At(j);
+		if (!thisTrack) continue;
+
+		nScintillators = thisTrack->getNScintillators();	
+		hFitResults->Fill(nScintillators);	
+	}
+}
+
+
 void drawBraggPeakGraphFit(Int_t Runs, Int_t dataType, Bool_t recreate, Float_t energy) {
 	run_energy = energy;
 	
@@ -583,6 +725,8 @@ void drawBraggPeakGraphFit(Int_t Runs, Int_t dataType, Bool_t recreate, Float_t 
 		setWaterPValues(kHigh);
 		cout << "p = " << p_water << ", alpha = " << alpha_water << endl;
 	}
+	
+// 	kIsScintillator = false;
 	
 	cout << "Using aluminum plate: ";
 	if (kIsAluminumPlate) cout << "TRUE\n";
@@ -611,20 +755,17 @@ void drawBraggPeakGraphFit(Int_t Runs, Int_t dataType, Bool_t recreate, Float_t 
 	
 	TH1F *hFitResults = 0;
 	if (kOutputUnit == kPhysical) {
-		if (kMaterial == kTungsten) 
-			hFitResults = new TH1F("fitResult", hTitle, 1000, getTLFromEnergy(energy*0.6), getTLFromEnergy(energy*1.2));
-		else if (kMaterial == kAluminum)
-			hFitResults = new TH1F("fitResult", hTitle, 1000, getTLFromEnergy(energy*0.6), getTLFromEnergy(energy*1.2));
-		else
-			hFitResults = new TH1F("fitResult", hTitle, 1000, getTLFromEnergy(energy*0.6), getTLFromEnergy(energy*1.2));
+		hFitResults = new TH1F("fitResult", hTitle, 500, getTLFromEnergy(0), getTLFromEnergy(energy*1.2));
 	}
 	
 	else if (kOutputUnit == kWEPL) {
-		hFitResults = new TH1F("fitResult", hTitle, 1000, getWEPLFromEnergy(energy*0.6), getWEPLFromEnergy(energy*1.2));
+		hFitResults = new TH1F("fitResult", hTitle, 500, getWEPLFromEnergy(0), getWEPLFromEnergy(energy*1.2));
 	}
+	
 	else if (kOutputUnit == kEnergy) {
-		hFitResults = new TH1F("fitResult", hTitle, 1000, energy*0.6, energy*1.2);
+		hFitResults = new TH1F("fitResult", hTitle, 500, 0, energy*1.2);
 	}
+	
 	else {
 		cout << "Unknown output unit!\n";
 	}
@@ -642,22 +783,17 @@ void drawBraggPeakGraphFit(Int_t Runs, Int_t dataType, Bool_t recreate, Float_t 
 	Tracks * tracks = loadOrCreateTracks(recreate, Runs, dataType, energy);
 	tracks->extrapolateToLayer0();
 
+	Float_t finalEnergy = 0;
+	TRandom3 *gRandom = new TRandom3(0);
+	
+	Int_t nCutDueToTrackEndingAbruptly = 0;
+	
 	for (Int_t j=0; j<tracks->GetEntriesFast(); j++) {
 		Track *thisTrack = tracks->At(j);
 		if (!thisTrack) continue;
-	
-		outputGraph = (TGraphErrors*) thisTrack->doFit();
-		if (!outputGraph) continue;
-			
-		Float_t fitEnergy = thisTrack->getFitParameterEnergy();
-		Float_t fitScale = thisTrack->getFitParameterScale();
 		
-		Float_t finalEnergy = fitEnergy + thisTrack->getPreEnergyLoss();
-
-
-		hScale->Fill(fitScale);
-
-		if (fitEnergy < run_energy*1.245) {
+		if (thisTrack->doesTrackEndAbruptly() && false) {
+			finalEnergy = thisTrack->getEnergy();
 			if (kOutputUnit == kPhysical) {
 				hFitResults->Fill(getTLFromEnergy(finalEnergy));
 			}
@@ -667,13 +803,38 @@ void drawBraggPeakGraphFit(Int_t Runs, Int_t dataType, Bool_t recreate, Float_t 
 			else if (kOutputUnit == kEnergy) {
 				hFitResults->Fill(finalEnergy);
 			}
+			nCutDueToTrackEndingAbruptly++;
+			
+			continue;
+		}
+		
+		outputGraph = (TGraphErrors*) thisTrack->doRangeFit();
+		if (!outputGraph) continue;
+			
+		Float_t fitEnergy = thisTrack->getFitParameterEnergy();
+		Float_t fitScale = thisTrack->getFitParameterScale();
+		
+		hScale->Fill(fitScale);
+
+		Bool_t isOnScintillator = (fabs(thisTrack->At(0)->getXmm()) < 5||1);
+		
+		if (fitEnergy < run_energy*1.245 && isOnScintillator) {
+			if (kOutputUnit == kPhysical) {
+				hFitResults->Fill(getTLFromEnergy(fitEnergy));
+			}
+			else if (kOutputUnit == kWEPL) {
+				hFitResults->Fill(getWEPLFromEnergy(fitEnergy));
+			}
+			else if (kOutputUnit == kEnergy) {
+				hFitResults->Fill(fitEnergy);
+			}
 		}
 
 		if (fitIdx < plotSize) {
 			cGraph->cd(fitIdx+1);
 			
 			outputGraph->SetMinimum(0);
-			outputGraph->SetMaximum(1200);
+			outputGraph->SetMaximum(600);
 			outputGraph->SetTitle("");
 			if (kOutputUnit == kWEPL || kOutputUnit == kEnergy) {
 				outputGraph->GetXaxis()->SetTitle("Water Equivalent Path Length [mm]");
@@ -711,7 +872,7 @@ void drawBraggPeakGraphFit(Int_t Runs, Int_t dataType, Bool_t recreate, Float_t 
 			func->SetParameters(fitEnergy, fitScale);
 			func->Draw("same");
 
-			TLatex *text = new TLatex(low*1.2, 900, Form("Fitted energy: %.1f MeV", finalEnergy));
+			TLatex *text = new TLatex(low*1.2, 500, Form("Fitted energy: %.1f MeV", fitEnergy));
 			text->SetTextSize(0.06);
 			text->Draw();
 		
@@ -723,6 +884,8 @@ void drawBraggPeakGraphFit(Int_t Runs, Int_t dataType, Bool_t recreate, Float_t 
 			delete outputGraph;
 		}
 	}
+	
+	cout << 100 * float(nCutDueToTrackEndingAbruptly) / tracks->GetEntriesFast() << " % of the tracks were cut due to seemingly inelastic nuclear interactions.\n";
 	
 	cScale->cd();
 	hScale->SetYTitle("Number of protons");
@@ -755,45 +918,46 @@ void drawBraggPeakGraphFit(Int_t Runs, Int_t dataType, Bool_t recreate, Float_t 
 	// Draw expected gaussian distribution of results from initial energy
 	
 	Float_t expectedStraggling = 0, expectedMean = 0, dlayer_down = 0, dlayer = 0;
-	
 	Float_t separationFactor = 0.9;
+	Float_t nullStraggling = 0;
+	
+	Float_t sigma_energy = 0;
+// 	if (dataType == kData) {
+	if 		(energy == 188) sigma_energy = 0.3; // approx
+	else if (energy == 180) sigma_energy = 2.3;
+	else if (energy == 170) sigma_energy = 4.5; // was 4.5
+	else if (energy == 160) sigma_energy = 8.3;
+	else if (energy == 150) sigma_energy = 20;
+// 	}
+	
 	if (kMaterial == kAluminum)
 		separationFactor = 1; // don't ask why...
 	
 	if (kOutputUnit == kPhysical) {
 		expectedMean = getTLFromEnergy(energy);
-		expectedStraggling = getRangeStragglingFromEnergy(energy);
+		expectedStraggling = getTLStragglingFromEnergy(energy, sigma_energy);
+		nullStraggling = getTLStragglingFromEnergy(energy, 0);
 		dlayer = dz*separationFactor;
 	}
 	
 	else if (kOutputUnit == kEnergy) {
 		expectedMean = energy;
-		expectedStraggling = getEnergyStragglingFromEnergy(expectedMean);
+		expectedStraggling = getEnergyStragglingFromEnergy(expectedMean, sigma_energy);
+		nullStraggling = getEnergyStragglingFromEnergy(expectedMean, 0);
 		dlayer = getEnergyFromTL(getTLFromEnergy(energy) + dz*separationFactor) - expectedMean;
 	}
+	
 	else if (kOutputUnit == kWEPL) {
 		expectedMean = getWEPLFromEnergy(energy);
-		expectedStraggling = getWEPLStragglingFromEnergy(energy);
+		expectedStraggling = getWEPLStragglingFromEnergy(energy, sigma_energy);
+		nullStraggling = getWEPLStragglingFromEnergy(energy, 0);
 		dlayer = getWEPLFromTL(getTLFromEnergy(energy) + dz*separationFactor) - expectedMean;
 	}
 	
-	Int_t meanBin = hFitResults->GetMean();
+	cout << "OutputUnit is " << kOutputUnit << " and the expected mean value is " << expectedMean 
+		 << ". The straggling including / excluding energy variation is " << expectedStraggling << " / " << nullStraggling << ".\n";
 	
-	Float_t initial_straggling = 0;
-
-	if (kMaterial == kTungsten) {
-		if (dataType == kData) {
-			if (energy == 188) initial_straggling = 1; // ish
-			else if (energy == 180) initial_straggling = 2.5;
-			else if (energy == 170) initial_straggling = 4.5;
-
-			// Definitly not monoenergetic
-			if (kOutputUnit == kEnergy) { // FIX THIS.. IS NOT JUST ADDED IN QUADRATURE
-				expectedStraggling = quadratureAdd(expectedStraggling,  initial_straggling);
-			}
-		}
-	}
-
+	Int_t meanBin = hFitResults->GetMean();
 	
 	Float_t expectedStragglingTo = expectedStraggling;
 	if (kMaterial == kAluminum && run_energy < 110) {
@@ -804,6 +968,37 @@ void drawBraggPeakGraphFit(Int_t Runs, Int_t dataType, Bool_t recreate, Float_t 
 	// three gaussians with a x0 at dlayer_down, 0, dlayer_up
 	// same sigma, same x, different scaling
 	
+	
+	TF1 *landau;
+	cout << "Energy " << run_energy << endl;
+	cout << "Layer;\t Constant;\t MPV;\t Sigma\n";
+	
+	for (Int_t i=0; i<15; i++) {
+		// do Landau fit for all possible layers
+		
+		Float_t searchFrom = getWEPLFromTL(getLayerPositionmm(i)) - 3;
+		Float_t searchTo = getWEPLFromTL(getLayerPositionmm(i+1)) - 5;
+		
+		landau = new TF1(Form("Landau_%d", i), "landau(0)", searchFrom, searchTo);
+		
+ 		landau->SetParameters(250, searchFrom+4, 1);
+ 		landau->SetParLimits(0, 5, 1500);
+ 		landau->SetParLimits(1, searchFrom, searchTo);
+ 		landau->SetParLimits(2, 0, 10);
+		landau->SetNpx(500);
+		
+		hFitResults->Fit(landau, "Q,M,B", "", searchFrom, searchTo);
+		
+		Float_t sigma = landau->GetParameter(2);
+		Float_t constant = landau->GetParameter(1);
+		
+		
+		if (sigma<4 && constant < 1000) {
+			landau->Draw("same");
+			cout << Form("%d;\t %8.5f;\t %8.5f; %8.5f\n", i, landau->GetParameter(0), landau->GetParameter(1), landau->GetParameter(2));
+		}
+	}
+	
 	TF1 *ES = new TF1("ES", 
 		Form("[0]*exp(-0.5*((x-[1])/[2])**2) + [3]*exp(-0.5*((x-[1]-%.5f)/[2])**2)", dlayer), 
 		expectedMean*0.9, expectedMean*1.25);
@@ -813,7 +1008,7 @@ void drawBraggPeakGraphFit(Int_t Runs, Int_t dataType, Bool_t recreate, Float_t 
  	ES->SetParLimits(2,expectedStraggling,expectedStragglingTo);
  	ES->SetParLimits(3,0,maxBin);
 	
-	hFitResults->Fit(ES,"B,Q,M,WW", "", expectedMean*0.85, expectedMean*1.25);
+	hFitResults->Fit(ES,"B,Q,M,WW,N", "", expectedMean*0.85, expectedMean*1.25);
 	
 	Float_t p1 = ES->GetParameter(0);
 	Float_t p2 = ES->GetParameter(3);
@@ -881,14 +1076,28 @@ void drawBraggPeakGraphFit(Int_t Runs, Int_t dataType, Bool_t recreate, Float_t 
 	cout << "Estimated WEPL = " << max_tl << " mm.\n";
 	cout << "Estimated energy = " << max_en << " MeV.\n";
 	
-	ES->Draw("same");
+// 	ES->Draw("same");
+// 	landau->Draw("same");
+// 	landau2->Draw("same");
 	cFitResults->Update();
-
-	TLegend *legend = new TLegend(0.65, 0.6, 0.98, 0.75);
+	
+		
+	// draw vertical lines between layers
+	Float_t line_z = 0;
+	TLine *l;
+	for (Int_t i=0; i<10; i++) {
+		line_z = getWEPLFromTL(getLayerPositionmm(i));
+		l = new TLine(line_z, 0, line_z, 80);
+		l->SetLineColor(kBlack); l->SetLineWidth(2); l->Draw();
+	}
+	
+	TLegend *legend = new TLegend(0.15, 0.7, 0.48, 0.85);
 	legend->SetTextSize(0.02);
 	legend->AddEntry(hFitResults, "Energy fits to tracks", "F");
-	legend->AddEntry(ES, "Theoretical curve with range straggling", "F");
+// 	legend->AddEntry(landau, Form("Fit with E = %.1f MeV and #sigma = %.1f mm ", landau_energy, landau->GetParameter(2)*1.7), "F");
+	legend->AddEntry(l, "Sensor layer positions", "L");
 	legend->Draw();
+
 	
 	Float_t lowerRange = expectedMean - expectedStraggling;
 	Float_t higherRange = expectedMean + expectedStraggling;
@@ -932,6 +1141,7 @@ void drawBraggPeakGraphFit(Int_t Runs, Int_t dataType, Bool_t recreate, Float_t 
 	
 	else if (kOutputUnit == kWEPL) {
 		cFitResults->SaveAs(Form("figures/Fitted_energies_%.2f_MeV_%s_%s_WEPL.pdf", energy, getMaterialChar(), getDataTypeChar(dataType)));
+		cFitResults->SaveAs(Form("figures/Tungsten_%.0fMeV_4.5sigma_projection.png", energy));
 	}
 	
   	delete tracks;
@@ -987,8 +1197,8 @@ void Draw2DProjection(Int_t Runs, Int_t dataType, Bool_t recreate, Float_t energ
 	Tracks * tracks = loadOrCreateTracks(recreate, Runs, kCalorimeter, energy);
 	tracks->extrapolateToLayer0();
 	
-	Int_t hSizeX = nx/8;
-	Int_t hSizeY = ny/8;
+	Int_t hSizeX = nx/32;
+	Int_t hSizeY = ny/32;
 
 	Float_t angleCut = 5.;
 	Float_t x0, y0, theta0;
@@ -1008,14 +1218,18 @@ void Draw2DProjection(Int_t Runs, Int_t dataType, Bool_t recreate, Float_t energ
 	for (Int_t i=0; i<ntracks; i++) {
 		Track *thisTrack = tracks->At(i);
 
+		if (!thisTrack) continue;
+		
 		x0 = thisTrack->getX(0);
 		y0 = thisTrack->getY(0);
 		theta0 = thisTrack->getSlopeAngle();
-		fit_energy = thisTrack->getEnergy();
+		
+		thisTrack->doFit();
+		fit_energy = thisTrack->getFitParameterEnergy();
 
 		if (theta0 > angleCut) continue;
 
-		Frame2D->Fill(x0, y0, energy);
+		Frame2D->Fill(x0, y0, fit_energy);
 		normalizeFrame->Fill(x0, y0);
 
 		nPoints++;
@@ -1025,6 +1239,8 @@ void Draw2DProjection(Int_t Runs, Int_t dataType, Bool_t recreate, Float_t energ
 
 	delete tracks;
 
+	cout << "nPoints = " << nPoints << endl;
+	
 	Frame2D->Draw("COLZ");
 	gStyle->SetOptStat(0);
 
@@ -1389,111 +1605,23 @@ Bool_t getCutBraggPeakInTrack(Track *track) {
 
 void getPValues() {
 	// create list with energies vs range
-	Int_t n = nPLEnergies;
 
-	TCanvas *cW = new TCanvas("cW", "Range fit for tungsten", 1200, 900);
-	TCanvas *cAl = new TCanvas("cAl", "Range fit for aluminum", 1200, 900);
-	TCanvas *cPMMA = new TCanvas("cPMMA", "Range fit for PMMA", 1200, 900);
-	TCanvas *cwater = new TCanvas("cwater", "Range fit for water", 1200, 900);
 	TCanvas *cCustom = new TCanvas("cCustom", "Range fit for custom range-energy list", 1200, 900);
+	Float_t energies[6] = {150, 160, 170, 180, 190, 200};
+	Float_t ranges[6] = {18.92, 20.95, 23.42, 25.61, 28.27, 30.97};
 
-	Float_t kPLFocal_H2O[n];
-	for (Int_t i=0; i<n; i++) {
-		kPLFocal_H2O[i] = kPLFocal_Al[i] * kWEPLRatio_Al[i];
-	}
-
-	const Int_t n2 = 18;
-	Float_t energies[n2] =
-				{30, 50, 70, 90, 110, 130, 150, 170, 180, 200,
-				 225, 250, 275, 300, 325, 350, 375, 400};
-
-// G4 ranges for pure Tungsten
-//	Float_t ranges[n2] = 
-//				{4.42, 6.83, 9.62, 12.8, 16.3, 20.1,
-//				 22.1, 26.3, 32.0, 38.0, 44.4, 51.0, 58.2, 65.3, 72.9, 80.6};
-
-// G4 ranges for pure Aluminium
-//	Float_t ranges[n2] = 
-//				{19.74, 30.788, 43.7312, 58.546, 75.122, 93.277, 102.893, 123.255,
-//					150.405, 180.101, 210.362, 242.602, 276.825, 312.74, 350.071, 387.685};
-
-	// PSTAR CSDA ranges water
-	Float_t ranges[n2] = 
-		{8.85, 22.27, 40.8, 63.98, 91.4, 122.8, 157.7, 196.1, 216.5, 259.6, 317.4, 379.4, 445.2, 514.5, 587.1, 662.8, 741.3, 822.5};
-
-	// G4 ranges for pure Aluminium
-//	Float_t ranges[n2] = 
-//		{40.48, 65.8, 91.22, 122.74, 157.334, 195.919, 216.203, 259.057, 316.699,
-//		 381.18, 446.793, 513.254, 586.785, 656.357, 739.504, 827.741};
-
-// PSTAR CSDA ranges for pure Tungsten
-//	Float_t ranges[n2] = 
-//				{0.18, 1.08, 2.56, 4.52, 6.92, 9.72, 12.9, 16.4, 20.2,
-//				 22.3, 26.5, 32.2, 38.3, 44.7, 51.5, 58.5, 65.9, 72.4, 81.2};
-
-
-	TGraph *graph_W = new TGraph(n,kPLEnergies,kPLFocal_W);
-	TGraph *graph_Al = new TGraph(n,kPLEnergies,kPLFocal_Al);
-	TGraph *graph_PMMA = new TGraph(n,kPLEnergies,kPLFocal_PMMA);
-	TGraph *graph_water = new TGraph(n,kPLEnergies, kPLFocal_H2O);
-	TGraph *graph_custom = new TGraph(4, energies, ranges);
-
-	graph_W->SetTitle("Range fit for tungsten");
-	graph_Al->SetTitle("Range fit for aluminum");
-	graph_PMMA->SetTitle("Range fit for PMMA");
-	graph_water->SetTitle("Range fit for water");
+	TGraph *graph_custom = new TGraph(6, energies, ranges);
 	graph_custom->SetTitle("Range fit for custom range-energy list");
+	graph_custom->Draw("A*");
 
-
-	cW->cd();
-		graph_W->Draw("A*");
-
-	cAl->cd();
-		graph_Al->Draw("A*");
-
-	cPMMA->cd();
-		graph_PMMA->Draw("A*");
-
-	cwater->cd();
-		graph_water->Draw("A*");
-
-	cCustom->cd();
-		graph_custom->Draw("A*");
-
-	TF1 *fW = new TF1("fW", "[0]*pow(x,[1])",0,400);
-	TF1 *fAl = new TF1("fAl", "[0]*pow(x,[1])",0,400);
-	TF1 *fPMMA = new TF1("fPMMA", "[0]*pow(x,[1])",0,400);
-	TF1 *fwater = new TF1("fwater", "[0]*pow(x,[1])",0,400);
-	TF1 *fCustom = new TF1("fCustom", "[0]*pow(x, [1])",0,400);
-
-	fW->SetParameter(0, 0.01); fW->SetParameter(1, 1.7);
-	fAl->SetParameter(0, 0.01); fAl->SetParameter(1, 1.7);
-	fPMMA->SetParameter(0, 0.01); fPMMA->SetParameter(1, 1.7);
-	fwater->SetParameter(0, 0.01); fwater->SetParameter(1, 1.7);
+	TF1 *fCustom = new TF1("fCustom", "[0]*pow(x, [1])",90,200);
 	fCustom->SetParameter(0, 0.01); fCustom->SetParameter(1, 1.7);
-
-	graph_W->Fit("fW");
-	graph_Al->Fit("fAl");
-	graph_PMMA->Fit("fPMMA");
-	graph_water->Fit("fwater");
 	graph_custom->Fit("fCustom");
 
-	Float_t a1 = fW->GetParameter(0);
-	Float_t p1 = fW->GetParameter(1);
-	Float_t a2 = fAl->GetParameter(0);
-	Float_t p2 = fAl->GetParameter(1);
-	Float_t a3 = fPMMA->GetParameter(0);
-	Float_t p3 = fPMMA->GetParameter(1);
-	Float_t a4 = fwater->GetParameter(0);
-	Float_t p4 = fwater->GetParameter(1);
-	Float_t a5 = fCustom->GetParameter(0);
-	Float_t p5 = fCustom->GetParameter(1);
+	Float_t a = fCustom->GetParameter(0);
+	Float_t p = fCustom->GetParameter(1);
 
-	cout << Form("For tungsten, the range fit is R = %.6f * E ^ %.6f\n", a1, p1);
-	cout << Form("For aluminum, the range fit is R = %.6f * E ^ %.6f\n", a2, p2);
-	cout << Form("For PMMA, the range fit is R = %.6f * E ^ %.6f\n", a3, p3);
-	cout << Form("For water, the range fit is R = %.6f * E ^ %.6f\n", a4, p4);
-	cout << Form("For custom, the range fit is R = %.6f * E ^ %.6f\n", a5, p5);
+	cout << Form("For custom, the range fit is R = %.6f * E ^ %.6f\n", a, p);
 
 }
 

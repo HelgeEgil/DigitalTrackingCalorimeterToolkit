@@ -17,7 +17,8 @@
 /gate/systems/scanner/level1/attach simplified
 /gate/systems/scanner/level2/attach layer
 
-/gate/chip/attachCrystalSD
+#/control/execute readout_chip.mac
+/control/execute readout_full.mac
 
 #=================#
 # Physics			#
@@ -35,15 +36,15 @@
 /gate/physics/ActivateStepLimiter         gamma
 /gate/physics/ActivateStepLimiter         proton
 
-/gate/physics/Electron/SetCutInRegion  scanner {step_passive} um
-/gate/physics/Positron/SetCutInRegion  scanner {step_passive} um
-/gate/physics/Gamma/SetCutInRegion     scanner {step_passive} um
-/gate/physics/Proton/SetCutInRegion    scanner {step_passive} um
+/gate/physics/Electron/SetCutInRegion  scanner 1 m
+/gate/physics/Positron/SetCutInRegion  scanner 1 m
+/gate/physics/Gamma/SetCutInRegion     scanner 1 m
+/gate/physics/Proton/SetCutInRegion    scanner 1 m
 
-/gate/physics/Electron/SetCutInRegion  chip {step_active} um
-/gate/physics/Positron/SetCutInRegion  chip {step_active} um
-/gate/physics/Gamma/SetCutInRegion     chip {step_active} um
-/gate/physics/Proton/SetCutInRegion    chip {step_active} um
+#/gate/physics/Electron/SetCutInRegion  chip {step_active} um
+#/gate/physics/Positron/SetCutInRegion  chip {step_active} um
+#/gate/physics/Gamma/SetCutInRegion     chip {step_active} um
+#/gate/physics/Proton/SetCutInRegion    chip {step_active} um
 
 /gate/run/initialize
 

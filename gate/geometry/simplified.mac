@@ -1,12 +1,3 @@
-/gate/scanner/daughters/name absorber_pre
-/gate/scanner/daughters/insert box
-/gate/absorber_pre/geometry/setXLength 38900. um
-/gate/absorber_pre/geometry/setYLength 38300. um
-/gate/absorber_pre/geometry/setZLength  1499.9 um
-/gate/absorber_pre/placement/setTranslation 0. 0. -750. um
-/gate/absorber_pre/setMaterial Aluminium
-/gate/absorber_pre/vis/setColor white
-
 /gate/scanner/daughters/name simplified
 /gate/scanner/daughters/insert box
 /gate/simplified/geometry/setXLength 40000.  um
@@ -55,12 +46,21 @@
 /gate/glue_2/setMaterial Glue
 /gate/glue_2/vis/setColor yellow
 
+/gate/layer/daughters/name passive
+/gate/layer/daughters/insert box
+/gate/passive/geometry/setXLength 38900.  um
+/gate/passive/geometry/setYLength 19149.5 um
+/gate/passive/geometry/setZLength    89.9 um
+/gate/passive/placement/setTranslation 0. 0. -165. um
+/gate/passive/setMaterial Silicon
+/gate/passive/vis/setColor green
+
 /gate/layer/daughters/name chip
 /gate/layer/daughters/insert box
 /gate/chip/geometry/setXLength 38900.  um
 /gate/chip/geometry/setYLength 19149.5 um
-/gate/chip/geometry/setZLength  119.9 um
-/gate/chip/placement/setTranslation 0. 0. -150. um
+/gate/chip/geometry/setZLength  29.9 um
+/gate/chip/placement/setTranslation 0. 0. -105. um
 /gate/chip/setMaterial Silicon
 /gate/chip/vis/setColor red
 
