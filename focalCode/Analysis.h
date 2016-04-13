@@ -1,10 +1,11 @@
 #ifndef Analysis_h
 #define Analysis_h
 
+class TCanvas;
+
 #include "Tracks.h"
 
 Tracks * getTracks(Int_t Runs, Int_t dataType = kMC, Int_t frameType = kCalorimeter, Float_t energy = 188);
-void		drawBraggPeakFit(Int_t Runs, Int_t dataType = kMC, Bool_t recreate = 0, Float_t energy = 188);
 void 		drawBraggPeakGraphFit(Int_t Runs, Int_t dataType = kMC, Bool_t recreate = 0, Float_t energy = 188);
 void	drawTungstenSpectrum(Int_t Runs, Int_t dataType = kMC, Bool_t recreate = 0, Float_t energy = 188);
 void saveTracks(Tracks* tracks, Int_t dataType, Float_t energy);
@@ -30,4 +31,5 @@ Bool_t getCutTrackLength(Float_t energy, Track *track);
 Bool_t getCutWEPL(Track *track);
 Bool_t getCutChipNumber(Track *track);
 Bool_t getCutBraggPeakInTrack(Track *track);
+void drawIndividualGraphs(TCanvas *cGraph, TGraphErrors* outputGraph, Float_t fitEnergy, Float_t fitScale, Int_t fitIdx);
 #endif

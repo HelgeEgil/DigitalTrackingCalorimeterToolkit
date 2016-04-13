@@ -23,4 +23,7 @@ Float_t getWEPLStragglingFromEnergy(Float_t energy, Float_t sigma_energy);
 Float_t getEnergyStragglingFromTL(Float_t range, Float_t sigma_energy);
 Float_t getEnergyStragglingFromEnergy(Float_t energy, Float_t sigma_energy);
 
+Float_t getUnitFromEnergy(Float_t energy);
+Float_t getUnitStragglingFromEnergy(Float_t energy, Float_t sigma_energy);
+
 #endif

@@ -126,3 +126,21 @@ Float_t getEnergyStragglingFromWEPLStraggling(Float_t wepl, Float_t WEPLStraggli
 
 	return energy_straggling;
 }
+
+Float_t getUnitFromEnergy(Float_t energy) {
+	Float_t res = 0;
+	if		  (kOutputUnit == kEnergy) 	res = energy;
+	else if (kOutputUnit == kPhysical) 	res = getTLFromEnergy(energy);
+	else if (kOutputUnit == kWEPL) 		res = getWEPLFromEnergy(energy);
+
+	return res;
+}
+
+Float_t getUnitStragglingFromEnergy(Float_t energy, Float_t sigma_energy) {
+	Float_t res = 0;
+	if		  (kOutputUnit == kEnergy)		res = getEnergyStragglingFromEnergy(energy, sigma_energy);
+	else if (kOutputUnit == kWEPL) 		res = getWEPLStragglingFromEnergy(energy, sigma_energy);
+	else if (kOutputUnit == kPhysical) 	res = getTLStragglingFromEnergy(energy, sigma_energy);
+
+	return res;
+}

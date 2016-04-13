@@ -63,266 +63,6 @@ void Focal::getMCData(Int_t runNo, TH3F* Frame3D) {
 	
 } // end function GetData3D
 
-/*
-void Focal::GetTrackerData(Int_t EventFrom, Int_t EventTo, vector<TH2F*> *Frame3D) {
-   // contains a list of clusters
-
-   if (fChain == 0) return;
-   TRandom3 *gRandom = new TRandom3(0);
-
-   Long64_t nentries = fChain->GetEntriesFast();
-
-   Frame3D->reserve((int) nTrackers);
-   for (Int_t i=0; i<nTrackers; i++) {
-      Frame3D->push_back(new TH2F(Form("Frame3D.%i", i), 
-                           Form("Energy deposition in tracker %i", i),
-                           nx*2, 0, nx*2, ny*2, 0, ny*2));
-   } // end fill vector with TH2F layers
-
-   Long64_t nbytes = 0, nb = 0;
-	Float_t X = 0, Y = 0;
-	Int_t Tracker = 0;
-
-
-   for (Long64_t jentry=0; jentry<nentries;jentry++) { // loop over entries in tree
-		Long64_t ientry = LoadTree(jentry);
-      if (ientry<0) break;
-      nb = fChain->GetEntry(jentry);
-      nbytes += nb;
-
-		if (eventID <= EventFrom) continue;
-		if (eventID > EventTo) break;
-      if (level1ID > 3) continue; // regular layers
-
-      Tracker = level1ID - 4;
-      
-		// with integration of four extra trackers
-      // -4, -3, -2, -1 are the trackers
-      
-      X = (posX + 19.25) * nx / (19.25);
-      Y = (posY + 19.2) * ny / (19.2);
-     
-      DiffuseAndFill(Frame3D, gRandom, X, Y, Tracker, edep*1000);
-   } // end loop over entries
-} // end function GetTrackerData
-
-// TOOL
-TrackerCollection* Focal::FindTrackerFrame(Int_t EventFrom, Int_t EventTo, Clusters *restPoints) {
-	Int_t Runs = EventTo - EventFrom;	
-
-	cout << "Before GetTrackerData\n";
-   vector<TH2F*> *Frame3D = new vector<TH2F*>;
-   GetTrackerData(EventFrom, EventTo, Frame3D);
-	cout << "After GetTrackerData\n";
-
-   // working cluster hit list
-   // to be emptied throughout run
-	Clusters *preClusters = new Clusters(Runs*ntrackers*10); // layer 0-1
-   Clusters *postClusters = new Clusters(Runs*nTrackers*10); // layer 2-3
-   TrackerCollection *trackerFrames = new TrackerCollection(Runs*nTrackers*20);
-   TrackerCollection *preTrackerFrames = new TrackerCollection(Runs*nTrackers*10);
-   TrackerCollection *postTrackerFrames = new TrackerCollection(Runs*nTrackers*10);
-   Cluster *nullCluster = new Cluster();
-
-	Tracker *tracker = new Tracker();
-   Tracker *preTracker = new Tracker();
-   Tracker *postTracker = new Tracker();
-
-   // Loop over layers to find connected clusters
-   // Put them in vector clusters with information about
-
-   for (Int_t l=-4; l<-4+ntrackers; l++) {
-      
-      Hits *hits = new Hits(Runs*200);
-      Clusters *clustersThisLayer = new Clusters(Runs*20);
-		
-		cout << "Before FindHits\n";
-      FindHits(Frame3D->at(l + nTrackers), hits, l);
-		cout << "After FindHits, before FindClustersFromHits\n";
-      FindClustersFromHits(hits, clustersThisLayer, Frame3D); 
-		cout << "After FindClustersFromHits\n";
-
-      Int_t nClusters = 0;
-
-      for (Int_t i=0; i<clustersThisLayer->GetEntriesFast(); i++) {
-         if (l==-4 || l==-3) preClusters->appendCluster(clustersThisLayer->At(i));
-         if (l==-2 || l==-1) postClusters->appendCluster(clustersThisLayer->At(i));
-         nClusters++;
-      } // end loop over clusters for layer l
-
-      delete clustersThisLayer;
-      delete hits;
-   } // end loop over all layers
-
-	for (UInt_t f=0; f<Frame3D->size(); f++) {
-		delete Frame3D->at(f);
-	}
-
-	delete Frame3D;
-
-   cout << "Found " << preClusters->GetEntriesFast() << " clusters in pre-tracker frames.\n";
-   cout << "Found " << postClusters->GetEntriesFast() << " clusters in post-tracker frames.\n";
-
-	cout << "Before optimization\n";
-   preClusters->makeLayerIndex(); // optimization step
-   postClusters->makeLayerIndex(); // optimization step
-	cout << "After optimization\n";
-
-
-   Clusters *seeds = new Clusters(1000);
-   Track* bestTrack = new Track();
-  
-	cout << "Before FindSeeds\n";	
-   FindSeeds(preClusters, seeds, -4);
-	cout << "After FindSeeds\n";
-
-   cout << "Found " << seeds->GetEntriesFast() << " seeds in pre-tracker layer.\n";
-
-   Int_t searchToLayer = -3;
-
-   for (Int_t i=0; i<seeds->GetEntriesFast(); i++) { // loop through layer -4 seeds
-		if (!seeds->At(i)) continue;
-		cout << "pre followseeds\n";
-		FollowSeeds(preClusters, seeds->At(i), bestTrack, searchToLayer);
-		cout << "post followseeds\n";
-
-      if (bestTrack->GetEntriesFast() > 0) {
-         preTracker->SetPreTracker1(bestTrack->At(0));
-         preTracker->SetPreTracker2(bestTrack->At(1));
-         
-         preTrackerFrames->AddTracker(preTracker);
-         preClusters->removeAllClustersInTrack(bestTrack);
-      } // end if bestTrack
-      bestTrack->Clear();
-   } // end loop through layer 0 seeds
-
-   seeds->Clear();
-   FindSeeds(postClusters, seeds, -2);
-
-   searchToLayer = -1;
-   
-   cout << "Found " << seeds->GetEntriesFast() << " seeds in post-tracker layer.\n";
-
-   for (Int_t i=0; i<seeds->GetEntriesFast(); i++) { // loop through layer -2 seeds
-		if (!seeds->At(i)) continue;
-      FollowSeeds(postClusters, seeds->At(i), bestTrack, searchToLayer);
-
-      if (bestTrack->GetEntriesFast() > 0) {
-         // found four here...?
-			cout << "Found " << bestTrack->GetEntriesFast() << " entries in bestTrack for post-tracker.\n";
-			for (Int_t j=0; j<bestTrack->GetEntriesFast(); j++) {
-				cout << bestTrack->At(j) << endl;
-				if (bestTrack->At(j)) cout << *bestTrack->At(j) << endl;
-			}
-         
-         postTracker->SetPostTracker1(bestTrack->At(0));
-         postTracker->SetPostTracker2(bestTrack->At(1));
-         
-         postTrackerFrames->AddTracker(postTracker);
-         postClusters->removeAllClustersInTrack(bestTrack);
-      } // end if bestTrack
-		bestTrack->Clear();
-   } // end loop through layer 1 seeds
-
-
-	// Try to connect tracks from the pre-tracker to the post-tracker...
-	// In this part the event count should be LOW to get a good match!
-	
-	Int_t nPre = preTrackerFrames->GetEntriesFast();
-	Int_t nPost = postTrackerFrames->GetEntriesFast();
-
-	for (Int_t i=0; i<nPre; i++) {
-		// 1) Find entry angle & position
-		// 2) Find projected (straight line) path to hit on post-tracker layer
-		// 3) For each post-track hit, calculate distance between expected hit and hit
-		// 4) If the smallest distance is < delta, connect the two events:
-		//		4a) Add them to trackerFrames object
-		//		4b) Remove them from PreTrackerFrame and PostTrackerFrame
-
-		if (!preTrackerFrames->At(i)) continue;
-
-
-		Cluster preDerivative = preTrackerFrames->At(i)->GetPreDerivative();
-		
-		Cluster *prePosition = preTrackerFrames->At(i)->GetPreTracker2();
-		Cluster *postPosition = new Cluster(0, 0, -2);
-		
-		cout << "Treating tracker hit at " << *prePosition << endl;
-
-		Float_t delta_z = postPosition->getLayermm() - prePosition->getLayermm();
-
-		postPosition->setXmm(prePosition->getXmm() + delta_z * preDerivative.getX());
-		postPosition->setYmm(prePosition->getYmm() + delta_z * preDerivative.getY());
-
-		cout << "Searching for layer in " << *postPosition << "... ";
-
-		Int_t minidx = -1;
-		Float_t mindelta = 1e10;
-
-		for (Int_t j=0; j<nPost; j++) {
-			if (!postTrackerFrames->At(j)) continue;
-
-			Float_t delta = sqrt(pow(postPosition->getXmm() - postTrackerFrames->At(j)->GetPostPositionXmm(), 2) +
-										pow(postPosition->getYmm() - postTrackerFrames->At(j)->GetPostPositionYmm(), 2));
-
-			if (delta < mindelta) {
-				// new candidate for tracker connection
-				mindelta = delta;
-				minidx = j;
-			}
-		}
-
-		cout << " ... done. The closest connection at actual point " << postTrackerFrames->At(minidx) << " with mindelta = " << mindelta << endl;
-	
-		tracker->SetPreTracker1(preTrackerFrames->At(i)->GetPreTracker1());
-		tracker->SetPreTracker2(preTrackerFrames->At(i)->GetPreTracker2());
-		tracker->SetPostTracker1(postTrackerFrames->At(minidx)->GetPostTracker1());
-		tracker->SetPostTracker2(postTrackerFrames->At(minidx)->GetPostTracker2());
-
-		trackerFrames->AddTracker(tracker);
-	}
-
-	cout << "After FindClustersFromHits\n";
-	cout << "There are now " << trackerFrames->GetEntriesFast() << " entries in trackerFrames.\n";
-
-	Int_t clustersLeft = 0;
-	for (Int_t i=0; i<preClusters->GetEntriesFast(); i++) {
-		if (preClusters->At(i)) {
-		   clustersLeft++;
-		   if (restPoints)  restPoints->appendCluster(postClusters->At(i));
-      }
-	}
-	for (Int_t i=0; i<postClusters->GetEntriesFast(); i++) {
-		if (postClusters->At(i)) {
-		   clustersLeft++;
-		   if (restPoints)  restPoints->appendCluster(postClusters->At(i));
-      }
-	}
-
-   cout << "There are " << clustersLeft << " of " << preClusters->GetEntriesFast() + postClusters->GetEntriesFast() << " remaining hits not assigned to track!\n";
-
-   delete seeds;
-   delete bestTrack;
-   delete preClusters;
-   delete postClusters;
-	delete tracker;
-	delete preTracker;
-	delete postTracker;
-	delete nullCluster;
-	delete preClusters;
-	delete postClusters;
-	delete preTrackerFrames;
-	delete postTrackerFrames;
-   
-   return trackerFrames;
-   
-} // end function FindTracks
-
-// TOOL
-*/
-
-// TOOL
-
 void Focal::getDataFrame(Int_t runNo, CalorimeterFrame * cf, Int_t energy) {
 
 	if (!existsEnergyFile(energy)) {
@@ -407,21 +147,17 @@ void Focal::getMCFrame(Int_t runNo, CalorimeterFrame *cf) {
 	Float_t offsetX = (nx+2) * dx;
 	Float_t offsetY = (ny) * dy;
 	Float_t x,y;
-	Int_t calorimeterLayer;
+	Int_t calorimeterLayer = 0;
 
-		if (fChain == 0) return;
+	if (fChain == 0) return;
 	Long64_t nentries = fChain->GetEntriesFast();
 	Long64_t nbytes = 0, nb = 0;
+
 	for (Long64_t jentry=lastJentry_; jentry<nentries; jentry++) {
-			Long64_t ientry = LoadTree(jentry);
+		Long64_t ientry = LoadTree(jentry);
 		if (ientry<0) break;
 		nb = fChain->GetEntry(jentry);
 		nbytes += nb;
-
-		if (parentID != 0) {
-			// a secondary particle
-			continue;
-		}
 		
 		if (eventID < eventIdFrom) {
 			continue;
@@ -434,7 +170,6 @@ void Focal::getMCFrame(Int_t runNo, CalorimeterFrame *cf) {
 		
 		calorimeterLayer = level1ID;
 
-		
 		if (calorimeterLayer<0) {
 			continue;
 		}
@@ -442,6 +177,6 @@ void Focal::getMCFrame(Int_t runNo, CalorimeterFrame *cf) {
 		x = (posX + offsetX) * nx / (offsetX);
 		y = (posY + offsetY) * ny / (offsetY);
 
-		cf->fillAt(calorimeterLayer, x, y, edep*1000); // /4 to account for longer chip
+		cf->fillAt(calorimeterLayer, x, y, edep*1000);
 	}
 }
