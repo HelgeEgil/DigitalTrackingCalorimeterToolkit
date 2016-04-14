@@ -69,7 +69,7 @@
 /gate/source/uniformBeam/gps/centre 0. 0. -1.7 m # -20 cm for scintillator
 
 /gate/output/root/enable
-/gate/output/root/setFileName ../../focalCode/rawdata/test_scintillatorfilter_{energy}_thickness-{thick}MeV
+/gate/output/root/setFileName ../../focalCode/rawdata/test_scintillatorfilter_{energy}MeV
 
 /gate/random/setEngineName MersenneTwister
 /gate/random/setEngineSeed auto

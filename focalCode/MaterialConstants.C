@@ -130,3 +130,15 @@ Double_t getLayerPositionmm(Int_t i) {
 
 	return z;
 }
+
+Float_t getSigmaEnergy(Int_t energy) { 
+	Float_t sigma_energy = 0;
+	
+		if 	  (energy == 188) sigma_energy = 0.3; // approx
+	else if (energy == 180) sigma_energy = 2.3;
+	else if (energy == 170) sigma_energy = 4.5; // was 4.5
+	else if (energy == 160) sigma_energy = 8.3;
+	else if (energy == 150) sigma_energy = 20;
+	
+	return sigma_energy;
+}

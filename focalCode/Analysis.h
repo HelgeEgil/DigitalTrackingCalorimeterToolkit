@@ -2,6 +2,8 @@
 #define Analysis_h
 
 class TCanvas;
+class TH1F;
+class TF1;
 
 #include "Tracks.h"
 
@@ -27,9 +29,13 @@ void 		Draw2DProjection(Int_t Runs, Int_t dataType, Bool_t recreate, Float_t ene
 void 		drawTrackRanges(Int_t Runs, Int_t dataType, Bool_t recreate, Float_t energy);
 void		getTrackStatistics(Int_t Runs, Int_t dataType = kMC, Bool_t recreate = 0, Float_t energy = 188);
 // void   EdepHistogram();
+void drawFitScale(Int_t Runs, Int_t dataType, Bool_t recreate, Float_t energy);
 Bool_t getCutTrackLength(Float_t energy, Track *track);
 Bool_t getCutWEPL(Track *track);
 Bool_t getCutChipNumber(Track *track);
 Bool_t getCutBraggPeakInTrack(Track *track);
 void drawIndividualGraphs(TCanvas *cGraph, TGraphErrors* outputGraph, Float_t fitEnergy, Float_t fitScale, Int_t fitIdx);
+TF1 * doNGaussianFit( TH1F *h, Float_t sigma_energy );
+void doNLandauFit(TH1F *h);
+
 #endif

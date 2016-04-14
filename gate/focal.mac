@@ -36,10 +36,10 @@
 /gate/physics/ActivateStepLimiter         gamma
 /gate/physics/ActivateStepLimiter         proton
 
-/gate/physics/Electron/SetCutInRegion  scanner 1 mm
-/gate/physics/Positron/SetCutInRegion  scanner 1 mm
-/gate/physics/Gamma/SetCutInRegion     scanner 1 mm
-/gate/physics/Proton/SetCutInRegion    scanner 1 mm
+/gate/physics/Electron/SetCutInRegion  scanner {step_passive} mm
+/gate/physics/Positron/SetCutInRegion  scanner {step_passive} mm
+/gate/physics/Gamma/SetCutInRegion     scanner {step_passive} mm
+/gate/physics/Proton/SetCutInRegion    scanner {step_passive} mm
 
 /gate/physics/Electron/SetCutInRegion  chip {step_active} um
 /gate/physics/Positron/SetCutInRegion  chip {step_active} um
@@ -81,7 +81,7 @@
 #/gate/source/PBS/setEllipseYPhiRotationNorm positive
 
 /gate/output/root/enable
-/gate/output/root/setFileName ../focalCode/rawdata/focal_{material}_energy{energy}_sigma{sigma}
+/gate/output/root/setFileName ../focalCode/rawdata/focal_{material}_energy{energy}_sigma{sigma}_noscint
 
 #===============#
 # START BEAMS	#
