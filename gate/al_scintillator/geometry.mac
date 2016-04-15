@@ -18,7 +18,7 @@
 /gate/filter/geometry/setYLength 75. cm
 /gate/filter/geometry/setZLength 1.5 mm
 /gate/filter/placement/setTranslation 0. 0. 0. m
-/gate/filter/setMaterial aluminium
+/gate/filter/setMaterial Aluminium
 /gate/filter/vis/forceWireframe
 
 /gate/scanner/daughters/name filter2
@@ -26,6 +26,6 @@
 /gate/filter2/geometry/setXLength 75. cm
 /gate/filter2/geometry/setYLength 75. cm
 /gate/filter2/geometry/setZLength 1. cm
-/gate/filter2/placement/setTranslation 0. 0. 1 cm
+/gate/filter2/placement/setTranslation 0. 0. 2 cm
 /gate/filter2/setMaterial myScintillator
 /gate/filter2/vis/forceWireframe

@@ -27,6 +27,8 @@ Float_t getEnergyLossFromScintillators(Float_t energy, Int_t nScintillators);
 Float_t getEnergyLossErrorFromScintillators(Int_t nScintillators);
 Float_t getEnergyLossFromAluminumAbsorber(Float_t energy);
 Float_t getEnergyLossErrorFromAluminumAbsorber();
+Float_t getEnergyLossFromScintillatorAndAluminum(Float_t energy);
+Float_t getEnergyLossErrorFromScintillatorAndAluminum();
 Double_t getLayerPositionmm(Int_t i);
 Float_t getSigmaEnergy(Int_t energy);
 void setWaterPValues(Int_t setting);

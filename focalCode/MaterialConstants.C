@@ -121,6 +121,14 @@ Float_t getEnergyLossErrorFromAluminumAbsorber() {
 	return 0.16;
 }
 
+Float_t getEnergyLossFromScintillatorAndAluminum(Float_t energy) {
+	return 451.86 * pow(energy, -0.818);
+}
+
+Float_t getEnergyLossErrorFromScintillatorAndAluminum() {
+	return 0.37;
+}
+
 Double_t getLayerPositionmm(Int_t i) {
 	Double_t z = 0;
 

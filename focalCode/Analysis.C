@@ -570,8 +570,11 @@ void drawBraggPeakGraphFit(Int_t Runs, Int_t dataType, Bool_t recreate, Float_t 
 	cout << "Using scintillators: " << kIsScintillator << endl;
 	
 	Bool_t kDrawHorizontalLines = false;
-	Bool_t kDrawVerticalLayerLines = true;
+	Bool_t kDrawVerticalLayerLines = false;
 	Bool_t kDrawIndividualGraphs = true;
+	
+	Bool_t kOutsideScintillatorCross = false;
+	Bool_t kInsideScintillatorCross = true;
 
 	char * sDataType = getDataTypeChar(dataType); char * sMaterial = getMaterialChar();
 	char * hTitle = Form("Fitted energy of a %.2f MeV beam in %s (%s)", energy, sMaterial, sDataType);
@@ -602,7 +605,15 @@ void drawBraggPeakGraphFit(Int_t Runs, Int_t dataType, Bool_t recreate, Float_t 
 			continue;
 		}
 		
-		outputGraph = (TGraphErrors*) thisTrack->doRangeFit();
+		if (kOutsideScintillatorCross) {
+			if (thisTrack->isHitOnScintillators()) continue;
+		}
+		
+		if (kInsideScintillatorCross) {
+			if (!thisTrack->isHitOnScintillators()) continue;
+		}
+		
+		outputGraph = (TGraphErrors*) thisTrack->doFit();
 		if (!outputGraph) continue;
 			
 		Float_t fitEnergy = thisTrack->getFitParameterEnergy();
@@ -645,10 +656,10 @@ void drawBraggPeakGraphFit(Int_t Runs, Int_t dataType, Bool_t recreate, Float_t 
 		 << ". The straggling including / excluding energy variation is " << expectedStraggling << " / " << nullStraggling << ".\n";
 	
 // 	TF1 *nGauss = doNGaussianFit(hFitResults, sigma_energy);
-// 	doNLandauFit(hFitResults);
+//  	doNLandauFit(hFitResults);
 	
 		 
-	hFitResults->GetXaxis()->SetRangeUser(120, 220);
+// 	hFitResults->GetXaxis()->SetRangeUser(120, 220);
 	cFitResults->Update();
 	
 	TLine *l;
@@ -663,12 +674,11 @@ void drawBraggPeakGraphFit(Int_t Runs, Int_t dataType, Bool_t recreate, Float_t 
 	
 	TLegend *legend = new TLegend(0.15, 0.7, 0.48, 0.85);
 	legend->SetTextSize(0.02);
-	legend->AddEntry(hFitResults, "Energy fits to tracks", "F");
-// 	legend->AddEntry(landau, Form("Fit with E = %.1f MeV and #sigma = %.1f mm ", landau_energy, landau->GetParameter(2)*1.7), "F");
+	legend->AddEntry(hFitResults, "Results from individual track fits", "F");
+//  	legend->AddEntry(landau, Form("Fit with E = %.1f MeV and #sigma = %.1f mm ", landau_energy, landau->GetParameter(2)*1.7), "F");
 	if (kDrawVerticalLayerLines) legend->AddEntry(l, "Sensor layer positions", "L");
-	legend->Draw();
+// 	legend->Draw();
 
-	
 	Float_t lowerRange = expectedMean - expectedStraggling;
 	Float_t higherRange = expectedMean + expectedStraggling;
 	
@@ -890,8 +900,8 @@ Tracks * getTracks(Int_t Runs, Int_t dataType, Int_t frameType, Float_t energy) 
 	for (Int_t i=0; i<Runs; i++) {
 
 		cout << "Finding track " << (i+1)*kEventsPerRun << " of " << Runs*kEventsPerRun << "...\n";
-		
 		if (dataType == kMC) {
+		
 			t1.Start();
 			f->getMCFrame(i, cf);
 			if (kDebug) cout << "Sum frame layer 2 = " << cf->getTH2F(2)->GetSum() << endl;
@@ -1347,7 +1357,7 @@ void doNLandauFit(TH1F *h) {
 		
 		Float_t integral = h->Integral(bmin, bmax);
 		Float_t ratio = integral / fullIntegral;
-
+		
  		if (ratio < 0.15 && i<4) continue;
 
 		landau = new TF1(Form("Landau_%d", i), "landau(0)", searchFrom, searchTo);
@@ -1363,9 +1373,9 @@ void doNLandauFit(TH1F *h) {
 		Float_t sigma = landau->GetParameter(2);
 		Float_t constant = landau->GetParameter(1);
 		
-		if (sigma<4 && constant < 1000) {
+ 		if (sigma<1 && constant < 1000) {
 			landau->Draw("same");
 			cout << Form("%d;\t %8.5f;\t %8.5f;\t %8.5f;\t %8.5f\n", i, landau->GetParameter(0), landau->GetParameter(1), landau->GetParameter(2), ratio);
-		}
+ 		}
 	}
 }

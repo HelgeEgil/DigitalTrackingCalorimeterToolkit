@@ -45,6 +45,8 @@ void findFilterEnergyLoss::Loop()
 	Double_t alpha_prime = 0.203815;
 	Double_t p = 1.707283;
 	
+	Float_t run_thickness = 1;
+
 	if (fChain == 0) return;
 
 	Long64_t nentries = fChain->GetEntriesFast();

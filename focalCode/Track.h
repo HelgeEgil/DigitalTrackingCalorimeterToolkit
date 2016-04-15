@@ -50,6 +50,7 @@ class Track : public TObject {
 	virtual Float_t getPreEnergyLoss();
 	virtual Float_t getPreWEPL();
 	virtual Float_t getPreTL();
+	virtual Float_t getPreTLFromScintillatorAndAluminum();
 	virtual Float_t getPreEnergyLossError();
 
 	// with dimensions
@@ -81,6 +82,7 @@ class Track : public TObject {
 	Float_t getEnergyStraggling();
 	Bool_t isHitOnScintillatorH();
 	Bool_t isHitOnScintillatorV();
+	Bool_t isHitOnScintillators();
 
 	Bool_t doesTrackEndAbruptly();
 	Float_t getRiseFactor();

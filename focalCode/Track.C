@@ -565,8 +565,8 @@ TGraphErrors * Track::doRangeFit() {
 	Int_t n = GetEntriesFast();
 	Float_t x[n], y[n];
 	Float_t erx[n], ery[n];
-	Float_t preTL = getPreTL();
- 	preTL = 0;
+	Float_t preTL = getPreTLFromScintillatorAndAluminum();
+//  	preTL = 0;
 	
 	for (Int_t i=0; i<n; i++) {
 		if (!At(i)) continue;
@@ -625,8 +625,8 @@ TGraphErrors * Track::doFit() {
 	Int_t n = GetEntriesFast();
 	Float_t x[n], y[n];
 	Float_t erx[n], ery[n];
-	Float_t preTL = getPreTL();
-	Float_t trackLength = 0; preTL;
+	Float_t preTL = getPreTLFromScintillatorAndAluminum();
+	Float_t trackLength = preTL;
 	
 	for (Int_t i=0; i<n; i++) {
 		if (!At(i)) continue;
@@ -643,11 +643,9 @@ TGraphErrors * Track::doFit() {
 	if (kOutputUnit == kWEPL || kOutputUnit == kEnergy) {
 		Float_t WEPLFactor = getWEPLFactorFromEnergy(estimated_energy);
 		for (Int_t i=0; i<n; i++) {
-			x[i] = x[i] * WEPLFactor / getSinuosity();
+			x[i] = x[i] * WEPLFactor;
 		}
 	}
-	
-// 	Float_t estimated_energy = getEnergyFromWEPL(x[n-1] + 0.5*dz);
 	
 	TGraphErrors *graph = new TGraphErrors(n, x, y, erx, ery);
 	Float_t scaleParameter = 0;
@@ -661,10 +659,6 @@ TGraphErrors * Track::doFit() {
 		if (kMaterial == kTungsten) scaleParameter = 100;
 		if (kMaterial == kAluminum) scaleParameter = 126;
 	}
-
-	//if (run_energy > max_energy) {
-		//max_energy = run_energy;
-//	}
 		
 	TF1 *func = new TF1("fit_BP", fitfunc_DBP, 0, 500, 2);
 	func->SetParameter(0, estimated_energy);
@@ -710,7 +704,7 @@ Float_t Track::getPreEnergyLoss() {
 
 	if (kIsScintillator) {
 		nScintillators = 1 + isHitOnScintillatorH() + isHitOnScintillatorV();
-// 		energyLoss = getEnergyLossFromScintillators(run_energy, nScintillators);
+ 		energyLoss = getEnergyLossFromScintillators(run_energy, nScintillators);
 	}
 
 	if (kIsAluminumPlate) {
@@ -736,7 +730,15 @@ Float_t Track::getPreWEPL() {
 	Float_t wepl = getWEPLFromEnergy(run_energy) - getWEPLFromEnergy(run_energy - energyLoss);
 	return wepl;
 }
+
+Float_t Track::getPreTLFromScintillatorAndAluminum() {
+	Float_t energyLoss = getEnergyLossFromScintillatorAndAluminum(run_energy);
 	
+	Float_t tl = getTLFromEnergy(run_energy) - getTLFromEnergy(run_energy - energyLoss);
+	
+	return tl;
+}
+
 Float_t Track::getPreTL() {
 	Float_t energyLoss = 0;
 	Int_t nScintillators = 0;
@@ -773,12 +775,16 @@ Float_t Track::getPreEnergyLossError() {
 	return energyLossError;
 }
 
+Bool_t Track::isHitOnScintillators() {
+	return (isHitOnScintillatorH() || isHitOnScintillatorV());
+}
+
 Bool_t Track::isHitOnScintillatorH() {
 	// (dx, dy, dz) = (4, 1, 0.5) cm @ -174 mm
 	Float_t scintillatorMeanDepth = 174;
 	Bool_t isOnScintillator = false;
 
-	Cluster *extrapolatedCluster = getExtrapolatedClusterAt(scintillatorMeanDepth);
+	Cluster *extrapolatedCluster = getExtrapolatedClusterAt(0);
 	Float_t y = extrapolatedCluster->getYmm();
 
 	if (fabs(y)<8) {		
@@ -793,7 +799,7 @@ Bool_t Track::isHitOnScintillatorV() {
 	Float_t scintillatorMeanDepth = 166;
 	Bool_t isOnScintillator = false;
 
-	Cluster *extrapolatedCluster = getExtrapolatedClusterAt(scintillatorMeanDepth);
+	Cluster *extrapolatedCluster = getExtrapolatedClusterAt(0);
 	Float_t x = extrapolatedCluster->getXmm();
 
 	if (fabs(x)<8) {

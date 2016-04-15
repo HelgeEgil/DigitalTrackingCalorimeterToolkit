@@ -197,13 +197,11 @@ Track * Clusters::nearestClusterTrackPropagation(Cluster *seed) {
 
 		currentTrack->clearTrack();
 	}
-
-	if (kDebug) {
-		cout << "Found " << seedTracks->GetEntriesFast() << " potential tracks from seed.\n";
-	}
 	
-	if (seedTracks->GetEntriesFast())
+	if (seedTracks->GetEntriesFast()) {
 		longestTrack = findLongestTrack(seedTracks);
+		if (kDebug) cout << Form("Longest track is %d layers deep with an energy of about %.1f MeV.\n", longestTrack->GetEntriesFast(), longestTrack->getEnergy());
+	}
 
 	delete seedTracks;
 	delete currentTrack;
