@@ -136,6 +136,16 @@ Float_t getUnitFromEnergy(Float_t energy) {
 	return res;
 }
 
+Float_t getEnergyFromUnit(Float_t unit) {
+	Float_t res = 0;
+
+	if		(kOutputUnit == kEnergy)	res = unit;
+	else if	(kOutputUnit == kPhysical)	res = getEnergyFromTL(unit);
+	else if (kOutputUnit == kWEPL)		res = getEnergyFromWEPL(unit);
+	
+	return res;
+}
+
 Float_t getUnitStragglingFromEnergy(Float_t energy, Float_t sigma_energy) {
 	Float_t res = 0;
 	if		  (kOutputUnit == kEnergy)		res = getEnergyStragglingFromEnergy(energy, sigma_energy);

@@ -75,10 +75,6 @@ void Clusters::findTracksFromLayer(Tracks * tracks, Int_t layer, Int_t trackFind
 	
 	Clusters * seeds = findSeeds(layer);
 	
-	if (kDebug) {
-		cout << "Number of seeds in layer " << layer << ": " << seeds->GetEntriesFast() << endl;
-	}
-	
 	for (Int_t i=0; i<seeds->GetEntriesFast(); i++) {
 		if (!seeds->At(i))
 			continue;
@@ -259,19 +255,24 @@ void Clusters::doNearestClusterTrackPropagation(Track *track, Int_t lastHitLayer
 	Cluster * skipNearestNeighbour = 0;
 	Float_t distance, skipDistance;
 
-	for (Int_t layer = lastHitLayer + 1; layer<nSearchLayers-1; layer++) {
+	// Used to be layer < nSearchlayers - 1
+	// I don't know why... 
+	for (Int_t layer = lastHitLayer + 1; layer <= nSearchLayers+1; layer++) {
 		projectedPoint = getTrackPropagationToLayer(track, layer);
 
-		if (isPointOutOfBounds(projectedPoint))
+		if (isPointOutOfBounds(projectedPoint)) {
 			break;
+		}
 
 		nearestNeighbour = findNearestNeighbour(projectedPoint);
 		distance = diffmm(projectedPoint, nearestNeighbour);
 
-		if (distance > searchRadius/2) {
+		Bool_t skipCurrentLayer = (distance > searchRadius / 2);
+
+		if (skipCurrentLayer) {
 			projectedPoint = getTrackPropagationToLayer(track, layer+1);
 
-			if (!isPointOutOfBounds(projectedPoint)) {
+			if (!isPointOutOfBounds(projectedPoint)) { // repeat process in layer+1
 				skipNearestNeighbour = findNearestNeighbour(projectedPoint);
 				skipDistance = diffmm(projectedPoint, skipNearestNeighbour);
 
@@ -279,6 +280,7 @@ void Clusters::doNearestClusterTrackPropagation(Track *track, Int_t lastHitLayer
 					track->appendCluster(skipNearestNeighbour);
 					lastHitLayer = ++layer+1; // don't search next layer...
 				}
+				
 				else if (distance > 0) {
 					track->appendCluster(nearestNeighbour);
 					lastHitLayer = layer+1;
@@ -291,8 +293,9 @@ void Clusters::doNearestClusterTrackPropagation(Track *track, Int_t lastHitLayer
 			lastHitLayer = layer;
 		}
 
-		if (layer>lastHitLayer+2)
+		if (layer>lastHitLayer+2) {
 			break;
+		}
 	}
 
 	delete projectedPoint;

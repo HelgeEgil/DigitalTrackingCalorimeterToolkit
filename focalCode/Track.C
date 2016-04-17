@@ -566,7 +566,6 @@ TGraphErrors * Track::doRangeFit() {
 	Float_t x[n], y[n];
 	Float_t erx[n], ery[n];
 	Float_t preTL = getPreTLFromScintillatorAndAluminum();
-//  	preTL = 0;
 	
 	for (Int_t i=0; i<n; i++) {
 		if (!At(i)) continue;

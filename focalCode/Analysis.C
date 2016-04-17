@@ -574,7 +574,7 @@ void drawBraggPeakGraphFit(Int_t Runs, Int_t dataType, Bool_t recreate, Float_t 
 	Bool_t kDrawIndividualGraphs = true;
 	
 	Bool_t kOutsideScintillatorCross = false;
-	Bool_t kInsideScintillatorCross = true;
+	Bool_t kInsideScintillatorCross = false;
 
 	char * sDataType = getDataTypeChar(dataType); char * sMaterial = getMaterialChar();
 	char * hTitle = Form("Fitted energy of a %.2f MeV beam in %s (%s)", energy, sMaterial, sDataType);
@@ -613,7 +613,7 @@ void drawBraggPeakGraphFit(Int_t Runs, Int_t dataType, Bool_t recreate, Float_t 
 			if (!thisTrack->isHitOnScintillators()) continue;
 		}
 		
-		outputGraph = (TGraphErrors*) thisTrack->doFit();
+		outputGraph = (TGraphErrors*) thisTrack->doRangeFit();
 		if (!outputGraph) continue;
 			
 		Float_t fitEnergy = thisTrack->getFitParameterEnergy();
@@ -621,7 +621,7 @@ void drawBraggPeakGraphFit(Int_t Runs, Int_t dataType, Bool_t recreate, Float_t 
 		
 		hFitResults->Fill(getUnitFromEnergy(fitEnergy));
 
-		if (fitIdx < plotSize && kDrawIndividualGraphs) {
+		if (fitIdx < plotSize && kDrawIndividualGraphs ) {
 			drawIndividualGraphs(cGraph, outputGraph, fitEnergy, fitScale, fitIdx++);
 		}
 		
@@ -656,7 +656,7 @@ void drawBraggPeakGraphFit(Int_t Runs, Int_t dataType, Bool_t recreate, Float_t 
 		 << ". The straggling including / excluding energy variation is " << expectedStraggling << " / " << nullStraggling << ".\n";
 	
 // 	TF1 *nGauss = doNGaussianFit(hFitResults, sigma_energy);
-//  	doNLandauFit(hFitResults);
+  	doNLandauFit(hFitResults);
 	
 		 
 // 	hFitResults->GetXaxis()->SetRangeUser(120, 220);
@@ -1338,7 +1338,7 @@ void doNLandauFit(TH1F *h) {
 	TF1 *landau;
 	cout << "Energy " << run_energy << endl;
 	cout << "Layer;\t Constant;\t MPV;\t Sigma;\t Fits in layer\n";
-	
+	Float_t constant, mpv, lEnergy, sigma;
 	
 	Int_t bmin, bmax;
 	TAxis *axis = h->GetXaxis();
@@ -1347,7 +1347,7 @@ void doNLandauFit(TH1F *h) {
 	for (Int_t i=0; i<15; i++) {
 		// do Landau fit for all possible layers
 		
-// 		if (getWEPLFromTL(getLayerPositionmm(i)) > getUnitFromEnergy(run_energy*1.2)) continue;
+ 		if (getWEPLFromTL(getLayerPositionmm(i)) > getUnitFromEnergy(run_energy*1.2)) continue;
 
 		Float_t searchFrom = getWEPLFromTL(getLayerPositionmm(i)) - 3;
 		Float_t searchTo = getWEPLFromTL(getLayerPositionmm(i+1)) - 3;
@@ -1363,19 +1363,22 @@ void doNLandauFit(TH1F *h) {
 		landau = new TF1(Form("Landau_%d", i), "landau(0)", searchFrom, searchTo);
 		
   		landau->SetParameters(250, searchFrom, 4);
-  		landau->SetParLimits(0, 5, 1500);
+  		landau->SetParLimits(0, 50, 10000);
   		landau->SetParLimits(1, searchFrom, searchTo);
   		landau->SetParLimits(2, 0, 10);
 		landau->SetNpx(500);
 		
 		h->Fit(landau, "Q,M,B", "", searchFrom, searchTo);
 		
-		Float_t sigma = landau->GetParameter(2);
-		Float_t constant = landau->GetParameter(1);
-		
- 		if (sigma<1 && constant < 1000) {
+		sigma = landau->GetParameter(2);
+		constant = landau->GetParameter(0);
+		mpv = landau->GetParameter(1);
+		lEnergy = getEnergyFromUnit(mpv);
+
+
+ 		if (sigma<5 && constant != 250) {
 			landau->Draw("same");
-			cout << Form("%d;\t %8.5f;\t %8.5f;\t %8.5f;\t %8.5f\n", i, landau->GetParameter(0), landau->GetParameter(1), landau->GetParameter(2), ratio);
+			cout << Form("%d;\t %8.5f;\t %8.5f;\t %8.5f;\t %8.5f;\t %8.5f\n", i, constant, mpv, lEnergy, sigma, ratio);
  		}
 	}
 }

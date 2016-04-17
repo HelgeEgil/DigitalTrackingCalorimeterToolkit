@@ -48,7 +48,7 @@
 
 /gate/run/initialize
 
-/geometry/test/recursive_test
+# /geometry/test/recursive_test
 
 #=======================#
 # ADD PROTON BEAM	      #
@@ -64,7 +64,7 @@
 /gate/source/uniformBeam/gps/direction 0 0 1
 /gate/source/uniformBeam/gps/halfx 20. mm
 /gate/source/uniformBeam/gps/halfy 20. mm
-/gate/source/uniformBeam/gps/centre 0. 0. -5.0 cm # -20 cm for scintillator
+/gate/source/uniformBeam/gps/centre 0. 0. -20.0 cm # -20 cm for scintillator
 
 #/gate/source/addSource PBS PencilBeam
 #/gate/source/PBS/setParticleType proton

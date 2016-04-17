@@ -35,9 +35,6 @@ void Layer::diffuseLayer(TRandom3 *gRandom) {
 		y = hits->getY(h);
 		eDep = hits->getEdep(h);
 		
-//		eDep = frame2D_.GetBinContent(x, y);
-//		frame2D_.SetBinContent(x, y, 0);
-
 		repeatFactor = eDep * EnergyFactor;
 		newSigma = pow(repeatFactor, 0.25) / 6;
 		
