@@ -573,7 +573,7 @@ void drawBraggPeakGraphFit(Int_t Runs, Int_t dataType, Bool_t recreate, Float_t 
 	Bool_t kDrawVerticalLayerLines = false;
 	Bool_t kDrawIndividualGraphs = true;
 	
-	Bool_t kOutsideScintillatorCross = false;
+	Bool_t kOutsideScintillatorCross = true;
 	Bool_t kInsideScintillatorCross = false;
 
 	char * sDataType = getDataTypeChar(dataType); char * sMaterial = getMaterialChar();
@@ -613,7 +613,7 @@ void drawBraggPeakGraphFit(Int_t Runs, Int_t dataType, Bool_t recreate, Float_t 
 			if (!thisTrack->isHitOnScintillators()) continue;
 		}
 		
-		outputGraph = (TGraphErrors*) thisTrack->doRangeFit();
+		outputGraph = (TGraphErrors*) thisTrack->doFit();
 		if (!outputGraph) continue;
 			
 		Float_t fitEnergy = thisTrack->getFitParameterEnergy();
@@ -654,12 +654,18 @@ void drawBraggPeakGraphFit(Int_t Runs, Int_t dataType, Bool_t recreate, Float_t 
 	
 	cout << "OutputUnit is " << kOutputUnit << " and the expected mean value is " << expectedMean 
 		 << ". The straggling including / excluding energy variation is " << expectedStraggling << " / " << nullStraggling << ".\n";
-	
-// 	TF1 *nGauss = doNGaussianFit(hFitResults, sigma_energy);
-  	doNLandauFit(hFitResults);
-	
+
 		 
-// 	hFitResults->GetXaxis()->SetRangeUser(120, 220);
+	Float_t means[10] = {};
+	
+// 	doNLandauFit(hFitResults, means);
+	doNGaussianFit(hFitResults, means);
+	
+	Int_t nMean = 0;
+	for (Int_t i=0; i<10; i++) {
+		if (means[i]) nMean++;
+	}
+	
 	cFitResults->Update();
 	
 	TLine *l;
@@ -690,9 +696,11 @@ void drawBraggPeakGraphFit(Int_t Runs, Int_t dataType, Bool_t recreate, Float_t 
 	hFitResults->SetBit(TH1::kNoStats);
 	ps->AddText(Form("Nominal mean = %.2f", expectedMean));
 	ps->AddText(Form("Nominal straggling = %.2f", expectedStraggling));
-	ps->AddText(Form("Straggling (from FWHM) = %.2f", sigma_fwhm));
-	ps->AddText(Form("Straggling (from FWTM) = %.2f", sigma_fwtm));
-	ps->AddText(Form("Straggling (from FWQM) = %.2f", sigma_fwqm));
+	
+	for (Int_t i=0; i<nMean; i++) {
+		ps->AddText(Form("WEPL fit %d = %.2f", i+1, means[i]));
+		ps->AddText(Form("Energy fit %d = %.2f", i+1, getEnergyFromUnit(means[i])));
+	}
 		
 	if (kOutputUnit == kPhysical) {
 		cFitResults->SaveAs(Form("figures/Fitted_energies_%.2f_MeV_%s_%s_physical.pdf", energy, getMaterialChar(), getDataTypeChar(dataType)));
@@ -702,7 +710,7 @@ void drawBraggPeakGraphFit(Int_t Runs, Int_t dataType, Bool_t recreate, Float_t 
 	}
 	
 	else if (kOutputUnit == kWEPL) {
-		cFitResults->SaveAs(Form("figures/Fitted_energies_%.2f_MeV_%s_%s_WEPL.pdf", energy, getMaterialChar(), getDataTypeChar(dataType)));
+		cFitResults->SaveAs(Form("figures/Fitted_energies_%.2f_MeV_%s_%s_WEPL.png", energy, getMaterialChar(), getDataTypeChar(dataType)));
 	}
 	
   	delete tracks;
@@ -977,7 +985,7 @@ Tracks * getTracks(Int_t Runs, Int_t dataType, Int_t frameType, Float_t energy) 
 void drawTracks3D(Int_t Runs, Int_t dataType, Bool_t recreate, Float_t energy) {
 	// FIXME Add kTracker to loadOrCreateTracks
   
-	Tracks * tracks = loadOrCreateTracks(recreate, Runs, kCalorimeter, energy);
+	Tracks * tracks = loadOrCreateTracks(recreate, Runs, dataType, energy);
 	tracks->extrapolateToLayer0();
 
 	TCanvas *c1 = new TCanvas("c1");
@@ -1233,6 +1241,7 @@ void drawIndividualGraphs(TCanvas *cGraph, TGraphErrors* outputGraph, Float_t fi
 	cGraph->Update();
 }
 
+/*
 TF1 * doNGaussianFit(TH1F* h, Float_t sigma_energy) {	
 	Int_t meanBin = h->GetMean();
 	Float_t expectedMean = getUnitFromEnergy(run_energy);
@@ -1333,40 +1342,145 @@ TF1 * doNGaussianFit(TH1F* h, Float_t sigma_energy) {
 	
 	return ES;
 }
+*/
 
-void doNLandauFit(TH1F *h) {
-	TF1 *landau;
+TF1 *doNGaussianFit ( TH1F *h, Float_t *means) {
+	TF1 *gauss;
 	cout << "Energy " << run_energy << endl;
-	cout << "Layer;\t Constant;\t MPV;\t Sigma;\t Fits in layer\n";
-	Float_t constant, mpv, lEnergy, sigma;
+	cout << "Layer;\t Constant;\t Mean;\t\t Energy;\t Sigma;\t\t Fits in layer\n";
 	
-	Int_t bmin, bmax;
+	Float_t constant, mean, lEnergy, sigma;
+	
+	Float_t array_mean[3] = {};
+	Int_t array_layer[3] = {};
+	Float_t array_constant[3] = {};
+	Float_t array_sigma[3] = {};
+	Float_t array_energy[3] = {};
+	Float_t array_f[3] = {};
+	
 	TAxis *axis = h->GetXaxis();
-	Float_t fullIntegral = h->Integral(0, axis->GetNbins());
+	Float_t fullIntegral = h->Integral();
 	
+	Bool_t isLastLayer, wasLastLayer = false;;
+	
+	Int_t j=0;
 	for (Int_t i=0; i<15; i++) {
 		// do Landau fit for all possible layers
 		
- 		if (getWEPLFromTL(getLayerPositionmm(i)) > getUnitFromEnergy(run_energy*1.2)) continue;
+ 		if (getWEPLFromTL(getLayerPositionmm(i)) > getUnitFromEnergy(run_energy*1.1)) continue;
 
-		Float_t searchFrom = getWEPLFromTL(getLayerPositionmm(i)) - 3;
-		Float_t searchTo = getWEPLFromTL(getLayerPositionmm(i+1)) - 3;
-	
+		Float_t searchFrom = getWEPLFromTL(getLayerPositionmm(i)) + 5;
+		Float_t searchTo = getWEPLFromTL(getLayerPositionmm(i+1)) + 10;
+		
 		Int_t bmin = axis->FindBin(searchFrom);
 		Int_t bmax = axis->FindBin(searchTo);
 		
 		Float_t integral = h->Integral(bmin, bmax);
 		Float_t ratio = integral / fullIntegral;
 		
- 		if (ratio < 0.15 && i<4) continue;
+		isLastLayer = ((getWEPLFromTL(getLayerPositionmm(i)) > getUnitFromEnergy(run_energy-10)) && !wasLastLayer && ratio > 0.01) ;
+		
+// 		cout << "searchFrom " << searchFrom << " isLastLayer << " << isLastLayer << " ratio " << ratio << endl;
+		
+ 		if (i<=4) continue;
+		if (ratio < 0.1 && !isLastLayer) continue;
+		
+		gauss = new TF1(Form("Gaus_%d", i), "gaus(0)", searchFrom, searchTo);
+		
+		sigma = 2;
+		if (isLastLayer && ratio < 0.05) sigma = 0.2;
+		
+		gauss->SetParameters(10, searchFrom, sigma);
+		gauss->SetParLimits(0, 2, 200);
+		gauss->SetParLimits(1, searchFrom, searchTo);
+		gauss->SetParLimits(2, 0.01, 10);
+// 		gauss->SetNpx(250);
+		
+		h->Fit(gauss, "Q, M, B, W", "", searchFrom, searchTo);
+		
+		sigma = gauss->GetParameter(2);
+		constant = gauss->GetParameter(0);
+		mean = gauss->GetParameter(1);
+		lEnergy = getEnergyFromUnit(mean);
+		
+// 		cout << Form("Searching from %.1f to %.1f, with midpoint at %.1f. Found best fit @ %.1f.\n", searchFrom, searchTo,(searchTo+searchFrom)/2 , mean);
+		
+ 		if (ratio > 0.1 || isLastLayer) {
+			gauss->Draw("same");
+			cout << Form("%d;\t %8.5f;\t %8.5f;\t %8.5f;\t %8.5f;\t %8.5f\n", i, constant, mean, lEnergy, sigma, ratio);
+			
+			if (j<3) {
+				array_mean[j] = mean;
+				array_layer[j] = i;
+				array_constant[j] = constant;
+				array_energy[j] = lEnergy;
+				array_sigma[j] = sigma;
+				array_f[j] = ratio;
+			}
+			
+			means[j++] = mean;
+ 		}
+ 		wasLastLayer = isLastLayer;
+	}
+	
+	if (true) {
+		ofstream file("output_gauss.csv", ofstream::out | ofstream::app);
+		// run_energy; layer[i], constant[i], mpv[i], energy[i], sigma[i], ratio[i];  i 1->3
+		
+		file << run_energy << "; ";
+		for (Int_t j=0; j<3; j++) {
+			file << Form("%d; %.5f; %.5f; %.5f; %.5f; %.5f; ",
+						 array_layer[j], array_constant[j], array_mean[j],
+						 array_energy[j], array_sigma[j], array_f[j]);
+		}
+		
+		file << endl;
+		file.close();
+	}
+	
+}
+
+void doNLandauFit(TH1F *h, Float_t *mpvs) {
+	TF1 *landau;
+	cout << "Energy " << run_energy << endl;
+	cout << "Layer;\t Constant;\t MPV;\t\t Energy;\t Sigma;\t\t Fits in layer\n";
+	Float_t constant, mpv, lEnergy, sigma;
+	
+	Bool_t kWriteFile = true;
+	Float_t array_mpv[3] = {};
+	Int_t array_layer[3] = {};
+	Float_t array_constant[3] = {};
+	Float_t array_sigma[3] = {};
+	Float_t array_energy[3] = {};
+	Float_t array_f[3] = {};
+	
+	TAxis *axis = h->GetXaxis();
+	Float_t fullIntegral = h->Integral();
+	
+	Int_t j=0;
+	for (Int_t i=0; i<15; i++) {
+		// do Landau fit for all possible layers
+		
+ 		if (getWEPLFromTL(getLayerPositionmm(i)) > getUnitFromEnergy(run_energy*1.2)) continue;
+
+		Float_t searchFrom = getWEPLFromTL(getLayerPositionmm(i)) + 10;
+		Float_t searchTo = getWEPLFromTL(getLayerPositionmm(i+1)) + 10;
+		
+		Int_t bmin = axis->FindBin(searchFrom);
+		Int_t bmax = axis->FindBin(searchTo);
+		
+		Float_t integral = h->Integral(bmin, bmax);
+		Float_t ratio = integral / fullIntegral;
+		
+ 		if (ratio < 0.05 || i<=4) continue;
 
 		landau = new TF1(Form("Landau_%d", i), "landau(0)", searchFrom, searchTo);
 		
-  		landau->SetParameters(250, searchFrom, 4);
-  		landau->SetParLimits(0, 50, 10000);
+  		landau->SetParameters(500, searchFrom+2, 0.5);
+  		landau->SetParLimits(0, 75, 2000);
   		landau->SetParLimits(1, searchFrom, searchTo);
-  		landau->SetParLimits(2, 0, 10);
-		landau->SetNpx(500);
+  		landau->SetParLimits(2, 0, 2);
+		landau->SetNpx(1000);
 		
 		h->Fit(landau, "Q,M,B", "", searchFrom, searchTo);
 		
@@ -1374,11 +1488,38 @@ void doNLandauFit(TH1F *h) {
 		constant = landau->GetParameter(0);
 		mpv = landau->GetParameter(1);
 		lEnergy = getEnergyFromUnit(mpv);
-
-
- 		if (sigma<5 && constant != 250) {
+		
+		cout << Form("Searching from %.1f to %.1f, with midpoint at %.1f. Found best fit @ %.1f.\n", searchFrom, searchTo, searchTo, mpv);
+		
+ 		if (sigma<5 && constant != 250 and ratio > 0.05) {
 			landau->Draw("same");
 			cout << Form("%d;\t %8.5f;\t %8.5f;\t %8.5f;\t %8.5f;\t %8.5f\n", i, constant, mpv, lEnergy, sigma, ratio);
+			
+			if (j<3) {
+				array_mpv[j] = mpv;
+				array_layer[j] = i;
+				array_constant[j] = constant;
+				array_energy[j] = lEnergy;
+				array_sigma[j] = sigma;
+				array_f[j] = ratio;
+			}
+			
+			mpvs[j++] = mpv;
  		}
+	}
+	
+	if (kWriteFile) {
+		ofstream file("output_landau.csv", ofstream::out | ofstream::app);
+		// run_energy; layer[i], constant[i], mpv[i], energy[i], sigma[i], ratio[i];  i 1->3
+		
+		file << run_energy << "; ";
+		for (Int_t j=0; j<3; j++) {
+			file << Form("%d; %.5f; %.5f; %.5f; %.5f; %.5f; ",
+						 array_layer[j], array_constant[j], array_mpv[j],
+						 array_energy[j], array_sigma[j], array_f[j]);
+		}
+		
+		file << endl;
+		file.close();
 	}
 }

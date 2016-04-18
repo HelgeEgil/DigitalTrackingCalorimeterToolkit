@@ -29,6 +29,5 @@ char * getDataTypeChar(Int_t dataType);
 Int_t getMinimumTrackLength(Float_t energy);
 Int_t getFWxMInRange(TH1F* h, Float_t first, Float_t last, Int_t div);
 Float_t quadratureAdd(Float_t a, Float_t b);
-Float_t getUnitFromEnergy(Float_t energy);
 
 #endif /* FOCALCODE_TOOLS_H_ */

@@ -664,7 +664,7 @@ TGraphErrors * Track::doFit() {
 	func->SetParameter(1, scaleParameter);
 	func->SetParLimits(0, 0, max_energy);
 	func->SetParLimits(1, scaleParameter,scaleParameter);
-	graph->Fit("fit_BP", "B, Q, N", "", 0, 500);
+	graph->Fit("fit_BP", "B, Q, N, WW", "", 0, 500);
 	
 	fitEnergy_ = func->GetParameter(0);
 	fitScale_ = func->GetParameter(1);

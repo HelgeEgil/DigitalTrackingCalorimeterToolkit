@@ -1,7 +1,7 @@
 #!/bin/bash
 # Usage: run.sh material energy_from energy_increment energy_to
 
-echo "Usage: ./run.sh <material> <energy_from> <energy_increment> <energy_to> <npart>"
+echo "Usage: ./run.sh <material> <energy_from> <energy_increment> <energy_to> <runs>"
 
 if [ $# -ne 5 ]; then
 	echo "No arguments supplied, exiting"
@@ -22,12 +22,11 @@ if [ $2 -gt $4 ] ; then
 	exit
 fi
 
-for i in `seq --format="%.2f" $2 $3 $4`;
+for i in `seq $2 $3 $4`;
 do
 	echo "Moving .root file"
-	mv rawdata/test_"$1"_"$i"MeV.root rawdata/test.root
+	mv rawdata/focal_Tungsten_energy"$i"_sigma0.root rawdata/test.root
 	echo "Making tracks at $i MeV."
-	# makeTracksFile.C(int Runs, int dataType, int energy)
 	root -l -q 'makeTracksFile.C('$5', '$i')'
-	mv rawdata/test.root rawdata/test_"$1"_"$i"MeV.root
+	mv rawdata/test.root rawdata/focal_Tungsten_energy"$i"_sigma0.root
 done

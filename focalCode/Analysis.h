@@ -35,7 +35,7 @@ Bool_t getCutWEPL(Track *track);
 Bool_t getCutChipNumber(Track *track);
 Bool_t getCutBraggPeakInTrack(Track *track);
 void drawIndividualGraphs(TCanvas *cGraph, TGraphErrors* outputGraph, Float_t fitEnergy, Float_t fitScale, Int_t fitIdx);
-TF1 * doNGaussianFit( TH1F *h, Float_t sigma_energy );
-void doNLandauFit(TH1F *h);
+TF1 * doNGaussianFit( TH1F *h, Float_t *means );
+void doNLandauFit(TH1F *h, Float_t *mpvs);
 
 #endif

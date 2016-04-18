@@ -81,7 +81,7 @@
 #/gate/source/PBS/setEllipseYPhiRotationNorm positive
 
 /gate/output/root/enable
-/gate/output/root/setFileName ../focalCode/rawdata/focal_{material}_energy{energy}_sigma{sigma}_noscint
+/gate/output/root/setFileName ../focalCode/rawdata/focal_{material}_energy{energy}_sigma{sigma}
 
 #===============#
 # START BEAMS	#

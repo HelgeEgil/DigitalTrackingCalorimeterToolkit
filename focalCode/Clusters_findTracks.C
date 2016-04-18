@@ -267,6 +267,13 @@ void Clusters::doNearestClusterTrackPropagation(Track *track, Int_t lastHitLayer
 		nearestNeighbour = findNearestNeighbour(projectedPoint);
 		distance = diffmm(projectedPoint, nearestNeighbour);
 
+		if (kDebug && distance > 0) {
+			cout << "Searching layer " << layer << ", and found nearest neighbour " << * nearestNeighbour << " with distance " << distance << " mm.\n";
+		}
+		if (kDebug && distance < 0) {
+			cout << "Searching layer " << layer << " and did not find any neighbours!\n";
+		}
+		
 		Bool_t skipCurrentLayer = (distance > searchRadius / 2);
 
 		if (skipCurrentLayer) {
@@ -288,7 +295,7 @@ void Clusters::doNearestClusterTrackPropagation(Track *track, Int_t lastHitLayer
 			}
 		}
 
-		else if (distance > 0) {
+		else if (distance > 0) { // and <searchRadius/2
 			track->appendCluster(nearestNeighbour);
 			lastHitLayer = layer;
 		}
