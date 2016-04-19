@@ -557,7 +557,7 @@ void drawFitScale(Int_t Runs, Int_t dataType, Bool_t recreate, Float_t energy) {
 	hScale->Draw();
 }	
 
-void drawBraggPeakGraphFit(Int_t Runs, Int_t dataType, Bool_t recreate, Float_t energy) {
+Float_t drawBraggPeakGraphFit(Int_t Runs, Int_t dataType, Bool_t recreate, Float_t energy) {
 	run_energy = energy;
 	
 	if (run_energy < 150) setWaterPValues(kLow);
@@ -573,8 +573,8 @@ void drawBraggPeakGraphFit(Int_t Runs, Int_t dataType, Bool_t recreate, Float_t 
 	Bool_t kDrawVerticalLayerLines = false;
 	Bool_t kDrawIndividualGraphs = true;
 	
-	Bool_t kOutsideScintillatorCross = true;
-	Bool_t kInsideScintillatorCross = false;
+	Bool_t kOutsideScintillatorCross = false;
+	Bool_t kInsideScintillatorCross = true;
 
 	char * sDataType = getDataTypeChar(dataType); char * sMaterial = getMaterialChar();
 	char * hTitle = Form("Fitted energy of a %.2f MeV beam in %s (%s)", energy, sMaterial, sDataType);
@@ -613,7 +613,7 @@ void drawBraggPeakGraphFit(Int_t Runs, Int_t dataType, Bool_t recreate, Float_t 
 			if (!thisTrack->isHitOnScintillators()) continue;
 		}
 		
-		outputGraph = (TGraphErrors*) thisTrack->doFit();
+		outputGraph = (TGraphErrors*) thisTrack->doRangeFit();
 		if (!outputGraph) continue;
 			
 		Float_t fitEnergy = thisTrack->getFitParameterEnergy();
@@ -659,8 +659,8 @@ void drawBraggPeakGraphFit(Int_t Runs, Int_t dataType, Bool_t recreate, Float_t 
 	Float_t means[10] = {};
 	
 // 	doNLandauFit(hFitResults, means);
-	doNGaussianFit(hFitResults, means);
-	
+	Float_t nGaussianFitRange = doNGaussianFit(hFitResults, means);
+		
 	Int_t nMean = 0;
 	for (Int_t i=0; i<10; i++) {
 		if (means[i]) nMean++;
@@ -714,6 +714,8 @@ void drawBraggPeakGraphFit(Int_t Runs, Int_t dataType, Bool_t recreate, Float_t 
 	}
 	
   	delete tracks;
+	
+	return nGaussianFitRange;
 }
 
 void writeClusterFile(Int_t Runs, Int_t dataType, Float_t energy) {
@@ -1344,7 +1346,7 @@ TF1 * doNGaussianFit(TH1F* h, Float_t sigma_energy) {
 }
 */
 
-TF1 *doNGaussianFit ( TH1F *h, Float_t *means) {
+Float_t  doNGaussianFit ( TH1F *h, Float_t *means) {
 	TF1 *gauss;
 	cout << "Energy " << run_energy << endl;
 	cout << "Layer;\t Constant;\t Mean;\t\t Energy;\t Sigma;\t\t Fits in layer\n";
@@ -1387,16 +1389,16 @@ TF1 *doNGaussianFit ( TH1F *h, Float_t *means) {
 		
 		gauss = new TF1(Form("Gaus_%d", i), "gaus(0)", searchFrom, searchTo);
 		
-		sigma = 2;
+		sigma = 3;
 		if (isLastLayer && ratio < 0.05) sigma = 0.2;
 		
 		gauss->SetParameters(10, searchFrom, sigma);
 		gauss->SetParLimits(0, 2, 200);
 		gauss->SetParLimits(1, searchFrom, searchTo);
-		gauss->SetParLimits(2, 0.01, 10);
+		gauss->SetParLimits(2, 0.01, 15);
 // 		gauss->SetNpx(250);
 		
-		h->Fit(gauss, "Q, M, B, W", "", searchFrom, searchTo);
+		h->Fit(gauss, "Q, M, B", "", searchFrom, searchTo);
 		
 		sigma = gauss->GetParameter(2);
 		constant = gauss->GetParameter(0);
@@ -1423,6 +1425,18 @@ TF1 *doNGaussianFit ( TH1F *h, Float_t *means) {
  		wasLastLayer = isLastLayer;
 	}
 	
+	Float_t estimated_energy = 0, estimated_range = 0;
+	Float_t sum_constant = 0;
+	for (Int_t i=0 ; i<3; i++) {
+		estimated_range += array_constant[i] * array_mean[i];
+		sum_constant += array_constant[i];
+	}
+	estimated_range /= sum_constant;
+	estimated_energy = getEnergyFromUnit(estimated_range);
+	cout << "ESTIMATED ENERGY FROM RUN IS " << estimated_energy << endl;
+	cout << "ESTIMATED ENERGY FROM RUN WITH 6 % FACTOR IS " << getEnergyFromUnit(estimated_range * 1.06) << endl;
+	
+	
 	if (true) {
 		ofstream file("output_gauss.csv", ofstream::out | ofstream::app);
 		// run_energy; layer[i], constant[i], mpv[i], energy[i], sigma[i], ratio[i];  i 1->3
@@ -1437,7 +1451,7 @@ TF1 *doNGaussianFit ( TH1F *h, Float_t *means) {
 		file << endl;
 		file.close();
 	}
-	
+	return estimated_range;
 }
 
 void doNLandauFit(TH1F *h, Float_t *mpvs) {
