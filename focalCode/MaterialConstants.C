@@ -82,16 +82,16 @@ void setWaterPValues(Int_t setting) {
 Float_t getEnergyLossFromScintillators(Float_t energy, Int_t nScintillators) {
 	Float_t energyLoss = 0;
 	
-	if 		(nScintillators == 0) energyLoss = 0;
-	else if (nScintillators == 1) energyLoss = 6.64;
-	else if (nScintillators == 2) energyLoss = 9.23;
-	else if (nScintillators == 3) energyLoss = 11.79;
+//	if 		(nScintillators == 0) energyLoss = 0;
+//	else if (nScintillators == 1) energyLoss = 6.64;
+//	else if (nScintillators == 2) energyLoss = 9.23;
+//	else if (nScintillators == 3) energyLoss = 11.79;
 	
 	
-// 	if 		(nScintillators == 0) energyLoss = 0;
-// 	else if (nScintillators == 1) energyLoss = 439.79 * pow(energy, -0.870);
-// 	else if (nScintillators == 2) energyLoss = 530.50 * pow(energy, -0.822);
-// 	else if (nScintillators == 3) energyLoss = 650.42 * pow(energy, -0.804);
+ 	if 		(nScintillators == 0) energyLoss = 0;
+ 	else if (nScintillators == 1) energyLoss = 439.79 * pow(energy, -0.870);
+ 	else if (nScintillators == 2) energyLoss = 530.50 * pow(energy, -0.822);
+ 	else if (nScintillators == 3) energyLoss = 650.42 * pow(energy, -0.804);
 	
 	else {
 		cout << "ASSERTION ERROR ON NUMBER OF SCINTILLATORS!\n";

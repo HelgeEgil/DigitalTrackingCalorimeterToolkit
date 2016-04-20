@@ -126,9 +126,16 @@ Float_t Track::getSlopeAngle() {
 	return getSlopeAngleAtLayer(lastIdx);
 }
 
+
+
 Float_t Track::getSlopeAngleAtLayer(Int_t i) {
 	// return the slope angle of the track between
 	// entry point in layer 0 and at layer i
+
+	if (!At(i) || !At(0)) {
+		cout << "Could not find slope angle...\n";
+		return 0;
+	}
 
 	Cluster *a = At(0);
 	Cluster *b = At(i);
@@ -494,7 +501,7 @@ Cluster * Track::getExtrapolatedClusterAt(Float_t mmBeforeDetector) {
 		break;
 	}
 	
-	Float_t softenFactor = 0.75;
+	Float_t softenFactor = 1;
 
 	Cluster *first = At(firstIdx);
 	Cluster *next = At(nextIdx);
@@ -565,7 +572,8 @@ TGraphErrors * Track::doRangeFit() {
 	Int_t n = GetEntriesFast();
 	Float_t x[n], y[n];
 	Float_t erx[n], ery[n];
-	Float_t preTL = getPreTLFromScintillatorAndAluminum();
+//	Float_t preTL = getPreTLFromScintillatorAndAluminum();
+	Float_t preTL = getPreTL();
 	
 	for (Int_t i=0; i<n; i++) {
 		if (!At(i)) continue;
@@ -624,7 +632,8 @@ TGraphErrors * Track::doFit() {
 	Int_t n = GetEntriesFast();
 	Float_t x[n], y[n];
 	Float_t erx[n], ery[n];
-	Float_t preTL = getPreTLFromScintillatorAndAluminum();
+//	Float_t preTL = getPreTLFromScintillatorAndAluminum();
+	Float_t preTL = getPreTL();
 	Float_t trackLength = preTL;
 	
 	for (Int_t i=0; i<n; i++) {
@@ -786,7 +795,7 @@ Bool_t Track::isHitOnScintillatorH() {
 	Cluster *extrapolatedCluster = getExtrapolatedClusterAt(0);
 	Float_t y = extrapolatedCluster->getYmm();
 
-	if (fabs(y)<8) {		
+	if (fabs(y)<5) {
 		isOnScintillator = true;
 	}
 
@@ -801,7 +810,7 @@ Bool_t Track::isHitOnScintillatorV() {
 	Cluster *extrapolatedCluster = getExtrapolatedClusterAt(0);
 	Float_t x = extrapolatedCluster->getXmm();
 
-	if (fabs(x)<8) {
+	if (fabs(x)<5) {
 		isOnScintillator = true;
 	}
 

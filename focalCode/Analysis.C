@@ -127,7 +127,44 @@ void GetTrackerStatistics(Int_t Events, Int_t Runs) {
 
 */
 
+void drawTrackAngleAtVaryingRunNumbers(Int_t dataType, Float_t energy) {
+	Int_t nRuns = 0;
 
+	for (Int_t i=26; i<34; i++) {
+		nRuns = pow(2, 4 + 0.25 * i) + 0.5;
+
+		cout << "Reconstructing tracks with " << nRuns << " protons per frame.";
+
+		kEventsPerRun = nRuns;
+
+		Tracks * tracks = loadOrCreateTracks(1, 100, dataType, energy);
+		tracks->extrapolateToLayer0();
+
+		char * sDataType = getDataTypeChar(dataType);
+		TCanvas *c1 = new TCanvas("c1", "c1", 1200, 800);
+		TH1F *hAngles = new TH1F("hAngles", Form("Proton angle plot with %d protons in frame (%s)", nRuns, sDataType), 500, 0, 30);
+		hAngles->SetXTitle("Protons angle from initial measurement to layer 1");
+		hAngles->SetXTitle("Number of protons");
+		hAngles->SetFillColor(kCyan-8);
+		hAngles->SetLineColor(kBlack);
+		gStyle->SetOptStat(0);
+
+		Track *thisTrack;
+		for (Int_t i=0; i<tracks->GetEntriesFast(); i++) {
+			thisTrack = tracks->At(i);
+			if (!thisTrack) continue;
+			hAngles->Fill(thisTrack->getSlopeAngleAtLayer(1));
+		}
+
+		hAngles->Draw();
+		c1->SaveAs(Form("figures/angles/angles_layer1_with_nRuns-%d.png", nRuns));
+//		break;
+
+		delete tracks;
+		delete hAngles;
+		delete c1;
+	}
+}
 
 void getTrackStatistics(Int_t Runs, Int_t dataType, Bool_t recreate, Float_t energy) {
 	Focal f;
@@ -294,7 +331,7 @@ void getTrackStatistics(Int_t Runs, Int_t dataType, Bool_t recreate, Float_t ene
 
 	delete tracks;
 }
-
+//
 void drawClusterShapes(Int_t Runs, Bool_t dataType, Bool_t recreate, Float_t energy) {
 	// get vector of TH2F's, each with a hits distribution and cluster size
 	// dataType = kMC (0) or kData (1)
@@ -405,7 +442,6 @@ void drawClusterShapes(Int_t Runs, Bool_t dataType, Bool_t recreate, Float_t ene
 	}
 }
 
-
 void makeTracks(Int_t Runs, Int_t dataType, Bool_t recreate, Float_t energy) {
 	Tracks * tracks = loadOrCreateTracks(recreate, Runs, dataType, energy);
 	tracks->extrapolateToLayer0();
@@ -485,10 +521,6 @@ void drawTungstenSpectrum(Int_t Runs, Int_t dataType, Bool_t recreate, Float_t e
 		
 		hFitResults->Fill(getWEPLFromEnergy(thisTrack->getFitParameterEnergy()));	
 	}
-	
-	Float_t sigma_energy = 4.5;
-	Float_t expectedMean = getWEPLFromEnergy(energy);
-	Float_t expectedStraggling = getWEPLStragglingFromEnergy(energy, sigma_energy);
 }
 
 void drawScintillatorStatistics(Int_t Runs, Int_t dataType, Bool_t recreate, Float_t energy) {
@@ -574,7 +606,7 @@ Float_t drawBraggPeakGraphFit(Int_t Runs, Int_t dataType, Bool_t recreate, Float
 	Bool_t kDrawIndividualGraphs = true;
 	
 	Bool_t kOutsideScintillatorCross = false;
-	Bool_t kInsideScintillatorCross = true;
+	Bool_t kInsideScintillatorCross = false;
 
 	char * sDataType = getDataTypeChar(dataType); char * sMaterial = getMaterialChar();
 	char * hTitle = Form("Fitted energy of a %.2f MeV beam in %s (%s)", energy, sMaterial, sDataType);
@@ -613,7 +645,7 @@ Float_t drawBraggPeakGraphFit(Int_t Runs, Int_t dataType, Bool_t recreate, Float
 			if (!thisTrack->isHitOnScintillators()) continue;
 		}
 		
-		outputGraph = (TGraphErrors*) thisTrack->doRangeFit();
+		outputGraph = (TGraphErrors*) thisTrack->doFit();
 		if (!outputGraph) continue;
 			
 		Float_t fitEnergy = thisTrack->getFitParameterEnergy();
@@ -657,9 +689,10 @@ Float_t drawBraggPeakGraphFit(Int_t Runs, Int_t dataType, Bool_t recreate, Float
 
 		 
 	Float_t means[10] = {};
+	Float_t sigmas[10] = {};
 	
 // 	doNLandauFit(hFitResults, means);
-	Float_t nGaussianFitRange = doNGaussianFit(hFitResults, means);
+	Float_t nGaussianFitRange = doNGaussianFit(hFitResults, means, sigmas);
 		
 	Int_t nMean = 0;
 	for (Int_t i=0; i<10; i++) {
@@ -700,6 +733,7 @@ Float_t drawBraggPeakGraphFit(Int_t Runs, Int_t dataType, Bool_t recreate, Float
 	for (Int_t i=0; i<nMean; i++) {
 		ps->AddText(Form("WEPL fit %d = %.2f", i+1, means[i]));
 		ps->AddText(Form("Energy fit %d = %.2f", i+1, getEnergyFromUnit(means[i])));
+		ps->AddText(Form("Sigma fit %d = %.2f", i+1, sigmas[i]));
 	}
 		
 	if (kOutputUnit == kPhysical) {
@@ -763,13 +797,13 @@ void writeClusterFile(Int_t Runs, Int_t dataType, Float_t energy) {
 	file.close();
 }
 
-void Draw2DProjection(Int_t Runs, Int_t dataType, Bool_t recreate, Float_t energy) {
+void draw2DProjection(Int_t Runs, Int_t dataType, Bool_t recreate, Float_t energy) {
 
-	Tracks * tracks = loadOrCreateTracks(recreate, Runs, kCalorimeter, energy);
+	Tracks * tracks = loadOrCreateTracks(recreate, Runs, dataType, energy);
 	tracks->extrapolateToLayer0();
 	
-	Int_t hSizeX = nx/32;
-	Int_t hSizeY = ny/32;
+	Int_t hSizeX = nx/8;
+	Int_t hSizeY = ny/8;
 
 	Float_t angleCut = 5.;
 	Float_t x0, y0, theta0;
@@ -778,8 +812,9 @@ void Draw2DProjection(Int_t Runs, Int_t dataType, Bool_t recreate, Float_t energ
 	Float_t fit_energy;
 
 	Int_t ntracks = tracks->GetEntriesFast();
+	Int_t nScintillatorHits = 0;
 
-	char *title = (char*) Form("2D Projection of data from %.2f MeV proton beam on %s type FOCAL", energy, getMaterialChar());
+	char *title = (char*) Form("2D Projection of data from %.2f MeV proton beam", energy, getMaterialChar());
 
 	TCanvas *c1 = new TCanvas(title);
 	
@@ -794,16 +829,19 @@ void Draw2DProjection(Int_t Runs, Int_t dataType, Bool_t recreate, Float_t energ
 		x0 = thisTrack->getX(0);
 		y0 = thisTrack->getY(0);
 		theta0 = thisTrack->getSlopeAngle();
-		
-		thisTrack->doFit();
-		fit_energy = thisTrack->getFitParameterEnergy();
 
-		if (theta0 > angleCut) continue;
+		fit_energy = thisTrack->getEnergy();
+		if (fit_energy > 180) continue;
 
+		if (thisTrack->isHitOnScintillators())	{
+			nScintillatorHits ++;
+
+	//		if (theta0 > angleCut) continue;
 		Frame2D->Fill(x0, y0, fit_energy);
 		normalizeFrame->Fill(x0, y0);
-
+		}
 		nPoints++;
+
 	}
 
 	Frame2D->Divide(normalizeFrame);
@@ -811,9 +849,17 @@ void Draw2DProjection(Int_t Runs, Int_t dataType, Bool_t recreate, Float_t energ
 	delete tracks;
 
 	cout << "nPoints = " << nPoints << endl;
+	cout << "Estimated scintillator hits = " << nScintillatorHits << endl;
 	
 	Frame2D->Draw("COLZ");
 	gStyle->SetOptStat(0);
+
+	// draw lines from 474 to 806
+	TLine *l1 = new TLine(474, 0, 474, 1280);
+	TLine *l2 = new TLine(806, 0, 806, 1280);
+	TLine *l3 = new TLine(0, 474, 1280, 474);
+	TLine *l4 = new TLine(0, 806, 1280, 806);
+	l1->Draw(); l2->Draw(); l3->Draw(); l4->Draw();
 
 }
 
@@ -1081,7 +1127,7 @@ void drawDiffusionCheck(Int_t Runs, Int_t Layer) {
    c1->Update();
 }
 
-void DrawFrame2D(Int_t Runs, Int_t Layer) {
+void drawFrame2D(Int_t Runs, Int_t Layer) {
    // Draw one layer using GetFrame2D
 
    Focal *f = new Focal();
@@ -1346,7 +1392,7 @@ TF1 * doNGaussianFit(TH1F* h, Float_t sigma_energy) {
 }
 */
 
-Float_t  doNGaussianFit ( TH1F *h, Float_t *means) {
+Float_t  doNGaussianFit ( TH1F *h, Float_t *means, Float_t *sigmas) {
 	TF1 *gauss;
 	cout << "Energy " << run_energy << endl;
 	cout << "Layer;\t Constant;\t Mean;\t\t Energy;\t Sigma;\t\t Fits in layer\n";
@@ -1363,6 +1409,8 @@ Float_t  doNGaussianFit ( TH1F *h, Float_t *means) {
 	TAxis *axis = h->GetXaxis();
 	Float_t fullIntegral = h->Integral();
 	
+	Float_t maxBinHeight = h->GetMaximum();
+
 	Bool_t isLastLayer, wasLastLayer = false;;
 	
 	Int_t j=0;
@@ -1392,10 +1440,10 @@ Float_t  doNGaussianFit ( TH1F *h, Float_t *means) {
 		sigma = 3;
 		if (isLastLayer && ratio < 0.05) sigma = 0.2;
 		
-		gauss->SetParameters(10, searchFrom, sigma);
-		gauss->SetParLimits(0, 2, 200);
+		gauss->SetParameters(10, (searchFrom+searchTo)/2, sigma);
+		gauss->SetParLimits(0, maxBinHeight*0.1, maxBinHeight);
 		gauss->SetParLimits(1, searchFrom, searchTo);
-		gauss->SetParLimits(2, 0.01, 15);
+		gauss->SetParLimits(2, 1, 15);
 // 		gauss->SetNpx(250);
 		
 		h->Fit(gauss, "Q, M, B", "", searchFrom, searchTo);
@@ -1420,7 +1468,9 @@ Float_t  doNGaussianFit ( TH1F *h, Float_t *means) {
 				array_f[j] = ratio;
 			}
 			
+			sigmas[j] = sigma;
 			means[j++] = mean;
+
  		}
  		wasLastLayer = isLastLayer;
 	}

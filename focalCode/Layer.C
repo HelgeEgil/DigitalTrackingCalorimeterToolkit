@@ -25,7 +25,7 @@ void Layer::diffuseLayer(TRandom3 *gRandom) {
 	Int_t nHits = hits->GetEntriesFast();
 	
 	frame2D_.Reset();
-	
+
 	if (kDebug) {
 		cout << "Diffusing layer  " << layerNo_ << ". Number of hits = " << nHits << endl;
 	}
@@ -37,7 +37,7 @@ void Layer::diffuseLayer(TRandom3 *gRandom) {
 		
 		repeatFactor = eDep * EnergyFactor;
 		newSigma = pow(repeatFactor, 0.25) / 6;
-		
+
 		for (Int_t j=0; j<repeatFactor; j++) {
 			randX = gRandom->Gaus(x, newSigma);
 			randY = gRandom->Gaus(y, newSigma);

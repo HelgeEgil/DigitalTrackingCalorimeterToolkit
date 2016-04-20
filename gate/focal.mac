@@ -18,6 +18,7 @@
 /gate/systems/scanner/level2/attach layer
 
 /control/execute readout_chip.mac
+#/control/execute readout_chip_scintillators.mac
 #/control/execute readout_full.mac
 
 #=================#

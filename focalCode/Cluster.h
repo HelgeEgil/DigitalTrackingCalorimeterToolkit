@@ -27,8 +27,8 @@ public:
 	Float_t getDepositedEnergy();
 	Float_t getDepositedEnergyError();
 
-	Double_t getXmm() { return x_ * dx; }
-	Double_t getYmm() { return y_ * dy; }
+	Double_t getXmm() { return (x_ - nx) * dx; } // -nx*dx/2 -> +nx*dx/2
+	Double_t getYmm() { return (y_ - ny) * dy; }
 	Double_t getLayermm(); // take into account tracker positions
 
 	void set(Float_t x, Float_t y, Int_t layer = -1, Int_t size = -1);

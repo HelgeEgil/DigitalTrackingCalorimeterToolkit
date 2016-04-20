@@ -148,6 +148,8 @@ void Focal::getMCFrame(Int_t runNo, CalorimeterFrame *cf) {
 	Float_t offsetY = (ny) * dy;
 	Float_t x,y;
 	Int_t calorimeterLayer = 0;
+	Int_t blackListEventID = -1;
+	Int_t whiteListEventID = -1;
 
 	if (fChain == 0) return;
 	Long64_t nentries = fChain->GetEntriesFast();
@@ -168,9 +170,17 @@ void Focal::getMCFrame(Int_t runNo, CalorimeterFrame *cf) {
 			break;
 		}
 		
+		if (eventID == blackListEventID) continue;
+
+		if (posZ < -100) {
+			blackListEventID = eventID;
+			whiteListEventID = eventID;
+			continue;
+		}
+
 		calorimeterLayer = level1ID;
 
-		if (calorimeterLayer<0) {
+		if (calorimeterLayer<0 || posZ < -20) {
 			continue;
 		}
 
