@@ -18,7 +18,6 @@ Double_t p_water_low, alpha_water_low;
 Double_t p_water_high, alpha_water_high;
 Double_t p_aluminum, alpha_aluminum, alpha_prime_aluminum;
 Double_t p_tungsten, alpha_tungsten, alpha_prime_tungsten;
-Double_t firstHalfLayer;
 
 Double_t firstUpperLayerZ;
 Double_t firstLowerLayerZ;
@@ -32,5 +31,6 @@ Float_t getEnergyLossErrorFromScintillatorAndAluminum();
 Double_t getLayerPositionmm(Int_t i);
 Float_t getSigmaEnergy(Int_t energy);
 void setWaterPValues(Int_t setting);
+void setCalibratedTungstenPValues();
 
 #endif

@@ -595,6 +595,8 @@ Float_t drawBraggPeakGraphFit(Int_t Runs, Int_t dataType, Bool_t recreate, Float
 	if (run_energy < 150) setWaterPValues(kLow);
 	else setWaterPValues(kHigh);
 	
+ 	setCalibratedTungstenPValues();
+	
 	Tracks * tracks = loadOrCreateTracks(recreate, Runs, dataType, energy);
 	tracks->extrapolateToLayer0();
 
@@ -604,6 +606,7 @@ Float_t drawBraggPeakGraphFit(Int_t Runs, Int_t dataType, Bool_t recreate, Float
 	Bool_t kDrawHorizontalLines = false;
 	Bool_t kDrawVerticalLayerLines = false;
 	Bool_t kDrawIndividualGraphs = true;
+	Bool_t kUseTrackLength = false;
 	
 	Bool_t kOutsideScintillatorCross = false;
 	Bool_t kInsideScintillatorCross = false;
@@ -645,7 +648,11 @@ Float_t drawBraggPeakGraphFit(Int_t Runs, Int_t dataType, Bool_t recreate, Float
 			if (!thisTrack->isHitOnScintillators()) continue;
 		}
 		
-		outputGraph = (TGraphErrors*) thisTrack->doFit();
+		if (kUseTrackLength)
+			outputGraph = (TGraphErrors*) thisTrack->doFit();
+		else
+			outputGraph = (TGraphErrors*) thisTrack->doRangeFit();
+		
 		if (!outputGraph) continue;
 			
 		Float_t fitEnergy = thisTrack->getFitParameterEnergy();
@@ -814,7 +821,8 @@ void draw2DProjection(Int_t Runs, Int_t dataType, Bool_t recreate, Float_t energ
 	Int_t ntracks = tracks->GetEntriesFast();
 	Int_t nScintillatorHits = 0;
 
-	char *title = (char*) Form("2D Projection of data from %.2f MeV proton beam", energy, getMaterialChar());
+	char * sDataType = getDataTypeChar(dataType); char * sMaterial = getMaterialChar();
+	char *title = (char*) Form("2D Projection of data from %.2f MeV proton beam in %s (%s)", energy, sMaterial, sDataType);
 
 	TCanvas *c1 = new TCanvas(title);
 	
@@ -1395,7 +1403,7 @@ TF1 * doNGaussianFit(TH1F* h, Float_t sigma_energy) {
 Float_t  doNGaussianFit ( TH1F *h, Float_t *means, Float_t *sigmas) {
 	TF1 *gauss;
 	cout << "Energy " << run_energy << endl;
-	cout << "Layer;\t Constant;\t Mean;\t\t Energy;\t Sigma;\t\t Fits in layer\n";
+	cout << "Layer;\t Constant;\t Mean;\t\t Energy;\t Sigma;\t\t Fits in layer;\t Chi2/n\n";
 	
 	Float_t constant, mean, lEnergy, sigma;
 	
@@ -1405,6 +1413,7 @@ Float_t  doNGaussianFit ( TH1F *h, Float_t *means, Float_t *sigmas) {
 	Float_t array_sigma[3] = {};
 	Float_t array_energy[3] = {};
 	Float_t array_f[3] = {};
+	Float_t array_chi2n[3] = {};
 	
 	TAxis *axis = h->GetXaxis();
 	Float_t fullIntegral = h->Integral();
@@ -1415,25 +1424,24 @@ Float_t  doNGaussianFit ( TH1F *h, Float_t *means, Float_t *sigmas) {
 	
 	Int_t j=0;
 	for (Int_t i=0; i<15; i++) {
-		// do Landau fit for all possible layers
-		
  		if (getWEPLFromTL(getLayerPositionmm(i)) > getUnitFromEnergy(run_energy*1.1)) continue;
 
-		Float_t searchFrom = getWEPLFromTL(getLayerPositionmm(i)) + 5;
-		Float_t searchTo = getWEPLFromTL(getLayerPositionmm(i+1)) + 10;
+		Float_t searchFrom = getWEPLFromTL(getLayerPositionmm(i))+10;
+		Float_t searchTo = getWEPLFromTL(getLayerPositionmm(i+1))+10;
 		
 		Int_t bmin = axis->FindBin(searchFrom);
 		Int_t bmax = axis->FindBin(searchTo);
+		
+		TLine *l1 = new TLine(searchFrom, 0, searchFrom, 1000); l1->SetLineColor(kGreen); l1->Draw();
+		TLine *l2 = new TLine(searchTo, 0, searchTo, 1000); l2->SetLineColor(kRed); l2->Draw();
 		
 		Float_t integral = h->Integral(bmin, bmax);
 		Float_t ratio = integral / fullIntegral;
 		
 		isLastLayer = ((getWEPLFromTL(getLayerPositionmm(i)) > getUnitFromEnergy(run_energy-10)) && !wasLastLayer && ratio > 0.01) ;
 		
-// 		cout << "searchFrom " << searchFrom << " isLastLayer << " << isLastLayer << " ratio " << ratio << endl;
-		
- 		if (i<=4) continue;
-		if (ratio < 0.1 && !isLastLayer) continue;
+ 		if (i<=3) continue;
+ 		if (ratio < 0.05 && !isLastLayer) continue;
 		
 		gauss = new TF1(Form("Gaus_%d", i), "gaus(0)", searchFrom, searchTo);
 		
@@ -1441,23 +1449,30 @@ Float_t  doNGaussianFit ( TH1F *h, Float_t *means, Float_t *sigmas) {
 		if (isLastLayer && ratio < 0.05) sigma = 0.2;
 		
 		gauss->SetParameters(10, (searchFrom+searchTo)/2, sigma);
-		gauss->SetParLimits(0, maxBinHeight*0.1, maxBinHeight);
+		gauss->SetParLimits(0, 5, maxBinHeight);
 		gauss->SetParLimits(1, searchFrom, searchTo);
 		gauss->SetParLimits(2, 1, 15);
-// 		gauss->SetNpx(250);
 		
-		h->Fit(gauss, "Q, M, B", "", searchFrom, searchTo);
+		h->Fit(gauss, "M, B, WW, Q", "", searchFrom, searchTo);
+		
+		Float_t chi2 = gauss->GetChisquare();
+		Float_t chi2n = chi2 / integral;
 		
 		sigma = gauss->GetParameter(2);
 		constant = gauss->GetParameter(0);
 		mean = gauss->GetParameter(1);
 		lEnergy = getEnergyFromUnit(mean);
 		
-// 		cout << Form("Searching from %.1f to %.1f, with midpoint at %.1f. Found best fit @ %.1f.\n", searchFrom, searchTo,(searchTo+searchFrom)/2 , mean);
+ 		cout << Form("Searching from %.1f to %.1f, with midpoint at %.1f. Found best fit @ %.1f with chi2 = %.2f and chi2/n = %.2f, ratio = %.2f.\n", searchFrom, searchTo,(searchTo+searchFrom)/2 , mean, chi2, chi2n, ratio);
 		
- 		if (ratio > 0.1 || isLastLayer) {
-			gauss->Draw("same");
-			cout << Form("%d;\t %8.5f;\t %8.5f;\t %8.5f;\t %8.5f;\t %8.5f\n", i, constant, mean, lEnergy, sigma, ratio);
+//  		if (chi2n > 4) {
+//  			delete gauss;
+//  			continue;
+//  		}
+ 		
+ 		if (ratio > 0.05 || isLastLayer) {
+ 			gauss->Draw("same");
+			cout << Form("%d;\t %8.5f;\t %8.5f;\t %8.5f;\t %8.5f;\t %8.5f;\t %.2f\n", i, constant, mean, lEnergy, sigma, ratio, chi2n);
 			
 			if (j<3) {
 				array_mean[j] = mean;
@@ -1484,8 +1499,6 @@ Float_t  doNGaussianFit ( TH1F *h, Float_t *means, Float_t *sigmas) {
 	estimated_range /= sum_constant;
 	estimated_energy = getEnergyFromUnit(estimated_range);
 	cout << "ESTIMATED ENERGY FROM RUN IS " << estimated_energy << endl;
-	cout << "ESTIMATED ENERGY FROM RUN WITH 6 % FACTOR IS " << getEnergyFromUnit(estimated_range * 1.06) << endl;
-	
 	
 	if (true) {
 		ofstream file("output_gauss.csv", ofstream::out | ofstream::app);
@@ -1493,9 +1506,9 @@ Float_t  doNGaussianFit ( TH1F *h, Float_t *means, Float_t *sigmas) {
 		
 		file << run_energy << "; ";
 		for (Int_t j=0; j<3; j++) {
-			file << Form("%d; %.5f; %.5f; %.5f; %.5f; %.5f; ",
+			file << Form("%d; %.5f; %.5f; %.5f; %.5f; %.5f; %.5f",
 						 array_layer[j], array_constant[j], array_mean[j],
-						 array_energy[j], array_sigma[j], array_f[j]);
+						 array_energy[j], array_sigma[j], array_f[j], array_chi2n[j]);
 		}
 		
 		file << endl;

@@ -34,8 +34,13 @@ void MaterialConstants() {
 	
 // 	p_tungsten = 1.658973;
 // 	alpha_tungsten = 0.004663;
-	p_tungsten = 1.72286;
-	alpha_tungsten = 0.003353;
+	
+// 	p_tungsten = 1.72286;
+// 	alpha_tungsten = 0.003353;
+	
+	p_tungsten = 1.6677;
+	alpha_tungsten = 0.004461;
+	
 	alpha_prime_tungsten = 0.1086784;
 
 	if (kMaterial == kTungsten) {
@@ -63,7 +68,6 @@ void MaterialConstants() {
 	}
 
 	pinv = 1./p;
-	firstHalfLayer = 0.15;
 }
 
 void setWaterPValues(Int_t setting) {
@@ -149,4 +153,10 @@ Float_t getSigmaEnergy(Int_t energy) {
 	else if (energy == 150) sigma_energy = 20;
 	
 	return sigma_energy;
+}
+
+void setCalibratedTungstenPValues() {
+// 	alpha_tungsten /= 1.028;
+	alpha_tungsten /= 1.037;
+	alpha = alpha_tungsten; // mm
 }
