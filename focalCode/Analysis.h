@@ -7,12 +7,12 @@ class TF1;
 
 #include "Tracks.h"
 
-Tracks * getTracks(Int_t Runs, Int_t dataType = kMC, Int_t frameType = kCalorimeter, Float_t energy = 188);
+Tracks * getTracks(Int_t Runs, Int_t dataType = kMC, Int_t frameType = kCalorimeter, Float_t energy = 188, Float_t *x = 0, Float_t *y = 0);
 Float_t 		drawBraggPeakGraphFit(Int_t Runs, Int_t dataType = kMC, Bool_t recreate = 0, Float_t energy = 188);
 void	drawTungstenSpectrum(Int_t Runs, Int_t dataType = kMC, Bool_t recreate = 0, Float_t energy = 188);
 void saveTracks(Tracks* tracks, Int_t dataType, Float_t energy);
 Tracks* loadTracks(Int_t Runs, Int_t dataType, Float_t energy);
-Tracks * loadOrCreateTracks(Bool_t recreate, Int_t Runs, Int_t dataType, Float_t energy);
+Tracks * loadOrCreateTracks(Bool_t recreate, Int_t Runs, Int_t dataType, Float_t energy, Float_t *x = 0, Float_t *y = 0);
 void		drawFrame2D(Int_t Runs, Int_t Layer);
 //void		DrawData3D(Int_t RunFrom, Int_t RunTo);
 //void		DrawRealData3D(Int_t RunFrom, Int_t RunTo);
@@ -35,7 +35,7 @@ Bool_t getCutTrackLength(Float_t energy, Track *track);
 Bool_t getCutWEPL(Track *track);
 Bool_t getCutChipNumber(Track *track);
 Bool_t getCutBraggPeakInTrack(Track *track);
-void drawIndividualGraphs(TCanvas *cGraph, TGraphErrors* outputGraph, Float_t fitEnergy, Float_t fitScale, Int_t fitIdx);
+void drawIndividualGraphs(TCanvas *cGraph, TGraphErrors* outputGraph, Float_t fitEnergy, Float_t fitScale, Int_t fitIdx, Int_t skipIdx = 0, Float_t *x = 0, Float_t *y = 0);
 Float_t doNGaussianFit( TH1F *h, Float_t *means, Float_t *sigmas);
 void doNLandauFit(TH1F *h, Float_t *mpvs);
 

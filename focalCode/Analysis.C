@@ -589,6 +589,54 @@ void drawFitScale(Int_t Runs, Int_t dataType, Bool_t recreate, Float_t energy) {
 	hScale->Draw();
 }	
 
+void drawTracksWithEnergyLoss(Int_t Runs, Int_t dataType, Bool_t recreate, Float_t energy) {
+	run_energy = energy;
+	
+ 	setCalibratedTungstenPValues();
+	
+	Float_t x_energy[1000*200] = {};
+	Float_t y_energy[1000*200] = {};
+	
+	Tracks * tracks = loadOrCreateTracks(recreate, Runs, dataType, energy, x_energy, y_energy);
+	tracks->extrapolateToLayer0();
+	
+	cout << "Using aluminum plate: " << kIsAluminumPlate << endl;
+	cout << "Using scintillators: " << kIsScintillator << endl;
+
+	Int_t nPlotX = 5, nPlotY = 5;
+	Int_t fitIdx = 0, plotSize = nPlotX*nPlotY;
+	Int_t skipIdx = 0;
+
+	TGraphErrors *outputGraph;
+	TCanvas *cGraph = new TCanvas("cGraph", "Fitted data points", 1400, 1000);
+	cGraph->Divide(nPlotX,nPlotY, 0.000001, 0.000001, 0);
+	gStyle->SetPadBorderMode(0); gStyle->SetFrameBorderMode(0);
+	gStyle->SetTitleH(0.06); gStyle->SetTitleYOffset(1);
+
+	Float_t finalEnergy = 0;
+	
+	for (Int_t j=0; j<tracks->GetEntriesFast(); j++) {
+		Track *thisTrack = tracks->At(j);
+		if (!thisTrack) continue;
+		if (thisTrack->doesTrackEndAbruptly()) continue;
+
+		outputGraph = (TGraphErrors*) thisTrack->doRangeFit();
+		if (!outputGraph) {
+			skipIdx++;
+			continue;
+		}
+			
+		Float_t fitEnergy = thisTrack->getFitParameterEnergy();
+		Float_t fitScale = thisTrack->getFitParameterScale();
+		
+		if (fitIdx < plotSize) {
+			drawIndividualGraphs(cGraph, outputGraph, fitEnergy, fitScale, fitIdx++, skipIdx++, x_energy, y_energy);
+		}
+		
+		else delete outputGraph;
+	}
+}
+
 Float_t drawBraggPeakGraphFit(Int_t Runs, Int_t dataType, Bool_t recreate, Float_t energy) {
 	run_energy = energy;
 	
@@ -920,11 +968,11 @@ Tracks * loadTracks(Int_t Runs, Int_t dataType, Float_t energy) {
 	return tracks;
 }
 
-Tracks * loadOrCreateTracks(Bool_t recreate, Int_t Runs, Int_t dataType, Float_t energy) {
+Tracks * loadOrCreateTracks(Bool_t recreate, Int_t Runs, Int_t dataType, Float_t energy, Float_t *x, Float_t *y) {
 	Tracks * tracks;
 	
 	if (recreate) {
-		tracks = getTracks(Runs, dataType, kCalorimeter, energy);
+		tracks = getTracks(Runs, dataType, kCalorimeter, energy, x, y);
 		saveTracks(tracks, dataType, energy);
 	}
 
@@ -940,14 +988,14 @@ Tracks * loadOrCreateTracks(Bool_t recreate, Int_t Runs, Int_t dataType, Float_t
 	return tracks;
 }
 
-Tracks * getTracks(Int_t Runs, Int_t dataType, Int_t frameType, Float_t energy) {
+Tracks * getTracks(Int_t Runs, Int_t dataType, Int_t frameType, Float_t energy, Float_t *x, Float_t *y) {
 	Focal *f = new Focal();
 
 	Int_t nClusters = kEventsPerRun * 5 * nLayers;
 	Int_t nHits = kEventsPerRun * 50;
 	Int_t nTracks = kEventsPerRun * 2;
 
-	Bool_t breakSignal = kFALSE;
+	Bool_t breakSignal = false;
 
 	CalorimeterFrame *cf = new CalorimeterFrame();
 	TrackerFrame *tf = new TrackerFrame();
@@ -967,7 +1015,7 @@ Tracks * getTracks(Int_t Runs, Int_t dataType, Int_t frameType, Float_t energy) 
 		if (dataType == kMC) {
 		
 			t1.Start();
-			f->getMCFrame(i, cf);
+			f->getMCFrame(i, cf, x, y);
 			if (kDebug) cout << "Sum frame layer 2 = " << cf->getTH2F(2)->GetSum() << endl;
 			t1.Stop(); t2.Start();
 			if (kDebug) cout << "Start diffuseFrame\n";
@@ -1250,15 +1298,17 @@ void getPValues() {
 
 }
 
-void drawIndividualGraphs(TCanvas *cGraph, TGraphErrors* outputGraph, Float_t fitEnergy, Float_t fitScale, Int_t fitIdx) {
+void drawIndividualGraphs(TCanvas *cGraph, TGraphErrors* outputGraph, Float_t fitEnergy, Float_t fitScale, Int_t fitIdx, Int_t skipIdx, Float_t *x_energy, Float_t *y_energy) {
 	cGraph->cd(fitIdx+1);
 
 	outputGraph->SetMinimum(0);
 	outputGraph->SetMaximum(600);
 	outputGraph->SetTitle("");
+	
 	if (kOutputUnit == kWEPL || kOutputUnit == kEnergy) {
 		outputGraph->GetXaxis()->SetTitle("Water Equivalent Path Length [mm]");
 	}
+	
 	else if (kOutputUnit == kPhysical) {
 		outputGraph->GetXaxis()->SetTitle("Physical path length [mm]");
 	}
@@ -1269,16 +1319,8 @@ void drawIndividualGraphs(TCanvas *cGraph, TGraphErrors* outputGraph, Float_t fi
 	outputGraph->GetXaxis()->SetLabelSize(0.04);
 	outputGraph->GetYaxis()->SetLabelSize(0.04);
 
-	Float_t low = 0, high = 0;
-	if (kOutputUnit == kPhysical) {
-		low = getTLFromEnergy(0);
-		high = getTLFromEnergy(run_energy*1.2);
-	}
-
-	else if (kOutputUnit == kWEPL || kOutputUnit == kEnergy) {
-		low = getWEPLFromEnergy(0);
-		high = getWEPLFromEnergy(run_energy*1.2);
-	}
+	Float_t low = getUnitFromEnergy(0);
+	Float_t high = getUnitFromEnergy(run_energy * 1.2);
 
 	outputGraph->GetXaxis()->SetLimits(low, high);
 
@@ -1289,11 +1331,50 @@ void drawIndividualGraphs(TCanvas *cGraph, TGraphErrors* outputGraph, Float_t fi
 	TF1 *func = new TF1("fit_BP", fitfunc_DBP, 0, 500, 2);
 	func->SetParameters(fitEnergy, fitScale);
 	func->Draw("same");
+	
+	if (x_energy) {
+		
+		Float_t WEPLFactor = getWEPLFactorFromEnergy(run_energy);
+		Long64_t n=0;
+		Long64_t j=0;
+		
+		for (Long64_t i=skipIdx*1000; i<skipIdx*1000 + 1000; i++) {
+			
+			if (x_energy[i] == 0) {
+				n = j - 1;
+				break;
+			}
+			
+			x_energy[i] *=  WEPLFactor;	
+			y_energy[i] *=  2;
+			
+			j++;
+		}
+		
+		if (n>1) {
+			TGraph *energyLoss = new TGraph(n, (x_energy + skipIdx*1000), (y_energy + skipIdx*1000));
+			energyLoss->SetLineColor(kBlack); energyLoss->SetLineWidth(2);
+			energyLoss->Draw("same");
+		}
+		
+		Float_t lastX = x_energy[skipIdx*1000 + n-1];
+		TLine *l = new TLine(lastX, 0, lastX, 600);
+		l->Draw();
+		
+		Float_t realEnergy = getEnergyFromWEPL(x_energy[skipIdx*1000 + n-1]);
+		TLatex *text2 = new TLatex(13, 450, Form("'Real' energy: %.1f MeV", realEnergy));
+		text2->SetTextSize(0.06);
+		text2->Draw();
+		
+		cout << "Accuracy = " <<  100 * (realEnergy - fitEnergy ) / realEnergy << " %.\n";
 
-	TLatex *text = new TLatex(low*1.2, 500, Form("Fitted energy: %.1f MeV", fitEnergy));
+	}
+
+	TLatex *text = new TLatex(10, 500, Form("Fitted energy: %.1f MeV", fitEnergy));
 	text->SetTextSize(0.06);
 	text->Draw();
 
+	
 	cGraph->Update();
 }
 

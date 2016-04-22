@@ -1,8 +1,8 @@
-/gate/scanner/daughters/name absorber_pre
+/gate/scanner/daughters/name preabsorber
 /gate/scanner/daughters/insert box
-/gate/absorber_pre/geometry/setXLength 38900. um
-/gate/absorber_pre/geometry/setYLength 38300. um
-/gate/absorber_pre/geometry/setZLength  1499.9 um
-/gate/absorber_pre/placement/setTranslation 0. 0. -750. um
-/gate/absorber_pre/setMaterial Aluminium
-/gate/absorber_pre/vis/setColor white
+/gate/preabsorber/geometry/setXLength 38900. um
+/gate/preabsorber/geometry/setYLength 38300. um
+/gate/preabsorber/geometry/setZLength  1499.9 um
+/gate/preabsorber/placement/setTranslation 0. 0. -750. um
+/gate/preabsorber/setMaterial Aluminium
+/gate/preabsorber/vis/setColor white

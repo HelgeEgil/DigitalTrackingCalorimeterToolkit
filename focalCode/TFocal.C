@@ -136,7 +136,7 @@ void Focal::getMCTrackerFrame(Int_t runNo, TrackerFrame *tf) {
 	}
 }
 
-void Focal::getMCFrame(Int_t runNo, CalorimeterFrame *cf) {
+void Focal::getMCFrame(Int_t runNo, CalorimeterFrame *cf, Float_t *x_energy, Float_t *y_energy) {
 	// Retrieve kEventsPerRun events and put them into CalorimeterFrame*
 	
 	Int_t eventIdFrom = runNo * kEventsPerRun;
@@ -147,9 +147,12 @@ void Focal::getMCFrame(Int_t runNo, CalorimeterFrame *cf) {
 	Float_t offsetX = (nx+2) * dx;
 	Float_t offsetY = (ny) * dy;
 	Float_t x,y;
+	Float_t sum_edep = 0;
+	Int_t n = 0;
 	Int_t calorimeterLayer = 0;
 	Int_t blackListEventID = -1;
 	Int_t whiteListEventID = -1;
+	Int_t lastID = 0;
 
 	if (fChain == 0) return;
 	Long64_t nentries = fChain->GetEntriesFast();
@@ -161,32 +164,50 @@ void Focal::getMCFrame(Int_t runNo, CalorimeterFrame *cf) {
 		nb = fChain->GetEntry(jentry);
 		nbytes += nb;
 		
-		if (eventID < eventIdFrom) {
-			continue;
+		if (lastID != eventID) {
+			sum_edep = 0;
+			n = 0;
 		}
 		
-		else if (eventID >= eventIdTo) {
-			lastJentry_ = jentry;
-			break;
+		sum_edep += edep;
+		
+		if  (x_energy && y_energy && parentID == 0) {
+			x_energy[n + 1000*eventID] = posZ;
+			y_energy[n + 1000*eventID] = run_energy - sum_edep;
+			n++;
 		}
 		
-		if (eventID == blackListEventID) continue;
+		if (volumeID[4] == 4 || !x_energy) { // hit in chip, if no x_energy provided do this
+			
+			if (eventID < eventIdFrom) {
+				continue;
+			}
+			
+			else if (eventID >= eventIdTo) {
+				lastJentry_ = jentry;
+				break;
+			}
+			
+			if (eventID == blackListEventID) continue;
 
-		if (posZ < -100) {
-			blackListEventID = eventID;
-			whiteListEventID = eventID;
-			continue;
+			if (posZ < -100) {
+				blackListEventID = eventID;
+				whiteListEventID = eventID;
+				continue;
+			}
+			
+			calorimeterLayer = level1ID;
+
+			if (calorimeterLayer<0 || posZ < -20) {
+				continue;
+			}
+
+			x = (posX + offsetX) * nx / (offsetX);
+			y = (posY + offsetY) * ny / (offsetY);
+
+			cf->fillAt(calorimeterLayer, x, y, edep*1000);
 		}
-
-		calorimeterLayer = level1ID;
-
-		if (calorimeterLayer<0 || posZ < -20) {
-			continue;
-		}
-
-		x = (posX + offsetX) * nx / (offsetX);
-		y = (posY + offsetY) * ny / (offsetY);
-
-		cf->fillAt(calorimeterLayer, x, y, edep*1000);
+		
+		lastID = eventID;
 	}
 }

@@ -78,6 +78,7 @@ void findRange::Loop(Double_t energy, Double_t sigma_mev)
 	Float_t dE_random = 0;
 	
 	Float_t tl = 0;
+	Int_t n = 0;
 	
 	TRandom3 *gRandom = new TRandom3();
 
@@ -101,6 +102,7 @@ void findRange::Loop(Double_t energy, Double_t sigma_mev)
 
 	if (lastID < 0) lastID = eventID;
 
+	if (posY<0) continue;
 
 	if (parentID == 0) {
 	
@@ -108,9 +110,18 @@ void findRange::Loop(Double_t energy, Double_t sigma_mev)
 		Float_t y = posY;
 		Float_t x = posX;
 		
-		if (fabs(x) < 20 && fabs(y) < 20) hZ->Fill(z + x_compensate, edep);
+// 		for (Int_t i=0; i<10; i++) {
+// 			cout << "VolumeID[" << i << "] = " << volumeID[i] << endl;
+// 		}
+		
+		if (fabs(x) < 20 && fabs(y) < 20 && volumeID[4] == 4) hZ->Fill(z + x_compensate, edep);
+		n++;
 			
 		if (eventID != lastID) {
+			
+			cout << "Number of hits = " << n << endl;
+			n = 0;
+			
 			Float_t diff = sqrt( pow(firstX - lastX, 2) + pow(firstY - lastY, 2) + pow(firstZ - lastZ, 2));
 			hRange->Fill(lastRange - firstZ);
 			hTracklength->Fill(diff);
@@ -161,6 +172,8 @@ void findRange::Loop(Double_t energy, Double_t sigma_mev)
 		}
    }
 
+   
+   
 	// range 1: 80 % of maximum for bragg peak on distal edge
 	Double_t range_1 = hZ->GetXaxis()->GetBinCenter(hZ->FindLastBinAbove(hZ->GetMaximum() * 0.8));
 	Double_t range_3 = hRange->GetXaxis()->GetBinCenter(hRange->GetMaximumBin());

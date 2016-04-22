@@ -16,10 +16,11 @@
 
 /gate/systems/scanner/level1/attach simplified
 /gate/systems/scanner/level2/attach layer
+/gate/systems/scanner/level3/attach chip
 
-/control/execute readout_chip.mac
+#/control/execute readout_chip.mac
 #/control/execute readout_chip_scintillators.mac
-#/control/execute readout_full.mac
+/control/execute readout_full.mac
 
 #=================#
 # Physics			#
@@ -65,7 +66,7 @@
 /gate/source/uniformBeam/gps/direction 0 0 1
 /gate/source/uniformBeam/gps/halfx 20. mm
 /gate/source/uniformBeam/gps/halfy 20. mm
-/gate/source/uniformBeam/gps/centre 0. 0. -20.0 cm # -20 cm for scintillator
+/gate/source/uniformBeam/gps/centre 0. 0. -20.0 cm
 
 #/gate/source/addSource PBS PencilBeam
 #/gate/source/PBS/setParticleType proton
@@ -82,7 +83,7 @@
 #/gate/source/PBS/setEllipseYPhiRotationNorm positive
 
 /gate/output/root/enable
-/gate/output/root/setFileName ../focalCode/rawdata/focal_{material}_energy{energy}_sigma{sigma}
+/gate/output/root/setFileName ../focalCode/rawdata/focal_{material}_energy{energy}_sigma{sigma}_full
 
 #===============#
 # START BEAMS	#

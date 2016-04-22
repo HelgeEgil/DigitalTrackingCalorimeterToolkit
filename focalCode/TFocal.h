@@ -129,7 +129,7 @@ public :
    virtual void      Show(Long64_t entry = -1);
 
    // My own functions in TFocal.C
-   virtual void getMCFrame(Int_t runNo, CalorimeterFrame *cf);
+   virtual void getMCFrame(Int_t runNo, CalorimeterFrame *cf, Float_t *x_energy = 0, Float_t *y_energy = 0);
    virtual void getMCTrackerFrame(Int_t runNo, TrackerFrame *tf);
    virtual void getDataFrame(Int_t runNo, CalorimeterFrame *cf, Int_t energy = 190);
 	//virtual Tracks * FindRealTracks(Int_t Runs, Clusters *restPoints, Int_t energy = -1);

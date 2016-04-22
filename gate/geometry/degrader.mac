@@ -1,0 +1,15 @@
+# Widths of the degrader:
+# 0.0 cm: 188.00 MeV (~188 MeV)
+# 0.8 cm: 179.96 MeV (~180 MeV)
+# 1.7 cm: 170.61 MeV (~170 MeV)
+# 2.7 cm: 159.82 MeV (~160 MeV)
+# 3.5 cm: 150.83 MeV (~150 MeV)
+
+/gate/scanner/daughters/name degrader
+/gate/scanner/daughters/insert box
+/gate/degrader/geometry/setXLength 10. cm
+/gate/degrader/geometry/setYLength 10. cm
+/gate/degrader/geometry/setZLength 1.7 cm
+/gate/degrader/placement/setTranslation 0. 0. -200. mm # 50 + 174
+/gate/degrader/setMaterial Aluminium
+/gate/degrader/vis/forceWireframe
