@@ -22,7 +22,7 @@ class Layer : public TObject {
 		Layer(Int_t layerNo, Bool_t frameType, Bool_t dataType);
 		virtual ~Layer();
 
-		void diffuseLayer(TRandom3 *gRandom);
+		Int_t diffuseLayer(TRandom3 *gRandom);
 		void oldDiffuseLayer();
 		virtual Bool_t findHits(Hits *hits);
 

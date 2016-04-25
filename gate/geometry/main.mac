@@ -8,5 +8,5 @@
 /control/execute geometry/world.mac
 /control/execute geometry/preabsorber.mac
 #/control/execute geometry/degrader.mac
-/control/execute geometry/scintillators.mac
+#/control/execute geometry/scintillators.mac
 /control/execute geometry/simplified.mac

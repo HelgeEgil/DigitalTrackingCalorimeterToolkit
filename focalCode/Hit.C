@@ -7,7 +7,7 @@ Hit::Hit() {
 	x_ = -1;
 	y_ = -1;
 	layerNo_ = -1;
-	eventNo_ = -1;
+	eventID_ = -1;
 	edep_ = 0;
 }
 
@@ -15,11 +15,11 @@ Hit::~Hit() {
   // Destructor
 }
 
-Hit::Hit(Int_t x, Int_t y, Int_t layerNo, Int_t eventNo, Float_t edep) {
+Hit::Hit(Int_t x, Int_t y, Int_t layerNo, Int_t eventID, Float_t edep) {
   x_ = x;
   y_ = y;
   layerNo_ = layerNo;
-  eventNo_ = eventNo;
+  eventID_ = eventID;
   edep_ = edep;
 }
 
@@ -27,15 +27,15 @@ Hit::Hit(Hit* hit) {
   x_ = hit->getX();
   y_ = hit->getY();
   layerNo_ = hit->getLayer();
-  eventNo_ = hit->getEvent();
+  eventID_ = hit->getEventID();
   edep_ = hit->getEdep();
 }
 
-void Hit::set(Int_t x, Int_t y, Int_t layerNo, Int_t eventNo, Float_t edep) {
+void Hit::set(Int_t x, Int_t y, Int_t layerNo, Int_t eventID, Float_t edep) {
   x_ = x;
   y_ = y;
   layerNo_ = layerNo;
-  eventNo_ = eventNo;
+  eventID_ = eventID;
   edep_ = edep;
 }
 
@@ -43,7 +43,7 @@ void Hit::set(Hit* hit) {
   x_ = hit->getX();
   y_ = hit->getY();
   layerNo_ = hit->getLayer();
-  eventNo_ = hit->getEvent();
+  eventID_ = hit->getEventID();
   edep_ = hit->getEdep();
 }
 

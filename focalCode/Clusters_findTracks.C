@@ -55,6 +55,12 @@ Tracks * Clusters::findCalorimeterTracks() {
 	findTracksFromLayer(tracks, 1);
 
 	cout << "Found " << tracks->GetEntriesFast() << " tracks.\n";
+	cout << "All the eventIDs are: ";
+
+	for (int i=0; i<tracks->GetEntriesFast(); i++) {
+		if (!At(i)) continue;
+		cout << tracks->At(i)->At(0)->getEventID() << ", ";
+	}
 
 	Int_t clustersLeft = 0;
 	for (Int_t i=0; i<GetEntriesFast(); i++) {
@@ -64,7 +70,9 @@ Tracks * Clusters::findCalorimeterTracks() {
 		}
 	}
 	Float_t factor = 100 * (1 - (Float_t) clustersLeft / GetEntriesFast());
-	cout << clustersLeft << " of total " << GetEntriesFast() << " clusters were not assigned to track! (" << factor << " %)\n";
+	if (clustersLeft>0) {
+		cout << clustersLeft << " of total " << GetEntriesFast() << " clusters were not assigned to track! (" << factor << " %)\n";
+	}
 
 	return tracks;
 }
@@ -211,13 +219,13 @@ Clusters * Clusters::findNearestClustersInNextLayer(Cluster *seed) {
 	Clusters *clustersFromThisLayer = 0;
 
 	Int_t layerCounter = 1;
-
 	for (Int_t skipLayers=0; skipLayers<3; skipLayers++) {
 		Int_t nextLayer = seed->getLayer() + 1 + skipLayers;
 		clustersFromThisLayer = findClustersFromSeedInLayer(seed, nextLayer);
 
-		if (clustersFromThisLayer->GetEntriesFast())
+		if (clustersFromThisLayer->GetEntriesFast()) {
 			break;
+		}
 	}
 
 	for (Int_t i=0; i<clustersFromThisLayer->GetEntriesFast(); i++) {
@@ -236,7 +244,7 @@ Clusters * Clusters::findClustersFromSeedInLayer(Cluster *seed, Int_t nextLayer)
 	Clusters *clustersFromThisLayer = new Clusters(50);
 
 	if (layerIdxFrom < 0)
-		return 0;
+		return clustersFromThisLayer; // empty
 
 	for (Int_t i=layerIdxFrom; i<layerIdxTo; i++) {
 		if (!At(i))

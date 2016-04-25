@@ -592,10 +592,10 @@ void drawFitScale(Int_t Runs, Int_t dataType, Bool_t recreate, Float_t energy) {
 void drawTracksWithEnergyLoss(Int_t Runs, Int_t dataType, Bool_t recreate, Float_t energy) {
 	run_energy = energy;
 	
- 	setCalibratedTungstenPValues();
+// 	setCalibratedTungstenPValues();
 	
-	Float_t x_energy[1000*200] = {};
-	Float_t y_energy[1000*200] = {};
+	Float_t x_energy[sizeOfEventID*4000] = {};
+	Float_t y_energy[sizeOfEventID*4000] = {};
 	
 	Tracks * tracks = loadOrCreateTracks(recreate, Runs, dataType, energy, x_energy, y_energy);
 	tracks->extrapolateToLayer0();
@@ -608,33 +608,52 @@ void drawTracksWithEnergyLoss(Int_t Runs, Int_t dataType, Bool_t recreate, Float
 	Int_t skipIdx = 0;
 
 	TGraphErrors *outputGraph;
+	TCanvas *cAccuracy = new TCanvas("cAccuracy", "Accuracy of fit", 1400, 1000);
 	TCanvas *cGraph = new TCanvas("cGraph", "Fitted data points", 1400, 1000);
+	TH2F *hAccuracy = new TH2F("hAccuracy", Form("Accuracy of fit in a %.0f MeV nominal beam", run_energy), 400, 0, 180, 400, 0, 180);
 	cGraph->Divide(nPlotX,nPlotY, 0.000001, 0.000001, 0);
 	gStyle->SetPadBorderMode(0); gStyle->SetFrameBorderMode(0);
 	gStyle->SetTitleH(0.06); gStyle->SetTitleYOffset(1);
+	hAccuracy->SetYTitle("Fit energy [MeV]"); hAccuracy->SetXTitle("Real energy [MeV]");
 
-	Float_t finalEnergy = 0;
+	Float_t finalEnergy, realEnergy, preTL = 0;
+	Float_t fitEnergy, fitScale = 0;
+	Int_t eventID = -1;
 	
 	for (Int_t j=0; j<tracks->GetEntriesFast(); j++) {
 		Track *thisTrack = tracks->At(j);
 		if (!thisTrack) continue;
-		if (thisTrack->doesTrackEndAbruptly()) continue;
 
 		outputGraph = (TGraphErrors*) thisTrack->doRangeFit();
 		if (!outputGraph) {
-			skipIdx++;
 			continue;
 		}
-			
-		Float_t fitEnergy = thisTrack->getFitParameterEnergy();
-		Float_t fitScale = thisTrack->getFitParameterScale();
+
+		eventID = thisTrack->At(0)->getEventID()-1;
+
+		preTL = thisTrack->getPreTL() - 1.5;
+//		if 		(thisTrack->getYmm(0) > 0)		{ preTL = thisTrack->getPreTL() + firstUpperLayerZ; }
+//		else if 	(thisTrack->getYmm(0) < 0) 	{ preTL = thisTrack->getPreTL() + firstLowerLayerZ; }
+		for (Int_t i=eventID*sizeOfEventID; i<(eventID+1)*sizeOfEventID; i++) { x_energy[i] += preTL; }
+
+		convertXYToWEPL(x_energy, y_energy, eventID);
+		realEnergy = getEnergyFromXY(x_energy, y_energy, eventID);
+
+		fitEnergy = thisTrack->getFitParameterEnergy();
+		fitScale  = thisTrack->getFitParameterScale();
 		
+		cout << "realEnergy = " << realEnergy << ", fitEnergy = " << fitEnergy << endl;
+
+		hAccuracy->Fill(realEnergy, fitEnergy);
+
 		if (fitIdx < plotSize) {
-			drawIndividualGraphs(cGraph, outputGraph, fitEnergy, fitScale, fitIdx++, skipIdx++, x_energy, y_energy);
+			drawIndividualGraphs(cGraph, outputGraph, fitEnergy, fitScale, fitIdx++, eventID, x_energy, y_energy);
 		}
-		
+
 		else delete outputGraph;
 	}
+	cAccuracy->cd();
+	hAccuracy->Draw("COLZ");
 }
 
 Float_t drawBraggPeakGraphFit(Int_t Runs, Int_t dataType, Bool_t recreate, Float_t energy) {
@@ -1006,31 +1025,34 @@ Tracks * getTracks(Int_t Runs, Int_t dataType, Int_t frameType, Float_t energy, 
 	Tracks *calorimeterTracks = new Tracks(nTracks);
 	Tracks *trackerTracks = new Tracks(nTracks);
 	Tracks *allTracks = new Tracks(nTracks * Runs);
+	TRandom3 *gRandom = new TRandom3(0);
 	
+	Int_t eventID = -1;
+
 	TStopwatch t1, t2, t3, t4, t5, t6;
 	
 	for (Int_t i=0; i<Runs; i++) {
 
-		cout << "Finding track " << (i+1)*kEventsPerRun << " of " << Runs*kEventsPerRun << "...\n";
+		cout << "Finding track " << (i+1)*kEventsPerRun << " of " << Runs*kEventsPerRun << "... ";
 		if (dataType == kMC) {
 		
 			t1.Start();
-			f->getMCFrame(i, cf, x, y);
+			eventID = f->getMCFrame(i, cf, x, y);
 			if (kDebug) cout << "Sum frame layer 2 = " << cf->getTH2F(2)->GetSum() << endl;
 			t1.Stop(); t2.Start();
 			if (kDebug) cout << "Start diffuseFrame\n";
-			cf->diffuseFrame(new TRandom3(0));
+			cf->diffuseFrame(gRandom);
 			if (kDebug) cout << "End diffuseFrame, start findHits\n";
 			t2.Stop(); t3.Start();
-			hits = cf->findHits();
+			hits = cf->findHits(eventID);
 			if (kDebug) cout << "Number of hits in frame: " << hits->GetEntriesFast() << endl;
 			t3.Stop(); t4.Start();
 			clusters = hits->findClustersFromHits(); // badly optimized
+			clusters->removeSmallClusters(2);
 			if (kDebug) cout << "Number of clusters in frame: " << clusters->GetEntriesFast() << endl;
 			t4.Stop();
 		}
 		
-
 		else if (dataType == kData) {
 			f->getDataFrame(i, cf, energy);
 			hits = cf->findHits();
@@ -1060,7 +1082,7 @@ Tracks * getTracks(Int_t Runs, Int_t dataType, Int_t frameType, Float_t energy, 
 		allTracks->appendClustersWithoutTrack(clusters->getClustersWithoutTrack());
 		cout << Form("Timing: getMCframe (%.2f sec), diffuseFrame (%.2f sec), findHits (%.2f sec), findClustersFromHits (%.2f sec), findTracks (%.2f sec)\n",
 			     t1.RealTime(), t2.RealTime(), t3.RealTime(), t4.RealTime(), t5.RealTime());
-		
+
 		cf->Reset();
 //		tf->Reset();
 		hits->clearHits();
@@ -1070,7 +1092,7 @@ Tracks * getTracks(Int_t Runs, Int_t dataType, Int_t frameType, Float_t energy, 
 		calorimeterTracks->clearTracks();
 		trackerTracks->clearTracks();
 
-		if (breakSignal) break;
+//		if (breakSignal) break;
 	}
 
 	delete cf;
@@ -1177,7 +1199,7 @@ void drawDiffusionCheck(Int_t Runs, Int_t Layer) {
    c1->cd(1);
    undiffusedTH2F->Draw("COLZ");
    
-   c1->cd(1);
+   c1->cd(2);
    diffusedTH2F->Draw("COLZ");
    
    c1->Update();
@@ -1298,7 +1320,7 @@ void getPValues() {
 
 }
 
-void drawIndividualGraphs(TCanvas *cGraph, TGraphErrors* outputGraph, Float_t fitEnergy, Float_t fitScale, Int_t fitIdx, Int_t skipIdx, Float_t *x_energy, Float_t *y_energy) {
+void drawIndividualGraphs(TCanvas *cGraph, TGraphErrors* outputGraph, Float_t fitEnergy, Float_t fitScale, Int_t fitIdx, Int_t eventID, Float_t *x_energy, Float_t *y_energy) {
 	cGraph->cd(fitIdx+1);
 
 	outputGraph->SetMinimum(0);
@@ -1333,40 +1355,35 @@ void drawIndividualGraphs(TCanvas *cGraph, TGraphErrors* outputGraph, Float_t fi
 	func->Draw("same");
 	
 	if (x_energy) {
-		
 		Float_t WEPLFactor = getWEPLFactorFromEnergy(run_energy);
 		Long64_t n=0;
 		Long64_t j=0;
 		
-		for (Long64_t i=skipIdx*1000; i<skipIdx*1000 + 1000; i++) {
+		for (Long64_t i=eventID*sizeOfEventID; i<(eventID+1)*sizeOfEventID; i++) {
 			
-			if (x_energy[i] == 0) {
-				n = j - 1;
+			if (y_energy[i] == 0) {
+				n = j;
 				break;
 			}
-			
-			x_energy[i] *=  WEPLFactor;	
 			y_energy[i] *=  2;
 			
 			j++;
 		}
 		
 		if (n>1) {
-			TGraph *energyLoss = new TGraph(n, (x_energy + skipIdx*1000), (y_energy + skipIdx*1000));
+			TGraph *energyLoss = new TGraph(n, (x_energy + eventID*sizeOfEventID), (y_energy + eventID*sizeOfEventID));
 			energyLoss->SetLineColor(kBlack); energyLoss->SetLineWidth(2);
 			energyLoss->Draw("same");
 		}
 		
-		Float_t lastX = x_energy[skipIdx*1000 + n-1];
+		Float_t lastX = x_energy[eventID*sizeOfEventID + n-1];
 		TLine *l = new TLine(lastX, 0, lastX, 600);
 		l->Draw();
 		
-		Float_t realEnergy = getEnergyFromWEPL(x_energy[skipIdx*1000 + n-1]);
+		Float_t realEnergy = getEnergyFromWEPL(x_energy[eventID*sizeOfEventID + n-1]);
 		TLatex *text2 = new TLatex(13, 450, Form("'Real' energy: %.1f MeV", realEnergy));
 		text2->SetTextSize(0.06);
 		text2->Draw();
-		
-		cout << "Accuracy = " <<  100 * (realEnergy - fitEnergy ) / realEnergy << " %.\n";
 
 	}
 

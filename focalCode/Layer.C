@@ -15,7 +15,7 @@ Layer::~Layer() {
 	// TODO Auto-generated destructor stub
 }
 
-void Layer::diffuseLayer(TRandom3 *gRandom) {
+Int_t Layer::diffuseLayer(TRandom3 *gRandom) {
 	Int_t repeatFactor, x, y, z, randX, randY;
 	Float_t EnergyFactor = 1000 / 30. * SpreadNumber;
 	Float_t newSigma, eDep;
@@ -44,7 +44,9 @@ void Layer::diffuseLayer(TRandom3 *gRandom) {
 			frame2D_.Fill(randX, randY, EnergyFactor);
 		}
 	}
+
 	delete hits;
+	return nHits;
 }
 
 

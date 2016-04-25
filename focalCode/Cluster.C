@@ -72,6 +72,7 @@ void Cluster::set(Cluster* copyCluster) {
    y_ = copyCluster->getY();
    layerNo_ = copyCluster->getLayer();
    clusterSize_ = copyCluster->getSize();
+   eventID_ = copyCluster->getEventID();
 }
 
 void Cluster::set(Float_t x, Float_t y, Int_t layer, Int_t size) {

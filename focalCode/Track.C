@@ -50,12 +50,17 @@ void Track::appendCluster(Cluster *copyCluster, Int_t startOffset /* default 0 *
    Cluster *c = (Cluster*) track_.ConstructedAt(i);
    c->set(copyCluster->getX(), copyCluster->getY(), 
           copyCluster->getLayer(), copyCluster->getSize());
+
+   if (kEventsPerRun == 1) {
+   	c->setEventID(copyCluster->getEventID());
+   }
 }
 
-void Track::appendPoint(Float_t x, Float_t y, Int_t layer, Int_t size) {
+void Track::appendPoint(Float_t x, Float_t y, Int_t layer, Int_t size, Int_t eventID) {
    Int_t i = GetEntriesFast();
    Cluster *c = (Cluster*) track_.ConstructedAt(i);
    c->set(x,y,layer,size);
+   c->setEventID(eventID);
 }
 
 Float_t Track::getTrackLengthmm() {
@@ -406,6 +411,10 @@ void Track::extrapolateToLayer0() {
                  getY(1) - slope->getLayer() * slope->getY(), // new y
                  0); // layer = 0
 
+      if (kEventsPerRun == 1) {
+      	newStart->setEventID(At(1)->getEventID());
+      }
+
       cout << "Extrapolated to " << *At(0) << " from " << *At(1) << endl;
    }
 }
@@ -567,7 +576,7 @@ TGraphErrors * Track::doRangeFit() {
 	Bool_t newCutBraggPeak = (getAverageCSLastN(2) > getAverageCS()*kBPFactorAboveAverage);
 	Bool_t cutNPointsInTrack = (GetEntries()>3);
 	Bool_t cut = newCutBraggPeak * cutNPointsInTrack;
-	if (!cut) return 0;
+//	if (!cut) return 0;
 
 	Int_t n = GetEntriesFast();
 	Float_t x[n], y[n];

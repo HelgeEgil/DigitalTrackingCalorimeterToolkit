@@ -32,7 +32,7 @@ class Track : public TObject {
 
 	virtual void setTrack(Track *copyTrack, Int_t startOffset = 0); // copy whole track
 	virtual void appendCluster(Cluster *copyCluster, Int_t startOffset = 0); // copy cluster
-	virtual void appendPoint(Float_t x, Float_t y, Int_t layer, Int_t size = -1);
+	virtual void appendPoint(Float_t x, Float_t y, Int_t layer, Int_t size = -1, Int_t eventID = -1);
 
 	virtual void clearTrack() { track_.Clear("C"); }
 	virtual void Clear(Option_t * = "");

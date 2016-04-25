@@ -11,9 +11,10 @@ private:
 	Float_t x_, y_;
 	Int_t layerNo_;
 	Int_t clusterSize_;
+	Int_t eventID_;
 
 public:
-	Cluster() { x_ = -1; y_ = -1; layerNo_ = -1; clusterSize_ = -1;}
+	Cluster() { x_ = -1; y_ = -1; layerNo_ = -1; clusterSize_ = -1; eventID_ = -1;}
 	Cluster(Cluster *cluster);
 	Cluster(Float_t x, Float_t y, Int_t layer = -1, Int_t size = -1);
 	virtual ~Cluster();
@@ -22,6 +23,7 @@ public:
 	Float_t getY() { return y_; }
 	Int_t getLayer() { return layerNo_; }
 	Int_t getSize() { return clusterSize_; }
+	Int_t getEventID() { return eventID_; }
 	Int_t getError() { return sqrt(clusterSize_); }
 	Float_t getRadiusmm();
 	Float_t getDepositedEnergy();
@@ -38,6 +40,7 @@ public:
 	void setY(Float_t y) { y_ = y; }
 	void setLayer(Int_t layer) { layerNo_ = layer; }
 	void setSize(Int_t size) { clusterSize_ = size; }
+	void setEventID(Int_t id) { eventID_ = id; }
 
 	void setXmm(Float_t x) { x_ = x / dx; }
 	void setYmm(Float_t y) { y_ = y / dy; }

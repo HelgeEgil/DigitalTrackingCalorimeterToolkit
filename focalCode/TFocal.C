@@ -136,7 +136,7 @@ void Focal::getMCTrackerFrame(Int_t runNo, TrackerFrame *tf) {
 	}
 }
 
-void Focal::getMCFrame(Int_t runNo, CalorimeterFrame *cf, Float_t *x_energy, Float_t *y_energy) {
+Int_t Focal::getMCFrame(Int_t runNo, CalorimeterFrame *cf, Float_t *x_energy, Float_t *y_energy) {
 	// Retrieve kEventsPerRun events and put them into CalorimeterFrame*
 	
 	Int_t eventIdFrom = runNo * kEventsPerRun;
@@ -154,7 +154,7 @@ void Focal::getMCFrame(Int_t runNo, CalorimeterFrame *cf, Float_t *x_energy, Flo
 	Int_t whiteListEventID = -1;
 	Int_t lastID = 0;
 
-	if (fChain == 0) return;
+	if (fChain == 0) return -1;
 	Long64_t nentries = fChain->GetEntriesFast();
 	Long64_t nbytes = 0, nb = 0;
 
@@ -172,8 +172,8 @@ void Focal::getMCFrame(Int_t runNo, CalorimeterFrame *cf, Float_t *x_energy, Flo
 		sum_edep += edep;
 		
 		if  (x_energy && y_energy && parentID == 0) {
-			x_energy[n + 1000*eventID] = posZ;
-			y_energy[n + 1000*eventID] = run_energy - sum_edep;
+			x_energy[n + sizeOfEventID*eventID] = posZ + 1.5; // 1.5 for Al absorber
+			y_energy[n + sizeOfEventID*eventID] = run_energy - sum_edep;
 			n++;
 		}
 		
@@ -210,4 +210,7 @@ void Focal::getMCFrame(Int_t runNo, CalorimeterFrame *cf, Float_t *x_energy, Flo
 		
 		lastID = eventID;
 	}
+
+	if (kEventsPerRun > 1) return -1;
+	return eventID;
 }

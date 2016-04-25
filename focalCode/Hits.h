@@ -31,7 +31,7 @@ public:
 	virtual Int_t getX(Int_t i) { return At(i)->getX(); }
 	virtual Int_t getY(Int_t i) { return At(i)->getY(); }
 	virtual Int_t getLayer(Int_t i) { return At(i)->getLayer(); }
-	virtual Int_t getEvent(Int_t i) { return At(i)->getEvent(); }
+	virtual Int_t getEventID(Int_t i) { return At(i)->getEventID(); }
 	virtual Float_t getEdep(Int_t i) { return At(i)->getEdep(); }
 
 	virtual Hit* At(Int_t i) { return ((Hit*) hits_.At(i)); }

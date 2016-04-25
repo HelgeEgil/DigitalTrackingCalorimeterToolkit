@@ -169,3 +169,29 @@ Int_t getMinimumTrackLength(Float_t energy) {
 Float_t quadratureAdd(Float_t a, Float_t b) {
 	return sqrt(pow(a,2) + pow(b, 2));
 }
+
+void convertXYToWEPL(Float_t *x_energy, Float_t *y_energy, Int_t eventID) {
+	Float_t WEPLFactor = getWEPLFactorFromEnergy(run_energy);
+	Long64_t n=0;
+	Long64_t j=0;
+
+	for (Long64_t i=eventID*sizeOfEventID; i<(eventID+1)*sizeOfEventID; i++) {
+		x_energy[i] *=  WEPLFactor;
+	}
+}
+
+Float_t getEnergyFromXY(Float_t *x_energy, Float_t *y_energy, Int_t eventID) {
+	Float_t WEPLFactor = getWEPLFactorFromEnergy(run_energy);
+	Long64_t n=0;
+	Long64_t j=0;
+
+	for (Long64_t i=eventID*sizeOfEventID; i<(eventID+1)*sizeOfEventID; i++) {
+		if (y_energy[i] == 0) {
+			n = j;
+			break;
+		}
+		j++;
+	}
+
+	return getEnergyFromWEPL(x_energy[eventID*sizeOfEventID + n-1]);
+}

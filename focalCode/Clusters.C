@@ -33,6 +33,11 @@ void Clusters::appendCluster(Cluster *cluster) {
    Int_t i = GetEntriesFast();
    Cluster *c = (Cluster*) clusters_.ConstructedAt(i);
    c->set(cluster->getX(), cluster->getY(), cluster->getLayer(), cluster->getSize());
+
+   if (kEventsPerRun == 1) {
+   	c->setEventID(cluster->getEventID());
+   }
+
 }
 
 void Clusters::appendClusterWithoutTrack(Cluster *cluster) {

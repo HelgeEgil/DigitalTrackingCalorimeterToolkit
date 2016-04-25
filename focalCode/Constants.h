@@ -10,9 +10,11 @@ enum eDataType {kMC, kData};
 
 Float_t run_energy = 0;
 Bool_t kIsAluminumPlate = true;
-Bool_t kIsScintillator = true;
+Bool_t kIsScintillator = false;
 
 Bool_t kDebug = false;
+
+const Int_t sizeOfEventID = 350;
 
 // natural unit is mm
 const Float_t cm = 0.1;
@@ -28,7 +30,7 @@ const Int_t nTrackers = 4;
 const Float_t dx = 0.03; // mm
 const Float_t dy = 0.03; // mm
 const Float_t dz = 3.975; // mm // was 3.84
-Int_t kEventsPerRun = 50;
+Int_t kEventsPerRun = 1;
 
 // Used for treatment of available experimental data files
 const Int_t nEnergies = 8;

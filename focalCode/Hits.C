@@ -74,6 +74,12 @@ Clusters * Hits::findClustersFromHits() {
 		delete checkedIndices;
 	}
 
+	if (kEventsPerRun == 1) {
+		for (Int_t i=0; i<clusters->GetEntriesFast(); i++) {
+			clusters->At(i)->setEventID(getEventID(0));
+		}
+	}
+
 	return clusters;
 }
 
