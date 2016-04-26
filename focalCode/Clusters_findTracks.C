@@ -55,12 +55,6 @@ Tracks * Clusters::findCalorimeterTracks() {
 	findTracksFromLayer(tracks, 1);
 
 	cout << "Found " << tracks->GetEntriesFast() << " tracks.\n";
-	cout << "All the eventIDs are: ";
-
-	for (int i=0; i<tracks->GetEntriesFast(); i++) {
-		if (!At(i)) continue;
-		cout << tracks->At(i)->At(0)->getEventID() << ", ";
-	}
 
 	Int_t clustersLeft = 0;
 	for (Int_t i=0; i<GetEntriesFast(); i++) {

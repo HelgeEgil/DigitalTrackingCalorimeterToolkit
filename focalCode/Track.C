@@ -576,12 +576,11 @@ TGraphErrors * Track::doRangeFit() {
 	Bool_t newCutBraggPeak = (getAverageCSLastN(2) > getAverageCS()*kBPFactorAboveAverage);
 	Bool_t cutNPointsInTrack = (GetEntries()>3);
 	Bool_t cut = newCutBraggPeak * cutNPointsInTrack;
-//	if (!cut) return 0;
+	// if (!cut) return 0;
 
 	Int_t n = GetEntriesFast();
 	Float_t x[n], y[n];
 	Float_t erx[n], ery[n];
-//	Float_t preTL = getPreTLFromScintillatorAndAluminum();
 	Float_t preTL = getPreTL();
 	
 	for (Int_t i=0; i<n; i++) {
@@ -621,7 +620,7 @@ TGraphErrors * Track::doRangeFit() {
 	func->SetParameter(1, scaleParameter);
 	func->SetParLimits(0, 0, max_energy);
 	
-	func->SetNpx(1000);
+	func->SetNpx(500);
 	
 	func->SetParLimits(1, scaleParameter,scaleParameter);
 	graph->Fit("fit_BP", "B, Q, N, W", "", 0, getWEPLFromEnergy(max_energy*1.2));

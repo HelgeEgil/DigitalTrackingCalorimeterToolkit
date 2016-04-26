@@ -594,8 +594,8 @@ void drawTracksWithEnergyLoss(Int_t Runs, Int_t dataType, Bool_t recreate, Float
 	
 // 	setCalibratedTungstenPValues();
 	
-	Float_t x_energy[sizeOfEventID*4000] = {};
-	Float_t y_energy[sizeOfEventID*4000] = {};
+	Float_t x_energy[sizeOfEventID*400] = {};
+	Float_t y_energy[sizeOfEventID*400] = {};
 	
 	Tracks * tracks = loadOrCreateTracks(recreate, Runs, dataType, energy, x_energy, y_energy);
 	tracks->extrapolateToLayer0();
@@ -603,7 +603,7 @@ void drawTracksWithEnergyLoss(Int_t Runs, Int_t dataType, Bool_t recreate, Float
 	cout << "Using aluminum plate: " << kIsAluminumPlate << endl;
 	cout << "Using scintillators: " << kIsScintillator << endl;
 
-	Int_t nPlotX = 5, nPlotY = 5;
+	Int_t nPlotX = 2, nPlotY = 2;
 	Int_t fitIdx = 0, plotSize = nPlotX*nPlotY;
 	Int_t skipIdx = 0;
 
@@ -691,7 +691,7 @@ Float_t drawBraggPeakGraphFit(Int_t Runs, Int_t dataType, Bool_t recreate, Float
 	gStyle->SetPadBorderMode(0); gStyle->SetFrameBorderMode(0);
 	gStyle->SetTitleH(0.06); gStyle->SetTitleYOffset(1);
 	
-	TH1F *hFitResults = new TH1F("fitResult", hTitle, 500, getUnitFromEnergy(0), getUnitFromEnergy(energy*1.2));
+	TH1F *hFitResults = new TH1F("fitResult", hTitle, 250, getUnitFromEnergy(0), getUnitFromEnergy(energy*1.2));
 	hFitResults->SetLineColor(kBlack); hFitResults->SetFillColor(kGreen-5);
 
 	Float_t finalEnergy = 0;
@@ -1092,7 +1092,7 @@ Tracks * getTracks(Int_t Runs, Int_t dataType, Int_t frameType, Float_t energy, 
 		calorimeterTracks->clearTracks();
 		trackerTracks->clearTracks();
 
-//		if (breakSignal) break;
+		if (breakSignal) break;
 	}
 
 	delete cf;
@@ -1322,6 +1322,8 @@ void getPValues() {
 
 void drawIndividualGraphs(TCanvas *cGraph, TGraphErrors* outputGraph, Float_t fitEnergy, Float_t fitScale, Int_t fitIdx, Int_t eventID, Float_t *x_energy, Float_t *y_energy) {
 	cGraph->cd(fitIdx+1);
+	Bool_t kDrawFit = true;
+	Bool_t kDrawText = true;
 
 	outputGraph->SetMinimum(0);
 	outputGraph->SetMaximum(600);
@@ -1352,7 +1354,10 @@ void drawIndividualGraphs(TCanvas *cGraph, TGraphErrors* outputGraph, Float_t fi
 
 	TF1 *func = new TF1("fit_BP", fitfunc_DBP, 0, 500, 2);
 	func->SetParameters(fitEnergy, fitScale);
-	func->Draw("same");
+
+	if (kDrawFit) {
+		func->Draw("same");
+	}
 	
 	if (x_energy) {
 		Float_t WEPLFactor = getWEPLFactorFromEnergy(run_energy);
@@ -1361,6 +1366,8 @@ void drawIndividualGraphs(TCanvas *cGraph, TGraphErrors* outputGraph, Float_t fi
 		
 		for (Long64_t i=eventID*sizeOfEventID; i<(eventID+1)*sizeOfEventID; i++) {
 			
+			cout << i << ", " << x_energy[i] << ", " << y_energy[i] << endl;
+
 			if (y_energy[i] == 0) {
 				n = j;
 				break;
@@ -1387,116 +1394,15 @@ void drawIndividualGraphs(TCanvas *cGraph, TGraphErrors* outputGraph, Float_t fi
 
 	}
 
-	TLatex *text = new TLatex(10, 500, Form("Fitted energy: %.1f MeV", fitEnergy));
-	text->SetTextSize(0.06);
-	text->Draw();
+	if (kDrawText) {
+		TLatex *text = new TLatex(10, 500, Form("Fitted energy: %.1f MeV", fitEnergy));
+		text->SetTextSize(0.06);
+		text->Draw();
+	}
 
 	
 	cGraph->Update();
 }
-
-/*
-TF1 * doNGaussianFit(TH1F* h, Float_t sigma_energy) {	
-	Int_t meanBin = h->GetMean();
-	Float_t expectedMean = getUnitFromEnergy(run_energy);
-	Float_t expectedStraggling = getUnitStragglingFromEnergy(run_energy, sigma_energy);
-	Float_t maxBin = h->GetMaximum();
-	Float_t separationFactor = 0.9, dlayer = 0;
-
-	
-	if (kMaterial == kAluminum)
-		separationFactor = 1; // don't ask why...
-
-	if 	  (kOutputUnit == kPhysical) 	dlayer = dz*separationFactor;
-	else if (kOutputUnit == kEnergy) 	dlayer = getEnergyFromTL(getTLFromEnergy(run_energy) + dz*separationFactor) - expectedMean;
-	else if (kOutputUnit == kWEPL) 		dlayer = getWEPLFromTL(getTLFromEnergy(run_energy) + dz*separationFactor) - expectedMean;
-	
-	Float_t expectedStragglingTo = expectedStraggling;
-	if (kMaterial == kAluminum && run_energy < 110) {
-		// empirical factor... 
-		expectedStragglingTo = expectedStraggling * 2;
-	}
-	
-	TF1 *ES = new TF1("ES", 
-		Form("[0]*exp(-0.5*((x-[1])/[2])**2) + [3]*exp(-0.5*((x-[1]-%.5f)/[2])**2)", dlayer), 
-		expectedMean*0.9, expectedMean*1.25);
-	ES->SetParameters(maxBin*0.5,meanBin,expectedStraggling, maxBin*0.5);
-	ES->SetParLimits(0,0,maxBin);
-	ES->SetParLimits(1,meanBin*0.75,meanBin*1.1);
-	ES->SetParLimits(2,expectedStraggling,expectedStragglingTo);
-	ES->SetParLimits(3,0,maxBin);
-
-	h->Fit(ES,"B,Q,M,WW,N", "", expectedMean*0.85, expectedMean*1.25);
-
-	Float_t p1 = ES->GetParameter(0);
-	Float_t p2 = ES->GetParameter(3);
-		
-	Float_t old_p1_n = p1 / (p1 + p2);
-	Float_t old_p2_n = p2 / (p1 + p2);
-	
-	Float_t shiftFactor = 1.65974; // determined from parameter scan in W
-	if (kMaterial == kAluminum) shiftFactor = 1;
-	else if (kMaterial == kTungsten) shiftFactor = 1;
-	
-	Float_t norm = p1/shiftFactor + p2 * shiftFactor;
-	Float_t p1_n = ( p1 / shiftFactor ) / norm;
-	Float_t p2_n = ( p2 * shiftFactor ) / norm;
-	
-	Float_t peak_x = ES->GetParameter(1);
-	Float_t mu1 = peak_x;
-	Float_t mu2 = peak_x + dlayer;
-	
-	Float_t weighted = p1_n * mu1 + p2_n * mu2;
-	Float_t w_tl = 0, w_wepl = 0, w_en = 0, max_en = 0, max_tl = 0;
-	
-	Float_t max_mu = (p2_n > 0.2) ? mu2 : mu1;
-	
-	if (kOutputUnit == kPhysical) {
-		w_en = getEnergyFromTL(weighted);
-		w_wepl = getWEPLFromTL(weighted);
-		w_tl = weighted;
-		max_en = getEnergyFromTL(max_mu);
-		max_tl = getWEPLFromTL(max_mu);
-	}
-	else if (kOutputUnit == kWEPL) {
-		w_en = getEnergyFromWEPL(weighted);
-		w_tl = getTLFromWEPL(weighted);
-		w_wepl = weighted;
-		max_en = getEnergyFromWEPL(max_mu);
-		max_tl = max_mu;
-	}
-	else { // kEnergy
-		w_en = weighted;
-		w_tl = getTLFromEnergy(weighted);
-		w_wepl = getWEPLFromEnergy(weighted);
-		max_en = max_mu;
-		max_tl = getWEPLFromEnergy(max_mu);
-	}
-
-	if (p2_n < 0.2) {
-		cout << "mu2 @ (" << getEnergyFromTL(mu2) << " MeV, f=" << p2_n << ") too small, choosing mu1\n";
-	}
-	
-	cout << "Three Gaussian peaks at: " << 100 * old_p1_n << "% " << mu1 << " mm, " 
-										<< 100 * old_p2_n << "% " << mu2 << " mm\n";
-										
-	cout << "---> The expected mean tracklength is " << w_tl << " mm\n";
-	cout << "---> The expected mean WEPL is " << w_wepl << " mm\n";
-	cout << "---> With an energy of " << w_en << " MeV\n";
-	
-	cout << "WEPL range: " << ES->GetParameter(1) << endl;
-	cout << "Estimated energy: " << getEnergyFromWEPL(ES->GetParameter(1)) << endl;
-	cout << "Fitted sigma: " << ES->GetParameter(2) << endl;
-	cout << "Expected sigma: " << expectedStraggling << endl;
-	cout << "(expected range: " << expectedMean << ")\n";
-
-	cout << endl;
-	cout << "Estimated WEPL = " << max_tl << " mm.\n";
-	cout << "Estimated energy = " << max_en << " MeV.\n";
-	
-	return ES;
-}
-*/
 
 Float_t  doNGaussianFit ( TH1F *h, Float_t *means, Float_t *sigmas) {
 	TF1 *gauss;
@@ -1547,9 +1453,9 @@ Float_t  doNGaussianFit ( TH1F *h, Float_t *means, Float_t *sigmas) {
 		if (isLastLayer && ratio < 0.05) sigma = 0.2;
 		
 		gauss->SetParameters(10, (searchFrom+searchTo)/2, sigma);
-		gauss->SetParLimits(0, 5, maxBinHeight);
+		gauss->SetParLimits(0, 1, maxBinHeight);
 		gauss->SetParLimits(1, searchFrom, searchTo);
-		gauss->SetParLimits(2, 1, 15);
+		gauss->SetParLimits(2, 2, 15);
 		
 		h->Fit(gauss, "M, B, WW, Q", "", searchFrom, searchTo);
 		
@@ -1563,11 +1469,12 @@ Float_t  doNGaussianFit ( TH1F *h, Float_t *means, Float_t *sigmas) {
 		
  		cout << Form("Searching from %.1f to %.1f, with midpoint at %.1f. Found best fit @ %.1f with chi2 = %.2f and chi2/n = %.2f, ratio = %.2f.\n", searchFrom, searchTo,(searchTo+searchFrom)/2 , mean, chi2, chi2n, ratio);
 		
-//  		if (chi2n > 4) {
-//  			delete gauss;
-//  			continue;
-//  		}
- 		
+  		if (chi2n > 12) {
+  			delete gauss;
+  			continue;
+		}
+
+
  		if (ratio > 0.05 || isLastLayer) {
  			gauss->Draw("same");
 			cout << Form("%d;\t %8.5f;\t %8.5f;\t %8.5f;\t %8.5f;\t %8.5f;\t %.2f\n", i, constant, mean, lEnergy, sigma, ratio, chi2n);
@@ -1597,6 +1504,7 @@ Float_t  doNGaussianFit ( TH1F *h, Float_t *means, Float_t *sigmas) {
 	estimated_range /= sum_constant;
 	estimated_energy = getEnergyFromUnit(estimated_range);
 	cout << "ESTIMATED ENERGY FROM RUN IS " << estimated_energy << endl;
+	cout << "Estimated range = " << estimated_range << endl;
 	
 	if (true) {
 		ofstream file("output_gauss.csv", ofstream::out | ofstream::app);
