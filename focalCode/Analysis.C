@@ -1454,8 +1454,8 @@ Float_t  doNGaussianFit ( TH1F *h, Float_t *means, Float_t *sigmas) {
 		
 		gauss->SetParameters(10, (searchFrom+searchTo)/2, sigma);
 		gauss->SetParLimits(0, 1, maxBinHeight);
-		gauss->SetParLimits(1, searchFrom, searchTo);
-		gauss->SetParLimits(2, 2, 15);
+		gauss->SetParLimits(1, searchFrom+8, searchTo-8);
+		gauss->SetParLimits(2, 2, 12);
 		
 		h->Fit(gauss, "M, B, WW, Q", "", searchFrom, searchTo);
 		
@@ -1469,11 +1469,10 @@ Float_t  doNGaussianFit ( TH1F *h, Float_t *means, Float_t *sigmas) {
 		
  		cout << Form("Searching from %.1f to %.1f, with midpoint at %.1f. Found best fit @ %.1f with chi2 = %.2f and chi2/n = %.2f, ratio = %.2f.\n", searchFrom, searchTo,(searchTo+searchFrom)/2 , mean, chi2, chi2n, ratio);
 		
-  		if (chi2n > 12) {
+  		if (chi2n > 7) {
   			delete gauss;
   			continue;
 		}
-
 
  		if (ratio > 0.05 || isLastLayer) {
  			gauss->Draw("same");

@@ -22,10 +22,11 @@
 #/vis/viewer/panTo 0.03 -0.05
 /vis/viewer/set/viewpointThetaPhi 90 0
 /vis/viewer/set/style surface
+/vis/viewer/zoom 8
 /vis/drawVolume
 /tracking/storeTrajectory 1
 /vis/scene/endOfEventAction accumulate 25
-#/vis/scene/add/trajectories
+/vis/scene/add/trajectories
 /vis/viewer/update
 
 /gate/geometry/setMaterialDatabase ../GateMaterials.db
@@ -34,7 +35,6 @@
 /gate/scanner/vis/setColor black
 
 /gate/filter/attachCrystalSD
-/gate/filter2/attachCrystalSD
 
 #===============#
 # Physics	#
@@ -47,6 +47,9 @@
 #/gate/physics/addProcess SingleScattering proton
 
 /gate/physics/SetMaxStepSizeInRegion      filter {step_active} um
+/gate/physics/Gamma/SetCutInRegion           filter   50. um
+/gate/physics/Electron/SetCutInRegion        filter   50. um
+
 
 /gate/run/initialize
 
@@ -67,7 +70,7 @@
 /gate/source/uniformBeam/gps/direction 0 0 1
 /gate/source/uniformBeam/gps/halfx 25. mm
 /gate/source/uniformBeam/gps/halfy 25. mm
-/gate/source/uniformBeam/gps/centre 0. 0. -1 m # -20 cm for scintillator
+/gate/source/uniformBeam/gps/centre 0. 0. -8. cm # -20 cm for scintillator
 
 /gate/output/root/enable
 /gate/output/root/setFileName ../../focalCode/rawdata/test_scintillatorfilter_{energy}MeV
