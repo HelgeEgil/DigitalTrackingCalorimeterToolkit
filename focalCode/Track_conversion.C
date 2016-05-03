@@ -71,12 +71,22 @@ Float_t getTLStragglingFromEnergy(Float_t energy, Float_t sigma_energy) {
 Float_t getWEPLStragglingFromWEPL(Float_t wepl, Float_t sigma_energy) {
 	Float_t energy = getEnergyFromWEPL(wepl);
 	
-	Float_t sigma_a = alpha_prime_water * (pow(p_water, 2) * pow(alpha_water, 2*pinv_water) / (3-2*pinv_water) * pow(wepl, 3-2*pinv_water)) ;
-	Float_t sigma_b = pow(sigma_energy * alpha_water * p_water, 2) * pow(energy, 2*p_water-2);
+	Float_t tlStraggling = getTLStragglingFromEnergy(energy, sigma_energy);
+	Float_t tl = getTLFromEnergy(energy);
 
-	Float_t sigma = sqrt(sigma_a + sigma_b);
+	Float_t upperTL = tl + tlStraggling / 2;
+	Float_t lowerTL = tl - tlStraggling / 2;
 
-	return sigma;
+	Float_t weplStraggling = getWEPLFromTL(upperTL) - getWEPLFromTL(lowerTL);
+
+	return weplStraggling;
+//
+//	Float_t sigma_a = alpha_prime_water * (pow(p_water, 2) * pow(alpha_water, 2*pinv_water) / (3-2*pinv_water) * pow(wepl, 3-2*pinv_water)) ;
+//	Float_t sigma_b = pow(sigma_energy * alpha_water * p_water, 2) * pow(energy, 2*p_water-2);
+//
+//	Float_t sigma = sqrt(sigma_a + sigma_b);
+
+//	return sigma;
 }
 
 Float_t getWEPLStragglingFromEnergy(Float_t energy, Float_t sigma_energy) {

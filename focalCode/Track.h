@@ -14,18 +14,21 @@ class Track : public TObject {
 		TClonesArray track_;
 		Float_t fitEnergy_;
 		Float_t fitScale_;
+		Float_t fitError_;
 
 	public:
 
 	Track() : track_("Cluster", MaxTrackLength) {
 		fitEnergy_ = 0;
 		fitScale_ = 0;
+		fitError_ = 0;
 	};
 
 	Track(Cluster *cluster) : track_("Cluster", MaxTrackLength) { 
 		appendCluster(cluster);
 		fitEnergy_ = 0;
 		fitScale_ = 0;
+		fitError_ = 0;
 	}
 
 	virtual ~Track(); 
@@ -78,6 +81,7 @@ class Track : public TObject {
 	Float_t getEnergy();
 	Float_t getFitParameterEnergy();
 	Float_t getFitParameterScale();
+	Float_t getFitParameterError();
 	Float_t getWEPL();
 	Float_t getEnergyStraggling();
 	Bool_t isHitOnScintillatorH();

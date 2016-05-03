@@ -617,7 +617,7 @@ void drawTracksWithEnergyLoss(Int_t Runs, Int_t dataType, Bool_t recreate, Float
 	hAccuracy->SetYTitle("Fit energy [MeV]"); hAccuracy->SetXTitle("Real energy [MeV]");
 
 	Float_t finalEnergy, realEnergy, preTL = 0;
-	Float_t fitEnergy, fitScale = 0;
+	Float_t fitEnergy, fitScale, fitError = 0;
 	Int_t eventID = -1;
 	
 	for (Int_t j=0; j<tracks->GetEntriesFast(); j++) {
@@ -641,13 +641,14 @@ void drawTracksWithEnergyLoss(Int_t Runs, Int_t dataType, Bool_t recreate, Float
 
 		fitEnergy = thisTrack->getFitParameterEnergy();
 		fitScale  = thisTrack->getFitParameterScale();
+		fitEnergy = quadratureAdd(thisTrack->getFitParameterError(), dz/sqrt(12));
 		
 		cout << "realEnergy = " << realEnergy << ", fitEnergy = " << fitEnergy << endl;
 
 		hAccuracy->Fill(realEnergy, fitEnergy);
 
 		if (fitIdx < plotSize) {
-			drawIndividualGraphs(cGraph, outputGraph, fitEnergy, fitScale, fitIdx++, eventID, x_energy, y_energy);
+			drawIndividualGraphs(cGraph, outputGraph, fitEnergy, fitScale, fitError, fitIdx++, eventID, x_energy, y_energy);
 		}
 
 		else delete outputGraph;
@@ -721,14 +722,16 @@ Float_t drawBraggPeakGraphFit(Int_t Runs, Int_t dataType, Bool_t recreate, Float
 			outputGraph = (TGraphErrors*) thisTrack->doRangeFit();
 		
 		if (!outputGraph) continue;
-			
+
 		Float_t fitEnergy = thisTrack->getFitParameterEnergy();
 		Float_t fitScale = thisTrack->getFitParameterScale();
 		
+		Float_t fitError = quadratureAdd(thisTrack->getFitParameterError(), dz/sqrt(12));
+
 		hFitResults->Fill(getUnitFromEnergy(fitEnergy));
 
-		if (fitIdx < plotSize && kDrawIndividualGraphs ) {
-			drawIndividualGraphs(cGraph, outputGraph, fitEnergy, fitScale, fitIdx++);
+		if (fitIdx < plotSize && kDrawIndividualGraphs) {
+			drawIndividualGraphs(cGraph, outputGraph, fitEnergy, fitScale, fitError, fitIdx++);
 		}
 		
 		else delete outputGraph;
@@ -773,9 +776,17 @@ Float_t drawBraggPeakGraphFit(Int_t Runs, Int_t dataType, Bool_t recreate, Float
 		if (means[i]) nMean++;
 	}
 	
+	Float_t rangeSigma = 0;
+	for (Int_t i=0; i<nMean; i++) {
+		rangeSigma += pow(sigmas[i], 2);
+	}
+	rangeSigma = sqrt(rangeSigma);
+
+	Float_t energySigma = getEnergyFromUnit(nGaussianFitRange + rangeSigma / 2) - getEnergyFromUnit(nGaussianFitRange - rangeSigma / 2);
+
 	cFitResults->Update();
 	
-	TLine *l;
+	TLine *l = nullptr;
 	if (kDrawVerticalLayerLines) {
 		Float_t line_z = 0;
 		for (Int_t i=0; i<10; i++) {
@@ -792,13 +803,6 @@ Float_t drawBraggPeakGraphFit(Int_t Runs, Int_t dataType, Bool_t recreate, Float
 	if (kDrawVerticalLayerLines) legend->AddEntry(l, "Sensor layer positions", "L");
 // 	legend->Draw();
 
-	Float_t lowerRange = expectedMean - expectedStraggling;
-	Float_t higherRange = expectedMean + expectedStraggling;
-	
-	Float_t sigma_fwhm = getFWxMInRange(hFitResults, lowerRange, higherRange, 2);
-	Float_t sigma_fwtm = getFWxMInRange(hFitResults, lowerRange, higherRange, 3);
-	Float_t sigma_fwqm = getFWxMInRange(hFitResults, lowerRange, higherRange, 4);
-	
 	TPaveStats *ps = (TPaveStats*) cFitResults->GetPrimitive("stats");
 	hFitResults->SetBit(TH1::kNoStats);
 	ps->AddText(Form("Nominal mean = %.2f", expectedMean));
@@ -809,6 +813,8 @@ Float_t drawBraggPeakGraphFit(Int_t Runs, Int_t dataType, Bool_t recreate, Float
 		ps->AddText(Form("Energy fit %d = %.2f", i+1, getEnergyFromUnit(means[i])));
 		ps->AddText(Form("Sigma fit %d = %.2f", i+1, sigmas[i]));
 	}
+	ps->AddText(Form("Resulting range = %.2f #pm %.2f", nGaussianFitRange, rangeSigma));
+	ps->AddText(Form("Resulting energy = %.2f #pm %.2f", getEnergyFromUnit(nGaussianFitRange), energySigma));
 		
 	if (kOutputUnit == kPhysical) {
 		cFitResults->SaveAs(Form("figures/Fitted_energies_%.2f_MeV_%s_%s_physical.pdf", energy, getMaterialChar(), getDataTypeChar(dataType)));
@@ -1320,7 +1326,7 @@ void getPValues() {
 
 }
 
-void drawIndividualGraphs(TCanvas *cGraph, TGraphErrors* outputGraph, Float_t fitEnergy, Float_t fitScale, Int_t fitIdx, Int_t eventID, Float_t *x_energy, Float_t *y_energy) {
+void drawIndividualGraphs(TCanvas *cGraph, TGraphErrors* outputGraph, Float_t fitEnergy, Float_t fitScale, Float_t fitError, Int_t fitIdx, Int_t eventID, Float_t *x_energy, Float_t *y_energy) {
 	cGraph->cd(fitIdx+1);
 	Bool_t kDrawFit = true;
 	Bool_t kDrawText = true;
@@ -1365,9 +1371,6 @@ void drawIndividualGraphs(TCanvas *cGraph, TGraphErrors* outputGraph, Float_t fi
 		Long64_t j=0;
 		
 		for (Long64_t i=eventID*sizeOfEventID; i<(eventID+1)*sizeOfEventID; i++) {
-			
-			cout << i << ", " << x_energy[i] << ", " << y_energy[i] << endl;
-
 			if (y_energy[i] == 0) {
 				n = j;
 				break;
@@ -1388,19 +1391,17 @@ void drawIndividualGraphs(TCanvas *cGraph, TGraphErrors* outputGraph, Float_t fi
 		l->Draw();
 		
 		Float_t realEnergy = getEnergyFromWEPL(x_energy[eventID*sizeOfEventID + n-1]);
-		TLatex *text2 = new TLatex(13, 450, Form("'Real' energy: %.1f MeV", realEnergy));
+		TLatex *text2 = new TLatex(13, 450, Form("'Real' energy: %.1f #pm MeV", realEnergy));
 		text2->SetTextSize(0.06);
 		text2->Draw();
-
 	}
 
 	if (kDrawText) {
-		TLatex *text = new TLatex(10, 500, Form("Fitted energy: %.1f MeV", fitEnergy));
+		TLatex *text = new TLatex(10, 500, Form("Fitted energy: %.1f #pm %.1f MeV", fitEnergy, fitError));
 		text->SetTextSize(0.06);
 		text->Draw();
 	}
 
-	
 	cGraph->Update();
 }
 
@@ -1436,8 +1437,8 @@ Float_t  doNGaussianFit ( TH1F *h, Float_t *means, Float_t *sigmas) {
 		Int_t bmin = axis->FindBin(searchFrom);
 		Int_t bmax = axis->FindBin(searchTo);
 		
-		TLine *l1 = new TLine(searchFrom, 0, searchFrom, 1000); l1->SetLineColor(kGreen); l1->Draw();
-		TLine *l2 = new TLine(searchTo, 0, searchTo, 1000); l2->SetLineColor(kRed); l2->Draw();
+//		TLine *l1 = new TLine(searchFrom, 0, searchFrom, 1000); l1->SetLineColor(kGreen); l1->Draw();
+//		TLine *l2 = new TLine(searchTo, 0, searchTo, 1000); l2->SetLineColor(kRed); l2->Draw();
 		
 		Float_t integral = h->Integral(bmin, bmax);
 		Float_t ratio = integral / fullIntegral;
@@ -1474,7 +1475,7 @@ Float_t  doNGaussianFit ( TH1F *h, Float_t *means, Float_t *sigmas) {
   			continue;
 		}
 
- 		if (ratio > 0.05 || isLastLayer) {
+ 		if (ratio > 0.05 || (isLastLayer && ratio>0.025)) {
  			gauss->Draw("same");
 			cout << Form("%d;\t %8.5f;\t %8.5f;\t %8.5f;\t %8.5f;\t %8.5f;\t %.2f\n", i, constant, mean, lEnergy, sigma, ratio, chi2n);
 			
@@ -1495,15 +1496,22 @@ Float_t  doNGaussianFit ( TH1F *h, Float_t *means, Float_t *sigmas) {
 	}
 	
 	Float_t estimated_energy = 0, estimated_range = 0;
-	Float_t sum_constant = 0;
+	Float_t estimated_energy_error = 0;
+	Float_t sum_constant = 0, sumSigma = 0;
 	for (Int_t i=0 ; i<3; i++) {
 		estimated_range += array_constant[i] * array_mean[i];
 		sum_constant += array_constant[i];
+		sumSigma += pow(array_sigma[i], 2);
 	}
+
+	sumSigma = sqrt(sumSigma);
+
+
 	estimated_range /= sum_constant;
 	estimated_energy = getEnergyFromUnit(estimated_range);
-	cout << "ESTIMATED ENERGY FROM RUN IS " << estimated_energy << endl;
-	cout << "Estimated range = " << estimated_range << endl;
+	estimated_energy_error = getEnergyFromWEPL(estimated_range + sumSigma/2) - getEnergyFromWEPL(estimated_range - sumSigma/2);
+	cout << "ESTIMATED ENERGY FROM RUN IS " << estimated_energy << " +- " << estimated_energy_error << endl;
+	cout << "Estimated range = " << estimated_range << " +- " << sumSigma << endl;
 	
 	if (true) {
 		ofstream file("output_gauss.csv", ofstream::out | ofstream::app);

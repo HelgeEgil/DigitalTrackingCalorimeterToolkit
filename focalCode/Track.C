@@ -576,7 +576,7 @@ TGraphErrors * Track::doRangeFit() {
 	Bool_t newCutBraggPeak = (getAverageCSLastN(2) > getAverageCS()*kBPFactorAboveAverage);
 	Bool_t cutNPointsInTrack = (GetEntries()>3);
 	Bool_t cut = newCutBraggPeak * cutNPointsInTrack;
-	// if (!cut) return 0;
+	if (!cut) return 0;
 
 	Int_t n = GetEntriesFast();
 	Float_t x[n], y[n];
@@ -588,7 +588,7 @@ TGraphErrors * Track::doRangeFit() {
 		x[i] = preTL + getLayermm(i);
 		y[i] = getDepositedEnergy(i);
 		ery[i] = getDepositedEnergyError(i);
-		erx[i] = dz;
+		erx[i] = dz / sqrt(12);
 	}
 	
 	Float_t max_energy = getEnergyFromTL(x[n-1] + 0.75*dz);
@@ -627,6 +627,7 @@ TGraphErrors * Track::doRangeFit() {
 	
 	fitEnergy_ = func->GetParameter(0);
 	fitScale_ = func->GetParameter(1);
+	fitError_ = func->GetParError(0);
 
 	return graph;
 }
@@ -712,6 +713,18 @@ Float_t Track::getFitParameterScale() {
 		}
 	}
 	return fitScale_;
+}
+
+Float_t Track::getFitParameterError() {
+	if (!fitScale_) {
+		if (!run_energy) {
+			return 0;
+		}
+		else {
+			doFit();
+		}
+	}
+	return fitError_;
 }
 
 Float_t Track::getPreEnergyLoss() {
