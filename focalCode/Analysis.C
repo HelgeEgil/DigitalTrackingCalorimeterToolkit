@@ -688,12 +688,18 @@ Float_t drawBraggPeakGraphFit(Int_t Runs, Int_t dataType, Bool_t recreate, Float
 	TGraphErrors *outputGraph;
 	TCanvas *cGraph = new TCanvas("cGraph", "Fitted data points", 1400, 1000);
 	TCanvas *cFitResults = new TCanvas("cFitResults", hTitle, 1400, 1000);
+	TCanvas *cMaxAngle = new TCanvas("cMaxAngle", "Maxium angle for proton track", 1400, 1000);
 	cGraph->Divide(nPlotX,nPlotY, 0.000001, 0.000001, 0);
 	gStyle->SetPadBorderMode(0); gStyle->SetFrameBorderMode(0);
 	gStyle->SetTitleH(0.06); gStyle->SetTitleYOffset(1);
 	
 	TH1F *hFitResults = new TH1F("fitResult", hTitle, 250, getUnitFromEnergy(0), getUnitFromEnergy(energy*1.2));
 	hFitResults->SetLineColor(kBlack); hFitResults->SetFillColor(kGreen-5);
+
+	TH1F *hMaxAngle = new TH1F("hMaxAngle", "Maximum angle for proton track", 200, 0, 25);
+	hMaxAngle->SetLineColor(kBlack); hMaxAngle->SetFillColor(kGreen-5);
+
+	Bool_t acceptAngle = false;
 
 	Float_t finalEnergy = 0;
 	Int_t nCutDueToTrackEndingAbruptly = 0;
@@ -715,7 +721,17 @@ Float_t drawBraggPeakGraphFit(Int_t Runs, Int_t dataType, Bool_t recreate, Float
 		if (kInsideScintillatorCross) {
 			if (!thisTrack->isHitOnScintillators()) continue;
 		}
-		
+	
+		Float_t maxAngle = 0, thisAngle = 0;
+		for (Int_t i=0; i<thisTrack->GetEntriesFast(); i++) {
+			thisAngle = thisTrack->getSlopeAngleAtLayer(i);
+			maxAngle = max(thisAngle, maxAngle);
+		}
+
+		acceptAngle = (maxAngle < 13);
+
+		hMaxAngle->Fill(maxAngle);
+
 		if (kUseTrackLength)
 			outputGraph = (TGraphErrors*) thisTrack->doFit();
 		else
@@ -728,10 +744,12 @@ Float_t drawBraggPeakGraphFit(Int_t Runs, Int_t dataType, Bool_t recreate, Float
 		
 		Float_t fitError = quadratureAdd(thisTrack->getFitParameterError(), dz/sqrt(12));
 
-		hFitResults->Fill(getUnitFromEnergy(fitEnergy));
+		if (acceptAngle) {
+			hFitResults->Fill(getUnitFromEnergy(fitEnergy));
 
-		if (fitIdx < plotSize && kDrawIndividualGraphs) {
-			drawIndividualGraphs(cGraph, outputGraph, fitEnergy, fitScale, fitError, fitIdx++);
+			if (fitIdx < plotSize && kDrawIndividualGraphs) {
+				drawIndividualGraphs(cGraph, outputGraph, fitEnergy, fitScale, fitError, fitIdx++);
+			}
 		}
 		
 		else delete outputGraph;
@@ -741,6 +759,19 @@ Float_t drawBraggPeakGraphFit(Int_t Runs, Int_t dataType, Bool_t recreate, Float
 	
 	cout << 100 * float(nCutDueToTrackEndingAbruptly) / tracks->GetEntriesFast() << " % of the tracks were cut due to seemingly inelastic nuclear interactions.\n";
 	
+	cMaxAngle->cd();
+	hMaxAngle->Draw();
+	TF1 *fMaxAngle = new TF1("fMaxAngle", "gaus(0)", 0, 25);
+	fMaxAngle->SetParameters(100, 4, 6);
+	hMaxAngle->Fit(fMaxAngle, "M, W, Q", "", 0, 25);
+
+	Float_t angleTo = fMaxAngle->GetParameter(1) + 3 * fMaxAngle->GetParameter(2);
+
+	cout << "3 sigma CL = " << angleTo << endl;
+
+	Int_t nAccepted = hMaxAngle->Integral(0,hMaxAngle->GetXaxis()->FindBin(angleTo));
+	cout << "Number of accepted events = " << nAccepted << " of total " << hMaxAngle->Integral()  << Form("(%.2f %)", 100*nAccepted / hMaxAngle->Integral()) << endl;
+
 	cFitResults->cd();
 
 	if (kOutputUnit == kPhysical) hFitResults->SetXTitle("Physical range [mm]");
