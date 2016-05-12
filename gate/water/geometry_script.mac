@@ -18,5 +18,5 @@
 /gate/waterbox/geometry/setYLength 8. cm
 /gate/waterbox/geometry/setZLength 100. cm
 /gate/waterbox/placement/setTranslation 0. 0. 50. cm
-/gate/waterbox/setMaterial Tungsten
+/gate/waterbox/setMaterial Silicon
 /gate/waterbox/vis/forceWireframe

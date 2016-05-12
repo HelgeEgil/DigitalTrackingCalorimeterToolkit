@@ -18,9 +18,9 @@
 /gate/systems/scanner/level2/attach layer
 /gate/systems/scanner/level3/attach chip
 
-#/control/execute readout_chip.mac
+/control/execute readout_chip.mac
 #/control/execute readout_chip_scintillators.mac
-/control/execute readout_full.mac
+#/control/execute readout_full.mac
 
 #=================#
 # Physics			#
@@ -83,7 +83,7 @@
 #/gate/source/PBS/setEllipseYPhiRotationNorm positive
 
 /gate/output/root/enable
-/gate/output/root/setFileName ../focalCode/rawdata/focal_{material}_energy{energy}_sigma{sigma}_full
+/gate/output/root/setFileName ../focalCode/rawdata/focal_{material}_energy{energy}_sigma{sigma}
 
 #===============#
 # START BEAMS	#
