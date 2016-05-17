@@ -11,6 +11,9 @@
 #include <TChain.h>
 #include <TFile.h>
 
+Float_t getTLFromEnergyQuadratic(Float_t energy);
+Double_t getEnergyFromTLQuadratic(Float_t tl);
+
 class TH2;
 
 // Header file for the classes stored in the TTree if any.
@@ -133,7 +136,7 @@ findRange::findRange(Int_t energy, TTree *tree) : fChain(0)
       // The following code should be used if you want this class to access a chain
       // of trees.
       TChain * chain = new TChain("Hits","");
-      chain->Add(Form("rawdata/test_scintillatorfilter_%dMeV.root/Hits", energy));
+      chain->Add(Form("rawdata/focal_Tungsten_energy%d_sigma0.root/Hits", energy));
       tree = chain;
 #endif // SINGLE_TREE
 

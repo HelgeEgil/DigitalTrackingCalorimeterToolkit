@@ -56,7 +56,7 @@ void findFilterEnergyLoss::Loop()
 	TCanvas *c2 = new TCanvas("c2", "c2", 800, 600);
 	TCanvas *c3 = new TCanvas("c3", "c3", 800, 600);
 	
-	TH1F *hEnergyLoss = new TH1F("hEnergyLoss", Form("Energy loss for a %d MeV proton beam on a %.1f mm aluminum foil", energy, run_thickness), 1000, 0, 40);
+	TH1F *hEnergyLoss = new TH1F("hEnergyLoss", Form("Energy loss for a %d MeV proton beam on a %.1f mm aluminum foil", energy, run_thickness), 400, 0, 20);
 	TH1F *hEnergy= new TH1F("hEnergy", Form("Final energy for a %d MeV proton beam on a %.1f mm aluminum foil", energy, run_thickness), 5000, 0, 250);
 	TH2F *hEnergy2D = new TH2F("hEnergy2D", Form("Final energy for a %d MeV proton beam on focal vs x", energy), 128, -20, 20, 200, 0, 200);
 	
@@ -77,56 +77,31 @@ void findFilterEnergyLoss::Loop()
 
 // 		if (abs(posX) < 1 && abs(posY) < 1) {
 // 			continue;
-// 		}
-		
-		sum_edep += edep;
+// 		}		
+
 		if (eventID != lastID) {
 			hEnergyLoss->Fill(sum_edep);
 			hEnergy->Fill(energy - sum_edep);
 			hEnergy2D->Fill(lastX, energy - sum_edep);
-			sum_edep = 0;
+			sum_edep = edep;
 		}
+
+      else
+   		sum_edep += edep;
+
 		lastID = eventID;
 		lastX = posX;
 	}
 	
-	Int_t res;
+	TF1 *fEnergy = new TF1("f_Energy", "gaus(0)", 0, energy+10);
+	TF1 *fEnergyLoss = new TF1("f_EnergyLoss", "gaus(0)", 0, 30);
+
+//	fEnergy->SetParameters(100, energy-10, 0.3);
+//	fEnergyLoss->SetParameters(160, 10, 0.3);
 	
-//	TSpectrum *s = new TSpectrum(6);
-//	TSpectrum *sLoss = new TSpectrum(6);
-//
-//	res = s->Search(hEnergy);
-//	TList *functions = hEnergy->GetListOfFunctions();
-//	TPolyMarker *pm = (TPolyMarker*) functions->FindObject("TPolyMarker");
-//
-//	res = sLoss->Search(hEnergyLoss);
-//	TList *functionsLoss = hEnergyLoss->GetListOfFunctions();
-//	TPolyMarker *pmLoss = (TPolyMarker*) functionsLoss->FindObject("TPolyMarker");
-//
-//	Int_t n = pm->GetN();
-//	Int_t nLoss = pmLoss->GetN();
-//
-//	Double_t *x = pm->GetX();
-//	Double_t *xLoss = pmLoss->GetX();
-//
-//	Double_t finalLoss = 0;
-//
-//	for (Int_t i=0; i<n; i++) {
-//		cout << "Final energy peak " << i + 1 << " at " << x[i] << endl;
-//	}
-//
-//	for (Int_t i=0; i<nLoss; i++) {
-//		cout << "Energy loss peak " << i + 1 << " at " << xLoss[i] << endl;
-//		finalLoss = xLoss[i];
-//	}
-	
-	TF1 *fEnergy = new TF1("fEnergy", "gaus(0)", energy-50, energy+15);
-	TF1 *fEnergyLoss = new TF1("fEnergyLoss", "gaus(0)", 0, 40);
-	
-	fEnergy->SetParameters(100, energy-10, 0.3);
-	fEnergyLoss->SetParameters(160, 10, 0.3);
-	
-//	fEnergyLoss->SetParLimits(0, 10, 500);
+   hEnergy->Fit("f_Energy");
+   hEnergyLoss->Fit("gaus", "M");
+
 //	fEnergyLoss->SetParLimits(1, finalLoss*0.8, finalLoss*1.2);
 //	fEnergyLoss->SetParLimits(2, 0.05, 0.5);
 
@@ -141,16 +116,12 @@ void findFilterEnergyLoss::Loop()
 	hEnergyLoss->SetXTitle("Total energy loss");
 	hEnergyLoss->SetYTitle("Number of particles");
 	hEnergyLoss->Draw();
-	hEnergyLoss->Fit("fEnergyLoss", "B, Q", "", 0, 30);
-	
-	fEnergyLoss->Draw("same");
 	
 	c3->cd();
 	hEnergy2D->SetXTitle("X position [mm]");
 	hEnergy2D->SetYTitle("Final energy [MeV]");
-	hEnergy2D->Draw("COLZ");
+//	hEnergy2D->Draw("COLZ");
 	
-	//hEnergy->Fit("fEnergy", "B, Q", "", 0, energy+50);
 
 	cout << "For a " << energy << " MeV beam, the energy loss is " << Form("%.2f", fEnergyLoss->GetParameter(1)) << " +- " << Form("%.2f", fEnergyLoss->GetParameter(2)) << " MeV.\n";
 }

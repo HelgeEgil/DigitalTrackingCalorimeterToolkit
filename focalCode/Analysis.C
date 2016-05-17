@@ -663,8 +663,10 @@ Float_t drawBraggPeakGraphFit(Int_t Runs, Int_t dataType, Bool_t recreate, Float
 	if (run_energy < 150) setWaterPValues(kLow);
 	else setWaterPValues(kHigh);
 	
- 	setCalibratedTungstenPValues();
+// 	setCalibratedTungstenPValues();
 	
+ 	cout << "At energy " << run_energy << ", expecting TL = " << getTLFromEnergy(run_energy) << " and WEPL = " << getWEPLFromEnergy(run_energy) << endl;
+
 	Tracks * tracks = loadOrCreateTracks(recreate, Runs, dataType, energy);
 	tracks->extrapolateToLayer0();
 
@@ -688,7 +690,7 @@ Float_t drawBraggPeakGraphFit(Int_t Runs, Int_t dataType, Bool_t recreate, Float
 	TGraphErrors *outputGraph;
 	TCanvas *cGraph = new TCanvas("cGraph", "Fitted data points", 1400, 1000);
 	TCanvas *cFitResults = new TCanvas("cFitResults", hTitle, 1400, 1000);
-	TCanvas *cMaxAngle = new TCanvas("cMaxAngle", "Maxium angle for proton track", 1400, 1000);
+//	TCanvas *cMaxAngle = new TCanvas("cMaxAngle", "Maxium angle for proton track", 1400, 1000);
 	cGraph->Divide(nPlotX,nPlotY, 0.000001, 0.000001, 0);
 	gStyle->SetPadBorderMode(0); gStyle->SetFrameBorderMode(0);
 	gStyle->SetTitleH(0.06); gStyle->SetTitleYOffset(1);
@@ -759,11 +761,11 @@ Float_t drawBraggPeakGraphFit(Int_t Runs, Int_t dataType, Bool_t recreate, Float
 	
 	cout << 100 * float(nCutDueToTrackEndingAbruptly) / tracks->GetEntriesFast() << " % of the tracks were cut due to seemingly inelastic nuclear interactions.\n";
 	
-	cMaxAngle->cd();
-	hMaxAngle->Draw();
+//	cMaxAngle->cd();
+//	hMaxAngle->Draw();
 	TF1 *fMaxAngle = new TF1("fMaxAngle", "gaus(0)", 0, 25);
 	fMaxAngle->SetParameters(100, 4, 6);
-	hMaxAngle->Fit(fMaxAngle, "M, W, Q", "", 0, 25);
+	hMaxAngle->Fit(fMaxAngle, "M, W, Q, N", "", 0, 25);
 
 	Float_t angleTo = fMaxAngle->GetParameter(1) + 3 * fMaxAngle->GetParameter(2);
 
@@ -1500,11 +1502,11 @@ Float_t  doNGaussianFit ( TH1F *h, Float_t *means, Float_t *sigmas) {
 		lEnergy = getEnergyFromUnit(mean);
 		
  		cout << Form("Searching from %.1f to %.1f, with midpoint at %.1f. Found best fit @ %.1f with chi2 = %.2f and chi2/n = %.2f, ratio = %.2f.\n", searchFrom, searchTo,(searchTo+searchFrom)/2 , mean, chi2, chi2n, ratio);
-		
-  		if (chi2n > 7) {
-  			delete gauss;
-  			continue;
-		}
+//
+//  		if (chi2n > 7) {
+//  			delete gauss;
+//  			continue;
+//		}
 
  		if (ratio > 0.05 || (isLastLayer && ratio>0.025)) {
  			gauss->Draw("same");
@@ -1537,8 +1539,8 @@ Float_t  doNGaussianFit ( TH1F *h, Float_t *means, Float_t *sigmas) {
 
 	sumSigma = sqrt(sumSigma);
 
-
 	estimated_range /= sum_constant;
+
 	estimated_energy = getEnergyFromUnit(estimated_range);
 	estimated_energy_error = getEnergyFromWEPL(estimated_range + sumSigma/2) - getEnergyFromWEPL(estimated_range - sumSigma/2);
 	cout << "ESTIMATED ENERGY FROM RUN IS " << estimated_energy << " +- " << estimated_energy_error << endl;

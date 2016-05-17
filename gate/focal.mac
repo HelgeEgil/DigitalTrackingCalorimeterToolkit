@@ -27,26 +27,26 @@
 #=================#
 
 /gate/geometry/setIonisationPotential Water 75 eV
-/gate/physics/addPhysicsList emstandard_opt3
+/gate/physics/addPhysicsList QGSP_BIC_EMY
 
 #/gate/physics/addProcess SingleScattering proton
 
-/gate/physics/SetMaxStepSizeInRegion      scanner {step_passive} um
-/gate/physics/SetMaxStepSizeInRegion	   chip {step_active} um
+#/gate/physics/SetMaxStepSizeInRegion      scanner {step_passive} um
+#/gate/physics/SetMaxStepSizeInRegion	   chip {step_active} um
 
-/gate/physics/ActivateStepLimiter         charged
-/gate/physics/ActivateStepLimiter         gamma
-/gate/physics/ActivateStepLimiter         proton
+#/gate/physics/ActivateStepLimiter         charged
+#/gate/physics/ActivateStepLimiter         gamma
+#/gate/physics/ActivateStepLimiter         proton
 
-/gate/physics/Electron/SetCutInRegion  scanner {step_passive} mm
-/gate/physics/Positron/SetCutInRegion  scanner {step_passive} mm
-/gate/physics/Gamma/SetCutInRegion     scanner {step_passive} mm
-/gate/physics/Proton/SetCutInRegion    scanner {step_passive} mm
+#gate/physics/Electron/SetCutInRegion  scanner {step_passive} mm
+#gate/physics/Positron/SetCutInRegion  scanner {step_passive} mm
+#gate/physics/Gamma/SetCutInRegion     scanner {step_passive} mm
+#gate/physics/Proton/SetCutInRegion    scanner {step_passive} mm
 
-/gate/physics/Electron/SetCutInRegion  chip {step_active} um
-/gate/physics/Positron/SetCutInRegion  chip {step_active} um
-/gate/physics/Gamma/SetCutInRegion     chip {step_active} um
-/gate/physics/Proton/SetCutInRegion    chip {step_active} um
+#gate/physics/Electron/SetCutInRegion  chip {step_active} um
+#gate/physics/Positron/SetCutInRegion  chip {step_active} um
+#gate/physics/Gamma/SetCutInRegion     chip {step_active} um
+#gate/physics/Proton/SetCutInRegion    chip {step_active} um
 
 /gate/run/initialize
 

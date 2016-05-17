@@ -53,7 +53,6 @@ class Track : public TObject {
 	virtual Float_t getPreEnergyLoss();
 	virtual Float_t getPreWEPL();
 	virtual Float_t getPreTL();
-	virtual Float_t getPreTLFromScintillatorAndAluminum();
 	virtual Float_t getPreEnergyLossError();
 
 	// with dimensions

@@ -26,7 +26,7 @@
 /vis/drawVolume
 /tracking/storeTrajectory 1
 /vis/scene/endOfEventAction accumulate 25
-/vis/scene/add/trajectories
+#/vis/scene/add/trajectories
 /vis/viewer/update
 
 /gate/geometry/setMaterialDatabase ../GateMaterials.db
@@ -41,12 +41,12 @@
 #===============#
 
 /gate/geometry/setIonisationPotential Water 75 eV
-/gate/physics/addPhysicsList emstandard_opt3
-#/gate/physics/addPhysicsList QGSP_BIC
+#/gate/physics/addPhysicsList emstandard_opt3
+/gate/physics/addPhysicsList QGSP_BIC_EMY
 
 #/gate/physics/addProcess SingleScattering proton
 
-/gate/physics/SetMaxStepSizeInRegion      filter {step_active} um
+/gate/physics/SetMaxStepSizeInRegion         filter   50. um
 /gate/physics/Gamma/SetCutInRegion           filter   50. um
 /gate/physics/Electron/SetCutInRegion        filter   50. um
 

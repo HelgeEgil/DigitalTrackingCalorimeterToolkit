@@ -625,7 +625,7 @@ TGraphErrors * Track::doRangeFit() {
 	func->SetParLimits(1, scaleParameter,scaleParameter);
 	graph->Fit("fit_BP", "B, Q, N, W", "", 0, getWEPLFromEnergy(max_energy*1.2));
 	
-	fitEnergy_ = func->GetParameter(0);
+	fitEnergy_ = correctForEnergyParameterisation(func->GetParameter(0));
 	fitScale_ = func->GetParameter(1);
 	fitError_ = func->GetParError(0);
 
@@ -758,14 +758,6 @@ Float_t Track::getPreWEPL() {
 	
 	Float_t wepl = getWEPLFromEnergy(run_energy) - getWEPLFromEnergy(run_energy - energyLoss);
 	return wepl;
-}
-
-Float_t Track::getPreTLFromScintillatorAndAluminum() {
-	Float_t energyLoss = getEnergyLossFromScintillatorAndAluminum(run_energy);
-	
-	Float_t tl = getTLFromEnergy(run_energy) - getTLFromEnergy(run_energy - energyLoss);
-	
-	return tl;
 }
 
 Float_t Track::getPreTL() {

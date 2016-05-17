@@ -195,3 +195,17 @@ Float_t getEnergyFromXY(Float_t *x_energy, Float_t *y_energy, Int_t eventID) {
 
 	return getEnergyFromWEPL(x_energy[eventID*sizeOfEventID + n-1]);
 }
+
+Double_t correctForEnergyParameterisation(Float_t energy) {
+	// By using the range = alpha * pow ( energy, p ) parameterisation to find
+	// the depth dose curve used in Bragg Peak fitting, a 0.2 % error is introduced
+	// This may be fixed by calculating back the WEPL range using the r = a E^p method,
+	// and then finding the corresponding energy using the cubic and more accurate method
+
+	Double_t wepl = alpha_water * pow(energy, p_water);
+	Double_t corrected_energy = getEnergyFromWEPL(wepl);
+
+	cout << "Energy = " << energy << ", corrected energy = " << corrected_energy << endl;
+
+	return corrected_energy;
+}

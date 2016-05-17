@@ -8,48 +8,64 @@
 
 using namespace std;
 
-Float_t getEnergyFromTL(Float_t tl) {
-	return pow(tl / alpha, pinv);
+// New calculation as of 2016-05-16
+// Using QSGP-BIC-EMY instead of EMSTANDARD_OPT3
+
+
+Double_t getQ(Double_t a1, Double_t a2,Double_t a3, Double_t a4) {
+		return (2*pow(a2,3) - 9*a1*a2*a3 + 27*pow(a1,2) * a4) / (27*pow(a1,3));
 }
 
-Float_t getTLFromWEPL(Float_t wepl) {
-	return alpha * pow(wepl / alpha_water, p / p_water);
+Double_t getP(Double_t a1, Double_t a2, Double_t a3) {
+	return (3*a1 * a3 - pow(a2, 2)) / (3 * pow(a1, 2));
 }
 
-Float_t getTLFromMaterial(Float_t tl_mat, Int_t material) {
-	Float_t tl = 0;
-	if (material == kTungsten) {
-		tl = alpha * pow(tl_mat / alpha_tungsten, p / p_tungsten);
-	}
-	else if (material == kAluminum) {
-		tl = alpha * pow(tl_mat / alpha_aluminum, p / p_aluminum);
-	}
-	else {
-		cout << "MATERIAL" << material << " NOT FOUND! Reverting to input TL\n";
-		tl = tl_mat;
-	}
+Double_t inverse_cubic(Double_t p, Double_t q) {
+	return 2 * sqrt(-p/3) * cos(1/3. * acos((3*q)/(2*p) * sqrt(-3./p)) - 2*3.14159265/3.);
+}
 
-	return tl;
+Float_t getTLFromEnergy(Float_t energy, Double_t a1, Double_t a2, Double_t a3, Double_t a4) {
+	return a1 * pow(energy, 3) + a2 * pow(energy, 2) + a3 * energy + a4;
+}
+
+Float_t getEnergyFromTL(Float_t range, Double_t a1, Double_t a2, Double_t a3, Double_t a4) {
+	Double_t p = getP(a1, a2, a3);
+	Double_t q = getQ(a1, a2, a3, a4 - range);
+
+	Double_t tk = inverse_cubic(p, q);
+	Double_t energy = tk - a2 / (3 * a1);
+
+	return energy;
 }
 
 Float_t getTLFromEnergy(Float_t energy) {
-	return alpha * pow(energy, p);
+	return getTLFromEnergy(energy, a1_tungsten, a2_tungsten, a3_tungsten, a4_tungsten);
 }
 
-Float_t getEnergyFromWEPL(Float_t wepl) {
-	return pow(wepl / alpha_water, 1/(p_water));
-}
-
-Float_t getWEPLFactorFromEnergy(Float_t energy) {
-	return (alpha_water / alpha) * pow(energy, p_water - p);
-}
-
-Float_t getWEPLFromTL(Float_t tl) {
-	return alpha_water * pow(tl / alpha, p_water / p);
+Float_t getEnergyFromTL(Float_t range) {
+	return getEnergyFromTL(range, a1_tungsten, a2_tungsten, a3_tungsten, a4_tungsten);
 }
 
 Float_t getWEPLFromEnergy(Float_t energy) {
-	return alpha_water * pow(energy, p_water);
+	return getTLFromEnergy(energy, a1_water, a2_water, a3_water, a4_water);
+}
+
+Float_t getEnergyFromWEPL(Float_t wepl) {
+	return getEnergyFromTL(wepl, a1_water, a2_water, a3_water, a4_water);
+}
+
+Float_t getWEPLFactorFromEnergy(Float_t energy) {
+	Float_t range = getTLFromEnergy(energy);
+	Float_t wepl = getWEPLFromEnergy(energy);
+
+	return wepl / range;
+}
+
+Float_t getWEPLFromTL(Float_t tl) {
+	Double_t energy = getEnergyFromTL(tl);
+	Double_t wepl = getWEPLFromEnergy(energy);
+
+	return wepl;
 }
 
 Float_t getTLStragglingFromTL(Float_t tl, Float_t sigma_energy) {
@@ -80,13 +96,6 @@ Float_t getWEPLStragglingFromWEPL(Float_t wepl, Float_t sigma_energy) {
 	Float_t weplStraggling = getWEPLFromTL(upperTL) - getWEPLFromTL(lowerTL);
 
 	return weplStraggling;
-//
-//	Float_t sigma_a = alpha_prime_water * (pow(p_water, 2) * pow(alpha_water, 2*pinv_water) / (3-2*pinv_water) * pow(wepl, 3-2*pinv_water)) ;
-//	Float_t sigma_b = pow(sigma_energy * alpha_water * p_water, 2) * pow(energy, 2*p_water-2);
-//
-//	Float_t sigma = sqrt(sigma_a + sigma_b);
-
-//	return sigma;
 }
 
 Float_t getWEPLStragglingFromEnergy(Float_t energy, Float_t sigma_energy) {

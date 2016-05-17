@@ -17,15 +17,33 @@
 
 using namespace std;
 
-Float_t p= 1.658973;
-Float_t alpha = 0.004663;
+Float_t p = 1.7813;
+Float_t alpha = 0.02073;
+Float_t alphaprime = 0.0087;
 
-Float_t getEnergyFromTL(Float_t tl) {
-	return pow(tl / alpha, 1/p);
+Double_t a0 = -3.7279603175;
+Double_t a1 =  0.1958689129;
+Double_t a2 =  0.0066110840;
+Double_t a3 = -0.0000051372;
+
+Float_t getTLFromEnergyQuadratic(Float_t energy) {
+	return a0 + a1 * energy + a2 * pow(energy,2) + a3 * pow(energy,3);
 }
 
-Float_t getTLFromEnergy(Float_t energy) {
-	return alpha * pow(energy, p);
+Double_t getEnergyFromTLQuadratic(Float_t tl) {
+	Double_t a = a3;
+	Double_t b = a2;
+	Double_t c = a1;
+	Double_t d = a0;
+
+	Double_t qq = (2*pow(b,3) - 9*a*b*c + 27*pow(a,2) * (d - tl)) / (27*pow(a,3));
+	Double_t pp = (3*a*c - pow(b,2)) / (3 * pow(a,2));
+
+	Int_t nRoot = 1;
+	Double_t t = 2 * sqrt(-pp/3.) * cos(1/3. * acos((3*qq)/(2*pp) * sqrt(-3/pp)) - nRoot * 2 * 3.14159265/3.);
+	Double_t E = t - b/(3*a);
+
+	return E;
 }
 
 void findRange::Loop(Double_t energy, Double_t sigma_mev)
@@ -39,12 +57,9 @@ void findRange::Loop(Double_t energy, Double_t sigma_mev)
    TCanvas *c2 = new TCanvas("c2", "c2", 800, 600);
    TCanvas *c3 = new TCanvas("c3", "c3", 800, 600);
    TCanvas *c4 = new TCanvas("c4", "c4", 800, 600);
-//    TCanvas *c5 = new TCanvas("c5", "c5", 800, 600);
-//    TCanvas *c6 = new TCanvas("c6", "c6", 800, 600);
-//    TCanvas *c7 = new TCanvas("c7", "c7", 800, 600);
-//    TCanvas *c8 = new TCanvas("c8", "c8", 800, 600);
+   TCanvas *c5 = new TCanvas("c5", "c5", 800, 600);
 
-   Int_t nbinsx = 10000;
+   Int_t nbinsx = 20000;
    Int_t xfrom = 0;
    Int_t xto = 50;
 
@@ -54,14 +69,7 @@ void findRange::Loop(Double_t energy, Double_t sigma_mev)
 	TH1F *hRange = new TH1F("hRange", "Primary ranges", nbinsx, xfrom + x_compensate, xto + x_compensate);
 	TH1F *hTracklength = new TH1F("hTracklength", "Straight tracklengths", nbinsx, xfrom + x_compensate, xto + x_compensate);
 	TH1F *hActualTracklength = new TH1F("hActualTracklength", "Actual tracklengths", nbinsx, xfrom + x_compensate, xto + x_compensate);
-// 	TH1F *hRangec = new TH1F("hRangec", "Corrected primary ranges", nbinsx, xfrom + x_compensate, xto + x_compensate);
-// 	TH2F *hRange2D = new TH2F("hRange2D", "Proton ranges in scintillators + focal", 300, 18, 30, 128, -25, 25);
-// 	TH2F *hEnergy2D = new TH2F("hEnergy2D", "Estimated initial energy", 300, 150, 200, 128, -25, 25);
-// 	TH2F *hEnergy2Dc = new TH2F("hEnergy2Dc", "Estimated initial energy, corrected for scintillators", 300, 150, 200, 128, -25, 25);
-// 	TH2F *hEnergy2Dcg = new TH2F("hEnergy2Dcg", "Estimated initial energy, Gauss-corrected for scintillators", 300, 150, 200, 128, -25, 25);
-// 	TH2F *hRange2Dtrue = new TH2F("hRange2Dtrue", "True proton ranges in scintillators + focal", 300, 18, 30, 128, -25, 25);
-// 	TH2F *hEnergy2Dtrue = new TH2F("hEnergy2Dtrue", "True Estimated initial energy", 300, 150, 200, 128, -25, 25);
-	
+	TH1F *hStepLength = new TH1F("hStepLength", "Steplenghths", 1000, 0, 1);
 
    gStyle->SetOptStat(0);
 
@@ -102,63 +110,35 @@ void findRange::Loop(Double_t energy, Double_t sigma_mev)
 
 	if (lastID < 0) lastID = eventID;
 
-	if (posY<0) continue;
+//	if (posY<0) continue;
 
 	if (parentID == 0) {
 	
+		hStepLength->Fill(stepLength);
+
 		Float_t z = posZ;
 		Float_t y = posY;
 		Float_t x = posX;
 		
-// 		for (Int_t i=0; i<10; i++) {
-// 			cout << "VolumeID[" << i << "] = " << volumeID[i] << endl;
-// 		}
 		
 		if (fabs(x) < 20 && fabs(y) < 20 && volumeID[4] == 4) hZ->Fill(z + x_compensate, edep);
 		n++;
 			
 		if (eventID != lastID) {
-			
-			cout << "Number of hits = " << n << endl;
 			n = 0;
 			
-			Float_t diff = sqrt( pow(firstX - lastX, 2) + pow(firstY - lastY, 2) + pow(firstZ - lastZ, 2));
-			hRange->Fill(lastRange - firstZ);
+			Float_t diff = sqrt( pow(firstX - lastX, 2) + pow(firstY - lastY, 2) + pow(0 - lastZ, 2));
+			hRange->Fill(lastRange);
 			hTracklength->Fill(diff);
-			hActualTracklength->Fill(tl);
-			
-	// 				hRange2D->Fill(lastRange + x_compensate, lastX);
-	// 				hEnergy2D->Fill(getEnergyFromTL(lastRange + x_compensate), lastX);
-	// 				
-	// 				if (abs(lastX)>5 && abs(lastY)>5) {
-	// 					dE = 6.65;
-	// 					dE_random = gRandom->Gaus(dE, 0.35);
-	// 				}
-	// 				else if (abs(lastX)<5 && abs(lastY)>5) {
-	// 					dE = 9.23;
-	// 					dE_random = gRandom->Gaus(dE, 0.43);
-	// 				}
-	// 				else if (abs(lastX)>5 && abs(lastY)<5) {
-	// 					dE = 9.23;
-	// 					dE_random = gRandom->Gaus(dE, 0.43);
-	// 				}
-	// 				else if (abs(lastX)<5 && abs(lastY)<5) {
-	// 					dE = 11.79;
-	// 					dE_random = gRandom->Gaus(dE, 0.55);
-	// 				}
-	// 				
-	// 				dTL = getTLFromEnergy(energy) - getTLFromEnergy(energy - dE);
-	// 				hEnergy2Dc->Fill(getEnergyFromTL(lastRange + x_compensate) + dE, lastX);
-	// 				hEnergy2Dcg->Fill(getEnergyFromTL(lastRange + x_compensate) + dE_random, lastX);
-	// 				hRangec->Fill(lastRange + x_compensate + dTL);
-					
+			hActualTracklength->Fill(tl + firstZ);
+
 			firstX = posX;
 			firstY = posY;
 			firstZ = posZ;
 			tl = 0;
 
 		}
-			
+
 		else if (jentry>0) {
 			Float_t diff = sqrt( pow(x - lastX, 2) + pow(y - lastY, 2) + pow(z - lastZ, 2));
 			tl += diff;
@@ -179,20 +159,34 @@ void findRange::Loop(Double_t energy, Double_t sigma_mev)
 	Double_t range_3 = hRange->GetXaxis()->GetBinCenter(hRange->GetMaximumBin());
 	
  	cout << "Maximum from bragg peak plot, 80\% of maximum on distal edge: " << range_1 << " mm.\n";
-// 	cout << "Maximum from hRange plot: Max bin " << range_3 << " mm.\n";
 
 	c2->cd();
 	
-	TF1 *fRange = new TF1("fit_range", "gaus", 0, 900);
-	hRange->Fit("fit_range", "Q, W", "", 0, 900);
-	cout << Form("Mean range: %.2f mm +- %.2f mm.\n", fRange->GetParameter(1), fRange->GetParameter(2));
+	Float_t fit_tl = 0, fit_range = 0;
+
+	TF1 *fRange = new TF1("fit_range", "gaus", xfrom, xto);
+//	fRange->SetParameters(100, 157, 0.5);
+	hRange->Fit("fit_range", "Q,M,WW", "", xfrom, xto);
+ 	fit_range = fRange->GetParameter(1);
+	cout << Form("Range: %.3f mm +- %.3f mm.\n", fRange->GetParameter(1), fRange->GetParameter(2));
 	
- 	hTracklength->Fit("fit_range", "Q, W", "", 0, 900);
- 	cout << Form("Mean tracklength: %.2f mm +- %.2f mm.\n", fRange->GetParameter(1), fRange->GetParameter(2));
+ 	hTracklength->Fit("fit_range", "Q,M,WW", "", xfrom, xto);
+ 	cout << Form("Straight line: %.3f mm +- %.3f mm.\n", fRange->GetParameter(1), fRange->GetParameter(2));
 	
- 	hActualTracklength->Fit("fit_range", "Q, W", "", 0, 900);
- 	cout << Form("Mean actual tracklengths: %.2f mm +- %.2f mm.\n", fRange->GetParameter(1), fRange->GetParameter(2));
+ 	hActualTracklength->Fit("fit_range", "Q,M,WW", "", xfrom, xto);
+ 	fit_tl = fRange->GetParameter(1);
+ 	cout << Form("Tracklength: %.3f mm +- %.3f mm.\n", fit_tl, fRange->GetParameter(2));
 	
+ 	cout << "Detour factor = " << fit_range / fit_tl << endl;
+ 	Float_t straggling = sqrt( alphaprime * (pow(p, 2) * pow(alpha, 2/p) / (3-2/p) * pow(fit_range, 3-2/p)) );
+ 	cout << "Expected Energy from Bortfeld = " << getEnergyFromTLQuadratic(fit_range) << endl;
+ 	cout << "Expected straggling from Bortfeld = " << straggling << endl;
+
+ 	Float_t cutoff = fit_range - 4*straggling;
+ 	Float_t total = hRange->Integral();
+ 	Float_t attenuation = hRange->Integral(0, hRange->GetXaxis()->FindBin(cutoff));
+
+ 	cout << "Number of protons attenuated (more than 4 sigma below) = " << 100 * attenuation / total << " %.\n";
 	
 	c1->cd();
 		hZ->SetXTitle("Z [mm]");
@@ -222,6 +216,13 @@ void findRange::Loop(Double_t energy, Double_t sigma_mev)
 		hActualTracklength->SetLineColor(kBlack);
 		hActualTracklength->Draw();
 		
+	c5->cd();
+		hStepLength->SetXTitle("Steplength [mm]");
+		hStepLength->SetYTitle("Number of steps");
+		hStepLength->SetFillColor(kBlue-7);
+		hStepLength->SetLineColor(kBlack);
+		hStepLength->Draw();
+
 // 		hRange2D->SetYTitle("X position [mm]");
 // 		hRange2D->SetXTitle("Range [mm]");
 // 		hRange2D->SetFillColor(kBlue-7);

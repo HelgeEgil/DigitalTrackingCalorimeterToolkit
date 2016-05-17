@@ -6,12 +6,16 @@
 Float_t getEnergyFromWEPL(Float_t wepl);
 Float_t getEnergyFromTL(Float_t tl);
 
-Float_t getRangeFromEnergy(Float_t energy);
+Double_t getQ(Double_t a1, Double_t a2,Double_t a3, Double_t a4);
+Double_t getP(Double_t a1, Double_t a2, Double_t a3);
+
+Float_t getTLFromEnergy(Float_t energy, Double_t a1, Double_t a2, Double_t a3, Double_t a4);
+Float_t getEnergyFromTL(Float_t range, Double_t a1, Double_t a2, Double_t a3, Double_t a4);
+
 Float_t getTLFromEnergy(Float_t energy);
 Float_t getTLFromWEPL(Float_t wepl);
-Float_t getTLFromMaterial(Float_t tl_mat, Int_t material);
 Float_t getWEPLFromEnergy(Float_t energy);
-Float_t getWEPLFactorFromEnergy ( Float_t energy );
+Float_t getWEPLFactorFromEnergy ( Float_t energy);
 Float_t getWEPLFromTL(Float_t tl);
 
 Float_t getTLStragglingFromEnergy(Float_t energy, Float_t sigma_energy);

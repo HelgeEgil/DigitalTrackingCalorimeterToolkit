@@ -15,6 +15,7 @@ Cluster::Cluster(Cluster* cluster) {
    y_ = cluster->getY();
    layerNo_ = cluster->getLayer();
    clusterSize_ = cluster->getSize();
+   eventID_ = -1;
 }
 
 Cluster::Cluster(Float_t x, Float_t y, Int_t layer, Int_t size) {
@@ -22,15 +23,11 @@ Cluster::Cluster(Float_t x, Float_t y, Int_t layer, Int_t size) {
    y_ = y;
    layerNo_ = layer;
    clusterSize_ = size;
+   eventID_ = -1;
 }
 
 Double_t Cluster::getLayermm() {
 	Double_t z = 0;
-
-	if (layerNo_==-4) z = -67.68;
-	if (layerNo_==-3) z = -63.84;
-	if (layerNo_==-2) z = -13.84;
-	if (layerNo_==-1) z = -10;
 
 	if (layerNo_>0) {
 		if (getYmm()>0) {

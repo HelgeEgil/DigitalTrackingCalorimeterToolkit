@@ -19,6 +19,9 @@ Double_t p_water_high, alpha_water_high;
 Double_t p_aluminum, alpha_aluminum, alpha_prime_aluminum;
 Double_t p_tungsten, alpha_tungsten, alpha_prime_tungsten;
 
+Double_t a1_tungsten, a2_tungsten, a3_tungsten, a4_tungsten, a5_tungsten;
+Double_t a1_water, a2_water, a3_water, a4_water, a5_water;
+
 Double_t firstUpperLayerZ;
 Double_t firstLowerLayerZ;
 
@@ -26,8 +29,6 @@ Float_t getEnergyLossFromScintillators(Float_t energy, Int_t nScintillators);
 Float_t getEnergyLossErrorFromScintillators(Int_t nScintillators);
 Float_t getEnergyLossFromAluminumAbsorber(Float_t energy);
 Float_t getEnergyLossErrorFromAluminumAbsorber();
-Float_t getEnergyLossFromScintillatorAndAluminum(Float_t energy);
-Float_t getEnergyLossErrorFromScintillatorAndAluminum();
 Double_t getLayerPositionmm(Int_t i);
 Float_t getSigmaEnergy(Int_t energy);
 void setWaterPValues(Int_t setting);
