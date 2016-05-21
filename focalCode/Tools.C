@@ -33,7 +33,7 @@ Bool_t existsEnergyFile(Int_t energy) {
 	return res;
 }
 
-Float_t diffmm(Cluster *p1, Cluster *p2) {
+Float_t diffmmXY(Cluster *p1, Cluster *p2) {
 	if (!p1 || !p2)
 		return -1;
 
@@ -43,7 +43,7 @@ Float_t diffmm(Cluster *p1, Cluster *p2) {
 	return sqrt(pow(diffx,2) + pow(diffy,2));
 }
 
-Float_t diffmm(Hit *h1, Hit *h2) {
+Float_t diffmmXY(Hit *h1, Hit *h2) {
 	if (!h1 || !h2)
 		return -1;
 
@@ -51,6 +51,12 @@ Float_t diffmm(Hit *h1, Hit *h2) {
 	Double_t diffy = h2->getYmm() - h1->getYmm();
 
 	return sqrt(pow(diffx,2) + pow(diffy,2));
+}
+
+Float_t diffmmXYZ(Cluster *p1, Cluster *p2) {
+	return sqrt(pow(p2->getXmm() - p1->getXmm(), 2) + 
+				pow(p2->getYmm() - p1->getYmm(), 2) +
+				pow(p2->getLayermm() - p1->getLayermm(), 2));
 }
 
 Double_t fitfunc_DBP(Double_t *v, Double_t *par) {

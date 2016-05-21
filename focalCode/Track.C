@@ -24,13 +24,6 @@ void Track::Clear(Option_t *) {
 	track_.Clear("C");
 }
 
-Float_t Track::diffmm(Cluster *p1, Cluster *p2) {
-	return sqrt(pow(p2->getXmm() - p1->getXmm(), 2) +
-					pow(p2->getYmm() - p1->getYmm(), 2) +
-					pow(p2->getLayermm() - p1->getLayermm(), 2));
-}
-
-
 void Track::setTrack(Track *copyTrack, Int_t startOffset /* default 0 */) {
    clearTrack();
 	for (Int_t i=0; i<copyTrack->GetEntriesFast(); i++) {
@@ -108,7 +101,7 @@ Float_t Track::getSinuosity() {
 
 	if (a == b) return 0;
 
-	Float_t straightLength = diffmm(a,b);	
+	Float_t straightLength = diffmmXYZ(a,b);	
 	Float_t actualLength = getTrackLengthmm();
 
 	if (straightLength == 0 || actualLength == 0) return 0;
@@ -148,7 +141,7 @@ Float_t Track::getSlopeAngleAtLayer(Int_t i) {
 	Float_t diffx = b->getXmm() - a->getXmm();
 	Float_t diffy = b->getYmm() - a->getYmm();
 
-	Float_t straightLength = diffmm(a,b);
+	Float_t straightLength = diffmmXYZ(a,b);
 	Float_t xyDist = sqrt(diffx*diffx + diffy*diffy);
 
 	Float_t angle = atan2(xyDist, straightLength) / kRad;
@@ -165,7 +158,7 @@ Float_t Track::getSlopeAngleBetweenLayers(Int_t i) {
 	Float_t diffx = b->getXmm() - a->getXmm();
 	Float_t diffy = b->getYmm() - a->getYmm();
 	
-	Float_t straightLength = diffmm(a,b);
+	Float_t straightLength = diffmmXYZ(a,b);
 	Float_t xyDist = sqrt(diffx*diffx + diffy*diffy);
 
 	Float_t angle = atan2(xyDist, straightLength) / kRad;
@@ -205,15 +198,23 @@ Float_t Track::getTrackLengthmmAt(Int_t i) {
 	if (i==0) return 0;
 	if (i>GetEntriesFast()) return 0;
 
-	return diffmm(At(i-1), At(i));
+	return diffmmXYZ(At(i-1), At(i));
 }
 
 Float_t Track::getRangemmAt(Int_t i) {
 	if (i==0) return 0;
 	if (i>GetEntriesFast()) return 0;
 
-	return diffmm(new Cluster(getX(i-1), getY(i-1), getLayer(i-1)),
-				   new Cluster(getX(i-1), getY(i-1), getLayer(i)));
+	// FIXME: Remove this if it doesn't trigger
+	if ( getLayermm(i-1) - getLayermm(i) != diffmmXYZ(new Cluster(getX(i-1), getY(i-1), getLayer(i-1)), new Cluster(getX(i-1), getY(i-1), getLayer(i)))) {
+		cout << "ASSERTION ERROR ON Track::getRangemmAt(Int_t i)!\n";
+	}
+
+	return getLayermm(i-1) - getLayermm(i);
+
+//	Super strange way of doing this... But confirm!
+//	return diffmmXYZ(new Cluster(getX(i-1), getY(i-1), getLayer(i-1)),
+//				   new Cluster(getX(i-1), getY(i-1), getLayer(i)));
 }
 
 Float_t Track::getWEPL() {

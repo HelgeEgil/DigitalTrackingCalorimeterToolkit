@@ -19,8 +19,9 @@ class TH1F;
 using namespace std;
 
 Bool_t isItemInVector(Int_t i, vector<Int_t> *v);
-Float_t diffmm(Cluster *p1, Cluster *p2);
-Float_t diffmm(Hit *h1, Hit *h2);
+Float_t diffmmXY(Cluster *p1, Cluster *p2);
+Float_t diffmmXY(Hit *h1, Hit *h2);
+Float_t diffmmXYZ(Cluster *p1, Cluster *p2);
 Bool_t existsEnergyFile(Int_t energy);
 Double_t fitfunc_DBP(Double_t *v, Double_t *par);
 Double_t double_landau(Double_t *v, Double_t *par);

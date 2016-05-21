@@ -95,7 +95,6 @@ class Track : public TObject {
 	Int_t getLastLayer();
 	Int_t getFirstLayer();
 	Bool_t hasLayer(Int_t layer);
-	Float_t diffmm(Cluster *p1, Cluster *p2);
 
 	Float_t getAverageCS();
 	Float_t getAverageCSLastN(Int_t i);

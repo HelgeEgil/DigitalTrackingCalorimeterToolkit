@@ -244,7 +244,7 @@ Clusters * Clusters::findClustersFromSeedInLayer(Cluster *seed, Int_t nextLayer)
 		if (!At(i))
 			continue;
 
-		if (diffmm(seed, At(i)) < initialSearchRadius)
+		if (diffmmXY(seed, At(i)) < initialSearchRadius)
 			clustersFromThisLayer->appendCluster(At(i));
 	}
 	return clustersFromThisLayer;
@@ -267,7 +267,7 @@ void Clusters::doNearestClusterTrackPropagation(Track *track, Int_t lastHitLayer
 		}
 
 		nearestNeighbour = findNearestNeighbour(projectedPoint);
-		distance = diffmm(projectedPoint, nearestNeighbour);
+		distance = diffmmXY(projectedPoint, nearestNeighbour);
 
 		if (kDebug && distance > 0) {
 			cout << "Searching layer " << layer << ", and found nearest neighbour " << * nearestNeighbour << " with distance " << distance << " mm.\n";
@@ -283,7 +283,7 @@ void Clusters::doNearestClusterTrackPropagation(Track *track, Int_t lastHitLayer
 
 			if (!isPointOutOfBounds(projectedPoint)) { // repeat process in layer+1
 				skipNearestNeighbour = findNearestNeighbour(projectedPoint);
-				skipDistance = diffmm(projectedPoint, skipNearestNeighbour);
+				skipDistance = diffmmXY(projectedPoint, skipNearestNeighbour);
 
 				if (skipDistance * 1.2 < distance  && skipDistance > 0) {
 					track->appendCluster(skipNearestNeighbour);
@@ -344,7 +344,7 @@ Cluster * Clusters::findNearestNeighbour(Cluster *projectedPoint) {
 		if (!At(i))
 			continue;
 
-		delta = diffmm(projectedPoint, At(i));
+		delta = diffmmXY(projectedPoint, At(i));
 		if (delta < distance) {
 			nearestNeighbour->set(At(i));
 			distance = delta;
@@ -380,7 +380,7 @@ Clusters * Clusters::findAllClosePointsInNextLayer(Cluster *projectedPoint) {
 		if (!At(i))
 			continue;
 
-		delta = diffmm(projectedPoint, At(i));
+		delta = diffmmXY(projectedPoint, At(i));
 		if (delta < distance) {
 			nearestNeighbours->appendCluster(At(i));
 		}

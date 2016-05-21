@@ -118,7 +118,7 @@ void Tracks::splitSharedClusters() {
 				Track *closestTrack = At(closestTC.track);
 				Cluster *closestCluster = closestTrack->At(closestTC.cluster);
 				
-				minDist = diffmm(closestCluster, interpolatedCluster);
+				minDist = diffmmXY(closestCluster, interpolatedCluster);
 				Float_t clusterRadius = closestCluster->getRadiusmm();
 				if (minDist < clusterRadius * 2) {
 					
@@ -156,7 +156,7 @@ Int_t Tracks::getClosestCluster(vector<trackCluster> clusters, Cluster* interpol
 		trackCluster thisTrackCluster = clusters.at(i);
 		Cluster *thisCluster = At(thisTrackCluster.track)->At(thisTrackCluster.cluster);
 		
-		dist = diffmm(thisCluster, interpolatedCluster);
+		dist = diffmmXY(thisCluster, interpolatedCluster);
 		if (dist < minDist) {
 			minDist = dist;
 			minIdx = i;
