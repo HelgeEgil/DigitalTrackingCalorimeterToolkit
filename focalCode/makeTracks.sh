@@ -25,8 +25,8 @@ fi
 for i in `seq $2 $3 $4`;
 do
 	echo "Moving .root file"
-	mv rawdata/focal_Tungsten_energy"$i"_sigma0.root rawdata/test.root
+	mv Data/MonteCarlo/focal_Tungsten_energy"$i"_sigma0.root Data/MonteCarlo/test.root
 	echo "Making tracks at $i MeV."
-	root -l -q 'makeTracksFile.C('$5', '$i')'
-	mv rawdata/test.root rawdata/focal_Tungsten_energy"$i"_sigma0.root
+	root -l -q 'Scripts/makeTracksFile.C('$5', '$i')'
+	mv Data/MonteCarlo/test.root Data/MonteCarlo/focal_Tungsten_energy"$i"_sigma0.root
 done

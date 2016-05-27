@@ -28,6 +28,7 @@
 
 /gate/geometry/setIonisationPotential Water 75 eV
 /gate/physics/addPhysicsList QGSP_BIC_EMY
+# What about QGSP_BIC_HP_EMY? What does HP do? It's the recommended one @ the GATE workshop.
 
 #/gate/physics/addProcess SingleScattering proton
 

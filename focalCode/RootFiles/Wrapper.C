@@ -1,0 +1,28 @@
+// wrapper.C
+// include all the .C files to compile
+
+#include "GlobalConstants/Constants.h"
+#include "Classes/Hit/Hit.h"
+#include "Classes/Hit/Hit.C"
+#include "Classes/Hit/Hits.h"
+#include "Classes/Hit/Hits.C"
+#include "Classes/Cluster/Cluster.h"
+#include "Classes/Cluster/Cluster.C"
+#include "Classes/Cluster/Clusters.h"
+#include "Classes/Cluster/Clusters.C"
+#include "Classes/Cluster/findTracks.C"
+#include "Classes/Track/conversionFunctions.h"
+#include "Classes/Track/conversionFunctions.C"
+#include "Classes/Track/Track.h"
+#include "Classes/Track/Track.C"
+#include "Classes/Track/Tracks.h"
+#include "Classes/Track/Tracks.C"
+#include "HelperFunctions/Tools.h"
+#include "HelperFunctions/Tools.C"
+#include "Classes/Layer/Layer.h"
+#include "Classes/Layer/Layer.C"
+#include "Classes/CalorimeterFrame/CalorimeterFrame.h"
+#include "Classes/CalorimeterFrame/CalorimeterFrame.C"
+
+#include "Classes/DataInterface/DataInterface.h"
+#include "Classes/DataInterface/DataInterface.C"
