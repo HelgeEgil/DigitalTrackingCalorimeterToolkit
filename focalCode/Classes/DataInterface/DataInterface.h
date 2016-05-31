@@ -150,10 +150,11 @@ DataInterface::DataInterface(TTree *tree) : fChain(0)
 
       // The following code should be used if you want this class to access a chain
       // of trees.
+	  char *materialChar = getMaterialChar();
+	  
 	  //
-	  cout << "DataInterface constructor. run_energy = " << run_energy << endl;
       TChain * chain = new TChain("Hits","");
-      chain->Add(Form("Data/MonteCarlo/focal_Tungsten_energy%.0f_sigma0.root/Hits", run_energy));
+      chain->Add(Form("Data/MonteCarlo/focal_%s_energy%.0f_sigma0.root/Hits", materialChar, run_energy));
       tree = chain;
 #endif // SINGLE_TREE
 

@@ -88,8 +88,8 @@ Double_t double_landau(Double_t *v, Double_t *par) {
 char * getMaterialChar() {
 	char *sMaterial;
 
-	if (kMaterial == kTungsten) sMaterial = (char*) "tungsten";
-	if (kMaterial == kAluminum) sMaterial = (char*) "aluminum";
+	if (kMaterial == kTungsten) sMaterial = (char*) "Tungsten";
+	if (kMaterial == kAluminum) sMaterial = (char*) "Aluminium";
 	if (kMaterial == kPMMA) sMaterial = (char*) "PMMA";
 
 	return sMaterial;

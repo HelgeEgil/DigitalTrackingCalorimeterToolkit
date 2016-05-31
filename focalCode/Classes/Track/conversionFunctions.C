@@ -40,11 +40,11 @@ Float_t getEnergyFromTL(Float_t range, Double_t a1, Double_t a2, Double_t a3, Do
 }
 
 Float_t getTLFromEnergy(Float_t energy) {
-	return getTLFromEnergy(energy, a1_tungsten, a2_tungsten, a3_tungsten, a4_tungsten);
+	return getTLFromEnergy(energy, a1_material, a2_material, a3_material, a4_material);
 }
 
 Float_t getEnergyFromTL(Float_t range) {
-	return getEnergyFromTL(range, a1_tungsten, a2_tungsten, a3_tungsten, a4_tungsten);
+	return getEnergyFromTL(range, a1_material, a2_material, a3_material, a4_material);
 }
 
 Float_t getWEPLFromEnergy(Float_t energy) {

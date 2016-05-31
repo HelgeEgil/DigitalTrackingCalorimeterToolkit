@@ -47,6 +47,9 @@ void MaterialConstants() {
 		p = p_tungsten;
 		alpha = alpha_tungsten;
 		alpha_prime = alpha_prime_tungsten;
+		a1_material = a1_tungsten;
+		a2_material = a2_tungsten;
+		a3_material = a3_
 	}
 
 	else if (kMaterial == kAluminum) {

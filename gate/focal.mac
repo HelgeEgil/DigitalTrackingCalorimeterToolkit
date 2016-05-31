@@ -27,7 +27,7 @@
 #=================#
 
 /gate/geometry/setIonisationPotential Water 75 eV
-/gate/physics/addPhysicsList QGSP_BIC_EMY
+/gate/physics/addPhysicsList QGSP_BIC_HP_EMY
 # What about QGSP_BIC_HP_EMY? What does HP do? It's the recommended one @ the GATE workshop.
 
 #/gate/physics/addProcess SingleScattering proton
@@ -84,7 +84,7 @@
 #/gate/source/PBS/setEllipseYPhiRotationNorm positive
 
 /gate/output/root/enable
-/gate/output/root/setFileName ../focalCode/rawdata/focal_{material}_energy{energy}_sigma{sigma}
+/gate/output/root/setFileName ../focalCode/Data/MonteCarlo/focal_{material}_energy{energy}_sigma{sigma}
 
 #===============#
 # START BEAMS	#

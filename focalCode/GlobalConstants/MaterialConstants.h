@@ -14,6 +14,7 @@ Double_t p_tungsten, alpha_tungsten, alpha_prime_tungsten;
 
 // range = a1 * E^3 + a2 * E^2 + a3 * e + a4: More accurate
 Double_t a1_tungsten, a2_tungsten, a3_tungsten, a4_tungsten, a5_tungsten;
+Double_t a1_material, a2_material, a3_material, a4_material, a5_material;
 Double_t a1_water, a2_water, a3_water, a4_water, a5_water;
 
 Double_t firstUpperLayerZ, firstLowerLayerZ;
