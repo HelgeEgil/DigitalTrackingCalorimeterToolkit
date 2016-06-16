@@ -7,6 +7,8 @@
 
 #include "Classes/Track/Track.h"
 
+class Hits;
+
 using namespace std;
 
 struct trackCluster { 
@@ -45,8 +47,8 @@ class Tracks : public TObject {
 
       virtual void extrapolateToLayer0();
       virtual void splitSharedClusters();
+		virtual void matchWithEventIDs(Hits *eventIDs);
       Int_t getClosestCluster(vector<trackCluster> clusters, Cluster* interpolatedCluster);
-
 
       virtual Track* At(Int_t i) { return ((Track*) tracks_.At(i)); }
 
@@ -54,14 +56,9 @@ class Tracks : public TObject {
       virtual TObject* removeTrackAt(Int_t i) { return tracks_.RemoveAt(i); }
       void sortTrackByLayer(Int_t track);
 
-//      Float_t getPreMaterial();
-//      Float_t getPreEnergyLoss();
       void checkLayerOrientation();
       void doFit();
 
-      
-//       virtual void drawClusters(Clusters *a, Clusters *b);
-	  
    ClassDef(Tracks,2);
 };
 #endif

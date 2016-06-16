@@ -10,49 +10,75 @@
 
 using namespace std;
 
-// New calculation as of 2016-05-16
-// Using QSGP-BIC-EMY instead of EMSTANDARD_OPT3
+// Full revision of range-energy and depth-dose relationship as of 2016-06
+// Using Ulmer Rad Phys and Chem 76 (2007) 1089-1107
+// In short:
+// R = a1 E0 * (1 + sum_(k=1)^2 (bk - bk * exp(-gk * E0)))
+// E = R * sum_(i=1)^5 (ck * exp(-lambdak * R))
+//		 ( and  E(z) = (R-z) * sum_(i=1)^5 (ck * exp(-lambdak * (R-z))) )
+// -dE/dz = E(z) / (R-z) - sum_(k=1)^5 (lambdak * ck * (R-z) * exp(-lambdak * (R-z)))
+// The parameters a1, bk(1-2), gk(1-2), ck(1-5), lambdak(1-5) are found through range-energy fitting on different materials in GATE simulations, and defined below
+// All calculations are performed in Classes/Track/conversionFunctions.C
 
-Double_t getQ(Double_t a1, Double_t a2,Double_t a3, Double_t a4) {
-		return (2*pow(a2,3) - 9*a1*a2*a3 + 27*pow(a1,2) * a4) / (27*pow(a1,3));
+
+Float_t getTLFromEnergy(Float_t energy, Double_t a1, Double_t b1, Double_t b2, Double_t g1, Double_t g2) {
+	Double_t sum1 = b1 * (1 - exp( -g1 * energy ));
+	Double_t sum2 = b2 * (1 - exp( -g2 * energy ));
+	Float_t tl = a1 * energy * (1 + sum1 + sum2);
+
+	return tl;	
 }
 
-Double_t getP(Double_t a1, Double_t a2, Double_t a3) {
-	return (3*a1 * a3 - pow(a2, 2)) / (3 * pow(a1, 2));
+Float_t getEnergyFromTL(Float_t range, Double_t c1, Double_t c2, Double_t c3, Double_t c4, Double_t c5,
+													Double_t l1, Double_t l2, Double_t l3, Double_t l4, Double_t l5) {
+	Double_t sum1 = c1 * exp(-l1 * range);
+	Double_t sum2 = c2 * exp(-l2 * range);
+	Double_t sum3 = c3 * exp(-l3 * range);
+	Double_t sum4 = c4 * exp(-l4 * range);
+	Double_t sum5 = c5 * exp(-l5 * range);
+	Float_t energy = range * (sum1 + sum2 + sum3 + sum4 + sum5);
+
+	return energy;
 }
 
-Double_t inverse_cubic(Double_t p, Double_t q) {
-	return 2 * sqrt(-p/3) * cos(1/3. * acos((3*q)/(2*p) * sqrt(-3./p)) - 2*3.14159265/3.);
-}
+Float_t getEnergyAtTL(Float_t E0, Float_t depth, Double_t c1, Double_t c2, Double_t c3, Double_t c4, Double_t c5,
+													Double_t l1, Double_t l2, Double_t l3, Double_t l4, Double_t l5) {
 
-Float_t getTLFromEnergy(Float_t energy, Double_t a1, Double_t a2, Double_t a3, Double_t a4) {
-	return a1 * pow(energy, 3) + a2 * pow(energy, 2) + a3 * energy + a4;
-}
+	Double_t range = getTLFromEnergy(E0);
 
-Float_t getEnergyFromTL(Float_t range, Double_t a1, Double_t a2, Double_t a3, Double_t a4) {
-	Double_t p = getP(a1, a2, a3);
-	Double_t q = getQ(a1, a2, a3, a4 - range);
+	if (range < depth) return 0;
 
-	Double_t tk = inverse_cubic(p, q);
-	Double_t energy = tk - a2 / (3 * a1);
+	Double_t sum1 = c1 * exp(-l1 * (range - depth));
+	Double_t sum2 = c2 * exp(-l2 * (range - depth));
+	Double_t sum3 = c3 * exp(-l3 * (range - depth));
+	Double_t sum4 = c4 * exp(-l4 * (range - depth));
+	Double_t sum5 = c5 * exp(-l5 * (range - depth));
+	Float_t energy = (range - depth) * (sum1 + sum2 + sum3 + sum4 + sum5);
 
 	return energy;
 }
 
 Float_t getTLFromEnergy(Float_t energy) {
-	return getTLFromEnergy(energy, a1_material, a2_material, a3_material, a4_material);
+	return getTLFromEnergy(energy, a1_material, b1_material, b2_material, g1_material, g2_material);
 }
 
 Float_t getEnergyFromTL(Float_t range) {
-	return getEnergyFromTL(range, a1_material, a2_material, a3_material, a4_material);
+	return getEnergyFromTL(range, c1_material, c2_material, c3_material, c4_material, c5_material,
+											l1_material, l2_material, l3_material, l4_material, l5_material);
+}
+
+Float_t getEnergyAtTL(Float_t E0, Float_t depth) {
+	return getEnergyAtTL(E0, depth, c1_material, c2_material, c3_material, c4_material, c5_material,
+											l1_material, l2_material, l3_material, l4_material, l5_material);
 }
 
 Float_t getWEPLFromEnergy(Float_t energy) {
-	return getTLFromEnergy(energy, a1_water, a2_water, a3_water, a4_water);
+	return getTLFromEnergy(energy, a1_water, b1_water, b2_water, g1_water, g2_water);
 }
 
 Float_t getEnergyFromWEPL(Float_t wepl) {
-	return getEnergyFromTL(wepl, a1_water, a2_water, a3_water, a4_water);
+	return getEnergyFromTL(wepl, c1_water, c2_water, c3_water, c4_water, c5_water,
+											l1_water, l2_water, l3_water, l4_water, l5_water);
 }
 
 Float_t getWEPLFactorFromEnergy(Float_t energy) {
@@ -104,10 +130,6 @@ Float_t getWEPLStragglingFromEnergy(Float_t energy, Float_t sigma_energy) {
 	return getWEPLStragglingFromWEPL(wepl, sigma_energy);
 }	
 
-Float_t getEnergyStragglingFromEnergy(Float_t energy, Float_t sigma_energy) {
-	Float_t tl = getTLFromEnergy(energy);
-	return getEnergyStragglingFromTL(tl, sigma_energy);
-}
 
 Float_t getEnergyStragglingFromTL(Float_t tl, Float_t sigma_energy) {
 	Float_t straggling = getTLStragglingFromTL (tl, sigma_energy);
@@ -121,6 +143,11 @@ Float_t getEnergyStragglingFromTL(Float_t tl, Float_t sigma_energy) {
 	Float_t energy_straggling = (upper_energy - lower_energy);
 
 	return energy_straggling;
+}
+
+Float_t getEnergyStragglingFromEnergy(Float_t energy, Float_t sigma_energy) {
+	Float_t tl = getTLFromEnergy(energy);
+	return getEnergyStragglingFromTL(tl, sigma_energy);
 }
 
 Float_t getEnergyStragglingFromTLStraggling(Float_t tl, Float_t TLStraggling) {

@@ -27,6 +27,7 @@ public:
 
 	virtual void clearHits() { hits_.Clear("C"); }
 	virtual void Clear(Option_t * = "");
+	virtual TObject* removeHitAt(Int_t i) { return hits_.RemoveAt(i); }
 
 	virtual Int_t GetEntriesFast() { return hits_.GetEntriesFast(); }
 	virtual Int_t GetEntries() { return hits_.GetEntries(); }
@@ -37,17 +38,19 @@ public:
 	virtual Int_t getEventID(Int_t i) { return At(i)->getEventID(); }
 	virtual Float_t getEdep(Int_t i) { return At(i)->getEdep(); }
 
+	virtual Int_t sumAllHitsInEachLayer();
+
 	virtual Hit* At(Int_t i) { return ((Hit*) hits_.At(i)); }
 	virtual Hit* Last() { return ((Hit*) hits_.Last()); }
 
 	virtual Int_t getI(Int_t x, Int_t y);
 
 	Clusters * findClustersFromHits();
-	vector<Int_t> findNeighbours(Int_t index);
+	vector<Int_t> * findNeighbours(Int_t index);
 	vector<Int_t> * findExpandedCluster(Int_t i, vector<Int_t> *checkedIndices);
 	void appendExpandedClusterToClusters(vector<Int_t> *expandedCluster, Clusters *clusters);
 	void appendExpandedClusterToClusterHitMap(vector<Int_t> *expandedCluster, vector<Hits*> *clusterHitMap);
-	void checkAndAppendAllNextCandidates(vector<Int_t> nextCandidates, vector<Int_t> *checkedIndices,
+	void checkAndAppendAllNextCandidates(vector<Int_t> *nextCandidates, vector<Int_t> *checkedIndices,
 			vector<Int_t> *toCheck, vector<Int_t> *expandedCluster);
 	vector<Hits*> * findClustersHitMap();
 

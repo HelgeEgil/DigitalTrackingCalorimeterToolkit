@@ -30,7 +30,7 @@ const Int_t nTrackers = 4;
 const Float_t dx = 0.03; // mm
 const Float_t dy = 0.03; // mm
 const Float_t dz = 3.975; // mm // was 3.84
-Int_t kEventsPerRun = 200;
+Int_t kEventsPerRun = 50;
 
 // Used for treatment of available experimental data files
 const Int_t nEnergies = 8;
@@ -43,7 +43,7 @@ Int_t energies[nEnergies] = {122, 140, 150, 160, 170, 180, 188, 190};
 */
 
 enum eMaterial {kTungsten, kAluminum, kPMMA, kWater, kFocalTungsten, kFocalAluminum};
-const Int_t kMaterial = kAluminum;
+const Int_t kMaterial = kTungsten;
 
 enum eOutputUnit {kPhysical, kWEPL, kEnergy};
 Int_t kOutputUnit = kWEPL;
@@ -70,8 +70,8 @@ const Int_t kTrackFindingAlgorithm = kNearestCluster;
 const Bool_t kUseTrackSplitting = kTRUE;
 
 // Tracking parameters
-const Float_t initialSearchRadius = 50 * dx; // 20 if dimensionless
-const Float_t searchRadius = 40 * dx; // 20 if dimensionless
+Float_t initialSearchRadius = 50 * dx; // 20 if dimensionless
+Float_t searchRadius = 40 * dx; // 20 if dimensionless
 const Double_t SpreadNumber = 0.1; // number of iterations in gaussian spread
 const Double_t SpreadSigma  = 0.7; // sigma (in pixels) to spread
 

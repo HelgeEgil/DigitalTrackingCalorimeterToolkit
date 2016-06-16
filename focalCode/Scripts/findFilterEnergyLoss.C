@@ -17,7 +17,7 @@
 #include <TPolyMarker.h>
 #include <TMath.h>
 
-#include "Scripts/include/findFilterEnergyLoss.h"
+#include "include/findFilterEnergyLoss.h"
 
 using namespace std;
 

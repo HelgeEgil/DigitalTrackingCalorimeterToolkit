@@ -7,12 +7,14 @@
 
 Float_t getEnergyFromWEPL(Float_t wepl);
 Float_t getEnergyFromTL(Float_t tl);
+Float_t getEnergyAtTL(Float_t energy, Float_t depth);
 
 Double_t getQ(Double_t a1, Double_t a2,Double_t a3, Double_t a4);
 Double_t getP(Double_t a1, Double_t a2, Double_t a3);
 
 Float_t getTLFromEnergy(Float_t energy, Double_t a1, Double_t a2, Double_t a3, Double_t a4);
 Float_t getEnergyFromTL(Float_t range, Double_t a1, Double_t a2, Double_t a3, Double_t a4);
+Float_t getEnergyAtTL(Float_t E0, Float_t depth, Double_t a1, Double_t a2, Double_t a3, Double_t a4);
 
 Float_t getTLFromEnergy(Float_t energy);
 Float_t getTLFromWEPL(Float_t wepl);

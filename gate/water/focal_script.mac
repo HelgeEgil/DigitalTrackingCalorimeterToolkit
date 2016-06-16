@@ -41,26 +41,10 @@
 #===============#
 
 /gate/geometry/setIonisationPotential Water 75 eV
-#/gate/physics/addPhysicsList emstandard_opt3
-#/gate/physics/addPhysicsList QGSP_BIC
 /gate/physics/addPhysicsList QGSP_BIC_EMY
-
-#/gate/physics/addProcess SingleScattering proton
-
-#/gate/physics/SetMaxStepSizeInRegion      waterbox 750 um
-
-#/gate/physics/ActivateStepLimiter         charged
-#/gate/physics/ActivateStepLimiter         gamma
-#/gate/physics/ActivateStepLimiter         proton
-
-#/gate/physics/Electron/SetCutInRegion  waterbox 10 cm
-#/gate/physics/Positron/SetCutInRegion  waterbox 10 cm
-#/gate/physics/Gamma/SetCutInRegion     waterbox 10 cm
-#/gate/physics/Proton/SetCutInRegion    waterbox 10 cm
 
 /gate/run/initialize
 
-# Geometry is unaltered since last time
 #/geometry/test/recursive_test
 
 #=======================#
@@ -80,7 +64,7 @@
 /gate/source/uniformBeam/gps/centre 0. 0. -15. cm # -20 cm for scintillator
 
 /gate/output/root/enable
-/gate/output/root/setFileName ../../focalCode/rawdata/test_waterbox_qgsp_bic_emy_{energy}MeV
+/gate/output/root/setFileName ../../focalCode/Data/WaterBox/water_{energy}MeV
 
 /gate/random/setEngineName MersenneTwister
 /gate/random/setEngineSeed auto

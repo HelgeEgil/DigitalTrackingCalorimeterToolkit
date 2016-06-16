@@ -1,6 +1,8 @@
 #include <vector>
 #include <algorithm>
 
+#include <TStopwatch.h>
+
 #include "Classes/Hit/Hits.h"
 #include "Classes/Cluster/Clusters.h"
 #include "GlobalConstants/Constants.h"
@@ -42,6 +44,7 @@ Int_t Hits::getI(Int_t x, Int_t y) {
 Clusters * Hits::findClustersFromHits() {
 	Clusters *clusters = new Clusters(kEventsPerRun * 20);
 	vector<Int_t> *expandedCluster = 0;
+	TStopwatch t1, t2, t3, t4, t5;
 
 	Int_t layerIdxFrom, layerIdxTo;
 	for (Int_t layer=0; layer<nLayers; layer++) {
@@ -50,20 +53,33 @@ Clusters * Hits::findClustersFromHits() {
 
 		if (layerIdxFrom<0) continue;
 
+		t1.Start(false);
 		makeVerticalIndexOnLayer(layer); // only stores on this layer
+		t1.Stop();
 
 		Int_t nHits = layerIdxTo - layerIdxFrom;
 		vector<Int_t> *checkedIndices = new vector<Int_t>;
 		checkedIndices->reserve(nHits);
 
 		for (Int_t i = layerIdxFrom; i < layerIdxTo; i++) {
+			t2.Start(false);
 			if (isItemInVector(i, checkedIndices)) continue;
+			t2.Stop();
 
-			vector<Int_t> firstHits = findNeighbours(i);
-			if (firstHits.size()) {
+			t3.Start(false);
+			vector<Int_t> * firstHits = findNeighbours(i);
+			t3.Stop();
+
+			if (firstHits->size()) {
+				t4.Start(false);
 				expandedCluster = findExpandedCluster(i, checkedIndices);
+				t4.Stop();
+
+				t5.Start(false);
 				appendExpandedClusterToClusters(expandedCluster, clusters);
+				t5.Stop();
 				delete expandedCluster;
+				delete firstHits;
 			}
 		}
 		delete checkedIndices;
@@ -74,6 +90,8 @@ Clusters * Hits::findClustersFromHits() {
 			clusters->At(i)->setEventID(getEventID(0));
 		}
 	}
+
+	cout << "Summary findClustersFromHits: Make vertical index (\033[1m" << t1.RealTime() << " s\033[0m), Check if item is in vector (\033[1m" << t2.RealTime() << " s\033[0m), find neighbors (\033[1m" << t3.RealTime() << " s\033[0m), Find Expanded Clusters (\033[1m" << t4.RealTime() << " s\033[0m), Append expanded cluster to clusters (\033[1m" << t5.RealTime() << " s\033[0m).\n";
 
 	return clusters;
 }
@@ -87,11 +105,12 @@ vector<Hits*> * Hits::findClustersHitMap() {
 	for (Int_t i = 0; i < GetEntriesFast(); i++) {
 		if (isItemInVector(i, checkedIndices)) continue;
 
-		vector<Int_t> firstHits = findNeighbours(i);
-		if (firstHits.size()) {
+		vector<Int_t> * firstHits = findNeighbours(i);
+		if (firstHits->size()) {
 			expandedCluster = findExpandedCluster(i, checkedIndices);
 			appendExpandedClusterToClusterHitMap(expandedCluster, clusterHitMap);
 			delete expandedCluster;
+			delete firstHits;
 		}
 	}
 
@@ -141,9 +160,9 @@ void Hits::appendExpandedClusterToClusterHitMap(vector<Int_t> *expandedCluster, 
 	}
 }
 
-vector<Int_t> Hits::findNeighbours(Int_t index) {
-	vector<Int_t> neighbours;
-	neighbours.reserve(8);
+vector<Int_t> * Hits::findNeighbours(Int_t index) {
+	vector<Int_t> * neighbours = new vector<Int_t>;
+	neighbours->reserve(8);
 
 	Int_t xGoal = getX(index);
 	Int_t yGoal = getY(index);
@@ -153,11 +172,11 @@ vector<Int_t> Hits::findNeighbours(Int_t index) {
 	Int_t idxTo = getLastIndexAfterY(yGoal);
 
 	for (Int_t j=idxFrom; j < idxTo; j++) {
-		if (neighbours.size() == 8) break;
 		if (index == j) continue;
+		if (neighbours->size() == 8) break;
 
 		if (abs(xGoal - getX(j)) <= 1 && abs(yGoal - getY(j)) <= 1) {
-			neighbours.push_back(j);
+			neighbours->push_back(j);
 		}
 	}
 	return neighbours;
@@ -166,20 +185,24 @@ vector<Int_t> Hits::findNeighbours(Int_t index) {
 vector<Int_t> * Hits::findExpandedCluster(Int_t i, vector<Int_t> *checkedIndices) {
 	vector<Int_t> *expandedCluster = new vector<Int_t>;
 	vector<Int_t> *toCheck = new vector<Int_t>;
-	expandedCluster->reserve(80);
-	toCheck->reserve(80);
+	vector<Int_t> *nextCandidates = nullptr;
+	Int_t currentCandidate = 0;
+	
+	expandedCluster->reserve(40);
+	toCheck->reserve(40);
 
 	expandedCluster->push_back(i);
 	toCheck->push_back(i);
 	
 	while (!toCheck->empty()) {
-		Int_t currentCandidate = toCheck->back();		
+		currentCandidate = toCheck->back();		
 		toCheck->pop_back();
 		
 		checkedIndices->push_back(currentCandidate);
 		
-		vector<Int_t> nextCandidates = findNeighbours(currentCandidate);
+		nextCandidates = findNeighbours(currentCandidate);
 		checkAndAppendAllNextCandidates(nextCandidates, checkedIndices, toCheck, expandedCluster);
+		delete nextCandidates;
 	}
 
 	delete toCheck;
@@ -187,16 +210,16 @@ vector<Int_t> * Hits::findExpandedCluster(Int_t i, vector<Int_t> *checkedIndices
 	return expandedCluster;
 }
 
-void Hits::checkAndAppendAllNextCandidates(vector<Int_t> nextCandidates, vector<Int_t> *checkedIndices,
+void Hits::checkAndAppendAllNextCandidates(vector<Int_t> * nextCandidates, vector<Int_t> *checkedIndices,
 			vector<Int_t> *toCheck, vector<Int_t> *expandedCluster) {
 
 	Bool_t inChecked;
 	Bool_t inToCheck;
 	Int_t nextCandidate;
 	
-	while (!nextCandidates.empty()) {
-		nextCandidate = nextCandidates.back();
-		nextCandidates.pop_back();
+	while (!nextCandidates->empty()) {
+		nextCandidate = nextCandidates->back();
+		nextCandidates->pop_back();
 
 		inChecked = isItemInVector(nextCandidate, checkedIndices);
 		inToCheck = isItemInVector(nextCandidate, toCheck);
@@ -350,3 +373,40 @@ Int_t Hits::getLastIndexAfterY(Int_t y) {
 	if (idx == -1) idx = GetEntriesFast()-1;
 	return idx;
 }
+
+
+Int_t Hits::sumAllHitsInEachLayer() {
+	// put all hits in first hit number for each layer
+	Int_t firstHitPerLayer[nLayers];;
+	Int_t thisLayer, thisEventID, layerIDX;
+	Int_t nHitsRemoved = 0;
+	Float_t thisEdep;
+	Hit * thisHit = nullptr;
+	Hit * newHit = nullptr;
+	Hit * oldHit = nullptr;
+
+	for (Int_t i=0; i<nLayers; i++) firstHitPerLayer[i] = -1;
+
+	for (Int_t i=0; i<GetEntriesFast(); i++) {
+		thisLayer = getLayer(i);
+		layerIDX = firstHitPerLayer[thisLayer];
+
+		if (layerIDX > -1) {
+			// layer already exists
+			thisHit = At(i);
+			oldHit = At(layerIDX);
+			newHit = sumHits(thisHit, oldHit);
+
+			At(layerIDX)->set(newHit);
+			removeHitAt(i);
+			nHitsRemoved++;
+		}
+
+		else {
+			// layer does not exist
+			firstHitPerLayer[thisLayer] = i;
+		}
+	}
+	return nHitsRemoved;
+}
+

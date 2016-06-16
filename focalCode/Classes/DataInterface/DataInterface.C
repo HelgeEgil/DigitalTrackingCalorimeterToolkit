@@ -60,6 +60,65 @@ void DataInterface::getMCData(Int_t runNo, TH3F* Frame3D) {
 	
 } // end function GetData3D
 
+void DataInterface::getEventIDs(Int_t runNo, Hits * hits) {
+	if (fChain==0) return;
+
+   Int_t eventIdFrom = runNo * kEventsPerRun;
+   Int_t eventIdTo = eventIdFrom + kEventsPerRun;
+
+	Int_t lastZ = -1;
+
+   Float_t offsetX = (nx+2) * dx;
+   Float_t offsetY = (ny) * dy;
+   Float_t x,y,z;
+	Float_t xS = 0, yS = 0, edepS = 0;
+	Int_t n = 0;
+	Int_t lastEventID = -1;
+
+	Float_t xAvg, yAvg;
+
+	Long64_t nentries = fChain->GetEntriesFast();
+	Long64_t nb = 0;
+
+	for (Long64_t jentry=0; jentry<nentries; jentry++) {
+		Long64_t ientry = LoadTree(jentry);
+		nb = fChain->GetEntry(jentry);
+
+		if (eventID < eventIdFrom) continue;
+		else if (eventID >= eventIdTo) break;
+
+      x = (posX + offsetX) * nx / (offsetX);
+      y = (posY + offsetY) * ny / (offsetY);
+		z = level1ID;
+
+		if (lastZ<0 || lastZ == z) {
+			// First/same layer
+			xS += x;
+			yS += y;
+			edepS += edep;
+			n++;
+			lastZ = z;
+			lastEventID = eventID;
+//			cout << "First/same layer. x = " << x << ", y = " << y << ", edepS = " << edepS << ", z = " << z << endl;
+		}
+
+		else {
+			// new layer
+			xAvg = xS / n;
+			yAvg = yS / n;
+			hits->appendPoint(xAvg, yAvg, lastZ, lastEventID, edepS);
+//			cout << "New layer. x = " << xAvg << ", y = " << yAvg << ", edep = " << edepS << ", z = " << lastZ << endl;
+
+			xS = x;
+			yS = y;
+			edepS = edep;
+			lastZ = z;
+			lastEventID = eventID;
+			n = 1;
+		}
+	}
+}
+
 void DataInterface::getDataFrame(Int_t runNo, CalorimeterFrame * cf, Int_t energy) {
 
 	if (!existsEnergyFile(energy)) {
@@ -70,7 +129,7 @@ void DataInterface::getDataFrame(Int_t runNo, CalorimeterFrame * cf, Int_t energ
    Int_t eventIdFrom = runNo * kEventsPerRun;
    Int_t eventIdTo = eventIdFrom + kEventsPerRun;
 
-	TString fn = Form("../../Data/ExperimentalData/DataFrame_%i_MeV.root", energy);
+	TString fn = Form("Data/ExperimentalData/DataFrame_%i_MeV.root", energy);
 	TFile *f = new TFile(fn);
 	TTree *tree = (TTree*) f->Get("tree");
 

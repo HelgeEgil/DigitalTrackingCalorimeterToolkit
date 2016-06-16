@@ -1,36 +1,23 @@
-#ifndef DataInterface_h
-#define DataInterface_h
+//////////////////////////////////////////////////////////
+// This class has been automatically generated on
+// Wed May 20 09:43:10 2015 by ROOT version 5.34/24
+// from TChain Hits/
+//////////////////////////////////////////////////////////
 
-#include <vector>
+#ifndef findLET_h
+#define findLET_h
 
 #include <TROOT.h>
 #include <TChain.h>
 #include <TFile.h>
-#include <TObjArray.h>
 
+class TH2;
 
-#include "GlobalConstants/Constants.h"
-#include "Classes/Hit/Hit.h"
-#include "Classes/Hit/Hits.h"
-#include "Classes/Cluster/Cluster.h"
-#include "Classes/Cluster/Clusters.h"
-#include "Classes/Track/Track.h"
-#include "Classes/Track/Tracks.h"
-#include "Classes/Track/conversionFunctions.h"
-#include "HelperFunctions/Tools.h"
-#include "Classes/Layer/Layer.h"
-#include "Classes/CalorimeterFrame/CalorimeterFrame.h"
-#include "RootFiles/LinkDef.h"
+// Header file for the classes stored in the TTree if any.
 
+// Fixed size dimensions of array or collections stored in the TTree if any.
 
-class TH3F;
-class TH2F;
-class TRandom3;
-class Hits;
-
-using namespace std;
-
-class DataInterface {
+class findLET {
 public :
    TTree          *fChain;   //!pointer to the analyzed TTree or TChain
    Int_t           fCurrent; //!current Tree number in a TChain
@@ -69,14 +56,14 @@ public :
    Float_t         axialPos;
    Float_t         rotationAngle;
    Int_t           volumeID[10];
-   Char_t          processName[15];
+   Char_t          processName[17];
    Char_t          comptVolName[5];
    Char_t          RayleighVolName[5];
 
    // List of branches
    TBranch        *b_PDGEncoding;   //!
    TBranch        *b_trackID;   //!
-   TBranch        *b_parentID;   //!
+   TBranch        *b_parentID;   //
    TBranch        *b_time;   //!
    TBranch        *b_edep;   //!
    TBranch        *b_stepLength;   //!
@@ -111,30 +98,23 @@ public :
    TBranch        *b_comptVolName;   //!
    TBranch        *b_RayleighVolName;   //!
 
-   Long64_t lastJentry_;
-
-   DataInterface(TTree *tree=0);
-   virtual ~DataInterface();
-
-   // Original functions made by GATE / G4
-   virtual Int_t     Cut(Long64_t entry);
-   virtual Int_t     GetEntry(Long64_t entry);
-   virtual Long64_t  LoadTree(Long64_t entry);
-   virtual void      Init(TTree *tree);
-   virtual Bool_t    Notify();
-   virtual void      Show(Long64_t entry = -1);
-
-   // My own functions in DataInterface.C
-   virtual Int_t getMCFrame(Int_t runNo, CalorimeterFrame *cf, Float_t *x_energy = 0, Float_t *y_energy = 0);
-   virtual void getDataFrame(Int_t runNo, CalorimeterFrame *cf, Int_t energy = 190);
-   virtual void getMCData(Int_t runNo, TH3F* Frame3D);
-	virtual void getEventIDs(Int_t runNo, Hits* hits);
+   findLET(Int_t energy, TTree *tree=0);
+   virtual ~findLET();
+   virtual Int_t    Cut(Long64_t entry);
+   virtual Int_t    GetEntry(Long64_t entry);
+   virtual Long64_t LoadTree(Long64_t entry);
+   virtual void     Init(TTree *tree);
+   virtual void     Loop(Double_t energy = 100);
+   virtual Bool_t   Notify();
+   virtual void		BinLogX(TH1 *h);
+   virtual void     Show(Long64_t entry = -1);
+   
 };
 
 #endif
 
-#ifdef DataInterface_cxx
-DataInterface::DataInterface(TTree *tree) : fChain(0) 
+#ifdef findLET_cxx
+findLET::findLET(Int_t energy, TTree *tree) : fChain(0)
 {
 // if parameter tree is not specified (or zero), connect the file
 // used to generate this class and read the Tree.
@@ -153,11 +133,8 @@ DataInterface::DataInterface(TTree *tree) : fChain(0)
 
       // The following code should be used if you want this class to access a chain
       // of trees.
-	  char *materialChar = getMaterialChar();
-	  
-	  //
       TChain * chain = new TChain("Hits","");
-      chain->Add(Form("Data/MonteCarlo/focal_%s_energy%.0f_sigma0.root/Hits", materialChar, run_energy));
+      chain->Add(Form("../Data/MonteCarlo/focal_Tungsten_energy%d_sigma0_degrader.root/Hits", energy));
       tree = chain;
 #endif // SINGLE_TREE
 
@@ -165,19 +142,19 @@ DataInterface::DataInterface(TTree *tree) : fChain(0)
    Init(tree);
 }
 
-DataInterface::~DataInterface()
+findLET::~findLET()
 {
    if (!fChain) return;
    delete fChain->GetCurrentFile();
 }
 
-Int_t DataInterface::GetEntry(Long64_t entry)
+Int_t findLET::GetEntry(Long64_t entry)
 {
 // Read contents of entry.
    if (!fChain) return 0;
    return fChain->GetEntry(entry);
 }
-Long64_t DataInterface::LoadTree(Long64_t entry)
+Long64_t findLET::LoadTree(Long64_t entry)
 {
 // Set the environment to read one entry
    if (!fChain) return -5;
@@ -190,7 +167,7 @@ Long64_t DataInterface::LoadTree(Long64_t entry)
    return centry;
 }
 
-void DataInterface::Init(TTree *tree)
+void findLET::Init(TTree *tree)
 {
    // The Init() function is called when the selector needs to initialize
    // a new tree or chain. Typically here the branch addresses and branch
@@ -199,7 +176,6 @@ void DataInterface::Init(TTree *tree)
    // code, but the routine can be extended by the user if needed.
    // Init() will be called many times when running on PROOF
    // (once per file to be processed).
-
 
    // Set branch addresses and branch pointers
    if (!tree) return;
@@ -246,7 +222,7 @@ void DataInterface::Init(TTree *tree)
    Notify();
 }
 
-Bool_t DataInterface::Notify()
+Bool_t findLET::Notify()
 {
    // The Notify() function is called when a new file is opened. This
    // can be either for a new TTree in a TChain or when when a new TTree
@@ -257,21 +233,18 @@ Bool_t DataInterface::Notify()
    return kTRUE;
 }
 
-void DataInterface::Show(Long64_t entry)
+void findLET::Show(Long64_t entry)
 {
 // Print contents of entry.
 // If entry is not specified, print current entry
    if (!fChain) return;
    fChain->Show(entry);
 }
-Int_t DataInterface::Cut(Long64_t entry)
+Int_t findLET::Cut(Long64_t entry)
 {
 // This function may be called from Loop.
 // returns  1 if entry is accepted.
 // returns -1 otherwise.
    return 1;
 }
-
-
-
-#endif // #ifdef DataInterface_cxx
+#endif // #ifdef findLET_cxx

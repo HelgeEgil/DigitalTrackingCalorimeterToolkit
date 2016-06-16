@@ -28,6 +28,16 @@ Bool_t existsEnergyFile(Int_t energy) {
 	return res;
 }
 
+Float_t diffXY(Cluster *p, Hit *h) {
+	if (!p || !h) return 1e5;
+
+	Float_t diffx = p->getX() - h->getX();
+	Float_t diffy = p->getY() - h->getY();
+
+	return sqrt(pow(diffx, 2) + pow(diffy, 2));
+}
+
+
 Float_t diffmmXY(Cluster *p1, Cluster *p2) {
 	if (!p1 || !p2)
 		return -1;
@@ -55,18 +65,48 @@ Float_t diffmmXYZ(Cluster *p1, Cluster *p2) {
 }
 
 Double_t fitfunc_DBP(Double_t *v, Double_t *par) {
-	// Based on Bortfeld and Schlegel 1996
 
 	Float_t depth = v[0];
 	Float_t energy = par[0];
 	Float_t scale = par[1];
 
-	// alpha and p are values from MaterialConstants.C
-	
 	Double_t fitval = 0;
-	
+
 	Float_t range = getWEPLFromEnergy(energy); // cubic calculation, more accurate
 	fitval = scale / ( p_water * pow(alpha_water, 1/p_water) * pow((range - depth), 1-1/p_water) ); // power calculation, less accurate but with the depth dose function
+
+	/*
+	 * I tried to use an improved depth-dose curve in order to improve accuracy
+	 * Alas it didn't work. Maybe you could give it a go?
+	 * Start with: W. Ulmer, Rad. Phys. and Chem. 76 (2007)
+	 * and implement the depth-dose curve (28) with maybe a nice Bragg Peak
+	 * I had some bumps... Back to Bragg-Kleeman.
+	 *
+	Double_t rz = range - depth;
+	if (rz<0 || depth < 0) return 0;
+
+	Double_t sum_1a = rz * c1_water * exp(-l1_water * rz);
+	Double_t sum_1b = rz * c2_water * exp(-l2_water * rz);
+	Double_t sum_1c = rz * c3_water * exp(-l3_water * rz);
+	Double_t sum_1d = rz * c4_water * exp(-l4_water * rz);
+	Double_t sum_1e = rz * c5_water * exp(-l5_water * rz);
+	
+	Double_t Ez = sum_1a + sum_1b + sum_1c + sum_1d + sum_1e;
+	if (Ez < 0) return 0;
+
+	Double_t sum_2a = l1_water * sum_1a;
+	Double_t sum_2b = l2_water * sum_1b;
+	Double_t sum_2c = l3_water * sum_1c;
+	Double_t sum_2d = l4_water * sum_1d;
+	Double_t sum_2e = l5_water * sum_1e;
+
+	Double_t Ek = sum_2a + sum_2b + sum_2c + sum_2d + sum_2e;
+
+	Double_t dEdz = scale * (Ez / rz - Ek);
+	if (isnan(dEdz)) dEdz = 0;
+
+	cout << "dEdz = " << dEdz << ", fitval = " << fitval << endl;
+	*/
 
 	if (isnan(fitval)) fitval = 0;
 
@@ -201,4 +241,119 @@ Double_t correctForEnergyParameterisation(Float_t energy) {
 	Double_t corrected_energy = getEnergyFromWEPL(wepl);
 
 	return corrected_energy;
+}
+
+Float_t calculateMCS(Float_t energy, Float_t depth, Bool_t kUseDifferentX0) {
+	Float_t gamma = (energy + proton_mass) / proton_mass;
+	Float_t beta = sqrt(1 - pow(gamma, -2));
+	Float_t momentum = gamma * beta * proton_mass;
+
+	Float_t thisX0 = X0;
+	if (kUseDifferentX0) {
+		thisX0 = X0_firstlayer;
+	}
+
+	Float_t mcs = 13.6 / (beta * momentum) * sqrt(depth / thisX0) * (1 + 0.038 * log(depth / thisX0));
+
+	return mcs; // radians
+}
+
+Float_t findMCSPixelRadiusForLayer(Float_t layer, Float_t E0) {
+	Float_t currentEnergy = getEnergyAtTL(E0, getLayerPositionmm(layer));
+	currentEnergy -= getAverageEnergyLoss(E0);
+	
+	Bool_t kUseDifferentX0 = false;
+
+	Float_t depth = dz;
+	if (layer == 0) {
+		// Expected depth of scintillator + preabsorber (and no tungsten absorber before sensor)
+		depth = 16.6; 
+		kUseDifferentX0 = true;
+	}
+	
+	Float_t restRange = getTLFromEnergy(currentEnergy);
+	if (restRange < depth) depth = restRange;
+
+	Float_t mcs = calculateMCS(currentEnergy, depth, kUseDifferentX0);
+	Float_t radius = depth * tan (mcs);
+
+	return radius;
+}
+
+Float_t findMCSAtLayerRad(Int_t layer, Float_t E0) {
+	Float_t energy = E0 - getAverageEnergyLoss(E0);
+	Float_t restRange = getTLFromEnergy(energy);
+
+	Float_t mcs = calculateMCS(energy, restRange, false);
+	return mcs;
+}
+
+void fillMCSRadiusList(Float_t angleFactor) {
+	Float_t pixelRadius;
+
+	if (!run_energy) {
+		cout << "\033[1mRUN_ENERGY NOT DEFINED! ASSUMING 180 MeV.\033[0m\n";
+	}
+
+	for (Int_t i=0; i<nLayers; i++) {
+		pixelRadius = findMCSPixelRadiusForLayer(i, run_energy);
+		if (!isnan(pixelRadius)) {
+			mcs_radius_per_layer[i] = pixelRadius * angleFactor;
+		}
+	}
+}
+
+Float_t getSearchRadiusForLayer(Int_t layer) {
+	return mcs_radius_per_layer[layer];
+}
+
+Float_t getMCSAngleForLayer(Int_t layer) {
+	Float_t radius = getSearchRadiusForLayer(layer);
+	Float_t depth = dz;
+	if (layer == 0) {
+		depth = 16.6;
+	}
+	
+	Float_t angle = atan( radius / depth );
+	return angle * 180 / 3.14159265;
+}
+
+Float_t getAverageEnergyLoss(Float_t energy) {
+	Float_t dE_1 = getEnergyLossFromScintillators(energy, 1);
+	Float_t dE_2 = getEnergyLossFromScintillators(energy, 2);
+	Float_t dE_3 = getEnergyLossFromScintillators(energy, 3);
+	Float_t dE_Al = getEnergyLossFromAluminumAbsorber(energy);
+
+	Float_t probabilityOf1Scintillator = 0.5625;
+	Float_t probabilityOf2Scintillators = 0.375;
+	Float_t probabilityOf3Scintillators = 0.0675;
+
+	Float_t avgEnergyLoss = dE_1 * probabilityOf1Scintillator +
+									dE_2 * probabilityOf2Scintillators +
+									dE_3 * probabilityOf3Scintillators +
+									dE_Al;
+
+	return avgEnergyLoss;
+}
+
+Hit * sumHits(Hit * a, Hit * b) {
+	Int_t x, y, layer, eventID;
+	Float_t eDep;
+
+	if (!a) cout << "!a\n";
+	if (!b) cout << "!b\n";
+
+	eDep = a->getEdep() + b->getEdep(); // sum 
+	x = ( (int) a->getX() + (int) b->getX() + 0.5 ) / 2; // average
+	y = ( (int) a->getY() + (int) b->getY() + 0.5 ) / 2; // average
+	layer = a->getLayer();
+	eventID = a->getEventID();
+
+	if (a->getEventID() != b->getEventID() || a->getLayer() != b->getLayer()) {
+		cout << "\033[1mASSERTION ERROR IN sumHits: THE EVENT IDS OR LAYER# ARE DIFFERENT!!\033[0m\n";
+	}
+
+	Hit * newHit = new Hit(x, y, layer, eventID, eDep);
+
+	return newHit;
 }

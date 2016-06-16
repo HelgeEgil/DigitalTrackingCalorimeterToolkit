@@ -8,7 +8,7 @@
 class Hit : public TObject {
   private:
       Int_t x_, y_;
-	  Float_t edep_;
+	   Float_t edep_;
       Int_t layerNo_;
       Int_t eventID_;
 

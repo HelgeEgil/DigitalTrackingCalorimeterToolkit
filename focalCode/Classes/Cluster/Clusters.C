@@ -5,6 +5,7 @@
 
 #include "Classes/Cluster/Clusters.h"
 #include "Classes/Cluster/Cluster.h"
+#include "Classes/Hit/Hits.h"
 #include "Classes/Track/Track.h"
 #include "GlobalConstants/Constants.h"
 #include "GlobalConstants/MaterialConstants.h"
@@ -34,9 +35,7 @@ void Clusters::appendCluster(Cluster *cluster) {
    Cluster *c = (Cluster*) clusters_.ConstructedAt(i);
    c->set(cluster->getX(), cluster->getY(), cluster->getLayer(), cluster->getSize());
 
-   if (kEventsPerRun == 1) {
-   	c->setEventID(cluster->getEventID());
-   }
+   c->setEventID(cluster->getEventID());
 
 }
 
@@ -195,4 +194,85 @@ void Clusters::removeSmallClusters(Int_t size) {
 			removeClusterAt(i);
 		}
 	}
+}
+
+
+void Clusters::matchWithEventIDs(Hits * eventIDs) {
+	
+	TStopwatch t1;
+	Float_t minDist = 1e5; // px
+	Float_t thisDist = 0;
+	Cluster *thisCluster = nullptr;
+	Hit *thisHit = nullptr;
+	Int_t layer = -1;
+	Int_t minIdx = 0;
+	Bool_t doLoop = true;
+	Int_t nHits = eventIDs->GetEntriesFast();
+
+	Float_t cX, cY;
+
+	t1.Start();
+
+	Int_t nClusters = 0;
+	nClusters = GetEntries();
+
+	cout << "Number of clusters is " << nClusters << ", number of Hits is " << eventIDs->GetEntriesFast() << endl;
+
+	for (Int_t c=0; c<GetEntriesFast(); c++) {
+		thisCluster = At(c);
+		if (!thisCluster) continue;
+
+		layer = thisCluster->getLayer();
+
+		cX = thisCluster->getX();
+		cY = thisCluster->getY();
+
+		minDist = 1e5;
+		minIdx = -1;
+
+		for (Int_t h=0; h<eventIDs->GetEntriesFast(); h++) {
+			thisHit = eventIDs->At(h);
+			
+			if (!thisHit) continue;
+			if (thisHit->getLayer() != layer) continue;
+
+			if (fabs(cX - thisHit->getX()) < 10) {
+				if (fabs(cY - thisHit->getY()) < 10) {
+
+					thisDist = diffXY(thisCluster, thisHit);
+					if (thisDist < minDist) {
+						minDist = thisDist;
+						minIdx = h;
+					}
+				}
+			}
+		}
+		
+		if (minIdx >= 0 && minDist < 10) {
+			thisCluster->setEventID(eventIDs->getEventID(minIdx));
+			eventIDs->removeHitAt(minIdx);
+		}
+	}
+	t1.Stop();
+
+	cout << "Total time for function: " << t1.RealTime() << " seconds.\n";
+	cout << "Number of Hits not matched (out of " << nHits << "): " << eventIDs->GetEntries() << " ( " << eventIDs->GetEntries() / (float) nHits * 100 << "% )" << endl;
+
+	Int_t cWithoutEventID = 0;
+	for (Int_t c=0; c<GetEntriesFast(); c++) {
+		if (!At(c)) continue;
+		if (getEventID(c) < 0) {
+			cWithoutEventID++;
+			minDist = 1e5;
+			for (Int_t h=0; h<eventIDs->GetEntriesFast(); h++) {
+				thisHit = eventIDs->At(h);
+				if (!thisHit) continue;
+				thisDist = diffXY(At(c), thisHit);
+				if (thisDist < minDist) minDist = thisDist;
+			}
+		}
+	}
+
+	cout << "Number of clusters without eventID: " << cWithoutEventID << " (" << (float) cWithoutEventID / nClusters * 100 << "%)";
+	if (cWithoutEventID) cout << "Last minDist to Hit is " << minDist << endl;
 }

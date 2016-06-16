@@ -8,8 +8,13 @@
 #include <TAttLine.h>
 #include <TPolyMarker3D.h>
 #include <TPolyLine3D.h>
+#include <TStopwatch.h>
+#include <TH1F.h>
+#include <TH2F.h>
+
 
 #include "Classes/Track/Tracks.h"
+#include "Classes/Hit/Hits.h"
 #include "Classes/Cluster/Cluster.h"
 #include "Classes/Cluster/Clusters.h"
 #include "GlobalConstants/Constants.h"
@@ -247,4 +252,128 @@ void Tracks::doFit() {
 		if (!At(i)) continue;
 		At(i)->doFit();
 	}
+}
+
+void Tracks::matchWithEventIDs(Hits * eventIDs) {
+	// WRITE THIS TOMORROW
+	// Check each point in each track against the hits in Hits * (and remove when found...)
+	// N^2, but only done once and on MC
+	// IF DIFFXY ( thisHit , trackHit ) on same layer is identical, assign eventID to cluster
+	// is eventID same over whole track...? On which percent level?
+	
+	// ... and delete the sumEventID or something in Tools and in Hits.
+	
+	TStopwatch t1;
+	Float_t minDist = 1e5; // px
+	Float_t thisDist = 0;
+	Track *thisTrack = nullptr;
+	Cluster *thisCluster = nullptr;
+	Hit *thisHit = nullptr;
+	Int_t layer = -1;
+	Int_t minIdx = 0;
+	Bool_t doLoop = true;
+	Int_t nHits = eventIDs->GetEntriesFast();
+
+	Float_t cX, cY;
+
+	TCanvas *c3 = new TCanvas("c3", "Distribution of closest Hit*", 1200, 800);
+	TH1F *hist = new TH1F("hist", "Distribution of closest Hit*", 100, 0, 10);
+
+	TCanvas *c4 = new TCanvas("c4", "HIT vs Cluster", 1200, 800);
+	TH2F *hist2 = new TH2F("hist2", "HIT vs Cluster", 1280, 0, 1280, 1280, 0, 1280);
+
+	hist->SetXTitle("Distance between cluster and hit (pixels)");
+	hist->SetYTitle("Number of matchings");
+	hist->SetFillColor(kBlue-7);
+	hist->SetLineColor(kBlack);
+
+	t1.Start();
+
+	Int_t nClusters = 0;
+	for (Int_t t=0; t<GetEntriesFast(); t++) {
+		nClusters += At(t)->GetEntriesFast();
+	}
+
+	cout << "Number of clusters is " << nClusters << ", number of Hits is " << eventIDs->GetEntriesFast() << endl;
+
+
+	for (Int_t t=0; t<GetEntriesFast(); t++) {
+		thisTrack = At(t);
+
+		for (Int_t c=0; c<thisTrack->GetEntriesFast(); c++) {
+			thisCluster = thisTrack->At(c);
+			layer = thisCluster->getLayer();
+
+			cX = thisCluster->getX();
+			cY = thisCluster->getY();
+
+			minDist = diffXY(thisCluster, eventIDs->At(minIdx+1));
+
+			if (minDist < 10) {
+				minIdx++;
+				doLoop = false;
+			}
+
+			else {
+				doLoop = true;
+				minDist = 1e5;
+				minIdx = -1;
+			}
+
+			if (doLoop) {
+				for (Int_t h=0; h<eventIDs->GetEntriesFast(); h++) {
+					thisHit = eventIDs->At(h);
+					
+					if (!thisHit) continue;
+					if (thisHit->getLayer() != layer) continue;
+
+					if (fabs(cX - thisHit->getX()) < 10) {
+						if (fabs(cY - thisHit->getY()) < 10) {
+
+							thisDist = diffXY(thisCluster, thisHit);
+							if (thisDist < minDist) {
+								minDist = thisDist;
+								minIdx = h;
+							}
+						}
+					}
+				}
+			}
+			
+			if (minIdx >= 0 && minDist < 14) {
+				thisCluster->setEventID(eventIDs->getEventID(minIdx));
+				eventIDs->removeHitAt(minIdx);
+				hist->Fill(minDist);
+			}
+		}
+	}
+	t1.Stop();
+
+	c3->cd();
+	hist->Draw();
+	c3->SaveAs("OutputFiles/figures/EventIDMatching.png");
+
+	cout << "Total time for function: " << t1.RealTime() << " seconds.\n";
+	cout << "Number of Hits not matched (out of " << nHits << "): " << eventIDs->GetEntries() << endl;
+
+	Int_t cWithoutEventID = 0;
+	Bool_t printTrack = false;
+	for (Int_t t=0; t<GetEntriesFast(); t++) {
+		for (Int_t c=0; c<At(t)->GetEntriesFast(); c++) {
+			if (At(t)->getEventID(c) < 0) {
+				cWithoutEventID++;
+				hist2->Fill(At(t)->getX(c), At(t)->getY(c), 2);
+			}
+		}
+	}
+
+	for (Int_t i=0; i<eventIDs->GetEntriesFast(); i++) {
+		if (!eventIDs->At(i)) continue;
+		hist2->Fill(eventIDs->getX(i), eventIDs->getY(i));
+	}
+
+	c4->cd();
+	hist2->Draw("COLZ");
+	c4->SaveAs("OutputFiles/figures/EventIDMatching2D.png");
+	cout << "Number of clusters without eventID: " << cWithoutEventID << "( " << (float) cWithoutEventID / nClusters * 100 << "%)\n";
 }

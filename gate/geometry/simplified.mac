@@ -14,7 +14,7 @@
 /gate/layer/geometry/setXLength 38900.  um
 /gate/layer/geometry/setYLength 19149.7 um
 /gate/layer/geometry/setZLength 900.  um
-/gate/layer/placement/setTranslation 0. 9574.75 -1537.5 um # center on left side
+/gate/layer/placement/setTranslation 0. 9574.75 -1537.5 um # center on proximal side
 /gate/layer/setMaterial Vacuum
 /gate/layer/vis/setColor black
 /gate/layer/vis/forceWireframe

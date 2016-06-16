@@ -12,6 +12,7 @@
 using namespace std;
 
 class Track;
+class Hits;
 
 class Clusters : public TObject {
 
@@ -42,6 +43,7 @@ public:
 	virtual Float_t getY(Int_t i) { return At(i)->getY(); }
 	virtual Int_t getLayer(Int_t i) { return At(i)->getLayer(); }
 	virtual Int_t getSize(Int_t i) { return At(i)->getSize(); }
+	virtual Int_t getEventID(Int_t i) { return At(i)->getEventID(); }
 	virtual Int_t getFrameType() { return frameType_; }
 	virtual TClonesArray * getClustersWithoutTrack() { return (TClonesArray*) &clustersWithoutTrack_; }
 
@@ -49,7 +51,8 @@ public:
 	virtual TObject* removeClusterAt(Int_t i) { return clusters_.RemoveAt(i); }
 	virtual Bool_t removeClusterFromCoords(Float_t x, Float_t y, Int_t layer);
 	virtual void removeAllClustersInTrack(Track *track);
-	void removeSmallClusters(Int_t size);
+	void removeSmallClusters(Int_t size); 
+	virtual void matchWithEventIDs(Hits * eventIDs);
 
 	virtual void makeLayerIndex();
 	virtual Int_t getFirstIndexOfLayer(UInt_t layer);

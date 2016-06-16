@@ -1,0 +1,120 @@
+
+# DO NOT DELETE
+
+./UnitTests/UnitTests_C.so: /usr/include/root/TH2.h /usr/include/root/TH1.h
+./UnitTests/UnitTests_C.so: /usr/include/root/TAxis.h
+./UnitTests/UnitTests_C.so: /usr/include/root/TNamed.h
+./UnitTests/UnitTests_C.so: /usr/include/root/TObject.h
+./UnitTests/UnitTests_C.so: /usr/include/root/Rtypes.h
+./UnitTests/UnitTests_C.so: /usr/include/root/RConfig.h
+./UnitTests/UnitTests_C.so: /usr/include/root/RVersion.h
+./UnitTests/UnitTests_C.so: /usr/include/root/DllImport.h
+./UnitTests/UnitTests_C.so: /usr/include/root/Rtypeinfo.h
+./UnitTests/UnitTests_C.so: /usr/include/root/snprintf.h
+./UnitTests/UnitTests_C.so: /usr/include/root/strlcpy.h
+./UnitTests/UnitTests_C.so: /usr/include/root/TGenericClassInfo.h
+./UnitTests/UnitTests_C.so: /usr/include/root/TSchemaHelper.h
+./UnitTests/UnitTests_C.so: /usr/include/root/TStorage.h
+./UnitTests/UnitTests_C.so: /usr/include/root/TVersionCheck.h
+./UnitTests/UnitTests_C.so: /usr/include/root/Riosfwd.h
+./UnitTests/UnitTests_C.so: /usr/include/root/TBuffer.h
+./UnitTests/UnitTests_C.so: /usr/include/root/TString.h
+./UnitTests/UnitTests_C.so: /usr/include/root/TMathBase.h
+./UnitTests/UnitTests_C.so: /usr/include/root/TAttAxis.h
+./UnitTests/UnitTests_C.so: /usr/include/root/TArrayD.h
+./UnitTests/UnitTests_C.so: /usr/include/root/TArray.h
+./UnitTests/UnitTests_C.so: /usr/include/root/TAttLine.h
+./UnitTests/UnitTests_C.so: /usr/include/root/TAttFill.h
+./UnitTests/UnitTests_C.so: /usr/include/root/TAttMarker.h
+./UnitTests/UnitTests_C.so: /usr/include/root/TArrayC.h
+./UnitTests/UnitTests_C.so: /usr/include/root/TArrayS.h
+./UnitTests/UnitTests_C.so: /usr/include/root/TArrayI.h
+./UnitTests/UnitTests_C.so: /usr/include/root/TArrayF.h
+./UnitTests/UnitTests_C.so: /usr/include/root/Foption.h
+./UnitTests/UnitTests_C.so: /usr/include/root/TVectorFfwd.h
+./UnitTests/UnitTests_C.so: /usr/include/root/TVectorDfwd.h
+./UnitTests/UnitTests_C.so: /usr/include/root/TFitResultPtr.h
+./UnitTests/UnitTests_C.so: /usr/include/root/TMatrixFBasefwd.h
+./UnitTests/UnitTests_C.so: /usr/include/root/TMatrixDBasefwd.h
+./UnitTests/UnitTests_C.so: /usr/include/root/TH3.h
+./UnitTests/UnitTests_C.so: /usr/include/root/TAtt3D.h
+./UnitTests/UnitTests_C.so: /usr/include/root/TPolyLine3D.h
+./UnitTests/UnitTests_C.so: /usr/include/root/TList.h
+./UnitTests/UnitTests_C.so: /usr/include/root/TSeqCollection.h
+./UnitTests/UnitTests_C.so: /usr/include/root/TCollection.h
+./UnitTests/UnitTests_C.so: /usr/include/root/TIterator.h
+./UnitTests/UnitTests_C.so: /usr/include/root/TPolyMarker3D.h
+./UnitTests/UnitTests_C.so: /usr/include/root/TRandom3.h
+./UnitTests/UnitTests_C.so: /usr/include/root/TRandom.h
+./UnitTests/UnitTests_C.so: /usr/include/root/TLatex.h
+./UnitTests/UnitTests_C.so: /usr/include/root/TText.h
+./UnitTests/UnitTests_C.so: /usr/include/root/TAttText.h
+./UnitTests/UnitTests_C.so: /usr/include/root/TAttBBox2D.h
+./UnitTests/UnitTests_C.so: /usr/include/root/GuiTypes.h
+./UnitTests/UnitTests_C.so: /usr/include/root/TStyle.h
+./UnitTests/UnitTests_C.so: /usr/include/root/TAxis3D.h
+./UnitTests/UnitTests_C.so: /usr/include/root/TCanvas.h
+./UnitTests/UnitTests_C.so: /usr/include/root/TPad.h
+./UnitTests/UnitTests_C.so: /usr/include/root/TVirtualPad.h
+./UnitTests/UnitTests_C.so: /usr/include/root/TAttPad.h
+./UnitTests/UnitTests_C.so: /usr/include/root/TVirtualX.h
+./UnitTests/UnitTests_C.so: /usr/include/root/Buttons.h
+./UnitTests/UnitTests_C.so: /usr/include/root/TQObject.h
+./UnitTests/UnitTests_C.so: /usr/include/root/TAttCanvas.h
+./UnitTests/UnitTests_C.so: /usr/include/root/TCanvasImp.h
+./UnitTests/UnitTests_C.so: /usr/include/root/TGraph.h
+./UnitTests/UnitTests_C.so: /usr/include/root/TGraphErrors.h
+./UnitTests/UnitTests_C.so: /usr/include/root/TEllipse.h
+./UnitTests/UnitTests_C.so: /usr/include/root/TLegend.h
+./UnitTests/UnitTests_C.so: /usr/include/root/TPave.h
+./UnitTests/UnitTests_C.so: /usr/include/root/TBox.h
+./UnitTests/UnitTests_C.so: /usr/include/root/TStopwatch.h
+./UnitTests/UnitTests_C.so: /usr/include/root/TPaveStats.h
+./UnitTests/UnitTests_C.so: /usr/include/root/TPaveText.h
+./UnitTests/UnitTests_C.so: /usr/include/root/TLine.h
+./UnitTests/UnitTests_C.so: /usr/include/root/TView.h
+./UnitTests/UnitTests_C.so: /usr/include/root/TLeaf.h
+./UnitTests/UnitTests_C.so: /usr/include/root/TBranch.h
+./UnitTests/UnitTests_C.so: /usr/include/root/TObjArray.h
+./UnitTests/UnitTests_C.so: /usr/include/root/TDataType.h
+./UnitTests/UnitTests_C.so: /usr/include/root/TDictionary.h
+./UnitTests/UnitTests_C.so: /usr/include/root/Property.h
+./UnitTests/UnitTests_C.so: /usr/include/root/ESTLType.h
+./UnitTests/UnitTests_C.so: /usr/include/root/TArrow.h
+./UnitTests/UnitTests_C.so: /usr/include/root/TF1.h
+./UnitTests/UnitTests_C.so: /usr/include/root/TFormula.h
+./UnitTests/UnitTests_C.so: /usr/include/root/TBits.h
+./UnitTests/UnitTests_C.so: /usr/include/root/Math/ParamFunctor.h
+./UnitTests/UnitTests_C.so: /usr/include/root/Math/ProbFunc.h
+./UnitTests/UnitTests_C.so: /usr/include/root/RConfigure.h
+./UnitTests/UnitTests_C.so: /usr/include/root/Math/ProbFuncMathCore.h
+./UnitTests/UnitTests_C.so: UnitTests/UnitTests.h GlobalConstants/Constants.h
+./UnitTests/UnitTests_C.so: GlobalConstants/MaterialConstants.h
+./UnitTests/UnitTests_C.so: Classes/Hit/Hits.h
+./UnitTests/UnitTests_C.so: /usr/include/root/TClonesArray.h
+./UnitTests/UnitTests_C.so: Classes/Hit/Hit.h Classes/Cluster/Clusters.h
+./UnitTests/UnitTests_C.so: Classes/Cluster/Cluster.h Classes/Track/Tracks.h
+./UnitTests/UnitTests_C.so: Classes/Track/Track.h
+./UnitTests/UnitTests_C.so: Classes/Track/conversionFunctions.h
+./UnitTests/UnitTests_C.so: Classes/DataInterface/DataInterface.h
+./UnitTests/UnitTests_C.so: /usr/include/root/TROOT.h
+./UnitTests/UnitTests_C.so: /usr/include/root/TDirectory.h
+./UnitTests/UnitTests_C.so: /usr/include/root/TDatime.h
+./UnitTests/UnitTests_C.so: /usr/include/root/TUUID.h
+./UnitTests/UnitTests_C.so: /usr/include/root/TChain.h
+./UnitTests/UnitTests_C.so: /usr/include/root/TTree.h
+./UnitTests/UnitTests_C.so: /usr/include/root/TClass.h
+./UnitTests/UnitTests_C.so: /usr/include/root/TObjString.h
+./UnitTests/UnitTests_C.so: /usr/include/root/TVirtualTreePlayer.h
+./UnitTests/UnitTests_C.so: /usr/include/root/TFile.h
+./UnitTests/UnitTests_C.so: /usr/include/root/TDirectoryFile.h
+./UnitTests/UnitTests_C.so: /usr/include/root/TMap.h
+./UnitTests/UnitTests_C.so: /usr/include/root/THashTable.h
+./UnitTests/UnitTests_C.so: /usr/include/root/TUrl.h HelperFunctions/Tools.h
+./UnitTests/UnitTests_C.so: Classes/Hit/Hit.h Classes/Cluster/Cluster.h
+./UnitTests/UnitTests_C.so: Classes/Layer/Layer.h /usr/include/root/TH2F.h
+./UnitTests/UnitTests_C.so: GlobalConstants/Constants.h
+./UnitTests/UnitTests_C.so: Classes/CalorimeterFrame/CalorimeterFrame.h
+./UnitTests/UnitTests_C.so: RootFiles/LinkDef.h
+./UnitTests/UnitTests_C.so: /usr/include/root/cintdictversion.h /usr/include/root/RVersion.h
+UnitTests_C__ROOTBUILDVERSION= 5.34/19

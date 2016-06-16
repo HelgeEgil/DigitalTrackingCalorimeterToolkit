@@ -136,7 +136,7 @@ findRange::findRange(Int_t energy, TTree *tree) : fChain(0)
       // The following code should be used if you want this class to access a chain
       // of trees.
       TChain * chain = new TChain("Hits","");
-      chain->Add(Form("Data/MonteCarlo/focal_Tungsten_energy%d_sigma0.root/Hits", energy));
+      chain->Add(Form("../Data/MonteCarlo/focal_Tungsten_energy%d_sigma0.root/Hits", energy));
       tree = chain;
 #endif // SINGLE_TREE
 

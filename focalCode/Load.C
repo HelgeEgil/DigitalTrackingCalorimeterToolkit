@@ -5,4 +5,5 @@ void Load() {
 
 	gROOT->LoadMacro("RootFiles/Wrapper.C+");
 	gROOT->LoadMacro("Analysis/Analysis.C+");
+	gROOT->LoadMacro("UnitTests/UnitTests.C+");
 }

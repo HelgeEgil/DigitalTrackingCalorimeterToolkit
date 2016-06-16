@@ -13,6 +13,7 @@ class TH1F;
 using namespace std;
 
 Bool_t isItemInVector(Int_t i, vector<Int_t> *v);
+Float_t diffXY(Cluster *p, Hit *h);
 Float_t diffmmXY(Cluster *p1, Cluster *p2);
 Float_t diffmmXY(Hit *h1, Hit *h2);
 Float_t diffmmXYZ(Cluster *p1, Cluster *p2);
@@ -27,5 +28,14 @@ Float_t quadratureAdd(Float_t a, Float_t b);
 Float_t getEnergyFromXY(Float_t *x_energy, Float_t *y_energy, Int_t eventID);
 void convertXYToWEPL(Float_t *x_energy, Float_t *y_energy, Int_t eventID);
 Double_t correctForEnergyParameterisation(Float_t energy);
+Float_t getAverageEnergyLoss(Float_t energy);
+
+Float_t calculateMCS(Float_t energy, Float_t depth);
+Float_t findMCSPixelRadiusForLayer(Float_t layer, Float_t E0);
+void fillMCSRadiusList(Float_t angleFactor);
+Float_t getMCSAngleForLayer(Int_t layer);
+Float_t findMCSAtLayerRad(Int_t layer, Float_t E0);
+Float_t getSearchRadiusForLayer(Int_t layer);
+Hit * sumHits(Hit * a, Hit * b);
 
 #endif /* FOCALCODE_TOOLS_H_ */

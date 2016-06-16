@@ -15,8 +15,8 @@
 #include <TPad.h>
 #include <TMath.h>
 
-#include "Scripts/include/findLET.h"
-#include "GlobalConstants/Constants.h"
+#include "findLET.h"
+#include "../GlobalConstants/Constants.h"
 
 using namespace std;
 
@@ -60,7 +60,7 @@ void findLET::Loop(Double_t energy)
 
    for (Int_t layer=0; layer<nLayers; layer++) {
 	   cLET->push_back(new TCanvas(Form("c%d", layer), Form("LET for layer %d", layer), 1000, 800));
-	   hLET->push_back(new TH1F(Form("h%d", layer), Form("LET distribution for layer %d", layer), 250, 0, 5));
+	   hLET->push_back(new TH1F(Form("h%d", layer), Form("LET distribution for layer %d", layer), 250, 0, 10));
 
 	   hLET->at(layer)->SetXTitle("Linear Energy Transfer [kev/#mum]");
 	   hLET->at(layer)->SetYTitle("Number of protons");
@@ -83,45 +83,48 @@ void findLET::Loop(Double_t energy)
 	fChain->GetEntry(0);
 	
    for (Long64_t jentry=0; jentry<nentries;jentry++) {
-	Long64_t ientry = LoadTree(jentry);
-	
-	if (ientry < 0) {
-		cout << "Aborting run at jentry = " << jentry << endl;
-		break;
-	}
-
-	nb = fChain->GetEntry(jentry);   nbytes += nb;
-	if (level1ID>nLayers) {
-		cout << "UH OH! level1ID = " << level1ID << endl;
-		continue;
-	}
-
-	if (parentID != 0) continue;
-	if (volumeID[4] != 4) continue;
-
-	if (level1ID == lastLayer) { // same layer
-		sumEdep += edep;
-	}
-
-	else { // new layer
-		if (!sumEdep) {
-			sumEdep = edep; // first layer
+		Long64_t ientry = LoadTree(jentry);
+		
+		if (ientry < 0) {
+			cout << "Aborting run at jentry = " << jentry << endl;
+			break;
 		}
-		else {
-			hLET->at(level1ID)->Fill(sumEdep*1000 / 30);
-			sumEdep = edep;
-		}
-	}
+		
+		//	if (parentID != 0) continue;
+		//	if (volumeID[4] != 4) continue;
 
-	lastLayer = level1ID;
+		nb = fChain->GetEntry(jentry);   nbytes += nb;
+		if (level1ID>=nLayers) {
+			cout << "UH OH! level1ID = " << level1ID << endl;
+			continue;
+		}
+
+		if (level1ID == lastLayer) { // same layer
+			sumEdep += edep;
+		}
+
+		else { // new layer
+			if (!sumEdep) {
+				sumEdep = edep; // first layer
+			}
+			else {
+				hLET->at(level1ID)->Fill(sumEdep*1000 / 30.);
+				sumEdep = edep;
+			}
+		}
+
+		lastLayer = level1ID;
    }
 
    for (Int_t layer=0; layer<nLayers; layer++) {
 		cLET->at(layer)->cd();
+		hLET->at(layer)->SetFillColor(kBlue-7);
+		hLET->at(layer)->SetLineColor(kBlack);
 		hLET->at(layer)->Draw();
 
 		TF1 *landau = new TF1("landau", "landau(0)", 0, 20);
 		hLET->at(layer)->Fit(landau, "Q, M, WW", "");
+		hLET->at(layer)->SaveAs(Form("figures/let_degrader_layer%dMeV.root", layer));
 
 		hLETAllLayers->Fill(layer, landau->GetParameter(1));
 

@@ -43,9 +43,7 @@ void Track::appendCluster(Cluster *copyCluster, Int_t startOffset /* default 0 *
    c->set(copyCluster->getX(), copyCluster->getY(), 
           copyCluster->getLayer(), copyCluster->getSize());
 
-   if (kEventsPerRun == 1) {
-   	c->setEventID(copyCluster->getEventID());
-   }
+   c->setEventID(copyCluster->getEventID());
 }
 
 void Track::appendPoint(Float_t x, Float_t y, Int_t layer, Int_t size, Int_t eventID) {
@@ -138,10 +136,10 @@ Float_t Track::getSlopeAngleAtLayer(Int_t i) {
 	Float_t diffx = b->getXmm() - a->getXmm();
 	Float_t diffy = b->getYmm() - a->getYmm();
 
-	Float_t straightLength = diffmmXYZ(a,b);
+	Float_t zDist = diffmmXYZ(a,b);
 	Float_t xyDist = sqrt(diffx*diffx + diffy*diffy);
 
-	Float_t angle = atan2(xyDist, straightLength) / kRad;
+	Float_t angle = atan2(xyDist, zDist) / kRad;
 	return angle;
 }
 
@@ -154,13 +152,26 @@ Float_t Track::getSlopeAngleBetweenLayers(Int_t i) {
 	
 	Float_t diffx = b->getXmm() - a->getXmm();
 	Float_t diffy = b->getYmm() - a->getYmm();
-	
-	Float_t straightLength = diffmmXYZ(a,b);
+	Float_t diffz = b->getLayermm() - a->getLayermm();
+//	Float_t zDist = diffmmXYZ(a,b);
+
 	Float_t xyDist = sqrt(diffx*diffx + diffy*diffy);
 
-	Float_t angle = atan2(xyDist, straightLength) / kRad;
+	Float_t angle = atan2(xyDist, diffz) / kRad;
 	return angle;
 }	
+
+Float_t Track::getSlopeAngleChangeBetweenLayers(Int_t i) {
+
+	if ((i+1) >= GetEntriesFast()) return -1;
+	
+	Float_t theta1 = 0, theta2 = 0;
+
+	if (i>0) { theta1 = getSlopeAngleBetweenLayers(i); }
+	theta2 = getSlopeAngleBetweenLayers(i+1);
+
+	return theta2  - theta1;
+}
 
 Float_t Track::getAbsorberLength(Int_t i) {
 	// returns the traversed absorber length before sensor i
@@ -409,11 +420,7 @@ void Track::extrapolateToLayer0() {
                  getY(1) - slope->getLayer() * slope->getY(), // new y
                  0); // layer = 0
 
-      if (kEventsPerRun == 1) {
-      	newStart->setEventID(At(1)->getEventID());
-      }
-
-      cout << "Extrapolated to " << *At(0) << " from " << *At(1) << endl;
+		newStart->setEventID(At(1)->getEventID());
    }
 }
 
@@ -623,7 +630,7 @@ TGraphErrors * Track::doRangeFit() {
 	func->SetParLimits(1, scaleParameter,scaleParameter);
 	graph->Fit("fit_BP", "B, Q, N, W", "", 0, getWEPLFromEnergy(max_energy*1.2));
 	
-	fitEnergy_ = correctForEnergyParameterisation(func->GetParameter(0));
+ 	fitEnergy_ = correctForEnergyParameterisation(func->GetParameter(0));
 	fitScale_ = func->GetParameter(1);
 	fitError_ = func->GetParError(0);
 

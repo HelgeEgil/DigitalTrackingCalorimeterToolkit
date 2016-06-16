@@ -32,6 +32,7 @@
 #include "GlobalConstants/MaterialConstants.h"
 #include "Classes/Track/conversionFunctions.h"
 #include "Classes/Track/Tracks.h"
+#include "Classes/Hit/Hits.h"
 #include "Classes/DataInterface/DataInterface.h"
 #include "HelperFunctions/Tools.h"
 
@@ -39,40 +40,96 @@ using namespace std;
 
 void drawTrackAngleAtVaryingRunNumbers(Int_t dataType, Float_t energy) {
 	Int_t nRuns = 0;
+	Hits * eventIDs = nullptr;
 
-	for (Int_t i=26; i<34; i++) {
-		nRuns = pow(2, 4 + 0.25 * i) + 0.5;
 
-		cout << "Reconstructing tracks with " << nRuns << " protons per frame.";
+	for (Int_t i=2; i<32; i++) {
+		nRuns = pow(2, 4 + 0.3 * i) + 0.5;
 
 		kEventsPerRun = nRuns;
+		Float_t factor = 2;
 
-		Tracks * tracks = loadOrCreateTracks(1, 100, dataType, energy);
+		Int_t totalNumberOfRuns = 5000 / kEventsPerRun;
+		if (totalNumberOfRuns < 1) totalNumberOfRuns = 1;
+		if (totalNumberOfRuns > 250) totalNumberOfRuns = 250;
+
+		Tracks * tracks = loadOrCreateTracks(1, totalNumberOfRuns, dataType, energy);
 		tracks->extrapolateToLayer0();
+
+//		eventIDs = getEventIDs(totalNumberOfRuns, energy);
+//		tracks->matchWithEventIDs(eventIDs);
 
 		char * sDataType = getDataTypeChar(dataType);
 		TCanvas *c1 = new TCanvas("c1", "c1", 1200, 800);
 		TH1F *hAngles = new TH1F("hAngles", Form("Proton angle plot with %d protons in frame (%s)", nRuns, sDataType), 500, 0, 30);
-		hAngles->SetXTitle("Protons angle from initial measurement to layer 1");
-		hAngles->SetXTitle("Number of protons");
+		TCanvas *c2 = new TCanvas("c2", "Number of correct proton tracks with depth", 1200, 800);
+		TH1F *hCorrectTracks = new TH1F("hCorrectTracks", "Number of correct proton tracks with depth", 10, 0, 10);
+		TH1F *normCorrectTracks = new TH1F("normCorrectTracks", "Normalisation histogram", 10,0,10);
+
+		hAngles->SetXTitle("Protons angle from initial measurement to layer 2");
+		hAngles->SetYTitle("Number of protons");
 		hAngles->SetFillColor(kCyan-8);
 		hAngles->SetLineColor(kBlack);
 		gStyle->SetOptStat(0);
 
+		hCorrectTracks->SetTitle(Form("Tracks with same eventID using search cone size of MCS * %.1f and %d protons/run", factor, kEventsPerRun));
+		hCorrectTracks->SetXTitle("Layer number");
+		hCorrectTracks->SetYTitle("Number of protons");
+		hCorrectTracks->SetFillColor(kBlue-7);
+		hCorrectTracks->SetLineColor(kBlack);
+
 		Track *thisTrack;
-		for (Int_t i=0; i<tracks->GetEntriesFast(); i++) {
-			thisTrack = tracks->At(i);
+		Int_t EID, thisEID;
+		for (Int_t j=0; j<tracks->GetEntriesFast(); j++) {
+			thisTrack = tracks->At(j);
 			if (!thisTrack) continue;
-			hAngles->Fill(thisTrack->getSlopeAngleAtLayer(1));
+			hAngles->Fill(thisTrack->getSlopeAngleChangeBetweenLayers(2));
+
+			EID = thisTrack->getEventID(0);
+			if (EID > -1) { hCorrectTracks->Fill(0); }
+			normCorrectTracks->Fill(0);
+			for (Int_t k=1; k<thisTrack->GetEntriesFast(); k++) {
+				if (!thisTrack->At(k)) continue;
+				normCorrectTracks->Fill(thisTrack->getLayer(k));
+				thisEID = thisTrack->getEventID(k);
+				if (thisEID == EID) {
+					hCorrectTracks->Fill(thisTrack->getLayer(k));
+				}
+			}
 		}
 
+		hCorrectTracks->Divide(normCorrectTracks);
+
+		ofstream file2("OutputFiles/lastLayerCorrect_different_nRuns.csv", ofstream::out | ofstream::app);
+		file2 << factor << ";" << nRuns << ";" << hCorrectTracks->GetBinContent(5) << endl;
+		file2.close();
+
+		c1->cd();
 		hAngles->Draw();
-		c1->SaveAs(Form("OutputFiles/figures/angles/angles_layer1_with_nRuns-%d.png", nRuns));
-//		break;
+		c1->SaveAs(Form("OutputFiles/figures/angles/angles_layer%.1f_with_nRuns-%d.png", factor, nRuns));
+		c1->SaveAs(Form("OutputFiles/figures/angles/angles_layer%.1f_with_nRuns-%d.root", factor, nRuns));
+
+		c2->cd();
+		hCorrectTracks->Draw();
+
+		c2->SaveAs(Form("OutputFiles/figures/angles/correctTracks_factor%.1f_nruns%d.png", factor, nRuns));
+
+		Float_t rms = hAngles->GetRMS();
+		Float_t mean = hAngles->GetMean();
+		Int_t binmax = hAngles->FindLastBinAbove(1);
+		Float_t maximum = hAngles->GetXaxis()->GetBinCenter(binmax);
+
+		ofstream file("OutputFiles/angles_different_nRuns.csv", ofstream::out | ofstream::app);
+		file << factor << ";" << nRuns << ";" << rms << ";" << mean << ";"
+	   	  << maximum << endl;
+
+
+		file.close();
 
 		delete tracks;
 		delete hAngles;
 		delete c1;
+		delete c2;
 	}
 }
 
@@ -139,7 +196,7 @@ void getTrackStatistics(Int_t Runs, Int_t dataType, Bool_t recreate, Float_t ene
 	for (Int_t layer=0; layer<9; layer++) {
 		hAngles->push_back(new TH1F(Form("hAngles_%i", layer),
 				Form("Proton angle distribution in layer %i (%s)", layer, sDataType), 50, 0, 20));
-		hAngles->at(layer)->SetXTitle("Track Length [mm]");
+		hAngles->at(layer)->SetXTitle("Proton angle [deg]");
 		hAngles->at(layer)->SetYTitle("Cluster size [# of pixels]");
 	}
 	
@@ -156,6 +213,7 @@ void getTrackStatistics(Int_t Runs, Int_t dataType, Bool_t recreate, Float_t ene
 	Bool_t cutCHIP = false;
 	Int_t okTL = 0;
 	Int_t okCHIP = 0;
+	Float_t ang = 0;
 
 	Track *thisTrack;
 	for (Int_t i=0; i<tracks->GetEntriesFast(); i++) {
@@ -186,7 +244,11 @@ void getTrackStatistics(Int_t Runs, Int_t dataType, Bool_t recreate, Float_t ene
 			Int_t layer = thisTrack->getLayer(j);
 			if (layer<9) {
 				hCSLayer->at(layer)->Fill(thisTrack->getSize(j));
-				hAngles->at(layer)->Fill(thisTrack->getSlopeAngleAtLayer(j));
+//				hAngles->at(layer)->Fill(thisTrack->getSlopeAngleAtLayer(j));
+				ang = thisTrack->getSlopeAngleChangeBetweenLayers(j);
+				if (ang>=0) {
+					hAngles->at(layer)->Fill(ang);
+				}
 			}
 
 			if (trackNum < nTracksToPlot && cutTL && cutCHIP) {
@@ -224,6 +286,9 @@ void getTrackStatistics(Int_t Runs, Int_t dataType, Bool_t recreate, Float_t ene
 		c6->cd(layer+1);
 		hCSLayer->at(layer)->SetFillColor(kRed-9+layer);
 		hCSLayer->at(layer)->Draw("same");
+
+		cout << "Average cluster size and RMS for layer " << layer << " is \033[1m " << hCSLayer->at(layer)->GetMean() << " pixels \033[0m and \033[1m " << hCSLayer->at(layer)->GetRMS() << "pixels \033[0m\n";
+
 	}
 
 	for (Int_t track=0; track<nTracksToPlot; track++) {
@@ -233,10 +298,25 @@ void getTrackStatistics(Int_t Runs, Int_t dataType, Bool_t recreate, Float_t ene
 		hFollowTrack->at(track)->Draw("same");
 	}
 
+	fillMCSRadiusList(1);
 	for (Int_t layer=0; layer<9; layer++) {
 		c8->cd(layer+1);
+
+		Float_t meanAngleAtLayer = findMCSAtLayerRad(layer, run_energy);
+		Float_t mcs = getMCSAngleForLayer(layer) / cos(meanAngleAtLayer);
+
+		cout << "The added MCS factor due to inclined crossing is " << 1/(cos(meanAngleAtLayer)) << ".\n";
+
+		int maxHeight = hAngles->at(layer)->GetMaximum();
+		TLine *line = new TLine(mcs, 0, mcs, maxHeight * 1.1);
+		TLine *line2 = new TLine(mcs  * 1.5, 0, mcs * 1.5, maxHeight * 1.1);
+		TLine *line3 = new TLine(mcs  * 2, 0, mcs * 2, maxHeight * 1.1);
+
 		hAngles->at(layer)->SetFillColor(kRed-9+layer);
 		hAngles->at(layer)->Draw("same");
+		line->Draw("same");
+		line2->Draw("same");
+		line3->Draw("same");
 	}
 
 	delete tracks;
@@ -673,7 +753,9 @@ Float_t drawBraggPeakGraphFit(Int_t Runs, Int_t dataType, Bool_t recreate, Float
 	cout << "3 sigma CL = " << angleTo << endl;
 
 	Int_t nAccepted = hMaxAngle->Integral(0,hMaxAngle->GetXaxis()->FindBin(angleTo));
-	cout << "Number of accepted events = " << nAccepted << " of total " << hMaxAngle->Integral()  << Form("(%.2f %)", 100*nAccepted / hMaxAngle->Integral()) << endl;
+	Float_t percentAccepted = 100 * nAccepted / hMaxAngle->Integral(0);
+
+	cout << "Number of accepted events = " << nAccepted << " of total " << hMaxAngle->Integral()  << "(" <<  percentAccepted << " %) " << endl;
 
 	cFitResults->cd();
 
@@ -948,6 +1030,19 @@ Tracks * loadOrCreateTracks(Bool_t recreate, Int_t Runs, Int_t dataType, Float_t
 	return tracks;
 }
 
+Hits * getEventIDs(Int_t Runs, Float_t energy) {
+	run_energy = energy;
+	DataInterface *di = new DataInterface();
+
+	Hits * hits = new Hits(kEventsPerRun * sizeOfEventID * Runs);
+
+	for (Int_t i=0; i<Runs; i++) {
+		di->getEventIDs(i, hits);
+	}
+
+	return hits;
+}
+
 Tracks * getTracks(Int_t Runs, Int_t dataType, Int_t frameType, Float_t energy, Float_t *x, Float_t *y) {
 	run_energy = energy;
 
@@ -964,6 +1059,7 @@ Tracks * getTracks(Int_t Runs, Int_t dataType, Int_t frameType, Float_t energy, 
 	Clusters * clusters = new Clusters(nClusters);
 	Clusters * trackerClusters = new Clusters(nClusters);
 	Hits *hits = new Hits(nHits);
+	Hits *eventIDs = new Hits(kEventsPerRun * sizeOfEventID);
 	Hits *trackerHits = new Hits(nHits);
 	Tracks *calorimeterTracks = new Tracks(nTracks);
 	Tracks *trackerTracks = new Tracks(nTracks);
@@ -981,6 +1077,7 @@ Tracks * getTracks(Int_t Runs, Int_t dataType, Int_t frameType, Float_t energy, 
 		
 			t1.Start();
 			eventID = di->getMCFrame(i, cf, x, y);
+			di->getEventIDs(i, eventIDs);
 			if (kDebug) cout << "Sum frame layer 2 = " << cf->getTH2F(2)->GetSum() << endl;
 			t1.Stop(); t2.Start();
 			if (kDebug) cout << "Start diffuseFrame\n";
@@ -994,6 +1091,8 @@ Tracks * getTracks(Int_t Runs, Int_t dataType, Int_t frameType, Float_t energy, 
 			clusters->removeSmallClusters(2);
 			if (kDebug) cout << "Number of clusters in frame: " << clusters->GetEntriesFast() << endl;
 			t4.Stop();
+			clusters->matchWithEventIDs(eventIDs);
+			eventIDs->Clear();
 		}
 		
 		else if (dataType == kData) {
@@ -1012,6 +1111,8 @@ Tracks * getTracks(Int_t Runs, Int_t dataType, Int_t frameType, Float_t energy, 
 		if (kUseTrackSplitting) {
 			calorimeterTracks->splitSharedClusters();
 		}
+
+//		calorimeterTracks->matchWithEventIDs(eventIDs);
 
 		// should do track matching here
 		// and append calorimeterTracks to trackerTracks...
@@ -1050,21 +1151,27 @@ Tracks * getTracks(Int_t Runs, Int_t dataType, Int_t frameType, Float_t energy, 
 }
 
 void drawTracks3D(Int_t Runs, Int_t dataType, Bool_t recreate, Float_t energy) {
-	// FIXME Add kTracker to loadOrCreateTracks
-  
 	Tracks * tracks = loadOrCreateTracks(recreate, Runs, dataType, energy);
 	tracks->extrapolateToLayer0();
 
 	TCanvas *c1 = new TCanvas("c1");
 	c1->SetTitle(Form("Tracks from %.2f MeV protons on %s", energy, getMaterialChar()));
 	TView *view = TView::CreateView(1);
-	view->SetRange(0, 0, 0, 2*nx, nLayers, 2*ny);
+	view->SetRange(0, 0, 0, 2*nx, 10, 2*ny);
 
 	TClonesArray *restPoints = tracks->getClustersWithoutTrack();
 
-	TPolyMarker3D *pMarker = new TPolyMarker3D(restPoints->GetEntriesFast(), 7);
-   pMarker->SetMarkerColor(kRed);
+	Int_t nClusters = 0;
+	for (Int_t i=0; i<tracks->GetEntriesFast(); i++) {
+		nClusters += tracks->GetEntriesFast(i);
+	}
 
+	TPolyMarker3D *pMarker = new TPolyMarker3D(restPoints->GetEntriesFast(), 7);
+	TPolyMarker3D *EIDMarker = new TPolyMarker3D(nClusters, 7);
+   pMarker->SetMarkerColor(kRed);
+	EIDMarker->SetMarkerColor(kRed);
+
+	/*
    for (Int_t i=0; i<restPoints->GetEntriesFast(); i++) {
       if (!restPoints->At(i))
       	continue;
@@ -1079,13 +1186,19 @@ void drawTracks3D(Int_t Runs, Int_t dataType, Bool_t recreate, Float_t energy) {
    }
 
    pMarker->Draw();
+	*/
+
    
 	Int_t ntracks = tracks->GetEntriesFast();
+	Int_t firstEID;
+	Int_t EIDidx = 0;
 
 	for (Int_t i=0; i<ntracks; i++) {
 		Track *thisTrack = tracks->At(i);
 		if (thisTrack->getTrackLengthmm() < 2) continue;
 		
+		firstEID = thisTrack->getEventID(0);
+
 		Int_t n = thisTrack->GetEntriesFast();
 
 		TPolyLine3D *l = new TPolyLine3D(n);
@@ -1102,8 +1215,13 @@ void drawTracks3D(Int_t Runs, Int_t dataType, Bool_t recreate, Float_t energy) {
 			Float_t z = thisTrack->getY(j);
 			Float_t y = thisTrack->getLayer(j);
 			l->SetPoint(pointNumber++,x,y,z);
+
+			if (thisTrack->getEventID(j) != firstEID) {
+				EIDMarker->SetPoint(EIDidx++, x, y, z);
+			}
 		}
 		l->Draw();
+		EIDMarker->Draw();
 	}
 	view->ShowAxis();
    c1->Update();
@@ -1251,21 +1369,160 @@ void getPValues() {
 	// create list with energies vs range
 
 	TCanvas *cCustom = new TCanvas("cCustom", "Range fit for custom range-energy list", 1200, 900);
-	Float_t energies[6] = {150, 160, 170, 180, 190, 200};
-	Float_t ranges[6] = {18.92, 20.95, 23.42, 25.61, 28.27, 30.97};
+	TCanvas *cCustomInv = new TCanvas("cCustomInv", "Range fit for custom range-energy list", 1200, 900);
+	
+	TCanvas *cCustomW = new TCanvas("cCustomW", "Range fit for custom range-energy list tungsten", 1200, 900);
+	TCanvas *cCustomInvW = new TCanvas("cCustomInvW", "Range fit for custom range-energy list tungsten", 1200, 900);
 
-	TGraph *graph_custom = new TGraph(6, energies, ranges);
+	Float_t energies[19] = {10, 20, 30, 40, 50, 75, 100, 125, 150, 175, 200, 225, 250, 275, 300, 325, 350, 375, 400};
+	Float_t ranges[13] = {1.047, 4.061, 8.639, 14.655, 22.022, 45.868, 76.789, 114.074, 157.148, 205.502, 258.75, 316.419, 378.225};
+	Float_t rangesW[15] = {3.027, 5.989, 9.691, 13.983, 18.899, 24.586, 30.541, 37.219, 43.945, 51.257, 59.058, 67.172, 75.522, 84.338, 93.62};
+
+	cCustom->cd();
+	TGraph *graph_custom = new TGraph(13, energies, ranges);
 	graph_custom->SetTitle("Range fit for custom range-energy list");
 	graph_custom->Draw("A*");
 
-	TF1 *fCustom = new TF1("fCustom", "[0]*pow(x, [1])",90,200);
-	fCustom->SetParameter(0, 0.01); fCustom->SetParameter(1, 1.7);
-	graph_custom->Fit("fCustom");
+	cCustomInv->cd();
+	TGraph *graph_inv = new TGraph(13, ranges, energies);
+	graph_inv->SetTitle("Energy fit for custom energy-range list");
+	graph_inv->Draw("A*");
 
-	Float_t a = fCustom->GetParameter(0);
-	Float_t p = fCustom->GetParameter(1);
+	cCustomW->cd();
+	TGraph *graph_custom_w = new TGraph(15, energies, rangesW);
+	graph_custom_w->SetTitle("Range fit for W");
+	graph_custom_w->Draw("A*");
 
-	cout << Form("For custom, the range fit is R = %.6f * E ^ %.6f\n", a, p);
+	cCustomInvW->cd();
+	TGraph *graph_inv_w = new TGraph(15, rangesW, energies);
+	graph_inv_w->SetTitle("Energy for for W");
+	graph_inv_w->Draw("A*");
+
+	TF1 *fCustom = new TF1("fCustom", "[0] * x * (1 + ([1] - [1]* exp(-[2] * x)) + ([3] - [3] * exp(-[4]*x)))", 10, 250);
+	TF1 *fCustomInv = new TF1("fCustomInv", "x * ([0] * exp ( - [1] * x) + [2] * exp( - [3] * x) + [4] * exp( - [5] * x) + [6] * exp(-[7] * x) + [8] * exp(-[9] * x))", 1, 400);
+	TF1 *fCustomW = new TF1("fCustomW", "[0] * x * (1 + ([1] - [1]* exp(-[2] * x)) + ([3] - [3] * exp(-[4]*x)))", 10, 250);
+	TF1 *fCustomInvW = new TF1("fCustomInvW", "x * ([0] * exp ( - 1./[1] * x) + [2] * exp( - 1./[3] * x) + [4] * exp( - 1./[5] * x) + [6] * exp(-1./[7] * x) + [8] * exp(-1./[9] * x))", 1, 400);
+	fCustom->SetParameters(6.94656e-2, 15.14450027, 0.001260021, 29.84400076, 0.003260031);
+	fCustomInv->SetParameters(9.663872, 1/0.975, 2.50472, 1/12.4999, 0.880745, 1/57.001, 0.419001, 1/106.501, 0.92732, 1/1067.2784);
+	
+	fCustomW->SetParameters(6.94656e-2/9, 15.14450027, 0.001260021, 29.84400076, 0.003260031);
+	fCustomInvW->SetParameters(9.663872*9, 0.975/9, 2.50472*9, 12.4999/9, 0.880745*9, 57.001/9, 0.419001*9, 106.501/9, 0.92732*9, 1067.2784/9);
+	
+	fCustom->SetParLimits(0, 0.02, 0.1);
+	fCustom->SetParLimits(1, 5, 45);
+	fCustom->SetParLimits(2, 0.0005, 0.0045);
+	fCustom->SetParLimits(3, 10, 90);
+	fCustom->SetParLimits(4, 0.001, 0.01);
+	
+	fCustomInv->SetParLimits(0, 0.1, 100);
+	fCustomInv->SetParLimits(1, 0.001, 5);
+	fCustomInv->SetParLimits(2, 0.1, 100);
+	fCustomInv->SetParLimits(3, 0.001, 5);
+	fCustomInv->SetParLimits(4, 0.1, 100);
+	fCustomInv->SetParLimits(5, 0.001, 5);
+	fCustomInv->SetParLimits(6, 0.1, 100);
+	fCustomInv->SetParLimits(7, 0.001, 5);
+	fCustomInv->SetParLimits(8, 0.1, 100);
+	fCustomInv->SetParLimits(9, 0.001, 5);
+
+	fCustomInvW->SetParLimits(0, 1, 50);
+	fCustomInvW->SetParLimits(1, 0.01, 0.2);
+	fCustomInvW->SetParLimits(2, 5, 30);
+	fCustomInvW->SetParLimits(3, 1, 8);
+	fCustomInvW->SetParLimits(4, 1, 15);
+	fCustomInvW->SetParLimits(5, 5, 50);
+	fCustomInvW->SetParLimits(6, 0.1, 10);
+	fCustomInvW->SetParLimits(7, 0.5, 30);
+	fCustomInvW->SetParLimits(8, 1, 20);
+	fCustomInvW->SetParLimits(9, 30, 500);
+
+	cCustom->cd();
+	fCustom->SetNpx(500);
+	graph_custom->Fit("fCustom", "M, B");
+	cCustomInv->cd();
+	fCustomInv->SetNpx(500);
+	graph_inv->Fit("fCustomInv", "M, B");
+	cCustomW->cd();
+	fCustomW->SetNpx(500);
+	graph_custom_w->Fit("fCustomW", "M, B");
+	cCustomInvW->cd();
+	fCustomInvW->SetNpx(500);
+	graph_inv_w->Fit("fCustomInvW", "M, B");
+
+	Float_t sqrt1 = 0, sqrt2 = 0, sqrt3 = 0, sqrt4 = 0; 
+	Float_t avgRangeSum = 0, avgRangeSumW = 0;
+	for (Int_t i=0; i<9; i++) {
+		sqrt1 += pow(ranges[i] - fCustom->Eval(energies[i]), 2);
+		sqrt2 += pow(energies[i] - fCustomInv->Eval(ranges[i]), 2);
+		sqrt3 += pow(rangesW[i] - fCustomW->Eval(energies[i]), 2);
+		sqrt4 += pow(energies[i] - fCustomInvW->Eval(rangesW[i]), 2);
+		avgRangeSum += fabs(ranges[i] - fCustom->Eval(energies[i]));
+		avgRangeSumW += fabs(rangesW[i] - fCustomW->Eval(energies[i]));
+	}
+
+	avgRangeSum /= 9;
+	avgRangeSumW /= 15;
+
+	sqrt1 = sqrt(sqrt1);
+	sqrt2 = sqrt(sqrt2);
+	sqrt3 = sqrt(sqrt3);
+	sqrt4 = sqrt(sqrt4);
+
+	cout << "RSQ of Gompertz-function = " << sqrt1 << endl;
+	cout << "RSQ of INV fitted Gompertz-function = " << sqrt2 << endl;
+	cout << "RSQ of Gompertz-function in tungsten = " << sqrt3 << endl;
+	cout << "RSQ of INV fitted Gompertz-function in tungsten = " << sqrt4 << endl;
+	cout << endl << "Average range error for fitted Gompertz is " << avgRangeSum << " mm.\n";
+	cout << "Average range error for fitted Gompertz in tungsten is " << avgRangeSumW << " mm.\n";
+
+	Float_t E1 = fCustomInv->Eval(fCustom->Eval(10));
+	Float_t E2 = fCustomInv->Eval(fCustom->Eval(30));
+	Float_t E3 = fCustomInv->Eval(fCustom->Eval(50));
+
+	Float_t E1w = fCustomInvW->Eval(fCustomW->Eval(10));
+	Float_t E2w = fCustomInvW->Eval(fCustomW->Eval(30));
+	Float_t E3w = fCustomInvW->Eval(fCustomW->Eval(50));
+
+	cout << Form("From energy of 10, 30, 50 MeV, the calc-invcalc values are %.10f, %.10f, %.10f.\n", E1, E2, E3);
+	cout << Form("TUNGSTEN - From energy of 10, 30, 50 MeV, the calc-invcalc values are %.10f, %.10f, %.10f.\n", E1w, E2w, E3w);
+
+	cout << " --- \033[1m VALUES FOR WATER \033[0m --- " << endl;
+	cout << "a1      = " << fCustom->GetParameter(0) << endl;
+	cout << "b1      = " << fCustom->GetParameter(1) << endl;
+	cout << "g1      = " << fCustom->GetParameter(2) << endl;
+	cout << "b2      = " << fCustom->GetParameter(3) << endl;
+	cout << "g2      = " << fCustom->GetParameter(4) << endl;
+	cout << endl;
+	cout << "c1      = " << fCustomInv->GetParameter(0) << endl;
+	cout << "lambda1 = " << 1/fCustomInv->GetParameter(1) << endl;
+	cout << "c2      = " << fCustomInv->GetParameter(2) << endl;
+	cout << "lambda2 = " << 1/fCustomInv->GetParameter(3) << endl;
+	cout << "c3      = " << fCustomInv->GetParameter(4) << endl;
+	cout << "lambda3 = " << 1/fCustomInv->GetParameter(5) << endl;
+	cout << "c4      = " << fCustomInv->GetParameter(6) << endl;
+	cout << "lambda4 = " << 1/fCustomInv->GetParameter(7) << endl;
+	cout << "c5      = " << fCustomInv->GetParameter(8) << endl;
+	cout << "lambda5 = " << 1/fCustomInv->GetParameter(9) << endl;
+
+	cout << endl << endl;
+
+	cout << " --- \033[1m VALUES FOR TUNGSTEN \033[0m --- " << endl;
+	cout << "a1      = " << fCustomW->GetParameter(0) << endl;
+	cout << "b1      = " << fCustomW->GetParameter(1) << endl;
+	cout << "g1      = " << fCustomW->GetParameter(2) << endl;
+	cout << "b2      = " << fCustomW->GetParameter(3) << endl;
+	cout << "g2      = " << fCustomW->GetParameter(4) << endl;
+	cout << endl;
+	cout << "c1      = " << fCustomInvW->GetParameter(0) << endl;
+	cout << "lambda1 = " << 1/fCustomInvW->GetParameter(1) << endl;
+	cout << "c2      = " << fCustomInvW->GetParameter(2) << endl;
+	cout << "lambda2 = " << 1/fCustomInvW->GetParameter(3) << endl;
+	cout << "c3      = " << fCustomInvW->GetParameter(4) << endl;
+	cout << "lambda3 = " << 1/fCustomInvW->GetParameter(5) << endl;
+	cout << "c4      = " << fCustomInvW->GetParameter(6) << endl;
+	cout << "lambda4 = " << 1/fCustomInvW->GetParameter(7) << endl;
+	cout << "c5      = " << fCustomInvW->GetParameter(8) << endl;
+	cout << "lambda5 = " << 1/fCustomInvW->GetParameter(9) << endl;
 
 }
 
