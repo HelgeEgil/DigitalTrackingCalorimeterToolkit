@@ -8,6 +8,7 @@
 
 #include "Classes/Track/Track.h"
 #include "Classes/Cluster/Cluster.h"
+#include "Classes/Cluster/Clusters.h"
 #include "Classes/Hit/Hit.h"
 #include "HelperFunctions/Tools.h"
 #include "GlobalConstants/Constants.h"
@@ -43,6 +44,7 @@ void Track::appendCluster(Cluster *copyCluster, Int_t startOffset /* default 0 *
    c->set(copyCluster->getX(), copyCluster->getY(), 
           copyCluster->getLayer(), copyCluster->getSize());
 
+	if (copyCluster->isUsed()) c->markUsed();
    c->setEventID(copyCluster->getEventID());
 }
 
@@ -882,4 +884,25 @@ Float_t Track::getRiseFactor() {
 	
 	return riseFactor;
 }
-	
+
+
+Clusters * Track::getConflictClusters() { 
+	Clusters *conflictClusters = new Clusters(GetEntriesFast());
+	for (Int_t i=0; i<GetEntriesFast(); i++) {
+		if (!At(i)) continue;
+		if (At(i)->isUsed()) {
+			conflictClusters->appendCluster(At(i));
+		}
+	}
+
+	return conflictClusters;
+}
+
+Bool_t Track::isUsedClustersInTrack() {
+	Bool_t usedClusters = false;
+	for (Int_t i=0; i<GetEntriesFast(); i++) {
+		usedClusters *= isUsed(i);
+	}
+	return usedClusters;
+}
+

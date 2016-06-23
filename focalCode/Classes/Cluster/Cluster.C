@@ -18,6 +18,7 @@ Cluster::Cluster(Cluster* cluster) {
    layerNo_ = cluster->getLayer();
    clusterSize_ = cluster->getSize();
    eventID_ = -1;
+	isUsed_ = false;
 }
 
 Cluster::Cluster(Float_t x, Float_t y, Int_t layer, Int_t size) {
@@ -26,6 +27,7 @@ Cluster::Cluster(Float_t x, Float_t y, Int_t layer, Int_t size) {
    layerNo_ = layer;
    clusterSize_ = size;
    eventID_ = -1;
+	isUsed_ = false;
 }
 
 Double_t Cluster::getLayermm() {
@@ -68,6 +70,7 @@ void Cluster::set(Cluster* copyCluster) {
    layerNo_ = copyCluster->getLayer();
    clusterSize_ = copyCluster->getSize();
    eventID_ = copyCluster->getEventID();
+	isUsed_ = copyCluster->isUsed();	
 }
 
 void Cluster::set(Float_t x, Float_t y, Int_t layer, Int_t size) {

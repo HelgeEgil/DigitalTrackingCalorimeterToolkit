@@ -14,9 +14,10 @@ private:
 	Int_t layerNo_;
 	Int_t clusterSize_;
 	Int_t eventID_;
+	Bool_t isUsed_;
 
 public:
-	Cluster() { x_ = -1; y_ = -1; layerNo_ = -1; clusterSize_ = -1; eventID_ = -1;}
+	Cluster() { x_ = -1; y_ = -1; layerNo_ = -1; clusterSize_ = -1; eventID_ = -1; isUsed_ = false; }
 	Cluster(Cluster *cluster);
 	Cluster(Float_t x, Float_t y, Int_t layer = -1, Int_t size = -1);
 	virtual ~Cluster();
@@ -47,9 +48,13 @@ public:
 	void setXmm(Float_t x) { x_ = x / dx; }
 	void setYmm(Float_t y) { y_ = y / dy; }
 
+	void markUsed() { isUsed_ = true; }
+	void markUnused() { isUsed_ = false; }
+	Bool_t isUsed() { return isUsed_; }
+
 	friend ostream& operator<<(ostream &os, Cluster &c);
 
-	ClassDef(Cluster,2);
+	ClassDef(Cluster,4);
 };
 
 #endif

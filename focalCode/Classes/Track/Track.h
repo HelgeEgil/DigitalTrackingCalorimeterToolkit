@@ -9,6 +9,7 @@
 const Int_t MaxTrackLength = 40;
 class TGraph;
 class TGraphErrors;
+class Clusters;
 
 class Track : public TObject {
 
@@ -57,6 +58,10 @@ class Track : public TObject {
 	virtual Float_t getPreWEPL();
 	virtual Float_t getPreTL();
 	virtual Float_t getPreEnergyLossError();
+
+	Clusters * getConflictClusters();
+	Bool_t isUsedClustersInTrack();
+	Bool_t isUsed(Int_t i) { return At(i)->isUsed(); }
 
 	// with dimensions
 	Float_t getXmm(Int_t i) { return At(i)->getXmm(); }
@@ -117,6 +122,6 @@ class Track : public TObject {
 
 	virtual void extrapolateToLayer0();
 
-   ClassDef(Track,4);
+   ClassDef(Track,5);
 };
 #endif

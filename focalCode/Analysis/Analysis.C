@@ -978,6 +978,7 @@ void saveTracks(Tracks *tracks, Int_t dataType, Float_t energy) {
 	f.SetCompressionLevel(1);
 	TTree T("T", "tracks");
 	T.Branch("tracks", &tracks, 256000, 1);
+	cout << "Length of CWOT: " << tracks->GetEntriesFastClustersWithoutTrack() << endl; 
 	T.Fill();
 	T.Write();
 	f.Close();
@@ -1011,11 +1012,14 @@ Tracks * loadTracks(Int_t Runs, Int_t dataType, Float_t energy) {
 }
 
 Tracks * loadOrCreateTracks(Bool_t recreate, Int_t Runs, Int_t dataType, Float_t energy, Float_t *x, Float_t *y) {
-	Tracks * tracks;
+	Tracks * tracks = nullptr;
 	
 	if (recreate) {
 		tracks = getTracks(Runs, dataType, kCalorimeter, energy, x, y);
-		saveTracks(tracks, dataType, energy);
+		if (tracks->GetEntries()) {
+			cout << "Saving " << tracks->GetEntries() << " tracks.\n";
+//			saveTracks(tracks, dataType, energy);
+		}
 	}
 
 	else {
@@ -1160,6 +1164,8 @@ void drawTracks3D(Int_t Runs, Int_t dataType, Bool_t recreate, Float_t energy) {
 	view->SetRange(0, 0, 0, 2*nx, 10, 2*ny);
 
 	TClonesArray *restPoints = tracks->getClustersWithoutTrack();
+//	TClonesArray *conflictClusters = nullptr; 
+	Clusters * conflictClusters = nullptr;
 
 	Int_t nClusters = 0;
 	for (Int_t i=0; i<tracks->GetEntriesFast(); i++) {
@@ -1168,10 +1174,12 @@ void drawTracks3D(Int_t Runs, Int_t dataType, Bool_t recreate, Float_t energy) {
 
 	TPolyMarker3D *pMarker = new TPolyMarker3D(restPoints->GetEntriesFast(), 7);
 	TPolyMarker3D *EIDMarker = new TPolyMarker3D(nClusters, 7);
-   pMarker->SetMarkerColor(kRed);
+	TPolyMarker3D *conflictMarker = new TPolyMarker3D(nClusters, 7);
+   pMarker->SetMarkerColor(kBlue);
 	EIDMarker->SetMarkerColor(kRed);
+	conflictMarker->SetMarkerColor(kRed);
 
-	/*
+	
    for (Int_t i=0; i<restPoints->GetEntriesFast(); i++) {
       if (!restPoints->At(i))
       	continue;
@@ -1186,29 +1194,23 @@ void drawTracks3D(Int_t Runs, Int_t dataType, Bool_t recreate, Float_t energy) {
    }
 
    pMarker->Draw();
-	*/
-
    
 	Int_t ntracks = tracks->GetEntriesFast();
 	Int_t firstEID;
 	Int_t EIDidx = 0;
+	Int_t conflictIdx = 0;
 
 	for (Int_t i=0; i<ntracks; i++) {
 		Track *thisTrack = tracks->At(i);
 		if (thisTrack->getTrackLengthmm() < 2) continue;
-		
-		firstEID = thisTrack->getEventID(0);
-
 		Int_t n = thisTrack->GetEntriesFast();
 
 		TPolyLine3D *l = new TPolyLine3D(n);
 		l->SetLineWidth(1);
-		
-		// for points
-		Int_t pointNumber = 0;
 
+		firstEID = thisTrack->getEventID(0);
+		Int_t pointNumber = 0;
 		for (Int_t j=0; j<n; j++) {
-			// since we now keep null points here...
 			if (!thisTrack->At(j)) continue;
 
 			Float_t x = thisTrack->getX(j);
@@ -1220,8 +1222,21 @@ void drawTracks3D(Int_t Runs, Int_t dataType, Bool_t recreate, Float_t energy) {
 				EIDMarker->SetPoint(EIDidx++, x, y, z);
 			}
 		}
+
+		conflictClusters = (Clusters*) thisTrack->getConflictClusters();
+		for (Int_t j=0; j<conflictClusters->GetEntriesFast(); j++) {
+			if (!conflictClusters->At(j)) continue;
+			
+			Float_t x = conflictClusters->getX(j);
+			Float_t z = conflictClusters->getY(j);
+			Float_t y = conflictClusters->getLayer(j);
+			
+			conflictMarker->SetPoint(conflictIdx++, x,y,z);
+		}
+
 		l->Draw();
-		EIDMarker->Draw();
+//		EIDMarker->Draw();
+		conflictMarker->Draw();
 	}
 	view->ShowAxis();
    c1->Update();

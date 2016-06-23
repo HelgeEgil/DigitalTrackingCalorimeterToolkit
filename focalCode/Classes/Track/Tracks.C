@@ -294,9 +294,6 @@ void Tracks::matchWithEventIDs(Hits * eventIDs) {
 		nClusters += At(t)->GetEntriesFast();
 	}
 
-	cout << "Number of clusters is " << nClusters << ", number of Hits is " << eventIDs->GetEntriesFast() << endl;
-
-
 	for (Int_t t=0; t<GetEntriesFast(); t++) {
 		thisTrack = At(t);
 
@@ -353,8 +350,7 @@ void Tracks::matchWithEventIDs(Hits * eventIDs) {
 	hist->Draw();
 	c3->SaveAs("OutputFiles/figures/EventIDMatching.png");
 
-	cout << "Total time for function: " << t1.RealTime() << " seconds.\n";
-	cout << "Number of Hits not matched (out of " << nHits << "): " << eventIDs->GetEntries() << endl;
+//	cout << "Number of Hits not matched (out of " << nHits << "): " << eventIDs->GetEntries() << endl;
 
 	Int_t cWithoutEventID = 0;
 	Bool_t printTrack = false;

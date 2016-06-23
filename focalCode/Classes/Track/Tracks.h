@@ -25,7 +25,7 @@ class Tracks : public TObject {
    public:
 
       Tracks() : tracks_("Track", 1000), clustersWithoutTrack_("Cluster", 5000) {}
-      Tracks(Int_t nTracks) : tracks_("Track", nTracks), clustersWithoutTrack_("Cluster", nTracks*5) {}
+      Tracks(Int_t nTracks) : tracks_("Track", nTracks), clustersWithoutTrack_("Cluster", nTracks*100) {}
       virtual ~Tracks(); 
 
       virtual void appendTrack(Track *copyTrack, Int_t startOffset = 0);
@@ -36,6 +36,7 @@ class Tracks : public TObject {
       virtual void SetOwner(Bool_t val) { tracks_.SetOwner(val); }
 
       virtual Int_t GetEntriesFast() { return tracks_.GetEntriesFast(); }
+      virtual Int_t GetEntriesFastClustersWithoutTrack() { return clustersWithoutTrack_.GetEntriesFast(); }
       virtual Int_t GetEntries() { return tracks_.GetEntries(); }
       virtual Int_t GetEntriesFast(Int_t i) { return At(i)->GetEntriesFast(); }
 
@@ -44,6 +45,7 @@ class Tracks : public TObject {
       Float_t getTrackLengthmm(Int_t i) { return At(i)->getTrackLengthmm(); }
       Float_t getTrackScore(Int_t i) { return At(i)->getTrackScore(); }
       TClonesArray * getClustersWithoutTrack() { return (TClonesArray*) &clustersWithoutTrack_; }
+		virtual Bool_t isUsedClustersInTrack(Int_t i) { return At(i)->isUsedClustersInTrack(); }
 
       virtual void extrapolateToLayer0();
       virtual void splitSharedClusters();

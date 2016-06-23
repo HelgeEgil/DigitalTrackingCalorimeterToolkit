@@ -14,7 +14,8 @@
 using namespace std;
 
 Clusters::Clusters(Bool_t frameType) : clusters_("Cluster", kEventsPerRun*2),
-											 clustersWithoutTrack_("Cluster", kEventsPerRun*2) {
+											 clustersWithoutTrack_("Cluster", kEventsPerRun*2),
+											 conflictClusters_("Cluster", kEventsPerRun*2) {
 	frameType_ = frameType;
 }
 
@@ -22,6 +23,7 @@ Clusters::~Clusters() {
    // Destructor
    clusters_.Delete();
    clustersWithoutTrack_.Delete();
+	conflictClusters_.Delete();
 }
 
 void Clusters::appendCluster(Float_t x, Float_t y, Int_t layer, Int_t size) {
@@ -35,7 +37,8 @@ void Clusters::appendCluster(Cluster *cluster) {
    Cluster *c = (Cluster*) clusters_.ConstructedAt(i);
    c->set(cluster->getX(), cluster->getY(), cluster->getLayer(), cluster->getSize());
 
-   c->setEventID(cluster->getEventID());
+	if (cluster->isUsed()) { c->markUsed(); }
+	c->setEventID(cluster->getEventID());
 
 }
 
@@ -43,6 +46,18 @@ void Clusters::appendClusterWithoutTrack(Cluster *cluster) {
    Int_t i = clustersWithoutTrack_.GetEntriesFast();
    Cluster *c = (Cluster*) clustersWithoutTrack_.ConstructedAt(i);
    c->set(cluster->getX(), cluster->getY(), cluster->getLayer(), cluster->getSize());
+	c->setEventID(cluster->getEventID());
+}
+
+void Clusters::appendConflictClusters(Clusters *clusters) {
+	Int_t i=conflictClusters_.GetEntriesFast();
+	Int_t n=clusters->GetEntriesFast();
+
+	for (Int_t j=0; j<n; j++) {
+		Cluster *c = (Cluster*) conflictClusters_.ConstructedAt(i+j);
+		c->set(clusters->getX(j), clusters->getY(j), clusters->getLayer(j), clusters->getSize(j));
+		c->setEventID(clusters->getEventID(j));
+	}
 }
 
 void Clusters::Clear(Option_t *) {
@@ -69,6 +84,8 @@ void Clusters::removeAllClustersInTrack(Track *track) {
       Float_t x = track->getX(i);
       Float_t y = track->getY(i);
 
+
+
       for (Int_t j=lastIndex; j<GetEntriesFast(); j++) {
 
 			if (!At(j))
@@ -87,19 +104,71 @@ void Clusters::removeAllClustersInTrack(Track *track) {
    }
 }
 
-Bool_t Clusters::removeClusterFromCoords(Float_t x, Float_t y, Int_t layer) {
-   for (Int_t i=0; GetEntriesFast(); i++) {
-      if (getLayer(i) < layer) continue;
-      if (x == getX(i)) {
-         if (y == getY(i)) {
-            if (layer == getLayer(i)) { // found it
-               removeClusterAt(i);
-               return true;
+void Clusters::removeAllClustersInTrackFromClustersWithoutTrack(Track *track) {
+   Int_t lastIndex = 0;
+
+   for (Int_t i = 0; i < track->GetEntriesFast(); i++) {
+      if (!track->At(i)) continue;
+      Int_t layer = track->getLayer(i);
+      Float_t x = track->getX(i);
+      Float_t y = track->getY(i);
+
+      for (Int_t j=lastIndex; j<GetEntriesFast(); j++) {
+
+			Cluster *cluster = (Cluster *) clustersWithoutTrack_.At(j);
+
+			if (!cluster)
+				continue;
+
+         if (cluster->getLayer() < layer)
+         	continue;
+
+         if (cluster->getX() == x) {
+            if (cluster->getY() == y && cluster->getLayer() == layer) {
+               removeClusterWithoutTrackAt(j);
+               lastIndex = j+1;
             }
          }
       }
    }
-   return false;
+}
+void Clusters::markUsedClusters(Track *track) {
+	Int_t lastIndex = 0;
+
+   for (Int_t i = 0; i < track->GetEntriesFast(); i++) {
+      if (!track->At(i)) continue;
+      Int_t layer = track->getLayer(i);
+      Float_t x = track->getX(i);
+      Float_t y = track->getY(i);
+
+		Int_t idx = findClusterIdx(x,y,layer);
+		if (idx > -1) {
+			markUsed(idx);
+		}
+	}
+}
+
+Int_t Clusters::findClusterIdx(Float_t x, Float_t y, Int_t layer) {
+	for (Int_t i=0; i<GetEntriesFast(); i++) {
+		if (getLayer(i) < layer) continue;
+		if (x == getX(i)) {
+			if (y == getY(i)) {
+				if (layer == getLayer(i)) { // found it
+					return i;
+				}
+			}
+		}
+	}
+	return -1;
+}
+
+Bool_t Clusters::removeClusterFromCoords(Float_t x, Float_t y, Int_t layer) {
+	Int_t clusterIndex = findClusterIdx(x, y, layer);
+	if (clusterIndex>-1) {
+		removeClusterAt(clusterIndex);
+		return true;
+	}
+	else return false;
 }
 
 void Clusters::makeLayerIndex() {
