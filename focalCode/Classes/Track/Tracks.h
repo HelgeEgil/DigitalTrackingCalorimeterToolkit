@@ -46,6 +46,7 @@ class Tracks : public TObject {
       Float_t getTrackScore(Int_t i) { return At(i)->getTrackScore(); }
       TClonesArray * getClustersWithoutTrack() { return (TClonesArray*) &clustersWithoutTrack_; }
 		virtual Bool_t isUsedClustersInTrack(Int_t i) { return At(i)->isUsedClustersInTrack(); }
+		virtual Int_t getNumberOfConflictClusters(Int_t i) { return At(i)->getNumberOfConflictClusters(); }
 
       virtual void extrapolateToLayer0();
       virtual void splitSharedClusters();

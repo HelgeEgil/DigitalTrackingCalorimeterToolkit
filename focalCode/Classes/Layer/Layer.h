@@ -24,6 +24,7 @@ class Layer : public TObject {
 		virtual ~Layer();
 
 		Int_t diffuseLayer(TRandom3 *gRandom);
+		Float_t getOccupancy();
 		virtual Bool_t findHits(Hits *hits);
 
 		virtual void Reset() { frame2D_.Reset(); }

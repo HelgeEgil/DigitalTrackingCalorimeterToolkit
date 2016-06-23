@@ -60,6 +60,7 @@ class Track : public TObject {
 	virtual Float_t getPreEnergyLossError();
 
 	Clusters * getConflictClusters();
+	Int_t getNumberOfConflictClusters();
 	Bool_t isUsedClustersInTrack();
 	Bool_t isUsed(Int_t i) { return At(i)->isUsed(); }
 

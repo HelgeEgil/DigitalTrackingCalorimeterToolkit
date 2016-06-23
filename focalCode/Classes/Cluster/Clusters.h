@@ -40,6 +40,7 @@ public:
 	virtual void clearClusters();
 	virtual void Clear(Option_t * = "");
 
+	virtual Int_t GetEntriesFastLastLayer();
 	virtual void markUsed(Int_t i) { At(i)->markUsed(); }
 	virtual void markUnused(Int_t i) { At(i)->markUnused(); }
 	virtual Bool_t isUsed(Int_t i) { return At(i)->isUsed(); }

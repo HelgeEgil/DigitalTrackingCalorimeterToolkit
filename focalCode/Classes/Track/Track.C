@@ -310,7 +310,7 @@ Float_t Track::getSnakeness() {
 Float_t Track::getTrackScore() {
 	Float_t upperTrackLength = 35;
 	Float_t upperSnakeness = 3;
-	Int_t snakePoints = 5;
+	Int_t snakePoints = 10;
 	Int_t trackLengthPoints = 25;
 
 	Float_t trackLength = getTrackLengthmm();
@@ -320,6 +320,11 @@ Float_t Track::getTrackScore() {
 
 	Float_t points = trackLength * (trackLengthPoints / upperTrackLength)
 						+ (upperSnakeness - snakeness) * snakePoints/upperSnakeness;
+
+	// five points deduction for each shared track
+	points -= getNumberOfConflictClusters() * 3;
+
+	if (points<0) points = 0;
 
 	return points;
 }
@@ -905,4 +910,14 @@ Bool_t Track::isUsedClustersInTrack() {
 	}
 	return usedClusters;
 }
+
+Int_t Track::getNumberOfConflictClusters() { 
+	Int_t n = 0;
+	for (Int_t i=0; i<GetEntriesFast(); i++) {
+		if (!At(i)) continue;
+		if (At(i)->isUsed()) n++;
+	}
+	return n;
+}
+
 

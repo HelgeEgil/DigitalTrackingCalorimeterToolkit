@@ -45,12 +45,26 @@ Hits * CalorimeterFrame::findHits(Int_t eventID) {
 	return hits;
 }
 
+Float_t CalorimeterFrame::getOccupancyLastLayer() {
+	Float_t occupancy = 0;
+	Float_t lastOccupancy = 0;
+	for (Int_t layer=0; layer<nLayers; layer++) {
+		occupancy = At(layer)->getOccupancy();
+
+		if (occupancy>lastOccupancy*0.9) { lastOccupancy = occupancy; }
+		else { break; }
+	}
+
+	return lastOccupancy;
+}
+
 void CalorimeterFrame::diffuseFrame(TRandom3 *gRandom) {
 	Int_t nHitsInLayer = 1;
 	
 	for (Int_t layer=0; layer<nLayers; layer++) {
-		if (nHitsInLayer)
+		if (nHitsInLayer) {
 			nHitsInLayer = At(layer)->diffuseLayer(gRandom);
+		}
 		
 		else break;
 	}

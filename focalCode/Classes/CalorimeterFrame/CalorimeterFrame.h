@@ -31,6 +31,7 @@ class CalorimeterFrame : public TObject {
 
       virtual Hits *findHits(Int_t eventID = -1);
       virtual void diffuseFrame(TRandom3 *gRandom);
+		virtual Float_t getOccupancyLastLayer();
       virtual void Reset();
 
    ClassDef(CalorimeterFrame,2);

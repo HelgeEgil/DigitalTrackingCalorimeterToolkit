@@ -18,12 +18,13 @@ Tracks * Clusters::findCalorimeterTracks() {
 	Int_t startOffset = 0;
 
 	for (Int_t i=0; i<GetEntriesFast(); i++) {
+		if (!At(i)) continue;
 		appendClusterWithoutTrack(At(i));
 	}
-
+	
 	makeLayerIndex();
 
-	fillMCSRadiusList(2);
+	fillMCSRadiusList(3);
 	findTracksFromLayer(tracks, 0);
 	
 //	findTracksFromLayer(tracks, 1);
@@ -44,7 +45,7 @@ void Clusters::findTracksFromLayer(Tracks * tracks, Int_t layer, Int_t trackFind
 	Int_t startOffset = 0;
 	Track *bestTrack = nullptr;
 	Track *newBestTrack = nullptr;
-	
+
 	Clusters * seeds = findSeeds(layer);
 	Clusters * conflictClusters = nullptr;
 	
@@ -57,10 +58,12 @@ void Clusters::findTracksFromLayer(Tracks * tracks, Int_t layer, Int_t trackFind
 		if (bestTrack->GetEntriesFast() > 0) {
 			if (!bestTrack->At(0))
 				startOffset = 1;
+			
 
 			tracks->appendTrack(bestTrack, startOffset);
 //			removeAllClustersInTrack(bestTrack);
 			removeAllClustersInTrackFromClustersWithoutTrack(bestTrack);
+
 
 			// Get already conflicting clusters with the isUsed tag in bestTrack
 			conflictClusters = bestTrack->getConflictClusters();
@@ -70,6 +73,7 @@ void Clusters::findTracksFromLayer(Tracks * tracks, Int_t layer, Int_t trackFind
 			markUsedClusters(bestTrack);
 		}
 	}
+
 
 	Int_t nTracksWithConflicts = 0;
 	for (Int_t i=0; i<tracks->GetEntriesFast(); i++) {

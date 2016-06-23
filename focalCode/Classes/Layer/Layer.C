@@ -66,3 +66,15 @@ Bool_t Layer::findHits(Hits* hits) {
 	}
 	return isHits;
 }
+
+Float_t Layer::getOccupancy() {
+	Int_t numberOfActivatedPixels = 0;
+	Int_t nBins = frame2D_.GetBin(frame2D_.GetNbinsX(), frame2D_.GetNbinsY());
+	for (int i=1; i<nBins+1; i++) {
+		if (frame2D_.GetBinContent(i)) numberOfActivatedPixels++;
+	}
+
+	cout << "In layer " << layerNo_ << ", number of activated pixels is " << numberOfActivatedPixels << endl;
+
+	return (float) numberOfActivatedPixels / nBins;
+}

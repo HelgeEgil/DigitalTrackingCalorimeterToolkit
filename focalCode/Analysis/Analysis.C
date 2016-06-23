@@ -42,7 +42,6 @@ void drawTrackAngleAtVaryingRunNumbers(Int_t dataType, Float_t energy) {
 	Int_t nRuns = 0;
 	Hits * eventIDs = nullptr;
 
-
 	for (Int_t i=2; i<32; i++) {
 		nRuns = pow(2, 4 + 0.3 * i) + 0.5;
 
@@ -133,8 +132,12 @@ void drawTrackAngleAtVaryingRunNumbers(Int_t dataType, Float_t energy) {
 	}
 }
 
-void getTrackStatistics(Int_t Runs, Int_t dataType, Bool_t recreate, Float_t energy) {
+void getTrackStatistics(Int_t Runs, Int_t dataType, Bool_t recreate, Float_t energy, Int_t epr) {
 	run_energy = energy;
+	
+	if (epr>0) {
+		kEventsPerRun = epr;
+	}
 
 	Tracks * tracks = loadOrCreateTracks(recreate, Runs, dataType, energy);
 	tracks->extrapolateToLayer0();
@@ -287,8 +290,7 @@ void getTrackStatistics(Int_t Runs, Int_t dataType, Bool_t recreate, Float_t ene
 		hCSLayer->at(layer)->SetFillColor(kRed-9+layer);
 		hCSLayer->at(layer)->Draw("same");
 
-		cout << "Average cluster size and RMS for layer " << layer << " is \033[1m " << hCSLayer->at(layer)->GetMean() << " pixels \033[0m and \033[1m " << hCSLayer->at(layer)->GetRMS() << "pixels \033[0m\n";
-
+//		cout << "Average cluster size and RMS for layer " << layer << " is \033[1m " << hCSLayer->at(layer)->GetMean() << " pixels \033[0m and \033[1m " << hCSLayer->at(layer)->GetRMS() << "pixels \033[0m\n";
 	}
 
 	for (Int_t track=0; track<nTracksToPlot; track++) {
@@ -302,18 +304,30 @@ void getTrackStatistics(Int_t Runs, Int_t dataType, Bool_t recreate, Float_t ene
 	for (Int_t layer=0; layer<9; layer++) {
 		c8->cd(layer+1);
 
+
 		Float_t meanAngleAtLayer = findMCSAtLayerRad(layer, run_energy);
 		Float_t mcs = getMCSAngleForLayer(layer) / cos(meanAngleAtLayer);
 
-		cout << "The added MCS factor due to inclined crossing is " << 1/(cos(meanAngleAtLayer)) << ".\n";
+//		cout << "The added MCS factor due to inclined crossing is " << 1/(cos(meanAngleAtLayer)) << ".\n";
+
+		TF1 *mcsGauss = new TF1("mcsGauss", "gaus(0)", 0, 25);
+		if (hAngles->at(layer)->Integral()>0) {
+			mcsGauss->SetParameters(10, 0, mcs);
+			mcsGauss->SetParLimits(0, 1, 1000);
+			mcsGauss->SetParLimits(1, 0, 0);
+			mcsGauss->SetParLimits(2, mcs, mcs);
+
+			hAngles->at(layer)->Fit("mcsGauss", "M,B,Q");
+		}
 
 		int maxHeight = hAngles->at(layer)->GetMaximum();
-		TLine *line = new TLine(mcs, 0, mcs, maxHeight * 1.1);
-		TLine *line2 = new TLine(mcs  * 1.5, 0, mcs * 1.5, maxHeight * 1.1);
-		TLine *line3 = new TLine(mcs  * 2, 0, mcs * 2, maxHeight * 1.1);
+		TLine *line = new TLine(mcs, 0, mcs, maxHeight * 1.05);
+		TLine *line2 = new TLine(mcs  * 2, 0, mcs * 2, maxHeight * 1.05);
+		TLine *line3 = new TLine(mcs  * 3, 0, mcs * 3, maxHeight * 1.05);
 
 		hAngles->at(layer)->SetFillColor(kRed-9+layer);
 		hAngles->at(layer)->Draw("same");
+		mcsGauss->Draw("same");
 		line->Draw("same");
 		line2->Draw("same");
 		line3->Draw("same");
@@ -1086,6 +1100,7 @@ Tracks * getTracks(Int_t Runs, Int_t dataType, Int_t frameType, Float_t energy, 
 			t1.Stop(); t2.Start();
 			if (kDebug) cout << "Start diffuseFrame\n";
 			cf->diffuseFrame(gRandom);
+			cout << "Occupancy = " << 100 * cf->getOccupancyLastLayer() << "%.\n";
 			if (kDebug) cout << "End diffuseFrame, start findHits\n";
 			t2.Stop(); t3.Start();
 			hits = cf->findHits(eventID);
@@ -1093,7 +1108,8 @@ Tracks * getTracks(Int_t Runs, Int_t dataType, Int_t frameType, Float_t energy, 
 			t3.Stop(); t4.Start();
 			clusters = hits->findClustersFromHits(); // badly optimized
 			clusters->removeSmallClusters(2);
-			if (kDebug) cout << "Number of clusters in frame: " << clusters->GetEntriesFast() << endl;
+		//	cout << "Number of clusters in frame: " << clusters->GetEntriesFast() << endl;
+			cout << "Number of clusters in last layer: " << clusters->GetEntriesFastLastLayer() << endl;
 			t4.Stop();
 			clusters->matchWithEventIDs(eventIDs);
 			eventIDs->Clear();
@@ -1101,6 +1117,7 @@ Tracks * getTracks(Int_t Runs, Int_t dataType, Int_t frameType, Float_t energy, 
 		
 		else if (dataType == kData) {
 			di->getDataFrame(i, cf, energy);
+			cout << "Occupancy = " << 100 * cf->getOccupancyLastLayer() << "%.\n";
 			hits = cf->findHits();
 			clusters = hits->findClustersFromHits();
 			clusters->removeSmallClusters(2);
@@ -1175,9 +1192,9 @@ void drawTracks3D(Int_t Runs, Int_t dataType, Bool_t recreate, Float_t energy) {
 	TPolyMarker3D *pMarker = new TPolyMarker3D(restPoints->GetEntriesFast(), 7);
 	TPolyMarker3D *EIDMarker = new TPolyMarker3D(nClusters, 7);
 	TPolyMarker3D *conflictMarker = new TPolyMarker3D(nClusters, 7);
-   pMarker->SetMarkerColor(kBlue);
+   pMarker->SetMarkerColor(kBlue); // Missing cluster
 	EIDMarker->SetMarkerColor(kRed);
-	conflictMarker->SetMarkerColor(kRed);
+	conflictMarker->SetMarkerColor(kRed); // Conflicting cluster
 
 	
    for (Int_t i=0; i<restPoints->GetEntriesFast(); i++) {
@@ -1201,6 +1218,7 @@ void drawTracks3D(Int_t Runs, Int_t dataType, Bool_t recreate, Float_t energy) {
 	Int_t conflictIdx = 0;
 
 	for (Int_t i=0; i<ntracks; i++) {
+
 		Track *thisTrack = tracks->At(i);
 		if (thisTrack->getTrackLengthmm() < 2) continue;
 		Int_t n = thisTrack->GetEntriesFast();
@@ -1245,7 +1263,7 @@ void drawTracks3D(Int_t Runs, Int_t dataType, Bool_t recreate, Float_t energy) {
    axis->SetLabelColor(kBlack);
    axis->SetAxisColor(kBlack);
 
-   tracks->checkLayerOrientation();
+//   tracks->checkLayerOrientation();
 
    delete tracks;
 }

@@ -150,6 +150,7 @@ void Clusters::markUsedClusters(Track *track) {
 
 Int_t Clusters::findClusterIdx(Float_t x, Float_t y, Int_t layer) {
 	for (Int_t i=0; i<GetEntriesFast(); i++) {
+		if (!At(i)) continue;
 		if (getLayer(i) < layer) continue;
 		if (x == getX(i)) {
 			if (y == getY(i)) {
@@ -345,3 +346,29 @@ void Clusters::matchWithEventIDs(Hits * eventIDs) {
 	cout << "Number of clusters without eventID: " << cWithoutEventID << " (" << (float) cWithoutEventID / nClusters * 100 << "%)";
 	if (cWithoutEventID) cout << "Last minDist to Hit is " << minDist << endl;
 }
+
+Int_t Clusters::GetEntriesFastLastLayer() {
+	Int_t nInLayer[nLayers] = {0};
+
+	for (Int_t i=0; i<GetEntriesFast(); i++) {
+		if (!At(i)) continue;
+		nInLayer[getLayer(i)]++;
+	}
+
+	Int_t lastLayer = 0;
+	for (Int_t i=0; i<nLayers; i++) {
+		if (nInLayer[i] > 0) lastLayer = i;
+	}
+	
+	cout << "nClusters layer 3 = " << nInLayer[3] << endl;
+	cout << "nClusters layer 5 = " << nInLayer[5] << endl;
+	if (nInLayer[lastLayer] < 0.5 * nInLayer[lastLayer - 1]) {
+		cout << "nClusters last layer = " << nInLayer[lastLayer] << " and next-to-last  " << nInLayer[lastLayer-1] << ", switching.\n";
+		lastLayer--;
+	}
+
+	return nInLayer[lastLayer];
+}
+
+
+
