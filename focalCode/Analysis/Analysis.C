@@ -1133,7 +1133,7 @@ Tracks * getTracks(Int_t Runs, Int_t dataType, Int_t frameType, Float_t energy, 
 			calorimeterTracks->splitSharedClusters();
 		}
 
-//		calorimeterTracks->matchWithEventIDs(eventIDs);
+		calorimeterTracks->removeTracksLeavingDetector();
 
 		// should do track matching here
 		// and append calorimeterTracks to trackerTracks...
@@ -1217,6 +1217,69 @@ void drawTracks3D(Int_t Runs, Int_t dataType, Bool_t recreate, Float_t energy) {
 	Int_t EIDidx = 0;
 	Int_t conflictIdx = 0;
 
+	Int_t nTrueTracks = 0;
+	Int_t nOKTracks = 0;
+	Int_t nOKMinusTracks = 0;
+
+	Track * thisTrack = nullptr;
+
+	for (Int_t i=0; i<tracks->GetEntriesFast(); i++) {
+		thisTrack = tracks->At(i);
+		if (!thisTrack) continue;
+		cout << "Track " << i << endl;
+
+		for (Int_t j=0; j<thisTrack->GetEntriesFast(); j++) {
+			cout << thisTrack->At(j) << ", ";
+		}
+		cout << endl;
+
+		if (thisTrack->isOneEventID()) nTrueTracks++;
+		if (thisTrack->isFirstAndLastEventIDEqual()) nOKTracks++;
+		
+		else {
+			if (!thisTrack->Last()) continue;
+			if (!thisTrack->At(thisTrack->GetEntriesFast() - 2)) continue;
+
+			Int_t lastEID = thisTrack->Last()->getEventID();	
+			if (lastEID < 0) continue;
+
+			Int_t trackID = tracks->getTrackIdxFromFirstLayerEID(lastEID);
+
+			if (trackID < 0) continue;
+			if (!tracks->At(trackID)->At(0)) continue;
+	
+			Float_t delta = diffmmXY(tracks->At(trackID)->At(0), thisTrack->At(0));
+			Float_t phi0 = thisTrack->getSlopeAngleBetweenLayers(1);
+			Float_t phi1 = tracks->At(trackID)->getSlopeAngleBetweenLayers(1);
+
+			Float_t deltaphi = fabs(phi0 - phi1);
+
+			if (delta < 0.5 && deltaphi < 1) {
+				nOKMinusTracks++;
+			}
+		}			
+	}
+
+	nOKMinusTracks += nOKTracks;
+
+	Int_t numberOfTracks = tracks->GetEntries();
+
+	Float_t factorEID = 100 * ((float) nTrueTracks / numberOfTracks);
+	Float_t factorEIDOK = 100 * ((float) nOKTracks / numberOfTracks);
+	Float_t factorEIDOKMinus = 100 * ((float) nOKMinusTracks / numberOfTracks);
+
+	cout << nTrueTracks << " of total " << numberOfTracks << " tracks has the same event ID (" << factorEID << "%)\n";
+	cout << nOKTracks << " of total " << numberOfTracks << " tracks has the same first/last event ID (" << factorEIDOK << "%)\n";
+	cout << nOKMinusTracks << " of total " << numberOfTracks << " tracks has a close match (0.5 mm, 1 degree) on first / last cluster (" << factorEIDOKMinus << "%)\n";
+
+	cout << "Tracks with no EID in first layer: ";
+	for (Int_t i=0; i<ntracks; i++) {
+		if (!tracks->At(i)->At(0) || !tracks->At(i)->At(1)) continue;
+		if (tracks->At(i)->getEventID(0) < 0) cout << tracks->At(i)->getEventID(1) << ", ";
+	}
+	cout << endl;
+
+
 	for (Int_t i=0; i<ntracks; i++) {
 
 		Track *thisTrack = tracks->At(i);
@@ -1225,6 +1288,17 @@ void drawTracks3D(Int_t Runs, Int_t dataType, Bool_t recreate, Float_t energy) {
 
 		TPolyLine3D *l = new TPolyLine3D(n);
 		l->SetLineWidth(1);
+		if (!thisTrack->isFirstAndLastEventIDEqual()) {
+			l->SetLineColor(kRed);
+	
+			/*	
+			cout << "Track from " << *thisTrack->At(0) << " is MC wrong\nEvent IDs: ";
+			for (Int_t j=0; j<thisTrack->GetEntriesFast(); j++) {
+				cout << thisTrack->getEventID(j) << ", ";
+			}
+			cout << endl;
+			*/
+		}
 
 		firstEID = thisTrack->getEventID(0);
 		Int_t pointNumber = 0;

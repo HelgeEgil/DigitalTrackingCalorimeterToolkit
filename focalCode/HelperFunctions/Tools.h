@@ -14,6 +14,7 @@ using namespace std;
 
 Bool_t isItemInVector(Int_t i, vector<Int_t> *v);
 Float_t diffXY(Cluster *p, Hit *h);
+Float_t diffXY(Cluster *p1, Cluster *p2);
 Float_t diffmmXY(Cluster *p1, Cluster *p2);
 Float_t diffmmXY(Hit *h1, Hit *h2);
 Float_t diffmmXYZ(Cluster *p1, Cluster *p2);
@@ -37,5 +38,7 @@ Float_t getMCSAngleForLayer(Int_t layer);
 Float_t findMCSAtLayerRad(Int_t layer, Float_t E0);
 Float_t getSearchRadiusForLayer(Int_t layer);
 Hit * sumHits(Hit * a, Hit * b);
+Cluster * getTrackPropagationToLayer(Track * track, Int_t layer);
+Bool_t isPointOutOfBounds(Cluster * point, Float_t padding = 0);
 
 #endif /* FOCALCODE_TOOLS_H_ */

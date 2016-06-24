@@ -373,3 +373,31 @@ void Tracks::matchWithEventIDs(Hits * eventIDs) {
 	c4->SaveAs("OutputFiles/figures/EventIDMatching2D.png");
 	cout << "Number of clusters without eventID: " << cWithoutEventID << "( " << (float) cWithoutEventID / nClusters * 100 << "%)\n";
 }
+
+Int_t Tracks::getTrackIdxFromFirstLayerEID(Int_t eid) {
+	for (Int_t i=0; i<GetEntriesFast(); i++) {
+		if (!At(i)) continue;
+		if (!At(i)->At(0)) continue;
+		if (eid == At(i)->At(0)->getEventID()) return i;
+	}
+
+	return -1;
+}
+
+void Tracks::removeTracksLeavingDetector() {
+	Int_t nTracksRemoved = 0;
+	for (Int_t i=0; i<GetEntriesFast(); i++) {
+		if (!At(i)) continue;
+		if (!At(i)->Last()) continue;
+
+		Int_t lastLayer = At(i)->Last()->getLayer();
+		Cluster *nextPoint = getTrackPropagationToLayer(At(i), lastLayer + 1);
+		
+		if (isPointOutOfBounds(nextPoint, -15)) {
+			removeTrack(At(i));
+			nTracksRemoved++;
+		}
+	}
+	cout << "Tracks::removeTracksLeavingDetector() has removed " << nTracksRemoved  << " tracks.\n";
+}
+

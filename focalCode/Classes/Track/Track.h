@@ -63,6 +63,8 @@ class Track : public TObject {
 	Int_t getNumberOfConflictClusters();
 	Bool_t isUsedClustersInTrack();
 	Bool_t isUsed(Int_t i) { return At(i)->isUsed(); }
+	Bool_t isOneEventID();
+	Bool_t isFirstAndLastEventIDEqual();
 
 	// with dimensions
 	Float_t getXmm(Int_t i) { return At(i)->getXmm(); }

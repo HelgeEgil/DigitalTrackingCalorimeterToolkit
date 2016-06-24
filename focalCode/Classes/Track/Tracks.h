@@ -47,6 +47,7 @@ class Tracks : public TObject {
       TClonesArray * getClustersWithoutTrack() { return (TClonesArray*) &clustersWithoutTrack_; }
 		virtual Bool_t isUsedClustersInTrack(Int_t i) { return At(i)->isUsedClustersInTrack(); }
 		virtual Int_t getNumberOfConflictClusters(Int_t i) { return At(i)->getNumberOfConflictClusters(); }
+		Int_t getTrackIdxFromFirstLayerEID(Int_t eventID);
 
       virtual void extrapolateToLayer0();
       virtual void splitSharedClusters();
@@ -57,6 +58,7 @@ class Tracks : public TObject {
 
       virtual void removeTrack(Track *t) { tracks_.Remove((TObject*) t); }
       virtual TObject* removeTrackAt(Int_t i) { return tracks_.RemoveAt(i); }
+		void removeTracksLeavingDetector(); 
       void sortTrackByLayer(Int_t track);
 
       void checkLayerOrientation();

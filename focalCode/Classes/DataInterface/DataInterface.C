@@ -87,19 +87,25 @@ void DataInterface::getEventIDs(Int_t runNo, Hits * hits) {
 		if (eventID < eventIdFrom) continue;
 		else if (eventID >= eventIdTo) break;
 
+		if (parentID > 0) continue;
+
       x = (posX + offsetX) * nx / (offsetX);
       y = (posY + offsetY) * ny / (offsetY);
 		z = level1ID;
 
-		if (lastZ<0 || lastZ == z) {
-			// First/same layer
+		// often the layer has more than one hit
+		// and they must be accumulated before storing
+		// (sum edep, average position)
+
+		if (lastZ < 0 || (lastZ == z && lastEventID == eventID )) {
+			// First hit in list OR hit in same layer
 			xS += x;
 			yS += y;
 			edepS += edep;
 			n++;
 			lastZ = z;
 			lastEventID = eventID;
-//			cout << "First/same layer. x = " << x << ", y = " << y << ", edepS = " << edepS << ", z = " << z << endl;
+//			cout << "First/same layer. x = " << x << ", y = " << y << ", edepS = " << edepS << ", z = " << z << ", eventID = " << eventID << ", n = " << n << endl;
 		}
 
 		else {
@@ -107,7 +113,7 @@ void DataInterface::getEventIDs(Int_t runNo, Hits * hits) {
 			xAvg = xS / n;
 			yAvg = yS / n;
 			hits->appendPoint(xAvg, yAvg, lastZ, lastEventID, edepS);
-//			cout << "New layer. x = " << xAvg << ", y = " << yAvg << ", edep = " << edepS << ", z = " << lastZ << endl;
+//			cout << "Saving old layer: x = " << xS << "/" << n << " = " << xAvg << ", y = " << yAvg << ", edep = " << edepS << ", z = " << lastZ << ", eventID = " << lastEventID << endl;
 
 			xS = x;
 			yS = y;
@@ -115,8 +121,15 @@ void DataInterface::getEventIDs(Int_t runNo, Hits * hits) {
 			lastZ = z;
 			lastEventID = eventID;
 			n = 1;
+//			cout << "New layer: x = " << x << ", y = " << y << " Z = " << z << ", eventID = " << eventID << endl;
 		}
 	}
+	// last layer
+	xAvg = xS / n;
+	yAvg = yS / n;
+	hits->appendPoint(xAvg, yAvg, lastZ, lastEventID, edepS);
+//	cout << "Saving last layer: x = " << xS << "/" << n << " = " << xAvg << ", y = " << yAvg << ", edep = " << edepS << ", z = " << lastZ << ", eventID = " << lastEventID << endl;
+
 }
 
 void DataInterface::getDataFrame(Int_t runNo, CalorimeterFrame * cf, Int_t energy) {

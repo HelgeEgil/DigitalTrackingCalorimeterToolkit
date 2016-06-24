@@ -322,9 +322,6 @@ Float_t Track::getTrackScore() {
 						+ (upperSnakeness - snakeness) * snakePoints/upperSnakeness;
 
 	// five points deduction for each shared track
-	points -= getNumberOfConflictClusters() * 3;
-
-	if (points<0) points = 0;
 
 	return points;
 }
@@ -904,11 +901,12 @@ Clusters * Track::getConflictClusters() {
 }
 
 Bool_t Track::isUsedClustersInTrack() {
-	Bool_t usedClusters = false;
 	for (Int_t i=0; i<GetEntriesFast(); i++) {
-		usedClusters *= isUsed(i);
+		if (!At(i)) continue;
+		if (isUsed(i)) return true;
 	}
-	return usedClusters;
+
+	return false;
 }
 
 Int_t Track::getNumberOfConflictClusters() { 
@@ -920,4 +918,18 @@ Int_t Track::getNumberOfConflictClusters() {
 	return n;
 }
 
+Bool_t Track::isOneEventID() {
+	if (!At(0)) return false;
+	Int_t eid = getEventID(0);
+	for (Int_t i=0; i<GetEntriesFast(); i++) {
+		if (!At(i)) continue;
+		if (eid != getEventID(i)) return false;
+	}
 
+	return true;
+}
+
+Bool_t Track::isFirstAndLastEventIDEqual() {
+	if (!At(0)) return false;
+	return (getEventID(0) == Last()->getEventID());
+}

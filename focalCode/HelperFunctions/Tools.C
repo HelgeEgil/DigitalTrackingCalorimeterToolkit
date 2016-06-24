@@ -37,6 +37,15 @@ Float_t diffXY(Cluster *p, Hit *h) {
 	return sqrt(pow(diffx, 2) + pow(diffy, 2));
 }
 
+Float_t diffXY(Cluster *p1, Cluster *p2) {
+	if (!p1 || !p2)
+		return -1;
+
+	Double_t diffx = p2->getX() - p1->getX();
+	Double_t diffy = p2->getY() - p1->getY();
+
+	return sqrt(pow(diffx,2) + pow(diffy,2));
+}
 
 Float_t diffmmXY(Cluster *p1, Cluster *p2) {
 	if (!p1 || !p2)
@@ -356,4 +365,38 @@ Hit * sumHits(Hit * a, Hit * b) {
 	Hit * newHit = new Hit(x, y, layer, eventID, eDep);
 
 	return newHit;
+}
+
+Cluster * getTrackPropagationToLayer(Track * track, Int_t layer) {
+	Int_t last = track->GetEntriesFast() - 1;
+	Int_t diffLayer = layer - track->getLayer(last);
+
+	Cluster p1(track->getX(last-1), track->getY(last-1));
+	Cluster p2(track->getX(last), track->getY(last));
+
+	Cluster slope(p2.getX() - p1.getX(), p2.getY() - p1.getY());
+
+	Float_t x = p2.getX() + diffLayer * slope.getX();
+	Float_t y = p2.getY() + diffLayer * slope.getY();
+
+	return new Cluster(x, y, layer);
+}
+
+
+Bool_t isPointOutOfBounds(Cluster *point, Float_t padding) {
+	Bool_t isOutside;
+   Float_t x = point->getX();
+   Float_t y = point->getY();
+
+   if (!point)
+   	isOutside = kTRUE;
+   else {
+		if (x < 0 - padding || x > 2*nx + padding ||
+			 y < 0 - padding || y > 2*ny + padding)
+			isOutside = kTRUE;
+		else
+			isOutside = kFALSE;
+   }
+
+   return isOutside;
 }

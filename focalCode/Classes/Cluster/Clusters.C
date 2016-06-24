@@ -241,6 +241,7 @@ Int_t Clusters::getLastActiveLayer() {
 	return lastActiveLayer;
 }
 
+/*
 Bool_t Clusters::isPointOutOfBounds(Cluster *point) {
 	Bool_t isOutside;
    Float_t x = point->getX();
@@ -249,7 +250,8 @@ Bool_t Clusters::isPointOutOfBounds(Cluster *point) {
    if (!point)
    	isOutside = kTRUE;
    else {
-		if (x < 0 || x > 2*nx || y < 0 || y > 2*ny)
+		if (x < 0 - searchRadius || x > 2*nx + searchRadius ||
+			 y < 0 - searchRadius || y > 2*ny + searchRadius)
 			isOutside = kTRUE;
 		else
 			isOutside = kFALSE;
@@ -257,6 +259,7 @@ Bool_t Clusters::isPointOutOfBounds(Cluster *point) {
 
    return isOutside;
 }
+*/
 
 void Clusters::removeSmallClusters(Int_t size) {
 	for (Int_t i=0; i<GetEntriesFast(); i++) {
@@ -317,11 +320,13 @@ void Clusters::matchWithEventIDs(Hits * eventIDs) {
 				}
 			}
 		}
-		
+
 		if (minIdx >= 0 && minDist < 10) {
 			thisCluster->setEventID(eventIDs->getEventID(minIdx));
 			eventIDs->removeHitAt(minIdx);
 		}
+
+//		else { cout << "Could not find hit match for cluster @ " << *thisCluster << endl; }
 	}
 	t1.Stop();
 
@@ -343,12 +348,12 @@ void Clusters::matchWithEventIDs(Hits * eventIDs) {
 		}
 	}
 
-	cout << "Number of clusters without eventID: " << cWithoutEventID << " (" << (float) cWithoutEventID / nClusters * 100 << "%)";
-	if (cWithoutEventID) cout << "Last minDist to Hit is " << minDist << endl;
+	cout << "Number of clusters without eventID: " << cWithoutEventID << " (" << (float) cWithoutEventID / nClusters * 100 << "%)" << endl;
 }
 
 Int_t Clusters::GetEntriesFastLastLayer() {
-	Int_t nInLayer[nLayers] = {0};
+	Int_t nInLayer[nLayers];
+	for (Int_t i=0; i<nLayers; i++) nInLayer[i] = 0;
 
 	for (Int_t i=0; i<GetEntriesFast(); i++) {
 		if (!At(i)) continue;
@@ -360,10 +365,7 @@ Int_t Clusters::GetEntriesFastLastLayer() {
 		if (nInLayer[i] > 0) lastLayer = i;
 	}
 	
-	cout << "nClusters layer 3 = " << nInLayer[3] << endl;
-	cout << "nClusters layer 5 = " << nInLayer[5] << endl;
 	if (nInLayer[lastLayer] < 0.5 * nInLayer[lastLayer - 1]) {
-		cout << "nClusters last layer = " << nInLayer[lastLayer] << " and next-to-last  " << nInLayer[lastLayer-1] << ", switching.\n";
 		lastLayer--;
 	}
 

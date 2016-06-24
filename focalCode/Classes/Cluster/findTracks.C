@@ -1,4 +1,3 @@
-#include <iostream>
 #include <vector>
 
 #include <TClonesArray.h>
@@ -24,29 +23,50 @@ Tracks * Clusters::findCalorimeterTracks() {
 	
 	makeLayerIndex();
 
-	fillMCSRadiusList(3);
-	findTracksFromLayer(tracks, 0);
-	
-//	findTracksFromLayer(tracks, 1);
+	Float_t MCSSigma = 3;
+	Bool_t usedClustersInSeeds = true;
 
-	cout << "Found " << tracks->GetEntriesFast() << " tracks.\n";
+	fillMCSRadiusList(MCSSigma);
+	cout << getSearchRadiusForLayer(1) << endl;
+	findTracksFromLayer(tracks, 0, usedClustersInSeeds);
+
+	cout << "After first pass, found " << tracks->GetEntriesFast() << " tracks. Size of CWT = " << clustersWithoutTrack_.GetEntries() << endl;
+
+	if (clustersWithoutTrack_.GetEntries() > 0) {
+
+		MCSSigma = 5;
+		usedClustersInSeeds = false;
+	
+		fillMCSRadiusList(MCSSigma);
+		cout << getSearchRadiusForLayer(1) << endl;
+		findTracksFromLayer(tracks, 0, usedClustersInSeeds);
+	
+		cout << "After second pass, found " << tracks->GetEntriesFast() << " tracks. Size of CWT = " << clustersWithoutTrack_.GetEntries() << endl;
+	
+	}
 
 	Int_t clustersLeft = clustersWithoutTrack_.GetEntries();
-
 	Float_t factor = 100 * (1 - (Float_t) clustersLeft / GetEntriesFast());
-	if (clustersLeft>0) {
-		cout << clustersLeft << " of total " << GetEntriesFast() << " clusters were not assigned to track! (" << factor << " %)\n";
-	}
+	cout << "Found " << tracks->GetEntriesFast() << " tracks. " << clustersLeft << " of total " << GetEntriesFast() << " clusters were not assigned to track! (" << factor << " %)\n";
 
 	return tracks;
 }
 
-void Clusters::findTracksFromLayer(Tracks * tracks, Int_t layer, Int_t trackFindingAlgorithm) {
+void Clusters::findTracksFromLayer(Tracks * tracks, Int_t layer, Bool_t kUsedClustersInSeeds) {
 	Int_t startOffset = 0;
 	Track *bestTrack = nullptr;
 	Track *newBestTrack = nullptr;
 
-	Clusters * seeds = findSeeds(layer);
+	Bool_t kIsSecondPass = false;
+	if (!kUsedClustersInSeeds) kIsSecondPass = true;
+
+	Int_t minimumLengthOfTrackToPass = 4;
+
+	if (kIsSecondPass) {
+		minimumLengthOfTrackToPass = 1;
+	}
+
+	Clusters * seeds = findSeeds(layer, kUsedClustersInSeeds);
 	Clusters * conflictClusters = nullptr;
 	
 	for (Int_t i=0; i<seeds->GetEntriesFast(); i++) {
@@ -55,15 +75,13 @@ void Clusters::findTracksFromLayer(Tracks * tracks, Int_t layer, Int_t trackFind
 
 		bestTrack = nearestClusterTrackPropagation(seeds->At(i));
 
-		if (bestTrack->GetEntriesFast() > 0) {
+		if (bestTrack->GetEntriesFast() >= minimumLengthOfTrackToPass) {
 			if (!bestTrack->At(0))
 				startOffset = 1;
-			
 
 			tracks->appendTrack(bestTrack, startOffset);
 //			removeAllClustersInTrack(bestTrack);
 			removeAllClustersInTrackFromClustersWithoutTrack(bestTrack);
-
 
 			// Get already conflicting clusters with the isUsed tag in bestTrack
 			conflictClusters = bestTrack->getConflictClusters();
@@ -74,20 +92,17 @@ void Clusters::findTracksFromLayer(Tracks * tracks, Int_t layer, Int_t trackFind
 		}
 	}
 
-
 	Int_t nTracksWithConflicts = 0;
 	for (Int_t i=0; i<tracks->GetEntriesFast(); i++) {
 		if (!tracks->At(i)) continue;
 		nTracksWithConflicts += (int) tracks->isUsedClustersInTrack(i);
 	}
 
-	cout << "There are " << nTracksWithConflicts << " tracks with conflicting clusters!\n";
-
 	delete bestTrack;
 	delete seeds;
 }
 
-Clusters * Clusters::findSeeds(Int_t layer) {
+Clusters * Clusters::findSeeds(Int_t layer, Bool_t kUsedClustersInSeeds) {
 	Clusters *seeds = new Clusters(1000);
 	
 	Int_t layerIdxFrom = getFirstIndexOfLayer(layer);
@@ -101,10 +116,12 @@ Clusters * Clusters::findSeeds(Int_t layer) {
 		return seeds;
 
 	for (Int_t i=layerIdxFrom; i<layerIdxTo; i++) {
-		if (!At(i))
-			continue;
+		if (!At(i)) { continue; }
+		if (!kUsedClustersInSeeds && isUsed(i)) { continue; }
+		
 		seeds->appendCluster(At(i));
 	}
+
 	return seeds;
 }
 
@@ -157,8 +174,10 @@ Clusters * Clusters::findNearestClustersInNextLayer(Cluster *seed) {
 		}
 	}
 
-	for (Int_t i=0; i<clustersFromThisLayer->GetEntriesFast(); i++) {
+	Int_t nClusters = clustersFromThisLayer->GetEntriesFast();
+	for (Int_t i=0; i<nClusters; i++) {
 		if (!clustersFromThisLayer->At(i)) { continue; }
+		
 		nextClusters->appendCluster(clustersFromThisLayer->At(i));
 	}
 
@@ -172,7 +191,7 @@ Clusters * Clusters::findClustersFromSeedInLayer(Cluster *seed, Int_t nextLayer)
 	Int_t layerIdxTo = getLastIndexOfLayer(nextLayer);
 	Clusters *clustersFromThisLayer = new Clusters(50);
 
-	Float_t maxDelta = getSearchRadiusForLayer(nextLayer);
+	Float_t maxDelta = getSearchRadiusForLayer(nextLayer) * 0.75;
 
 	if (layerIdxFrom < 0)
 		return clustersFromThisLayer; // empty
@@ -196,21 +215,28 @@ void Clusters::doNearestClusterTrackPropagation(Track *track, Int_t lastHitLayer
 
 	for (Int_t layer = lastHitLayer + 1; layer <= nSearchLayers+1; layer++) {
 		searchRadius = getSearchRadiusForLayer(layer);
+
+		/*		
+		if (layer == 2) {
+			searchRadius *= 0.5;
+		}
+		*/
+
 		projectedPoint = getTrackPropagationToLayer(track, layer);
 
-		if (isPointOutOfBounds(projectedPoint)) {
+		if (isPointOutOfBounds(projectedPoint, searchRadius / dx)) {
 			break;
 		}
 
 		nearestNeighbour = findNearestNeighbour(projectedPoint);
 		delta = diffmmXY(projectedPoint, nearestNeighbour);
 
-		Bool_t skipCurrentLayer = (delta > searchRadius / 2);
+		Bool_t skipCurrentLayer = (delta > searchRadius); // was /2
 
 		if (skipCurrentLayer) {
 			projectedPoint = getTrackPropagationToLayer(track, layer+1);
 
-			if (!isPointOutOfBounds(projectedPoint)) { // repeat process in layer+1
+			if (!isPointOutOfBounds(projectedPoint, searchRadius / dx)) { // repeat process in layer+1
 				skipNearestNeighbour = findNearestNeighbour(projectedPoint);
 				skipDistance = diffmmXY(projectedPoint, skipNearestNeighbour);
 
@@ -226,7 +252,7 @@ void Clusters::doNearestClusterTrackPropagation(Track *track, Int_t lastHitLayer
 			}
 		}
 
-		else if (delta > 0) { // and <searchRadius/2
+		else if (delta > 0) {
 			track->appendCluster(nearestNeighbour);
 			lastHitLayer = layer;
 		}
@@ -239,21 +265,6 @@ void Clusters::doNearestClusterTrackPropagation(Track *track, Int_t lastHitLayer
 	delete projectedPoint;
 	delete nearestNeighbour;
 	delete skipNearestNeighbour;
-}
-
-Cluster * Clusters::getTrackPropagationToLayer(Track *track, Int_t layer) {
-	Int_t last = track->GetEntriesFast() - 1;
-	Int_t diffLayer = layer - track->getLayer(last);
-
-	Cluster p1(track->getX(last-1), track->getY(last-1));
-	Cluster p2(track->getX(last), track->getY(last));
-
-	Cluster slope(p2.getX() - p1.getX(), p2.getY() - p1.getY());
-
-	Float_t x = p2.getX() + diffLayer * slope.getX();
-	Float_t y = p2.getY() + diffLayer * slope.getY();
-
-	return new Cluster(x, y, layer);
 }
 
 Cluster * Clusters::findNearestNeighbour(Cluster *projectedPoint) {
@@ -275,7 +286,7 @@ Cluster * Clusters::findNearestNeighbour(Cluster *projectedPoint) {
 			continue;
 
 		delta = diffmmXY(projectedPoint, At(i));
-		if (delta < maxDelta) {
+		if (delta < maxDelta && !At(i)->isUsed()) {
 			nearestNeighbour->set(At(i));
 			maxDelta = delta;
 			kFoundNeighbour = kTRUE;
