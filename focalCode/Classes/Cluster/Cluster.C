@@ -21,12 +21,12 @@ Cluster::Cluster(Cluster* cluster) {
 	isUsed_ = false;
 }
 
-Cluster::Cluster(Float_t x, Float_t y, Int_t layer, Int_t size) {
+Cluster::Cluster(Float_t x, Float_t y, Int_t layer, Int_t size, Int_t eventID) {
    x_ = x;
    y_ = y;
    layerNo_ = layer;
    clusterSize_ = size;
-   eventID_ = -1;
+   eventID_ = eventID;
 	isUsed_ = false;
 }
 

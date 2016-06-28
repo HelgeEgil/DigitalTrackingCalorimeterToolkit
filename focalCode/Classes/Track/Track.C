@@ -919,11 +919,21 @@ Int_t Track::getNumberOfConflictClusters() {
 }
 
 Bool_t Track::isOneEventID() {
-	if (!At(0)) return false;
-	Int_t eid = getEventID(0);
+	Int_t eid;
+	if (!At(0)) {
+		if (!At(1)) return false;
+		eid = getEventID(1);
+	}
+
+	else { 
+		eid = getEventID(0);
+		if (eid < 0 && At(1)) { eid = getEventID(1); }
+		if (eid < 0) return false;
+	}
+
 	for (Int_t i=0; i<GetEntriesFast(); i++) {
 		if (!At(i)) continue;
-		if (eid != getEventID(i)) return false;
+		if (eid != getEventID(i) && getEventID(i) > 0) return false;
 	}
 
 	return true;
@@ -931,5 +941,5 @@ Bool_t Track::isOneEventID() {
 
 Bool_t Track::isFirstAndLastEventIDEqual() {
 	if (!At(0)) return false;
-	return (getEventID(0) == Last()->getEventID());
+	return (getEventID(0) == Last()->getEventID() || Last()->getEventID() < 0);
 }

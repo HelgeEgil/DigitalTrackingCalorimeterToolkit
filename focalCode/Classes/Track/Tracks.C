@@ -136,11 +136,12 @@ void Tracks::splitSharedClusters() {
 						x = ( closestCluster->getX() + interpolatedCluster->getX() ) / 2;
 						y = ( closestCluster->getY() + interpolatedCluster->getY() ) / 2;
 						size = closestCluster->getSize() / sizeFactor;
-						missingTrack->appendCluster(new Cluster(x, y, layer, size));
+						missingTrack->appendCluster(new Cluster(x, y, layer, size, -1));
 						nSplit++;
 						
 						// set size of closest cluster as well!
 						closestCluster->setSize(size);
+						closestCluster->setEventID(-1);
 
 						sortTrackByLayer(trackIdx);
 					}

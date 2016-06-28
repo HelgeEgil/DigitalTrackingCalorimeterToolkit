@@ -19,7 +19,7 @@ private:
 public:
 	Cluster() { x_ = -1; y_ = -1; layerNo_ = -1; clusterSize_ = -1; eventID_ = -1; isUsed_ = false; }
 	Cluster(Cluster *cluster);
-	Cluster(Float_t x, Float_t y, Int_t layer = -1, Int_t size = -1);
+	Cluster(Float_t x, Float_t y, Int_t layer = -1, Int_t size = -1, Int_t eventID = -1);
 	virtual ~Cluster();
 
 	Float_t getX() { return x_; }
