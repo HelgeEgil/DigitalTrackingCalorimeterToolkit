@@ -276,7 +276,7 @@ Float_t findMCSPixelRadiusForLayer(Float_t layer, Float_t E0) {
 	Float_t depth = dz;
 	if (layer == 0) {
 		// Expected depth of scintillator + preabsorber (and no tungsten absorber before sensor)
-		depth = 16.6; 
+		depth = 16.6;
 		kUseDifferentX0 = true;
 	}
 	
@@ -310,6 +310,11 @@ void fillMCSRadiusList(Float_t angleFactor) {
 			mcs_radius_per_layer[i] = pixelRadius * angleFactor;
 		}
 	}
+}
+
+void multiplyRadiusFirstLayers(Float_t factor) {
+	mcs_radius_per_layer[0] *= factor;
+	mcs_radius_per_layer[1] *= factor;
 }
 
 Float_t getSearchRadiusForLayer(Int_t layer) {
@@ -399,4 +404,14 @@ Bool_t isPointOutOfBounds(Cluster *point, Float_t padding) {
    }
 
    return isOutside;
+}
+
+Bool_t isSameCluster(Cluster *a, Cluster *b) {
+	if (!a || !b) return false;
+
+	Bool_t x = (a->getX() == b->getX());
+	Bool_t y = (a->getY() == b->getY());
+	Bool_t z = (a->getLayer() == b->getLayer());
+
+	return x*y*z;
 }

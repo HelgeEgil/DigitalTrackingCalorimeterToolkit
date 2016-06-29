@@ -896,7 +896,6 @@ Clusters * Track::getConflictClusters() {
 			conflictClusters->appendCluster(At(i));
 		}
 	}
-
 	return conflictClusters;
 }
 
@@ -916,6 +915,57 @@ Int_t Track::getNumberOfConflictClusters() {
 		if (At(i)->isUsed()) n++;
 	}
 	return n;
+}
+
+Int_t Track::getEventIDMode() {
+	const Int_t n = GetEntriesFast();
+
+	Int_t nUniqueEventIDs = 0;
+
+	Int_t eventIDs[n];
+	for (Int_t i=0; i<n; i++) {
+		eventIDs[i] = getEventID(i);
+	}
+
+	Int_t repeatArray[n] = {0};
+	Int_t thisID = -1;
+	for (Int_t i=0; i<n; i++) {
+		thisID = eventIDs[i];
+		
+		Bool_t metThisID = false;
+
+		for (Int_t j=0; j<i; j++) {
+			if (thisID == eventIDs[j]) {
+				metThisID = true;
+				break;
+			}
+		}
+
+		if (!metThisID) {
+			Int_t nThisID = 0;
+			for (Int_t j=0; j<n; j++) {
+				if (thisID == eventIDs[j]) nThisID++;
+			}
+		
+			repeatArray[i] = nThisID;
+			nUniqueEventIDs++;
+
+		}
+	}
+
+	Int_t maxIdx = 0;
+	for (Int_t i=0; i<n; i++) {
+		if (repeatArray[i] > repeatArray[maxIdx]) {
+			maxIdx = i;
+		}
+	}
+
+	cout << "From Track::getMedianEventID(): The different event IDs are: ";
+	for (Int_t i=0; i<n; i++) cout << eventIDs[i] << ", ";
+	cout << ".\nFrom Track::getMedianEventID(): Met " << nUniqueEventIDs << " unique eventIDs.\n";
+	cout << "From Track::getMedianEventID(): The eventID with most tracks is " << eventIDs[maxIdx] << " with " << repeatArray[maxIdx] << " occurrences.\n\n";
+
+	return eventIDs[maxIdx];
 }
 
 Bool_t Track::isOneEventID() {
@@ -942,4 +992,57 @@ Bool_t Track::isOneEventID() {
 Bool_t Track::isFirstAndLastEventIDEqual() {
 	if (!At(0)) return false;
 	return (getEventID(0) == Last()->getEventID() || Last()->getEventID() < 0);
+}
+
+Bool_t Track::isClusterInTrack(Cluster * cluster) {
+	Float_t x = cluster->getX();
+	Float_t y = cluster->getY();
+	Int_t layer = cluster->getLayer();
+
+	for (Int_t i=0; i<GetEntriesFast(); i++) {
+		if (!At(i)) continue;
+		if (getLayer(i) < layer) continue;
+		if (x == getX(i)) {
+			if (y == getY(i)) {
+				if (layer == getLayer(i)) { // found it
+					return true;
+				}
+			}
+		}
+	}
+	return false;
+}
+
+Int_t Track::findClusterIdx(Float_t x, Float_t y, Int_t layer) {
+	for (Int_t i=0; i<GetEntriesFast(); i++) {
+		if (!At(i)) continue;
+		if (getLayer(i) < layer) continue;
+		if (x == getX(i)) {
+			if (y == getY(i)) {
+				if (layer == getLayer(i)) { // found it
+					return i;
+				}
+			}
+		}
+	}
+	return -1;
+}
+
+Int_t Track::findClusterIdx(Cluster * cluster) {
+	Float_t x = cluster->getX();
+	Float_t y = cluster->getY();
+	Int_t layer = cluster->getLayer();
+
+	for (Int_t i=0; i<GetEntriesFast(); i++) {
+		if (!At(i)) continue;
+		if (getLayer(i) < layer) continue;
+		if (x == getX(i)) {
+			if (y == getY(i)) {
+				if (layer == getLayer(i)) { // found it
+					return i;
+				}
+			}
+		}
+	}
+	return -1;
 }

@@ -1,4 +1,5 @@
 #include <iostream>
+#include <vector>
 
 #include <TClonesArray.h>
 #include <TObject.h>
@@ -256,15 +257,6 @@ void Tracks::doFit() {
 }
 
 void Tracks::matchWithEventIDs(Hits * eventIDs) {
-	// WRITE THIS TOMORROW
-	// Check each point in each track against the hits in Hits * (and remove when found...)
-	// N^2, but only done once and on MC
-	// IF DIFFXY ( thisHit , trackHit ) on same layer is identical, assign eventID to cluster
-	// is eventID same over whole track...? On which percent level?
-	
-	// ... and delete the sumEventID or something in Tools and in Hits.
-	
-	TStopwatch t1;
 	Float_t minDist = 1e5; // px
 	Float_t thisDist = 0;
 	Track *thisTrack = nullptr;
@@ -287,8 +279,6 @@ void Tracks::matchWithEventIDs(Hits * eventIDs) {
 	hist->SetYTitle("Number of matchings");
 	hist->SetFillColor(kBlue-7);
 	hist->SetLineColor(kBlack);
-
-	t1.Start();
 
 	Int_t nClusters = 0;
 	for (Int_t t=0; t<GetEntriesFast(); t++) {
@@ -345,8 +335,6 @@ void Tracks::matchWithEventIDs(Hits * eventIDs) {
 			}
 		}
 	}
-	t1.Stop();
-
 	c3->cd();
 	hist->Draw();
 	c3->SaveAs("OutputFiles/figures/EventIDMatching.png");
@@ -402,3 +390,119 @@ void Tracks::removeTracksLeavingDetector() {
 	cout << "Tracks::removeTracksLeavingDetector() has removed " << nTracksRemoved  << " tracks.\n";
 }
 
+vector<Int_t> * Tracks::getTracksWithConflictClusters() {
+	const Int_t n = GetEntriesFast();
+	Track * thisTrack = nullptr;
+
+	vector<Int_t> * trackIdx = new vector<Int_t>;
+	trackIdx->reserve(n/10.);
+
+	for (Int_t i=0; i<n; i++) {
+		thisTrack = At(i);
+		if (!thisTrack) continue;
+		if (thisTrack->isUsedClustersInTrack()) { trackIdx->push_back(i); }
+	}
+
+	return trackIdx;
+}
+
+vector<Int_t> * Tracks::getConflictingTracksFromTrack(Int_t trackIdx) {
+	Cluster * conflictCluster = nullptr;
+	vector<Int_t> * conflictingTracks = new vector<Int_t>;
+	conflictingTracks->reserve(5);
+
+	Track * trackA = At(trackIdx);
+
+	Clusters * conflictClusters = trackA->getConflictClusters();
+	Int_t nClusters = conflictClusters->GetEntriesFast();
+
+	for (Int_t i=0; i<conflictClusters->GetEntriesFast(); i++) {
+		conflictCluster = conflictClusters->At(i);
+		if (!conflictCluster) continue;
+
+		vector<Int_t> * possibleTracks = getTracksFromCluster(conflictCluster);
+		for (UInt_t j=0; j<possibleTracks->size(); j++) {
+			if (!isItemInVector(possibleTracks->at(j), conflictingTracks)) {
+				conflictingTracks->push_back(possibleTracks->at(j));
+			}
+		}
+	}
+	return conflictingTracks;
+}
+
+vector<Int_t> * Tracks::getTracksFromCluster(Cluster * cluster) {
+	Track * thisTrack = nullptr;
+	vector<Int_t> * tracksWithCluster = new vector<Int_t>;
+
+	for (Int_t i=0; i<GetEntriesFast(); i++) {
+		thisTrack = At(i);
+		if (!thisTrack) continue;
+
+		if (thisTrack->isClusterInTrack(cluster)) {
+			tracksWithCluster->push_back(i);
+		}
+	}
+
+	return tracksWithCluster;
+}	
+
+void Tracks::removeTrackCollisions() {
+	// sometimes two tracks end in the same cluster
+	// remove the last cluster from the smallest track .. delete the track
+	// if the final length is 1
+	
+	vector<Int_t> * conflictPair = nullptr;
+	Clusters * conflictClusters[2] = {};
+	Track * track[2] = {};
+	Int_t len[2] = {0};
+	Int_t longTrack, shortTrack;
+
+	Int_t nRemoved = 0;
+	Int_t nShortRemoved = 0;
+
+	vector<Int_t> * conflictTracks = getTracksWithConflictClusters();
+
+	for (UInt_t i=0; i<conflictTracks->size(); i++) {
+		// Cluster is marked Used is only one of the tracks
+		// FIXME: getConflictingTracksFromTrack returns 2x objects, one is usually nullptr. Keep the good one, use it to find idx's and so on!
+
+		conflictPair = getConflictingTracksFromTrack(conflictTracks->at(i));
+		if (conflictPair->at(1) < 0) continue;
+
+		for (Int_t j=0; j<2; j++) {
+			track[j] = At(conflictPair->at(j));
+			conflictClusters[j] = track[j]->getConflictClusters();
+			cout << "Added conflict cluster \033[1m " << conflictClusters[j]->At(0) << "\033[0m ";
+			if (conflictClusters[j]->At(0)) cout << "-> \033[1m" << *conflictClusters[j]->At(0) << "\033[0m.\n";
+			else cout << endl;
+			len[j] = track[j]->GetEntriesFast();
+		}
+		
+		longTrack = (len[0] > len[1]) ? 0 : 1;
+		shortTrack = 1 - longTrack;
+
+//		Int_t nClustersInA = conflictClusters[0]->GetEntriesFast();
+//		Int_t nClustersInB = conflictClusters[1]->GetEntriesFast();
+
+//		Bool_t sameCluster = isSameCluster(conflictClusters[0]->At(0), conflictClusters[1]->At(0));
+//		if (nClustersInA != 1 || nClustersInB != 1 || !sameCluster) { continue; }
+		
+		Cluster * conflictCluster = conflictClusters[0]->At(0); // only one conflicting cluster!
+
+		Int_t longClusterIdx = track[longTrack]->findClusterIdx(conflictCluster);
+		track[longTrack]->At(longClusterIdx)->markUnused();
+		
+		if (len[shortTrack] > 2) {
+			track[shortTrack]->removeCluster(conflictCluster);
+		}
+		
+		else {
+			removeTrack(track[shortTrack]);
+			nShortRemoved++;
+		}
+		nRemoved++;
+	}
+
+	cout << "Tracks::removeTrackCollisions removed " << nRemoved << " collisions, and removed " << nShortRemoved << " too short tracks.\n";
+
+}

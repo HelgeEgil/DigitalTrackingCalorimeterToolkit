@@ -59,12 +59,18 @@ class Track : public TObject {
 	virtual Float_t getPreTL();
 	virtual Float_t getPreEnergyLossError();
 
+	Int_t findClusterIdx(Float_t x, Float_t y, Int_t layer);
+	Int_t findClusterIdx(Cluster * cluster);
+
 	Clusters * getConflictClusters();
 	Int_t getNumberOfConflictClusters();
 	Bool_t isUsedClustersInTrack();
 	Bool_t isUsed(Int_t i) { return At(i)->isUsed(); }
 	Bool_t isOneEventID();
 	Bool_t isFirstAndLastEventIDEqual();
+	Int_t getEventIDMode();
+
+	Bool_t isClusterInTrack(Cluster * cluster);
 
 	// with dimensions
 	Float_t getXmm(Int_t i) { return At(i)->getXmm(); }
@@ -101,7 +107,6 @@ class Track : public TObject {
 
 	Bool_t doesTrackEndAbruptly();
 	Float_t getRiseFactor();
-
 	
 	Int_t getNMissingLayers();
 	Int_t getLastLayer();

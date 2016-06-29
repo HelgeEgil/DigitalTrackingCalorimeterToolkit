@@ -127,14 +127,13 @@ void Clusters::removeAllClustersInTrackFromClustersWithoutTrack(Track *track) {
             if (cluster->getY() == y && cluster->getLayer() == layer) {
                removeClusterWithoutTrackAt(j);
                lastIndex = j+1;
+					break;
             }
          }
       }
    }
 }
 void Clusters::markUsedClusters(Track *track) {
-	Int_t lastIndex = 0;
-
    for (Int_t i = 0; i < track->GetEntriesFast(); i++) {
       if (!track->At(i)) continue;
       Int_t layer = track->getLayer(i);
@@ -240,26 +239,6 @@ Int_t Clusters::getLastActiveLayer() {
 	}
 	return lastActiveLayer;
 }
-
-/*
-Bool_t Clusters::isPointOutOfBounds(Cluster *point) {
-	Bool_t isOutside;
-   Float_t x = point->getX();
-   Float_t y = point->getY();
-
-   if (!point)
-   	isOutside = kTRUE;
-   else {
-		if (x < 0 - searchRadius || x > 2*nx + searchRadius ||
-			 y < 0 - searchRadius || y > 2*ny + searchRadius)
-			isOutside = kTRUE;
-		else
-			isOutside = kFALSE;
-   }
-
-   return isOutside;
-}
-*/
 
 void Clusters::removeSmallClusters(Int_t size) {
 	for (Int_t i=0; i<GetEntriesFast(); i++) {

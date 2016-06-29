@@ -48,6 +48,10 @@ class Tracks : public TObject {
 		virtual Bool_t isUsedClustersInTrack(Int_t i) { return At(i)->isUsedClustersInTrack(); }
 		virtual Int_t getNumberOfConflictClusters(Int_t i) { return At(i)->getNumberOfConflictClusters(); }
 		Int_t getTrackIdxFromFirstLayerEID(Int_t eventID);
+		vector<Int_t> * getTracksWithConflictClusters();
+		vector<Int_t> * getConflictingTracksFromTrack(Int_t trackIdx);
+		vector<Int_t> * getTracksFromCluster(Cluster * cluster);
+		void removeTrackCollisions();
 
       virtual void extrapolateToLayer0();
       virtual void splitSharedClusters();

@@ -183,6 +183,9 @@ vector<Int_t> * Hits::findNeighbours(Int_t index) {
 }
 
 vector<Int_t> * Hits::findExpandedCluster(Int_t i, vector<Int_t> *checkedIndices) {
+	// TODO: Optimize this function
+	// Use static arrays, and a counter instead of toCheck->empty();
+
 	vector<Int_t> *expandedCluster = new vector<Int_t>;
 	vector<Int_t> *toCheck = new vector<Int_t>;
 	vector<Int_t> *nextCandidates = nullptr;

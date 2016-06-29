@@ -109,9 +109,9 @@ void MaterialConstants() {
 
 	proton_mass = 938.27;
 	X0_tungsten = 3.857;
-	X0_firstlayer = 30.31;
-	X0_aluminum = 3; // FIXME
-	X0_pmma = 2; // FIXME
+	X0_firstlayer = 33.36;
+	X0_aluminum = 5.88;
+	X0_pmma = 16.52;
 
 	for (Int_t i=0; i<100; i++) {
 		mcs_radius_per_layer[i] = 0;

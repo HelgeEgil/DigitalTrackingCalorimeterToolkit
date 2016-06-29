@@ -70,8 +70,6 @@ public:
 	virtual Int_t getLastIndexOfLayer(UInt_t layer);
 	Int_t findClusterIdx(Float_t x, Float_t y, Int_t layer);
 
-//	Bool_t isPointOutOfBounds(Cluster *point);
-
 	// in file findTracks.C
 	Int_t getLastActiveLayer();
 	Tracks * findCalorimeterTracks();
@@ -81,7 +79,6 @@ public:
 	Track * nearestClusterTrackPropagation(Cluster *seed);
 	Clusters * findNearestClustersInNextLayer(Cluster *seed);
 	Clusters * findClustersFromSeedInLayer(Cluster *seed, Int_t nextLayer);
-//	Cluster * getTrackPropagationToLayer(Track *track, Int_t layer);
 	Cluster * findNearestNeighbour(Cluster *projectedPoint);
 	Track * findLongestTrack(Tracks *seedTracks);
 

@@ -27,7 +27,6 @@ Tracks * Clusters::findCalorimeterTracks() {
 	Bool_t usedClustersInSeeds = true;
 
 	fillMCSRadiusList(MCSSigma);
-	cout << getSearchRadiusForLayer(1) << endl;
 	findTracksFromLayer(tracks, 0, usedClustersInSeeds);
 
 	cout << "After first pass, found " << tracks->GetEntriesFast() << " tracks. Size of CWT = " << clustersWithoutTrack_.GetEntries() << endl;
@@ -38,11 +37,15 @@ Tracks * Clusters::findCalorimeterTracks() {
 		usedClustersInSeeds = false;
 	
 		fillMCSRadiusList(MCSSigma);
+		multiplyRadiusFirstLayers(2);
 		cout << getSearchRadiusForLayer(1) << endl;
 		findTracksFromLayer(tracks, 0, usedClustersInSeeds);
 	
 		cout << "After second pass, found " << tracks->GetEntriesFast() << " tracks. Size of CWT = " << clustersWithoutTrack_.GetEntries() << endl;
 	
+		// third pass
+		findTracksFromLayer(tracks, 1, usedClustersInSeeds);
+
 	}
 
 	Int_t clustersLeft = clustersWithoutTrack_.GetEntries();

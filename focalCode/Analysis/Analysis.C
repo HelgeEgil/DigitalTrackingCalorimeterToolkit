@@ -45,12 +45,14 @@ void drawTrackAngleAtVaryingRunNumbers(Int_t dataType, Float_t energy) {
 	for (Int_t i=2; i<32; i++) {
 		nRuns = pow(2, 4 + 0.3 * i) + 0.5;
 
+		nRuns = 10;
+
 		kEventsPerRun = nRuns;
 		Float_t factor = 2;
 
 		Int_t totalNumberOfRuns = 5000 / kEventsPerRun;
 		if (totalNumberOfRuns < 1) totalNumberOfRuns = 1;
-		if (totalNumberOfRuns > 250) totalNumberOfRuns = 250;
+		if (totalNumberOfRuns > 75) totalNumberOfRuns = 75;
 
 		Tracks * tracks = loadOrCreateTracks(1, totalNumberOfRuns, dataType, energy);
 		tracks->extrapolateToLayer0();
@@ -79,6 +81,10 @@ void drawTrackAngleAtVaryingRunNumbers(Int_t dataType, Float_t energy) {
 
 		Track *thisTrack;
 		Int_t EID, thisEID;
+		Int_t nTotal = tracks->GetEntries();
+		Int_t nFirstAndLast = 0;
+		Int_t nCorrect = 0;
+
 		for (Int_t j=0; j<tracks->GetEntriesFast(); j++) {
 			thisTrack = tracks->At(j);
 			if (!thisTrack) continue;
@@ -87,20 +93,26 @@ void drawTrackAngleAtVaryingRunNumbers(Int_t dataType, Float_t energy) {
 			EID = thisTrack->getEventID(0);
 			if (EID > -1) { hCorrectTracks->Fill(0); }
 			normCorrectTracks->Fill(0);
+			nCorrect += (int) thisTrack->isOneEventID();
+			nFirstAndLast += (int) thisTrack->isFirstAndLastEventIDEqual();
+
 			for (Int_t k=1; k<thisTrack->GetEntriesFast(); k++) {
 				if (!thisTrack->At(k)) continue;
 				normCorrectTracks->Fill(thisTrack->getLayer(k));
 				thisEID = thisTrack->getEventID(k);
-				if (thisEID == EID) {
+				if (thisEID == EID || EID == -1) {
 					hCorrectTracks->Fill(thisTrack->getLayer(k));
 				}
 			}
 		}
 
+		Float_t ratioCorrect = (float) nCorrect / nTotal;
+		Float_t ratioFirstAndLast = (float) nFirstAndLast / nTotal;
+
 		hCorrectTracks->Divide(normCorrectTracks);
 
 		ofstream file2("OutputFiles/lastLayerCorrect_different_nRuns.csv", ofstream::out | ofstream::app);
-		file2 << factor << ";" << nRuns << ";" << hCorrectTracks->GetBinContent(5) << endl;
+		file2 << factor << ";" << nRuns << ";" << hCorrectTracks->GetBinContent(5) << ";" << ratioCorrect << ";" << ratioFirstAndLast << endl;
 		file2.close();
 
 		c1->cd();
@@ -1174,6 +1186,7 @@ Tracks * getTracks(Int_t Runs, Int_t dataType, Int_t frameType, Float_t energy, 
 void drawTracks3D(Int_t Runs, Int_t dataType, Bool_t recreate, Float_t energy) {
 	Tracks * tracks = loadOrCreateTracks(recreate, Runs, dataType, energy);
 	tracks->extrapolateToLayer0();
+	tracks->removeTrackCollisions();
 
 	TCanvas *c1 = new TCanvas("c1");
 	c1->SetTitle(Form("Tracks from %.2f MeV protons on %s", energy, getMaterialChar()));
@@ -1195,7 +1208,6 @@ void drawTracks3D(Int_t Runs, Int_t dataType, Bool_t recreate, Float_t energy) {
    pMarker->SetMarkerColor(kBlue); // Missing cluster
 	EIDMarker->SetMarkerColor(kRed);
 	conflictMarker->SetMarkerColor(kRed); // Conflicting cluster
-
 	
    for (Int_t i=0; i<restPoints->GetEntriesFast(); i++) {
       if (!restPoints->At(i))
@@ -1203,7 +1215,6 @@ void drawTracks3D(Int_t Runs, Int_t dataType, Bool_t recreate, Float_t energy) {
 
       Cluster *thisCluster = (Cluster*) restPoints->At(i);
       Float_t x = thisCluster->getX();
-
       Float_t z = thisCluster->getY();
       Float_t y = thisCluster->getLayer();
 
@@ -1217,25 +1228,27 @@ void drawTracks3D(Int_t Runs, Int_t dataType, Bool_t recreate, Float_t energy) {
 	Int_t EIDidx = 0;
 	Int_t conflictIdx = 0;
 
+	Int_t medianEventID = -1;
+
 	Int_t nTrueTracks = 0;
 	Int_t nOKTracks = 0;
 	Int_t nOKMinusTracks = 0;
+	Int_t nOneWrong = 0;
 
 	Track * thisTrack = nullptr;
 
 	for (Int_t i=0; i<tracks->GetEntriesFast(); i++) {
 		thisTrack = tracks->At(i);
 		if (!thisTrack) continue;
-		cout << "Track " << i << endl;
-
-		for (Int_t j=0; j<thisTrack->GetEntriesFast(); j++) {
-			cout << thisTrack->At(j) << ", ";
-		}
-		cout << endl;
 
 		if (thisTrack->isOneEventID()) nTrueTracks++;
+
+		if (!thisTrack->isOneEventID()) {
+			medianEventID = thisTrack->getEventIDMode();
+		}
+
 		if (thisTrack->isFirstAndLastEventIDEqual()) nOKTracks++;
-		
+
 		else {
 			if (!thisTrack->Last()) continue;
 			if (!thisTrack->At(thisTrack->GetEntriesFast() - 2)) continue;
@@ -1291,13 +1304,11 @@ void drawTracks3D(Int_t Runs, Int_t dataType, Bool_t recreate, Float_t energy) {
 		if (!thisTrack->isFirstAndLastEventIDEqual()) {
 			l->SetLineColor(kRed);
 	
-			/*	
 			cout << "Track from " << *thisTrack->At(0) << " is MC wrong\nEvent IDs: ";
 			for (Int_t j=0; j<thisTrack->GetEntriesFast(); j++) {
 				cout << thisTrack->getEventID(j) << ", ";
 			}
 			cout << endl;
-			*/
 		}
 
 		firstEID = thisTrack->getEventID(0);
@@ -1310,9 +1321,11 @@ void drawTracks3D(Int_t Runs, Int_t dataType, Bool_t recreate, Float_t energy) {
 			Float_t y = thisTrack->getLayer(j);
 			l->SetPoint(pointNumber++,x,y,z);
 
+			/*
 			if (thisTrack->getEventID(j) != firstEID) {
 				EIDMarker->SetPoint(EIDidx++, x, y, z);
 			}
+			*/
 		}
 
 		conflictClusters = (Clusters*) thisTrack->getConflictClusters();
@@ -1337,9 +1350,53 @@ void drawTracks3D(Int_t Runs, Int_t dataType, Bool_t recreate, Float_t energy) {
    axis->SetLabelColor(kBlack);
    axis->SetAxisColor(kBlack);
 
-//   tracks->checkLayerOrientation();
+	vector<Int_t> * conflictTracks = tracks->getTracksWithConflictClusters();
+	vector<Int_t> * oneConflictPair = nullptr;
+	vector<Int_t> * allConflictPairs = new vector<Int_t>;
+	
+	for (UInt_t i=0; i<conflictTracks->size(); i++) {
+		oneConflictPair = tracks->getConflictingTracksFromTrack(conflictTracks->at(i));
+
+		Int_t idx0 = oneConflictPair->at(0);
+		Int_t idx1 = -1;
+		if (oneConflictPair->size() > 1) {
+			idx1 = oneConflictPair->at(1);
+		}
+
+		allConflictPairs->push_back(idx0);
+		allConflictPairs->push_back(idx1);
+	}
+
+	// PRINTING
+	cout << "Found the following tracks with conflicting clusters: ";
+	for (UInt_t i=0; i<conflictTracks->size(); i++) {
+		cout << conflictTracks->at(i) << " (eventID " << tracks->At(conflictTracks->at(i))->getEventID(0) << "), ";
+	}
+	cout << "\n";
+
+	for (UInt_t i=0; i<allConflictPairs->size() / 2; i++) {
+		if (allConflictPairs->at(2*i+1) < 0) continue;
+		
+		Track * trackA = tracks->At(allConflictPairs->at(2*i));
+		Track * trackB = tracks->At(allConflictPairs->at(2*i+1));
+
+		cout << "Track pair number " << i+1 << " found is: \n\tTRACK A: ";
+		for (Int_t j=0; j<trackA->GetEntriesFast(); j++) { 
+			if ( ! trackA->At(j) ) continue;
+			cout << *trackA->At(j) << ", ";
+		}
+
+		cout << "\n\tTRACK B: ";
+		for (Int_t j=0; j<trackB->GetEntriesFast(); j++) { 
+			if ( ! trackB->At(j) ) continue;
+			cout << *trackB->At(j) << ", ";
+		}
+		cout << endl;
+	}
 
    delete tracks;
+	delete conflictTracks;
+	delete allConflictPairs;
 }
 
 void drawDiffusionCheck(Int_t Runs, Int_t Layer, Float_t energy) {
