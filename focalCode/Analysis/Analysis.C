@@ -1199,6 +1199,7 @@ void drawTracks3D(Int_t Runs, Int_t dataType, Bool_t recreate, Float_t energy) {
 
 	Int_t nClusters = 0;
 	for (Int_t i=0; i<tracks->GetEntriesFast(); i++) {
+	   if (!tracks->At(i)) continue;
 		nClusters += tracks->GetEntriesFast(i);
 	}
 
@@ -1287,6 +1288,7 @@ void drawTracks3D(Int_t Runs, Int_t dataType, Bool_t recreate, Float_t energy) {
 
 	cout << "Tracks with no EID in first layer: ";
 	for (Int_t i=0; i<ntracks; i++) {
+	   if (!tracks->At(i)) continue;
 		if (!tracks->At(i)->At(0) || !tracks->At(i)->At(1)) continue;
 		if (tracks->At(i)->getEventID(0) < 0) cout << tracks->At(i)->getEventID(1) << ", ";
 	}
@@ -1294,8 +1296,8 @@ void drawTracks3D(Int_t Runs, Int_t dataType, Bool_t recreate, Float_t energy) {
 
 
 	for (Int_t i=0; i<ntracks; i++) {
-
 		Track *thisTrack = tracks->At(i);
+		if (!thisTrack) continue;
 		if (thisTrack->getTrackLengthmm() < 2) continue;
 		Int_t n = thisTrack->GetEntriesFast();
 

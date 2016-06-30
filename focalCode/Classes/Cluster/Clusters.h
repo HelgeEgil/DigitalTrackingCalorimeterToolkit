@@ -68,7 +68,7 @@ public:
 	virtual void makeLayerIndex();
 	virtual Int_t getFirstIndexOfLayer(UInt_t layer);
 	virtual Int_t getLastIndexOfLayer(UInt_t layer);
-	Int_t findClusterIdx(Float_t x, Float_t y, Int_t layer);
+	Int_t getClusterIdx(Float_t x, Float_t y, Int_t layer);
 
 	// in file findTracks.C
 	Int_t getLastActiveLayer();

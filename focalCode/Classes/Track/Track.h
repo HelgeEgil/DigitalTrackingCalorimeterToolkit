@@ -59,8 +59,8 @@ class Track : public TObject {
 	virtual Float_t getPreTL();
 	virtual Float_t getPreEnergyLossError();
 
-	Int_t findClusterIdx(Float_t x, Float_t y, Int_t layer);
-	Int_t findClusterIdx(Cluster * cluster);
+	Int_t getClusterIdx(Float_t x, Float_t y, Int_t layer);
+	Int_t getClusterIdx(Cluster * cluster);
 
 	Clusters * getConflictClusters();
 	Int_t getNumberOfConflictClusters();
@@ -114,7 +114,7 @@ class Track : public TObject {
 	Bool_t hasLayer(Int_t layer);
 
 	Float_t getAverageCS();
-	Float_t getAverageCSLastN(Int_t i);
+   Float_t getAverageCSLastN(Int_t i);
 
 	TGraphErrors * doFit();
 	TGraphErrors * doRangeFit();
@@ -129,6 +129,8 @@ class Track : public TObject {
 	virtual void removeCluster(Cluster *c) { track_.Remove((TObject*) c); }
 
 	virtual void extrapolateToLayer0();
+
+   friend ostream& operator<<(ostream &os, Track& t);
 
    ClassDef(Track,5);
 };

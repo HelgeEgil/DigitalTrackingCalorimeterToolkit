@@ -923,11 +923,12 @@ Int_t Track::getEventIDMode() {
 	Int_t nUniqueEventIDs = 0;
 
 	Int_t eventIDs[n];
+	Int_t repeatArray[n];
 	for (Int_t i=0; i<n; i++) {
 		eventIDs[i] = getEventID(i);
+		repeatArray[i] = 0;
 	}
 
-	Int_t repeatArray[n] = {0};
 	Int_t thisID = -1;
 	for (Int_t i=0; i<n; i++) {
 		thisID = eventIDs[i];
@@ -1013,7 +1014,7 @@ Bool_t Track::isClusterInTrack(Cluster * cluster) {
 	return false;
 }
 
-Int_t Track::findClusterIdx(Float_t x, Float_t y, Int_t layer) {
+Int_t Track::getClusterIdx(Float_t x, Float_t y, Int_t layer) {
 	for (Int_t i=0; i<GetEntriesFast(); i++) {
 		if (!At(i)) continue;
 		if (getLayer(i) < layer) continue;
@@ -1028,7 +1029,9 @@ Int_t Track::findClusterIdx(Float_t x, Float_t y, Int_t layer) {
 	return -1;
 }
 
-Int_t Track::findClusterIdx(Cluster * cluster) {
+Int_t Track::getClusterIdx(Cluster * cluster) {
+   if (!cluster) return -1;
+
 	Float_t x = cluster->getX();
 	Float_t y = cluster->getY();
 	Int_t layer = cluster->getLayer();
@@ -1045,4 +1048,17 @@ Int_t Track::findClusterIdx(Cluster * cluster) {
 		}
 	}
 	return -1;
+}
+
+ostream& operator<< (ostream &os, Track& t) {
+   int n = t.GetEntriesFast();
+   os << "[";
+   for (int i=0; i<n; i++) {
+      if (t.At(i)) {
+         os << i << *t.At(i);
+         if (i<n-1) os << ", ";
+      }
+   }
+   os << "]";
+   return os;
 }

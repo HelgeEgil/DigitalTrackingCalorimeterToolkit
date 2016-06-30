@@ -3,7 +3,7 @@
 !_TAG_PROGRAM_AUTHOR	Darren Hiebert	/dhiebert@users.sourceforge.net/
 !_TAG_PROGRAM_NAME	Exuberant Ctags	//
 !_TAG_PROGRAM_URL	http://ctags.sourceforge.net	/official site/
-!_TAG_PROGRAM_VERSION	5.9~svn20110310	//
+!_TAG_PROGRAM_VERSION	5.8	//
 Analysis_cxx	Analysis/Analysis.C	1;"	d	file:
 Analysis_h	Analysis/Analysis.h	2;"	d
 At	Classes/CalorimeterFrame/CalorimeterFrame.h	/^      virtual Layer * At(Int_t i) { return (Layer*) calorimeterFrame_.At(i); }$/;"	f	class:CalorimeterFrame
@@ -534,9 +534,6 @@ fCurrent	Scripts/include/findRange.h	/^   Int_t           fCurrent; \/\/!current
 fillAt	Classes/CalorimeterFrame/CalorimeterFrame.h	/^      virtual void fillAt(Int_t i, Float_t x, Float_t y, Float_t val = 1) { getTH2F(i)->Fill(x, y, val); }$/;"	f	class:CalorimeterFrame
 fillMCSRadiusList	HelperFunctions/Tools.C	/^void fillMCSRadiusList(Float_t angleFactor) {$/;"	f
 findCalorimeterTracks	Classes/Cluster/findTracks.C	/^Tracks * Clusters::findCalorimeterTracks() {$/;"	f	class:Clusters
-findClusterIdx	Classes/Cluster/Clusters.C	/^Int_t Clusters::findClusterIdx(Float_t x, Float_t y, Int_t layer) {$/;"	f	class:Clusters
-findClusterIdx	Classes/Track/Track.C	/^Int_t Track::findClusterIdx(Cluster * cluster) {$/;"	f	class:Track
-findClusterIdx	Classes/Track/Track.C	/^Int_t Track::findClusterIdx(Float_t x, Float_t y, Int_t layer) {$/;"	f	class:Track
 findClustersFromHits	Classes/Hit/Hits.C	/^Clusters * Hits::findClustersFromHits() {$/;"	f	class:Hits
 findClustersFromSeedInLayer	Classes/Cluster/findTracks.C	/^Clusters * Clusters::findClustersFromSeedInLayer(Cluster *seed, Int_t nextLayer) {$/;"	f	class:Clusters
 findClustersHitMap	Classes/Hit/Hits.C	/^vector<Hits*> * Hits::findClustersHitMap() {$/;"	f	class:Hits
@@ -593,6 +590,9 @@ getAverageCSLastN	Classes/Track/Track.C	/^Float_t Track::getAverageCSLastN(Int_t
 getAverageEnergyLoss	HelperFunctions/Tools.C	/^Float_t getAverageEnergyLoss(Float_t energy) {$/;"	f
 getClosestCluster	Classes/Track/Tracks.C	/^Int_t Tracks::getClosestCluster(vector<trackCluster> clusters, Cluster* interpolatedCluster) {$/;"	f	class:Tracks
 getClusterFromLayer	Classes/Track/Track.C	/^Int_t Track::getClusterFromLayer(Int_t layer) {$/;"	f	class:Track
+getClusterIdx	Classes/Cluster/Clusters.C	/^Int_t Clusters::getClusterIdx(Float_t x, Float_t y, Int_t layer) {$/;"	f	class:Clusters
+getClusterIdx	Classes/Track/Track.C	/^Int_t Track::getClusterIdx(Cluster * cluster) {$/;"	f	class:Track
+getClusterIdx	Classes/Track/Track.C	/^Int_t Track::getClusterIdx(Float_t x, Float_t y, Int_t layer) {$/;"	f	class:Track
 getClustersWithoutTrack	Classes/Cluster/Clusters.h	/^	virtual TClonesArray * getClustersWithoutTrack() { return (TClonesArray*) &clustersWithoutTrack_; }$/;"	f	class:Clusters
 getClustersWithoutTrack	Classes/Track/Tracks.h	/^      TClonesArray * getClustersWithoutTrack() { return (TClonesArray*) &clustersWithoutTrack_; }$/;"	f	class:Tracks
 getConflictClusters	Classes/Cluster/Clusters.h	/^	virtual TClonesArray * getConflictClusters() { return (TClonesArray*) &conflictClusters_; }$/;"	f	class:Clusters
@@ -915,8 +915,9 @@ nTrackers	GlobalConstants/Constants.h	/^const Int_t nTrackers = 4;$/;"	v
 nearestClusterTrackPropagation	Classes/Cluster/findTracks.C	/^Track * Clusters::nearestClusterTrackPropagation(Cluster *seed) {$/;"	f	class:Clusters
 nx	GlobalConstants/Constants.h	/^const Int_t nx = 640;$/;"	v
 ny	GlobalConstants/Constants.h	/^const Int_t ny = 640;$/;"	v
-operator <<	Classes/Cluster/Cluster.C	/^   ostream& operator<< (ostream &os, Cluster& c) {$/;"	f
+operator <<	Classes/Cluster/Cluster.C	/^ostream& operator<< (ostream &os, Cluster& c) {$/;"	f
 operator <<	Classes/Hit/Hit.C	/^ostream &operator<< (ostream &os, Hit &h) {$/;"	f
+operator <<	Classes/Track/Track.C	/^ostream& operator<< (ostream &os, Track& t) {$/;"	f
 p	GlobalConstants/MaterialConstants.h	/^Double_t p, alpha, alpha_prime;$/;"	v
 p	Scripts/Check.C	/^Double_t alpha, p, alpha_prime, beta, gamma_p;$/;"	v
 p_aluminum	GlobalConstants/MaterialConstants.h	/^Double_t p_aluminum, alpha_aluminum, alpha_prime_aluminum;$/;"	v
@@ -1049,7 +1050,6 @@ stepLength	Scripts/include/findRange.h	/^   Float_t         stepLength;$/;"	m	cl
 sumAllHitsInEachLayer	Classes/Hit/Hits.C	/^Int_t Hits::sumAllHitsInEachLayer() {$/;"	f	class:Hits
 sumHits	HelperFunctions/Tools.C	/^Hit * sumHits(Hit * a, Hit * b) {$/;"	f
 testHits	UnitTests/UnitTests.C	/^void testHits() {$/;"	f
-testdEdx	testdEdx.C	/^void testdEdx() {$/;"	f
 time	Classes/DataInterface/DataInterface.h	/^   Double_t        time;$/;"	m	class:DataInterface
 time	Scripts/findLET.h	/^   Double_t        time;$/;"	m	class:findLET
 time	Scripts/findRange.h	/^   Double_t        time;$/;"	m	class:findRange

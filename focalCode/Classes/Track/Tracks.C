@@ -407,6 +407,8 @@ vector<Int_t> * Tracks::getTracksWithConflictClusters() {
 }
 
 vector<Int_t> * Tracks::getConflictingTracksFromTrack(Int_t trackIdx) {
+   // Should return two tracks... 
+	
 	Cluster * conflictCluster = nullptr;
 	vector<Int_t> * conflictingTracks = new vector<Int_t>;
 	conflictingTracks->reserve(5);
@@ -415,18 +417,24 @@ vector<Int_t> * Tracks::getConflictingTracksFromTrack(Int_t trackIdx) {
 
 	Clusters * conflictClusters = trackA->getConflictClusters();
 	Int_t nClusters = conflictClusters->GetEntriesFast();
+	Int_t nClustersReal = conflictClusters->GetEntries();
 
-	for (Int_t i=0; i<conflictClusters->GetEntriesFast(); i++) {
+	cout << "Tracks::getConflictingTracksFromTrack found " << nClusters << " (" << nClustersReal << ") conflict Clusters.\n";
+
+	for (Int_t i=0; i<nClusters; i++) {
 		conflictCluster = conflictClusters->At(i);
 		if (!conflictCluster) continue;
 
 		vector<Int_t> * possibleTracks = getTracksFromCluster(conflictCluster);
+      cout << "Tracks::getConflictingTracksFromTracks - getTracksFromCluster found " << possibleTracks->size() << " possible tracks (" << At(possibleTracks->at(0)) << ").\n";
+
 		for (UInt_t j=0; j<possibleTracks->size(); j++) {
 			if (!isItemInVector(possibleTracks->at(j), conflictingTracks)) {
 				conflictingTracks->push_back(possibleTracks->at(j));
 			}
 		}
 	}
+
 	return conflictingTracks;
 }
 
@@ -439,6 +447,9 @@ vector<Int_t> * Tracks::getTracksFromCluster(Cluster * cluster) {
 		if (!thisTrack) continue;
 
 		if (thisTrack->isClusterInTrack(cluster)) {
+		   cout << "Tracks::getTracksFromCluster found cluster " << *cluster << " in track " << *thisTrack << endl;
+		   Int_t idx = thisTrack->getClusterIdx(cluster);
+		   thisTrack->At(idx)->markUsed();
 			tracksWithCluster->push_back(i);
 		}
 	}
@@ -448,7 +459,7 @@ vector<Int_t> * Tracks::getTracksFromCluster(Cluster * cluster) {
 
 void Tracks::removeTrackCollisions() {
 	// sometimes two tracks end in the same cluster
-	// remove the last cluster from the smallest track .. delete the track
+	// remove the last cluster from the smallest track IF THE SMALLEST TRACK IS <= 2.. delete the track
 	// if the final length is 1
 	
 	vector<Int_t> * conflictPair = nullptr;
@@ -462,17 +473,22 @@ void Tracks::removeTrackCollisions() {
 
 	vector<Int_t> * conflictTracks = getTracksWithConflictClusters();
 
+	cout << "getTracksWithConflictClusters found " << conflictTracks->size() << " tracks.\n";
+	for (UInt_t i=0; i<conflictTracks->size(); i++) {
+	   cout << *At(conflictTracks->at(i)) << endl;;
+   }
+
 	for (UInt_t i=0; i<conflictTracks->size(); i++) {
 		// Cluster is marked Used is only one of the tracks
 		// FIXME: getConflictingTracksFromTrack returns 2x objects, one is usually nullptr. Keep the good one, use it to find idx's and so on!
 
-		conflictPair = getConflictingTracksFromTrack(conflictTracks->at(i));
-		if (conflictPair->at(1) < 0) continue;
+		conflictPair = getConflictingTracksFromTrack(conflictTracks->at(i)); // 2 tracks
+      if (conflictPair->size() < 2) continue;
 
 		for (Int_t j=0; j<2; j++) {
 			track[j] = At(conflictPair->at(j));
-			conflictClusters[j] = track[j]->getConflictClusters();
-			cout << "Added conflict cluster \033[1m " << conflictClusters[j]->At(0) << "\033[0m ";
+			conflictClusters[j] = track[j]->getConflictClusters(); // 1 cluster
+			cout << "Added j=" << j << " conflict cluster \033[1m " << conflictClusters[j]->At(0) << "\033[0m ";
 			if (conflictClusters[j]->At(0)) cout << "-> \033[1m" << *conflictClusters[j]->At(0) << "\033[0m.\n";
 			else cout << endl;
 			len[j] = track[j]->GetEntriesFast();
@@ -481,17 +497,24 @@ void Tracks::removeTrackCollisions() {
 		longTrack = (len[0] > len[1]) ? 0 : 1;
 		shortTrack = 1 - longTrack;
 
-//		Int_t nClustersInA = conflictClusters[0]->GetEntriesFast();
-//		Int_t nClustersInB = conflictClusters[1]->GetEntriesFast();
-
-//		Bool_t sameCluster = isSameCluster(conflictClusters[0]->At(0), conflictClusters[1]->At(0));
-//		if (nClustersInA != 1 || nClustersInB != 1 || !sameCluster) { continue; }
+		Bool_t sameCluster = isSameCluster(conflictClusters[0]->At(0), conflictClusters[1]->At(0));
+   	if (!sameCluster) { continue; }
 		
 		Cluster * conflictCluster = conflictClusters[0]->At(0); // only one conflicting cluster!
 
-		Int_t longClusterIdx = track[longTrack]->findClusterIdx(conflictCluster);
+      if (!conflictCluster) continue;
+
+		Int_t longClusterIdx = track[longTrack]->getClusterIdx(conflictCluster);
+		Int_t shortClusterIdx = track[shortTrack]->getClusterIdx(conflictCluster);
+
+      if (shortClusterIdx != track[shortTrack]->GetEntriesFast() - 1) {
+         // not a terminating cluster!
+         cout << "THIS CLUSTER IS NOT TERMINATING, NOT REMOVING ANYTHING.\n";
+         continue;
+      }
+
 		track[longTrack]->At(longClusterIdx)->markUnused();
-		
+	
 		if (len[shortTrack] > 2) {
 			track[shortTrack]->removeCluster(conflictCluster);
 		}

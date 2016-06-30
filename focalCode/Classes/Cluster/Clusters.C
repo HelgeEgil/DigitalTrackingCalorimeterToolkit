@@ -140,14 +140,14 @@ void Clusters::markUsedClusters(Track *track) {
       Float_t x = track->getX(i);
       Float_t y = track->getY(i);
 
-		Int_t idx = findClusterIdx(x,y,layer);
+		Int_t idx = getClusterIdx(x,y,layer);
 		if (idx > -1) {
 			markUsed(idx);
 		}
 	}
 }
 
-Int_t Clusters::findClusterIdx(Float_t x, Float_t y, Int_t layer) {
+Int_t Clusters::getClusterIdx(Float_t x, Float_t y, Int_t layer) {
 	for (Int_t i=0; i<GetEntriesFast(); i++) {
 		if (!At(i)) continue;
 		if (getLayer(i) < layer) continue;
@@ -163,7 +163,7 @@ Int_t Clusters::findClusterIdx(Float_t x, Float_t y, Int_t layer) {
 }
 
 Bool_t Clusters::removeClusterFromCoords(Float_t x, Float_t y, Int_t layer) {
-	Int_t clusterIndex = findClusterIdx(x, y, layer);
+	Int_t clusterIndex = getClusterIdx(x, y, layer);
 	if (clusterIndex>-1) {
 		removeClusterAt(clusterIndex);
 		return true;
