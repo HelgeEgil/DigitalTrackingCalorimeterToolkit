@@ -51,7 +51,7 @@ class Tracks : public TObject {
 		vector<Int_t> * getTracksWithConflictClusters();
 		vector<Int_t> * getConflictingTracksFromTrack(Int_t trackIdx);
 		vector<Int_t> * getTracksFromCluster(Cluster * cluster);
-		void removeTrackCollisions();
+		Int_t getTrackIdxFromCluster(Cluster * cluster);
 
       virtual void extrapolateToLayer0();
       virtual void splitSharedClusters();
@@ -62,11 +62,14 @@ class Tracks : public TObject {
 
       virtual void removeTrack(Track *t) { tracks_.Remove((TObject*) t); }
       virtual TObject* removeTrackAt(Int_t i) { return tracks_.RemoveAt(i); }
-		void removeTracksLeavingDetector(); 
       void sortTrackByLayer(Int_t track);
 
       void checkLayerOrientation();
       void doFit();
+		
+		void removeTracksLeavingDetector(); 
+		void removeTrackCollisions();
+		void retrogradeTrackImprovement(Clusters * clusters);
 
    ClassDef(Tracks,2);
 };

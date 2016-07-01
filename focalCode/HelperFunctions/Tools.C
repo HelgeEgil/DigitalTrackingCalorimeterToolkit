@@ -372,8 +372,11 @@ Hit * sumHits(Hit * a, Hit * b) {
 	return newHit;
 }
 
+/*
+
 Cluster * getTrackPropagationToLayer(Track * track, Int_t layer) {
 	Int_t last = track->GetEntriesFast() - 1;
+
 	Int_t diffLayer = layer - track->getLayer(last);
 
 	Cluster p1(track->getX(last-1), track->getY(last-1));
@@ -387,6 +390,44 @@ Cluster * getTrackPropagationToLayer(Track * track, Int_t layer) {
 	return new Cluster(x, y, layer);
 }
 
+*/
+
+Cluster * getTrackPropagationToLayer(Track * track, Int_t layer) {
+	Int_t fromLayer = track->getLayer(track->GetEntriesFast() - 1);
+
+	return getTrackPropagationFromTo(track, fromLayer, layer);
+}
+
+Cluster * getRetrogradeTrackPropagationToLayer(Track * track, Int_t layer) {
+	Int_t fromLayer = layer + 1;
+
+	if (track->getIdxFromLayer(fromLayer) < 0) fromLayer++;
+	if (track->getIdxFromLayer(fromLayer) < 0) return nullptr;
+	
+	return getTrackPropagationFromTo(track, fromLayer, layer);
+}
+
+Cluster * getTrackPropagationFromTo(Track * track, Int_t fromLayer, Int_t toLayer) {
+	Int_t diffLayer = toLayer - fromLayer;
+	Int_t sign = (0 < diffLayer) - (diffLayer < 0);
+	Int_t vectorLayer = fromLayer - sign;
+
+	Int_t fromIdx = track->getIdxFromLayer(fromLayer);
+	Int_t vectorIdx = fromIdx - sign;
+	if (!track->At(vectorIdx)) return nullptr;
+	
+	Int_t vectorDiff = abs(fromLayer - track->getLayer(vectorIdx));
+	
+	Cluster p1(track->getX(vectorIdx), track->getY(vectorIdx));
+	Cluster p2(track->getX(fromIdx), track->getY(fromIdx));
+
+	Cluster slope((p2.getX() - p1.getX()) / vectorDiff, (p2.getY() - p1.getY()) / vectorDiff);
+
+	Float_t x = p2.getX() + diffLayer * slope.getX();
+	Float_t y = p2.getY() + diffLayer * slope.getY();
+
+	return new Cluster(x, y, toLayer);
+}
 
 Bool_t isPointOutOfBounds(Cluster *point, Float_t padding) {
 	Bool_t isOutside;
@@ -414,4 +455,9 @@ Bool_t isSameCluster(Cluster *a, Cluster *b) {
 	Bool_t z = (a->getLayer() == b->getLayer());
 
 	return x*y*z;
+}
+
+Float_t max(Float_t a, Float_t b) {
+	if (a > b) return a;
+	else return b;
 }

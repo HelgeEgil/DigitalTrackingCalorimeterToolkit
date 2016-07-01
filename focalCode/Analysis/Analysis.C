@@ -1141,14 +1141,12 @@ Tracks * getTracks(Int_t Runs, Int_t dataType, Int_t frameType, Float_t energy, 
 
 		if (calorimeterTracks->GetEntriesFast() == 0) breakSignal = kTRUE; // to stop running
 
-		if (kUseTrackSplitting) {
-			calorimeterTracks->splitSharedClusters();
-		}
-
+		// Track improvements
+		calorimeterTracks->extrapolateToLayer0();
+		calorimeterTracks->splitSharedClusters();
 		calorimeterTracks->removeTracksLeavingDetector();
-
-		// should do track matching here
-		// and append calorimeterTracks to trackerTracks...
+		calorimeterTracks->removeTrackCollisions();
+		calorimeterTracks->retrogradeTrackImprovement(clusters);
 
 		for (Int_t j=0; j<calorimeterTracks->GetEntriesFast(); j++) {
 			if (!calorimeterTracks->At(j)) continue;
@@ -1185,8 +1183,6 @@ Tracks * getTracks(Int_t Runs, Int_t dataType, Int_t frameType, Float_t energy, 
 
 void drawTracks3D(Int_t Runs, Int_t dataType, Bool_t recreate, Float_t energy) {
 	Tracks * tracks = loadOrCreateTracks(recreate, Runs, dataType, energy);
-	tracks->extrapolateToLayer0();
-	tracks->removeTrackCollisions();
 
 	TCanvas *c1 = new TCanvas("c1");
 	c1->SetTitle(Form("Tracks from %.2f MeV protons on %s", energy, getMaterialChar()));

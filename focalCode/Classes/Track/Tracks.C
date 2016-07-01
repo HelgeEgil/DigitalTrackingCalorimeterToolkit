@@ -407,8 +407,6 @@ vector<Int_t> * Tracks::getTracksWithConflictClusters() {
 }
 
 vector<Int_t> * Tracks::getConflictingTracksFromTrack(Int_t trackIdx) {
-   // Should return two tracks... 
-	
 	Cluster * conflictCluster = nullptr;
 	vector<Int_t> * conflictingTracks = new vector<Int_t>;
 	conflictingTracks->reserve(5);
@@ -419,14 +417,11 @@ vector<Int_t> * Tracks::getConflictingTracksFromTrack(Int_t trackIdx) {
 	Int_t nClusters = conflictClusters->GetEntriesFast();
 	Int_t nClustersReal = conflictClusters->GetEntries();
 
-	cout << "Tracks::getConflictingTracksFromTrack found " << nClusters << " (" << nClustersReal << ") conflict Clusters.\n";
-
 	for (Int_t i=0; i<nClusters; i++) {
 		conflictCluster = conflictClusters->At(i);
 		if (!conflictCluster) continue;
 
 		vector<Int_t> * possibleTracks = getTracksFromCluster(conflictCluster);
-      cout << "Tracks::getConflictingTracksFromTracks - getTracksFromCluster found " << possibleTracks->size() << " possible tracks (" << At(possibleTracks->at(0)) << ").\n";
 
 		for (UInt_t j=0; j<possibleTracks->size(); j++) {
 			if (!isItemInVector(possibleTracks->at(j), conflictingTracks)) {
@@ -438,6 +433,19 @@ vector<Int_t> * Tracks::getConflictingTracksFromTrack(Int_t trackIdx) {
 	return conflictingTracks;
 }
 
+Int_t Tracks::getTrackIdxFromCluster(Cluster * cluster) {
+	Track * thisTrack = nullptr;
+
+	for (Int_t i=0; i<GetEntriesFast(); i++) {
+		thisTrack = At(i);
+		if (!thisTrack) continue;
+
+		if (thisTrack->isClusterInTrack(cluster)) {
+			return i;
+		}
+	}
+}
+
 vector<Int_t> * Tracks::getTracksFromCluster(Cluster * cluster) {
 	Track * thisTrack = nullptr;
 	vector<Int_t> * tracksWithCluster = new vector<Int_t>;
@@ -447,7 +455,6 @@ vector<Int_t> * Tracks::getTracksFromCluster(Cluster * cluster) {
 		if (!thisTrack) continue;
 
 		if (thisTrack->isClusterInTrack(cluster)) {
-		   cout << "Tracks::getTracksFromCluster found cluster " << *cluster << " in track " << *thisTrack << endl;
 		   Int_t idx = thisTrack->getClusterIdx(cluster);
 		   thisTrack->At(idx)->markUsed();
 			tracksWithCluster->push_back(i);
@@ -473,15 +480,7 @@ void Tracks::removeTrackCollisions() {
 
 	vector<Int_t> * conflictTracks = getTracksWithConflictClusters();
 
-	cout << "getTracksWithConflictClusters found " << conflictTracks->size() << " tracks.\n";
 	for (UInt_t i=0; i<conflictTracks->size(); i++) {
-	   cout << *At(conflictTracks->at(i)) << endl;;
-   }
-
-	for (UInt_t i=0; i<conflictTracks->size(); i++) {
-		// Cluster is marked Used is only one of the tracks
-		// FIXME: getConflictingTracksFromTrack returns 2x objects, one is usually nullptr. Keep the good one, use it to find idx's and so on!
-
 		conflictPair = getConflictingTracksFromTrack(conflictTracks->at(i)); // 2 tracks
       if (conflictPair->size() < 2) continue;
 
@@ -509,7 +508,6 @@ void Tracks::removeTrackCollisions() {
 
       if (shortClusterIdx != track[shortTrack]->GetEntriesFast() - 1) {
          // not a terminating cluster!
-         cout << "THIS CLUSTER IS NOT TERMINATING, NOT REMOVING ANYTHING.\n";
          continue;
       }
 
@@ -527,5 +525,121 @@ void Tracks::removeTrackCollisions() {
 	}
 
 	cout << "Tracks::removeTrackCollisions removed " << nRemoved << " collisions, and removed " << nShortRemoved << " too short tracks.\n";
+}
 
+void Tracks::retrogradeTrackImprovement(Clusters * clusters) {
+	Track * thisTrack = nullptr;
+	Cluster * estimatedRetrogradeCluster = nullptr;
+	Cluster * nearestNeighborAllTracks = nullptr;
+	Cluster * actualCluster = nullptr;
+	Float_t deltaThisTrack = 0;
+	Float_t deltaBestTrack = 0;
+	Bool_t anotherTrackIsCloserMatch;
+
+	Track * switchTrack = nullptr;
+	Int_t switchTrackIdx = -1;
+	Int_t switchTrackAtLayer = -1;
+	Int_t idxThis, idxSwitch;
+
+	Tracks * newTracks = new Tracks();
+
+	Bool_t ignoreTrack[GetEntriesFast()];
+	for (Int_t i=0; i<GetEntriesFast(); i++) {
+		ignoreTrack[i] = false;
+	}
+
+	for (Int_t i=0; i<GetEntriesFast(); i++) {
+		if (ignoreTrack[i]) continue;
+
+		switchTrack = nullptr;
+		switchTrackIdx = -1;
+		switchTrackAtLayer = -1;
+
+		thisTrack = At(i);
+		if (!thisTrack) continue;
+
+		Int_t lastIdx = thisTrack->GetEntriesFast() - 1;
+		Int_t lastLayer = thisTrack->getLayer(lastIdx);
+		
+		for (Int_t layer = lastLayer - 2; layer>=0; layer--) {
+			if (thisTrack->getIdxFromLayer(layer) < 0) continue;
+
+			estimatedRetrogradeCluster = getRetrogradeTrackPropagationToLayer(thisTrack, layer);
+			if (!estimatedRetrogradeCluster) continue;
+			
+			actualCluster = thisTrack->At(thisTrack->getClusterFromLayer(layer));
+			nearestNeighborAllTracks = clusters->findNearestNeighbour(estimatedRetrogradeCluster, false);	
+
+			if (!nearestNeighborAllTracks) {
+				delete estimatedRetrogradeCluster;
+				continue;
+			}
+
+			deltaThisTrack = diffXY(estimatedRetrogradeCluster, actualCluster);
+			deltaBestTrack = diffXY(estimatedRetrogradeCluster, nearestNeighborAllTracks);
+			delete estimatedRetrogradeCluster;
+			
+			anotherTrackIsCloserMatch = (deltaBestTrack < deltaThisTrack);
+
+			if (anotherTrackIsCloserMatch) {
+				switchTrackIdx = getTrackIdxFromCluster(nearestNeighborAllTracks);
+				switchTrack = At(switchTrackIdx);
+				switchTrackAtLayer = layer;
+				break;
+			}
+		}
+
+		if (switchTrack) {
+			Track * newTrackA = new Track();
+			Track * newTrackB = new Track();
+			
+			Int_t longestTrack = max(thisTrack->Last()->getLayer(), switchTrack->Last()->getLayer());
+			
+			for (Int_t layer=0; layer<=longestTrack; layer++) {
+				idxThis = thisTrack->getIdxFromLayer(layer);
+				idxSwitch = switchTrack->getIdxFromLayer(layer);
+
+				Cluster *clusterThis   = (idxThis>=0) ? thisTrack->At(idxThis) : nullptr;
+				Cluster *clusterSwitch = (idxSwitch>=0) ? switchTrack->At(idxSwitch) : nullptr;
+				
+				if (layer <= switchTrackAtLayer) { // SWITCH TRACKS
+					if (clusterThis)   newTrackB->appendCluster(clusterThis);
+					if (clusterSwitch) newTrackA->appendCluster(clusterSwitch);
+				}
+
+				else { // KEEP ORIGINAL TRACKS
+					if (clusterThis)   newTrackA->appendCluster(clusterThis);
+					if (clusterSwitch) newTrackB->appendCluster(clusterSwitch);
+				}
+			}
+
+			Float_t sin1 = thisTrack->getSinuosity();
+			Float_t sin2 = switchTrack->getSinuosity();
+
+			Float_t sin3 = newTrackA->getSinuosity();
+			Float_t sin4 = newTrackB->getSinuosity();
+			
+			Float_t metricOld = quadratureAdd(sin1, sin2);
+			Float_t metricNew = quadratureAdd(sin3, sin4);
+
+			if (metricNew < metricOld) {
+				newTracks->appendTrack(newTrackA);
+				newTracks->appendTrack(newTrackB);
+				removeTrackAt(switchTrackIdx);
+				removeTrackAt(i);
+			}
+
+			ignoreTrack[switchTrackIdx] = true;
+			delete newTrackA;
+			delete newTrackB;
+		}
+	}
+
+	cout << "Track::retrogradeTrackImprovement found " << newTracks->GetEntriesFast() << " improved tracks!\n";
+
+	if (newTracks->GetEntriesFast()) {
+		for (Int_t i=0; i<newTracks->GetEntriesFast(); i++) {
+			appendTrack(newTracks->At(i));
+		}
+	}
 }

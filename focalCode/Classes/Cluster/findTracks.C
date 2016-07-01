@@ -168,7 +168,7 @@ Clusters * Clusters::findNearestClustersInNextLayer(Cluster *seed) {
 	Clusters *clustersFromThisLayer = 0;
 
 	Int_t layerCounter = 1;
-	for (Int_t skipLayers=0; skipLayers<3; skipLayers++) {
+	for (Int_t skipLayers=0; skipLayers<2; skipLayers++) {
 		Int_t nextLayer = seed->getLayer() + 1 + skipLayers;
 		clustersFromThisLayer = findClustersFromSeedInLayer(seed, nextLayer);
 
@@ -232,6 +232,7 @@ void Clusters::doNearestClusterTrackPropagation(Track *track, Int_t lastHitLayer
 		}
 
 		nearestNeighbour = findNearestNeighbour(projectedPoint);
+
 		delta = diffmmXY(projectedPoint, nearestNeighbour);
 
 		Bool_t skipCurrentLayer = (delta > searchRadius); // was /2
@@ -270,10 +271,11 @@ void Clusters::doNearestClusterTrackPropagation(Track *track, Int_t lastHitLayer
 	delete skipNearestNeighbour;
 }
 
-Cluster * Clusters::findNearestNeighbour(Cluster *projectedPoint) {
+Cluster * Clusters::findNearestNeighbour(Cluster *projectedPoint, Bool_t rejectUsed) {
 	Cluster *nearestNeighbour = new Cluster();
 	Float_t delta;
-	Bool_t kFoundNeighbour = kFALSE;
+	Bool_t kFoundNeighbour = false;
+	Bool_t reject = false;
 
 	Int_t searchLayer = projectedPoint->getLayer();
 	Int_t layerIdxFrom = getFirstIndexOfLayer(searchLayer);
@@ -289,7 +291,8 @@ Cluster * Clusters::findNearestNeighbour(Cluster *projectedPoint) {
 			continue;
 
 		delta = diffmmXY(projectedPoint, At(i));
-		if (delta < maxDelta && !At(i)->isUsed()) {
+		reject = (At(i)->isUsed() && rejectUsed);
+		if (delta < maxDelta && !reject) {
 			nearestNeighbour->set(At(i));
 			maxDelta = delta;
 			kFoundNeighbour = kTRUE;

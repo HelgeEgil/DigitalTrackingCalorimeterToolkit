@@ -74,7 +74,5 @@ Float_t Layer::getOccupancy() {
 		if (frame2D_.GetBinContent(i)) numberOfActivatedPixels++;
 	}
 
-	cout << "In layer " << layerNo_ << ", number of activated pixels is " << numberOfActivatedPixels << endl;
-
 	return (float) numberOfActivatedPixels / nBins;
 }

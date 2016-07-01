@@ -52,6 +52,7 @@ class Track : public TObject {
 	virtual Int_t getSize(Int_t i) { return At(i)->getSize(); }
 	virtual Int_t getEventID(Int_t i) { return At(i)->getEventID(); }
 	virtual Int_t getError(Int_t i) { return At(i)->getError(); } 
+	virtual Int_t getIdxFromLayer(Int_t i);
 	virtual Float_t getDepositedEnergy(Int_t i) {return At(i)->getDepositedEnergy(); }
 	virtual Float_t getDepositedEnergyError(Int_t i) {return At(i)->getDepositedEnergyError(); }
 	virtual Float_t getPreEnergyLoss();
@@ -89,6 +90,8 @@ class Track : public TObject {
 	Float_t getSlopeAngleAtLayer(Int_t i);
 	Float_t getSlopeAngleBetweenLayers(Int_t i);
 	Float_t getSlopeAngleChangeBetweenLayers(Int_t i);
+	Float_t getSlopeAngleDifferenceSum();
+	Float_t getMaximumSlopeAngleChange();
 	Float_t getAbsorberLength(Int_t i);
 	Float_t getSnakeness();
 	Int_t	getNScintillators();
@@ -104,6 +107,7 @@ class Track : public TObject {
 	Bool_t isHitOnScintillatorH();
 	Bool_t isHitOnScintillatorV();
 	Bool_t isHitOnScintillators();
+
 
 	Bool_t doesTrackEndAbruptly();
 	Float_t getRiseFactor();

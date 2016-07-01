@@ -79,7 +79,7 @@ public:
 	Track * nearestClusterTrackPropagation(Cluster *seed);
 	Clusters * findNearestClustersInNextLayer(Cluster *seed);
 	Clusters * findClustersFromSeedInLayer(Cluster *seed, Int_t nextLayer);
-	Cluster * findNearestNeighbour(Cluster *projectedPoint);
+	Cluster * findNearestNeighbour(Cluster *projectedPoint, Bool_t rejectUsed = true);
 	Track * findLongestTrack(Tracks *seedTracks);
 
 	ClassDef(Clusters,4);

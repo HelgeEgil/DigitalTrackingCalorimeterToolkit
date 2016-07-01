@@ -84,6 +84,15 @@ Float_t Track::getTrackLengthmm() {
 	return trackLength;
 }
 
+Int_t Track::getIdxFromLayer(Int_t layer) {
+	for (Int_t i=0; i<GetEntriesFast(); i++) {
+		if (!At(i)) continue;
+		if (getLayer(i) == layer) return i;
+	}
+
+	return -1;
+}
+
 Float_t Track::getRangemm() {
 	// return range (z2 - z1), not track length
 	Float_t range = 0;
@@ -165,7 +174,7 @@ Float_t Track::getSlopeAngleBetweenLayers(Int_t i) {
 
 Float_t Track::getSlopeAngleChangeBetweenLayers(Int_t i) {
 
-	if ((i+1) >= GetEntriesFast()) return -1;
+	if ((i+1) >= GetEntriesFast()) return 0;
 	
 	Float_t theta1 = 0, theta2 = 0;
 
@@ -174,6 +183,27 @@ Float_t Track::getSlopeAngleChangeBetweenLayers(Int_t i) {
 
 	return theta2  - theta1;
 }
+
+Float_t Track::getSlopeAngleDifferenceSum() {
+	Float_t angleSum = 0;
+
+	for (Int_t i=1; i<GetEntriesFast() - 1; i++) {
+		angleSum += fabs(getSlopeAngleChangeBetweenLayers(i));
+	}
+
+	return angleSum;
+}
+
+Float_t Track::getMaximumSlopeAngleChange() {
+	Float_t maxChange = 0;
+
+	for (Int_t i=1; i<GetEntriesFast() - 1; i++) {
+		maxChange = max(maxChange, fabs(getSlopeAngleChangeBetweenLayers(i)));
+	}
+
+	return maxChange;
+}
+
 
 Float_t Track::getAbsorberLength(Int_t i) {
 	// returns the traversed absorber length before sensor i

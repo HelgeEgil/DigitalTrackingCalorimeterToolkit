@@ -3,7 +3,7 @@
 !_TAG_PROGRAM_AUTHOR	Darren Hiebert	/dhiebert@users.sourceforge.net/
 !_TAG_PROGRAM_NAME	Exuberant Ctags	//
 !_TAG_PROGRAM_URL	http://ctags.sourceforge.net	/official site/
-!_TAG_PROGRAM_VERSION	5.8	//
+!_TAG_PROGRAM_VERSION	5.9~svn20110310	//
 Analysis_cxx	Analysis/Analysis.C	1;"	d	file:
 Analysis_h	Analysis/Analysis.h	2;"	d
 At	Classes/CalorimeterFrame/CalorimeterFrame.h	/^      virtual Layer * At(Int_t i) { return (Layer*) calorimeterFrame_.At(i); }$/;"	f	class:CalorimeterFrame
@@ -649,6 +649,7 @@ getFitParameterError	Classes/Track/Track.C	/^Float_t Track::getFitParameterError
 getFitParameterScale	Classes/Track/Track.C	/^Float_t Track::getFitParameterScale() {$/;"	f	class:Track
 getFrameType	Classes/Cluster/Clusters.h	/^	virtual Int_t getFrameType() { return frameType_; }$/;"	f	class:Clusters
 getI	Classes/Hit/Hits.C	/^Int_t Hits::getI(Int_t x, Int_t y) {$/;"	f	class:Hits
+getIdxFromLayer	Classes/Track/Track.C	/^Int_t Track::getIdxFromLayer(Int_t layer) {$/;"	f	class:Track
 getInterpolatedClusterAt	Classes/Track/Track.C	/^Cluster * Track::getInterpolatedClusterAt(Int_t layer) {$/;"	f	class:Track
 getLastActiveLayer	Classes/Cluster/Clusters.C	/^Int_t Clusters::getLastActiveLayer() {$/;"	f	class:Clusters
 getLastActiveLayer	Classes/Hit/Hits.C	/^Int_t Hits::getLastActiveLayer() {$/;"	f	class:Hits
@@ -686,6 +687,7 @@ getRadiusmm	Classes/Cluster/Cluster.C	/^Float_t Cluster::getRadiusmm() {$/;"	f	c
 getRangeWEPLAt	Classes/Track/Track.C	/^Float_t Track::getRangeWEPLAt(Int_t i) {	$/;"	f	class:Track
 getRangemm	Classes/Track/Track.C	/^Float_t Track::getRangemm() {$/;"	f	class:Track
 getRangemmAt	Classes/Track/Track.C	/^Float_t Track::getRangemmAt(Int_t i) {$/;"	f	class:Track
+getRetrogradeTrackPropagationToLayer	HelperFunctions/Tools.C	/^Cluster * getRetrogradeTrackPropagationToLayer(Track * track, Int_t layer) {$/;"	f
 getRiseFactor	Classes/Track/Track.C	/^Float_t Track::getRiseFactor() {$/;"	f	class:Track
 getSearchRadiusForLayer	HelperFunctions/Tools.C	/^Float_t getSearchRadiusForLayer(Int_t layer) {$/;"	f
 getSigmaEnergy	GlobalConstants/MaterialConstants.C	/^Float_t getSigmaEnergy(Int_t energy) { $/;"	f
@@ -699,6 +701,7 @@ getSlopeAngle	Classes/Track/Tracks.h	/^      Float_t getSlopeAngle(Int_t i) { re
 getSlopeAngleAtLayer	Classes/Track/Track.C	/^Float_t Track::getSlopeAngleAtLayer(Int_t i) {$/;"	f	class:Track
 getSlopeAngleBetweenLayers	Classes/Track/Track.C	/^Float_t Track::getSlopeAngleBetweenLayers(Int_t i) {$/;"	f	class:Track
 getSlopeAngleChangeBetweenLayers	Classes/Track/Track.C	/^Float_t Track::getSlopeAngleChangeBetweenLayers(Int_t i) {$/;"	f	class:Track
+getSlopeAngleDifferenceSum	Classes/Track/Track.C	/^Float_t Track::getSlopeAngleDifferenceSum() {$/;"	f	class:Track
 getSnakeness	Classes/Track/Track.C	/^Float_t Track::getSnakeness() {$/;"	f	class:Track
 getStdSizeToIdx	Classes/Track/Track.C	/^Float_t Track::getStdSizeToIdx(Int_t toIdx) {$/;"	f	class:Track
 getTH2F	Classes/CalorimeterFrame/CalorimeterFrame.h	/^      virtual TH2F * getTH2F(Int_t i) { return (TH2F*) At(i)->getTH2F(); }$/;"	f	class:CalorimeterFrame
@@ -708,11 +711,13 @@ getTLFromEnergy	Classes/Track/conversionFunctions.C	/^Float_t getTLFromEnergy(Fl
 getTLFromEnergyQuadratic	Scripts/findRange.C	/^Float_t getTLFromEnergyQuadratic(Float_t energy) {$/;"	f
 getTLStragglingFromEnergy	Classes/Track/conversionFunctions.C	/^Float_t getTLStragglingFromEnergy(Float_t energy, Float_t sigma_energy) {$/;"	f
 getTLStragglingFromTL	Classes/Track/conversionFunctions.C	/^Float_t getTLStragglingFromTL(Float_t tl, Float_t sigma_energy) {$/;"	f
+getTrackFromCluster	Classes/Track/Tracks.C	/^Track * Tracks::getTrackFromCluster(Cluster * cluster) {$/;"	f	class:Tracks
 getTrackIdxFromFirstLayerEID	Classes/Track/Tracks.C	/^Int_t Tracks::getTrackIdxFromFirstLayerEID(Int_t eid) {$/;"	f	class:Tracks
 getTrackLengthWEPLmmAt	Classes/Track/Track.C	/^Float_t Track::getTrackLengthWEPLmmAt(Int_t i) {$/;"	f	class:Track
 getTrackLengthmm	Classes/Track/Track.C	/^Float_t Track::getTrackLengthmm() {$/;"	f	class:Track
 getTrackLengthmm	Classes/Track/Tracks.h	/^      Float_t getTrackLengthmm(Int_t i) { return At(i)->getTrackLengthmm(); }$/;"	f	class:Tracks
 getTrackLengthmmAt	Classes/Track/Track.C	/^Float_t Track::getTrackLengthmmAt(Int_t i) {$/;"	f	class:Track
+getTrackPropagationFromTo	HelperFunctions/Tools.C	/^Cluster * getTrackPropagationFromTo(Track * track, Int_t fromLayer, Int_t toLayer) {$/;"	f
 getTrackPropagationToLayer	HelperFunctions/Tools.C	/^Cluster * getTrackPropagationToLayer(Track * track, Int_t layer) {$/;"	f
 getTrackScore	Classes/Track/Track.C	/^Float_t Track::getTrackScore() {$/;"	f	class:Track
 getTrackScore	Classes/Track/Tracks.h	/^      Float_t getTrackScore(Int_t i) { return At(i)->getTrackScore(); }$/;"	f	class:Tracks
@@ -883,6 +888,7 @@ markUsed	Classes/Cluster/Clusters.h	/^	virtual void markUsed(Int_t i) { At(i)->m
 markUsedClusters	Classes/Cluster/Clusters.C	/^void Clusters::markUsedClusters(Track *track) {$/;"	f	class:Clusters
 matchWithEventIDs	Classes/Cluster/Clusters.C	/^void Clusters::matchWithEventIDs(Hits * eventIDs) {$/;"	f	class:Clusters
 matchWithEventIDs	Classes/Track/Tracks.C	/^void Tracks::matchWithEventIDs(Hits * eventIDs) {$/;"	f	class:Tracks
+max	HelperFunctions/Tools.C	/^Float_t max(Float_t a, Float_t b) {$/;"	f
 mcs_radius_per_layer	GlobalConstants/MaterialConstants.h	/^Float_t mcs_radius_per_layer[100]; \/\/ change if max(nLayers) > 100$/;"	v
 multiplyRadiusFirstLayers	HelperFunctions/Tools.C	/^void multiplyRadiusFirstLayers(Float_t factor) {$/;"	f
 nCrystalCompton	Classes/DataInterface/DataInterface.h	/^   Int_t           nCrystalCompton;$/;"	m	class:DataInterface
@@ -983,6 +989,7 @@ removeTrack	Classes/Track/Tracks.h	/^      virtual void removeTrack(Track *t) { 
 removeTrackAt	Classes/Track/Tracks.h	/^      virtual TObject* removeTrackAt(Int_t i) { return tracks_.RemoveAt(i); }$/;"	f	class:Tracks
 removeTrackCollisions	Classes/Track/Tracks.C	/^void Tracks::removeTrackCollisions() {$/;"	f	class:Tracks
 removeTracksLeavingDetector	Classes/Track/Tracks.C	/^void Tracks::removeTracksLeavingDetector() {$/;"	f	class:Tracks
+retrogradeTrackImprovement	Classes/Track/Tracks.C	/^void Tracks::retrogradeTrackImprovement(Clusters * clusters) {$/;"	f	class:Tracks
 rotationAngle	Classes/DataInterface/DataInterface.h	/^   Float_t         rotationAngle;$/;"	m	class:DataInterface
 rotationAngle	Scripts/findLET.h	/^   Float_t         rotationAngle;$/;"	m	class:findLET
 rotationAngle	Scripts/findRange.h	/^   Float_t         rotationAngle;$/;"	m	class:findRange
@@ -1050,6 +1057,7 @@ stepLength	Scripts/include/findRange.h	/^   Float_t         stepLength;$/;"	m	cl
 sumAllHitsInEachLayer	Classes/Hit/Hits.C	/^Int_t Hits::sumAllHitsInEachLayer() {$/;"	f	class:Hits
 sumHits	HelperFunctions/Tools.C	/^Hit * sumHits(Hit * a, Hit * b) {$/;"	f
 testHits	UnitTests/UnitTests.C	/^void testHits() {$/;"	f
+testdEdx	testdEdx.C	/^void testdEdx() {$/;"	f
 time	Classes/DataInterface/DataInterface.h	/^   Double_t        time;$/;"	m	class:DataInterface
 time	Scripts/findLET.h	/^   Double_t        time;$/;"	m	class:findLET
 time	Scripts/findRange.h	/^   Double_t        time;$/;"	m	class:findRange
