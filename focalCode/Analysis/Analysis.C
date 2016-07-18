@@ -35,6 +35,7 @@
 #include "Classes/Hit/Hits.h"
 #include "Classes/DataInterface/DataInterface.h"
 #include "HelperFunctions/Tools.h"
+#include "HelperFunctions/getTracks.h"
 
 using namespace std;
 
@@ -987,79 +988,6 @@ void draw2DProjection(Int_t Runs, Int_t dataType, Bool_t recreate, Float_t energ
 
 }
 
-void saveTracks(Tracks *tracks, Int_t dataType, Float_t energy) {
-  	
-	// C++ / ROOT has something to learn from Python... ;)
-	TString sDataType = (dataType == 0) ? "_MC_" : "_data_";
-
-	TString sEnergy = Form("_%.2fMeV", energy);
-	TString fileName = "Data/Tracks/tracks";
-	TString sMaterial = getMaterialChar();
-	fileName.Append(sDataType);
-	fileName.Append(sMaterial);
-	fileName.Append(sEnergy);
-	fileName.Append(".root");
-	
-	TFile f(fileName, "recreate");
-	f.SetCompressionLevel(1);
-	TTree T("T", "tracks");
-	T.Branch("tracks", &tracks, 256000, 1);
-	cout << "Length of CWOT: " << tracks->GetEntriesFastClustersWithoutTrack() << endl; 
-	T.Fill();
-	T.Write();
-	f.Close();
-}
-
-Tracks * loadTracks(Int_t Runs, Int_t dataType, Float_t energy) {
-  	TString sDataType = (dataType == 0) ? "_MC_" : "_data_";
-	TString sEnergy = Form("_%.2fMeV", energy);
-	TString fileName = "Data/Tracks/tracks";
-	TString sMaterial = getMaterialChar();
-	fileName.Append(sDataType);
-	fileName.Append(sMaterial);
-	fileName.Append(sEnergy);
-	fileName.Append(".root");
-	
-	TFile *f = new TFile(fileName);
-	if (!f) return 0;
-	TTree *T = (TTree*) f->Get("T");
-	Tracks * tracks = new Tracks();
-
-	T->GetBranch("tracks")->SetAutoDelete(kFALSE);
-	T->SetBranchAddress("tracks",&tracks);
-
-//	cout << "There are " << T->GetEntriesFast() << " entries in TTree.\n";
-
-	T->GetEntry(0);
-	
-	cout << "There are " << tracks->GetEntriesFast() << " tracks in " << fileName << ".\n";
-	
-	return tracks;
-}
-
-Tracks * loadOrCreateTracks(Bool_t recreate, Int_t Runs, Int_t dataType, Float_t energy, Float_t *x, Float_t *y) {
-	Tracks * tracks = nullptr;
-	
-	if (recreate) {
-		tracks = getTracks(Runs, dataType, kCalorimeter, energy, x, y);
-		if (tracks->GetEntries()) {
-			cout << "Saving " << tracks->GetEntries() << " tracks.\n";
-//			saveTracks(tracks, dataType, energy);
-		}
-	}
-
-	else {
-		tracks = loadTracks(Runs, dataType, energy);
-	
-		if (!tracks) {
-			cout << "!tracks, creating new file\n";
-			tracks = getTracks(Runs, dataType, kCalorimeter, energy);
-			saveTracks(tracks, dataType, energy);
-		}
-	}
-	return tracks;
-}
-
 Hits * getEventIDs(Int_t Runs, Float_t energy) {
 	run_energy = energy;
 	DataInterface *di = new DataInterface();
@@ -1073,124 +1001,22 @@ Hits * getEventIDs(Int_t Runs, Float_t energy) {
 	return hits;
 }
 
-Tracks * getTracks(Int_t Runs, Int_t dataType, Int_t frameType, Float_t energy, Float_t *x, Float_t *y) {
-	run_energy = energy;
-
-	DataInterface *di = new DataInterface();
-
-	Int_t nClusters = kEventsPerRun * 5 * nLayers;
-	Int_t nHits = kEventsPerRun * 50;
-	Int_t nTracks = kEventsPerRun * 2;
-
-	Bool_t breakSignal = false;
-
-	CalorimeterFrame *cf = new CalorimeterFrame();
-//	TrackerFrame *tf = new TrackerFrame();
-	Clusters * clusters = new Clusters(nClusters);
-	Clusters * trackerClusters = new Clusters(nClusters);
-	Hits *hits = new Hits(nHits);
-	Hits *eventIDs = new Hits(kEventsPerRun * sizeOfEventID);
-	Hits *trackerHits = new Hits(nHits);
-	Tracks *calorimeterTracks = new Tracks(nTracks);
-	Tracks *trackerTracks = new Tracks(nTracks);
-	Tracks *allTracks = new Tracks(nTracks * Runs);
-	TRandom3 *gRandom = new TRandom3(0);
-	
-	Int_t eventID = -1;
-
-	TStopwatch t1, t2, t3, t4, t5, t6;
-	
-	for (Int_t i=0; i<Runs; i++) {
-
-		cout << "Finding track " << (i+1)*kEventsPerRun << " of " << Runs*kEventsPerRun << "... ";
-		if (dataType == kMC) {
-		
-			t1.Start();
-			eventID = di->getMCFrame(i, cf, x, y);
-			di->getEventIDs(i, eventIDs);
-			if (kDebug) cout << "Sum frame layer 2 = " << cf->getTH2F(2)->GetSum() << endl;
-			t1.Stop(); t2.Start();
-			if (kDebug) cout << "Start diffuseFrame\n";
-			cf->diffuseFrame(gRandom);
-			cout << "Occupancy = " << 100 * cf->getOccupancyLastLayer() << "%.\n";
-			if (kDebug) cout << "End diffuseFrame, start findHits\n";
-			t2.Stop(); t3.Start();
-			hits = cf->findHits(eventID);
-			if (kDebug) cout << "Number of hits in frame: " << hits->GetEntriesFast() << endl;
-			t3.Stop(); t4.Start();
-			clusters = hits->findClustersFromHits(); // badly optimized
-			clusters->removeSmallClusters(2);
-		//	cout << "Number of clusters in frame: " << clusters->GetEntriesFast() << endl;
-			cout << "Number of clusters in last layer: " << clusters->GetEntriesFastLastLayer() << endl;
-			t4.Stop();
-			clusters->matchWithEventIDs(eventIDs);
-			eventIDs->Clear();
-		}
-		
-		else if (dataType == kData) {
-			di->getDataFrame(i, cf, energy);
-			cout << "Occupancy = " << 100 * cf->getOccupancyLastLayer() << "%.\n";
-			hits = cf->findHits();
-			clusters = hits->findClustersFromHits();
-			clusters->removeSmallClusters(2);
-		}
-		
-		t5.Start();
-		calorimeterTracks = clusters->findCalorimeterTracks();
-		t5.Stop();
-
-		if (calorimeterTracks->GetEntriesFast() == 0) breakSignal = kTRUE; // to stop running
-
-		// Track improvements
-		calorimeterTracks->extrapolateToLayer0();
-		calorimeterTracks->splitSharedClusters();
-		calorimeterTracks->removeTracksLeavingDetector();
-		calorimeterTracks->removeTrackCollisions();
-		calorimeterTracks->retrogradeTrackImprovement(clusters);
-
-		for (Int_t j=0; j<calorimeterTracks->GetEntriesFast(); j++) {
-			if (!calorimeterTracks->At(j)) continue;
-
-			allTracks->appendTrack(calorimeterTracks->At(j));
-		}
-
-		allTracks->appendClustersWithoutTrack(clusters->getClustersWithoutTrack());
-		cout << Form("Timing: getMCframe (%.2f sec), diffuseFrame (%.2f sec), findHits (%.2f sec), findClustersFromHits (%.2f sec), findTracks (%.2f sec)\n",
-			     t1.RealTime(), t2.RealTime(), t3.RealTime(), t4.RealTime(), t5.RealTime());
-
-		cf->Reset();
-		hits->clearHits();
-		trackerHits->clearHits();
-		clusters->clearClusters();
-		trackerClusters->clearClusters();
-		calorimeterTracks->clearTracks();
-		trackerTracks->clearTracks();
-
-		if (breakSignal) break;
-	}
-
-	delete cf;
-	delete clusters;
-	delete trackerClusters;
-	delete hits;
-	delete trackerHits;
-	delete calorimeterTracks;
-	delete trackerTracks;
-	delete di;
-
-	return allTracks;
-}
-
 void drawTracks3D(Int_t Runs, Int_t dataType, Bool_t recreate, Float_t energy) {
 	Tracks * tracks = loadOrCreateTracks(recreate, Runs, dataType, energy);
 
-	TCanvas *c1 = new TCanvas("c1");
+	Int_t switchLayer = 6;
+
+	TCanvas *c1 = new TCanvas("c1", "c1", 1600, 1200);
 	c1->SetTitle(Form("Tracks from %.2f MeV protons on %s", energy, getMaterialChar()));
 	TView *view = TView::CreateView(1);
 	view->SetRange(0, 0, 0, 2*nx, 10, 2*ny);
+	Int_t iret;
+	Float_t theta = 285;
+	Float_t phi = 80;
+
+	view->SetView(theta, phi, 0, iret);
 
 	TClonesArray *restPoints = tracks->getClustersWithoutTrack();
-//	TClonesArray *conflictClusters = nullptr; 
 	Clusters * conflictClusters = nullptr;
 
 	Int_t nClusters = 0;
@@ -1298,7 +1124,9 @@ void drawTracks3D(Int_t Runs, Int_t dataType, Bool_t recreate, Float_t energy) {
 		Int_t n = thisTrack->GetEntriesFast();
 
 		TPolyLine3D *l = new TPolyLine3D(n);
-		l->SetLineWidth(1);
+		l->SetLineWidth(2);
+		TPolyMarker3D *trackPoints = new TPolyMarker3D(nClusters, 7);
+
 		if (!thisTrack->isFirstAndLastEventIDEqual()) {
 			l->SetLineColor(kRed);
 	
@@ -1310,6 +1138,7 @@ void drawTracks3D(Int_t Runs, Int_t dataType, Bool_t recreate, Float_t energy) {
 		}
 
 		firstEID = thisTrack->getEventID(0);
+		Int_t lineElementNumber = 0;
 		Int_t pointNumber = 0;
 		for (Int_t j=0; j<n; j++) {
 			if (!thisTrack->At(j)) continue;
@@ -1317,13 +1146,13 @@ void drawTracks3D(Int_t Runs, Int_t dataType, Bool_t recreate, Float_t energy) {
 			Float_t x = thisTrack->getX(j);
 			Float_t z = thisTrack->getY(j);
 			Float_t y = thisTrack->getLayer(j);
-			l->SetPoint(pointNumber++,x,y,z);
-
-			/*
-			if (thisTrack->getEventID(j) != firstEID) {
-				EIDMarker->SetPoint(EIDidx++, x, y, z);
+			
+			if (thisTrack->getLayer(j) < switchLayer) {
+				l->SetPoint(lineElementNumber++,x,y,z);
 			}
-			*/
+			else {
+				trackPoints->SetPoint(pointNumber++, x, y, z);
+			}
 		}
 
 		conflictClusters = (Clusters*) thisTrack->getConflictClusters();
@@ -1338,6 +1167,7 @@ void drawTracks3D(Int_t Runs, Int_t dataType, Bool_t recreate, Float_t energy) {
 		}
 
 		l->Draw();
+		trackPoints->Draw();
 //		EIDMarker->Draw();
 		conflictMarker->Draw();
 	}
@@ -1345,8 +1175,13 @@ void drawTracks3D(Int_t Runs, Int_t dataType, Bool_t recreate, Float_t energy) {
    c1->Update();
 
    TAxis3D *axis = TAxis3D::GetPadAxis();
+	axis->SetTitle("3D view of tracks and clusters");
    axis->SetLabelColor(kBlack);
    axis->SetAxisColor(kBlack);
+	axis->SetXTitle("Pixels in X");
+	axis->SetYTitle("Layer number");
+	axis->SetZTitle("Pixels in Y");
+	axis->SetTitleOffset(2);
 
 	vector<Int_t> * conflictTracks = tracks->getTracksWithConflictClusters();
 	vector<Int_t> * oneConflictPair = nullptr;
@@ -1391,6 +1226,8 @@ void drawTracks3D(Int_t Runs, Int_t dataType, Bool_t recreate, Float_t energy) {
 		}
 		cout << endl;
 	}
+
+	c1->SaveAs(Form("testOutput_switchLayer%d.png", switchLayer));
 
    delete tracks;
 	delete conflictTracks;

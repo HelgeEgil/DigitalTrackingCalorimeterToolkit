@@ -9,6 +9,12 @@
 #include "GlobalConstants/MaterialConstants.h"
 #include "HelperFunctions/Tools.h"
 
+#ifdef USEDEBUG
+#define showDebug(x) std::cout << x
+#else
+#define showDebug(x)
+#endif
+
 Hits::~Hits() {
    // Destructor
    hits_.Delete();
@@ -54,7 +60,7 @@ Clusters * Hits::findClustersFromHits() {
 		if (layerIdxFrom<0) continue;
 
 		t1.Start(false);
-		makeVerticalIndexOnLayer(layer); // only stores on this layer
+		makeVerticalIndexOnLayer(layer); // optimization
 		t1.Stop();
 
 		Int_t nHits = layerIdxTo - layerIdxFrom;
@@ -91,7 +97,7 @@ Clusters * Hits::findClustersFromHits() {
 		}
 	}
 
-	cout << "Summary findClustersFromHits: Make vertical index (\033[1m" << t1.RealTime() << " s\033[0m), Check if item is in vector (\033[1m" << t2.RealTime() << " s\033[0m), find neighbors (\033[1m" << t3.RealTime() << " s\033[0m), Find Expanded Clusters (\033[1m" << t4.RealTime() << " s\033[0m), Append expanded cluster to clusters (\033[1m" << t5.RealTime() << " s\033[0m).\n";
+	showDebug("Summary findClustersFromHits: Make vertical index (\033[1m" << t1.RealTime() << " s\033[0m), Check if item is in vector (\033[1m" << t2.RealTime() << " s\033[0m), find neighbors (\033[1m" << t3.RealTime() << " s\033[0m), Find Expanded Clusters (\033[1m" << t4.RealTime() << " s\033[0m), Append expanded cluster to clusters (\033[1m" << t5.RealTime() << " s\033[0m).\n");
 
 	return clusters;
 }

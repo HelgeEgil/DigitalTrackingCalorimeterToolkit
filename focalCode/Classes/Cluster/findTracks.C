@@ -10,6 +10,12 @@
 #include "GlobalConstants/MaterialConstants.h"
 #include "HelperFunctions/Tools.h"
 
+#ifdef USEDEBUG
+#define showDebug(x) std::cout << x
+#else
+#define showDebug(x)
+#endif
+
 using namespace std;
 
 Tracks * Clusters::findCalorimeterTracks() {
@@ -29,7 +35,7 @@ Tracks * Clusters::findCalorimeterTracks() {
 	fillMCSRadiusList(MCSSigma);
 	findTracksFromLayer(tracks, 0, usedClustersInSeeds);
 
-	cout << "After first pass, found " << tracks->GetEntriesFast() << " tracks. Size of CWT = " << clustersWithoutTrack_.GetEntries() << endl;
+	showDebug( "After first pass, found " << tracks->GetEntriesFast() << " tracks. Size of CWT = " << clustersWithoutTrack_.GetEntries() << endl);
 
 	if (clustersWithoutTrack_.GetEntries() > 0) {
 
@@ -41,11 +47,10 @@ Tracks * Clusters::findCalorimeterTracks() {
 		cout << getSearchRadiusForLayer(1) << endl;
 		findTracksFromLayer(tracks, 0, usedClustersInSeeds);
 	
-		cout << "After second pass, found " << tracks->GetEntriesFast() << " tracks. Size of CWT = " << clustersWithoutTrack_.GetEntries() << endl;
+		showDebug("After second pass, found " << tracks->GetEntriesFast() << " tracks. Size of CWT = " << clustersWithoutTrack_.GetEntries() << endl);
 	
 		// third pass
 		findTracksFromLayer(tracks, 1, usedClustersInSeeds);
-
 	}
 
 	Int_t clustersLeft = clustersWithoutTrack_.GetEntries();
@@ -111,9 +116,7 @@ Clusters * Clusters::findSeeds(Int_t layer, Bool_t kUsedClustersInSeeds) {
 	Int_t layerIdxFrom = getFirstIndexOfLayer(layer);
 	Int_t layerIdxTo = getLastIndexOfLayer(layer);
 
-	if (kDebug) {
-		cout << "Layer Index From , To: (" << layerIdxFrom << "," << layerIdxTo << ")\n";
-	}
+	showDebug("Layer Index From , To: (" << layerIdxFrom << "," << layerIdxTo << ")\n");
 	
 	if (layerIdxFrom<0)
 		return seeds;
@@ -153,7 +156,7 @@ Track * Clusters::nearestClusterTrackPropagation(Cluster *seed) {
 	
 	if (seedTracks->GetEntriesFast()) {
 		longestTrack = findLongestTrack(seedTracks);
-		if (kDebug) cout << Form("Longest track is %d layers deep with an energy of about %.1f MeV.\n", longestTrack->GetEntriesFast(), longestTrack->getEnergy());
+		showDebug(Form("Longest track is %d layers deep with an energy of about %.1f MeV.\n", longestTrack->GetEntriesFast(), longestTrack->getEnergy()));
 	}
 
 	delete seedTracks;

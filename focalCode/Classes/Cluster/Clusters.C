@@ -248,7 +248,6 @@ void Clusters::removeSmallClusters(Int_t size) {
 	}
 }
 
-
 void Clusters::matchWithEventIDs(Hits * eventIDs) {
 	
 	TStopwatch t1;
