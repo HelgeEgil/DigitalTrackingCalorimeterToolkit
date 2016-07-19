@@ -91,6 +91,7 @@ class Track : public TObject {
 	Float_t getSlopeAngleBetweenLayers(Int_t i);
 	Float_t getSlopeAngleChangeBetweenLayers(Int_t i);
 	Float_t getSlopeAngleDifferenceSum();
+	Float_t getSlopeAngleDifferenceSumInTheta0();
 	Float_t getMaximumSlopeAngleChange();
 	Float_t getAbsorberLength(Int_t i);
 	Float_t getSnakeness();

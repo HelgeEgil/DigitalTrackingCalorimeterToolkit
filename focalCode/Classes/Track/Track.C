@@ -173,6 +173,7 @@ Float_t Track::getSlopeAngleBetweenLayers(Int_t i) {
 }	
 
 Float_t Track::getSlopeAngleChangeBetweenLayers(Int_t i) {
+	// The change in angle due to material between sensor layer i and i+1
 
 	if ((i+1) >= GetEntriesFast()) return 0;
 	
@@ -192,6 +193,22 @@ Float_t Track::getSlopeAngleDifferenceSum() {
 	}
 
 	return angleSum;
+}
+
+Float_t Track::getSlopeAngleDifferenceSumInTheta0() {
+	Float_t theta0sum = 0;
+	Float_t dtheta = 0;
+	Float_t expected_mcs = 0;
+
+	for (Int_t i=1; i<GetEntriesFast() - 1; i++) {
+		if (!At(i)) continue;
+		dtheta = fabs(getSlopeAngleChangeBetweenLayers(i));
+		expected_mcs = getMCSAngleForLayer(getLayer(i));
+
+		theta0sum += pow(dtheta / expected_mcs, 2);
+	}
+
+	return sqrt(theta0sum);
 }
 
 Float_t Track::getMaximumSlopeAngleChange() {
@@ -326,7 +343,7 @@ Float_t Track::getSnakeness() {
 
 			dX = xp + slopeX - x;
 			dY = yp + slopeY - y;
-			dXY = pow(dX*dX + dY*dY, 0.5);
+			dXY = quadratureAdd(dX, dY);
 
 			slopeX = x - xp; slopeY = y - yp;
 
@@ -338,20 +355,29 @@ Float_t Track::getSnakeness() {
 }
 
 Float_t Track::getTrackScore() {
-	Float_t upperTrackLength = 35;
-	Float_t upperSnakeness = 3;
-	Int_t snakePoints = 10;
+	Float_t upperTrackLength = getTLFromEnergy(run_energy);
+	Float_t upperAngularChange = 3;
+	Int_t angularChangePoints = 10;
 	Int_t trackLengthPoints = 25;
+	Int_t braggPeakPoints = 0;
+
+	// If angularChange is 3, give 0 points
+	// If its 0, give 10 points
+	// If bragg peak is found, give 10 points
+	
+	if (getAverageCSLastN(2) > getAverageCS() * kBPFactorAboveAverage) {
+		braggPeakPoints = 10;
+	}
 
 	Float_t trackLength = getTrackLengthmm();
 	Float_t snakeness = getSnakeness();
+	Float_t angularChange = getSlopeAngleDifferenceSumInTheta0();
 
 	if (trackLength == 0) return 0;
 
-	Float_t points = trackLength * (trackLengthPoints / upperTrackLength)
-						+ (upperSnakeness - snakeness) * snakePoints/upperSnakeness;
-
-	// five points deduction for each shared track
+	Float_t points = trackLength * (trackLengthPoints / upperTrackLength);
+	points += (upperAngularChange - angularChange) * (angularChangePoints / upperAngularChange);
+	points += braggPeakPoints;
 
 	return points;
 }
@@ -366,6 +392,7 @@ Int_t Track::getNMissingLayers() {
        break;
      }
    }
+
    if (firstLayer > 1e5) cout << "Couldn't set first layer!\n";
    
    for (Int_t i=GetEntriesFast()-1; i>=0; i--) {
@@ -680,7 +707,6 @@ TGraphErrors * Track::doFit() {
 	Int_t n = GetEntriesFast();
 	Float_t x[n], y[n];
 	Float_t erx[n], ery[n];
-//	Float_t preTL = getPreTLFromScintillatorAndAluminum();
 	Float_t preTL = getPreTL();
 	Float_t trackLength = preTL;
 	

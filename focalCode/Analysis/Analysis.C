@@ -1056,6 +1056,7 @@ void drawTracks3D(Int_t Runs, Int_t dataType, Bool_t recreate, Float_t energy) {
 	Int_t nTrueTracks = 0;
 	Int_t nOKTracks = 0;
 	Int_t nOKMinusTracks = 0;
+	Int_t nOKLastLayers = 0;
 	Int_t nOneWrong = 0;
 
 	Track * thisTrack = nullptr;
@@ -1092,21 +1093,33 @@ void drawTracks3D(Int_t Runs, Int_t dataType, Bool_t recreate, Float_t energy) {
 
 			if (delta < 0.5 && deltaphi < 1) {
 				nOKMinusTracks++;
+				nOKLastLayers++;
 			}
+			else if (thisTrack->getWEPL() < 0.6 * getWEPLFromEnergy(run_energy)) {
+				// Bad track ends early. OK...
+				nOKLastLayers++;
+			}
+			else {
+				cout << "Bad track... " << *thisTrack << endl;
+			}
+
 		}			
 	}
 
 	nOKMinusTracks += nOKTracks;
+	nOKLastLayers += nOKTracks;
 
 	Int_t numberOfTracks = tracks->GetEntries();
 
 	Float_t factorEID = 100 * ((float) nTrueTracks / numberOfTracks);
 	Float_t factorEIDOK = 100 * ((float) nOKTracks / numberOfTracks);
 	Float_t factorEIDOKMinus = 100 * ((float) nOKMinusTracks / numberOfTracks);
+	Float_t factorLastLayers = 100 * ((float) nOKLastLayers / numberOfTracks);
 
 	cout << nTrueTracks << " of total " << numberOfTracks << " tracks has the same event ID (" << factorEID << "%)\n";
 	cout << nOKTracks << " of total " << numberOfTracks << " tracks has the same first/last event ID (" << factorEIDOK << "%)\n";
 	cout << nOKMinusTracks << " of total " << numberOfTracks << " tracks has a close match (0.5 mm, 1 degree) on first / last cluster (" << factorEIDOKMinus << "%)\n";
+	cout << nOKLastLayers << " of total " << numberOfTracks << " tracks has a close match (0.5 mm, 1 degree) or is a very short tracr (" << factorLastLayers << "%)\n";
 
 	cout << "Tracks with no EID in first layer: ";
 	for (Int_t i=0; i<ntracks; i++) {
@@ -1227,7 +1240,7 @@ void drawTracks3D(Int_t Runs, Int_t dataType, Bool_t recreate, Float_t energy) {
 		cout << endl;
 	}
 
-	c1->SaveAs(Form("testOutput_switchLayer%d.png", switchLayer));
+	c1->SaveAs(Form("OutputFiles/figures/testOutput_switchLayer%d.png", switchLayer));
 
    delete tracks;
 	delete conflictTracks;

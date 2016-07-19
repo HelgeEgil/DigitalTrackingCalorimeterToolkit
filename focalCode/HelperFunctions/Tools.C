@@ -372,26 +372,6 @@ Hit * sumHits(Hit * a, Hit * b) {
 	return newHit;
 }
 
-/*
-
-Cluster * getTrackPropagationToLayer(Track * track, Int_t layer) {
-	Int_t last = track->GetEntriesFast() - 1;
-
-	Int_t diffLayer = layer - track->getLayer(last);
-
-	Cluster p1(track->getX(last-1), track->getY(last-1));
-	Cluster p2(track->getX(last), track->getY(last));
-
-	Cluster slope(p2.getX() - p1.getX(), p2.getY() - p1.getY());
-
-	Float_t x = p2.getX() + diffLayer * slope.getX();
-	Float_t y = p2.getY() + diffLayer * slope.getY();
-
-	return new Cluster(x, y, layer);
-}
-
-*/
-
 Cluster * getTrackPropagationToLayer(Track * track, Int_t layer) {
 	Int_t fromLayer = track->getLayer(track->GetEntriesFast() - 1);
 

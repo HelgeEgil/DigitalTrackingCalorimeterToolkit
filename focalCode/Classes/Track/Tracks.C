@@ -413,6 +413,8 @@ vector<Int_t> * Tracks::getConflictingTracksFromTrack(Int_t trackIdx) {
 
 	Track * trackA = At(trackIdx);
 
+	if (!trackA) { return conflictingTracks; }
+
 	Clusters * conflictClusters = trackA->getConflictClusters();
 	Int_t nClusters = conflictClusters->GetEntriesFast();
 	Int_t nClustersReal = conflictClusters->GetEntries();
@@ -514,7 +516,7 @@ void Tracks::removeTrackCollisions() {
 		track[longTrack]->At(longClusterIdx)->markUnused();
 	
 		if (len[shortTrack] > 2) {
-			track[shortTrack]->removeCluster(conflictCluster);
+			track[shortTrack]->removeClusterAt(shortClusterIdx);
 		}
 		
 		else {

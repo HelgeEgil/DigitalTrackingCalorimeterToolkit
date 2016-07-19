@@ -82,6 +82,8 @@ public:
 	Cluster * findNearestNeighbour(Cluster *projectedPoint, Bool_t rejectUsed = true);
 	Track * findLongestTrack(Tracks *seedTracks);
 
+	Float_t MCSMultiplicationFactor;
+
 	ClassDef(Clusters,4);
 };
 #endif

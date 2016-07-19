@@ -30,21 +30,21 @@ Tracks * Clusters::findCalorimeterTracks() {
 	makeLayerIndex();
 
 	Float_t MCSSigma = 3;
+	
+	MCSMultiplicationFactor = 3;
+
 	Bool_t usedClustersInSeeds = true;
 
-	fillMCSRadiusList(MCSSigma);
+	fillMCSRadiusList(1);
 	findTracksFromLayer(tracks, 0, usedClustersInSeeds);
 
 	showDebug( "After first pass, found " << tracks->GetEntriesFast() << " tracks. Size of CWT = " << clustersWithoutTrack_.GetEntries() << endl);
 
+	MCSMultiplicationFactor = 5;
 	if (clustersWithoutTrack_.GetEntries() > 0) {
 
-		MCSSigma = 5;
 		usedClustersInSeeds = false;
-	
-		fillMCSRadiusList(MCSSigma);
 		multiplyRadiusFirstLayers(2);
-		cout << getSearchRadiusForLayer(1) << endl;
 		findTracksFromLayer(tracks, 0, usedClustersInSeeds);
 	
 		showDebug("After second pass, found " << tracks->GetEntriesFast() << " tracks. Size of CWT = " << clustersWithoutTrack_.GetEntries() << endl);
@@ -197,7 +197,7 @@ Clusters * Clusters::findClustersFromSeedInLayer(Cluster *seed, Int_t nextLayer)
 	Int_t layerIdxTo = getLastIndexOfLayer(nextLayer);
 	Clusters *clustersFromThisLayer = new Clusters(50);
 
-	Float_t maxDelta = getSearchRadiusForLayer(nextLayer) * 0.75;
+	Float_t maxDelta = getSearchRadiusForLayer(nextLayer) * 0.75 * MCSMultiplicationFactor;
 
 	if (layerIdxFrom < 0)
 		return clustersFromThisLayer; // empty
@@ -220,13 +220,7 @@ void Clusters::doNearestClusterTrackPropagation(Track *track, Int_t lastHitLayer
 	Float_t delta, skipDistance;
 
 	for (Int_t layer = lastHitLayer + 1; layer <= nSearchLayers+1; layer++) {
-		searchRadius = getSearchRadiusForLayer(layer);
-
-		/*		
-		if (layer == 2) {
-			searchRadius *= 0.5;
-		}
-		*/
+		searchRadius = getSearchRadiusForLayer(layer) * MCSMultiplicationFactor;
 
 		projectedPoint = getTrackPropagationToLayer(track, layer);
 
@@ -284,7 +278,7 @@ Cluster * Clusters::findNearestNeighbour(Cluster *projectedPoint, Bool_t rejectU
 	Int_t layerIdxFrom = getFirstIndexOfLayer(searchLayer);
 	Int_t layerIdxTo = getLastIndexOfLayer(searchLayer);
 	
-	Float_t maxDelta = getSearchRadiusForLayer(searchLayer); // maximum distance for nearest neighbour
+	Float_t maxDelta = getSearchRadiusForLayer(searchLayer) * MCSMultiplicationFactor; // maximum distance for nearest neighbour
 
 	if (layerIdxFrom < 0)
 		return 0;
