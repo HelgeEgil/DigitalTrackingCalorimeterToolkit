@@ -109,7 +109,6 @@ class Track : public TObject {
 	Bool_t isHitOnScintillatorV();
 	Bool_t isHitOnScintillators();
 
-
 	Bool_t doesTrackEndAbruptly();
 	Float_t getRiseFactor();
 	

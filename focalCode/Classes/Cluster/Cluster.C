@@ -6,10 +6,13 @@
 #include "GlobalConstants/Constants.h"
 #include "GlobalConstants/MaterialConstants.h"
 
-// ClassImp(Cluster)
-
-Cluster::~Cluster() {
-   // Destructor
+Cluster::Cluster() {
+	x_ = -1;
+	y_ = -1;
+	layerNo_ = -1;
+	clusterSize_ -1;
+	eventID_ = -1;
+	isUsed_ = false;
 }
 
 Cluster::Cluster(Cluster* cluster) {
@@ -28,6 +31,10 @@ Cluster::Cluster(Float_t x, Float_t y, Int_t layer, Int_t size, Int_t eventID) {
    clusterSize_ = size;
    eventID_ = eventID;
 	isUsed_ = false;
+}
+
+Cluster::~Cluster() {
+   // Destructor
 }
 
 Double_t Cluster::getLayermm() {

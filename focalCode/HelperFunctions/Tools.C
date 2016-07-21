@@ -372,22 +372,22 @@ Hit * sumHits(Hit * a, Hit * b) {
 	return newHit;
 }
 
-Cluster * getTrackPropagationToLayer(Track * track, Int_t layer) {
+Cluster * getTrackExtrapolationToLayer(Track * track, Int_t layer) {
 	Int_t fromLayer = track->getLayer(track->GetEntriesFast() - 1);
 
-	return getTrackPropagationFromTo(track, fromLayer, layer);
+	return getTrackExtrapolationromTo(track, fromLayer, layer);
 }
 
-Cluster * getRetrogradeTrackPropagationToLayer(Track * track, Int_t layer) {
+Cluster * getRetrogradeTrackExtrapolationToLayer(Track * track, Int_t layer) {
 	Int_t fromLayer = layer + 1;
 
 	if (track->getIdxFromLayer(fromLayer) < 0) fromLayer++;
 	if (track->getIdxFromLayer(fromLayer) < 0) return nullptr;
 	
-	return getTrackPropagationFromTo(track, fromLayer, layer);
+	return getTrackExtrapolationFromTo(track, fromLayer, layer);
 }
 
-Cluster * getTrackPropagationFromTo(Track * track, Int_t fromLayer, Int_t toLayer) {
+Cluster * getTrackExtrapolationFromTo(Track * track, Int_t fromLayer, Int_t toLayer) {
 	Int_t diffLayer = toLayer - fromLayer;
 	Int_t sign = (0 < diffLayer) - (diffLayer < 0);
 	Int_t vectorLayer = fromLayer - sign;
@@ -439,5 +439,10 @@ Bool_t isSameCluster(Cluster *a, Cluster *b) {
 
 Float_t max(Float_t a, Float_t b) {
 	if (a > b) return a;
+	else return b;
+}
+
+Float_t min(Float_t a, Float_t b) {
+	if (a < b) return a;
 	else return b;
 }

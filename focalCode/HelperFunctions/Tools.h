@@ -33,17 +33,18 @@ Float_t getAverageEnergyLoss(Float_t energy);
 
 Float_t calculateMCS(Float_t energy, Float_t depth);
 Float_t findMCSPixelRadiusForLayer(Float_t layer, Float_t E0);
-void fillMCSRadiusList(Float_t angleFactor);
+void fillMCSRadiusList(Float_t angleFactor = 1);
 void multiplyRadiusFirstLayers(Float_t factor);
 Float_t getMCSAngleForLayer(Int_t layer);
 Float_t findMCSAtLayerRad(Int_t layer, Float_t E0);
 Float_t getSearchRadiusForLayer(Int_t layer);
 Hit * sumHits(Hit * a, Hit * b);
-Cluster * getTrackPropagationToLayer(Track * track, Int_t layer);
-Cluster * getTrackPropagationFromTo(Track * track, Int_t fromLayer, Int_t toLayer);
-Cluster * getRetrogradeTrackPropagationToLayer(Track * track, Int_t layer);
+Cluster * getTrackExtrapolationToLayer(Track * track, Int_t layer);
+Cluster * getTrackExtrapolationFromTo(Track * track, Int_t fromLayer, Int_t toLayer);
+Cluster * getRetrogradeTrackExtrapolationToLayer(Track * track, Int_t layer);
 Bool_t isPointOutOfBounds(Cluster * point, Float_t padding = 0);
 Bool_t isSameCluster(Cluster *a, Cluster *b);
 Float_t max(Float_t a, Float_t b);
+Float_t min(Float_t a, Float_t b);
 
 #endif /* FOCALCODE_TOOLS_H_ */

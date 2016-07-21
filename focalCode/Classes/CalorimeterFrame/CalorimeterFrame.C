@@ -22,6 +22,12 @@ void CalorimeterFrame::Clear(Option_t *) {
 	calorimeterFrame_.Clear("C");
 }
 
+void CalorimeterFrame::Reset() {
+	for (Int_t layer=0; layer<nLayers; layer++) {
+		At(layer)->Reset();
+	}
+}
+
 Hits * CalorimeterFrame::findHits(Int_t eventID) {
 	Hits *hits = new Hits();
 
@@ -45,19 +51,6 @@ Hits * CalorimeterFrame::findHits(Int_t eventID) {
 	return hits;
 }
 
-Float_t CalorimeterFrame::getOccupancyLastLayer() {
-	Float_t occupancy = 0;
-	Float_t lastOccupancy = 0;
-	for (Int_t layer=0; layer<nLayers; layer++) {
-		occupancy = At(layer)->getOccupancy();
-
-		if (occupancy>lastOccupancy*0.9) { lastOccupancy = occupancy; }
-		else { break; }
-	}
-
-	return lastOccupancy;
-}
-
 void CalorimeterFrame::diffuseFrame(TRandom3 *gRandom) {
 	Int_t nHitsInLayer = 1;
 	
@@ -70,8 +63,15 @@ void CalorimeterFrame::diffuseFrame(TRandom3 *gRandom) {
 	}
 }
 
-void CalorimeterFrame::Reset() {
+Float_t CalorimeterFrame::getOccupancyLastLayer() {
+	Float_t occupancy = 0;
+	Float_t lastOccupancy = 0;
 	for (Int_t layer=0; layer<nLayers; layer++) {
-		At(layer)->Reset();
+		occupancy = At(layer)->getOccupancy();
+
+		if (occupancy>lastOccupancy*0.9) { lastOccupancy = occupancy; }
+		else { break; }
 	}
+
+	return lastOccupancy;
 }

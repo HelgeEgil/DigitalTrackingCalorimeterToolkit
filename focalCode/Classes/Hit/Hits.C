@@ -16,7 +16,6 @@
 #endif
 
 Hits::~Hits() {
-   // Destructor
    hits_.Delete();
 }
 
@@ -26,16 +25,17 @@ void Hits::Clear(Option_t *) {
 
 void Hits::appendPoint(Int_t x, Int_t y, Int_t layer, Int_t event, Float_t edep) {
    Int_t i = GetEntriesFast();
+
    Hit *hit = (Hit*) hits_.ConstructedAt(i);
    hit->set(x,y,layer,event, edep);
 }
 
 void Hits::appendHits(Hits *hits) {
   Int_t i = GetEntriesFast();
+
   for (Int_t j=0; j<hits->GetEntriesFast(); j++) {
 	Hit *hit = (Hit*) hits_.ConstructedAt(i);
-	hit->set(hits->At(i));
-	i++;
+	hit->set(hits->At(i++));
   }
 }
 
@@ -48,42 +48,33 @@ Int_t Hits::getI(Int_t x, Int_t y) {
 }
 
 Clusters * Hits::findClustersFromHits() {
-	Clusters *clusters = new Clusters(kEventsPerRun * 20);
-	vector<Int_t> *expandedCluster = 0;
-	TStopwatch t1, t2, t3, t4, t5;
+	Clusters			 *	clusters = new Clusters(kEventsPerRun * 20);
+	vector<Int_t>   *	expandedCluster = nullptr;
+	vector<Int_t>	 *	checkedIndices = nullptr; // Optimization: Make this array
+	vector<Int_t>	 *	firstHits = nullptr;
+	Int_t					layerIdxFrom, layerIdxTo;
 
-	Int_t layerIdxFrom, layerIdxTo;
 	for (Int_t layer=0; layer<nLayers; layer++) {
 		layerIdxFrom = getFirstIndexOfLayer(layer);
 		layerIdxTo = getLastIndexOfLayer(layer);
 
 		if (layerIdxFrom<0) continue;
 
-		t1.Start(false);
 		makeVerticalIndexOnLayer(layer); // optimization
-		t1.Stop();
 
-		Int_t nHits = layerIdxTo - layerIdxFrom;
-		vector<Int_t> *checkedIndices = new vector<Int_t>;
-		checkedIndices->reserve(nHits);
+		checkedIndices = new vector<Int_t>;
+		checkedIndices->reserve(layerIdxTo - layerIdxFrom);
 
 		for (Int_t i = layerIdxFrom; i < layerIdxTo; i++) {
-			t2.Start(false);
 			if (isItemInVector(i, checkedIndices)) continue;
-			t2.Stop();
 
-			t3.Start(false);
-			vector<Int_t> * firstHits = findNeighbours(i);
-			t3.Stop();
+			firstHits = findNeighbours(i);
 
 			if (firstHits->size()) {
-				t4.Start(false);
-				expandedCluster = findExpandedCluster(i, checkedIndices);
-				t4.Stop();
+				// Find expanded clusters is the time demanding function
+				expandedCluster = getAllNeighboursFromCluster(i, checkedIndices);
 
-				t5.Start(false);
-				appendExpandedClusterToClusters(expandedCluster, clusters);
-				t5.Stop();
+				appendNeighboursToClusters(expandedCluster, clusters);
 				delete expandedCluster;
 				delete firstHits;
 			}
@@ -96,8 +87,6 @@ Clusters * Hits::findClustersFromHits() {
 			clusters->At(i)->setEventID(getEventID(0));
 		}
 	}
-
-	showDebug("Summary findClustersFromHits: Make vertical index (\033[1m" << t1.RealTime() << " s\033[0m), Check if item is in vector (\033[1m" << t2.RealTime() << " s\033[0m), find neighbors (\033[1m" << t3.RealTime() << " s\033[0m), Find Expanded Clusters (\033[1m" << t4.RealTime() << " s\033[0m), Append expanded cluster to clusters (\033[1m" << t5.RealTime() << " s\033[0m).\n");
 
 	return clusters;
 }
@@ -382,40 +371,3 @@ Int_t Hits::getLastIndexAfterY(Int_t y) {
 	if (idx == -1) idx = GetEntriesFast()-1;
 	return idx;
 }
-
-
-Int_t Hits::sumAllHitsInEachLayer() {
-	// put all hits in first hit number for each layer
-	Int_t firstHitPerLayer[nLayers];;
-	Int_t thisLayer, thisEventID, layerIDX;
-	Int_t nHitsRemoved = 0;
-	Float_t thisEdep;
-	Hit * thisHit = nullptr;
-	Hit * newHit = nullptr;
-	Hit * oldHit = nullptr;
-
-	for (Int_t i=0; i<nLayers; i++) firstHitPerLayer[i] = -1;
-
-	for (Int_t i=0; i<GetEntriesFast(); i++) {
-		thisLayer = getLayer(i);
-		layerIDX = firstHitPerLayer[thisLayer];
-
-		if (layerIDX > -1) {
-			// layer already exists
-			thisHit = At(i);
-			oldHit = At(layerIDX);
-			newHit = sumHits(thisHit, oldHit);
-
-			At(layerIDX)->set(newHit);
-			removeHitAt(i);
-			nHitsRemoved++;
-		}
-
-		else {
-			// layer does not exist
-			firstHitPerLayer[thisLayer] = i;
-		}
-	}
-	return nHitsRemoved;
-}
-

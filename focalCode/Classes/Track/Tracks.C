@@ -380,7 +380,7 @@ void Tracks::removeTracksLeavingDetector() {
 		if (!At(i)->Last()) continue;
 
 		Int_t lastLayer = At(i)->Last()->getLayer();
-		Cluster *nextPoint = getTrackPropagationToLayer(At(i), lastLayer + 1);
+		Cluster *nextPoint = getTrackExtrapolationToLayer(At(i), lastLayer + 1);
 		
 		if (isPointOutOfBounds(nextPoint, -15)) {
 			removeTrack(At(i));
@@ -566,7 +566,7 @@ void Tracks::retrogradeTrackImprovement(Clusters * clusters) {
 		for (Int_t layer = lastLayer - 2; layer>=0; layer--) {
 			if (thisTrack->getIdxFromLayer(layer) < 0) continue;
 
-			estimatedRetrogradeCluster = getRetrogradeTrackPropagationToLayer(thisTrack, layer);
+			estimatedRetrogradeCluster = getRetrogradeTrackExtrapolationToLayer(thisTrack, layer);
 			if (!estimatedRetrogradeCluster) continue;
 			
 			actualCluster = thisTrack->At(thisTrack->getClusterFromLayer(layer));
