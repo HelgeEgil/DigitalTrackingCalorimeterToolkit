@@ -20,6 +20,9 @@ using namespace std;
 // The parameters a1, bk(1-2), gk(1-2), ck(1-5), lambdak(1-5) are found through range-energy fitting on different materials in GATE simulations, and defined below
 // All calculations are performed in Classes/Track/conversionFunctions.C
 
+//////////////////////////////////
+// Actual calculation functions //
+//////////////////////////////////
 
 Float_t getTLFromEnergy(Float_t energy, Double_t a1, Double_t b1, Double_t b2, Double_t g1, Double_t g2) {
 	Double_t sum1 = b1 * (1 - exp( -g1 * energy ));
@@ -58,13 +61,18 @@ Float_t getEnergyAtTL(Float_t E0, Float_t depth, Double_t c1, Double_t c2, Doubl
 	return energy;
 }
 
-Float_t getTLFromEnergy(Float_t energy) {
-	return getTLFromEnergy(energy, a1_material, b1_material, b2_material, g1_material, g2_material);
-}
+//////////////////////////
+// Conversion to energy //
+//////////////////////////
 
 Float_t getEnergyFromTL(Float_t range) {
 	return getEnergyFromTL(range, c1_material, c2_material, c3_material, c4_material, c5_material,
 											l1_material, l2_material, l3_material, l4_material, l5_material);
+}
+
+Float_t getEnergyFromWEPL(Float_t wepl) {
+	return getEnergyFromTL(wepl, c1_water, c2_water, c3_water, c4_water, c5_water,
+											l1_water, l2_water, l3_water, l4_water, l5_water);
 }
 
 Float_t getEnergyAtTL(Float_t E0, Float_t depth) {
@@ -72,14 +80,21 @@ Float_t getEnergyAtTL(Float_t E0, Float_t depth) {
 											l1_material, l2_material, l3_material, l4_material, l5_material);
 }
 
+//////////////////////////
+// Conversion to range  //
+//////////////////////////
+
+Float_t getTLFromEnergy(Float_t energy) {
+	return getTLFromEnergy(energy, a1_material, b1_material, b2_material, g1_material, g2_material);
+}
+
 Float_t getWEPLFromEnergy(Float_t energy) {
 	return getTLFromEnergy(energy, a1_water, b1_water, b2_water, g1_water, g2_water);
 }
 
-Float_t getEnergyFromWEPL(Float_t wepl) {
-	return getEnergyFromTL(wepl, c1_water, c2_water, c3_water, c4_water, c5_water,
-											l1_water, l2_water, l3_water, l4_water, l5_water);
-}
+//////////////////////////
+// Conversion to WEPL   //
+//////////////////////////
 
 Float_t getWEPLFactorFromEnergy(Float_t energy) {
 	Float_t range = getTLFromEnergy(energy);
@@ -94,6 +109,10 @@ Float_t getWEPLFromTL(Float_t tl) {
 
 	return wepl;
 }
+
+/////////////////////////////////////
+// calculation of range straggling //
+/////////////////////////////////////
 
 Float_t getTLStragglingFromTL(Float_t tl, Float_t sigma_energy) {
 	Float_t energy = getEnergyFromTL(tl);
@@ -110,6 +129,10 @@ Float_t getTLStragglingFromEnergy(Float_t energy, Float_t sigma_energy) {
 	Float_t tl = getTLFromEnergy(energy);
 	return getTLStragglingFromTL(tl, sigma_energy);
 }
+
+/////////////////////////////////////
+// Conversion to WEPL straggling   //
+/////////////////////////////////////
 
 Float_t getWEPLStragglingFromWEPL(Float_t wepl, Float_t sigma_energy) {
 	Float_t energy = getEnergyFromWEPL(wepl);
@@ -130,6 +153,9 @@ Float_t getWEPLStragglingFromEnergy(Float_t energy, Float_t sigma_energy) {
 	return getWEPLStragglingFromWEPL(wepl, sigma_energy);
 }	
 
+///////////////////////////////////////
+// Conversion to energy straggling   //
+///////////////////////////////////////
 
 Float_t getEnergyStragglingFromTL(Float_t tl, Float_t sigma_energy) {
 	Float_t straggling = getTLStragglingFromTL (tl, sigma_energy);
@@ -173,6 +199,10 @@ Float_t getEnergyStragglingFromWEPLStraggling(Float_t wepl, Float_t WEPLStraggli
 
 	return energy_straggling;
 }
+
+/////////////////////////////////////////////
+// Conversion to/from defined kOutputUnit  //
+/////////////////////////////////////////////
 
 Float_t getUnitFromEnergy(Float_t energy) {
 	Float_t res = 0;

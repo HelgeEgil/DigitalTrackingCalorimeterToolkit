@@ -6,6 +6,12 @@
 #include "Classes/Layer/Layer.h"
 #include "Classes/Hit/Hits.h"
 
+#ifdef SETDEBUG
+#define showDebug(x) std::cout << x
+#else
+#define showDebug(x)
+#endif
+
 Layer::Layer(Int_t layerNo, Bool_t frameType, Bool_t dataType) : frame2D_(Form("%d_frame2D_%i",frameType, layerNo), Form("frame2D_layer_%i", layerNo), 2*nx, 0, 2*nx, 2*ny, 0, 2*ny) {
 	dataType_ = dataType;
 	frameType_ = frameType;
@@ -13,7 +19,6 @@ Layer::Layer(Int_t layerNo, Bool_t frameType, Bool_t dataType) : frame2D_(Form("
 }
 
 Layer::~Layer() {
-	// TODO Auto-generated destructor stub
 }
 
 Int_t Layer::diffuseLayer(TRandom3 *gRandom) {
@@ -21,15 +26,13 @@ Int_t Layer::diffuseLayer(TRandom3 *gRandom) {
 	Float_t EnergyFactor = 1000 / 30. * SpreadNumber;
 	Float_t newSigma, eDep;
 
-	Hits *hits = new Hits();
+   Hits *hits = new Hits();
 	Bool_t isHits = findHits(hits);
 	Int_t nHits = hits->GetEntriesFast();
 	
 	frame2D_.Reset();
 
-	if (kDebug) {
-		cout << "Diffusing layer  " << layerNo_ << ". Number of hits = " << nHits << endl;
-	}
+   showDebug("Diffusing layer  " << layerNo_ << ". Number of hits = " << nHits << endl);
 
 	for (Int_t h=0; h<nHits; h++) {
 		x = hits->getX(h);
@@ -51,28 +54,36 @@ Int_t Layer::diffuseLayer(TRandom3 *gRandom) {
 }
 
 Bool_t Layer::findHits(Hits* hits) {
-	Int_t x, y, z;
-	Bool_t isHits = false;
-	Float_t edep;
+	Int_t		x, y, z, nbins;
+	Bool_t	isHits = false;
+	Float_t	edep;
+	Int_t		dummyEventID = -1;
 
-	Int_t nBins = frame2D_.GetBin(frame2D_.GetNbinsX(), frame2D_.GetNbinsY());
-	for (int i=1; i<nBins+1; i++) {
+	nBins = frame2D_.GetBin(frame2D_.GetNbinsX(), frame2D_.GetNbinsY());
+
+	for (Int_t i=1; i<nBins+1; i++) {
 		edep = frame2D_.GetBinContent(i);
+
 		if (edep) {
-			frame2D_.GetBinXYZ(i,x,y,z);			
-			hits->appendPoint(x,y,layerNo_, -1, edep);
+			frame2D_.GetBinXYZ(i,x,y,z);
+			hits->appendPoint(x,y,layerNo_, dummyEventID, edep);
 			isHits = true;
 		}
 	}
+
 	return isHits;
 }
 
 Float_t Layer::getOccupancy() {
-	Int_t numberOfActivatedPixels = 0;
-	Int_t nBins = frame2D_.GetBin(frame2D_.GetNbinsX(), frame2D_.GetNbinsY());
+	Int_t		numberOfActivatedPixels = 0;
+	Int_t		nBins = frame2D_.GetBin(frame2D_.GetNbinsX(), frame2D_.GetNbinsY());
+	Float_t	occupancy;
+
 	for (int i=1; i<nBins+1; i++) {
 		if (frame2D_.GetBinContent(i)) numberOfActivatedPixels++;
 	}
 
-	return (float) numberOfActivatedPixels / nBins;
+	occupancy = (Float_t) numberOfActivatedPixels / nBins;
+
+	return occupancy;
 }

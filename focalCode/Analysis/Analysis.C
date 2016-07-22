@@ -1068,7 +1068,7 @@ void drawTracks3D(Int_t Runs, Int_t dataType, Bool_t recreate, Float_t energy) {
 		if (thisTrack->isOneEventID()) nTrueTracks++;
 
 		if (!thisTrack->isOneEventID()) {
-			medianEventID = thisTrack->getEventIDMode();
+			medianEventID = thisTrack->getModeEventID();
 		}
 
 		if (thisTrack->isFirstAndLastEventIDEqual()) nOKTracks++;

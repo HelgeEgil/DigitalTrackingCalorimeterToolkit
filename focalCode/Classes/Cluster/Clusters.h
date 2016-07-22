@@ -21,9 +21,9 @@ private:
 	TClonesArray	clustersWithoutTrack_;
 	vector<Int_t>	layerIndex_;
 	Bool_t			frameType_; // Not used yet... kCalorimeter or kTracker (for the 4 trackers)
+	Float_t			MCSMultiplicationFactor;
 
 public:
-	Float_t MCSMultiplicationFactor;
 	
 	Clusters(Bool_t frameType = kCalorimeter);
 	virtual ~Clusters(); 

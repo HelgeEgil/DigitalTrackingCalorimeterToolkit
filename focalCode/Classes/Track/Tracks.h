@@ -23,53 +23,58 @@ class Tracks : public TObject {
       TClonesArray clustersWithoutTrack_;
 
    public:
-
       Tracks() : tracks_("Track", 1000), clustersWithoutTrack_("Cluster", 5000) {}
       Tracks(Int_t nTracks) : tracks_("Track", nTracks), clustersWithoutTrack_("Cluster", nTracks*100) {}
       virtual ~Tracks(); 
 
-      virtual void appendTrack(Track *copyTrack, Int_t startOffset = 0);
-      virtual void appendClustersWithoutTrack(TClonesArray *clustersWithoutTrack);
+		// ROOT & I/O     
+		virtual void		clearTracks()				{ tracks_.Clear("C"); }
+      virtual Track	 *	At(Int_t i)					{ return ((Track*) tracks_.At(i)); }
+      virtual void		SetOwner(Bool_t val)		{ tracks_.SetOwner(val); }
+      virtual Int_t		GetEntriesFast()			{ return tracks_.GetEntriesFast(); }
+      virtual Int_t		GetEntriesFastCWT()		{ return clustersWithoutTrack_.GetEntriesFast(); }
+      virtual Int_t		GetEntries()				{ return tracks_.GetEntries(); }
+      virtual Int_t		GetEntriesFast(Int_t i) { return At(i)->GetEntriesFast(); }
+      virtual void		Clear(Option_t * = "");
 
-      virtual void clearTracks() { tracks_.Clear("C"); }
-      virtual void Clear(Option_t * = "");
-      virtual void SetOwner(Bool_t val) { tracks_.SetOwner(val); }
+		// Add and remove tracks
+      virtual void		removeTrack(Track *t)	{ tracks_.Remove((TObject*) t); }
+      virtual TObject*	removeTrackAt(Int_t i)	{ return tracks_.RemoveAt(i); }
+      void					appendTrack(Track *copyTrack, Int_t startOffset = 0);
+      void					appendClustersWithoutTrack(TClonesArray *clustersWithoutTrack);
 
-      virtual Int_t GetEntriesFast() { return tracks_.GetEntriesFast(); }
-      virtual Int_t GetEntriesFastClustersWithoutTrack() { return clustersWithoutTrack_.GetEntriesFast(); }
-      virtual Int_t GetEntries() { return tracks_.GetEntries(); }
-      virtual Int_t GetEntriesFast(Int_t i) { return At(i)->GetEntriesFast(); }
+		// Retrieve tracks
+      TClonesArray	 *	getClustersWithoutTrack() { return (TClonesArray*) &clustersWithoutTrack_; }
+		vector<Int_t>	 *	getTracksWithConflictClusters();
+		vector<Int_t>	 *	getConflictingTracksFromTrack(Int_t trackIdx);
 
-      Float_t getSinuosity(Int_t i) { return At(i)->getSinuosity(); }
-      Float_t getSlopeAngle(Int_t i) { return At(i)->getSlopeAngle(); }
-      Float_t getTrackLengthmm(Int_t i) { return At(i)->getTrackLengthmm(); }
-      Float_t getTrackScore(Int_t i) { return At(i)->getTrackScore(); }
-      TClonesArray * getClustersWithoutTrack() { return (TClonesArray*) &clustersWithoutTrack_; }
-		virtual Bool_t isUsedClustersInTrack(Int_t i) { return At(i)->isUsedClustersInTrack(); }
-		virtual Int_t getNumberOfConflictClusters(Int_t i) { return At(i)->getNumberOfConflictClusters(); }
-		Int_t getTrackIdxFromFirstLayerEID(Int_t eventID);
-		vector<Int_t> * getTracksWithConflictClusters();
-		vector<Int_t> * getConflictingTracksFromTrack(Int_t trackIdx);
-		vector<Int_t> * getTracksFromCluster(Cluster * cluster);
-		Int_t getTrackIdxFromCluster(Cluster * cluster);
+		// Operations on single Track objects
+		Float_t				getSinuosity(Int_t i)						{ return At(i)->getSinuosity(); }
+      Float_t				getSlopeAngle(Int_t i)						{ return At(i)->getSlopeAngle(); }
+      Float_t				getTrackLengthmm(Int_t i)					{ return At(i)->getTrackLengthmm(); }
+      Float_t				getTrackScore(Int_t i)						{ return At(i)->getTrackScore(); }
+		virtual Bool_t		isUsedClustersInTrack(Int_t i)			{ return At(i)->isUsedClustersInTrack(); }
+		virtual Int_t		getNumberOfConflictClusters(Int_t i)	{ return At(i)->getNumberOfConflictClusters(); }
+      virtual void		extrapolateToLayer0();
+      virtual void		doFit();
 
-      virtual void extrapolateToLayer0();
-      virtual void splitSharedClusters();
-		virtual void matchWithEventIDs(Hits *eventIDs);
-      Int_t getClosestCluster(vector<trackCluster> clusters, Cluster* interpolatedCluster);
+		// Search for clusters
+      Int_t					getClosestCluster(vector<trackCluster> clusters, Cluster* interpolatedCluster);
+		vector<Int_t>   *	getTracksFromCluster(Cluster * cluster);
+		Int_t					getTrackIdxFromFirstLayerEID(Int_t eventID);
+		Int_t					getTrackIdxFromCluster(Cluster * cluster);
 
-      virtual Track* At(Int_t i) { return ((Track*) tracks_.At(i)); }
-
-      virtual void removeTrack(Track *t) { tracks_.Remove((TObject*) t); }
-      virtual TObject* removeTrackAt(Int_t i) { return tracks_.RemoveAt(i); }
-      void sortTrackByLayer(Int_t track);
-
-      void checkLayerOrientation();
-      void doFit();
-		
-		void removeTracksLeavingDetector(); 
-		void removeTrackCollisions();
-		void retrogradeTrackImprovement(Clusters * clusters);
+		// Calculations on involving all tracks
+		void					matchWithEventIDs(Hits *eventIDs);
+      void					sortTrackByLayer(Int_t track);
+      void					checkLayerOrientation();
+      
+      // Optimization of the tracking function
+      // tracksOptimization.C
+      void					splitSharedClusters();
+		void					removeTracksLeavingDetector(); 
+		void					removeTrackCollisions();
+		void					retrogradeTrackImprovement(Clusters * clusters);
 
    ClassDef(Tracks,2);
 };
