@@ -40,7 +40,7 @@ Clusters * Hits::findClustersFromHits() {
 
 			if (firstHits->size()) {
 				// Find expanded clusters is the time demanding function
-				expandedCluster = getAllNeighboursFromCluster(i, checkedIndices);
+				expandedCluster = getAllNeighboursFromCluster(i, checkedIndices); 
 
 				appendNeighboursToClusters(expandedCluster, clusters);
 				delete expandedCluster;
@@ -80,7 +80,7 @@ vector<Int_t> * Hits::findNeighbours(Int_t index) {
 	return neighbours;
 }
 
-vector<Int_t> * Hits::findExpandedCluster(Int_t i, vector<Int_t> *checkedIndices) {
+vector<Int_t> * Hits::getAllNeighboursFromCluster(Int_t i, vector<Int_t> *checkedIndices) {
 	// TODO: Optimize this function
 	// Use static arrays, and a counter instead of toCheck->empty();
 
@@ -111,7 +111,7 @@ vector<Int_t> * Hits::findExpandedCluster(Int_t i, vector<Int_t> *checkedIndices
 	return expandedCluster;
 }
 
-void Hits::appendExpandedClusterToClusters(vector<Int_t> *expandedCluster, Clusters *clusters) {
+void Hits::appendNeighboursToClusters(vector<Int_t> *expandedCluster, Clusters *clusters) {
 	Float_t  sumX = 0;
 	Float_t  sumY = 0;
 	Int_t    idx = 0;
@@ -158,7 +158,7 @@ vector<Hits*> * Hits::findClustersHitMap() {
 
 		vector<Int_t> * firstHits = findNeighbours(i);
 		if (firstHits->size()) {
-			expandedCluster = findExpandedCluster(i, checkedIndices);
+			expandedCluster = getAllNeighboursFromCluster(i, checkedIndices);
 			appendExpandedClusterToClusterHitMap(expandedCluster, clusterHitMap);
 			delete expandedCluster;
 			delete firstHits;

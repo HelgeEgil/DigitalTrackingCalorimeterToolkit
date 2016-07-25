@@ -160,9 +160,6 @@ void Tracks::removeTrackCollisions() {
 		for (Int_t j=0; j<2; j++) {
 			track[j] = At(conflictPair->at(j));
 			conflictClusters[j] = track[j]->getConflictClusters(); // 1 cluster
-			cout << "Added j=" << j << " conflict cluster \033[1m " << conflictClusters[j]->At(0) << "\033[0m ";
-			if (conflictClusters[j]->At(0)) cout << "-> \033[1m" << *conflictClusters[j]->At(0) << "\033[0m.\n";
-			else cout << endl;
 			len[j] = track[j]->GetEntriesFast();
 		}
 		

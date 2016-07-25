@@ -58,9 +58,46 @@ Bool_t Track::doesTrackEndAbruptly() {
 	else					return false;
 }
 
+Float_t Track::getRiseFactor() {
+	Float_t	normalization = 0;
+	Float_t	riseFactor = 0;
+	Int_t		nNorm = 0;
+	Int_t		nNormActual = 0;
+	Int_t		n = GetEntriesFast();
+
+	if (!n) return 0;
+
+	nNorm = n/2;
+
+	for (Int_t i=0; i<nNorm; i++) {
+		if (!At(i)) continue;
+		normalization += getSize(i);
+		nNormActual++;
+	}
+
+	normalization /= nNormActual;
+
+	if (At(n-1) && At(n-2)) {
+		riseFactor = (getSize(n-1) + getSize(n-2)) / 2 / normalization;
+	}
+
+	else if (At(n-1) && !At(n-1)) {
+		riseFactor = getSize(n-1) / normalization;
+	}
+
+	else if (!At(n-1) && At(n-1)) {
+		riseFactor = getSize(n-2) / normalization;
+	}
+
+	else return 0;
+
+	return riseFactor;
+}
+
+
 Int_t Track::getNMissingLayers() {
    Int_t missingLayers = 0;
-   Int_t lastLayer = 0
+   Int_t lastLayer = 0;
    Int_t firstLayer = 1e6;
    Int_t previousLayer = -1;
 	Int_t diff = 0;

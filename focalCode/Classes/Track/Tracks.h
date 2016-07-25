@@ -60,7 +60,7 @@ class Tracks : public TObject {
 
 		// Search for clusters
       Int_t					getClosestCluster(vector<trackCluster> clusters, Cluster* interpolatedCluster);
-		vector<Int_t>   *	getTracksFromCluster(Cluster * cluster);
+		vector<Int_t>	 *	getTracksFromCluster(Cluster * cluster);
 		Int_t					getTrackIdxFromFirstLayerEID(Int_t eventID);
 		Int_t					getTrackIdxFromCluster(Cluster * cluster);
 

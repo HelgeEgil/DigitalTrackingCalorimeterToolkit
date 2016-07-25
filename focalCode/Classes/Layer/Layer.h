@@ -19,13 +19,13 @@ class Layer : public TObject {
 	public:
 		// ROOT & I/O
 		Layer(Int_t layerNo, Bool_t frameType, Bool_t dataType);
-		virtual		  ~Layer();
+		virtual			~Layer();
 		virtual void	Reset() { frame2D_.Reset(); }
 		virtual void	Fill(Float_t x, Float_t y, Float_t val = 1) { frame2D_.Fill(x,y,val); }
-		virtual TH2F * getTH2F() { return (TH2F*) &frame2D_; }
+		virtual TH2F *	getTH2F() { return (TH2F*) &frame2D_; }
 		
 		Int_t				diffuseLayer(TRandom3 *gRandom);
-		virtual Bool_t findHits(Hits *hits);
+		virtual Bool_t	findHits(Hits *hits);
 		Float_t			getOccupancy();
 		
 		ClassDef(Layer,2);

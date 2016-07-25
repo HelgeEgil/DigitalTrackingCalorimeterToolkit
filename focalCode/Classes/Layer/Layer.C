@@ -54,7 +54,7 @@ Int_t Layer::diffuseLayer(TRandom3 *gRandom) {
 }
 
 Bool_t Layer::findHits(Hits* hits) {
-	Int_t		x, y, z, nbins;
+	Int_t		x, y, z, nBins;
 	Bool_t	isHits = false;
 	Float_t	edep;
 	Int_t		dummyEventID = -1;

@@ -49,7 +49,7 @@ void saveTracks(Tracks *tracks, Int_t dataType, Float_t energy) {
 	f.SetCompressionLevel(1);
 	TTree T("T", "tracks");
 	T.Branch("tracks", &tracks, 256000, 1);
-	cout << "Length of CWOT: " << tracks->GetEntriesFastClustersWithoutTrack() << endl; 
+	cout << "Length of CWOT: " << tracks->GetEntriesFastCWT() << endl; 
 	T.Fill();
 	T.Write();
 	f.Close();
@@ -86,6 +86,7 @@ Tracks * loadOrCreateTracks(Bool_t recreate, Int_t Runs, Int_t dataType, Float_t
 	
 	if (recreate) {
 		tracks = getTracks(Runs, dataType, kCalorimeter, energy, x, y);
+
 		if (tracks->GetEntries()) {
 			cout << "Saving " << tracks->GetEntries() << " tracks.\n";
 //			saveTracks(tracks, dataType, energy);
@@ -98,7 +99,7 @@ Tracks * loadOrCreateTracks(Bool_t recreate, Int_t Runs, Int_t dataType, Float_t
 		if (!tracks) {
 			cout << "!tracks, creating new file\n";
 			tracks = getTracks(Runs, dataType, kCalorimeter, energy);
-			saveTracks(tracks, dataType, energy);
+//			saveTracks(tracks, dataType, energy);
 		}
 	}
 	return tracks;
@@ -179,7 +180,7 @@ Tracks * getTracks(Int_t Runs, Int_t dataType, Int_t frameType, Float_t energy, 
 		calorimeterTracks->splitSharedClusters();
 		calorimeterTracks->removeTracksLeavingDetector();
 		calorimeterTracks->removeTrackCollisions();
-		calorimeterTracks->retrogradeTrackImprovement(clusters);
+//		calorimeterTracks->retrogradeTrackImprovement(clusters);
 
 		for (Int_t j=0; j<calorimeterTracks->GetEntriesFast(); j++) {
 			if (!calorimeterTracks->At(j)) continue;

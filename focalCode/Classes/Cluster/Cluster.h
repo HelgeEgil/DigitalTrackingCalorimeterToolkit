@@ -29,8 +29,8 @@ public:
 	Int_t		getSize()				{ return clusterSize_; }
 	Int_t		getEventID()			{ return eventID_; }
 	Int_t		getError()				{ return sqrt(clusterSize_); }
-	Double_t getXmm()					{ return (x_ - nx) * dx; } // from -nx*dx to nx*dx
-	Double_t getYmm()					{ return (y_ - ny) * dy; } // from -ny*dy to ny*dy
+	Double_t	getXmm()					{ return (x_ - nx) * dx; } // from -nx*dx to nx*dx
+	Double_t	getYmm()					{ return (y_ - ny) * dy; } // from -ny*dy to ny*dy
 	Bool_t	isUsed()					{ return isUsed_; }
 
 	void		setX(Float_t x)		{ x_ = x; }
@@ -44,7 +44,7 @@ public:
 	void		markUnused()			{ isUsed_ = false; }
 	
 	// In .C
-	Double_t getLayermm(); // take into account placement of sensor layer, depends on y
+	Double_t	getLayermm(); // take into account placement of sensor layer, depends on y
 	Float_t	getRadiusmm(); // cluster size as circle radius [mm]
 	Float_t	getDepositedEnergy();
 	Float_t	getDepositedEnergyError();

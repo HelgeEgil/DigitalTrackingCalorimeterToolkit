@@ -42,21 +42,6 @@ Bool_t Track::isClusterInTrack(Cluster * cluster) {
 	return (idx >= 0);
 }
 
-Int_t Track::getClusterIdx(Float_t x, Float_t y, Int_t layer) {
-	for (Int_t i=0; i<GetEntriesFast(); i++) {
-		if (!At(i)) continue;
-		if (getLayer(i) < layer) continue;
-		if (x == getX(i)) {
-			if (y == getY(i)) {
-				if (layer == getLayer(i)) { // found it
-					return i;
-				}
-			}
-		}
-	}
-	return -1;
-}
-
 Int_t Track::getClusterFromLayer(Int_t layer) {
 	for (Int_t i=0; i<GetEntriesFast(); i++) {
 		if (!At(i)) continue;

@@ -29,7 +29,7 @@ public:
 	virtual ~Clusters(); 
 
 	// ROOT & I/O
-	virtual Cluster * At(Int_t i)						{ return ((Cluster*) clusters_.At(i)); }
+	virtual Cluster *	At(Int_t i)						{ return ((Cluster*) clusters_.At(i)); }
 	TClonesArray	 *	getClustersWithoutTrack()	{ return (TClonesArray*) &clustersWithoutTrack_; }
 	virtual Int_t		GetEntriesFast()				{ return clusters_.GetEntriesFast(); }
 	virtual Int_t		GetEntries()					{ return clusters_.GetEntries(); }
@@ -40,7 +40,7 @@ public:
 	// Add and remove clusters
 	virtual void		removeCluster(Cluster *c)					{ clusters_.Remove((TObject*) c); }
 	virtual TObject *	removeClusterAt(Int_t i)					{ return clusters_.RemoveAt(i); }
-	virtual TObject * removeClusterWithoutTrackAt(Int_t i)	{ return clustersWithoutTrack_.RemoveAt(i); }
+	virtual TObject *	removeClusterWithoutTrackAt(Int_t i)	{ return clustersWithoutTrack_.RemoveAt(i); }
 	void					removeAllClustersInTrack(Track *track);
 	void					removeTrackFromClustersWithoutTrack(Track *track);
 	void					removeSmallClusters(Int_t size); 

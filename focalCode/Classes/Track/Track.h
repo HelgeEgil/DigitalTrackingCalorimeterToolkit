@@ -20,8 +20,9 @@ class Track : public TObject {
 		Float_t fitError_;
 
 	public:
-		Track(); 
+		Track();
 		Track(Cluster *cluster);
+
 		virtual ~Track(); 
 
 		// ROOT & I/O
@@ -30,7 +31,7 @@ class Track : public TObject {
 		virtual Int_t		GetEntriesFast()						{ return track_.GetEntriesFast(); }
 		virtual Int_t		GetEntries()							{ return track_.GetEntries(); }
 		virtual void		clearTrack()							{ track_.Clear("C"); }
-		virtual void		Clear(Option_t * = "");
+		virtual void		Clear(Option_t * = "")				{ track_.Clear("C"); }
 	
 		// Add and remove clusters
 		virtual TObject * removeClusterAt(Int_t i)			{ return track_.RemoveAt(i); }
@@ -54,9 +55,9 @@ class Track : public TObject {
 		Bool_t				isUsed(Int_t i)						{ return At(i)->isUsed(); }
 		
 		// TRACK PROPERTIES - Event IDs
+		Int_t					getModeEventID(); // (vs. median)
 		Bool_t				isOneEventID();
 		Bool_t				isFirstAndLastEventIDEqual();
-		Int_t					getModeEventID(); // (vs. median)
 
 		// TRACK PROPERTIES - General track properties
 		// trackProperties.C
@@ -64,7 +65,8 @@ class Track : public TObject {
 		Int_t					getLastLayer();
 		Bool_t				hasLayer(Int_t layer);
 		Int_t					getIdxFromLayer(Int_t i);
-		Bool_t				doesTrackEndAbruptly();		
+		Bool_t				doesTrackEndAbruptly();
+		Float_t				getRiseFactor();
 		Int_t					getNMissingLayers();
 
 		// TRACK PROPERTIES - Ranges and energies
@@ -98,7 +100,7 @@ class Track : public TObject {
 		Int_t					getClusterIdx(Float_t x, Float_t y, Int_t layer);
 		Bool_t				isClusterInTrack(Cluster * cluster);
 		Int_t					getClusterFromLayer(Int_t layer);
-		Clusters        *	getConflictClusters();
+		Clusters			 *	getConflictClusters();
 		Int_t					getNumberOfConflictClusters();
 		Bool_t				isUsedClustersInTrack();
 		Float_t				getAverageCS();
@@ -126,8 +128,8 @@ class Track : public TObject {
 
 		// TRACK PROPERTIES - Track fitting, scoring
 		// trackFitting.C
-		TGraphErrors 	 * doFit();
-		TGraphErrors 	 * doRangeFit();
+		TGraphErrors	 *	doFit();
+		TGraphErrors	 *	doRangeFit();
 		Float_t				getFitParameterEnergy();
 		Float_t				getFitParameterScale();
 		Float_t				getFitParameterError();

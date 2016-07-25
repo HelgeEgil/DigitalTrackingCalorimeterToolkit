@@ -321,7 +321,7 @@ void Tracks::sortTrackByLayer(Int_t trackIdx) {
 		if (newTrack->GetEntriesFast()) {
 			appendTrack(newTrack);
 			removeTrackAt(trackIdx);
-			newTrack->clearTracks();
+			newTrack->clearTrack();
 		}
 	}
 }

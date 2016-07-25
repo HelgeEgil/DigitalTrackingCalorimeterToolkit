@@ -295,17 +295,21 @@ Track * Clusters::findLongestTrack(Tracks *seedTracks) {
 	
 	Float_t	bestScore = -1;
 	Float_t	score = -1;
-	Track  *	longestTrack = new Track();
-	Track  *	track = 0;
-	Int_t		startOffset = (track->getLayer(0)) ? 0 : 1;
+	Track	 *	longestTrack = new Track();
+	Track	 *	track = 0;
+	Int_t		startOffset;
 
 	for (Int_t i=0; i<seedTracks->GetEntriesFast(); i++) {
+		if (!seedTracks->At(i)) continue;
+
 		score = seedTracks->getTrackScore(i);
 		if (score > bestScore) {
 			bestScore = score;
 			track = seedTracks->At(i);
 		}
 	}
+
+	startOffset = (track->getLayer(0)) ? 0 : 1;
 
 	longestTrack->setTrack(track, startOffset);
 

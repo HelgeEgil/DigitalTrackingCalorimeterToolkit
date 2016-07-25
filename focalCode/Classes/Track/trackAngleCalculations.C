@@ -19,7 +19,7 @@ Float_t Track::getSlopeAngleAtLayer(Int_t i) {
 	// In degrees
 	
 	Cluster *a, *b;
-	Float_t	diffx, diffy, diffz
+	Float_t	diffx, diffy, diffz;
 	Float_t	xyDist, angle;
 
 	if (!At(i) || !At(0)) {

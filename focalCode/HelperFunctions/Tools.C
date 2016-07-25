@@ -375,7 +375,7 @@ Hit * sumHits(Hit * a, Hit * b) {
 Cluster * getTrackExtrapolationToLayer(Track * track, Int_t layer) {
 	Int_t fromLayer = track->getLayer(track->GetEntriesFast() - 1);
 
-	return getTrackExtrapolationromTo(track, fromLayer, layer);
+	return getTrackExtrapolationFromTo(track, fromLayer, layer);
 }
 
 Cluster * getRetrogradeTrackExtrapolationToLayer(Track * track, Int_t layer) {

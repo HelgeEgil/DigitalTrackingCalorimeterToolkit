@@ -19,22 +19,18 @@ using namespace std;
 Track::Track() : track_("Cluster", MaxTrackLength) {
 	fitEnergy_ = 0;
 	fitScale_ = 0;
-	fitEnergy_ = 0;
+	fitError_ = 0;
 }
 
-Track(Cluster *cluster) : track_("Cluster", MaxTrackLength) {
+Track::Track(Cluster *cluster) : track_("Cluster", MaxTrackLength) {
 	appendCluster(cluster);
 	fitEnergy_ = 0;
 	fitScale_ = 0;
-	fitEnergy_ = 0;
+	fitError_ = 0;
 }
 
 Track::~Track() {
 	track_.Delete();
-}
-
-void Track::Clear(Option_t *) {
-	track_.Clear("C");
 }
 
 void Track::setTrack(Track *copyTrack, Int_t startOffset /* default 0 */) {
@@ -72,6 +68,7 @@ Int_t Track::getModeEventID() {
 	Bool_t		metThisID = false;
 	Int_t			nUniqueEventIDs = 0;
 	Int_t			thisID = -1;
+	Int_t			nThisID = 0;
 	Int_t			eventIDs[n];
 	Int_t			repeatArray[n];
 	Int_t			maxIdx = 0;
