@@ -35,7 +35,7 @@ void drawUlmerAndBortfeld() {
 //	 float l4_water = 0.0099829 * factor;
 //	 float c5_water = 0.868646 / factor;
 //	 float l5_water = 0.000805688 * factor;
-
+/*
 	 float c1_water = 76.9241;
 	 float l1_water = 1/0.2;
 	 float c2_water = 21.2753;
@@ -46,6 +46,18 @@ void drawUlmerAndBortfeld() {
 	 float l4_water = 1/10.3271;
 	 float c5_water = 8.64322;
 	 float l5_water = 1/125.208;
+*/
+	 
+	 float c1_water = 96.63872;
+	 float l1_water = 1/0.0975;
+	 float c2_water = 25.0472;
+	 float l2_water = 1/1.24999;
+	 float c3_water = 8.80745;
+	 float l3_water = 1/5.7001;
+	 float c4_water = 4.19001;
+	 float l4_water = 1/10.6501;
+	 float c5_water = 9.2732;
+	 float l5_water = 1/106.72784;
 
 	 float a01 = 2.277463;
 	 float a02 = 0.2431;
@@ -78,7 +90,7 @@ void drawUlmerAndBortfeld() {
 	double Ez, Ek, dEdz, rz, rzCM;
 
 	float cc1, cc2, cc3, cc4, cc5, pe, phi1, phi2, phi3, phi4, phi5, qp, theta, zmax, taurange, tau0;
-	tau0 = 10e-5; // cm
+	tau0 = 1e-5; // cm
 
 	cout << "Energy is \033[1m " << energy << " MeV\033[0m, calculated range in water is \033[1m " << range << " mm\033[0m.\n";
 
@@ -125,8 +137,8 @@ void drawUlmerAndBortfeld() {
 			cout << " z = " << z << " cm. -> E = " << Ez << endl;
 		}
 
-
 		// 2nd calculation method
+		// Ulmer 2011 Rad Phys and Chem 80 378-389
 
 		cc1 = a01 + a11 * energy;
 		cc2 = a02 + a12 * energy;
@@ -134,25 +146,28 @@ void drawUlmerAndBortfeld() {
 		cc4 = a04 + a14 * energy;
 		cc5 = a05 + a15 * energy;
 
-		taurange = range * (2.117908559e-5 * energy + 0.919238854e-7 * pow(energy, 2));
+		taurange = range * (2.117908559e-5 * energy + 0.919238854e-7 * pow(energy, 2)); // 0.41 cm
 		zmax = range + taurange;
 		pe = (a05 + a15 * energy);
+
 
 		theta = 1;
 		if (rz<=0) theta = 0;
 		qp = 3.1415926536 * pe / zmax;
 
-		phi1 = cc1 * exp(-pow(rz, 2) / (tau0*tau0)) * theta;
+		phi1 = cc1 * exp(-pow(rz, 2) / pow(tau0*100, 2)) * theta;
 		phi2 = 2 * cc2 * theta;
 		phi3 = 2 * cc3 * exp(-qp * rz) * theta;
 		phi4 = 2 * cc4 * pow(z / range, 2) * theta;
 
-		aPhi1[i] = phi1 / 400;
-		aPhi2[i] = phi2 / 400;
-		aPhi3[i] = phi3 / 400;
-		aPhi4[i] = phi4 / 400;
+		Float_t redFactor = 40;
+
+		aPhi1[i] = phi1 / redFactor;
+		aPhi2[i] = phi2 / redFactor;
+		aPhi3[i] = phi3 / redFactor;
+		aPhi4[i] = phi4 / redFactor;
 	
-		dEdx2[i] = (phi1 + phi2 + phi3 + phi4) / 200;
+		dEdx2[i] = (phi1 + phi2 + phi3*5 + phi4) / redFactor;
 	}
 
 	cout << "zmax is \033[1m " << zmax << " cm \033[0m at max depth.\n";
@@ -171,16 +186,18 @@ void drawUlmerAndBortfeld() {
 	gLet->SetLineColor(kBlue);
 	gLet2->SetLineColor(kRed);
 
-	gPhi1->SetLineColor(kGray);
-	gPhi2->SetLineColor(kGray);
+	gPhi1->SetLineColor(kBlack);
+	gPhi2->SetLineColor(kBlack);
 	gPhi3->SetLineColor(kBlack);
-	gPhi4->SetLineColor(kGray);
+	gPhi4->SetLineColor(kBlack);
 
-	gEnergy->Draw("");
-	gLet->Draw("same");
+	gPad->SetLogy();
+
+//	gEnergy->Draw("");
+	gLet->Draw("");
 	gLet2->Draw("same");
-	gPhi1->Draw("same");
-	gPhi2->Draw("same");
-	gPhi3->Draw("same");
-	gPhi4->Draw("same");
+//	gPhi1->Draw("same");
+//	gPhi2->Draw("same");
+//	gPhi3->Draw("same");
+//	gPhi4->Draw("same");
 }
