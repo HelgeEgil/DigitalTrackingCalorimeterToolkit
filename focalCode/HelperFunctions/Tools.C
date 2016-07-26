@@ -81,41 +81,18 @@ Double_t fitfunc_DBP(Double_t *v, Double_t *par) {
 
 	Double_t fitval = 0;
 
-	Float_t range = getWEPLFromEnergy(energy); // cubic calculation, more accurate
+	Float_t range = getWEPLFromEnergy(energy);
 	fitval = scale / ( p_water * pow(alpha_water, 1/p_water) * pow((range - depth), 1-1/p_water) ); // power calculation, less accurate but with the depth dose function
 
 	/*
 	 * I tried to use an improved depth-dose curve in order to improve accuracy
 	 * Alas it didn't work. Maybe you could give it a go?
 	 * Start with: W. Ulmer, Rad. Phys. and Chem. 76 (2007)
-	 * and implement the depth-dose curve (28) with maybe a nice Bragg Peak
+	 * and implement the depth-dose curve (Eq. 28) with maybe a nice Bragg Peak
 	 * I had some bumps... Back to Bragg-Kleeman.
-	 *
-	Double_t rz = range - depth;
-	if (rz<0 || depth < 0) return 0;
-
-	Double_t sum_1a = rz * c1_water * exp(-l1_water * rz);
-	Double_t sum_1b = rz * c2_water * exp(-l2_water * rz);
-	Double_t sum_1c = rz * c3_water * exp(-l3_water * rz);
-	Double_t sum_1d = rz * c4_water * exp(-l4_water * rz);
-	Double_t sum_1e = rz * c5_water * exp(-l5_water * rz);
 	
-	Double_t Ez = sum_1a + sum_1b + sum_1c + sum_1d + sum_1e;
-	if (Ez < 0) return 0;
-
-	Double_t sum_2a = l1_water * sum_1a;
-	Double_t sum_2b = l2_water * sum_1b;
-	Double_t sum_2c = l3_water * sum_1c;
-	Double_t sum_2d = l4_water * sum_1d;
-	Double_t sum_2e = l5_water * sum_1e;
-
-	Double_t Ek = sum_2a + sum_2b + sum_2c + sum_2d + sum_2e;
-
-	Double_t dEdz = scale * (Ez / rz - Ek);
-	if (isnan(dEdz)) dEdz = 0;
-
-	cout << "dEdz = " << dEdz << ", fitval = " << fitval << endl;
-	*/
+	 * However, the depth at the bragg peak is correct, since the rance is calculated using Ulmer 2007
+	 */
 
 	if (isnan(fitval)) fitval = 0;
 

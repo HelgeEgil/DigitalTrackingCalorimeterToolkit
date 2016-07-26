@@ -16,6 +16,7 @@ void drawUlmerAndBortfeld() {
 	Float_t x[8000];
 	Float_t dEdx[8000] = {0};
 	Float_t dEdx2[8000] = {0};
+	Float_t dEdx3[8000] = {0};
 	Float_t E[8000] = {0};
 
 	float aPhi1[8000] = {0};
@@ -24,7 +25,10 @@ void drawUlmerAndBortfeld() {
 	float aPhi4[8000] = {0};
 
 	float factor = 1;
-	
+
+	float p = 1.6677;
+	float a = 0.04461;
+
 //	 float c1_water = 8.55221 / factor;
 //	 float l1_water = 0.680604 * factor;
 //	 float c2_water = 2.69391 / factor;
@@ -69,7 +73,6 @@ void drawUlmerAndBortfeld() {
 	 float a13 = -0.00103;
 	 float a14 = -0.0007;
 	 float a15 = 0.00103;
-	
 
 //	float c1_water = 96.63872 / factor;
 //	float l1_water = 1/0.0975 * factor;
@@ -118,7 +121,7 @@ void drawUlmerAndBortfeld() {
 
 		Ez = a1 + b1 + c1 + d1 + e1;
 
-		E[i] = Ez / 400;
+		E[i] = Ez;
 
 		a2 = l1_water * a1;
 		b2 = l2_water * b1;
@@ -133,7 +136,7 @@ void drawUlmerAndBortfeld() {
 		dEdx[i] = dEdz / 200;
 		sumLET += dEdz / 200;
 
-		if (abs(rz - 0.7) < 0.2) {
+		if (abs(rz) < 1) {
 			cout << " z = " << z << " cm. -> E = " << Ez << endl;
 		}
 
@@ -150,14 +153,13 @@ void drawUlmerAndBortfeld() {
 		zmax = range + taurange;
 		pe = (a05 + a15 * energy);
 
-
 		theta = 1;
 		if (rz<=0) theta = 0;
 		qp = 3.1415926536 * pe / zmax;
 
-		phi1 = cc1 * exp(-pow(rz, 2) / pow(tau0*100, 2)) * theta;
+		phi1 = cc1 * exp(-pow(rz, 2) / pow(tau0, 2)) * theta;
 		phi2 = 2 * cc2 * theta;
-		phi3 = 2 * cc3 * exp(-qp * rz) * theta;
+		phi3 = 2 * cc3 * exp(-3.1415*qp * rz * theta);
 		phi4 = 2 * cc4 * pow(z / range, 2) * theta;
 
 		Float_t redFactor = 40;
@@ -168,6 +170,11 @@ void drawUlmerAndBortfeld() {
 		aPhi4[i] = phi4 / redFactor;
 	
 		dEdx2[i] = (phi1 + phi2 + phi3*5 + phi4) / redFactor;
+
+		// 3d calculation method
+		// Bortfeld
+
+		dEdx3[i] = 1 / (50 * p * pow(a, 1./p) * pow(rz, 1-1./p));
 	}
 
 	cout << "zmax is \033[1m " << zmax << " cm \033[0m at max depth.\n";
@@ -176,6 +183,7 @@ void drawUlmerAndBortfeld() {
 	TGraph *gEnergy = new TGraph(8000, x, E);
 	TGraph *gLet = new TGraph(8000, x, dEdx);
 	TGraph *gLet2 = new TGraph(8000, x, dEdx2);
+	TGraph *gLet3 = new TGraph(8000, x, dEdx3);
 
 	TGraph *gPhi1 = new TGraph(8000, x, aPhi1);
 	TGraph *gPhi2 = new TGraph(8000, x, aPhi2);
@@ -185,6 +193,7 @@ void drawUlmerAndBortfeld() {
 	gEnergy->SetLineColor(kBlack);
 	gLet->SetLineColor(kBlue);
 	gLet2->SetLineColor(kRed);
+	gLet3->SetLineColor(kGreen);
 
 	gPhi1->SetLineColor(kBlack);
 	gPhi2->SetLineColor(kBlack);
@@ -196,6 +205,7 @@ void drawUlmerAndBortfeld() {
 //	gEnergy->Draw("");
 	gLet->Draw("");
 	gLet2->Draw("same");
+	gLet3->Draw("same");
 //	gPhi1->Draw("same");
 //	gPhi2->Draw("same");
 //	gPhi3->Draw("same");

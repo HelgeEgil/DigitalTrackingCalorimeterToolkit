@@ -142,7 +142,8 @@ TGraphErrors * Track::doRangeFit() {
 	
 	graph->Fit("fit_BP", "B, Q, N, W", "", 0, getWEPLFromEnergy(maxEnergy*1.2));
 	
- 	fitEnergy_ = correctForEnergyParameterisation(func->GetParameter(0));
+// 	fitEnergy_ = correctForEnergyParameterisation(func->GetParameter(0));
+	fitEnergy_ = func->GetParameter(0);
 	fitScale_ = func->GetParameter(1);
 	fitError_ = func->GetParError(0);
 

@@ -24,17 +24,19 @@ class Tracks : public TObject {
 
    public:
       Tracks() : tracks_("Track", 1000), clustersWithoutTrack_("Cluster", 5000) {}
-      Tracks(Int_t nTracks) : tracks_("Track", nTracks), clustersWithoutTrack_("Cluster", nTracks*100) {}
+      Tracks(Int_t nTracks) : tracks_("Track", nTracks), clustersWithoutTrack_("Cluster", nTracks*5) {}
       virtual ~Tracks(); 
 
 		// ROOT & I/O     
 		virtual void		clearTracks()				{ tracks_.Clear("C"); }
       virtual Track	 *	At(Int_t i)					{ return ((Track*) tracks_.At(i)); }
+      virtual Cluster *	AtCWT(Int_t i)				{ return ((Cluster*) clustersWithoutTrack_.At(i)); }
       virtual void		SetOwner(Bool_t val)		{ tracks_.SetOwner(val); }
       virtual Int_t		GetEntriesFast()			{ return tracks_.GetEntriesFast(); }
       virtual Int_t		GetEntriesFastCWT()		{ return clustersWithoutTrack_.GetEntriesFast(); }
       virtual Int_t		GetEntries()				{ return tracks_.GetEntries(); }
       virtual Int_t		GetEntriesFast(Int_t i) { return At(i)->GetEntriesFast(); }
+      virtual void		CompressCWT()				{ clustersWithoutTrack_.Compress(); }
       virtual void		Clear(Option_t * = "");
 
 		// Add and remove tracks

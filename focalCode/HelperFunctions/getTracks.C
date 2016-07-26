@@ -37,6 +37,10 @@ void makeTracks(Int_t Runs, Int_t dataType, Bool_t recreate, Float_t energy) {
 void saveTracks(Tracks *tracks, Int_t dataType, Float_t energy) {
 	TString sDataType = (dataType == 0) ? "_MC_" : "_data_";
 
+	tracks->CompressCWT();
+
+	gDebug=3;
+
 	TString sEnergy = Form("_%.2fMeV", energy);
 	TString fileName = "Data/Tracks/tracks";
 	TString sMaterial = getMaterialChar();
@@ -45,12 +49,21 @@ void saveTracks(Tracks *tracks, Int_t dataType, Float_t energy) {
 	fileName.Append(sEnergy);
 	fileName.Append(".root");
 	
+	cout << "saveTracks::TFile...";
 	TFile f(fileName, "recreate");
 	f.SetCompressionLevel(1);
+	cout << "saveTracks::TTree...";
 	TTree T("T", "tracks");
+	cout << "saveTracks::TBranch...";
 	T.Branch("tracks", &tracks, 256000, 1);
-	cout << "Length of CWOT: " << tracks->GetEntriesFastCWT() << endl; 
+
+	for (int i=0; i<tracks->GetEntriesFastCWT(); i++) {
+		if (tracks->AtCWT(i)) cout << "CWT " << i << ": " << *tracks->AtCWT(i) << ", ";
+	}
+	
+	cout << "saveTracks::T.Fill...";
 	T.Fill();
+	cout << "saveTracks::T.Write...";
 	T.Write();
 	f.Close();
 }
@@ -89,7 +102,7 @@ Tracks * loadOrCreateTracks(Bool_t recreate, Int_t Runs, Int_t dataType, Float_t
 
 		if (tracks->GetEntries()) {
 			cout << "Saving " << tracks->GetEntries() << " tracks.\n";
-//			saveTracks(tracks, dataType, energy);
+			saveTracks(tracks, dataType, energy);
 		}
 	}
 
@@ -99,7 +112,7 @@ Tracks * loadOrCreateTracks(Bool_t recreate, Int_t Runs, Int_t dataType, Float_t
 		if (!tracks) {
 			cout << "!tracks, creating new file\n";
 			tracks = getTracks(Runs, dataType, kCalorimeter, energy);
-//			saveTracks(tracks, dataType, energy);
+			saveTracks(tracks, dataType, energy);
 		}
 	}
 	return tracks;
