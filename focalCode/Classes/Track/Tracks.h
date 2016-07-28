@@ -36,7 +36,9 @@ class Tracks : public TObject {
       virtual Int_t		GetEntriesFastCWT()		{ return clustersWithoutTrack_.GetEntriesFast(); }
       virtual Int_t		GetEntries()				{ return tracks_.GetEntries(); }
       virtual Int_t		GetEntriesFast(Int_t i) { return At(i)->GetEntriesFast(); }
-      virtual void		CompressCWT()				{ clustersWithoutTrack_.Compress(); }
+      virtual void		Compress()					{ tracks_.Compress(); }
+	  	virtual void		CompressCWT()				{ clustersWithoutTrack_.Compress(); }
+		virtual void		CompressClusters();
       virtual void		Clear(Option_t * = "");
 
 		// Add and remove tracks

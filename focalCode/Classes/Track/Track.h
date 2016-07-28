@@ -30,6 +30,7 @@ class Track : public TObject {
 		virtual Cluster *	Last()									{ return ((Cluster*) track_.At(GetEntriesFast()-1)); }
 		virtual Int_t		GetEntriesFast()						{ return track_.GetEntriesFast(); }
 		virtual Int_t		GetEntries()							{ return track_.GetEntries(); }
+		virtual void		Compress()								{ track_.Compress(); }
 		virtual void		clearTrack()							{ track_.Clear("C"); }
 		virtual void		Clear(Option_t * = "")				{ track_.Clear("C"); }
 	

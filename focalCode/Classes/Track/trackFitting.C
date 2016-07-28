@@ -129,8 +129,8 @@ TGraphErrors * Track::doRangeFit() {
 	}
 	
 	else if (kOutputUnit == kWEPL || kOutputUnit == kEnergy) {
-		if (kMaterial == kTungsten) scaleParameter = 100;
-		if (kMaterial == kAluminum) scaleParameter = 126;
+		if (kMaterial == kTungsten) scaleParameter = 100/2.;
+		if (kMaterial == kAluminum) scaleParameter = 126/2.;
 	}
 
 	TF1 *func = new TF1("fit_BP", fitfunc_DBP, 0, getWEPLFromEnergy(maxEnergy*1.2), 2);

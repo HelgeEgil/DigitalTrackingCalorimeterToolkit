@@ -29,29 +29,6 @@ void drawUlmerAndBortfeld() {
 	float p = 1.6677;
 	float a = 0.04461;
 
-//	 float c1_water = 8.55221 / factor;
-//	 float l1_water = 0.680604 * factor;
-//	 float c2_water = 2.69391 / factor;
-//	 float l2_water = 0.139472 * factor;
-//	 float c3_water = 1.32594 / factor;
-//	 float l3_water = 0.0383079 * factor;
-//	 float c4_water = 0.894249 / factor;
-//	 float l4_water = 0.0099829 * factor;
-//	 float c5_water = 0.868646 / factor;
-//	 float l5_water = 0.000805688 * factor;
-/*
-	 float c1_water = 76.9241;
-	 float l1_water = 1/0.2;
-	 float c2_water = 21.2753;
-	 float l2_water = 1/0.96092;
-	 float c3_water = 10.9277;
-	 float l3_water = 1/2.97584;
-	 float c4_water = 8.5464;
-	 float l4_water = 1/10.3271;
-	 float c5_water = 8.64322;
-	 float l5_water = 1/125.208;
-*/
-	 
 	 float c1_water = 96.63872;
 	 float l1_water = 1/0.0975;
 	 float c2_water = 25.0472;
@@ -73,17 +50,6 @@ void drawUlmerAndBortfeld() {
 	 float a13 = -0.00103;
 	 float a14 = -0.0007;
 	 float a15 = 0.00103;
-
-//	float c1_water = 96.63872 / factor;
-//	float l1_water = 1/0.0975 * factor;
-//	float c2_water = 25.0472 / factor;
-//	float l2_water = 1/1.24999 * factor;
-//	float c3_water = 8.80745 / factor;
-//	float l3_water = 1/5.7001 * factor;
-//	float c4_water = 4.19001 / factor;
-//	float l4_water = 1/10.6501 * factor;
-//	float c5_water = 9.2732 / factor;
-//	float l5_water = 1/106.72784 * factor;
 
 	float energy = 250;
 	float range = 37.8225;
@@ -133,8 +99,8 @@ void drawUlmerAndBortfeld() {
 
 		dEdz = (Ez / rz - Ek);
 
-		dEdx[i] = dEdz / 200;
-		sumLET += dEdz / 200;
+		dEdx[i] = dEdz;
+		sumLET += dEdz;
 
 		if (abs(rz) < 1) {
 			cout << " z = " << z << " cm. -> E = " << Ez << endl;
@@ -157,33 +123,45 @@ void drawUlmerAndBortfeld() {
 		if (rz<=0) theta = 0;
 		qp = 3.1415926536 * pe / zmax;
 
-		phi1 = cc1 * exp(-pow(rz, 2) / pow(tau0, 2)) * theta;
+		phi1 = 1 * cc1 * exp(-pow(rz, 2) / pow(tau0, 2)) * theta;
 		phi2 = 2 * cc2 * theta;
-		phi3 = 2 * cc3 * exp(-3.1415*qp * rz * theta);
+		phi3 = 2 * cc3 * exp(-3.1415*qp * rz) * theta;
 		phi4 = 2 * cc4 * pow(z / range, 2) * theta;
 
-		Float_t redFactor = 40;
+		Float_t redFactor = 1;
 
 		aPhi1[i] = phi1 / redFactor;
 		aPhi2[i] = phi2 / redFactor;
 		aPhi3[i] = phi3 / redFactor;
 		aPhi4[i] = phi4 / redFactor;
 	
-		dEdx2[i] = (phi1 + phi2 + phi3*5 + phi4) / redFactor;
+		dEdx2[i] = (phi1 + phi2 + phi3 + phi4) / redFactor;
 
 		// 3d calculation method
 		// Bortfeld
 
-		dEdx3[i] = 1 / (50 * p * pow(a, 1./p) * pow(rz, 1-1./p));
+		dEdx3[i] = 1 / (p * pow(a, 1./p) * pow(rz, 1-1./p));
 	}
 
 	cout << "zmax is \033[1m " << zmax << " cm \033[0m at max depth.\n";
 
 	TCanvas *c = new TCanvas("c", "E(z) and dE(z)/dz as function of z", 1200, 800);
+	c->Divide(3, 1, 0.01, 0.01);
+	
 	TGraph *gEnergy = new TGraph(8000, x, E);
 	TGraph *gLet = new TGraph(8000, x, dEdx);
 	TGraph *gLet2 = new TGraph(8000, x, dEdx2);
 	TGraph *gLet3 = new TGraph(8000, x, dEdx3);
+
+	gLet->SetTitle("S(z) = #sum_{k=1}^{5}A_{k} [#beta_{k}^{-1} (R_{CSDA} - z)] e^{(R_{CSDA}-z)/#beta_{k}} (Ulmer 2007)");
+	gLet->GetXaxis()->SetTitle("Depth [cm]");
+	gLet->GetYaxis()->SetTitle("dE/dz (a. u.)");
+	gLet2->SetTitle("S(z) #approx #sum_{k=1}^{5} #varphi_{k}(z, E_{0}) (Ulmer 2011)");
+	gLet2->GetXaxis()->SetTitle("Depth [cm]");
+	gLet2->GetYaxis()->SetTitle("dE/dz (a. u.)");
+	gLet3->SetTitle("S(z) #approx #left(p a^{1/p} (R_{CSDA} - z)^{1 - 1/p}#right)^{-1} (Bragg-Kleeman)");
+	gLet3->GetXaxis()->SetTitle("Depth [cm]");
+	gLet3->GetYaxis()->SetTitle("dE/dz (a. u.)");
 
 	TGraph *gPhi1 = new TGraph(8000, x, aPhi1);
 	TGraph *gPhi2 = new TGraph(8000, x, aPhi2);
@@ -191,21 +169,20 @@ void drawUlmerAndBortfeld() {
 	TGraph *gPhi4 = new TGraph(8000, x, aPhi4);
 
 	gEnergy->SetLineColor(kBlack);
-	gLet->SetLineColor(kBlue);
-	gLet2->SetLineColor(kRed);
-	gLet3->SetLineColor(kGreen);
 
 	gPhi1->SetLineColor(kBlack);
 	gPhi2->SetLineColor(kBlack);
 	gPhi3->SetLineColor(kBlack);
 	gPhi4->SetLineColor(kBlack);
 
-	gPad->SetLogy();
-
 //	gEnergy->Draw("");
+//	gLet->Draw("");
+	c->cd(1);
 	gLet->Draw("");
-	gLet2->Draw("same");
-	gLet3->Draw("same");
+	c->cd(2);
+	gLet2->Draw("");
+	c->cd(3);
+	gLet3->Draw("");
 //	gPhi1->Draw("same");
 //	gPhi2->Draw("same");
 //	gPhi3->Draw("same");

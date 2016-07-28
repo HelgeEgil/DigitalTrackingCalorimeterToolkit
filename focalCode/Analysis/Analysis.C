@@ -46,8 +46,6 @@ void drawTrackAngleAtVaryingRunNumbers(Int_t dataType, Float_t energy) {
 	for (Int_t i=2; i<32; i++) {
 		nRuns = pow(2, 4 + 0.3 * i) + 0.5;
 
-		nRuns = 10;
-
 		kEventsPerRun = nRuns;
 		Float_t factor = 2;
 
@@ -57,9 +55,6 @@ void drawTrackAngleAtVaryingRunNumbers(Int_t dataType, Float_t energy) {
 
 		Tracks * tracks = loadOrCreateTracks(1, totalNumberOfRuns, dataType, energy);
 		tracks->extrapolateToLayer0();
-
-//		eventIDs = getEventIDs(totalNumberOfRuns, energy);
-//		tracks->matchWithEventIDs(eventIDs);
 
 		char * sDataType = getDataTypeChar(dataType);
 		TCanvas *c1 = new TCanvas("c1", "c1", 1200, 800);
@@ -74,7 +69,7 @@ void drawTrackAngleAtVaryingRunNumbers(Int_t dataType, Float_t energy) {
 		hAngles->SetLineColor(kBlack);
 		gStyle->SetOptStat(0);
 
-		hCorrectTracks->SetTitle(Form("Tracks with same eventID using search cone size of MCS * %.1f and %d protons/run", factor, kEventsPerRun));
+		hCorrectTracks->SetTitle(Form("Tracks with same eventID using %d protons/run", kEventsPerRun));
 		hCorrectTracks->SetXTitle("Layer number");
 		hCorrectTracks->SetYTitle("Number of protons");
 		hCorrectTracks->SetFillColor(kBlue-7);
@@ -1004,7 +999,7 @@ Hits * getEventIDs(Int_t Runs, Float_t energy) {
 void drawTracks3D(Int_t Runs, Int_t dataType, Bool_t recreate, Float_t energy) {
 	Tracks * tracks = loadOrCreateTracks(recreate, Runs, dataType, energy);
 
-	Int_t switchLayer = 6;
+	Int_t switchLayer = 10;
 
 	TCanvas *c1 = new TCanvas("c1", "c1", 1600, 1200);
 	c1->SetTitle(Form("Tracks from %.2f MeV protons on %s", energy, getMaterialChar()));

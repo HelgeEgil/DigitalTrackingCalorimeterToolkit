@@ -29,6 +29,13 @@ Tracks::~Tracks() {
    clustersWithoutTrack_.Delete();
 }
 
+void Tracks::CompressClusters() {
+	for (Int_t i=0; i<GetEntriesFast(); i++) {
+		if (!At(i)) continue;
+		At(i)->Compress();
+	}
+}
+
 void Tracks::Clear(Option_t *) {
 	tracks_.Clear("C");
 	clustersWithoutTrack_.Clear("C");

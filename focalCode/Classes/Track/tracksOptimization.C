@@ -259,6 +259,10 @@ void Tracks::retrogradeTrackImprovement(Clusters * clusters) {
 			}
 		}
 
+		if (switchTrackIdx == i) {
+			switchTrack = nullptr;
+		}
+
 		if (switchTrack) {
 			Track * newTrackA = new Track();
 			Track * newTrackB = new Track();
@@ -305,7 +309,10 @@ void Tracks::retrogradeTrackImprovement(Clusters * clusters) {
 		}
 	}
 
-	cout << "Track::retrogradeTrackImprovement found " << newTracks->GetEntriesFast() << " improved tracks!\n";
+	cout << "Track::retrogradeTrackImprovement found " << newTracks->GetEntries() << " improved tracks:\n";
+	for (Int_t i=0; i<newTracks->GetEntriesFast(); i++) {
+		cout << newTracks->At(i) << ": " << *newTracks->At(i) << endl;
+	}
 
 	if (newTracks->GetEntriesFast()) {
 		for (Int_t i=0; i<newTracks->GetEntriesFast(); i++) {

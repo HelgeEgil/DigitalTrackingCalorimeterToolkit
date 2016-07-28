@@ -6,8 +6,7 @@
 # placement: -number of layers * 3975 / 2
 /gate/simplified/placement/setTranslation 0. 0. 79500. um
 /gate/simplified/setMaterial Vacuum
-/gate/simplified/vis/setColor black
-/gate/simplified/vis/forceWireframe
+/gate/simplified/vis/setVisible false
 
 /gate/simplified/daughters/name layer
 /gate/simplified/daughters/insert box
@@ -16,8 +15,7 @@
 /gate/layer/geometry/setZLength 900.  um
 /gate/layer/placement/setTranslation 0. 9574.75 -1537.5 um # center on proximal side
 /gate/layer/setMaterial Vacuum
-/gate/layer/vis/setColor black
-/gate/layer/vis/forceWireframe
+/gate/layer/vis/setVisible false
 
 /gate/layer/daughters/name glue_1
 /gate/layer/daughters/insert box
@@ -27,6 +25,7 @@
 /gate/glue_1/placement/setTranslation 0. 0. -430. um
 /gate/glue_1/setMaterial Glue
 /gate/glue_1/vis/setColor yellow
+/gate/glue_1/vis/forceWireframe
 
 /gate/layer/daughters/name pcb
 /gate/layer/daughters/insert box
@@ -36,6 +35,7 @@
 /gate/pcb/placement/setTranslation 0. 0. -330. um
 /gate/pcb/setMaterial PCB
 /gate/pcb/vis/setColor green
+/gate/pcb/vis/forceWireframe
 
 /gate/layer/daughters/name glue_2
 /gate/layer/daughters/insert box
@@ -45,22 +45,24 @@
 /gate/glue_2/placement/setTranslation 0. 0. -230. um
 /gate/glue_2/setMaterial Glue
 /gate/glue_2/vis/setColor yellow
+/gate/glue_2/vis/forceWireframe
 
 /gate/layer/daughters/name passive
 /gate/layer/daughters/insert box
 /gate/passive/geometry/setXLength 38900.  um
 /gate/passive/geometry/setYLength 19149.5 um
-/gate/passive/geometry/setZLength    89.9 um
-/gate/passive/placement/setTranslation 0. 0. -165. um
+/gate/passive/geometry/setZLength   105.9 um # was 89.9, then +16 = 105.9
+/gate/passive/placement/setTranslation 0. 0. -157. um # was -165. um, then + 8 = 157.
 /gate/passive/setMaterial Silicon
 /gate/passive/vis/setColor green
+/gate/passive/vis/forceWireframe
 
 /gate/layer/daughters/name chip
 /gate/layer/daughters/insert box
 /gate/chip/geometry/setXLength 38900.  um
 /gate/chip/geometry/setYLength 19149.5 um
-/gate/chip/geometry/setZLength  29.9 um
-/gate/chip/placement/setTranslation 0. 0. -105. um
+/gate/chip/geometry/setZLength  13.9 um # was 29.9, then -16 = 13.9
+/gate/chip/placement/setTranslation 0. 0. -97. um # was -105, then +8 = -97
 /gate/chip/setMaterial Silicon
 /gate/chip/vis/setColor red
 
@@ -71,8 +73,7 @@
 /gate/gap_1/geometry/setZLength  169.9 um
 /gate/gap_1/placement/setTranslation 0. 0. -5. um
 /gate/gap_1/setMaterial Air
-/gate/gap_1/vis/setColor black
-/gate/gap_1/vis/forceWireframe
+/gate/gap_1/vis/setVisible false
 
 /gate/layer/daughters/name filler
 /gate/layer/daughters/insert box
@@ -91,6 +92,7 @@
 /gate/glue_3/placement/setTranslation 0. 0. 415. um
 /gate/glue_3/setMaterial Glue
 /gate/glue_3/vis/setColor yellow
+/gate/glue_3/vis/forceWireframe
 
 /gate/simplified/daughters/name absorber_1
 /gate/simplified/daughters/insert box
@@ -108,8 +110,7 @@
 /gate/gap_2/geometry/setZLength   74.9 um
 /gate/gap_2/placement/setTranslation 0. 0. 360. um
 /gate/gap_2/setMaterial Air
-/gate/gap_2/vis/setColor black
-/gate/gap_2/vis/forceWireframe
+/gate/gap_2/vis/setVisible false
 
 /gate/simplified/daughters/name absorber_2
 /gate/simplified/daughters/insert box

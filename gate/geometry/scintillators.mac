@@ -5,7 +5,8 @@
 /gate/scintillator_F/geometry/setZLength 1. cm
 /gate/scintillator_F/placement/setTranslation 0. 0. -65. mm # 50 + 65
 /gate/scintillator_F/setMaterial myScintillator
-/gate/scintillator_F/vis/forceWireframe
+/gate/scintillator_F/vis/setColor white
+#/gate/scintillator_F/vis/forceWireframe
 
 /gate/scanner/daughters/name scintillator_H
 /gate/scanner/daughters/insert box
@@ -14,7 +15,8 @@
 /gate/scintillator_H/geometry/setZLength 0.5 cm
 /gate/scintillator_H/placement/setTranslation 0. 0. -166. mm # 50 + 166
 /gate/scintillator_H/setMaterial myScintillator
-/gate/scintillator_H/vis/forceWireframe
+/gate/scintillator_H/vis/setColor white
+#/gate/scintillator_H/vis/forceWireframe
 
 /gate/scanner/daughters/name scintillator_V
 /gate/scanner/daughters/insert box
@@ -23,4 +25,5 @@
 /gate/scintillator_V/geometry/setZLength 0.5 cm
 /gate/scintillator_V/placement/setTranslation 0. 0. -174. mm # 50 + 174
 /gate/scintillator_V/setMaterial myScintillator
-/gate/scintillator_V/vis/forceWireframe
+/gate/scintillator_V/vis/setColor white
+#/gate/scintillator_V/vis/forceWireframe

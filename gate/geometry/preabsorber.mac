@@ -5,4 +5,5 @@
 /gate/preabsorber/geometry/setZLength  1499.9 um
 /gate/preabsorber/placement/setTranslation 0. 0. -750. um
 /gate/preabsorber/setMaterial Aluminium
-/gate/preabsorber/vis/setColor white
+/gate/preabsorber/vis/setColor gray
+#/gate/preabsorber/vis/forceWireframe

@@ -39,8 +39,6 @@ void saveTracks(Tracks *tracks, Int_t dataType, Float_t energy) {
 
 	tracks->CompressCWT();
 
-	gDebug=3;
-
 	TString sEnergy = Form("_%.2fMeV", energy);
 	TString fileName = "Data/Tracks/tracks";
 	TString sMaterial = getMaterialChar();
@@ -49,21 +47,11 @@ void saveTracks(Tracks *tracks, Int_t dataType, Float_t energy) {
 	fileName.Append(sEnergy);
 	fileName.Append(".root");
 	
-	cout << "saveTracks::TFile...";
 	TFile f(fileName, "recreate");
 	f.SetCompressionLevel(1);
-	cout << "saveTracks::TTree...";
 	TTree T("T", "tracks");
-	cout << "saveTracks::TBranch...";
 	T.Branch("tracks", &tracks, 256000, 1);
-
-	for (int i=0; i<tracks->GetEntriesFastCWT(); i++) {
-		if (tracks->AtCWT(i)) cout << "CWT " << i << ": " << *tracks->AtCWT(i) << ", ";
-	}
-	
-	cout << "saveTracks::T.Fill...";
 	T.Fill();
-	cout << "saveTracks::T.Write...";
 	T.Write();
 	f.Close();
 }
@@ -185,7 +173,7 @@ Tracks * getTracks(Int_t Runs, Int_t dataType, Int_t frameType, Float_t energy, 
 		t5.Start();
 		calorimeterTracks = clusters->findCalorimeterTracks();
 		t5.Stop();
-
+		
 		if (calorimeterTracks->GetEntriesFast() == 0) breakSignal = kTRUE; // to stop running
 
 		// Track improvements
@@ -195,6 +183,9 @@ Tracks * getTracks(Int_t Runs, Int_t dataType, Int_t frameType, Float_t energy, 
 		calorimeterTracks->removeTrackCollisions();
 //		calorimeterTracks->retrogradeTrackImprovement(clusters);
 
+		calorimeterTracks->Compress();
+		calorimeterTracks->CompressClusters();
+		
 		for (Int_t j=0; j<calorimeterTracks->GetEntriesFast(); j++) {
 			if (!calorimeterTracks->At(j)) continue;
 
