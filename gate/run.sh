@@ -23,5 +23,5 @@ fi
 
 for i in `seq $2 $3 $4`;
 do
-	nice -n 18 Gate -a "'[material,$1] [energy,$i] [npart,$5] [step_active,10] [step_passive,80] [sigma,$6]'" focal.mac > terminal_output.txt &
+	time Gate -a "'[material,$1] [energy,$i] [npart,$5] [step_active,10] [step_passive,80] [sigma,$6]'" focal.mac > terminal_output.txt &
 done

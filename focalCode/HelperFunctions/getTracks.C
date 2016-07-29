@@ -177,11 +177,12 @@ Tracks * getTracks(Int_t Runs, Int_t dataType, Int_t frameType, Float_t energy, 
 		if (calorimeterTracks->GetEntriesFast() == 0) breakSignal = kTRUE; // to stop running
 
 		// Track improvements
+		
 		calorimeterTracks->extrapolateToLayer0();
 		calorimeterTracks->splitSharedClusters();
 		calorimeterTracks->removeTracksLeavingDetector();
 		calorimeterTracks->removeTrackCollisions();
-//		calorimeterTracks->retrogradeTrackImprovement(clusters);
+		// calorimeterTracks->retrogradeTrackImprovement(clusters);
 
 		calorimeterTracks->Compress();
 		calorimeterTracks->CompressClusters();

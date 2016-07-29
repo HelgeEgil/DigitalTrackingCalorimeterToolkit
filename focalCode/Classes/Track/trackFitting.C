@@ -88,9 +88,9 @@ TGraphErrors * Track::doRangeFit() {
 	// The difference should be minimal! However this is how the conversion functions
 	// are defined.
 
-	Bool_t newCutBraggPeak = (getAverageCSLastN(2) > getAverageCS()*kBPFactorAboveAverage);
-	Bool_t cutNPointsInTrack = (GetEntries()>3);
-	Bool_t cut = newCutBraggPeak * cutNPointsInTrack;
+	Bool_t			newCutBraggPeak = (getAverageCSLastN(2) > getAverageCS()*kBPFactorAboveAverage);
+	Bool_t			cutNPointsInTrack = (GetEntries()>3);
+	Bool_t			cut = newCutBraggPeak * cutNPointsInTrack;
 	if (!cut) return 0;
 
 	TGraphErrors * graph = nullptr;
@@ -114,7 +114,7 @@ TGraphErrors * Track::doRangeFit() {
 	estimatedEnergy = getEnergyFromTL(x[n-1] + 0.5*dz);
 
 	if (kOutputUnit == kWEPL || kOutputUnit == kEnergy) {
-		Float_t WEPLFactor = getWEPLFactorFromEnergy(estimatedEnergy);
+		WEPLFactor = getWEPLFactorFromEnergy(estimatedEnergy);
 		for (Int_t i=0; i<n; i++) {
 			x[i] = x[i] * WEPLFactor;
 			erx[i] = erx[i] * WEPLFactor;
@@ -129,20 +129,22 @@ TGraphErrors * Track::doRangeFit() {
 	}
 	
 	else if (kOutputUnit == kWEPL || kOutputUnit == kEnergy) {
-		if (kMaterial == kTungsten) scaleParameter = 100/2.;
-		if (kMaterial == kAluminum) scaleParameter = 126/2.;
+		if (kMaterial == kTungsten) scaleParameter = 63; // validated through drawFitScale
+		if (kMaterial == kAluminum) scaleParameter = 126;
 	}
+
+	if (kDataType == kData) scaleParameter = 95;
 
 	TF1 *func = new TF1("fit_BP", fitfunc_DBP, 0, getWEPLFromEnergy(maxEnergy*1.2), 2);
 	func->SetParameter(0, estimatedEnergy);
 	func->SetParameter(1, scaleParameter);
 	func->SetParLimits(0, 0, maxEnergy);
-	func->SetParLimits(1, scaleParameter,scaleParameter);
+	func->SetParLimits(1, scaleParameter, scaleParameter);
 	func->SetNpx(500);
+
+	graph->Fit("fit_BP", "B, N, Q, W", "", 0, getWEPLFromEnergy(maxEnergy*1.2));
 	
-	graph->Fit("fit_BP", "B, Q, N, W", "", 0, getWEPLFromEnergy(maxEnergy*1.2));
-	
-// 	fitEnergy_ = correctForEnergyParameterisation(func->GetParameter(0));
+//	fitEnergy_ = correctForEnergyParameterisation(func->GetParameter(0));
 	fitEnergy_ = func->GetParameter(0);
 	fitScale_ = func->GetParameter(1);
 	fitError_ = func->GetParError(0);
@@ -156,7 +158,7 @@ Float_t Track::getFitParameterEnergy() {
 			return 0;
 		}
 		else {
-			doFit();
+			doRangeFit();
 		}
 	}
 
@@ -169,7 +171,7 @@ Float_t Track::getFitParameterScale() {
 			return 0;
 		}
 		else {
-			doFit();
+			doRangeFit();
 		}
 	}
 	return fitScale_;
@@ -181,7 +183,7 @@ Float_t Track::getFitParameterError() {
 			return 0;
 		}
 		else {
-			doFit();
+			doRangeFit();
 		}
 	}
 	return fitError_;

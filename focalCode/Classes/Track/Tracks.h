@@ -31,6 +31,7 @@ class Tracks : public TObject {
 		virtual void		clearTracks()				{ tracks_.Clear("C"); }
       virtual Track	 *	At(Int_t i)					{ return ((Track*) tracks_.At(i)); }
       virtual Cluster *	AtCWT(Int_t i)				{ return ((Cluster*) clustersWithoutTrack_.At(i)); }
+      virtual Track	 *	Last()						{ return ((Track*) tracks_.At(GetEntriesFast()-1)); }
       virtual void		SetOwner(Bool_t val)		{ tracks_.SetOwner(val); }
       virtual Int_t		GetEntriesFast()			{ return tracks_.GetEntriesFast(); }
       virtual Int_t		GetEntriesFastCWT()		{ return clustersWithoutTrack_.GetEntriesFast(); }

@@ -30,7 +30,7 @@ const Int_t nTrackers = 4;
 const Float_t dx = 0.03; // mm
 const Float_t dy = 0.03; // mm
 const Float_t dz = 3.975; // mm // was 3.84
-Int_t kEventsPerRun = 75;
+Int_t kEventsPerRun = 300;
 
 // Used for treatment of available experimental data files
 const Int_t nEnergies = 8;
@@ -44,6 +44,8 @@ Int_t energies[nEnergies] = {122, 140, 150, 160, 170, 180, 188, 190};
 
 enum eMaterial {kTungsten, kAluminum, kPMMA, kWater, kFocalTungsten, kFocalAluminum};
 const Int_t kMaterial = kTungsten;
+
+Int_t kDataType = kMC;
 
 enum eOutputUnit {kPhysical, kWEPL, kEnergy};
 Int_t kOutputUnit = kWEPL;

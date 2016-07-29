@@ -19,9 +19,11 @@
 using namespace std;
 
 Tracks * Clusters::findCalorimeterTracks() {
-	Tracks *tracks = new Tracks(kEventsPerRun * 5);
-	Int_t startOffset = 0;
-	Bool_t usedClustersInSeeds = true;
+	Tracks * tracks = new Tracks(kEventsPerRun * 5);
+	Int_t		startOffset = 0;
+	Bool_t	usedClustersInSeeds = true;
+	Int_t		clustersLeft;
+	Float_t	factor;
 
 	for (Int_t i=0; i<GetEntriesFast(); i++) {
 		if (!At(i)) continue;
@@ -47,8 +49,8 @@ Tracks * Clusters::findCalorimeterTracks() {
 		findTracksFromLayer(tracks, 1, usedClustersInSeeds);
 	}
 
-	Int_t clustersLeft = clustersWithoutTrack_.GetEntries();
-	Float_t factor = 100 * (1 - (Float_t) clustersLeft / GetEntriesFast());
+	clustersLeft = clustersWithoutTrack_.GetEntries();
+	factor = 100 * (1 - (Float_t) clustersLeft / GetEntriesFast());
 	cout << "Found " << tracks->GetEntriesFast() << " tracks. " << clustersLeft << " of total " << GetEntriesFast() << " clusters were not assigned to track! (" << factor << " %)\n";
 
 	return tracks;
@@ -296,7 +298,7 @@ Track * Clusters::findLongestTrack(Tracks *seedTracks) {
 	Float_t	bestScore = -1;
 	Float_t	score = -1;
 	Track	 *	longestTrack = new Track();
-	Track	 *	track = 0;
+	Track	 *	track = nullptr;
 	Int_t		startOffset;
 
 	for (Int_t i=0; i<seedTracks->GetEntriesFast(); i++) {
@@ -309,9 +311,17 @@ Track * Clusters::findLongestTrack(Tracks *seedTracks) {
 		}
 	}
 
-	startOffset = (track->getLayer(0)) ? 0 : 1;
+	if (!track) return longestTrack;
 
+	if (track->At(0)) {
+		startOffset = (track->getLayer(0) == 0) ? 0 : 1;
+	}
+	
+	else {
+		startOffset = 1;
+	}
+	
 	longestTrack->setTrack(track, startOffset);
-
+	
 	return longestTrack;
 }

@@ -7,10 +7,11 @@
 Analysis_cxx	Analysis/Analysis.C	1;"	d	file:
 Analysis_h	Analysis/Analysis.h	2;"	d
 At	Classes/CalorimeterFrame/CalorimeterFrame.h	/^      virtual Layer *At(Int_t i) { return (Layer*) calorimeterFrame_.At(i); }$/;"	f	class:CalorimeterFrame
-At	Classes/Cluster/Clusters.h	/^	virtual Cluster * At(Int_t i)						{ return ((Cluster*) clusters_.At(i)); }$/;"	f	class:Clusters
-At	Classes/Hit/Hits.h	/^	virtual Hit*   	At(Int_t i)		   	{ return ((Hit*) hits_.At(i)); }$/;"	f	class:Hits
-At	Classes/Track/Track.h	/^	virtual Cluster* At(Int_t i) { return ((Cluster*) track_.At(i)); }$/;"	f	class:Track
-At	Classes/Track/Tracks.h	/^      virtual Track* At(Int_t i) { return ((Track*) tracks_.At(i)); }$/;"	f	class:Tracks
+At	Classes/Cluster/Clusters.h	/^	virtual Cluster *	At(Int_t i)						{ return ((Cluster*) clusters_.At(i)); }$/;"	f	class:Clusters
+At	Classes/Hit/Hits.h	/^	virtual Hit		 *	At(Int_t i)		   	{ return ((Hit*) hits_.At(i)); }$/;"	f	class:Hits
+At	Classes/Track/Track.h	/^		virtual Cluster *	At(Int_t i)								{ return ((Cluster*) track_.At(i)); }$/;"	f	class:Track
+At	Classes/Track/Tracks.h	/^      virtual Track	 *	At(Int_t i)					{ return ((Track*) tracks_.At(i)); }$/;"	f	class:Tracks
+AtCWT	Classes/Track/Tracks.h	/^      virtual Cluster *	AtCWT(Int_t i)				{ return ((Cluster*) clustersWithoutTrack_.At(i)); }$/;"	f	class:Tracks
 BinLogX	Scripts/findLET.C	/^void findLET::BinLogX(TH1 *h) {$/;"	f	class:findLET
 BinLogY	Scripts/Check.C	/^void Check::BinLogY(TH2 *h) {$/;"	f	class:Check
 BinLogY	Scripts/findFilterEnergyLoss.C	/^void findFilterEnergyLoss::BinLogY(TH2 *h) {$/;"	f	class:findFilterEnergyLoss
@@ -23,7 +24,7 @@ Check_h	Scripts/include/Check.h	8;"	d
 Clear	Classes/CalorimeterFrame/CalorimeterFrame.C	/^void CalorimeterFrame::Clear(Option_t *) {$/;"	f	class:CalorimeterFrame
 Clear	Classes/Cluster/Clusters.C	/^void Clusters::Clear(Option_t *) {$/;"	f	class:Clusters
 Clear	Classes/Hit/Hits.C	/^void Hits::Clear(Option_t *) {$/;"	f	class:Hits
-Clear	Classes/Track/Track.C	/^void Track::Clear(Option_t *) {$/;"	f	class:Track
+Clear	Classes/Track/Track.h	/^		virtual void		Clear(Option_t * = "")				{ track_.Clear("C"); }$/;"	f	class:Track
 Clear	Classes/Track/Tracks.C	/^void Tracks::Clear(Option_t *) {$/;"	f	class:Tracks
 Cluster	Classes/Cluster/Cluster.C	/^Cluster::Cluster() {$/;"	f	class:Cluster
 Cluster	Classes/Cluster/Cluster.C	/^Cluster::Cluster(Cluster* cluster) {$/;"	f	class:Cluster
@@ -33,6 +34,10 @@ ClusterCollection_h	Classes/Cluster/Clusters.h	2;"	d
 Cluster_h	Classes/Cluster/Cluster.h	2;"	d
 Clusters	Classes/Cluster/Clusters.C	/^Clusters::Clusters(Bool_t frameType) : clusters_("Cluster", kEventsPerRun*2),$/;"	f	class:Clusters
 Clusters	Classes/Cluster/Clusters.h	/^class Clusters : public TObject {$/;"	c
+Compress	Classes/Track/Track.h	/^		virtual void		Compress()								{ track_.Compress(); }$/;"	f	class:Track
+Compress	Classes/Track/Tracks.h	/^      virtual void		Compress()					{ tracks_.Compress(); }$/;"	f	class:Tracks
+CompressCWT	Classes/Track/Tracks.h	/^	  	virtual void		CompressCWT()				{ clustersWithoutTrack_.Compress(); }$/;"	f	class:Tracks
+CompressClusters	Classes/Track/Tracks.C	/^void Tracks::CompressClusters() {$/;"	f	class:Tracks
 Constants_h	GlobalConstants/Constants.h	2;"	d
 Cut	Classes/DataInterface/DataInterface.h	/^Int_t DataInterface::Cut(Long64_t entry)$/;"	f	class:DataInterface
 Cut	Scripts/findLET.h	/^Int_t findLET::Cut(Long64_t entry)$/;"	f	class:findLET
@@ -48,15 +53,15 @@ FOCALCODE_TOOLS_H_	HelperFunctions/Tools.h	2;"	d
 Fill	Classes/Layer/Layer.h	/^		virtual void	Fill(Float_t x, Float_t y, Float_t val = 1) { frame2D_.Fill(x,y,val); }$/;"	f	class:Layer
 FrameCalorimeter_h	Classes/CalorimeterFrame/CalorimeterFrame.h	2;"	d
 GetEntries	Classes/Cluster/Clusters.h	/^	virtual Int_t		GetEntries()					{ return clusters_.GetEntries(); }$/;"	f	class:Clusters
-GetEntries	Classes/Hit/Hits.h	/^	virtual Int_t  	GetEntries()	   	{ return hits_.GetEntries(); }$/;"	f	class:Hits
-GetEntries	Classes/Track/Track.h	/^	virtual Int_t GetEntries() { return track_.GetEntries(); }$/;"	f	class:Track
-GetEntries	Classes/Track/Tracks.h	/^      virtual Int_t GetEntries() { return tracks_.GetEntries(); }$/;"	f	class:Tracks
+GetEntries	Classes/Hit/Hits.h	/^	virtual Int_t		GetEntries()	   	{ return hits_.GetEntries(); }$/;"	f	class:Hits
+GetEntries	Classes/Track/Track.h	/^		virtual Int_t		GetEntries()							{ return track_.GetEntries(); }$/;"	f	class:Track
+GetEntries	Classes/Track/Tracks.h	/^      virtual Int_t		GetEntries()				{ return tracks_.GetEntries(); }$/;"	f	class:Tracks
 GetEntriesFast	Classes/Cluster/Clusters.h	/^	virtual Int_t		GetEntriesFast()				{ return clusters_.GetEntriesFast(); }$/;"	f	class:Clusters
-GetEntriesFast	Classes/Hit/Hits.h	/^	virtual Int_t  	GetEntriesFast()  	{ return hits_.GetEntriesFast(); }$/;"	f	class:Hits
-GetEntriesFast	Classes/Track/Track.h	/^	virtual Int_t GetEntriesFast() { return track_.GetEntriesFast(); }$/;"	f	class:Track
-GetEntriesFast	Classes/Track/Tracks.h	/^      virtual Int_t GetEntriesFast() { return tracks_.GetEntriesFast(); }$/;"	f	class:Tracks
-GetEntriesFast	Classes/Track/Tracks.h	/^      virtual Int_t GetEntriesFast(Int_t i) { return At(i)->GetEntriesFast(); }$/;"	f	class:Tracks
-GetEntriesFastClustersWithoutTrack	Classes/Track/Tracks.h	/^      virtual Int_t GetEntriesFastClustersWithoutTrack() { return clustersWithoutTrack_.GetEntriesFast(); }$/;"	f	class:Tracks
+GetEntriesFast	Classes/Hit/Hits.h	/^	virtual Int_t		GetEntriesFast()  	{ return hits_.GetEntriesFast(); }$/;"	f	class:Hits
+GetEntriesFast	Classes/Track/Track.h	/^		virtual Int_t		GetEntriesFast()						{ return track_.GetEntriesFast(); }$/;"	f	class:Track
+GetEntriesFast	Classes/Track/Tracks.h	/^      virtual Int_t		GetEntriesFast()			{ return tracks_.GetEntriesFast(); }$/;"	f	class:Tracks
+GetEntriesFast	Classes/Track/Tracks.h	/^      virtual Int_t		GetEntriesFast(Int_t i) { return At(i)->GetEntriesFast(); }$/;"	f	class:Tracks
+GetEntriesFastCWT	Classes/Track/Tracks.h	/^      virtual Int_t		GetEntriesFastCWT()		{ return clustersWithoutTrack_.GetEntriesFast(); }$/;"	f	class:Tracks
 GetEntriesFastLastLayer	Classes/Cluster/Clusters.C	/^Int_t Clusters::GetEntriesFastLastLayer() {$/;"	f	class:Clusters
 GetEntry	Classes/DataInterface/DataInterface.h	/^Int_t DataInterface::GetEntry(Long64_t entry)$/;"	f	class:DataInterface
 GetEntry	Scripts/findLET.h	/^Int_t findLET::GetEntry(Long64_t entry)$/;"	f	class:findLET
@@ -79,8 +84,8 @@ Init	Scripts/findRange.h	/^void findRange::Init(TTree *tree)$/;"	f	class:findRan
 Init	Scripts/include/Check.h	/^void Check::Init(TTree *tree)$/;"	f	class:Check
 Init	Scripts/include/findFilterEnergyLoss.h	/^void findFilterEnergyLoss::Init(TTree *tree)$/;"	f	class:findFilterEnergyLoss
 Init	Scripts/include/findRange.h	/^void findRange::Init(TTree *tree)$/;"	f	class:findRange
-Last	Classes/Hit/Hits.h	/^	virtual Hit*   	Last()			   	{ return ((Hit*) hits_.Last()); }$/;"	f	class:Hits
-Last	Classes/Track/Track.h	/^	virtual Cluster* Last() { return ((Cluster*) track_.At(GetEntriesFast()-1)); }$/;"	f	class:Track
+Last	Classes/Hit/Hits.h	/^	virtual Hit		 *	Last()			   	{ return ((Hit*) hits_.Last()); }$/;"	f	class:Hits
+Last	Classes/Track/Track.h	/^		virtual Cluster *	Last()									{ return ((Cluster*) track_.At(GetEntriesFast()-1)); }$/;"	f	class:Track
 Layer	Classes/Layer/Layer.C	/^Layer::Layer(Int_t layerNo, Bool_t frameType, Bool_t dataType) : frame2D_(Form("%d_frame2D_%i",frameType, layerNo), Form("frame2D_layer_%i", layerNo), 2*nx, 0, 2*nx, 2*ny, 0, 2*ny) {$/;"	f	class:Layer
 Layer	Classes/Layer/Layer.h	/^class Layer : public TObject {$/;"	c
 Layer_h	Classes/Layer/Layer.h	2;"	d
@@ -95,7 +100,7 @@ Loop	Scripts/Check.C	/^void Check::Loop(Double_t energy, Double_t sigma_mev)$/;"
 Loop	Scripts/findFilterEnergyLoss.C	/^void findFilterEnergyLoss::Loop()$/;"	f	class:findFilterEnergyLoss
 Loop	Scripts/findLET.C	/^void findLET::Loop(Double_t energy)$/;"	f	class:findLET
 Loop	Scripts/findRange.C	/^void findRange::Loop(Double_t energy, Double_t sigma_mev)$/;"	f	class:findRange
-MCSMultiplicationFactor	Classes/Cluster/Clusters.h	/^	Float_t MCSMultiplicationFactor;$/;"	m	class:Clusters
+MCSMultiplicationFactor	Classes/Cluster/Clusters.h	/^	Float_t			MCSMultiplicationFactor;$/;"	m	class:Clusters
 MaterialConstants	GlobalConstants/MaterialConstants.C	/^void MaterialConstants() {$/;"	f
 MaterialConstants_h	GlobalConstants/MaterialConstants.h	2;"	d
 MaxTrackLength	Classes/Track/Track.h	/^const Int_t MaxTrackLength = 40;$/;"	v
@@ -119,7 +124,7 @@ RayleighVolName	Scripts/include/findFilterEnergyLoss.h	/^   Char_t          Rayl
 RayleighVolName	Scripts/include/findRange.h	/^   Char_t          RayleighVolName[5];$/;"	m	class:findRange
 Reset	Classes/CalorimeterFrame/CalorimeterFrame.C	/^void CalorimeterFrame::Reset() {$/;"	f	class:CalorimeterFrame
 Reset	Classes/Layer/Layer.h	/^		virtual void	Reset() { frame2D_.Reset(); }$/;"	f	class:Layer
-SetOwner	Classes/Track/Tracks.h	/^      virtual void SetOwner(Bool_t val) { tracks_.SetOwner(val); }$/;"	f	class:Tracks
+SetOwner	Classes/Track/Tracks.h	/^      virtual void		SetOwner(Bool_t val)		{ tracks_.SetOwner(val); }$/;"	f	class:Tracks
 Show	Classes/DataInterface/DataInterface.h	/^void DataInterface::Show(Long64_t entry)$/;"	f	class:DataInterface
 Show	Scripts/findLET.h	/^void findLET::Show(Long64_t entry)$/;"	f	class:findLET
 Show	Scripts/findRange.h	/^void findRange::Show(Long64_t entry)$/;"	f	class:findRange
@@ -128,14 +133,14 @@ Show	Scripts/include/findFilterEnergyLoss.h	/^void findFilterEnergyLoss::Show(Lo
 Show	Scripts/include/findRange.h	/^void findRange::Show(Long64_t entry)$/;"	f	class:findRange
 SpreadNumber	GlobalConstants/Constants.h	/^const Double_t SpreadNumber = 0.1; \/\/ number of iterations in gaussian spread$/;"	v
 SpreadSigma	GlobalConstants/Constants.h	/^const Double_t SpreadSigma  = 0.7; \/\/ sigma (in pixels) to spread$/;"	v
-Track	Classes/Track/Track.h	/^	Track() : track_("Cluster", MaxTrackLength) {$/;"	f	class:Track
-Track	Classes/Track/Track.h	/^	Track(Cluster *cluster) : track_("Cluster", MaxTrackLength) { $/;"	f	class:Track
+Track	Classes/Track/Track.C	/^Track::Track() : track_("Cluster", MaxTrackLength) {$/;"	f	class:Track
+Track	Classes/Track/Track.C	/^Track::Track(Cluster *cluster) : track_("Cluster", MaxTrackLength) {$/;"	f	class:Track
 Track	Classes/Track/Track.h	/^class Track : public TObject {$/;"	c
 TrackCollection_h	Classes/Track/Tracks.h	2;"	d
 Track_conversion_h	Classes/Track/conversionFunctions.h	2;"	d
 Track_h	Classes/Track/Track.h	2;"	d
 Tracks	Classes/Track/Tracks.h	/^      Tracks() : tracks_("Track", 1000), clustersWithoutTrack_("Cluster", 5000) {}$/;"	f	class:Tracks
-Tracks	Classes/Track/Tracks.h	/^      Tracks(Int_t nTracks) : tracks_("Track", nTracks), clustersWithoutTrack_("Cluster", nTracks*100) {}$/;"	f	class:Tracks
+Tracks	Classes/Track/Tracks.h	/^      Tracks(Int_t nTracks) : tracks_("Track", nTracks), clustersWithoutTrack_("Cluster", nTracks*5) {}$/;"	f	class:Tracks
 Tracks	Classes/Track/Tracks.h	/^class Tracks : public TObject {$/;"	c
 X0	GlobalConstants/MaterialConstants.h	/^Double_t X0, X0_tungsten, X0_aluminum, X0_pmma, X0_firstlayer;$/;"	v
 X0_aluminum	GlobalConstants/MaterialConstants.h	/^Double_t X0, X0_tungsten, X0_aluminum, X0_pmma, X0_firstlayer;$/;"	v
@@ -167,10 +172,10 @@ appendCluster	Classes/Cluster/Clusters.C	/^void Clusters::appendCluster(Cluster 
 appendCluster	Classes/Cluster/Clusters.C	/^void Clusters::appendCluster(Float_t x, Float_t y, Int_t layer, Int_t size) {$/;"	f	class:Clusters
 appendCluster	Classes/Track/Track.C	/^void Track::appendCluster(Cluster *copyCluster, Int_t startOffset \/* default 0 *\/) {$/;"	f	class:Track
 appendClusterWithoutTrack	Classes/Cluster/Clusters.C	/^void Clusters::appendClusterWithoutTrack(Cluster *cluster) {$/;"	f	class:Clusters
-appendClustersWithoutTrack	Classes/Track/Tracks.C	/^void Tracks::appendClustersWithoutTrack(TClonesArray *clustersWithoutTrack) {$/;"	f	class:Tracks
+appendClustersWithoutTrack	Classes/Track/Tracks.C	/^void Tracks::appendClustersWithoutTrack(TClonesArray *copyCWT) {$/;"	f	class:Tracks
 appendExpandedClusterToClusterHitMap	Classes/Hit/findClusters.C	/^void Hits::appendExpandedClusterToClusterHitMap(vector<Int_t> *expandedCluster, vector<Hits*> *clusterHitMap) {$/;"	f	class:Hits
-appendExpandedClusterToClusters	Classes/Hit/findClusters.C	/^void Hits::appendExpandedClusterToClusters(vector<Int_t> *expandedCluster, Clusters *clusters) {$/;"	f	class:Hits
 appendHits	Classes/Hit/Hits.C	/^void Hits::appendHits(Hits *hits) {$/;"	f	class:Hits
+appendNeighboursToClusters	Classes/Hit/findClusters.C	/^void Hits::appendNeighboursToClusters(vector<Int_t> *expandedCluster, Clusters *clusters) {$/;"	f	class:Hits
 appendPoint	Classes/Hit/Hits.C	/^void Hits::appendPoint(Int_t x, Int_t y, Int_t layer, Int_t event, Float_t edep) {$/;"	f	class:Hits
 appendPoint	Classes/Track/Track.C	/^void Track::appendPoint(Float_t x, Float_t y, Int_t layer, Int_t size, Int_t eventID) {$/;"	f	class:Track
 appendTrack	Classes/Track/Tracks.C	/^void Tracks::appendTrack(Track *copyTrack, Int_t startOffset \/* default 0 *\/) {$/;"	f	class:Tracks
@@ -443,9 +448,9 @@ calorimeterFrame_	Classes/CalorimeterFrame/CalorimeterFrame.h	/^      TClonesArr
 checkAndAppendAllNextCandidates	Classes/Hit/findClusters.C	/^void Hits::checkAndAppendAllNextCandidates(vector<Int_t> * nextCandidates, vector<Int_t> *checkedIndices,$/;"	f	class:Hits
 checkLayerOrientation	Classes/Track/Tracks.C	/^void Tracks::checkLayerOrientation() {$/;"	f	class:Tracks
 clearClusters	Classes/Cluster/Clusters.C	/^void Clusters::clearClusters() {$/;"	f	class:Clusters
-clearHits	Classes/Hit/Hits.h	/^	virtual void   	clearHits()		   	{ hits_.Clear("C"); }$/;"	f	class:Hits
-clearTrack	Classes/Track/Track.h	/^	virtual void clearTrack() { track_.Clear("C"); }$/;"	f	class:Track
-clearTracks	Classes/Track/Tracks.h	/^      virtual void clearTracks() { tracks_.Clear("C"); }$/;"	f	class:Tracks
+clearHits	Classes/Hit/Hits.h	/^	virtual void		clearHits()		   	{ hits_.Clear("C"); }$/;"	f	class:Hits
+clearTrack	Classes/Track/Track.h	/^		virtual void		clearTrack()							{ track_.Clear("C"); }$/;"	f	class:Track
+clearTracks	Classes/Track/Tracks.h	/^		virtual void		clearTracks()				{ tracks_.Clear("C"); }$/;"	f	class:Tracks
 cluster	Classes/Track/Tracks.h	/^  int cluster;$/;"	m	struct:trackCluster
 clusterSize_	Classes/Cluster/Cluster.h	/^	Int_t clusterSize_;$/;"	m	class:Cluster
 clustersWithoutTrack_	Classes/Cluster/Clusters.h	/^	TClonesArray	clustersWithoutTrack_;$/;"	m	class:Clusters
@@ -468,11 +473,11 @@ diffmmXY	HelperFunctions/Tools.C	/^Float_t diffmmXY(Hit *h1, Hit *h2) {$/;"	f
 diffmmXYZ	HelperFunctions/Tools.C	/^Float_t diffmmXYZ(Cluster *p1, Cluster *p2) {$/;"	f
 diffuseFrame	Classes/CalorimeterFrame/CalorimeterFrame.C	/^void CalorimeterFrame::diffuseFrame(TRandom3 *gRandom) {$/;"	f	class:CalorimeterFrame
 diffuseLayer	Classes/Layer/Layer.C	/^Int_t Layer::diffuseLayer(TRandom3 *gRandom) {$/;"	f	class:Layer
-doFit	Classes/Track/Track.C	/^TGraphErrors * Track::doFit() {$/;"	f	class:Track
 doFit	Classes/Track/Tracks.C	/^void Tracks::doFit() {$/;"	f	class:Tracks
+doFit	Classes/Track/trackFitting.C	/^TGraphErrors * Track::doFit() {$/;"	f	class:Track
 doNGaussianFit	Analysis/Analysis.C	/^Float_t  doNGaussianFit ( TH1F *h, Float_t *means, Float_t *sigmas) {$/;"	f
-doRangeFit	Classes/Track/Track.C	/^TGraphErrors * Track::doRangeFit() {$/;"	f	class:Track
-doesTrackEndAbruptly	Classes/Track/Track.C	/^Bool_t Track::doesTrackEndAbruptly() {$/;"	f	class:Track
+doRangeFit	Classes/Track/trackFitting.C	/^TGraphErrors * Track::doRangeFit() {$/;"	f	class:Track
+doesTrackEndAbruptly	Classes/Track/trackProperties.C	/^Bool_t Track::doesTrackEndAbruptly() {$/;"	f	class:Track
 double_landau	HelperFunctions/Tools.C	/^Double_t double_landau(Double_t *v, Double_t *par) {$/;"	f
 draw2DProjection	Analysis/Analysis.C	/^void draw2DProjection(Int_t Runs, Int_t dataType, Bool_t recreate, Float_t energy) {$/;"	f
 drawBraggPeakGraphFit	Analysis/Analysis.C	/^Float_t drawBraggPeakGraphFit(Int_t Runs, Int_t dataType, Bool_t recreate, Float_t energy) {$/;"	f
@@ -488,6 +493,7 @@ drawTrackRanges	Analysis/Analysis.C	/^void drawTrackRanges(Int_t Runs, Int_t dat
 drawTracks3D	Analysis/Analysis.C	/^void drawTracks3D(Int_t Runs, Int_t dataType, Bool_t recreate, Float_t energy) {$/;"	f
 drawTracksWithEnergyLoss	Analysis/Analysis.C	/^void drawTracksWithEnergyLoss(Int_t Runs, Int_t dataType, Bool_t recreate, Float_t energy) {$/;"	f
 drawTungstenSpectrum	Analysis/Analysis.C	/^void drawTungstenSpectrum(Int_t Runs, Int_t dataType, Bool_t recreate, Float_t energy) {$/;"	f
+drawUlmerAndBortfeld	Scripts/drawUlmerAndBortfeld.C	/^void drawUlmerAndBortfeld() {$/;"	f
 dx	GlobalConstants/Constants.h	/^const Float_t dx = 0.03; \/\/ mm$/;"	v
 dy	GlobalConstants/Constants.h	/^const Float_t dy = 0.03; \/\/ mm$/;"	v
 dz	GlobalConstants/Constants.h	/^const Float_t dz = 3.975; \/\/ mm \/\/ was 3.84$/;"	v
@@ -513,8 +519,8 @@ eventID	Scripts/include/findRange.h	/^   Int_t           eventID;$/;"	m	class:fi
 eventID_	Classes/Cluster/Cluster.h	/^	Int_t eventID_;$/;"	m	class:Cluster
 eventID_	Classes/Hit/Hit.h	/^      Int_t eventID_;$/;"	m	class:Hit
 existsEnergyFile	HelperFunctions/Tools.C	/^Bool_t existsEnergyFile(Int_t energy) {$/;"	f
-extrapolateToLayer0	Classes/Track/Track.C	/^void Track::extrapolateToLayer0() {$/;"	f	class:Track
 extrapolateToLayer0	Classes/Track/Tracks.C	/^void Tracks::extrapolateToLayer0() {$/;"	f	class:Tracks
+extrapolateToLayer0	Classes/Track/trackExtrapolations.C	/^void Track::extrapolateToLayer0() {$/;"	f	class:Track
 fChain	Classes/DataInterface/DataInterface.h	/^   TTree          *fChain;   \/\/!pointer to the analyzed TTree or TChain$/;"	m	class:DataInterface
 fChain	Scripts/findLET.h	/^   TTree          *fChain;   \/\/!pointer to the analyzed TTree or TChain$/;"	m	class:findLET
 fChain	Scripts/findRange.h	/^   TTree          *fChain;   \/\/!pointer to the analyzed TTree or TChain$/;"	m	class:findRange
@@ -533,7 +539,6 @@ findCalorimeterTracks	Classes/Cluster/findTracks.C	/^Tracks * Clusters::findCalo
 findClustersFromHits	Classes/Hit/findClusters.C	/^Clusters * Hits::findClustersFromHits() {$/;"	f	class:Hits
 findClustersFromSeedInLayer	Classes/Cluster/findTracks.C	/^Clusters * Clusters::findClustersFromSeedInLayer(Cluster *seed, Int_t nextLayer) {$/;"	f	class:Clusters
 findClustersHitMap	Classes/Hit/findClusters.C	/^vector<Hits*> * Hits::findClustersHitMap() {$/;"	f	class:Hits
-findExpandedCluster	Classes/Hit/findClusters.C	/^vector<Int_t> * Hits::findExpandedCluster(Int_t i, vector<Int_t> *checkedIndices) {$/;"	f	class:Hits
 findFilterEnergyLoss	Scripts/include/findFilterEnergyLoss.h	/^class findFilterEnergyLoss {$/;"	c
 findFilterEnergyLoss	Scripts/include/findFilterEnergyLoss.h	/^findFilterEnergyLoss::findFilterEnergyLoss(Int_t energy, TTree *tree) : fChain(0)$/;"	f	class:findFilterEnergyLoss
 findFilterEnergyLoss_cxx	Scripts/findFilterEnergyLoss.C	1;"	d	file:
@@ -580,18 +585,20 @@ g2_pmma	GlobalConstants/MaterialConstants.h	/^Double_t a1_pmma, b1_pmma, b2_pmma
 g2_tungsten	GlobalConstants/MaterialConstants.h	/^Double_t a1_tungsten, b1_tungsten, b2_tungsten, g1_tungsten, g2_tungsten;$/;"	v
 g2_water	GlobalConstants/MaterialConstants.h	/^Double_t a1_water, b1_water, b2_water, g1_water, g2_water;$/;"	v
 gamma_p	Scripts/Check.C	/^Double_t alpha, p, alpha_prime, beta, gamma_p;$/;"	v
-getAbsorberLength	Classes/Track/Track.C	/^Float_t Track::getAbsorberLength(Int_t i) {$/;"	f	class:Track
-getAverageCS	Classes/Track/Track.C	/^Float_t Track::getAverageCS() {$/;"	f	class:Track
-getAverageCSLastN	Classes/Track/Track.C	/^Float_t Track::getAverageCSLastN(Int_t last_n) {$/;"	f	class:Track
+getAbsorberLength	Classes/Track/trackAngleCalculations.C	/^Float_t Track::getAbsorberLength(Int_t i) {$/;"	f	class:Track
+getAllNeighboursFromCluster	Classes/Hit/findClusters.C	/^vector<Int_t> * Hits::getAllNeighboursFromCluster(Int_t i, vector<Int_t> *checkedIndices) {$/;"	f	class:Hits
+getAverageCS	Classes/Track/trackClusterProperties.C	/^Float_t Track::getAverageCS() {$/;"	f	class:Track
+getAverageCSLastN	Classes/Track/trackClusterProperties.C	/^Float_t Track::getAverageCSLastN(Int_t last_n) {$/;"	f	class:Track
 getAverageEnergyLoss	HelperFunctions/Tools.C	/^Float_t getAverageEnergyLoss(Float_t energy) {$/;"	f
 getClosestCluster	Classes/Track/Tracks.C	/^Int_t Tracks::getClosestCluster(vector<trackCluster> clusters, Cluster* interpolatedCluster) {$/;"	f	class:Tracks
-getClusterFromLayer	Classes/Track/Track.C	/^Int_t Track::getClusterFromLayer(Int_t layer) {$/;"	f	class:Track
+getClusterFromLayer	Classes/Track/trackClusterProperties.C	/^Int_t Track::getClusterFromLayer(Int_t layer) {$/;"	f	class:Track
 getClusterIdx	Classes/Cluster/Clusters.C	/^Int_t Clusters::getClusterIdx(Float_t x, Float_t y, Int_t layer) {$/;"	f	class:Clusters
-getClusterIdx	Classes/Track/Track.C	/^Int_t Track::getClusterIdx(Cluster * cluster) {$/;"	f	class:Track
-getClusterIdx	Classes/Track/Track.C	/^Int_t Track::getClusterIdx(Float_t x, Float_t y, Int_t layer) {$/;"	f	class:Track
+getClusterIdx	Classes/Track/trackClusterProperties.C	/^Int_t Track::getClusterIdx(Cluster * cluster) {$/;"	f	class:Track
+getClusterIdx	Classes/Track/trackClusterProperties.C	/^Int_t Track::getClusterIdx(Float_t x, Float_t y, Int_t layer) {$/;"	f	class:Track
+getClusterSizeError	Classes/Track/Track.h	/^		virtual Int_t		getClusterSizeError(Int_t i)		{ return At(i)->getError(); } $/;"	f	class:Track
 getClustersWithoutTrack	Classes/Cluster/Clusters.h	/^	TClonesArray	 *	getClustersWithoutTrack()	{ return (TClonesArray*) &clustersWithoutTrack_; }$/;"	f	class:Clusters
-getClustersWithoutTrack	Classes/Track/Tracks.h	/^      TClonesArray * getClustersWithoutTrack() { return (TClonesArray*) &clustersWithoutTrack_; }$/;"	f	class:Tracks
-getConflictClusters	Classes/Track/Track.C	/^Clusters * Track::getConflictClusters() { $/;"	f	class:Track
+getClustersWithoutTrack	Classes/Track/Tracks.h	/^      TClonesArray	 *	getClustersWithoutTrack() { return (TClonesArray*) &clustersWithoutTrack_; }$/;"	f	class:Tracks
+getConflictClusters	Classes/Track/trackClusterProperties.C	/^Clusters * Track::getConflictClusters() { $/;"	f	class:Track
 getConflictingTracksFromTrack	Classes/Track/Tracks.C	/^vector<Int_t> * Tracks::getConflictingTracksFromTrack(Int_t trackIdx) {$/;"	f	class:Tracks
 getCutBraggPeakInTrack	Analysis/Analysis.C	/^Bool_t getCutBraggPeakInTrack(Track *track) {$/;"	f
 getCutChipNumber	Analysis/Analysis.C	/^Bool_t getCutChipNumber(Track *track) {$/;"	f
@@ -600,12 +607,12 @@ getCutWEPL	Analysis/Analysis.C	/^Bool_t getCutWEPL(Track *track) {$/;"	f
 getDataFrame	Classes/DataInterface/DataInterface.C	/^void DataInterface::getDataFrame(Int_t runNo, CalorimeterFrame * cf, Int_t energy) {$/;"	f	class:DataInterface
 getDataTypeChar	HelperFunctions/Tools.C	/^char * getDataTypeChar(Int_t dataType) {$/;"	f
 getDepositedEnergy	Classes/Cluster/Cluster.C	/^Float_t Cluster::getDepositedEnergy() {$/;"	f	class:Cluster
-getDepositedEnergy	Classes/Track/Track.h	/^	virtual Float_t getDepositedEnergy(Int_t i) {return At(i)->getDepositedEnergy(); }$/;"	f	class:Track
+getDepositedEnergy	Classes/Track/Track.h	/^		virtual Float_t	getDepositedEnergy(Int_t i)		{ return At(i)->getDepositedEnergy(); }$/;"	f	class:Track
 getDepositedEnergyError	Classes/Cluster/Cluster.C	/^Float_t Cluster::getDepositedEnergyError() {$/;"	f	class:Cluster
-getDepositedEnergyError	Classes/Track/Track.h	/^	virtual Float_t getDepositedEnergyError(Int_t i) {return At(i)->getDepositedEnergyError(); }$/;"	f	class:Track
+getDepositedEnergyError	Classes/Track/Track.h	/^		virtual Float_t	getDepositedEnergyError(Int_t i) { return At(i)->getDepositedEnergyError(); }$/;"	f	class:Track
 getEdep	Classes/Hit/Hit.h	/^      Float_t	getEdep()		{ return edep_; }$/;"	f	class:Hit
 getEdep	Classes/Hit/Hits.h	/^	virtual Float_t	getEdep(Int_t i)		{ return At(i)->getEdep(); }$/;"	f	class:Hits
-getEnergy	Classes/Track/Track.C	/^Float_t Track::getEnergy() {$/;"	f	class:Track
+getEnergy	Classes/Track/trackRangeCalculations.C	/^Float_t Track::getEnergy() {$/;"	f	class:Track
 getEnergyAtTL	Classes/Track/conversionFunctions.C	/^Float_t getEnergyAtTL(Float_t E0, Float_t depth) {$/;"	f
 getEnergyAtTL	Classes/Track/conversionFunctions.C	/^Float_t getEnergyAtTL(Float_t E0, Float_t depth, Double_t c1, Double_t c2, Double_t c3, Double_t c4, Double_t c5,$/;"	f
 getEnergyFromTL	Classes/Track/conversionFunctions.C	/^Float_t getEnergyFromTL(Float_t range) {$/;"	f
@@ -618,91 +625,89 @@ getEnergyLossErrorFromAluminumAbsorber	GlobalConstants/MaterialConstants.C	/^Flo
 getEnergyLossErrorFromScintillators	GlobalConstants/MaterialConstants.C	/^Float_t getEnergyLossErrorFromScintillators(Int_t nScintillators) {$/;"	f
 getEnergyLossFromAluminumAbsorber	GlobalConstants/MaterialConstants.C	/^Float_t getEnergyLossFromAluminumAbsorber(Float_t energy) {$/;"	f
 getEnergyLossFromScintillators	GlobalConstants/MaterialConstants.C	/^Float_t getEnergyLossFromScintillators(Float_t energy, Int_t nScintillators) {$/;"	f
-getEnergyStraggling	Classes/Track/Track.C	/^Float_t Track::getEnergyStraggling() {$/;"	f	class:Track
+getEnergyStraggling	Classes/Track/trackRangeCalculations.C	/^Float_t Track::getEnergyStraggling() {$/;"	f	class:Track
 getEnergyStragglingFromEnergy	Classes/Track/conversionFunctions.C	/^Float_t getEnergyStragglingFromEnergy(Float_t energy, Float_t sigma_energy) {$/;"	f
 getEnergyStragglingFromTL	Classes/Track/conversionFunctions.C	/^Float_t getEnergyStragglingFromTL(Float_t tl, Float_t sigma_energy) {$/;"	f
 getEnergyStragglingFromTLStraggling	Classes/Track/conversionFunctions.C	/^Float_t getEnergyStragglingFromTLStraggling(Float_t tl, Float_t TLStraggling) {$/;"	f
 getEnergyStragglingFromWEPLStraggling	Classes/Track/conversionFunctions.C	/^Float_t getEnergyStragglingFromWEPLStraggling(Float_t wepl, Float_t WEPLStraggling) {$/;"	f
 getError	Classes/Cluster/Cluster.h	/^	Int_t		getError()				{ return sqrt(clusterSize_); }$/;"	f	class:Cluster
-getError	Classes/Track/Track.h	/^	virtual Int_t getError(Int_t i) { return At(i)->getError(); } $/;"	f	class:Track
 getEventID	Classes/Cluster/Cluster.h	/^	Int_t		getEventID()			{ return eventID_; }$/;"	f	class:Cluster
 getEventID	Classes/Cluster/Clusters.h	/^	virtual Int_t		getEventID(Int_t i)	{ return At(i)->getEventID(); }$/;"	f	class:Clusters
 getEventID	Classes/Hit/Hit.h	/^      Int_t		getEventID()	{ return eventID_; }$/;"	f	class:Hit
 getEventID	Classes/Hit/Hits.h	/^	virtual Int_t		getEventID(Int_t i)	{ return At(i)->getEventID(); }$/;"	f	class:Hits
-getEventID	Classes/Track/Track.h	/^	virtual Int_t getEventID(Int_t i) { return At(i)->getEventID(); }$/;"	f	class:Track
-getEventIDMode	Classes/Track/Track.C	/^Int_t Track::getEventIDMode() {$/;"	f	class:Track
+getEventID	Classes/Track/Track.h	/^		virtual Int_t		getEventID(Int_t i)					{ return At(i)->getEventID(); }$/;"	f	class:Track
 getEventIDs	Analysis/Analysis.C	/^Hits * getEventIDs(Int_t Runs, Float_t energy) {$/;"	f
 getEventIDs	Classes/DataInterface/DataInterface.C	/^void DataInterface::getEventIDs(Int_t runNo, Hits * hits) {$/;"	f	class:DataInterface
-getExtrapolatedClusterAt	Classes/Track/Track.C	/^Cluster * Track::getExtrapolatedClusterAt(Float_t mmBeforeDetector) {$/;"	f	class:Track
+getExtrapolatedClusterAt	Classes/Track/trackExtrapolations.C	/^Cluster * Track::getExtrapolatedClusterAt(Float_t mmBeforeDetector) {$/;"	f	class:Track
 getFWxMInRange	HelperFunctions/Tools.C	/^Int_t getFWxMInRange(TH1F* h, Float_t first, Float_t last, Int_t div) {$/;"	f
 getFirstIndexBeforeY	Classes/Hit/Hits.C	/^Int_t Hits::getFirstIndexBeforeY(Int_t y) {$/;"	f	class:Hits
 getFirstIndexOfLayer	Classes/Cluster/Clusters.C	/^Int_t Clusters::getFirstIndexOfLayer(UInt_t layer) {$/;"	f	class:Clusters
 getFirstIndexOfLayer	Classes/Hit/Hits.C	/^Int_t Hits::getFirstIndexOfLayer(UInt_t layer) {$/;"	f	class:Hits
-getFirstLayer	Classes/Track/Track.C	/^Int_t Track::getFirstLayer() { $/;"	f	class:Track
-getFitParameterEnergy	Classes/Track/Track.C	/^Float_t Track::getFitParameterEnergy() {$/;"	f	class:Track
-getFitParameterError	Classes/Track/Track.C	/^Float_t Track::getFitParameterError() {$/;"	f	class:Track
-getFitParameterScale	Classes/Track/Track.C	/^Float_t Track::getFitParameterScale() {$/;"	f	class:Track
+getFirstLayer	Classes/Track/trackProperties.C	/^Int_t Track::getFirstLayer() { $/;"	f	class:Track
+getFitParameterEnergy	Classes/Track/trackFitting.C	/^Float_t Track::getFitParameterEnergy() {$/;"	f	class:Track
+getFitParameterError	Classes/Track/trackFitting.C	/^Float_t Track::getFitParameterError() {$/;"	f	class:Track
+getFitParameterScale	Classes/Track/trackFitting.C	/^Float_t Track::getFitParameterScale() {$/;"	f	class:Track
 getFrameType	Classes/Cluster/Clusters.h	/^	virtual Int_t		getFrameType()			{ return frameType_; }$/;"	f	class:Clusters
 getI	Classes/Hit/Hits.C	/^Int_t Hits::getI(Int_t x, Int_t y) {$/;"	f	class:Hits
-getIdxFromLayer	Classes/Track/Track.C	/^Int_t Track::getIdxFromLayer(Int_t layer) {$/;"	f	class:Track
-getInterpolatedClusterAt	Classes/Track/Track.C	/^Cluster * Track::getInterpolatedClusterAt(Int_t layer) {$/;"	f	class:Track
+getIdxFromLayer	Classes/Track/trackProperties.C	/^Int_t Track::getIdxFromLayer(Int_t layer) {$/;"	f	class:Track
+getInterpolatedClusterAt	Classes/Track/trackExtrapolations.C	/^Cluster * Track::getInterpolatedClusterAt(Int_t layer) {$/;"	f	class:Track
 getLastActiveLayer	Classes/Cluster/Clusters.C	/^Int_t Clusters::getLastActiveLayer() {$/;"	f	class:Clusters
 getLastActiveLayer	Classes/Hit/Hits.C	/^Int_t Hits::getLastActiveLayer() {$/;"	f	class:Hits
 getLastIndexAfterY	Classes/Hit/Hits.C	/^Int_t Hits::getLastIndexAfterY(Int_t y) {$/;"	f	class:Hits
 getLastIndexOfLayer	Classes/Cluster/Clusters.C	/^Int_t Clusters::getLastIndexOfLayer(UInt_t layer) {$/;"	f	class:Clusters
 getLastIndexOfLayer	Classes/Hit/Hits.C	/^Int_t Hits::getLastIndexOfLayer(UInt_t layer) {$/;"	f	class:Hits
-getLastLayer	Classes/Track/Track.C	/^Int_t Track::getLastLayer() {$/;"	f	class:Track
+getLastLayer	Classes/Track/trackProperties.C	/^Int_t Track::getLastLayer() {$/;"	f	class:Track
 getLayer	Classes/Cluster/Cluster.h	/^	Int_t		getLayer()				{ return layerNo_; }$/;"	f	class:Cluster
 getLayer	Classes/Cluster/Clusters.h	/^	virtual Int_t		getLayer(Int_t i)		{ return At(i)->getLayer(); }$/;"	f	class:Clusters
 getLayer	Classes/Hit/Hit.h	/^      Int_t		getLayer()		{ return layerNo_; }$/;"	f	class:Hit
 getLayer	Classes/Hit/Hits.h	/^	virtual Int_t		getLayer(Int_t i)		{ return At(i)->getLayer(); }$/;"	f	class:Hits
-getLayer	Classes/Track/Track.h	/^	virtual Int_t getLayer(Int_t i) { return At(i)->getLayer(); }$/;"	f	class:Track
+getLayer	Classes/Track/Track.h	/^		virtual Int_t		getLayer(Int_t i)						{ return At(i)->getLayer(); }$/;"	f	class:Track
 getLayerPositionmm	GlobalConstants/MaterialConstants.C	/^Double_t getLayerPositionmm(Int_t i) {$/;"	f
 getLayermm	Classes/Cluster/Cluster.C	/^Double_t Cluster::getLayermm() {$/;"	f	class:Cluster
-getLayermm	Classes/Track/Track.h	/^	Float_t getLayermm(Int_t i) { return At(i)->getLayermm(); }$/;"	f	class:Track
+getLayermm	Classes/Track/Track.h	/^		Float_t				getLayermm(Int_t i)					{ return At(i)->getLayermm(); }$/;"	f	class:Track
 getMCData	Classes/DataInterface/DataInterface.C	/^void DataInterface::getMCData(Int_t runNo, TH3F* Frame3D) {$/;"	f	class:DataInterface
 getMCFrame	Classes/DataInterface/DataInterface.C	/^Int_t DataInterface::getMCFrame(Int_t runNo, CalorimeterFrame *cf, Float_t *x_energy, Float_t *y_energy) {$/;"	f	class:DataInterface
 getMCSAngleForLayer	HelperFunctions/Tools.C	/^Float_t getMCSAngleForLayer(Int_t layer) {$/;"	f
 getMaterialChar	HelperFunctions/Tools.C	/^char * getMaterialChar() {$/;"	f
-getMaximumSlopeAngleChange	Classes/Track/Track.C	/^Float_t Track::getMaximumSlopeAngleChange() {$/;"	f	class:Track
-getMeanSizeToIdx	Classes/Track/Track.C	/^Float_t Track::getMeanSizeToIdx(Int_t toIdx) {$/;"	f	class:Track
+getMaximumSlopeAngleChange	Classes/Track/trackAngleCalculations.C	/^Float_t Track::getMaximumSlopeAngleChange() {$/;"	f	class:Track
+getMeanSizeToIdx	Classes/Track/trackClusterProperties.C	/^Float_t Track::getMeanSizeToIdx(Int_t toIdx) {$/;"	f	class:Track
 getMinimumTrackLength	HelperFunctions/Tools.C	/^Int_t getMinimumTrackLength(Float_t energy) {$/;"	f
-getNMissingLayers	Classes/Track/Track.C	/^Int_t Track::getNMissingLayers() {$/;"	f	class:Track
-getNScintillators	Classes/Track/Track.C	/^Int_t Track::getNScintillators() {$/;"	f	class:Track
-getNumberOfConflictClusters	Classes/Track/Track.C	/^Int_t Track::getNumberOfConflictClusters() { $/;"	f	class:Track
-getNumberOfConflictClusters	Classes/Track/Tracks.h	/^		virtual Int_t getNumberOfConflictClusters(Int_t i) { return At(i)->getNumberOfConflictClusters(); }$/;"	f	class:Tracks
+getModeEventID	Classes/Track/Track.C	/^Int_t Track::getModeEventID() {$/;"	f	class:Track
+getNMissingLayers	Classes/Track/trackProperties.C	/^Int_t Track::getNMissingLayers() {$/;"	f	class:Track
+getNScintillators	Classes/Track/trackPreSensorMaterial.C	/^Int_t Track::getNScintillators() {$/;"	f	class:Track
+getNumberOfConflictClusters	Classes/Track/Tracks.h	/^		virtual Int_t		getNumberOfConflictClusters(Int_t i)	{ return At(i)->getNumberOfConflictClusters(); }$/;"	f	class:Tracks
+getNumberOfConflictClusters	Classes/Track/trackClusterProperties.C	/^Int_t Track::getNumberOfConflictClusters() { $/;"	f	class:Track
 getOccupancy	Classes/Layer/Layer.C	/^Float_t Layer::getOccupancy() {$/;"	f	class:Layer
 getOccupancyLastLayer	Classes/CalorimeterFrame/CalorimeterFrame.C	/^Float_t CalorimeterFrame::getOccupancyLastLayer() {$/;"	f	class:CalorimeterFrame
 getPValues	Analysis/Analysis.C	/^void getPValues() {$/;"	f
-getPreEnergyLoss	Classes/Track/Track.C	/^Float_t Track::getPreEnergyLoss() {$/;"	f	class:Track
-getPreEnergyLossError	Classes/Track/Track.C	/^Float_t Track::getPreEnergyLossError() {$/;"	f	class:Track
-getPreTL	Classes/Track/Track.C	/^Float_t Track::getPreTL() {$/;"	f	class:Track
-getPreWEPL	Classes/Track/Track.C	/^Float_t Track::getPreWEPL() {$/;"	f	class:Track
-getProjectedRatio	Classes/Track/Track.C	/^Float_t Track::getProjectedRatio() {$/;"	f	class:Track
+getPreEnergyLoss	Classes/Track/trackPreSensorMaterial.C	/^Float_t Track::getPreEnergyLoss() {$/;"	f	class:Track
+getPreEnergyLossError	Classes/Track/trackPreSensorMaterial.C	/^Float_t Track::getPreEnergyLossError() {$/;"	f	class:Track
+getPreTL	Classes/Track/trackPreSensorMaterial.C	/^Float_t Track::getPreTL() {$/;"	f	class:Track
+getPreWEPL	Classes/Track/trackPreSensorMaterial.C	/^Float_t Track::getPreWEPL() {$/;"	f	class:Track
+getProjectedRatio	Classes/Track/trackAngleCalculations.C	/^Float_t Track::getProjectedRatio() {$/;"	f	class:Track
 getRadiusmm	Classes/Cluster/Cluster.C	/^Float_t Cluster::getRadiusmm() {$/;"	f	class:Cluster
-getRangeWEPLAt	Classes/Track/Track.C	/^Float_t Track::getRangeWEPLAt(Int_t i) {	$/;"	f	class:Track
-getRangemm	Classes/Track/Track.C	/^Float_t Track::getRangemm() {$/;"	f	class:Track
-getRangemmAt	Classes/Track/Track.C	/^Float_t Track::getRangemmAt(Int_t i) {$/;"	f	class:Track
+getRangeWEPLAt	Classes/Track/trackRangeCalculations.C	/^Float_t Track::getRangeWEPLAt(Int_t i) {	$/;"	f	class:Track
+getRangemm	Classes/Track/trackRangeCalculations.C	/^Float_t Track::getRangemm() {$/;"	f	class:Track
+getRangemmAt	Classes/Track/trackRangeCalculations.C	/^Float_t Track::getRangemmAt(Int_t i) {$/;"	f	class:Track
 getRetrogradeTrackExtrapolationToLayer	HelperFunctions/Tools.C	/^Cluster * getRetrogradeTrackExtrapolationToLayer(Track * track, Int_t layer) {$/;"	f
-getRiseFactor	Classes/Track/Track.C	/^Float_t Track::getRiseFactor() {$/;"	f	class:Track
+getRiseFactor	Classes/Track/trackProperties.C	/^Float_t Track::getRiseFactor() {$/;"	f	class:Track
 getSearchRadiusForLayer	HelperFunctions/Tools.C	/^Float_t getSearchRadiusForLayer(Int_t layer) {$/;"	f
 getSigmaEnergy	GlobalConstants/MaterialConstants.C	/^Float_t getSigmaEnergy(Int_t energy) { $/;"	f
-getSinuosity	Classes/Track/Track.C	/^Float_t Track::getSinuosity() {$/;"	f	class:Track
-getSinuosity	Classes/Track/Tracks.h	/^      Float_t getSinuosity(Int_t i) { return At(i)->getSinuosity(); }$/;"	f	class:Tracks
+getSinuosity	Classes/Track/Tracks.h	/^		Float_t				getSinuosity(Int_t i)						{ return At(i)->getSinuosity(); }$/;"	f	class:Tracks
+getSinuosity	Classes/Track/trackAngleCalculations.C	/^Float_t Track::getSinuosity() {$/;"	f	class:Track
 getSize	Classes/Cluster/Cluster.h	/^	Int_t		getSize()				{ return clusterSize_; }$/;"	f	class:Cluster
 getSize	Classes/Cluster/Clusters.h	/^	virtual Int_t		getSize(Int_t i)		{ return At(i)->getSize(); }$/;"	f	class:Clusters
-getSize	Classes/Track/Track.h	/^	virtual Int_t getSize(Int_t i) { return At(i)->getSize(); }$/;"	f	class:Track
-getSlopeAngle	Classes/Track/Track.C	/^Float_t Track::getSlopeAngle() {$/;"	f	class:Track
-getSlopeAngle	Classes/Track/Tracks.h	/^      Float_t getSlopeAngle(Int_t i) { return At(i)->getSlopeAngle(); }$/;"	f	class:Tracks
-getSlopeAngleAtLayer	Classes/Track/Track.C	/^Float_t Track::getSlopeAngleAtLayer(Int_t i) {$/;"	f	class:Track
-getSlopeAngleBetweenLayers	Classes/Track/Track.C	/^Float_t Track::getSlopeAngleBetweenLayers(Int_t i) {$/;"	f	class:Track
-getSlopeAngleChangeBetweenLayers	Classes/Track/Track.C	/^Float_t Track::getSlopeAngleChangeBetweenLayers(Int_t i) {$/;"	f	class:Track
-getSlopeAngleDifferenceSum	Classes/Track/Track.C	/^Float_t Track::getSlopeAngleDifferenceSum() {$/;"	f	class:Track
-getSlopeAngleDifferenceSumInTheta0	Classes/Track/Track.C	/^Float_t Track::getSlopeAngleDifferenceSumInTheta0() {$/;"	f	class:Track
-getSnakeness	Classes/Track/Track.C	/^Float_t Track::getSnakeness() {$/;"	f	class:Track
-getStdSizeToIdx	Classes/Track/Track.C	/^Float_t Track::getStdSizeToIdx(Int_t toIdx) {$/;"	f	class:Track
-getTH2F	Classes/CalorimeterFrame/CalorimeterFrame.h	/^      TH2F *			getTH2F(Int_t i) { return (TH2F*) At(i)->getTH2F(); }$/;"	f	class:CalorimeterFrame
-getTH2F	Classes/Layer/Layer.h	/^		virtual TH2F * getTH2F() { return (TH2F*) &frame2D_; }$/;"	f	class:Layer
+getSize	Classes/Track/Track.h	/^		virtual Int_t		getSize(Int_t i)						{ return At(i)->getSize(); }$/;"	f	class:Track
+getSlopeAngle	Classes/Track/Tracks.h	/^      Float_t				getSlopeAngle(Int_t i)						{ return At(i)->getSlopeAngle(); }$/;"	f	class:Tracks
+getSlopeAngle	Classes/Track/trackAngleCalculations.C	/^Float_t Track::getSlopeAngle() {$/;"	f	class:Track
+getSlopeAngleAtLayer	Classes/Track/trackAngleCalculations.C	/^Float_t Track::getSlopeAngleAtLayer(Int_t i) {$/;"	f	class:Track
+getSlopeAngleBetweenLayers	Classes/Track/trackAngleCalculations.C	/^Float_t Track::getSlopeAngleBetweenLayers(Int_t i) {$/;"	f	class:Track
+getSlopeAngleChangeBetweenLayers	Classes/Track/trackAngleCalculations.C	/^Float_t Track::getSlopeAngleChangeBetweenLayers(Int_t i) {$/;"	f	class:Track
+getSlopeAngleDifferenceSum	Classes/Track/trackAngleCalculations.C	/^Float_t Track::getSlopeAngleDifferenceSum() {$/;"	f	class:Track
+getSlopeAngleDifferenceSumInTheta0	Classes/Track/trackAngleCalculations.C	/^Float_t Track::getSlopeAngleDifferenceSumInTheta0() {$/;"	f	class:Track
+getStdSizeToIdx	Classes/Track/trackClusterProperties.C	/^Float_t Track::getStdSizeToIdx(Int_t toIdx) {$/;"	f	class:Track
+getTH2F	Classes/CalorimeterFrame/CalorimeterFrame.h	/^      TH2F			 *	getTH2F(Int_t i) { return (TH2F*) At(i)->getTH2F(); }$/;"	f	class:CalorimeterFrame
+getTH2F	Classes/Layer/Layer.h	/^		virtual TH2F *	getTH2F() { return (TH2F*) &frame2D_; }$/;"	f	class:Layer
 getTLFromEnergy	Classes/Track/conversionFunctions.C	/^Float_t getTLFromEnergy(Float_t energy) {$/;"	f
 getTLFromEnergy	Classes/Track/conversionFunctions.C	/^Float_t getTLFromEnergy(Float_t energy, Double_t a1, Double_t b1, Double_t b2, Double_t g1, Double_t g2) {$/;"	f
 getTLFromEnergyQuadratic	Scripts/findRange.C	/^Float_t getTLFromEnergyQuadratic(Float_t energy) {$/;"	f
@@ -711,13 +716,13 @@ getTLStragglingFromTL	Classes/Track/conversionFunctions.C	/^Float_t getTLStraggl
 getTrackExtrapolationFromTo	HelperFunctions/Tools.C	/^Cluster * getTrackExtrapolationFromTo(Track * track, Int_t fromLayer, Int_t toLayer) {$/;"	f
 getTrackExtrapolationToLayer	HelperFunctions/Tools.C	/^Cluster * getTrackExtrapolationToLayer(Track * track, Int_t layer) {$/;"	f
 getTrackIdxFromCluster	Classes/Track/Tracks.C	/^Int_t Tracks::getTrackIdxFromCluster(Cluster * cluster) {$/;"	f	class:Tracks
-getTrackIdxFromFirstLayerEID	Classes/Track/Tracks.C	/^Int_t Tracks::getTrackIdxFromFirstLayerEID(Int_t eid) {$/;"	f	class:Tracks
-getTrackLengthWEPLmmAt	Classes/Track/Track.C	/^Float_t Track::getTrackLengthWEPLmmAt(Int_t i) {$/;"	f	class:Track
-getTrackLengthmm	Classes/Track/Track.C	/^Float_t Track::getTrackLengthmm() {$/;"	f	class:Track
-getTrackLengthmm	Classes/Track/Tracks.h	/^      Float_t getTrackLengthmm(Int_t i) { return At(i)->getTrackLengthmm(); }$/;"	f	class:Tracks
-getTrackLengthmmAt	Classes/Track/Track.C	/^Float_t Track::getTrackLengthmmAt(Int_t i) {$/;"	f	class:Track
-getTrackScore	Classes/Track/Track.C	/^Float_t Track::getTrackScore() {$/;"	f	class:Track
-getTrackScore	Classes/Track/Tracks.h	/^      Float_t getTrackScore(Int_t i) { return At(i)->getTrackScore(); }$/;"	f	class:Tracks
+getTrackIdxFromFirstLayerEID	Classes/Track/Tracks.C	/^Int_t Tracks::getTrackIdxFromFirstLayerEID(Int_t eventID) {$/;"	f	class:Tracks
+getTrackLengthWEPLmmAt	Classes/Track/trackRangeCalculations.C	/^Float_t Track::getTrackLengthWEPLmmAt(Int_t i) {$/;"	f	class:Track
+getTrackLengthmm	Classes/Track/Tracks.h	/^      Float_t				getTrackLengthmm(Int_t i)					{ return At(i)->getTrackLengthmm(); }$/;"	f	class:Tracks
+getTrackLengthmm	Classes/Track/trackRangeCalculations.C	/^Float_t Track::getTrackLengthmm() {$/;"	f	class:Track
+getTrackLengthmmAt	Classes/Track/trackRangeCalculations.C	/^Float_t Track::getTrackLengthmmAt(Int_t i) {$/;"	f	class:Track
+getTrackScore	Classes/Track/Tracks.h	/^      Float_t				getTrackScore(Int_t i)						{ return At(i)->getTrackScore(); }$/;"	f	class:Tracks
+getTrackScore	Classes/Track/trackFitting.C	/^Float_t Track::getTrackScore() {$/;"	f	class:Track
 getTrackStatistics	Analysis/Analysis.C	/^void getTrackStatistics(Int_t Runs, Int_t dataType, Bool_t recreate, Float_t energy, Int_t epr) {$/;"	f
 getTracks	HelperFunctions/getTracks.C	/^Tracks * getTracks(Int_t Runs, Int_t dataType, Int_t frameType, Float_t energy, Float_t *x, Float_t *y) {$/;"	f
 getTracksFromCluster	Classes/Track/Tracks.C	/^vector<Int_t> * Tracks::getTracksFromCluster(Cluster * cluster) {$/;"	f	class:Tracks
@@ -726,7 +731,7 @@ getTracks_cxx	HelperFunctions/getTracks.C	1;"	d	file:
 getTracks_h	HelperFunctions/getTracks.h	2;"	d
 getUnitFromEnergy	Classes/Track/conversionFunctions.C	/^Float_t getUnitFromEnergy(Float_t energy) {$/;"	f
 getUnitStragglingFromEnergy	Classes/Track/conversionFunctions.C	/^Float_t getUnitStragglingFromEnergy(Float_t energy, Float_t sigma_energy) {$/;"	f
-getWEPL	Classes/Track/Track.C	/^Float_t Track::getWEPL() {$/;"	f	class:Track
+getWEPL	Classes/Track/trackRangeCalculations.C	/^Float_t Track::getWEPL() {$/;"	f	class:Track
 getWEPLFactorFromEnergy	Classes/Track/conversionFunctions.C	/^Float_t getWEPLFactorFromEnergy(Float_t energy) {$/;"	f
 getWEPLFromEnergy	Classes/Track/conversionFunctions.C	/^Float_t getWEPLFromEnergy(Float_t energy) {$/;"	f
 getWEPLFromTL	Classes/Track/conversionFunctions.C	/^Float_t getWEPLFromTL(Float_t tl) {$/;"	f
@@ -736,37 +741,37 @@ getX	Classes/Cluster/Cluster.h	/^	Float_t	getX()					{ return x_; }$/;"	f	class:
 getX	Classes/Cluster/Clusters.h	/^	virtual Float_t	getX(Int_t i)			{ return At(i)->getX(); }$/;"	f	class:Clusters
 getX	Classes/Hit/Hit.h	/^      Int_t		getX()			{ return x_; }$/;"	f	class:Hit
 getX	Classes/Hit/Hits.h	/^	virtual Int_t		getX(Int_t i)			{ return At(i)->getX(); }$/;"	f	class:Hits
-getX	Classes/Track/Track.h	/^	virtual Float_t getX(Int_t i) { return At(i)->getX(); }$/;"	f	class:Track
-getXmm	Classes/Cluster/Cluster.h	/^	Double_t getXmm()					{ return (x_ - nx) * dx; } \/\/ from -nx*dx to nx*dx$/;"	f	class:Cluster
-getXmm	Classes/Hit/Hit.h	/^      Double_t getXmm()			{ return (x_ - nx) * dx; }$/;"	f	class:Hit
-getXmm	Classes/Track/Track.h	/^	Float_t getXmm(Int_t i) { return At(i)->getXmm(); }$/;"	f	class:Track
+getX	Classes/Track/Track.h	/^		virtual Float_t	getX(Int_t i)							{ return At(i)->getX(); }$/;"	f	class:Track
+getXmm	Classes/Cluster/Cluster.h	/^	Double_t	getXmm()					{ return (x_ - nx) * dx; } \/\/ from -nx*dx to nx*dx$/;"	f	class:Cluster
+getXmm	Classes/Hit/Hit.h	/^      Double_t	getXmm()			{ return (x_ - nx) * dx; }$/;"	f	class:Hit
+getXmm	Classes/Track/Track.h	/^		Float_t				getXmm(Int_t i)						{ return At(i)->getXmm(); }$/;"	f	class:Track
 getY	Classes/Cluster/Cluster.h	/^	Float_t	getY()					{ return y_; }$/;"	f	class:Cluster
 getY	Classes/Cluster/Clusters.h	/^	virtual Float_t	getY(Int_t i)			{ return At(i)->getY(); }$/;"	f	class:Clusters
 getY	Classes/Hit/Hit.h	/^      Int_t		getY()			{ return y_; }$/;"	f	class:Hit
 getY	Classes/Hit/Hits.h	/^	virtual Int_t		getY(Int_t i)			{ return At(i)->getY(); }$/;"	f	class:Hits
-getY	Classes/Track/Track.h	/^	virtual Float_t getY(Int_t i) { return At(i)->getY(); }$/;"	f	class:Track
-getYmm	Classes/Cluster/Cluster.h	/^	Double_t getYmm()					{ return (y_ - ny) * dy; } \/\/ from -ny*dy to ny*dy$/;"	f	class:Cluster
-getYmm	Classes/Hit/Hit.h	/^      Double_t getYmm()			{ return (y_ - ny) * dy; }$/;"	f	class:Hit
-getYmm	Classes/Track/Track.h	/^	Float_t getYmm(Int_t i) { return At(i)->getYmm(); }$/;"	f	class:Track
+getY	Classes/Track/Track.h	/^		virtual Float_t	getY(Int_t i)							{ return At(i)->getY(); }$/;"	f	class:Track
+getYmm	Classes/Cluster/Cluster.h	/^	Double_t	getYmm()					{ return (y_ - ny) * dy; } \/\/ from -ny*dy to ny*dy$/;"	f	class:Cluster
+getYmm	Classes/Hit/Hit.h	/^      Double_t	getYmm()			{ return (y_ - ny) * dy; }$/;"	f	class:Hit
+getYmm	Classes/Track/Track.h	/^		Float_t				getYmm(Int_t i)						{ return At(i)->getYmm(); }$/;"	f	class:Track
 growTrackFromLayer	Classes/Cluster/findTracks.C	/^void Clusters::growTrackFromLayer(Track *track, Int_t fromLayer) {$/;"	f	class:Clusters
-hasLayer	Classes/Track/Track.C	/^Bool_t Track::hasLayer(Int_t layer) {$/;"	f	class:Track
+hasLayer	Classes/Track/trackProperties.C	/^Bool_t Track::hasLayer(Int_t layer) {$/;"	f	class:Track
 hermite	Scripts/Check.C	/^double hermite(unsigned n, double x) {$/;"	f
 hits_	Classes/Hit/Hits.h	/^	TClonesArray hits_;$/;"	m	class:Hits
 initialSearchRadius	GlobalConstants/Constants.h	/^Float_t initialSearchRadius = 50 * dx; \/\/ 20 if dimensionless$/;"	v
-isClusterInTrack	Classes/Track/Track.C	/^Bool_t Track::isClusterInTrack(Cluster * cluster) {$/;"	f	class:Track
+isClusterInTrack	Classes/Track/trackClusterProperties.C	/^Bool_t Track::isClusterInTrack(Cluster * cluster) {$/;"	f	class:Track
 isFirstAndLastEventIDEqual	Classes/Track/Track.C	/^Bool_t Track::isFirstAndLastEventIDEqual() {$/;"	f	class:Track
-isHitOnScintillatorH	Classes/Track/Track.C	/^Bool_t Track::isHitOnScintillatorH() {$/;"	f	class:Track
-isHitOnScintillatorV	Classes/Track/Track.C	/^Bool_t Track::isHitOnScintillatorV() {$/;"	f	class:Track
-isHitOnScintillators	Classes/Track/Track.C	/^Bool_t Track::isHitOnScintillators() {$/;"	f	class:Track
+isHitOnScintillatorH	Classes/Track/trackPreSensorMaterial.C	/^Bool_t Track::isHitOnScintillatorH() {$/;"	f	class:Track
+isHitOnScintillatorV	Classes/Track/trackPreSensorMaterial.C	/^Bool_t Track::isHitOnScintillatorV() {$/;"	f	class:Track
+isHitOnScintillators	Classes/Track/trackPreSensorMaterial.C	/^Bool_t Track::isHitOnScintillators() {$/;"	f	class:Track
 isItemInVector	HelperFunctions/Tools.C	/^Bool_t isItemInVector(Int_t i, vector<Int_t> *v) {$/;"	f
 isOneEventID	Classes/Track/Track.C	/^Bool_t Track::isOneEventID() {$/;"	f	class:Track
 isPointOutOfBounds	HelperFunctions/Tools.C	/^Bool_t isPointOutOfBounds(Cluster *point, Float_t padding) {$/;"	f
 isSameCluster	HelperFunctions/Tools.C	/^Bool_t isSameCluster(Cluster *a, Cluster *b) {$/;"	f
 isUsed	Classes/Cluster/Cluster.h	/^	Bool_t	isUsed()					{ return isUsed_; }$/;"	f	class:Cluster
 isUsed	Classes/Cluster/Clusters.h	/^	virtual Bool_t		isUsed(Int_t i)		{ return At(i)->isUsed(); }$/;"	f	class:Clusters
-isUsed	Classes/Track/Track.h	/^	Bool_t isUsed(Int_t i) { return At(i)->isUsed(); }$/;"	f	class:Track
-isUsedClustersInTrack	Classes/Track/Track.C	/^Bool_t Track::isUsedClustersInTrack() {$/;"	f	class:Track
-isUsedClustersInTrack	Classes/Track/Tracks.h	/^		virtual Bool_t isUsedClustersInTrack(Int_t i) { return At(i)->isUsedClustersInTrack(); }$/;"	f	class:Tracks
+isUsed	Classes/Track/Track.h	/^		Bool_t				isUsed(Int_t i)						{ return At(i)->isUsed(); }$/;"	f	class:Track
+isUsedClustersInTrack	Classes/Track/Tracks.h	/^		virtual Bool_t		isUsedClustersInTrack(Int_t i)			{ return At(i)->isUsedClustersInTrack(); }$/;"	f	class:Tracks
+isUsedClustersInTrack	Classes/Track/trackClusterProperties.C	/^Bool_t Track::isUsedClustersInTrack() {$/;"	f	class:Track
 isUsed_	Classes/Cluster/Cluster.h	/^	Bool_t isUsed_;$/;"	m	class:Cluster
 kAluminum	GlobalConstants/Constants.h	/^enum eMaterial {kTungsten, kAluminum, kPMMA, kWater, kFocalTungsten, kFocalAluminum};$/;"	e	enum:eMaterial
 kBPFactorAboveAverage	GlobalConstants/Constants.h	/^const Float_t kBPFactorAboveAverage = 1.3;$/;"	v
@@ -774,7 +779,7 @@ kCalorimeter	GlobalConstants/Constants.h	/^enum eFrameType {kCalorimeter, kTrack
 kData	GlobalConstants/Constants.h	/^enum eDataType {kMC, kData};$/;"	e	enum:eDataType
 kDebug	GlobalConstants/Constants.h	/^Bool_t kDebug = false;$/;"	v
 kEnergy	GlobalConstants/Constants.h	/^enum eOutputUnit {kPhysical, kWEPL, kEnergy};$/;"	e	enum:eOutputUnit
-kEventsPerRun	GlobalConstants/Constants.h	/^Int_t kEventsPerRun = 750;$/;"	v
+kEventsPerRun	GlobalConstants/Constants.h	/^Int_t kEventsPerRun = 300;$/;"	v
 kFocalAluminum	GlobalConstants/Constants.h	/^enum eMaterial {kTungsten, kAluminum, kPMMA, kWater, kFocalTungsten, kFocalAluminum};$/;"	e	enum:eMaterial
 kFocalTungsten	GlobalConstants/Constants.h	/^enum eMaterial {kTungsten, kAluminum, kPMMA, kWater, kFocalTungsten, kFocalAluminum};$/;"	e	enum:eMaterial
 kIsAluminumPlate	GlobalConstants/Constants.h	/^Bool_t kIsAluminumPlate = true;$/;"	v
@@ -978,18 +983,18 @@ quadratureAdd	HelperFunctions/Tools.C	/^Float_t quadratureAdd(Float_t a, Float_t
 real_DBP	Scripts/Check.C	/^Double_t real_DBP(Double_t z, Double_t E0, Double_t phi0, Double_t sigma_mev, Double_t sigma_scale) {$/;"	f
 removeAllClustersInTrack	Classes/Cluster/Clusters.C	/^void Clusters::removeAllClustersInTrack(Track *track) {$/;"	f	class:Clusters
 removeCluster	Classes/Cluster/Clusters.h	/^	virtual void		removeCluster(Cluster *c)					{ clusters_.Remove((TObject*) c); }$/;"	f	class:Clusters
-removeCluster	Classes/Track/Track.h	/^	virtual void removeCluster(Cluster *c) { track_.Remove((TObject*) c); }$/;"	f	class:Track
+removeCluster	Classes/Track/Track.h	/^		virtual void		removeCluster(Cluster *c)			{ track_.Remove((TObject*) c); }$/;"	f	class:Track
 removeClusterAt	Classes/Cluster/Clusters.h	/^	virtual TObject *	removeClusterAt(Int_t i)					{ return clusters_.RemoveAt(i); }$/;"	f	class:Clusters
-removeClusterAt	Classes/Track/Track.h	/^	virtual TObject* removeClusterAt(Int_t i) { return track_.RemoveAt(i); }$/;"	f	class:Track
-removeClusterWithoutTrackAt	Classes/Cluster/Clusters.h	/^	virtual TObject * removeClusterWithoutTrackAt(Int_t i)	{ return clustersWithoutTrack_.RemoveAt(i); }$/;"	f	class:Clusters
-removeHitAt	Classes/Hit/Hits.h	/^	TObject*	         removeHitAt(Int_t i)	{ return hits_.RemoveAt(i); }$/;"	f	class:Hits
+removeClusterAt	Classes/Track/Track.h	/^		virtual TObject * removeClusterAt(Int_t i)			{ return track_.RemoveAt(i); }$/;"	f	class:Track
+removeClusterWithoutTrackAt	Classes/Cluster/Clusters.h	/^	virtual TObject *	removeClusterWithoutTrackAt(Int_t i)	{ return clustersWithoutTrack_.RemoveAt(i); }$/;"	f	class:Clusters
+removeHitAt	Classes/Hit/Hits.h	/^	TObject			 *	removeHitAt(Int_t i)	{ return hits_.RemoveAt(i); }$/;"	f	class:Hits
 removeSmallClusters	Classes/Cluster/Clusters.C	/^void Clusters::removeSmallClusters(Int_t size) {$/;"	f	class:Clusters
-removeTrack	Classes/Track/Tracks.h	/^      virtual void removeTrack(Track *t) { tracks_.Remove((TObject*) t); }$/;"	f	class:Tracks
-removeTrackAt	Classes/Track/Tracks.h	/^      virtual TObject* removeTrackAt(Int_t i) { return tracks_.RemoveAt(i); }$/;"	f	class:Tracks
-removeTrackCollisions	Classes/Track/Tracks.C	/^void Tracks::removeTrackCollisions() {$/;"	f	class:Tracks
+removeTrack	Classes/Track/Tracks.h	/^      virtual void		removeTrack(Track *t)	{ tracks_.Remove((TObject*) t); }$/;"	f	class:Tracks
+removeTrackAt	Classes/Track/Tracks.h	/^      virtual TObject*	removeTrackAt(Int_t i)	{ return tracks_.RemoveAt(i); }$/;"	f	class:Tracks
+removeTrackCollisions	Classes/Track/tracksOptimization.C	/^void Tracks::removeTrackCollisions() {$/;"	f	class:Tracks
 removeTrackFromClustersWithoutTrack	Classes/Cluster/Clusters.C	/^void Clusters::removeTrackFromClustersWithoutTrack(Track *track) {$/;"	f	class:Clusters
-removeTracksLeavingDetector	Classes/Track/Tracks.C	/^void Tracks::removeTracksLeavingDetector() {$/;"	f	class:Tracks
-retrogradeTrackImprovement	Classes/Track/Tracks.C	/^void Tracks::retrogradeTrackImprovement(Clusters * clusters) {$/;"	f	class:Tracks
+removeTracksLeavingDetector	Classes/Track/tracksOptimization.C	/^void Tracks::removeTracksLeavingDetector() {$/;"	f	class:Tracks
+retrogradeTrackImprovement	Classes/Track/tracksOptimization.C	/^void Tracks::retrogradeTrackImprovement(Clusters * clusters) {$/;"	f	class:Tracks
 rotationAngle	Classes/DataInterface/DataInterface.h	/^   Float_t         rotationAngle;$/;"	m	class:DataInterface
 rotationAngle	Scripts/findLET.h	/^   Float_t         rotationAngle;$/;"	m	class:findLET
 rotationAngle	Scripts/findRange.h	/^   Float_t         rotationAngle;$/;"	m	class:findRange
@@ -1011,9 +1016,9 @@ set	Classes/Cluster/Cluster.C	/^void Cluster::set(Cluster* copyCluster) {$/;"	f	
 set	Classes/Cluster/Cluster.C	/^void Cluster::set(Float_t x, Float_t y, Int_t layer, Int_t size) {$/;"	f	class:Cluster
 set	Classes/Hit/Hit.C	/^void Hit::set(Hit* hit) {$/;"	f	class:Hit
 set	Classes/Hit/Hit.C	/^void Hit::set(Int_t x, Int_t y, Int_t layerNo, Int_t eventID, Float_t edep) {$/;"	f	class:Hit
-setEdep	Classes/Hit/Hit.h	/^      void setEdep(Float_t edep)		{ edep_ = edep; }$/;"	f	class:Hit
+setEdep	Classes/Hit/Hit.h	/^      void		setEdep(Float_t edep)		{ edep_ = edep; }$/;"	f	class:Hit
 setEventID	Classes/Cluster/Cluster.h	/^	void		setEventID(Int_t id)	{ eventID_ = id; }$/;"	f	class:Cluster
-setEventID	Classes/Hit/Hit.h	/^      void setEventID(Int_t event)	{ eventID_ = event; }$/;"	f	class:Hit
+setEventID	Classes/Hit/Hit.h	/^      void		setEventID(Int_t event)	{ eventID_ = event; }$/;"	f	class:Hit
 setLayer	Classes/Cluster/Cluster.h	/^	void		setLayer(Int_t l)		{ layerNo_ = l; }$/;"	f	class:Cluster
 setSize	Classes/Cluster/Cluster.h	/^	void		setSize(Int_t size)	{ clusterSize_ = size; }$/;"	f	class:Cluster
 setTrack	Classes/Track/Track.C	/^void Track::setTrack(Track *copyTrack, Int_t startOffset \/* default 0 *\/) {$/;"	f	class:Track
@@ -1057,7 +1062,7 @@ sourcePosZ	Scripts/findRange.h	/^   Float_t         sourcePosZ;$/;"	m	class:find
 sourcePosZ	Scripts/include/Check.h	/^   Float_t         sourcePosZ;$/;"	m	class:Check
 sourcePosZ	Scripts/include/findFilterEnergyLoss.h	/^   Float_t         sourcePosZ;$/;"	m	class:findFilterEnergyLoss
 sourcePosZ	Scripts/include/findRange.h	/^   Float_t         sourcePosZ;$/;"	m	class:findRange
-splitSharedClusters	Classes/Track/Tracks.C	/^void Tracks::splitSharedClusters() {$/;"	f	class:Tracks
+splitSharedClusters	Classes/Track/tracksOptimization.C	/^void Tracks::splitSharedClusters() {$/;"	f	class:Tracks
 stepLength	Classes/DataInterface/DataInterface.h	/^   Float_t         stepLength;$/;"	m	class:DataInterface
 stepLength	Scripts/findLET.h	/^   Float_t         stepLength;$/;"	m	class:findLET
 stepLength	Scripts/findRange.h	/^   Float_t         stepLength;$/;"	m	class:findRange

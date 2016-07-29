@@ -142,6 +142,7 @@ void drawTrackAngleAtVaryingRunNumbers(Int_t dataType, Float_t energy) {
 
 void getTrackStatistics(Int_t Runs, Int_t dataType, Bool_t recreate, Float_t energy, Int_t epr) {
 	run_energy = energy;
+	kDataType = dataType;
 	
 	if (epr>0) {
 		kEventsPerRun = epr;
@@ -349,6 +350,7 @@ void drawClusterShapes(Int_t Runs, Bool_t dataType, Bool_t recreate, Float_t ene
 	// dataType = kMC (0) or kData (1)
 
 	run_energy = energy;
+	kDataType = dataType;
 
   	Int_t nRows = 15;
 	Int_t nRepeats = 20;
@@ -463,6 +465,7 @@ void makeTracks(Int_t Runs, Int_t dataType, Bool_t recreate, Float_t energy) {
 
 void drawTrackRanges(Int_t Runs, Int_t dataType, Bool_t recreate, Float_t energy) {
 	run_energy = energy;
+	kDataType = dataType;
 	
 	char * sDataType = getDataTypeChar(dataType);
 	char * sMaterial = getMaterialChar();
@@ -496,6 +499,7 @@ void drawTrackRanges(Int_t Runs, Int_t dataType, Bool_t recreate, Float_t energy
 
 void drawTungstenSpectrum(Int_t Runs, Int_t dataType, Bool_t recreate, Float_t energy) {
 	run_energy = energy;
+	kDataType = dataType;
 	
 	char * sDataType = getDataTypeChar(dataType);
 	char * sMaterial = getMaterialChar();
@@ -536,6 +540,7 @@ void drawTungstenSpectrum(Int_t Runs, Int_t dataType, Bool_t recreate, Float_t e
 }
 
 void drawScintillatorStatistics(Int_t Runs, Int_t dataType, Bool_t recreate, Float_t energy) {
+	kDataType = dataType;
 	run_energy = energy;
 	
 	char * sDataType = getDataTypeChar(dataType);
@@ -573,6 +578,7 @@ void drawScintillatorStatistics(Int_t Runs, Int_t dataType, Bool_t recreate, Flo
 void drawFitScale(Int_t Runs, Int_t dataType, Bool_t recreate, Float_t energy) {
 	TCanvas *cScale = new TCanvas("cScale", "Scale histogram", 1400, 1000);
 	run_energy = energy;
+	kDataType = dataType;
 	
 	TH1F *hScale = new TH1F("hScale", "Scale histogram", 800, 0, 800);
 	TGraphErrors *outputGraph;
@@ -601,6 +607,7 @@ void drawFitScale(Int_t Runs, Int_t dataType, Bool_t recreate, Float_t energy) {
 
 void drawTracksWithEnergyLoss(Int_t Runs, Int_t dataType, Bool_t recreate, Float_t energy) {
 	run_energy = energy;
+	kDataType = dataType;
 	
 	Float_t x_energy[sizeOfEventID*400] = {};
 	Float_t y_energy[sizeOfEventID*400] = {};
@@ -667,11 +674,14 @@ void drawTracksWithEnergyLoss(Int_t Runs, Int_t dataType, Bool_t recreate, Float
 
 Float_t drawBraggPeakGraphFit(Int_t Runs, Int_t dataType, Bool_t recreate, Float_t energy) {
 	run_energy = energy;
+	kDataType = dataType;
 	
  	cout << "At energy " << run_energy << ", expecting TL = " << getTLFromEnergy(run_energy) << " and WEPL = " << getWEPLFromEnergy(run_energy) << endl;
 
 	Tracks * tracks = loadOrCreateTracks(recreate, Runs, dataType, energy);
 	tracks->extrapolateToLayer0();
+
+	cout << *tracks->At(5) << endl;
 
 	cout << "Using aluminum plate: " << kIsAluminumPlate << endl;
 	cout << "Using scintillators: " << kIsScintillator << endl;
@@ -871,6 +881,7 @@ Float_t drawBraggPeakGraphFit(Int_t Runs, Int_t dataType, Bool_t recreate, Float
 
 void writeClusterFile(Int_t Runs, Int_t dataType, Float_t energy) {
 	run_energy = energy;
+	kDataType = dataType;
 	
 	Int_t nClusters = kEventsPerRun * 5 * nLayers;
 	Int_t nHits = kEventsPerRun * 50;
@@ -1094,11 +1105,7 @@ void drawTracks3D(Int_t Runs, Int_t dataType, Bool_t recreate, Float_t energy) {
 				// Bad track ends early. OK...
 				nOKLastLayers++;
 			}
-			else {
-				cout << "Bad track... " << *thisTrack << endl;
-			}
-
-		}			
+		}
 	}
 
 	nOKMinusTracks += nOKTracks;
@@ -1123,7 +1130,6 @@ void drawTracks3D(Int_t Runs, Int_t dataType, Bool_t recreate, Float_t energy) {
 		if (tracks->At(i)->getEventID(0) < 0) cout << tracks->At(i)->getEventID(1) << ", ";
 	}
 	cout << endl;
-
 
 	for (Int_t i=0; i<ntracks; i++) {
 		Track *thisTrack = tracks->At(i);
@@ -1637,6 +1643,7 @@ Float_t  doNGaussianFit ( TH1F *h, Float_t *means, Float_t *sigmas) {
 	Int_t j=0;
 	for (Int_t i=0; i<15; i++) {
  		if (getWEPLFromTL(getLayerPositionmm(i)) > getUnitFromEnergy(run_energy*1.1)) continue;
+ 		if (getWEPLFromTL(getLayerPositionmm(i)) < getWEPLFromEnergy(run_energy * 0.8)) continue;
 
 		Float_t searchFrom = getWEPLFromTL(getLayerPositionmm(i))+10;
 		Float_t searchTo = getWEPLFromTL(getLayerPositionmm(i+1))+10;
@@ -1651,7 +1658,7 @@ Float_t  doNGaussianFit ( TH1F *h, Float_t *means, Float_t *sigmas) {
 		Float_t ratio = integral / fullIntegral;
 		
 		isLastLayer = ((getWEPLFromTL(getLayerPositionmm(i)) > getUnitFromEnergy(run_energy-10)) && !wasLastLayer && ratio > 0.01) ;
-		
+	
  		if (i<=3) continue;
  		if (ratio < 0.05 && !isLastLayer) continue;
 		
@@ -1720,19 +1727,27 @@ Float_t  doNGaussianFit ( TH1F *h, Float_t *means, Float_t *sigmas) {
 	cout << "ESTIMATED ENERGY FROM RUN IS " << estimated_energy << " +- " << estimated_energy_error << endl;
 	cout << "Estimated range = " << estimated_range << " +- " << sumSigma << endl;
 	
-	if (true) {
-		ofstream file("OutputFiles/output_gauss.csv", ofstream::out | ofstream::app);
-		// run_energy; layer[i], constant[i], mpv[i], energy[i], sigma[i], ratio[i];  i 1->3
-		
-		file << run_energy << "; ";
-		for (Int_t j=0; j<3; j++) {
-			file << Form("%d; %.5f; %.5f; %.5f; %.5f; %.5f; %.5f",
-						 array_layer[j], array_constant[j], array_mean[j],
-						 array_energy[j], array_sigma[j], array_f[j], array_chi2n[j]);
-		}
-		
-		file << endl;
-		file.close();
+	ofstream file("OutputFiles/output_gauss.csv", ofstream::out | ofstream::app);
+	// run_energy; layer[i], constant[i], mpv[i], energy[i], sigma[i], ratio[i];  i 1->3
+	
+	file << run_energy << "; ";
+	for (Int_t j=0; j<3; j++) {
+		file << Form("%d; %.5f; %.5f; %.5f; %.5f; %.5f; %.5f",
+					 array_layer[j], array_constant[j], array_mean[j],
+					 array_energy[j], array_sigma[j], array_f[j], array_chi2n[j]);
 	}
+
+	file << endl;
+	file.close();
+	
+	Float_t last_range = array_mean[0];
+	if (array_constant[1] > 0.1) last_range = array_mean[1];
+	if (array_constant[2] > 0.1) last_range = array_mean[2];
+
+	ofstream file2("OutputFiles/result_makebraggpeakfit.csv", ofstream::out | ofstream::app);
+	// energy; nominal range; estimated range; range sigma; last_range
+	file2 << run_energy << "; " << getWEPLFromEnergy(run_energy) << "; " << estimated_range << "; " << sumSigma << "; " << last_range << endl;
+	file2.close();
+
 	return estimated_range;
 }

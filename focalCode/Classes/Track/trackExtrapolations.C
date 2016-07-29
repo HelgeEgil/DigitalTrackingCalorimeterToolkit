@@ -99,6 +99,7 @@ void Track::extrapolateToLayer0() {
       }
 		else {
 			eventID = At(1)->getEventID();
+			if (getLayer(1) == 0) return; // hotfix... Why is layer 0 sometimes placed in idx 1? Must fix this.
 		}
 
       if (At(2)) {

@@ -41,8 +41,8 @@ Double_t Cluster::getLayermm() {
 	Double_t z = 0;
 
 	if (layerNo_ > 0) {
-		if (getYmm() > 0) { z = firstUpperLayerZ + layerNo_*dz; }
-		else			  { z = firstLowerLayerZ + layerNo_*dz; }
+		if (getYmm() > 0)	{ z = firstUpperLayerZ + layerNo_*dz; }
+		else					{ z = firstLowerLayerZ + layerNo_*dz; }
 	}
 
 	return z;
@@ -88,7 +88,7 @@ void Cluster::set(Float_t x, Float_t y, Int_t layer, Int_t size) {
 }
 
 ostream& operator<< (ostream &os, Cluster& c) {
-   os << "(" << c.x_ << ", " << c.y_ << ", " << c.layerNo_ << ")";
+   os << "(" << c.x_ << ", " << c.y_ << ", " << c.layerNo_ << ":" << c.clusterSize_ << ")";
    return os;
 }
 

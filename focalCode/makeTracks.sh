@@ -1,32 +1,22 @@
 #!/bin/bash
 # Usage: run.sh material energy_from energy_increment energy_to
 
-echo "Usage: ./run.sh <material> <energy_from> <energy_increment> <energy_to> <runs>"
+echo "Usage: ./run.sh <energy_from> <energy_increment> <energy_to> <runs>"
 
-if [ $# -ne 5 ]; then
+if [ $# -ne 4 ]; then
 	echo "No arguments supplied, exiting"
 	exit
 fi
 
-echo Material: $1, energy_from: $2, energy_increment: $3, energy_to: $4, npart: $5
+echo Material: energy_from: $1, energy_increment: $2, energy_to: $3, npart: $4
 
-if [ "$1" != "Aluminium" ] && [ "$1" != "Tungsten" ] && [ "$1" != "myPMMA" ] ; then
-	echo Please input a valid material. Your choice: $1
+if [ $1 -gt $3 ] ; then
+	echo "energy_from ($1) is higher than energy_to ($3)"
 	echo "Usage: ./run.sh <material> <energy_from> <energy_increment> <energy_to>"
 	exit
 fi
 
-if [ $2 -gt $4 ] ; then
-	echo "energy_from ($2) is higher than energy_to ($4)"
-	echo "Usage: ./run.sh <material> <energy_from> <energy_increment> <energy_to>"
-	exit
-fi
-
-for i in `seq $2 $3 $4`;
+for i in `seq $1 $2 $3`;
 do
-	echo "Moving .root file"
-	mv Data/MonteCarlo/focal_Tungsten_energy"$i"_sigma0.root Data/MonteCarlo/test.root
-	echo "Making tracks at $i MeV."
-	root -l -q 'Scripts/makeTracksFile.C('$5', '$i')'
-	mv Data/MonteCarlo/test.root Data/MonteCarlo/focal_Tungsten_energy"$i"_sigma0.root
+	root -l -q 'Scripts/makeTracksFile.C('$4', '$i')'
 done

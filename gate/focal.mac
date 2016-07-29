@@ -40,10 +40,10 @@
 #/gate/physics/ActivateStepLimiter         gamma
 #/gate/physics/ActivateStepLimiter         proton
 
-#/gate/physics/Electron/SetCutInRegion  scanner  1 mm
-#/gate/physics/Positron/SetCutInRegion  scanner  1 mm
-#/gate/physics/Gamma/SetCutInRegion     scanner  1 mm
-#/gate/physics/Proton/SetCutInRegion    scanner	 1 mm
+/gate/physics/Electron/SetCutInRegion  scanner  0.1 mm
+/gate/physics/Positron/SetCutInRegion  scanner  0.1 mm
+/gate/physics/Gamma/SetCutInRegion     scanner  0.1 mm
+/gate/physics/Proton/SetCutInRegion    scanner	0.1 mm
 
 #gate/physics/Electron/SetCutInRegion  chip {step_active} um
 #gate/physics/Positron/SetCutInRegion  chip {step_active} um
