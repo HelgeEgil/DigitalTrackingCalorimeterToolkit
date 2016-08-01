@@ -13,6 +13,7 @@
 #include <TRandom3.h>
 #include <TLatex.h>
 #include <TStyle.h>
+#include <TPaveText.h>
 #include <TAxis3D.h>
 #include <TCanvas.h>
 #include <TGraph.h>
@@ -43,8 +44,8 @@ void drawTrackAngleAtVaryingRunNumbers(Int_t dataType, Float_t energy) {
 	Int_t nRuns = 0;
 	Hits * eventIDs = nullptr;
 
-	for (Int_t i=2; i<32; i++) {
-		nRuns = pow(2, 4 + 0.3 * i) + 0.5;
+	for (Int_t i=2; i<47; i++) {
+		nRuns = pow(2, 4 + 0.25 * i) + 0.5;
 
 		kEventsPerRun = nRuns;
 		Float_t factor = 2;
@@ -78,7 +79,9 @@ void drawTrackAngleAtVaryingRunNumbers(Int_t dataType, Float_t energy) {
 		Track *thisTrack;
 		Int_t EID, thisEID;
 		Int_t nTotal = tracks->GetEntries();
+		Int_t nTotal2 = 0;
 		Int_t nFirstAndLast = 0;
+		Int_t nLastCloseToFirst = 0;
 		Int_t nCorrect = 0;
 
 		for (Int_t j=0; j<tracks->GetEntriesFast(); j++) {
@@ -91,6 +94,7 @@ void drawTrackAngleAtVaryingRunNumbers(Int_t dataType, Float_t energy) {
 			normCorrectTracks->Fill(0);
 			nCorrect += (int) thisTrack->isOneEventID();
 			nFirstAndLast += (int) thisTrack->isFirstAndLastEventIDEqual();
+			nLastCloseToFirst += (Int_t) tracks->isLastEventIDCloseToFirst(j);
 
 			for (Int_t k=1; k<thisTrack->GetEntriesFast(); k++) {
 				if (!thisTrack->At(k)) continue;
@@ -104,11 +108,12 @@ void drawTrackAngleAtVaryingRunNumbers(Int_t dataType, Float_t energy) {
 
 		Float_t ratioCorrect = (float) nCorrect / nTotal;
 		Float_t ratioFirstAndLast = (float) nFirstAndLast / nTotal;
+		Float_t ratioLastCloseToFirst = (float) nLastCloseToFirst / nTotal;
 
 		hCorrectTracks->Divide(normCorrectTracks);
 
 		ofstream file2("OutputFiles/lastLayerCorrect_different_nRuns.csv", ofstream::out | ofstream::app);
-		file2 << factor << ";" << nRuns << ";" << hCorrectTracks->GetBinContent(5) << ";" << ratioCorrect << ";" << ratioFirstAndLast << endl;
+		file2 << factor << " " << nRuns << " " << ratioCorrect << " " << ratioFirstAndLast << " " << ratioLastCloseToFirst << endl;
 		file2.close();
 
 		c1->cd();
@@ -129,7 +134,6 @@ void drawTrackAngleAtVaryingRunNumbers(Int_t dataType, Float_t energy) {
 		ofstream file("OutputFiles/angles_different_nRuns.csv", ofstream::out | ofstream::app);
 		file << factor << ";" << nRuns << ";" << rms << ";" << mean << ";"
 	   	  << maximum << endl;
-
 
 		file.close();
 
@@ -697,16 +701,21 @@ Float_t drawBraggPeakGraphFit(Int_t Runs, Int_t dataType, Bool_t recreate, Float
 	char * sDataType = getDataTypeChar(dataType); char * sMaterial = getMaterialChar();
 	char * hTitle = Form("Fitted energy of a %.2f MeV beam in %s (%s)", energy, sMaterial, sDataType);
 
-	Int_t nPlotX = 4, nPlotY = 4;
+	Int_t nPlotX = 3, nPlotY = 1;
 	Int_t fitIdx = 0, plotSize = nPlotX*nPlotY;
+	Int_t skipPlot = 5;
 
 	TGraphErrors *outputGraph;
-	TCanvas *cGraph = new TCanvas("cGraph", "Fitted data points", 1400, 1000);
-	TCanvas *cFitResults = new TCanvas("cFitResults", hTitle, 1400, 1000);
+	TCanvas *cGraph = new TCanvas("cGraph", "Fitted data points", 1500, 500);
+	TCanvas *cFitResults = new TCanvas("cFitResults", hTitle, 1000, 1000);
 //	TCanvas *cMaxAngle = new TCanvas("cMaxAngle", "Maxium angle for proton track", 1400, 1000);
 	cGraph->Divide(nPlotX,nPlotY, 0.000001, 0.000001, 0);
 	gStyle->SetPadBorderMode(0); gStyle->SetFrameBorderMode(0);
 	gStyle->SetTitleH(0.06); gStyle->SetTitleYOffset(1);
+	gStyle->SetPadTickX(1); gStyle->SetPadTickY(1);
+	gStyle->SetPadTopMargin(0.05); gStyle->SetPadRightMargin(0.05);
+	gStyle->SetPadBottomMargin(0.05);
+	gStyle->SetPadLeftMargin(0.15);
 	
 	TH1F *hFitResults = new TH1F("fitResult", hTitle, 250, getUnitFromEnergy(0), getUnitFromEnergy(energy*1.2));
 	hFitResults->SetLineColor(kBlack); hFitResults->SetFillColor(kGreen-5);
@@ -762,8 +771,35 @@ Float_t drawBraggPeakGraphFit(Int_t Runs, Int_t dataType, Bool_t recreate, Float
 		if (acceptAngle || true) {
 			hFitResults->Fill(getUnitFromEnergy(fitEnergy));
 
-			if (fitIdx < plotSize && kDrawIndividualGraphs) {
+			if (fitIdx < plotSize && kDrawIndividualGraphs && j>=skipPlot) {
 				drawIndividualGraphs(cGraph, outputGraph, fitEnergy, fitScale, fitError, fitIdx++);
+
+				if (fitIdx == 1) {
+					gPad->SetRightMargin(0.01);
+					gPad->SetLeftMargin(0.15);
+					outputGraph->GetXaxis()->SetTitle("");
+				}
+
+				else if (fitIdx == 2) {
+					gPad->SetLeftMargin(0.01);
+					gPad->SetRightMargin(0.01);
+					outputGraph->GetYaxis()->SetLabelOffset(2);
+					outputGraph->SetTitle("Bragg-Kleeman model fit to depth-dose data");
+					
+					gPad->Update();
+					TPaveText *title = (TPaveText*) gPad->GetPrimitive("title");
+					title->SetTextFont(22);
+					title->SetTextSize(0.06);
+					gPad->Modified();
+					
+				}
+
+				else if (fitIdx == 3) {
+					gPad->SetRightMargin(0.1);
+					gPad->SetLeftMargin(0.01);
+					outputGraph->GetXaxis()->SetTitle("");
+					outputGraph->GetYaxis()->SetLabelOffset(2);
+				}
 			}
 		}
 		
@@ -796,7 +832,18 @@ Float_t drawBraggPeakGraphFit(Int_t Runs, Int_t dataType, Bool_t recreate, Float
 	else if (kOutputUnit == kEnergy) { hFitResults->SetXTitle("Energy [MeV]"); }
 	hFitResults->SetYTitle("Number of protons");
 
+	hFitResults->GetXaxis()->SetTitleFont(22);
+	hFitResults->GetXaxis()->SetLabelFont(22);
+	hFitResults->GetYaxis()->SetTitleFont(22);
+	hFitResults->GetYaxis()->SetLabelFont(22);
+	hFitResults->GetYaxis()->SetTitleOffset(1.5);
+	
 	hFitResults->Draw();
+
+	gPad->Update();
+	TPaveText *title = (TPaveText*) gPad->GetPrimitive("title");
+	title->SetTextFont(22);
+	gPad->Modified();
 	
 	// Draw expected gaussian distribution of results from initial energy
 	
@@ -811,13 +858,12 @@ Float_t drawBraggPeakGraphFit(Int_t Runs, Int_t dataType, Bool_t recreate, Float
 	
 	cout << "OutputUnit is " << kOutputUnit << " and the expected mean value is " << expectedMean 
 		 << ". The straggling including / excluding energy variation is " << expectedStraggling << " / " << nullStraggling << ".\n";
-
 		 
 	Float_t means[10] = {};
 	Float_t sigmas[10] = {};
 	
 	Float_t nGaussianFitRange = doNGaussianFit(hFitResults, means, sigmas);
-		
+
 	Int_t nMean = 0;
 	for (Int_t i=0; i<10; i++) {
 		if (means[i]) nMean++;
@@ -843,24 +889,33 @@ Float_t drawBraggPeakGraphFit(Int_t Runs, Int_t dataType, Bool_t recreate, Float
 		}
 	}
 	
-	TLegend *legend = new TLegend(0.15, 0.6, 0.48, 0.85);
+	TLegend *legend = new TLegend(0.16, 0.78, 0.38, 0.88);
+
+	gPad->Update();
+	TF1 *fit1 = (TF1*) gPad->GetPrimitive("Gaus_5");
+	
 	legend->SetTextSize(0.02);
-	legend->AddEntry(hFitResults, "Results from individual track fits", "F");
+	legend->AddEntry(hFitResults, "Individual track fits", "F");
+	legend->AddEntry(fit1, "Weighted Gaussians", "L");
+	legend->SetTextFont(22);
 //  	legend->AddEntry(landau, Form("Fit with E = %.1f MeV and #sigma = %.1f mm ", landau_energy, landau->GetParameter(2)*1.7), "F");
 	if (kDrawVerticalLayerLines) legend->AddEntry(l, "Sensor layer positions", "L");
-// 	legend->Draw();
+ 	legend->Draw();
 
 	TPaveStats *ps = (TPaveStats*) cFitResults->GetPrimitive("stats");
 	hFitResults->SetBit(TH1::kNoStats);
-	ps->AddText(Form("Nominal mean = %.2f", expectedMean));
+	ps->SetY1NDC(0.53); ps->SetX1NDC(0.72);
+	ps->SetTextFont(22);
+	ps->AddText(Form("Nominal WEPL = %.2f", expectedMean));
 	ps->AddText(Form("Nominal straggling = %.2f", expectedStraggling));
 	
 	for (Int_t i=0; i<nMean; i++) {
-		ps->AddText(Form("WEPL fit %d = %.2f", i+1, means[i]));
-		ps->AddText(Form("Energy fit %d = %.2f", i+1, getEnergyFromUnit(means[i])));
-		ps->AddText(Form("Sigma fit %d = %.2f", i+1, sigmas[i]));
+		ps->AddText(Form("Fit %d WEPL = %.2f", i+1, means[i]));
+		ps->AddText(Form("Fit %d #sigma_{WEPL} = %.2f", i+1, sigmas[i]));
+		ps->AddText(Form("Fit %d energy = %.2f", i+1, getEnergyFromUnit(means[i])));
 	}
-	ps->AddText(Form("Resulting range = %.2f #pm %.2f", nGaussianFitRange, rangeSigma));
+
+	ps->AddText(Form("Resulting WEPL = %.2f #pm %.2f", nGaussianFitRange, rangeSigma));
 	ps->AddText(Form("Resulting energy = %.2f #pm %.2f", getEnergyFromUnit(nGaussianFitRange), energySigma));
 		
 	if (kOutputUnit == kPhysical) {
@@ -1545,7 +1600,7 @@ void drawIndividualGraphs(TCanvas *cGraph, TGraphErrors* outputGraph, Float_t fi
 	Bool_t kDrawText = true;
 
 	outputGraph->SetMinimum(0);
-	outputGraph->SetMaximum(600);
+	outputGraph->SetMaximum(30);
 	outputGraph->SetTitle("");
 	
 	if (kOutputUnit == kWEPL || kOutputUnit == kEnergy) {
@@ -1556,11 +1611,16 @@ void drawIndividualGraphs(TCanvas *cGraph, TGraphErrors* outputGraph, Float_t fi
 		outputGraph->GetXaxis()->SetTitle("Physical path length [mm]");
 	}
 
-	outputGraph->GetYaxis()->SetTitle("Deposited energy per layer [keV]");
+	outputGraph->GetYaxis()->SetTitle("Deposited energy on layer [keV/#mum]");
+	outputGraph->GetYaxis()->SetTitleOffset(1);
 	outputGraph->GetXaxis()->SetTitleSize(0.05);
 	outputGraph->GetYaxis()->SetTitleSize(0.05);
 	outputGraph->GetXaxis()->SetLabelSize(0.04);
 	outputGraph->GetYaxis()->SetLabelSize(0.04);
+	outputGraph->GetXaxis()->SetTitleFont(22);
+	outputGraph->GetXaxis()->SetLabelFont(22);
+	outputGraph->GetYaxis()->SetTitleFont(22);
+	outputGraph->GetYaxis()->SetLabelFont(22);
 
 	Float_t low = getUnitFromEnergy(0);
 	Float_t high = getUnitFromEnergy(run_energy * 1.2);
@@ -1604,16 +1664,20 @@ void drawIndividualGraphs(TCanvas *cGraph, TGraphErrors* outputGraph, Float_t fi
 		l->Draw();
 		
 		Float_t realEnergy = getEnergyFromWEPL(x_energy[eventID*sizeOfEventID + n-1]);
-		TLatex *text2 = new TLatex(13, 450, Form("'Real' energy: %.1f #pm MeV", realEnergy));
-		text2->SetTextSize(0.06);
+		TLatex *text2 = new TLatex(15, 28, Form("'Real' energy: %.1f #pm MeV", realEnergy));
+		text2->SetTextSize(0.045);
+		text2->SetTextFont(22);
 		text2->Draw();
 	}
 
 	if (kDrawText) {
-		TLatex *text = new TLatex(10, 500, Form("Fitted energy: %.1f #pm %.1f MeV", fitEnergy, fitError));
-		text->SetTextSize(0.06);
+		TLatex *text = new TLatex(15, 28, Form("Fitted energy: %.1f #pm %.1f MeV", fitEnergy, fitError));
+		text->SetTextSize(0.045);
+		text->SetTextFont(22);
 		text->Draw();
 	}
+	
+	outputGraph->GetXaxis()->SetRangeUser(0, 265);
 
 	cGraph->Update();
 }
@@ -1663,7 +1727,9 @@ Float_t  doNGaussianFit ( TH1F *h, Float_t *means, Float_t *sigmas) {
  		if (ratio < 0.05 && !isLastLayer) continue;
 		
 		gauss = new TF1(Form("Gaus_%d", i), "gaus(0)", searchFrom, searchTo);
-		
+	
+		gauss->SetLineWidth(2.5);
+
 		sigma = 3;
 		if (isLastLayer && ratio < 0.05) sigma = 0.2;
 		

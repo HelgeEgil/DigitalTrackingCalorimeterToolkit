@@ -86,6 +86,7 @@ Init	Scripts/include/findFilterEnergyLoss.h	/^void findFilterEnergyLoss::Init(TT
 Init	Scripts/include/findRange.h	/^void findRange::Init(TTree *tree)$/;"	f	class:findRange
 Last	Classes/Hit/Hits.h	/^	virtual Hit		 *	Last()			   	{ return ((Hit*) hits_.Last()); }$/;"	f	class:Hits
 Last	Classes/Track/Track.h	/^		virtual Cluster *	Last()									{ return ((Cluster*) track_.At(GetEntriesFast()-1)); }$/;"	f	class:Track
+Last	Classes/Track/Tracks.h	/^      virtual Track	 *	Last()						{ return ((Track*) tracks_.At(GetEntriesFast()-1)); }$/;"	f	class:Tracks
 Layer	Classes/Layer/Layer.C	/^Layer::Layer(Int_t layerNo, Bool_t frameType, Bool_t dataType) : frame2D_(Form("%d_frame2D_%i",frameType, layerNo), Form("frame2D_layer_%i", layerNo), 2*nx, 0, 2*nx, 2*ny, 0, 2*ny) {$/;"	f	class:Layer
 Layer	Classes/Layer/Layer.h	/^class Layer : public TObject {$/;"	c
 Layer_h	Classes/Layer/Layer.h	2;"	d
@@ -764,6 +765,7 @@ isHitOnScintillatorH	Classes/Track/trackPreSensorMaterial.C	/^Bool_t Track::isHi
 isHitOnScintillatorV	Classes/Track/trackPreSensorMaterial.C	/^Bool_t Track::isHitOnScintillatorV() {$/;"	f	class:Track
 isHitOnScintillators	Classes/Track/trackPreSensorMaterial.C	/^Bool_t Track::isHitOnScintillators() {$/;"	f	class:Track
 isItemInVector	HelperFunctions/Tools.C	/^Bool_t isItemInVector(Int_t i, vector<Int_t> *v) {$/;"	f
+isLastEventIDCloseToFirst	Classes/Track/Tracks.C	/^Bool_t Tracks::isLastEventIDCloseToFirst(Int_t trackIdx) {$/;"	f	class:Tracks
 isOneEventID	Classes/Track/Track.C	/^Bool_t Track::isOneEventID() {$/;"	f	class:Track
 isPointOutOfBounds	HelperFunctions/Tools.C	/^Bool_t isPointOutOfBounds(Cluster *point, Float_t padding) {$/;"	f
 isSameCluster	HelperFunctions/Tools.C	/^Bool_t isSameCluster(Cluster *a, Cluster *b) {$/;"	f
@@ -777,6 +779,7 @@ kAluminum	GlobalConstants/Constants.h	/^enum eMaterial {kTungsten, kAluminum, kP
 kBPFactorAboveAverage	GlobalConstants/Constants.h	/^const Float_t kBPFactorAboveAverage = 1.3;$/;"	v
 kCalorimeter	GlobalConstants/Constants.h	/^enum eFrameType {kCalorimeter, kTracker};$/;"	e	enum:eFrameType
 kData	GlobalConstants/Constants.h	/^enum eDataType {kMC, kData};$/;"	e	enum:eDataType
+kDataType	GlobalConstants/Constants.h	/^Int_t kDataType = kMC;$/;"	v
 kDebug	GlobalConstants/Constants.h	/^Bool_t kDebug = false;$/;"	v
 kEnergy	GlobalConstants/Constants.h	/^enum eOutputUnit {kPhysical, kWEPL, kEnergy};$/;"	e	enum:eOutputUnit
 kEventsPerRun	GlobalConstants/Constants.h	/^Int_t kEventsPerRun = 300;$/;"	v
@@ -883,6 +886,7 @@ localPosZ	Scripts/include/findRange.h	/^   Float_t         localPosZ;$/;"	m	clas
 makeBraggPeakPDF	Scripts/makeBraggPeakPDF.C	/^void makeBraggPeakPDF(Float_t energy) {$/;"	f
 makeLayerIndex	Classes/Cluster/Clusters.C	/^void Clusters::makeLayerIndex() {$/;"	f	class:Clusters
 makeLayerIndex	Classes/Hit/Hits.C	/^void Hits::makeLayerIndex() {$/;"	f	class:Hits
+makePlots	Scripts/makePlots.C	/^void makePlots() {$/;"	f
 makeTracks	Analysis/Analysis.C	/^void makeTracks(Int_t Runs, Int_t dataType, Bool_t recreate, Float_t energy) {$/;"	f
 makeTracks	HelperFunctions/getTracks.C	/^void makeTracks(Int_t Runs, Int_t dataType, Bool_t recreate, Float_t energy) {$/;"	f
 makeTracksFile	Scripts/makeTracksFile.C	/^void makeTracksFile(Int_t Runs, Float_t energy) {$/;"	f

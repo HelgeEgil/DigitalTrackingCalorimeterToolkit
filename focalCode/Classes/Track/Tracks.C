@@ -185,6 +185,21 @@ Int_t Tracks::getTrackIdxFromFirstLayerEID(Int_t eventID) {
 	return -1;
 }
 
+Int_t Tracks::getTrackIdxFromLastLayerEID(Int_t eventID) {
+	Cluster	* thisCluster = nullptr;
+
+	for (Int_t i=0; i<GetEntriesFast(); i++) {
+		if (!At(i)) continue;
+		thisCluster = At(i)->Last();
+
+		if (!thisCluster) continue;
+
+		if (eventID == thisCluster->getEventID()) return i;
+	}
+
+	return -1;
+}
+
 Int_t Tracks::getTrackIdxFromCluster(Cluster * cluster) {
 	Track * thisTrack = nullptr;
 
@@ -367,4 +382,59 @@ void Tracks::checkLayerOrientation() {
 		}
 	}
 	cout << ".\n";
+}
+
+Bool_t Tracks::isLastEventIDCloseToFirst(Int_t trackIdx) {
+	Track		 *	track = At(trackIdx);
+	Cluster	 *	comparisonCluster = nullptr;
+	Int_t			lastEventID = track->Last()->getEventID();
+	Int_t			firstEventID = track->getEventID(0);
+	Int_t			comparisonEventID;
+	Float_t		deltaXY, deltaPHI, phi1, phi2;
+	Int_t			comparisonIdx;
+	
+	if (!track)											return false;
+	if (!track->At(0))								return false;
+	if (track->isFirstAndLastEventIDEqual())	return true;
+
+	else {
+		// check first against last ID
+		comparisonIdx = getTrackIdxFromFirstLayerEID(lastEventID);
+
+		if (comparisonIdx < 0) return true; 
+
+		comparisonCluster = At(comparisonIdx)->At(0);
+		
+		if (!comparisonCluster) return false;
+
+		deltaXY = diffmmXY(track->At(0), comparisonCluster);
+		phi1 = track->getSlopeAngleAtLayer(1);
+		phi2 = At(comparisonIdx)->getSlopeAngleAtLayer(1);
+		deltaPHI = fabs(phi1 - phi2);
+
+		if (deltaXY < 0.5 && deltaPHI < 0.5) {
+			cout << "OK! deltaXY = " << deltaXY << "and angles (" << phi1 << ", " << phi2 << "(\n";
+			cout << "A = " << *track << endl;
+			cout << "B = " << *At(comparisonIdx) << endl;
+			return true;
+		}
+
+		// check last against first ID
+		comparisonIdx = getTrackIdxFromLastLayerEID(firstEventID);
+		if (comparisonIdx < 0) return true;
+		
+		comparisonCluster = At(comparisonIdx)->Last();
+		if (!comparisonCluster) return false;
+
+		deltaXY = diffmmXY(track->Last(), comparisonCluster);
+		phi1 = track->getSlopeAngleAtLayer(track->GetEntriesFast()-1);
+		phi2 = At(comparisonIdx)->getSlopeAngleAtLayer(At(comparisonIdx)->GetEntriesFast()-1);
+		deltaPHI = fabs(phi1 - phi2);
+		
+		if (deltaXY < 0.5 && deltaPHI < 0.5) {
+			return true;
+		}
+	}
+
+	return false;
 }

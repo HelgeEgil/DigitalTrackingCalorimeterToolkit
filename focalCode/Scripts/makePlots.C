@@ -7,6 +7,8 @@
 #include <TStyle.h>
 #include <TCanvas.h>
 #include <TLine.h>
+#include <TPaveText.h>
+#include <TText.h>
 #include <iostream>
 #include <fstream>
 #include <TLatex.h>
@@ -21,8 +23,8 @@
 using namespace std;
 
 void makePlots() {
-   TCanvas *c1	= new TCanvas("c1", "c1", 2000, 1500);
-	TCanvas *c2 = new TCanvas("c2", "Correct Tracks fraction", 2000, 1500);
+   TCanvas *c1	= new TCanvas("c1", "c1", 1200, 800);
+	TCanvas *c2 = new TCanvas("c2", "Correct Tracks fraction", 1200, 800);
 
 	Float_t arrayE[200] = {0}; // energy MC
 	Float_t arrayEE[200] = {0}; // error on energy MC
@@ -55,6 +57,7 @@ void makePlots() {
 		in >> energy_ >> nomrange_ >> estrange_ >> sigmaRange_ >> lastRange_ ;
 
 		if (!in.good()) {
+			cout << energy_ << ", " << nomrange_ << ", " << estrange_ << ", " << sigmaRange_ << ", " << lastRange_ << endl;
 			break;
 		}
 
@@ -83,18 +86,21 @@ void makePlots() {
 	
 	ifstream in2;
 	in2.open("OutputFiles/lastLayerCorrect_different_nRuns.csv");
-	Float_t factor, np, correctLast, correctWhole, lastIsFirst;
+	Float_t factor, np, correctLast, correctWhole, lastIsFirst, lastIsAlmostFirst;
 	Float_t arrayFractionX[200] = {0};
 	Float_t arrayFractionY[200] = {0};
+	Float_t arrayFractionY2[200] = {0};
+	Float_t arrayFractionY3[200] = {0};
 	Int_t nlines2 = 0;
 	while (1) {
-		in2 >> factor >> np >> correctLast >> correctWhole >> lastIsFirst;
+		in2 >> factor >> np >> correctWhole >> lastIsFirst >> lastIsAlmostFirst;
 
 		if (!in2.good()) break;
 		
 		arrayFractionX[nlines2] = np;
-		arrayFractionY[nlines2] = lastIsFirst * 100;
-		cout << "line " << nlines2 << ", np = " << np << ", lastIsFirst = " << lastIsFirst << endl;
+		arrayFractionY[nlines2] = correctWhole * 100;
+		arrayFractionY2[nlines2] = lastIsFirst * 100;
+		arrayFractionY3[nlines2] = lastIsAlmostFirst * 100;
 
 		nlines2++;
 	}
@@ -108,11 +114,12 @@ void makePlots() {
 	TGraphErrors *hData = new TGraphErrors(nlines-MC2Data, arrayE2, arrayData, arrayEE2, arrayEData);
 	TGraphErrors *pstar = new TGraphErrors(MC2Data, arrayE, arrayPSTAR, arrayEE, arrayEPstar);
 	
-	hMC->SetTitleFont(22);
 	hMC->GetXaxis()->SetTitleFont(22);
 	hMC->GetYaxis()->SetTitleFont(22);
 	hMC->GetXaxis()->SetTitleOffset(1.2);
 	hMC->GetYaxis()->SetTitleOffset(1.2);
+	hMC->GetXaxis()->SetLabelFont(22);
+	hMC->GetYaxis()->SetLabelFont(22);
 
 	hMC->GetXaxis()->SetRangeUser(145, 200);
 	hMC->GetYaxis()->SetRangeUser(145, 270);
@@ -130,13 +137,18 @@ void makePlots() {
 
 	gStyle->SetPadTickY(1);
 	hMC->SetTitle("Range estimation of proton tracks using weighted Gaussian approach;Energy [MeV];Projected range [mm]");
-
 	hMC->Draw("AP");
 	hData->Draw("P");
 	pstar->Draw("L");
 
-	TLegend *leg = new TLegend(0.15, 0.68, 0.44, 0.85);
+	gPad->Update();
+	TPaveText *title = (TPaveText*) gPad->GetPrimitive("title");
+	title->SetTextFont(22);
+	gPad->Modified();
+
+	TLegend *leg = new TLegend(0.15, 0.68, 0.40, 0.85);
 	leg->SetTextSize(0.035);
+	leg->SetTextFont(22);
 	leg->AddEntry(pstar, "PSTAR range", "L");
 	leg->AddEntry(hMC, "Monte Carlo", "PE");
 	leg->AddEntry(hData, "Experimental data", "PE");
@@ -146,43 +158,100 @@ void makePlots() {
 
 	c2->cd();
 	TGraph *gFraction = new TGraph(nlines2, arrayFractionX, arrayFractionY);
+	TGraph *gFraction2 = new TGraph(nlines2, arrayFractionX, arrayFractionY2);
+	TGraph *gFraction3 = new TGraph(nlines2, arrayFractionX, arrayFractionY3);
 	gFraction->GetXaxis()->SetRangeUser(10, 6000);
+	gFraction->SetMaximum(100);
+	gFraction->SetMinimum(0);
+	gFraction->GetXaxis()->SetTitleFont(22);
+	gFraction->GetYaxis()->SetTitleFont(22);
 	gFraction->GetXaxis()->SetTitleOffset(1.2);
 	gFraction->GetYaxis()->SetTitleOffset(1.2);
-	gFraction->SetTitle("Fraction of correctly reconstructed tracks;Number of protons in frame;Fraction of tracks where first and last track ID is equal [%]");
-	gFraction->SetLineColor(kBlue);
+	gFraction->GetXaxis()->SetLabelFont(22);
+	gFraction->GetYaxis()->SetLabelFont(22);
+	gFraction->SetTitle("Fraction of correctly reconstructed tracks;Number of protons in frame;Fraction of correctly reconstructed tracks");
+	gFraction->SetLineColor(kGreen+2);
 	gFraction->SetLineWidth(3);
+	gFraction2->SetLineColor(kAzure+4);
+	gFraction2->SetLineWidth(3);
+	gFraction3->SetLineColor(kPink+4);
+	gFraction3->SetLineWidth(3);
+
 	gFraction->Draw("AL");
+	gFraction2->Draw("L");
+	gFraction3->Draw("L");
+	
+	TText *t = new TText();
+	gFraction->GetYaxis()->SetLabelOffset(5);
+	t->SetTextAlign(32);
+	t->SetTextSize(0.035);
+	t->SetTextFont(22);
+	for (Int_t i=0; i<6;i++) {
+		cout << "Drawing text at " << -0.42 << ", " << i*20 << endl;
+		t->DrawText(-0.42, i*20, Form("%d%%", i*20));
+	}
 
 	gPad->SetLogx();
 	gFraction->GetXaxis()->SetNoExponent();
-
-	TLine *line80 = new TLine(0, 80, 234, 80);
+	
+	/*
+	TLine *line80 = new TLine(0, 80, 477, 80);
 	line80->SetLineColor(kRed);
 	line80->SetLineWidth(2);
-	line80->SetLineStyle(7);
+	line80->SetLineStyle(9);
 	line80->Draw("same");
 
-	TLine *vLine80 = new TLine(234, 80, 234, 0);
+	
+	TLine *vLine80 = new TLine(477, 80, 477, 0);
 	vLine80->SetLineColor(kRed);
 	vLine80->SetLineWidth(2);
-	vLine80->SetLineStyle(7);
+	vLine80->SetLineStyle(9);
 	vLine80->Draw("same");
 	
+	vLine80 = new TLine(192, 80, 192, 0);
+	vLine80->SetLineColor(kRed);
+	vLine80->SetLineWidth(2);
+	vLine80->SetLineStyle(9);
+	vLine80->Draw("same");
+	
+	vLine80 = new TLine(235, 80, 235, 0);
+	vLine80->SetLineColor(kRed);
+	vLine80->SetLineWidth(2);
+	vLine80->SetLineStyle(9);
+	vLine80->Draw("same");
+
 	TLine *line1000 = new TLine(0, 37.95, 1000, 37.95);
 	line1000->SetLineColor(kRed);
 	line1000->SetLineWidth(2);
-	line1000->SetLineStyle(7);
+	line1000->SetLineStyle(9);
 	line1000->Draw("same");
 
 	TLine *vLine1000 = new TLine(1000, 37.95, 1000, 0);
 	vLine1000->SetLineColor(kRed);
 	vLine1000->SetLineWidth(2);
-	vLine1000->SetLineStyle(7);
+	vLine1000->SetLineStyle(9);
 	vLine1000->Draw("same");
+	*/
+
+	gPad->Update();
+	title = (TPaveText*) gPad->GetPrimitive("title");
+	title->SetTextFont(22);
+	gPad->Modified();
+	
+	TLegend * leg2 = new TLegend(0.67, 0.76, 0.97, 0.93);
+	leg2->SetTextSize(0.025);
+	leg2->SetTextFont(22);
+	leg2->AddEntry(gFraction, "Whole track correct", "L");
+	leg2->AddEntry(gFraction2, "Correct endpoints (ID_{first} = ID_{last})", "L");
+	leg2->AddEntry(gFraction3, "Close endpoints (#pm 0.5 mm, #pm 0.5#circ)", "L");
+//	leg2->AddEntry(line80, "80% correct tracks", "L");
+//	leg2->AddEntry(line1000, "n_{p} = 1000", "L");
+	leg2->Draw();
 
 	c2->Update();
 
-	c1->SaveAs("OutputFiles/estimated_ranges_all_energies.pdf");
-	c2->SaveAs("OutputFiles/fraction_of_correct_tracks.pdf");
+	c1->SaveAs("OutputFiles/figures/finalPlotsForArticle/estimated_ranges_all_energies.pdf");
+	c1->SaveAs("OutputFiles/figures/finalPlotsForArticle/estimated_ranges_all_energies.root");
+	c2->SaveAs("OutputFiles/figures/finalPlotsForArticle/fraction_of_correct_tracks.pdf");
+	c2->SaveAs("OutputFiles/figures/finalPlotsForArticle/fraction_of_correct_tracks.root");
 }

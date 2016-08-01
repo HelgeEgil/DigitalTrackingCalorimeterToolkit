@@ -105,8 +105,8 @@ TGraphErrors * Track::doRangeFit() {
 	for (Int_t i=0; i<n; i++) {
 		if (!At(i)) continue;
 		x[i] = preTL + getLayermm(i);
-		y[i] = getDepositedEnergy(i);
-		ery[i] = getDepositedEnergyError(i);
+		y[i] = getDepositedEnergy(i) / 14.; // normalize to per um
+		ery[i] = getDepositedEnergyError(i) / 14.;
 		erx[i] = dz / sqrt(12);
 	}
 	
@@ -124,16 +124,16 @@ TGraphErrors * Track::doRangeFit() {
 	graph = new TGraphErrors(n, x, y, erx, ery);
 	
 	if (kOutputUnit == kPhysical) {
-		if (kMaterial == kTungsten) scaleParameter = 14;
-		if (kMaterial == kAluminum) scaleParameter = 65;
+		if (kMaterial == kTungsten) scaleParameter = 14/14.;
+		if (kMaterial == kAluminum) scaleParameter = 65/14.;
 	}
 	
 	else if (kOutputUnit == kWEPL || kOutputUnit == kEnergy) {
-		if (kMaterial == kTungsten) scaleParameter = 63; // validated through drawFitScale
-		if (kMaterial == kAluminum) scaleParameter = 126;
+		if (kMaterial == kTungsten) scaleParameter = 63/14.; // validated through drawFitScale
+		if (kMaterial == kAluminum) scaleParameter = 126/14.;
 	}
 
-	if (kDataType == kData) scaleParameter = 95;
+	if (kDataType == kData) scaleParameter = 95/14.;
 
 	TF1 *func = new TF1("fit_BP", fitfunc_DBP, 0, getWEPLFromEnergy(maxEnergy*1.2), 2);
 	func->SetParameter(0, estimatedEnergy);
@@ -144,8 +144,8 @@ TGraphErrors * Track::doRangeFit() {
 
 	graph->Fit("fit_BP", "B, N, Q, W", "", 0, getWEPLFromEnergy(maxEnergy*1.2));
 	
-//	fitEnergy_ = correctForEnergyParameterisation(func->GetParameter(0));
-	fitEnergy_ = func->GetParameter(0);
+	fitEnergy_ = correctForEnergyParameterisation(func->GetParameter(0));
+//	fitEnergy_ = func->GetParameter(0);
 	fitScale_ = func->GetParameter(1);
 	fitError_ = func->GetParError(0);
 

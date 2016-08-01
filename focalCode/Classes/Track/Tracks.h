@@ -67,12 +67,14 @@ class Tracks : public TObject {
       Int_t					getClosestCluster(vector<trackCluster> clusters, Cluster* interpolatedCluster);
 		vector<Int_t>	 *	getTracksFromCluster(Cluster * cluster);
 		Int_t					getTrackIdxFromFirstLayerEID(Int_t eventID);
+		Int_t					getTrackIdxFromLastLayerEID(Int_t eventID);
 		Int_t					getTrackIdxFromCluster(Cluster * cluster);
 
 		// Calculations on involving all tracks
 		void					matchWithEventIDs(Hits *eventIDs);
       void					sortTrackByLayer(Int_t track);
       void					checkLayerOrientation();
+		Bool_t				isLastEventIDCloseToFirst(Int_t trackIdx);
       
       // Optimization of the tracking function
       // tracksOptimization.C
