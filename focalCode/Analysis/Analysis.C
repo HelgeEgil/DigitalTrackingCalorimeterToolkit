@@ -804,12 +804,13 @@ Float_t drawBraggPeakGraphFit(Int_t Runs, Int_t dataType, Bool_t recreate, Float
 		}
 		
 		else delete outputGraph;
+
 	}
 	
 	if (!kDrawIndividualGraphs) delete cGraph;
 	
 	cout << 100 * float(nCutDueToTrackEndingAbruptly) / tracks->GetEntriesFast() << " % of the tracks were cut due to seemingly inelastic nuclear interactions.\n";
-	
+
 //	cMaxAngle->cd();
 //	hMaxAngle->Draw();
 	TF1 *fMaxAngle = new TF1("fMaxAngle", "gaus(0)", 0, 25);
@@ -1062,6 +1063,44 @@ Hits * getEventIDs(Int_t Runs, Float_t energy) {
 	return hits;
 }
 
+void drawClusterSizeDistribution(Int_t Runs, Int_t dataType, Bool_t recreate, Float_t energy) {
+	run_energy = energy;
+	DataInterface *di = new DataInterface();
+
+	Int_t nClusters = kEventsPerRun * 5 * nLayers;
+	Int_t nHits = kEventsPerRun * 50;
+
+	CalorimeterFrame *cf = new CalorimeterFrame();
+	Clusters * clusters = new Clusters(nClusters);
+	Hits * hits = new Hits(nHits);
+	TH2F * hClusterSizes = new TH2F("hClusterSizes", "Cluster sizes vs layer", nLayers, 0, nLayers-1, 50, 0, 50);
+
+	for (Int_t i=0; i<Runs; i++) {
+		if (dataType == kMC) {
+			di->getMCFrame(i, cf);
+			cf->diffuseFrame(new TRandom3(0));
+			hits = cf->findHits();
+			clusters = hits->findClustersFromHits();
+		}
+
+		else if (dataType == kData) {
+			di->getDataFrame(i, cf, energy);
+			hits = cf->findHits();
+			clusters = hits->findClustersFromHits();
+			clusters->removeSmallClusters(2);
+			clusters->removeAllClustersAfterLayer(8);
+		}
+		
+		clusters->Compress();
+
+		for (Int_t i=0; i<clusters->GetEntriesFast(); i++) {
+			hClusterSizes->Fill(clusters->getLayer(i), clusters->getSize(i));
+		}
+	}
+
+	hClusterSizes->Draw("COLZ");
+}
+		
 void drawTracks3D(Int_t Runs, Int_t dataType, Bool_t recreate, Float_t energy) {
 	Tracks * tracks = loadOrCreateTracks(recreate, Runs, dataType, energy);
 

@@ -33,7 +33,10 @@ public:
 	TClonesArray	 *	getClustersWithoutTrack()	{ return (TClonesArray*) &clustersWithoutTrack_; }
 	virtual Int_t		GetEntriesFast()				{ return clusters_.GetEntriesFast(); }
 	virtual Int_t		GetEntries()					{ return clusters_.GetEntries(); }
+	virtual Int_t		GetEntriesFastCWT()			{ return clustersWithoutTrack_.GetEntriesFast(); }
+	virtual void		Compress()						{ clusters_.Compress(); }
 	virtual Int_t		GetEntriesFastLastLayer();
+	virtual Int_t		GetEntriesInLayer(Int_t i);
 	virtual void		clearClusters();
 	virtual void		Clear(Option_t * = "");
 	
@@ -43,7 +46,8 @@ public:
 	virtual TObject *	removeClusterWithoutTrackAt(Int_t i)	{ return clustersWithoutTrack_.RemoveAt(i); }
 	void					removeAllClustersInTrack(Track *track);
 	void					removeTrackFromClustersWithoutTrack(Track *track);
-	void					removeSmallClusters(Int_t size); 
+	void					removeSmallClusters(Int_t size);
+	void					removeAllClustersAfterLayer(Int_t afterLayer);
 	virtual void		appendCluster(Float_t x, Float_t y, Int_t layer = -1, Int_t size = -1);
 	virtual void		appendCluster(Cluster *cluster);
 	virtual void		appendClusterWithoutTrack(Cluster *cluster);

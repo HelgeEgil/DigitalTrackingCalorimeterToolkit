@@ -117,6 +117,8 @@ Tracks * getTracks(Int_t Runs, Int_t dataType, Int_t frameType, Float_t energy, 
 
 	Bool_t breakSignal = false;
 
+	cout << "Start with " << kEventsPerRun << " potential events.\n";
+
 	CalorimeterFrame *cf = new CalorimeterFrame();
 	Clusters * clusters = new Clusters(nClusters);
 	Clusters * trackerClusters = new Clusters(nClusters);
@@ -124,7 +126,7 @@ Tracks * getTracks(Int_t Runs, Int_t dataType, Int_t frameType, Float_t energy, 
 	Hits *eventIDs = new Hits(kEventsPerRun * sizeOfEventID);
 	Int_t eventID = -1;
 	Hits *trackerHits = new Hits(nHits);
-	Tracks *calorimeterTracks = new Tracks(nTracks);
+	Tracks *calorimeterTracks = nullptr;
 	Tracks *trackerTracks = new Tracks(nTracks);
 	Tracks *allTracks = new Tracks(nTracks * Runs);
 	TRandom3 *gRandom = new TRandom3(0);
@@ -155,7 +157,12 @@ Tracks * getTracks(Int_t Runs, Int_t dataType, Int_t frameType, Float_t energy, 
 			t3.Stop(); t4.Start();
 
 			clusters = hits->findClustersFromHits(); // badly optimized
+			
+			cout << "Found " << clusters->GetEntriesInLayer(0) << " clusters in the first layer.\n";
+			cout << "Found " << clusters->GetEntriesInLayer(1) << " clusters in the second layer.\n";
+
 			clusters->removeSmallClusters(2);
+			cout << "Found " << clusters->GetEntriesInLayer(0) << " clusters in the first layer after removeSmallClusters.\n";
 
 			t4.Stop();
 
@@ -168,12 +175,13 @@ Tracks * getTracks(Int_t Runs, Int_t dataType, Int_t frameType, Float_t energy, 
 			hits = cf->findHits();
 			clusters = hits->findClustersFromHits();
 			clusters->removeSmallClusters(2);
+			clusters->removeAllClustersAfterLayer(8); // bad data in layer 10 and 11
 		}
 		
 		t5.Start();
 		calorimeterTracks = clusters->findCalorimeterTracks();
 		t5.Stop();
-		
+
 		if (calorimeterTracks->GetEntriesFast() == 0) breakSignal = kTRUE; // to stop running
 
 		// Track improvements
@@ -181,7 +189,9 @@ Tracks * getTracks(Int_t Runs, Int_t dataType, Int_t frameType, Float_t energy, 
 		calorimeterTracks->extrapolateToLayer0();
 		calorimeterTracks->splitSharedClusters();
 		calorimeterTracks->removeTracksLeavingDetector();
+		cout << "Found " << calorimeterTracks->GetEntries() << " tracks after removeTracksLeavingDetector.\n";
 		calorimeterTracks->removeTrackCollisions();
+		cout << "Found " << calorimeterTracks->GetEntries() << " tracks after removeTrackCollisions.\n";
 		// calorimeterTracks->retrogradeTrackImprovement(clusters);
 
 		calorimeterTracks->Compress();

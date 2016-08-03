@@ -46,6 +46,17 @@ Int_t Clusters::GetEntriesFastLastLayer() {
 	return nInLayer[lastLayer];
 }
 
+Int_t Clusters::GetEntriesInLayer(Int_t layer) {
+	Int_t nInLayer = 0;
+
+	for (Int_t i=0; i<GetEntriesFast(); i++) {
+		if (!At(i)) continue;
+		if (getLayer(i) == layer) nInLayer++;
+	}
+
+	return nInLayer;
+}
+
 void Clusters::clearClusters() {
 	 clusters_.Clear("C");
 	 clustersWithoutTrack_.Clear("C");
@@ -91,6 +102,8 @@ void Clusters::removeAllClustersInTrack(Track *track) {
 }
 
 void Clusters::removeTrackFromClustersWithoutTrack(Track *track) {
+	// FIXME TClonesArray error
+	
    Int_t		lastIndex = 0;
 	Int_t		layer;
 	Float_t	x, y;
@@ -101,7 +114,7 @@ void Clusters::removeTrackFromClustersWithoutTrack(Track *track) {
       x = track->getX(i);
       y = track->getY(i);
 
-      for (Int_t j=lastIndex; j<GetEntriesFast(); j++) {
+      for (Int_t j=lastIndex; j<GetEntriesFastCWT(); j++) {
 			Cluster *cluster = (Cluster *) clustersWithoutTrack_.At(j);
 
 			if (!cluster)
@@ -124,6 +137,15 @@ void Clusters::removeTrackFromClustersWithoutTrack(Track *track) {
 void Clusters::removeSmallClusters(Int_t size) {
 	for (Int_t i=0; i<GetEntriesFast(); i++) {
 		if (getSize(i) <= size) {
+			removeClusterAt(i);
+		}
+	}
+}
+
+void Clusters::removeAllClustersAfterLayer(Int_t afterLayer) {
+	for (Int_t i=0; i<GetEntriesFast(); i++) {
+		if (!At(i)) continue;
+		if (getLayer(i) > afterLayer) {
 			removeClusterAt(i);
 		}
 	}

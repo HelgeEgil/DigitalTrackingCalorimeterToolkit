@@ -3,7 +3,7 @@
 !_TAG_PROGRAM_AUTHOR	Darren Hiebert	/dhiebert@users.sourceforge.net/
 !_TAG_PROGRAM_NAME	Exuberant Ctags	//
 !_TAG_PROGRAM_URL	http://ctags.sourceforge.net	/official site/
-!_TAG_PROGRAM_VERSION	5.8	//
+!_TAG_PROGRAM_VERSION	5.9~svn20110310	//
 Analysis_cxx	Analysis/Analysis.C	1;"	d	file:
 Analysis_h	Analysis/Analysis.h	2;"	d
 At	Classes/CalorimeterFrame/CalorimeterFrame.h	/^      virtual Layer *At(Int_t i) { return (Layer*) calorimeterFrame_.At(i); }$/;"	f	class:CalorimeterFrame
@@ -34,6 +34,7 @@ ClusterCollection_h	Classes/Cluster/Clusters.h	2;"	d
 Cluster_h	Classes/Cluster/Cluster.h	2;"	d
 Clusters	Classes/Cluster/Clusters.C	/^Clusters::Clusters(Bool_t frameType) : clusters_("Cluster", kEventsPerRun*2),$/;"	f	class:Clusters
 Clusters	Classes/Cluster/Clusters.h	/^class Clusters : public TObject {$/;"	c
+Compress	Classes/Cluster/Clusters.h	/^	virtual void		Compress()						{ clusters_.Compress(); }$/;"	f	class:Clusters
 Compress	Classes/Track/Track.h	/^		virtual void		Compress()								{ track_.Compress(); }$/;"	f	class:Track
 Compress	Classes/Track/Tracks.h	/^      virtual void		Compress()					{ tracks_.Compress(); }$/;"	f	class:Tracks
 CompressCWT	Classes/Track/Tracks.h	/^	  	virtual void		CompressCWT()				{ clustersWithoutTrack_.Compress(); }$/;"	f	class:Tracks
@@ -61,14 +62,17 @@ GetEntriesFast	Classes/Hit/Hits.h	/^	virtual Int_t		GetEntriesFast()  	{ return 
 GetEntriesFast	Classes/Track/Track.h	/^		virtual Int_t		GetEntriesFast()						{ return track_.GetEntriesFast(); }$/;"	f	class:Track
 GetEntriesFast	Classes/Track/Tracks.h	/^      virtual Int_t		GetEntriesFast()			{ return tracks_.GetEntriesFast(); }$/;"	f	class:Tracks
 GetEntriesFast	Classes/Track/Tracks.h	/^      virtual Int_t		GetEntriesFast(Int_t i) { return At(i)->GetEntriesFast(); }$/;"	f	class:Tracks
+GetEntriesFastCWT	Classes/Cluster/Clusters.h	/^	virtual Int_t		GetEntriesFastCWT()			{ return clustersWithoutTrack_.GetEntriesFast(); }$/;"	f	class:Clusters
 GetEntriesFastCWT	Classes/Track/Tracks.h	/^      virtual Int_t		GetEntriesFastCWT()		{ return clustersWithoutTrack_.GetEntriesFast(); }$/;"	f	class:Tracks
 GetEntriesFastLastLayer	Classes/Cluster/Clusters.C	/^Int_t Clusters::GetEntriesFastLastLayer() {$/;"	f	class:Clusters
+GetEntriesInLayer	Classes/Cluster/Clusters.C	/^Int_t Clusters::GetEntriesInLayer(Int_t layer) {$/;"	f	class:Clusters
 GetEntry	Classes/DataInterface/DataInterface.h	/^Int_t DataInterface::GetEntry(Long64_t entry)$/;"	f	class:DataInterface
 GetEntry	Scripts/findLET.h	/^Int_t findLET::GetEntry(Long64_t entry)$/;"	f	class:findLET
 GetEntry	Scripts/findRange.h	/^Int_t findRange::GetEntry(Long64_t entry)$/;"	f	class:findRange
 GetEntry	Scripts/include/Check.h	/^Int_t Check::GetEntry(Long64_t entry)$/;"	f	class:Check
 GetEntry	Scripts/include/findFilterEnergyLoss.h	/^Int_t findFilterEnergyLoss::GetEntry(Long64_t entry)$/;"	f	class:findFilterEnergyLoss
 GetEntry	Scripts/include/findRange.h	/^Int_t findRange::GetEntry(Long64_t entry)$/;"	f	class:findRange
+Gui	Gui/Gui.C	/^void Gui()$/;"	f
 Hit	Classes/Hit/Hit.C	/^Hit::Hit() {$/;"	f	class:Hit
 Hit	Classes/Hit/Hit.C	/^Hit::Hit(Hit* hit) {$/;"	f	class:Hit
 Hit	Classes/Hit/Hit.C	/^Hit::Hit(Int_t x, Int_t y, Int_t layerNo, Int_t eventID, Float_t edep) {$/;"	f	class:Hit
@@ -483,6 +487,7 @@ double_landau	HelperFunctions/Tools.C	/^Double_t double_landau(Double_t *v, Doub
 draw2DProjection	Analysis/Analysis.C	/^void draw2DProjection(Int_t Runs, Int_t dataType, Bool_t recreate, Float_t energy) {$/;"	f
 drawBraggPeakGraphFit	Analysis/Analysis.C	/^Float_t drawBraggPeakGraphFit(Int_t Runs, Int_t dataType, Bool_t recreate, Float_t energy) {$/;"	f
 drawClusterShapes	Analysis/Analysis.C	/^void drawClusterShapes(Int_t Runs, Bool_t dataType, Bool_t recreate, Float_t energy) {$/;"	f
+drawClusterSizeDistribution	Analysis/Analysis.C	/^void drawClusterSizeDistribution(Int_t Runs, Int_t dataType, Bool_t recreate, Float_t energy) {$/;"	f
 drawData3D	Analysis/Analysis.C	/^void drawData3D(Int_t Runs, Float_t energy) {$/;"	f
 drawDiffusionCheck	Analysis/Analysis.C	/^void drawDiffusionCheck(Int_t Runs, Int_t Layer, Float_t energy) {$/;"	f
 drawFitScale	Analysis/Analysis.C	/^void drawFitScale(Int_t Runs, Int_t dataType, Bool_t recreate, Float_t energy) {$/;"	f
@@ -718,6 +723,7 @@ getTrackExtrapolationFromTo	HelperFunctions/Tools.C	/^Cluster * getTrackExtrapol
 getTrackExtrapolationToLayer	HelperFunctions/Tools.C	/^Cluster * getTrackExtrapolationToLayer(Track * track, Int_t layer) {$/;"	f
 getTrackIdxFromCluster	Classes/Track/Tracks.C	/^Int_t Tracks::getTrackIdxFromCluster(Cluster * cluster) {$/;"	f	class:Tracks
 getTrackIdxFromFirstLayerEID	Classes/Track/Tracks.C	/^Int_t Tracks::getTrackIdxFromFirstLayerEID(Int_t eventID) {$/;"	f	class:Tracks
+getTrackIdxFromLastLayerEID	Classes/Track/Tracks.C	/^Int_t Tracks::getTrackIdxFromLastLayerEID(Int_t eventID) {$/;"	f	class:Tracks
 getTrackLengthWEPLmmAt	Classes/Track/trackRangeCalculations.C	/^Float_t Track::getTrackLengthWEPLmmAt(Int_t i) {$/;"	f	class:Track
 getTrackLengthmm	Classes/Track/Tracks.h	/^      Float_t				getTrackLengthmm(Int_t i)					{ return At(i)->getTrackLengthmm(); }$/;"	f	class:Tracks
 getTrackLengthmm	Classes/Track/trackRangeCalculations.C	/^Float_t Track::getTrackLengthmm() {$/;"	f	class:Track
@@ -782,7 +788,7 @@ kData	GlobalConstants/Constants.h	/^enum eDataType {kMC, kData};$/;"	e	enum:eDat
 kDataType	GlobalConstants/Constants.h	/^Int_t kDataType = kMC;$/;"	v
 kDebug	GlobalConstants/Constants.h	/^Bool_t kDebug = false;$/;"	v
 kEnergy	GlobalConstants/Constants.h	/^enum eOutputUnit {kPhysical, kWEPL, kEnergy};$/;"	e	enum:eOutputUnit
-kEventsPerRun	GlobalConstants/Constants.h	/^Int_t kEventsPerRun = 300;$/;"	v
+kEventsPerRun	GlobalConstants/Constants.h	/^Int_t kEventsPerRun = 100;$/;"	v
 kFocalAluminum	GlobalConstants/Constants.h	/^enum eMaterial {kTungsten, kAluminum, kPMMA, kWater, kFocalTungsten, kFocalAluminum};$/;"	e	enum:eMaterial
 kFocalTungsten	GlobalConstants/Constants.h	/^enum eMaterial {kTungsten, kAluminum, kPMMA, kWater, kFocalTungsten, kFocalAluminum};$/;"	e	enum:eMaterial
 kIsAluminumPlate	GlobalConstants/Constants.h	/^Bool_t kIsAluminumPlate = true;$/;"	v
@@ -985,6 +991,7 @@ processName	Scripts/include/findRange.h	/^   Char_t          processName[17];$/;
 proton_mass	GlobalConstants/MaterialConstants.h	/^Double_t proton_mass;$/;"	v
 quadratureAdd	HelperFunctions/Tools.C	/^Float_t quadratureAdd(Float_t a, Float_t b) {$/;"	f
 real_DBP	Scripts/Check.C	/^Double_t real_DBP(Double_t z, Double_t E0, Double_t phi0, Double_t sigma_mev, Double_t sigma_scale) {$/;"	f
+removeAllClustersAfterLayer	Classes/Cluster/Clusters.C	/^void Clusters::removeAllClustersAfterLayer(Int_t afterLayer) {$/;"	f	class:Clusters
 removeAllClustersInTrack	Classes/Cluster/Clusters.C	/^void Clusters::removeAllClustersInTrack(Track *track) {$/;"	f	class:Clusters
 removeCluster	Classes/Cluster/Clusters.h	/^	virtual void		removeCluster(Cluster *c)					{ clusters_.Remove((TObject*) c); }$/;"	f	class:Clusters
 removeCluster	Classes/Track/Track.h	/^		virtual void		removeCluster(Cluster *c)			{ track_.Remove((TObject*) c); }$/;"	f	class:Track

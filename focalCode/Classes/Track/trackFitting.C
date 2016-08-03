@@ -91,7 +91,7 @@ TGraphErrors * Track::doRangeFit() {
 	Bool_t			newCutBraggPeak = (getAverageCSLastN(2) > getAverageCS()*kBPFactorAboveAverage);
 	Bool_t			cutNPointsInTrack = (GetEntries()>3);
 	Bool_t			cut = newCutBraggPeak * cutNPointsInTrack;
-	if (!cut) return 0;
+//	if (!cut) return 0;
 
 	TGraphErrors * graph = nullptr;
 	Int_t				n = GetEntriesFast();

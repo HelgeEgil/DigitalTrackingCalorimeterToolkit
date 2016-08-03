@@ -33,6 +33,7 @@ Tracks * Clusters::findCalorimeterTracks() {
 	makeLayerIndex();
 	fillMCSRadiusList();
 	MCSMultiplicationFactor = 3;
+	cout << "C\n";
 
 	// first pass, small search cone (3 sigma MCS)
 	findTracksFromLayer(tracks, 0, usedClustersInSeeds);
@@ -40,7 +41,7 @@ Tracks * Clusters::findCalorimeterTracks() {
 	MCSMultiplicationFactor = 5;
 	usedClustersInSeeds = false;
 	multiplyRadiusFirstLayers(2);
-	
+
 	if (clustersWithoutTrack_.GetEntries() > 0) {
 		// second pass, large seach cone (5 sigma MCS)
 		findTracksFromLayer(tracks, 0, usedClustersInSeeds);
@@ -80,7 +81,7 @@ void Clusters::findTracksFromLayer(Tracks * tracks, Int_t layer, Bool_t kUsedClu
 
 		if (!bestTrack->At(0))
 			startOffset = 1;
-
+		
 		tracks->appendTrack(bestTrack, startOffset);
 		removeTrackFromClustersWithoutTrack(bestTrack);
 		markUsedClusters(bestTrack);
