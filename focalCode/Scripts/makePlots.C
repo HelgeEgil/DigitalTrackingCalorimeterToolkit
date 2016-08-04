@@ -25,6 +25,7 @@ using namespace std;
 void makePlots() {
    TCanvas *c1	= new TCanvas("c1", "c1", 1200, 800);
 	TCanvas *c2 = new TCanvas("c2", "Correct Tracks fraction", 1200, 800);
+	TCanvas *c3 = new TCanvas("c3", "Reconstruction efficiency", 1200, 800);
 
 	Float_t arrayE[200] = {0}; // energy MC
 	Float_t arrayEE[200] = {0}; // error on energy MC
@@ -36,8 +37,12 @@ void makePlots() {
 	Float_t arrayEE2[200] = {0}; // error on energy data
 	Float_t arrayEData[200] = {0};  // range data
 	Float_t arrayData[200] = {0}; // error on range data
-	
+	Float_t arrayEfficiencyEnergy[300];
+	Float_t arrayEfficiencyFinal[300];
+	Float_t arrayEfficiencyFinal2[300];
 
+	Int_t	nThisEnergy = 0, lastEnergy = 0;
+	
    gStyle->SetOptStat(0);
 
 	ifstream in;
@@ -107,6 +112,69 @@ void makePlots() {
 	cout << "Found " << nlines2 << " lines in lastLayerCorrect.\n";
 	
 	in2.close();
+	
+	ifstream in3;
+	in3.open("OutputFiles/efficiency_500.csv");
+	Int_t energy, nRecon, nNotLeaving, nFinal;
+	Int_t nEnergies = 0;
+
+	while (1) {
+		in3 >> energy >> np >> nRecon >> nNotLeaving >> nFinal;
+
+		if (!in3.good()) break;
+		if (!lastEnergy) {
+			arrayEfficiencyEnergy[0] = energy;
+			arrayEfficiencyFinal[0] = nFinal;
+			nThisEnergy = np;
+			lastEnergy = energy;
+		}
+
+		else if (lastEnergy == energy) {
+			arrayEfficiencyFinal[nEnergies] += nFinal;
+			nThisEnergy += np;
+			lastEnergy = energy;
+		}
+
+		else if (lastEnergy != energy) {
+			arrayEfficiencyFinal[nEnergies] /= nThisEnergy;
+			nEnergies++;
+			arrayEfficiencyEnergy[nEnergies] = energy;
+			arrayEfficiencyFinal[nEnergies] = nFinal;
+			nThisEnergy = np;
+			lastEnergy = energy;
+		}
+	}
+
+	in3.close();
+
+	ifstream in4;
+	in4.open("OutputFiles/efficiency_200.csv");
+	nEnergies = 0;
+	lastEnergy = 0;
+	while (1) {
+		in4 >> energy >> np >> nRecon >> nNotLeaving >> nFinal;
+
+		if (!in4.good()) break;
+		if (!lastEnergy) {
+			arrayEfficiencyFinal2[0] = nFinal;
+			nThisEnergy = np;
+			lastEnergy = energy;
+		}
+
+		else if (lastEnergy == energy) {
+			arrayEfficiencyFinal2[nEnergies] += nFinal;
+			nThisEnergy += np;
+			lastEnergy = energy;
+		}
+
+		else if (lastEnergy != energy) {
+			arrayEfficiencyFinal2[nEnergies] /= nThisEnergy;
+			nEnergies++;
+			arrayEfficiencyFinal2[nEnergies] = nFinal;
+			nThisEnergy = np;
+			lastEnergy = energy;
+		}
+	}
 
 	c1->cd();
 	
@@ -193,45 +261,6 @@ void makePlots() {
 
 	gPad->SetLogx();
 	gFraction->GetXaxis()->SetNoExponent();
-	
-	/*
-	TLine *line80 = new TLine(0, 80, 477, 80);
-	line80->SetLineColor(kRed);
-	line80->SetLineWidth(2);
-	line80->SetLineStyle(9);
-	line80->Draw("same");
-
-	
-	TLine *vLine80 = new TLine(477, 80, 477, 0);
-	vLine80->SetLineColor(kRed);
-	vLine80->SetLineWidth(2);
-	vLine80->SetLineStyle(9);
-	vLine80->Draw("same");
-	
-	vLine80 = new TLine(192, 80, 192, 0);
-	vLine80->SetLineColor(kRed);
-	vLine80->SetLineWidth(2);
-	vLine80->SetLineStyle(9);
-	vLine80->Draw("same");
-	
-	vLine80 = new TLine(235, 80, 235, 0);
-	vLine80->SetLineColor(kRed);
-	vLine80->SetLineWidth(2);
-	vLine80->SetLineStyle(9);
-	vLine80->Draw("same");
-
-	TLine *line1000 = new TLine(0, 37.95, 1000, 37.95);
-	line1000->SetLineColor(kRed);
-	line1000->SetLineWidth(2);
-	line1000->SetLineStyle(9);
-	line1000->Draw("same");
-
-	TLine *vLine1000 = new TLine(1000, 37.95, 1000, 0);
-	vLine1000->SetLineColor(kRed);
-	vLine1000->SetLineWidth(2);
-	vLine1000->SetLineStyle(9);
-	vLine1000->Draw("same");
-	*/
 
 	gPad->Update();
 	title = (TPaveText*) gPad->GetPrimitive("title");
@@ -244,11 +273,28 @@ void makePlots() {
 	leg2->AddEntry(gFraction, "Whole track correct", "L");
 	leg2->AddEntry(gFraction2, "Correct endpoints (ID_{first} = ID_{last})", "L");
 	leg2->AddEntry(gFraction3, "Close endpoints (#pm 0.5 mm, #pm 0.5#circ)", "L");
-//	leg2->AddEntry(line80, "80% correct tracks", "L");
-//	leg2->AddEntry(line1000, "n_{p} = 1000", "L");
 	leg2->Draw();
 
 	c2->Update();
+
+	c3->cd();
+	TGraph *gEfficiency = new TGraph(nEnergies, arrayEfficiencyEnergy, arrayEfficiencyFinal);
+	TGraph *gEfficiency2 = new TGraph(nEnergies, arrayEfficiencyEnergy, arrayEfficiencyFinal2);
+	gEfficiency->SetTitle("Efficiency of tracking algorithm at n_{p} = 500;Energy [MeV];Tracks reconstructed / n_{p}");
+	gEfficiency->SetMinimum(0.7);
+	gEfficiency->SetMaximum(1);
+	gEfficiency->GetXaxis()->SetTitleFont(22);
+	gEfficiency->GetYaxis()->SetTitleFont(22);
+	gEfficiency->GetXaxis()->SetTitleOffset(1.2);
+	gEfficiency->GetYaxis()->SetTitleOffset(1.2);
+	gEfficiency->GetXaxis()->SetLabelFont(22);
+	gEfficiency->GetYaxis()->SetLabelFont(22);
+	gEfficiency->SetLineColor(kGreen+3);
+	gEfficiency->SetLineWidth(3);
+	gEfficiency2->SetLineColor(kGreen-3);
+	gEfficiency2->SetLineWidth(3);
+	gEfficiency->Draw("AL");
+	gEfficiency2->Draw("L");
 
 	c1->SaveAs("OutputFiles/figures/finalPlotsForArticle/estimated_ranges_all_energies.pdf");
 	c1->SaveAs("OutputFiles/figures/finalPlotsForArticle/estimated_ranges_all_energies.root");

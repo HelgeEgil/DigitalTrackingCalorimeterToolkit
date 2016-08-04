@@ -109,30 +109,27 @@ Tracks * loadOrCreateTracks(Bool_t recreate, Int_t Runs, Int_t dataType, Float_t
 Tracks * getTracks(Int_t Runs, Int_t dataType, Int_t frameType, Float_t energy, Float_t *x, Float_t *y) {
 	run_energy = energy;
 
-	DataInterface *di = new DataInterface();
-
-	Int_t nClusters = kEventsPerRun * 5 * nLayers;
-	Int_t nHits = kEventsPerRun * 50;
-	Int_t nTracks = kEventsPerRun * 2;
-
-	Bool_t breakSignal = false;
-
-	cout << "Start with " << kEventsPerRun << " potential events.\n";
-
+	DataInterface	 *	di = new DataInterface();
+	Int_t					nClusters = kEventsPerRun * 5 * nLayers;
+	Int_t					nHits = kEventsPerRun * 50;
+	Int_t					nTracks = kEventsPerRun * 2;
+	Bool_t				breakSignal = false;
 	CalorimeterFrame *cf = new CalorimeterFrame();
-	Clusters * clusters = new Clusters(nClusters);
-	Clusters * trackerClusters = new Clusters(nClusters);
-	Hits *hits = new Hits(nHits);
-	Hits *eventIDs = new Hits(kEventsPerRun * sizeOfEventID);
-	Int_t eventID = -1;
-	Hits *trackerHits = new Hits(nHits);
-	Tracks *calorimeterTracks = nullptr;
-	Tracks *trackerTracks = new Tracks(nTracks);
-	Tracks *allTracks = new Tracks(nTracks * Runs);
-	TRandom3 *gRandom = new TRandom3(0);
+	Clusters			 *	clusters = new Clusters(nClusters);
+	Clusters			 *	trackerClusters = new Clusters(nClusters);
+	Hits				 *	hits = new Hits(nHits);
+	Hits				 *	eventIDs = new Hits(kEventsPerRun * sizeOfEventID);
+	Int_t					eventID = -1;
+	Hits				 *	trackerHits = new Hits(nHits);
+	Tracks			 *	calorimeterTracks = nullptr;
+	Tracks			 *	trackerTracks = new Tracks(nTracks);
+	Tracks			 *	allTracks = new Tracks(nTracks * Runs);
+	TRandom3			 *	gRandom = new TRandom3(0);
+	TStopwatch			t1, t2, t3, t4, t5, t6;
+	ofstream				file("OutputFiles/efficiency.csv", ofstream::out | ofstream::app);
 
-	TStopwatch t1, t2, t3, t4, t5, t6;
-	
+	// file: np; number of reconstructed tracks; tracks after removeTracksLeavingDetector; tracks after removeTrackCollisions
+
 	for (Int_t i=0; i<Runs; i++) {
 
 		cout << "Finding track " << (i+1)*kEventsPerRun << " of " << Runs*kEventsPerRun << "... ";
@@ -185,13 +182,20 @@ Tracks * getTracks(Int_t Runs, Int_t dataType, Int_t frameType, Float_t energy, 
 		if (calorimeterTracks->GetEntriesFast() == 0) breakSignal = kTRUE; // to stop running
 
 		// Track improvements
+		Int_t nTracksBefore = 0, nTracksAfter = 0;
 		
 		calorimeterTracks->extrapolateToLayer0();
 		calorimeterTracks->splitSharedClusters();
+		nTracksBefore = calorimeterTracks->GetEntries();
 		calorimeterTracks->removeTracksLeavingDetector();
-		cout << "Found " << calorimeterTracks->GetEntries() << " tracks after removeTracksLeavingDetector.\n";
+		nTracksAfter = calorimeterTracks->GetEntries();
+		
+		cout << "Of " << nTracksBefore << " tracks, " << nTracksBefore - nTracksAfter << " (" << 100* ( nTracksBefore - nTracksAfter) / ( (float) nTracksBefore ) << "%) were lost when leaving the detector.\n";
+		
 		calorimeterTracks->removeTrackCollisions();
-		cout << "Found " << calorimeterTracks->GetEntries() << " tracks after removeTrackCollisions.\n";
+
+		file << energy << " " << kEventsPerRun << " " << nTracksBefore << " " << nTracksAfter << " " << calorimeterTracks->GetEntries() << endl;
+
 		// calorimeterTracks->retrogradeTrackImprovement(clusters);
 
 		calorimeterTracks->Compress();
@@ -218,6 +222,8 @@ Tracks * getTracks(Int_t Runs, Int_t dataType, Int_t frameType, Float_t energy, 
 
 		if (breakSignal) break;
 	}
+
+	file.close();
 
 	delete cf;
 	delete clusters;

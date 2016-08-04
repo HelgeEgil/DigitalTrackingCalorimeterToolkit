@@ -1217,6 +1217,7 @@ void drawTracks3D(Int_t Runs, Int_t dataType, Bool_t recreate, Float_t energy) {
 	cout << nOKMinusTracks << " of total " << numberOfTracks << " tracks has a close match (0.5 mm, 1 degree) on first / last cluster (" << factorEIDOKMinus << "%)\n";
 	cout << nOKLastLayers << " of total " << numberOfTracks << " tracks has a close match (0.5 mm, 1 degree) or is a very short tracr (" << factorLastLayers << "%)\n";
 
+	/*
 	cout << "Tracks with no EID in first layer: ";
 	for (Int_t i=0; i<ntracks; i++) {
 	   if (!tracks->At(i)) continue;
@@ -1224,6 +1225,8 @@ void drawTracks3D(Int_t Runs, Int_t dataType, Bool_t recreate, Float_t energy) {
 		if (tracks->At(i)->getEventID(0) < 0) cout << tracks->At(i)->getEventID(1) << ", ";
 	}
 	cout << endl;
+	*/
+
 
 	for (Int_t i=0; i<ntracks; i++) {
 		Track *thisTrack = tracks->At(i);
@@ -1237,12 +1240,14 @@ void drawTracks3D(Int_t Runs, Int_t dataType, Bool_t recreate, Float_t energy) {
 
 		if (!thisTrack->isFirstAndLastEventIDEqual()) {
 			l->SetLineColor(kRed);
-	
+
+			/*
 			cout << "Track from " << *thisTrack->At(0) << " is MC wrong\nEvent IDs: ";
 			for (Int_t j=0; j<thisTrack->GetEntriesFast(); j++) {
 				cout << thisTrack->getEventID(j) << ", ";
 			}
 			cout << endl;
+			*/
 		}
 
 		firstEID = thisTrack->getEventID(0);
@@ -1309,6 +1314,7 @@ void drawTracks3D(Int_t Runs, Int_t dataType, Bool_t recreate, Float_t energy) {
 	}
 
 	// PRINTING
+	/*
 	cout << "Found the following tracks with conflicting clusters: ";
 	for (UInt_t i=0; i<conflictTracks->size(); i++) {
 		cout << conflictTracks->at(i) << " (eventID " << tracks->At(conflictTracks->at(i))->getEventID(0) << "), ";
@@ -1334,6 +1340,7 @@ void drawTracks3D(Int_t Runs, Int_t dataType, Bool_t recreate, Float_t energy) {
 		}
 		cout << endl;
 	}
+	*/
 
 	c1->SaveAs(Form("OutputFiles/figures/testOutput_switchLayer%d.png", switchLayer));
 
@@ -1789,10 +1796,10 @@ Float_t  doNGaussianFit ( TH1F *h, Float_t *means, Float_t *sigmas) {
 		
  		cout << Form("Searching from %.1f to %.1f, with midpoint at %.1f. Found best fit @ %.1f with chi2 = %.2f and chi2/n = %.2f, ratio = %.2f.\n", searchFrom, searchTo,(searchTo+searchFrom)/2 , mean, chi2, chi2n, ratio);
 //
-//  		if (chi2n > 7) {
-//  			delete gauss;
-//  			continue;
-//		}
+  		if (chi2n > 50) {
+  			delete gauss;
+  			continue;
+		}
 
  		if (ratio > 0.05 || (isLastLayer && ratio>0.025)) {
  			gauss->Draw("same");
