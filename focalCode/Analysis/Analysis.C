@@ -584,7 +584,7 @@ void drawFitScale(Int_t Runs, Int_t dataType, Bool_t recreate, Float_t energy) {
 	run_energy = energy;
 	kDataType = dataType;
 	
-	TH1F *hScale = new TH1F("hScale", "Scale histogram", 800, 0, 800);
+	TH1F *hScale = new TH1F("hScale", "Scale histogram", 800, 0, 50);
 	TGraphErrors *outputGraph;
 
 	Tracks * tracks = loadOrCreateTracks(recreate, Runs, dataType, energy);
@@ -717,7 +717,7 @@ Float_t drawBraggPeakGraphFit(Int_t Runs, Int_t dataType, Bool_t recreate, Float
 	gStyle->SetPadBottomMargin(0.05);
 	gStyle->SetPadLeftMargin(0.15);
 	
-	TH1F *hFitResults = new TH1F("fitResult", hTitle, 250, getUnitFromEnergy(0), getUnitFromEnergy(energy*1.2));
+	TH1F *hFitResults = new TH1F("fitResult", hTitle, 200, getUnitFromEnergy(0), getUnitFromEnergy(energy*1.2));
 	hFitResults->SetLineColor(kBlack); hFitResults->SetFillColor(kGreen-5);
 
 	TH1F *hMaxAngle = new TH1F("hMaxAngle", "Maximum angle for proton track", 200, 0, 25);
@@ -1424,6 +1424,158 @@ void drawData3D(Int_t Runs, Float_t energy) {
    Frame3D->Draw("LEGO");
 }
 
+void compareClusterSizes(Int_t Runs, Bool_t recreate, Float_t energy) {
+	run_energy = energy;
+	Tracks	 *	MCTracks = nullptr;
+	Tracks	 *	DataTracks = nullptr;
+	Track		 *	thisTrack = nullptr;
+	Cluster	 *	thisCluster = nullptr;
+	Clusters	 *	MCClusters = nullptr;
+	Clusters	 *	DataClusters = nullptr;
+	Int_t		nTracksMC, nTracksData, thisLayer, thisSize;
+	const Int_t	nLayersToUse = 8;
+
+	MCTracks = loadOrCreateTracks(recreate, Runs, kMC, energy);
+	MCTracks->extrapolateToLayer0();
+
+	DataTracks = loadOrCreateTracks(recreate, Runs, kData, energy);
+	DataTracks->extrapolateToLayer0();
+
+	MCClusters = getClusters(Runs, kMC, kCalorimeter, energy);
+	DataClusters = getClusters(Runs, kData, kCalorimeter, energy);
+
+	TCanvas *c2 = new TCanvas("c2", "Individual cluster size distributions MC", 1200, 800);
+	c2->Divide(4, 2, 0.01, 0.01);
+	TCanvas *c3 = new TCanvas("c3", "Individual cluster size distributions DATA", 1200, 800);
+	c3->Divide(4, 2, 0.01, 0.01);
+	TCanvas *c1 = new TCanvas("c1", "Cluster size distribution comparison", 1022, 645);
+
+	vector<TH1F*> *hCSVectorMC = new vector<TH1F*>;
+	for (Int_t i=0; i<nLayersToUse; i++) {
+		hCSVectorMC->push_back(new TH1F(Form("hCSIndMC_%d", i), Form("CS histogram %d", i), 60, 0, 60));
+	}
+	
+	vector<TH1F*> *hCSVectorData = new vector<TH1F*>;
+	for (Int_t i=0; i<nLayersToUse; i++) {
+		hCSVectorData->push_back(new TH1F(Form("hCSIndData_%d", i), Form("CS histogram %d", i), 60, 0, 60));
+	}
+
+	/*
+	nTracksMC = MCTracks->GetEntriesFast();
+	nTracksData = DataTracks->GetEntriesFast();
+
+	for (Int_t i=0; i<nTracksMC; i++) {
+		thisTrack = MCTracks->At(i);
+		for (Int_t j=0; j<thisTrack->GetEntriesFast(); j++) {
+			thisCluster = thisTrack->At(j);
+			if (!thisCluster) continue;
+
+			thisLayer = thisCluster->getLayer();
+			thisSize = thisCluster->getSize();
+
+			hCSVectorMC->at(thisLayer)->Fill(thisSize);
+		}
+	}
+
+	for (Int_t i=0; i<nTracksData; i++) {
+		thisTrack = DataTracks->At(i);
+		for (Int_t j=0; j<thisTrack->GetEntriesFast(); j++) {
+			thisCluster = thisTrack->At(j);
+			if (!thisCluster) continue;
+
+			thisLayer = thisCluster->getLayer();
+			thisSize = thisCluster->getSize();
+
+			hCSVectorData->at(thisLayer)->Fill(thisSize);
+
+		}
+	}
+
+	*/
+
+	for (Int_t i=0; i<MCClusters->GetEntriesFast(); i++) {
+		thisCluster = MCClusters->At(i);
+		thisLayer = thisCluster->getLayer();
+		if (thisLayer >= nLayersToUse) {
+			cout << "Layer = " << thisLayer << ", skipping.\n";
+			continue;
+		}
+		thisSize = thisCluster->getSize();
+		hCSVectorMC->at(thisLayer)->Fill(thisSize);
+	}
+	
+	for (Int_t i=0; i<DataClusters->GetEntriesFast(); i++) {
+		thisCluster = DataClusters->At(i);
+		thisLayer = thisCluster->getLayer();
+		if (thisLayer >= nLayersToUse) {
+			cout << "Layer = " << thisLayer << ", skipping.\n";
+			continue;
+		}
+		thisSize = thisCluster->getSize();
+		hCSVectorData->at(thisLayer)->Fill(thisSize);
+	}
+
+	Float_t layerMC[nLayersToUse] = {0, 1, 2, 3, 4, 5, 6, 7};
+	Float_t layerData[nLayersToUse] = {0, 1, 2, 3, 4, 5, 6, 7};
+	Float_t errorLayer[nLayersToUse] = {0};
+	Float_t clusterSizeMC[nLayersToUse] = {0};
+	Float_t errorClusterSizeMC[nLayersToUse] = {0};
+	Float_t clusterSizeData[nLayersToUse] = {0};
+	Float_t errorClusterSizeData[nLayersToUse] = {0};
+
+	for (Int_t i=0; i<nLayersToUse; i++) {
+		layerMC[i] -= 0.07;
+		layerData[i] += 0.07;
+
+		clusterSizeMC[i] = hCSVectorMC->at(i)->GetMean();
+		clusterSizeData[i] = hCSVectorData->at(i)->GetMean();
+		errorClusterSizeMC[i] = hCSVectorMC->at(i)->GetRMS();
+		errorClusterSizeData[i] = hCSVectorData->at(i)->GetRMS();
+	}
+
+	TGraphErrors * graphCSMC = new TGraphErrors(nLayersToUse-1, layerMC, clusterSizeMC, errorLayer, errorClusterSizeMC);
+	TGraphErrors * graphCSData = new TGraphErrors(nLayersToUse-1, layerData, clusterSizeData, errorLayer, errorClusterSizeData);
+	
+	graphCSMC->SetTitle(Form("Cluster size distribution comparison at %.0f MeV;Layer number;Cluster size [# pixels]", run_energy));
+	graphCSMC->SetMinimum(0);
+	graphCSMC->SetMaximum(40);
+	graphCSMC->SetMarkerStyle(21);
+	graphCSMC->SetMarkerColor(kBlue);
+	graphCSData->SetMarkerStyle(22);
+	graphCSData->SetMarkerColor(kRed);
+	graphCSData->SetMarkerSize(1.5);
+	graphCSMC->SetMarkerSize(1.25);
+	graphCSMC->GetXaxis()->SetTitleFont(22);
+	graphCSMC->GetXaxis()->SetLabelFont(22);
+	graphCSMC->GetYaxis()->SetTitleFont(22);
+	graphCSMC->GetYaxis()->SetLabelFont(22);
+	graphCSMC->GetXaxis()->SetNdivisions(10);
+
+	TLegend *leg = new TLegend(0.16, 0.70, 0.28, 0.86);
+	leg->SetTextFont(22);
+	leg->AddEntry(graphCSMC, "MC", "ep");
+	leg->AddEntry(graphCSData, "Exp. data", "ep");
+
+	c1->cd();
+	graphCSMC->Draw("AP");
+	graphCSData->Draw("P");
+	leg->Draw();
+
+	gPad->Update();
+	TPaveText *title = (TPaveText*) gPad->GetPrimitive("title");
+	title->SetTextFont(22);
+//	title->SetTextSize(0.06);
+	gPad->Modified();
+
+	for (Int_t i=0; i<nLayersToUse; i++) {
+		c2->cd(i+1);
+		hCSVectorMC->at(i)->Draw();
+		c3->cd(i+1);
+		hCSVectorData->at(i)->Draw();
+	}
+
+}
+
 Bool_t getCutTrackLength(Float_t energy, Track *track) {
 	Int_t minTL = getMinimumTrackLength(energy);
 	Float_t TL = track->getTrackLengthmm();
@@ -1780,11 +1932,11 @@ Float_t  doNGaussianFit ( TH1F *h, Float_t *means, Float_t *sigmas) {
 		if (isLastLayer && ratio < 0.05) sigma = 0.2;
 		
 		gauss->SetParameters(10, (searchFrom+searchTo)/2, sigma);
-		gauss->SetParLimits(0, 1, maxBinHeight);
+		gauss->SetParLimits(0, 0, maxBinHeight);
 		gauss->SetParLimits(1, searchFrom+8, searchTo-8);
 		gauss->SetParLimits(2, 2, 12);
 		
-		h->Fit(gauss, "M, B, WW, Q", "", searchFrom, searchTo);
+		h->Fit(gauss, "M, B, WW, Q, 0", "", searchFrom, searchTo);
 		
 		Float_t chi2 = gauss->GetChisquare();
 		Float_t chi2n = chi2 / integral;
@@ -1796,12 +1948,21 @@ Float_t  doNGaussianFit ( TH1F *h, Float_t *means, Float_t *sigmas) {
 		
  		cout << Form("Searching from %.1f to %.1f, with midpoint at %.1f. Found best fit @ %.1f with chi2 = %.2f and chi2/n = %.2f, ratio = %.2f.\n", searchFrom, searchTo,(searchTo+searchFrom)/2 , mean, chi2, chi2n, ratio);
 //
-  		if (chi2n > 50) {
-  			delete gauss;
-  			continue;
+		if (run_energy > 182 && run_energy < 193) {
+			if (chi2n > 200 || sigma < 2.5 || constant < 3) {
+				delete gauss;
+				continue;
+			}
 		}
 
- 		if (ratio > 0.05 || (isLastLayer && ratio>0.025)) {
+		if (kDataType == kData && chi2n > 7.5) { // less statistics in data
+		delete gauss;
+			continue;
+		}
+
+ 		if (ratio > 0.05) { //  || (isLastLayer && ratio>0.025)) {
+ 			gauss->SetLineColor(kRed);
+ 			gauss->SetLineWidth(3);
  			gauss->Draw("same");
 			cout << Form("%d;\t %8.5f;\t %8.5f;\t %8.5f;\t %8.5f;\t %8.5f;\t %.2f\n", i, constant, mean, lEnergy, sigma, ratio, chi2n);
 			
@@ -1816,7 +1977,6 @@ Float_t  doNGaussianFit ( TH1F *h, Float_t *means, Float_t *sigmas) {
 			
 			sigmas[j] = sigma;
 			means[j++] = mean;
-
  		}
  		wasLastLayer = isLastLayer;
 	}
@@ -1858,7 +2018,7 @@ Float_t  doNGaussianFit ( TH1F *h, Float_t *means, Float_t *sigmas) {
 
 	ofstream file2("OutputFiles/result_makebraggpeakfit.csv", ofstream::out | ofstream::app);
 	// energy; nominal range; estimated range; range sigma; last_range
-	file2 << run_energy << "; " << getWEPLFromEnergy(run_energy) << "; " << estimated_range << "; " << sumSigma << "; " << last_range << endl;
+	file2 << run_energy << " " << getWEPLFromEnergy(run_energy) << " " << estimated_range << " " << sumSigma << " " << last_range << endl;
 	file2.close();
 
 	return estimated_range;

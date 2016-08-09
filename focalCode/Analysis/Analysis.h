@@ -22,6 +22,7 @@ void 		draw2DProjection(Int_t Runs, Int_t dataType, Bool_t recreate, Float_t ene
 void 		drawTrackRanges(Int_t Runs, Int_t dataType, Bool_t recreate, Float_t energy);
 void		getTrackStatistics(Int_t Runs, Int_t dataType = kMC, Bool_t recreate = 0, Float_t energy = 188, Int_t epr = 0);
 void		drawClusterSizeDistribution(Int_t Runs, Int_t dataType, Bool_t recreate, Float_t energy);
+void	compareClusterSizes(Int_t Runs, Bool_t recreate, Float_t energy);
 void drawFitScale(Int_t Runs, Int_t dataType, Bool_t recreate, Float_t energy);
 Bool_t getCutTrackLength(Float_t energy, Track *track);
 Bool_t getCutWEPL(Track *track);

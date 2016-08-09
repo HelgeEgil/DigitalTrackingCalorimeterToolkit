@@ -106,6 +106,77 @@ Tracks * loadOrCreateTracks(Bool_t recreate, Int_t Runs, Int_t dataType, Float_t
 	return tracks;
 }
 
+Clusters * getClusters(Int_t Runs, Int_t dataType, Int_t frameType, Float_t energy) {
+	run_energy = energy;
+
+	DataInterface	 *	di = new DataInterface();
+	Int_t					nClusters = kEventsPerRun * 5 * nLayers;
+	Int_t					nHits = kEventsPerRun * 50;
+	Int_t					nTracks = kEventsPerRun * 2;
+	Bool_t				breakSignal = false;
+	CalorimeterFrame *cf = new CalorimeterFrame();
+	Clusters			 *	clusters = new Clusters(nClusters);
+	Clusters			 *	trackerClusters = new Clusters(nClusters);
+	Clusters			 *	allClusters = new Clusters(nClusters * Runs);
+	Hits				 *	hits = new Hits(nHits);
+	Hits				 *	eventIDs = new Hits(kEventsPerRun * sizeOfEventID);
+	Int_t					eventID = -1;
+	Hits				 *	trackerHits = new Hits(nHits);
+	TRandom3			 *	gRandom = new TRandom3(0);
+
+	for (Int_t i=0; i<Runs; i++) {
+
+		cout << "Finding clusters " << i*kEventsPerRun << "->" << (i+1)*kEventsPerRun << " of " << Runs * kEventsPerRun << endl;
+
+		if (dataType == kMC) {
+			eventID = di->getMCFrame(i, cf);
+			di->getEventIDs(i, eventIDs);
+			cf->diffuseFrame(gRandom);
+			hits = cf->findHits(eventID);
+			clusters = hits->findClustersFromHits(); // badly optimized
+			clusters->removeSmallClusters(2);
+
+			clusters->matchWithEventIDs(eventIDs);
+			eventIDs->Clear();
+		}
+		
+		else if (dataType == kData) {
+			di->getDataFrame(i, cf, energy);
+			hits = cf->findHits();
+			clusters = hits->findClustersFromHits();
+			clusters->removeSmallClusters(2);
+			clusters->removeAllClustersAfterLayer(8); // bad data in layer 10 and 11
+		}
+		
+		clusters->Compress();
+		
+		if (clusters->GetEntriesFast() == 0) breakSignal = kTRUE; // to stop running
+
+		for (Int_t j=0; j<clusters->GetEntriesFast(); j++) {
+			allClusters->appendCluster(clusters->At(j));
+		}
+
+		cf->Reset();
+		hits->clearHits();
+		trackerHits->clearHits();
+		clusters->clearClusters();
+		trackerClusters->clearClusters();
+		
+		if (breakSignal) break;
+	}
+
+
+	delete cf;
+	delete clusters;
+	delete trackerClusters;
+	delete hits;
+	delete trackerHits;
+	delete di;
+
+	return allClusters;
+}
+
+
 Tracks * getTracks(Int_t Runs, Int_t dataType, Int_t frameType, Float_t energy, Float_t *x, Float_t *y) {
 	run_energy = energy;
 

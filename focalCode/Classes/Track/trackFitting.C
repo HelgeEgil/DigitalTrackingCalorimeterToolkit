@@ -129,11 +129,11 @@ TGraphErrors * Track::doRangeFit() {
 	}
 	
 	else if (kOutputUnit == kWEPL || kOutputUnit == kEnergy) {
-		if (kMaterial == kTungsten) scaleParameter = 63/14.; // validated through drawFitScale
+		if (kMaterial == kTungsten) scaleParameter = 3.1; // validated through drawFitScale
 		if (kMaterial == kAluminum) scaleParameter = 126/14.;
 	}
 
-	if (kDataType == kData) scaleParameter = 95/14.;
+	if (kDataType == kData) scaleParameter = 2.7;
 
 	TF1 *func = new TF1("fit_BP", fitfunc_DBP, 0, getWEPLFromEnergy(maxEnergy*1.2), 2);
 	func->SetParameter(0, estimatedEnergy);

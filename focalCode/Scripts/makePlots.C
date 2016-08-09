@@ -56,7 +56,7 @@ void makePlots() {
 	Int_t nlines = 0;
 	TNtuple *ntuple = new TNtuple("ntuple", "data from file", "energy_:nomrange_:estrange_:sigmaRange:lastRange_");
 	
-	Int_t MC2Data = 88;
+	Int_t MC2Data = 61;
 
 	while (1) {
 		in >> energy_ >> nomrange_ >> estrange_ >> sigmaRange_ >> lastRange_ ;
@@ -296,8 +296,8 @@ void makePlots() {
 	gEfficiency->Draw("AL");
 	gEfficiency2->Draw("L");
 
-	c1->SaveAs("OutputFiles/figures/finalPlotsForArticle/estimated_ranges_all_energies.pdf");
+	c1->SaveAs("OutputFiles/figures/finalPlotsForArticle/estimated_ranges_all_energies.eps");
 	c1->SaveAs("OutputFiles/figures/finalPlotsForArticle/estimated_ranges_all_energies.root");
-	c2->SaveAs("OutputFiles/figures/finalPlotsForArticle/fraction_of_correct_tracks.pdf");
+	c2->SaveAs("OutputFiles/figures/finalPlotsForArticle/fraction_of_correct_tracks.eps");
 	c2->SaveAs("OutputFiles/figures/finalPlotsForArticle/fraction_of_correct_tracks.root");
 }

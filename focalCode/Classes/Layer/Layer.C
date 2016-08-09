@@ -23,7 +23,7 @@ Layer::~Layer() {
 
 Int_t Layer::diffuseLayer(TRandom3 *gRandom) {
 	Int_t repeatFactor, x, y, z, randX, randY;
-	Float_t EnergyFactor = 1000 / 30. * SpreadNumber;
+	Float_t EnergyFactor = 2.67;
 	Float_t newSigma, eDep;
 
    Hits *hits = new Hits();
@@ -40,7 +40,7 @@ Int_t Layer::diffuseLayer(TRandom3 *gRandom) {
 		eDep = hits->getEdep(h);
 		
 		repeatFactor = eDep * EnergyFactor;
-		newSigma = pow(repeatFactor, 0.25) / 6;
+		newSigma = pow(repeatFactor, 0.35) / 6;
 
 		for (Int_t j=0; j<repeatFactor; j++) {
 			randX = gRandom->Gaus(x, newSigma);
