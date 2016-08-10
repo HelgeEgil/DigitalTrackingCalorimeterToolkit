@@ -33,6 +33,6 @@ class Hit : public TObject {
 
       friend ostream &operator<< (ostream &os, Hit &h);
 
-      ClassDef(Hit,2);
+      ClassDef(Hit,2)
 };
 #endif

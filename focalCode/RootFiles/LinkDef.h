@@ -7,4 +7,5 @@
 #pragma link C++ class Tracks+;
 #pragma link C++ class Layer+;
 #pragma link C++ class CalorimeterFrame+;
+//#pragma link C++ class Misalign+;
 #endif

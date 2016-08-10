@@ -28,7 +28,7 @@ class Layer : public TObject {
 		virtual Bool_t	findHits(Hits *hits);
 		Float_t			getOccupancy();
 		
-		ClassDef(Layer,2);
+		ClassDef(Layer,2)
 };
 
 #endif /* Layer_h */

@@ -83,6 +83,6 @@ public:
 	Cluster   *	findNearestNeighbour(Cluster *projectedPoint, Bool_t rejectUsed = true);
 	Track     *	findLongestTrack(Tracks *seedTracks);
 
-	ClassDef(Clusters,5);
+	ClassDef(Clusters,5)
 };
 #endif

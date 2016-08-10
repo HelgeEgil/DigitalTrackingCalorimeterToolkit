@@ -138,6 +138,6 @@ class Track : public TObject {
 
 		friend ostream& operator<<(ostream &os, Track& t);
 
-		ClassDef(Track,5);
+		ClassDef(Track,5)
 };
 #endif

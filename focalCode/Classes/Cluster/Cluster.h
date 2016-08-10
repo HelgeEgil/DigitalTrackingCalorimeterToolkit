@@ -53,7 +53,7 @@ public:
 
 	friend ostream& operator<<(ostream &os, Cluster &c);
 
-	ClassDef(Cluster,4);
+	ClassDef(Cluster,4)
 };
 
 #endif

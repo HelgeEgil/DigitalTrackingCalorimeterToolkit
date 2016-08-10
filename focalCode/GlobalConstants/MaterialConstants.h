@@ -3,6 +3,9 @@
 
 #include <TObject.h>
 
+class Hit;
+class Cluster;
+
 Int_t nLayers;
 
 // range = alpha * energy ^ p

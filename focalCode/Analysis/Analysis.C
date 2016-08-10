@@ -1349,6 +1349,140 @@ void drawTracks3D(Int_t Runs, Int_t dataType, Bool_t recreate, Float_t energy) {
 	delete allConflictPairs;
 }
 
+void drawAlignmentCheck(Int_t Runs, Int_t dataType, Bool_t recreate, Float_t energy) {
+	run_energy = energy;
+	kDataType = dataType;
+
+	Tracks * tracks = loadOrCreateTracks(recreate, Runs, dataType, energy);
+	tracks->extrapolateToLayer0();
+
+	TCanvas	 *	c1 = new TCanvas("c1", "Alignment check", 1800, 1500);
+	c1->Divide(2, 2, 0.01, 0.01);
+   gStyle->SetOptStat(0);
+
+	TH1F		 *	alignmentX1 = new TH1F("alignmentX1", "Alignment check in X1 direction;Layer;Mean alignment in x1 [mm]", 6, 0, 6);
+	TH1F		 *	alignmentY1 = new TH1F("alignmentY1", "Alignment check in Y1 direction;Layer;Mean alignment in y1 [mm]", 6, 0, 6);
+	TH1F		 *	alignmentX2 = new TH1F("alignmentX2", "Alignment check in X2 direction;Layer;Mean alignment in x2 [mm]", 6, 0, 6);
+	TH1F		 *	alignmentY2 = new TH1F("alignmentY2", "Alignment check in Y2 direction;Layer;Mean alignment in y2 [mm]", 6, 0, 6);
+	TH1F		 *	normX1 = new TH1F("normX1", "Alignment check in X1 direction", 6, 0, 6);
+	TH1F		 *	normY1 = new TH1F("normY1", "Alignment check in Y1 direction", 6, 0, 6);
+	TH1F		 *	normX2 = new TH1F("normX2", "Alignment check in X2 direction", 6, 0, 6);
+	TH1F		 *	normY2 = new TH1F("normY2", "Alignment check in Y2 direction", 6, 0, 6);
+	Track		 *	thisTrack = nullptr;
+	Cluster	 *	thisCluster = nullptr;
+	Cluster	 *	nextCluster = nullptr;
+	Int_t			thisLayer;
+	Float_t		x, y, xp, yp, diffx, diffy;
+
+	for (Int_t i=0; i<tracks->GetEntriesFast(); i++) {
+		thisTrack = tracks->At(i);
+
+		for (Int_t j=0; j<thisTrack->GetEntriesFast()-1; j++) {
+			thisCluster = thisTrack->At(j);
+			nextCluster = thisTrack->At(j+1);
+
+			if (thisCluster && nextCluster) {
+				x = thisCluster->getXmm();
+				y = thisCluster->getYmm();
+				xp = nextCluster->getXmm();
+				yp = nextCluster->getYmm();
+
+				diffx = xp - x;
+				diffy = yp - y;	
+				thisLayer = thisCluster->getLayer();
+
+				if (thisLayer>9) continue;
+
+				if (y>0) {
+					alignmentX1->Fill(thisLayer, diffx);
+					alignmentY1->Fill(thisLayer, diffy);
+					normX1->Fill(thisLayer);
+					normY1->Fill(thisLayer);
+				}
+				else {
+					alignmentX2->Fill(thisLayer, diffx);
+					alignmentY2->Fill(thisLayer, diffy);
+					normX2->Fill(thisLayer);
+					normY2->Fill(thisLayer);
+				}
+			}
+		}
+	}
+
+	alignmentX1->Divide(normX1);
+	alignmentY1->Divide(normY1);
+	alignmentX2->Divide(normX2);
+	alignmentY2->Divide(normY2);
+
+	c1->cd(1);
+	alignmentX1->GetYaxis()->SetRangeUser(-0.4, 0.4);
+	alignmentX1->GetYaxis()->SetTitleOffset(1.2);
+	alignmentX1->GetYaxis()->SetTitleFont(22);
+	alignmentX1->GetYaxis()->SetLabelFont(22);
+	alignmentX1->GetXaxis()->SetTitleFont(22);
+	alignmentX1->GetXaxis()->SetLabelFont(22);
+	alignmentX1->SetFillColor(kGreen+3);
+	alignmentX1->SetLineColor(kBlack);
+	alignmentX1->Draw();
+	gPad->Update();
+	TPaveText *title = (TPaveText*) gPad->GetPrimitive("title");
+	title->SetTextFont(22);
+	gPad->Modified();
+
+	c1->cd(2);
+	alignmentY1->GetYaxis()->SetRangeUser(-0.4, 0.4);
+	alignmentY1->GetYaxis()->SetTitleOffset(1.2);
+	alignmentY1->GetYaxis()->SetTitleFont(22);
+	alignmentY1->GetYaxis()->SetLabelFont(22);
+	alignmentY1->GetXaxis()->SetTitleFont(22);
+	alignmentY1->GetXaxis()->SetLabelFont(22);
+	alignmentY1->SetFillColor(kGreen+3);
+	alignmentY1->SetLineColor(kBlack);
+	alignmentY1->Draw();
+	gPad->Update();
+	TPaveText *title2 = (TPaveText*) gPad->GetPrimitive("title");
+	title2->SetTextFont(22);
+	gPad->Modified();
+
+	c1->cd(3);
+	alignmentX2->GetYaxis()->SetRangeUser(-0.4, 0.4);
+	alignmentX2->GetYaxis()->SetTitleOffset(1.2);
+	alignmentX2->GetYaxis()->SetTitleFont(22);
+	alignmentX2->GetYaxis()->SetLabelFont(22);
+	alignmentX2->GetXaxis()->SetTitleFont(22);
+	alignmentX2->GetXaxis()->SetLabelFont(22);
+	alignmentX2->SetFillColor(kGreen+3);
+	alignmentX2->SetLineColor(kBlack);
+	alignmentX2->Draw();
+	gPad->Update();
+	TPaveText *title3 = (TPaveText*) gPad->GetPrimitive("title");
+	title3->SetTextFont(22);
+	gPad->Modified();
+
+	c1->cd(4);
+	alignmentY2->GetYaxis()->SetRangeUser(-0.4, 0.4);
+	alignmentY2->GetYaxis()->SetTitleOffset(1.2);
+	alignmentY2->GetYaxis()->SetTitleFont(22);
+	alignmentY2->GetYaxis()->SetLabelFont(22);
+	alignmentY2->GetXaxis()->SetTitleFont(22);
+	alignmentY2->GetXaxis()->SetLabelFont(22);
+	alignmentY2->SetFillColor(kGreen+3);
+	alignmentY2->SetLineColor(kBlack);
+	alignmentY2->Draw();
+	gPad->Update();
+	TPaveText *title4 = (TPaveText*) gPad->GetPrimitive("title");
+	title4->SetTextFont(22);
+	gPad->Modified();
+
+	if (dataType == kMC) {
+		c1->SaveAs(Form("OutputFiles/figures/AlignmentCheck_MC_%.0fMeV.pdf", run_energy));
+	}
+	else {
+		c1->SaveAs(Form("OutputFiles/figures/AlignmentCheck_EXP_Corrected_%.0fMeV.pdf", run_energy));
+	}
+
+}
+
 void drawDiffusionCheck(Int_t Runs, Int_t Layer, Float_t energy) {
    run_energy = energy;
    DataInterface *di = new DataInterface();
@@ -1428,7 +1562,6 @@ void compareClusterSizes(Int_t Runs, Bool_t recreate, Float_t energy) {
 	run_energy = energy;
 	Tracks	 *	MCTracks = nullptr;
 	Tracks	 *	DataTracks = nullptr;
-	Track		 *	thisTrack = nullptr;
 	Cluster	 *	thisCluster = nullptr;
 	Clusters	 *	MCClusters = nullptr;
 	Clusters	 *	DataClusters = nullptr;
@@ -1459,39 +1592,6 @@ void compareClusterSizes(Int_t Runs, Bool_t recreate, Float_t energy) {
 	for (Int_t i=0; i<nLayersToUse; i++) {
 		hCSVectorData->push_back(new TH1F(Form("hCSIndData_%d", i), Form("CS histogram %d", i), 60, 0, 60));
 	}
-
-	/*
-	nTracksMC = MCTracks->GetEntriesFast();
-	nTracksData = DataTracks->GetEntriesFast();
-
-	for (Int_t i=0; i<nTracksMC; i++) {
-		thisTrack = MCTracks->At(i);
-		for (Int_t j=0; j<thisTrack->GetEntriesFast(); j++) {
-			thisCluster = thisTrack->At(j);
-			if (!thisCluster) continue;
-
-			thisLayer = thisCluster->getLayer();
-			thisSize = thisCluster->getSize();
-
-			hCSVectorMC->at(thisLayer)->Fill(thisSize);
-		}
-	}
-
-	for (Int_t i=0; i<nTracksData; i++) {
-		thisTrack = DataTracks->At(i);
-		for (Int_t j=0; j<thisTrack->GetEntriesFast(); j++) {
-			thisCluster = thisTrack->At(j);
-			if (!thisCluster) continue;
-
-			thisLayer = thisCluster->getLayer();
-			thisSize = thisCluster->getSize();
-
-			hCSVectorData->at(thisLayer)->Fill(thisSize);
-
-		}
-	}
-
-	*/
 
 	for (Int_t i=0; i<MCClusters->GetEntriesFast(); i++) {
 		thisCluster = MCClusters->At(i);
@@ -1564,7 +1664,6 @@ void compareClusterSizes(Int_t Runs, Bool_t recreate, Float_t energy) {
 	gPad->Update();
 	TPaveText *title = (TPaveText*) gPad->GetPrimitive("title");
 	title->SetTextFont(22);
-//	title->SetTextSize(0.06);
 	gPad->Modified();
 
 	for (Int_t i=0; i<nLayersToUse; i++) {

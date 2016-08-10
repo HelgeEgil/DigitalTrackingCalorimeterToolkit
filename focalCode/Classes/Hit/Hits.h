@@ -64,6 +64,6 @@ public:
 	vector<Hits*>	 *	findClustersHitMap();
 	void					appendExpandedClusterToClusterHitMap(vector<Int_t> *expandedCluster, vector<Hits*> *clusterHitMap);
 
-	ClassDef(Hits,2);
+	ClassDef(Hits,2)
 };
 #endif

@@ -37,6 +37,6 @@ class CalorimeterFrame : public TObject {
       virtual void	diffuseFrame(TRandom3 *gRandom);
 		Float_t			getOccupancyLastLayer();
 
-   ClassDef(CalorimeterFrame,2);
+   ClassDef(CalorimeterFrame,2)
 };
 #endif

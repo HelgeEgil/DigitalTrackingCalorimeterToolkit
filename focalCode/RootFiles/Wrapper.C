@@ -2,6 +2,8 @@
 // include all the .C files to compile
 
 #include "GlobalConstants/Constants.h"
+#include "GlobalConstants/Misalign.h"
+#include "GlobalConstants/Misalign.C"
 #include "Classes/Hit/Hit.h"
 #include "Classes/Hit/Hit.C"
 #include "Classes/Hit/Hits.h"

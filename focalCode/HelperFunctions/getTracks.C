@@ -14,12 +14,14 @@
 
 #include "GlobalConstants/Constants.h"
 #include "GlobalConstants/MaterialConstants.h"
+#include "GlobalConstants/Misalign.h"
 #include "Classes/Track/conversionFunctions.h"
 #include "Classes/Track/Tracks.h"
 #include "Classes/Hit/Hits.h"
 #include "Classes/DataInterface/DataInterface.h"
 #include "HelperFunctions/Tools.h"
 #include "HelperFunctions/getTracks.h"
+
 
 #ifdef USEDEBUG
 #define showDebug(x) std::cout << x
@@ -181,6 +183,7 @@ Tracks * getTracks(Int_t Runs, Int_t dataType, Int_t frameType, Float_t energy, 
 	run_energy = energy;
 
 	DataInterface	 *	di = new DataInterface();
+	Misalign			 *	m = new Misalign();
 	Int_t					nClusters = kEventsPerRun * 5 * nLayers;
 	Int_t					nHits = kEventsPerRun * 50;
 	Int_t					nTracks = kEventsPerRun * 2;
@@ -244,6 +247,10 @@ Tracks * getTracks(Int_t Runs, Int_t dataType, Int_t frameType, Float_t energy, 
 			clusters = hits->findClustersFromHits();
 			clusters->removeSmallClusters(2);
 			clusters->removeAllClustersAfterLayer(8); // bad data in layer 10 and 11
+			cout << "Found " << clusters->GetEntriesInLayer(0) << " clusters in the first layer.\n";
+			cout << "Found " << clusters->GetEntriesInLayer(1) << " clusters in the second layer.\n";
+
+			m->correctClusters(clusters);
 		}
 		
 		t5.Start();

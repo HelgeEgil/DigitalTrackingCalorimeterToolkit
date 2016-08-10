@@ -83,6 +83,6 @@ class Tracks : public TObject {
 		void					removeTrackCollisions();
 		void					retrogradeTrackImprovement(Clusters * clusters);
 
-   ClassDef(Tracks,2);
+   ClassDef(Tracks,2)
 };
 #endif

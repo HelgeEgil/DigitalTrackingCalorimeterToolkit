@@ -5,6 +5,8 @@
 #include <TObject.h>
 
 #include "MaterialConstants.h"
+#include "Classes/Hit/Hit.h"
+#include "Classes/Cluster/Cluster.h"
 #include "Constants.h"
 
 using namespace std;
@@ -239,7 +241,7 @@ Double_t getLayerPositionmm(Int_t i) {
 Float_t getSigmaEnergy(Int_t energy) { 
 	Float_t sigma_energy = 0;
 	
-		if 	  (energy == 188) sigma_energy = 0.3; // approx
+	if 	  (energy == 188) sigma_energy = 0.3; // approx
 	else if (energy == 180) sigma_energy = 2.3;
 	else if (energy == 170) sigma_energy = 4.5; // was 4.5
 	else if (energy == 160) sigma_energy = 8.3;
