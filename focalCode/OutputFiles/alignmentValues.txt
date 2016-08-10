@@ -1,0 +1,38 @@
+Not using any alignment correction, at 170 MeV (2500 tracks @ 25 per readout):
+RMS X1 = 0.307
+RMS X2 = 0.212
+RMS Y1 = 0.293
+RMS Y2 = 0.374
+
+Using the Utrecht correction at 170 MeV (2500 tracks @ 25 per readout):
+RMS X1 = 0.102
+RMS X2 = 0.110
+RMS Y1 = 0.489
+RMS Y2 = 0.120
+
+Using the Utrecht correction w/ the values below at 170 MeV (all tracks @ 25 per readout):
+RMS X1 = 0.093
+RMS X2 = 0.135
+RMS Y1 = 0.203
+RMS Y2 = 0.181
+
+Better values @ 170 MeV
+Layer 0: Keep Utrecht values
+Layer 1: [ 0.0686,  0.1030,  0.0899,  0.1465]
+Layer 2: [-0.0266, -0.0446,  0.0305,  0.1968]
+Layer 3: [-0.0828, -0.1363, -0.2506,  0.1097]
+Layer 4: [-0.2130, -0.0436,  0.0457,  0.2584]
+Layer 5: [ 0.1803,  0.1122, -0.1093, -0.0356]
+
+Using the Utrecht correction at 188 Mev (2500 tracks @ 25 per readout)
+RMS X1 = 0.098
+RMS X2 = 0.109
+RMS Y1 = 0.479
+RMS Y2 = 0.184
+
+Test: Monte Carlo values (absolutely no alignment problems)
+All are below 1.5 pixels
+RMS X1 = 0.003
+RMS X2 = 0.044
+RMS Y1 = 0.024
+RMS Y2 = 0.041

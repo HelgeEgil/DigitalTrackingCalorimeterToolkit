@@ -30,11 +30,30 @@ Misalign::Misalign() {
 						  -0.440048, -0.380420, -0.227459, -0.450782, -0.219784, -0.235561,
 						  -0.244287, -0.191445, -0.362194, -0.190465, -0.116786, -0.436257,
 						  -0.222045, -0.080618, -0.301860,  0       , -0.130745, -0.074902};
-	
+
+	// Corrected values using my tests
+	Float_t a_corr[6] = {-0.086,  0.015, -0.072, -0.049, -0.239,  0.255}; 
+	Float_t b_corr[6] = {-0.329,  0.355,  0.032,  0.159, -0.144,  0.131};
+	Float_t c_corr[6] = {-0.657, -0.526, -0.031, -0.341, -0.086, -0.186};
+	Float_t d_corr[6] = {-0.563, -0.337,  0.089,  0.018, -0.008, -0.088};
+
 	std::copy(a, a+24, misalignX[0]);
 	std::copy(b, b+24, misalignX[1]);
 	std::copy(c, c+24, misalignY[0]);
 	std::copy(d, d+24, misalignY[1]);
+
+	/*
+	for (int i=1; i<24; i++) {
+		misalignX[0][i] = 0; misalignX[1][i] = 0;
+		misalignY[0][i] = 0; misalignY[1][i] = 0;
+	}
+	*/
+
+
+//	std::copy(a_corr, a_corr+6, misalignX[0]);
+//	std::copy(b_corr, b_corr+6, misalignX[1]);
+//	std::copy(c_corr, c_corr+6, misalignY[0]);
+//	std::copy(d_corr, d_corr+6, misalignY[1]);
 }
 
 Misalign::~Misalign() {

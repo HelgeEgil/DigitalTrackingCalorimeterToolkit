@@ -1360,14 +1360,14 @@ void drawAlignmentCheck(Int_t Runs, Int_t dataType, Bool_t recreate, Float_t ene
 	c1->Divide(2, 2, 0.01, 0.01);
    gStyle->SetOptStat(0);
 
-	TH1F		 *	alignmentX1 = new TH1F("alignmentX1", "Alignment check in X1 direction;Layer;Mean alignment in x1 [mm]", 6, 0, 6);
-	TH1F		 *	alignmentY1 = new TH1F("alignmentY1", "Alignment check in Y1 direction;Layer;Mean alignment in y1 [mm]", 6, 0, 6);
-	TH1F		 *	alignmentX2 = new TH1F("alignmentX2", "Alignment check in X2 direction;Layer;Mean alignment in x2 [mm]", 6, 0, 6);
-	TH1F		 *	alignmentY2 = new TH1F("alignmentY2", "Alignment check in Y2 direction;Layer;Mean alignment in y2 [mm]", 6, 0, 6);
-	TH1F		 *	normX1 = new TH1F("normX1", "Alignment check in X1 direction", 6, 0, 6);
-	TH1F		 *	normY1 = new TH1F("normY1", "Alignment check in Y1 direction", 6, 0, 6);
-	TH1F		 *	normX2 = new TH1F("normX2", "Alignment check in X2 direction", 6, 0, 6);
-	TH1F		 *	normY2 = new TH1F("normY2", "Alignment check in Y2 direction", 6, 0, 6);
+	TH1F		 *	alignmentX1 = new TH1F("alignmentX1", "Alignment check in X1 direction;Layer;Mean alignment in x1 [mm]", 8, 0, 8);
+	TH1F		 *	alignmentY1 = new TH1F("alignmentY1", "Alignment check in Y1 direction;Layer;Mean alignment in y1 [mm]", 8, 0, 8);
+	TH1F		 *	alignmentX2 = new TH1F("alignmentX2", "Alignment check in X2 direction;Layer;Mean alignment in x2 [mm]", 8, 0, 8);
+	TH1F		 *	alignmentY2 = new TH1F("alignmentY2", "Alignment check in Y2 direction;Layer;Mean alignment in y2 [mm]", 8, 0, 8);
+	TH1F		 *	normX1 = new TH1F("normX1", "Alignment check in X1 direction", 8, 0, 8);
+	TH1F		 *	normY1 = new TH1F("normY1", "Alignment check in Y1 direction", 8, 0, 8);
+	TH1F		 *	normX2 = new TH1F("normX2", "Alignment check in X2 direction", 8, 0, 8);
+	TH1F		 *	normY2 = new TH1F("normY2", "Alignment check in Y2 direction", 8, 0, 8);
 	Track		 *	thisTrack = nullptr;
 	Cluster	 *	thisCluster = nullptr;
 	Cluster	 *	nextCluster = nullptr;
@@ -1389,7 +1389,7 @@ void drawAlignmentCheck(Int_t Runs, Int_t dataType, Bool_t recreate, Float_t ene
 
 				diffx = xp - x;
 				diffy = yp - y;	
-				thisLayer = thisCluster->getLayer();
+				thisLayer = nextCluster->getLayer();
 
 				if (thisLayer>9) continue;
 
@@ -1481,6 +1481,29 @@ void drawAlignmentCheck(Int_t Runs, Int_t dataType, Bool_t recreate, Float_t ene
 		c1->SaveAs(Form("OutputFiles/figures/AlignmentCheck_EXP_Corrected_%.0fMeV.pdf", run_energy));
 	}
 
+	Float_t rmsX1 = 0;
+	Float_t rmsX2 = 0;
+	Float_t rmsY1 = 0;
+	Float_t rmsY2 = 0;
+	for (Int_t i=0; i<7; i++) {
+		rmsX1 += pow(alignmentX1->GetBinContent(i), 2);
+		rmsX2 += pow(alignmentX2->GetBinContent(i), 2);
+		rmsY1 += pow(alignmentY1->GetBinContent(i), 2);
+		rmsY2 += pow(alignmentY2->GetBinContent(i), 2);
+	}
+	rmsX1 = sqrt(rmsX1);
+	rmsX2 = sqrt(rmsX2);
+	rmsY1 = sqrt(rmsY1);
+	rmsY2 = sqrt(rmsY2);
+	cout << "The RMS values for the distributions are: \n";
+	cout << "X1: " << rmsX1 << endl << "X2: " << rmsX2 << endl << "Y1: " << rmsY1 << endl << "Y2: " << rmsY2 << endl;
+	cout << "Better values: \n";
+	for (Int_t i=0; i<8; i++) {
+		cout << "X1[" << i << "] = " << Form("%.3f", -1 * alignmentX1->GetBinContent(i+1)) << endl;
+		cout << "X2[" << i << "] = " << Form("%.3f", -1 * alignmentX2->GetBinContent(i+1)) << endl;
+		cout << "Y1[" << i << "] = " << Form("%.3f", -1 * alignmentY1->GetBinContent(i+1)) << endl;
+		cout << "Y2[" << i << "] = " << Form("%.3f", -1 * alignmentY2->GetBinContent(i+1)) << endl << endl;
+	}
 }
 
 void drawDiffusionCheck(Int_t Runs, Int_t Layer, Float_t energy) {
