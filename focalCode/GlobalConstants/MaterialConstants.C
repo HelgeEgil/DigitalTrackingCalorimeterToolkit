@@ -110,7 +110,7 @@ void MaterialConstants() {
 	alpha_prime_tungsten = 0.1086784;
 
 	proton_mass = 938.27;
-	X0_tungsten = 3.857;
+	X0_tungsten = 4.2; // 3.857;
 	X0_firstlayer = 33.36;
 	X0_aluminum = 5.88;
 	X0_pmma = 16.52;
