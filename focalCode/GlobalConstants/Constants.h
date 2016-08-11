@@ -30,7 +30,7 @@ const Int_t nTrackers = 4;
 const Float_t dx = 0.03; // mm
 const Float_t dy = 0.03; // mm
 const Float_t dz = 3.975; // mm // was 3.84
-Int_t kEventsPerRun = 25;
+Int_t kEventsPerRun = 500;
 
 // Used for treatment of available experimental data files
 const Int_t nEnergies = 8;

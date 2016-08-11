@@ -1497,6 +1497,7 @@ void drawAlignmentCheck(Int_t Runs, Int_t dataType, Bool_t recreate, Float_t ene
 	rmsY2 = sqrt(rmsY2);
 	cout << "The RMS values for the distributions are: \n";
 	cout << "X1: " << rmsX1 << endl << "X2: " << rmsX2 << endl << "Y1: " << rmsY1 << endl << "Y2: " << rmsY2 << endl;
+	cout << "Total RMS = " << sqrt(pow(rmsX1, 2) + pow(rmsX2, 2) + pow(rmsY1, 2) + pow(rmsY2, 2)) << endl;
 	cout << "Better values: \n";
 	for (Int_t i=0; i<8; i++) {
 		cout << "X1[" << i << "] = " << Form("%.3f", -1 * alignmentX1->GetBinContent(i+1)) << endl;

@@ -3,32 +3,55 @@ RMS X1 = 0.307
 RMS X2 = 0.212
 RMS Y1 = 0.293
 RMS Y2 = 0.374
+TOTAL RMS = 604 um
+
+At all energies (25 per readout)
+TOTAL RMS @ 150 (1205)
+TOTAL RMS @ 160 (599)
+TOTAL RMS @ 170 (542)
+TOTAL RMS @ 180 (678)
+TOTAL RMS @ 188 (591)
+Weighted = 613 um
 
 Using the Utrecht correction at 170 MeV (2500 tracks @ 25 per readout):
 RMS X1 = 0.102
 RMS X2 = 0.110
 RMS Y1 = 0.489
-RMS Y2 = 0.120
+RMS Y2 = 0.120 
+TOTAL RMS = 525 um
+
+At all energies (25 per readout)
+TOTAL RMS @ 150 (617)
+TOTAL RMS @ 160 (615)
+TOTAL RMS @ 170 (513)
+TOTAL RMS @ 180 (542)
+TOTAL RMS @ 188 (519)
+Weighted = 529 um
 
 Using the Utrecht correction w/ the values below at 170 MeV (all tracks @ 25 per readout):
-RMS X1 = 0.093
-RMS X2 = 0.135
-RMS Y1 = 0.203
-RMS Y2 = 0.181
+RMS X1 = 0.023
+RMS X2 = 0.034
+RMS Y1 = 0.022
+RMS Y2 = 0.047
+TOTAL RMS = 66 um
 
-Better values @ 170 MeV
-Layer 0: Keep Utrecht values
-Layer 1: [ 0.0686,  0.1030,  0.0899,  0.1465]
-Layer 2: [-0.0266, -0.0446,  0.0305,  0.1968]
-Layer 3: [-0.0828, -0.1363, -0.2506,  0.1097]
-Layer 4: [-0.2130, -0.0436,  0.0457,  0.2584]
-Layer 5: [ 0.1803,  0.1122, -0.1093, -0.0356]
+At all energies (25 per readout)
+TOTAL RMS @ 150 (633)
+TOTAL RMS @ 160 (308)
+TOTAL RMS @ 170 (79)
+TOTAL RMS @ 180 (141)
+TOTAL RMS @ 188 (125)
+Weighted after = 143 um
 
-Using the Utrecht correction at 188 Mev (2500 tracks @ 25 per readout)
-RMS X1 = 0.098
-RMS X2 = 0.109
-RMS Y1 = 0.479
-RMS Y2 = 0.184
+Better values @ 170 MeV [in um] 
+[X1, X2, Y1, Y2] adjustment
+Layer 0: Define as 0, use as reference
+Layer 1: [101, 101, 64, 156]
+Layer 2: [14, 71, 244, 343]
+Layer 3: [4, -548, -19, 191]
+Layer 4: [-231, -128, 20, 393]
+Layer 5: [162, 95, -110, 356]
+Layer 6: [-98, 0, -141, 341]
 
 Test: Monte Carlo values (absolutely no alignment problems)
 All are below 1.5 pixels
@@ -36,3 +59,4 @@ RMS X1 = 0.003
 RMS X2 = 0.044
 RMS Y1 = 0.024
 RMS Y2 = 0.041
+TOTAL RMS = 65 um

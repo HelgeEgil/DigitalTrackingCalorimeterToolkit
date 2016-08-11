@@ -32,28 +32,31 @@ Misalign::Misalign() {
 						  -0.222045, -0.080618, -0.301860,  0       , -0.130745, -0.074902};
 
 	// Corrected values using my tests
-	Float_t a_corr[6] = {-0.086,  0.015, -0.072, -0.049, -0.239,  0.255}; 
-	Float_t b_corr[6] = {-0.329,  0.355,  0.032,  0.159, -0.144,  0.131};
-	Float_t c_corr[6] = {-0.657, -0.526, -0.031, -0.341, -0.086, -0.186};
-	Float_t d_corr[6] = {-0.563, -0.337,  0.089,  0.018, -0.008, -0.088};
+	Float_t a_corr[7] = { 0.000,  0.101,  0.014,  0.004, -0.231,  0.162, -0.098}; 
+	Float_t b_corr[7] = { 0.000,  0.101,  0.071, -0.548, -0.128,  0.095,  0.000};
+	Float_t c_corr[7] = { 0.000,  0.064,  0.244, -0.019,  0.020, -0.110, -0.141};
+	Float_t d_corr[7] = { 0.000,  0.156,  0.343,  0.191,  0.393,  0.356,  0.341};
+
+	Float_t mean_1 = 0, mean_2 = 0;
+	for (Int_t i=1; i<7; i++) {
+		mean_1 += sqrt(pow(a_corr[i], 2) + pow(c_corr[i], 2)) / 6.;
+		mean_2 += sqrt(pow(b_corr[i], 2) + pow(d_corr[i], 2)) / 6.;
+	}
 
 	std::copy(a, a+24, misalignX[0]);
 	std::copy(b, b+24, misalignX[1]);
 	std::copy(c, c+24, misalignY[0]);
 	std::copy(d, d+24, misalignY[1]);
-
-	/*
+	
 	for (int i=1; i<24; i++) {
 		misalignX[0][i] = 0; misalignX[1][i] = 0;
 		misalignY[0][i] = 0; misalignY[1][i] = 0;
 	}
-	*/
 
-
-//	std::copy(a_corr, a_corr+6, misalignX[0]);
-//	std::copy(b_corr, b_corr+6, misalignX[1]);
-//	std::copy(c_corr, c_corr+6, misalignY[0]);
-//	std::copy(d_corr, d_corr+6, misalignY[1]);
+	std::copy(a_corr, a_corr+7, misalignX[0]);
+	std::copy(b_corr, b_corr+7, misalignX[1]);
+	std::copy(c_corr, c_corr+7, misalignY[0]);
+	std::copy(d_corr, d_corr+7, misalignY[1]);
 }
 
 Misalign::~Misalign() {
