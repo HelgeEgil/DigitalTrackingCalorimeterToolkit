@@ -33,7 +33,6 @@ Tracks * Clusters::findCalorimeterTracks() {
 	makeLayerIndex();
 	fillMCSRadiusList();
 	MCSMultiplicationFactor = 3;
-	cout << "C\n";
 
 	// first pass, small search cone (3 sigma MCS)
 	findTracksFromLayer(tracks, 0, usedClustersInSeeds);

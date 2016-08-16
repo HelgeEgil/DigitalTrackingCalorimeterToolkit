@@ -125,6 +125,7 @@ class Track : public TObject {
 		// trackExtrapolations.C
 		Cluster			 *	getInterpolatedClusterAt(Int_t layer);
 		Cluster			 *	getExtrapolatedClusterAt(Float_t mmBeforeDetector);
+		vector<Float_t>	getLateralDeflectionFromExtrapolatedPosition(Int_t layer);
 		void					extrapolateToLayer0();
 
 		// TRACK PROPERTIES - Track fitting, scoring

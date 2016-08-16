@@ -404,6 +404,11 @@ Bool_t isPointOutOfBounds(Cluster *point, Float_t padding) {
    return isOutside;
 }
 
+Float_t getClusterSizeFromDepositedEnergy(Float_t edep) {
+	// Calculated using inverse.py in Dropbox
+	return 1.065 + 0.2639 * edep - 0.0001926 * pow(edep, 2);
+}
+
 Bool_t isSameCluster(Cluster *a, Cluster *b) {
 	if (!a || !b) return false;
 

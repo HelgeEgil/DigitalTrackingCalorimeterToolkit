@@ -39,10 +39,19 @@ Cluster::~Cluster() {
 
 Double_t Cluster::getLayermm() {
 	Double_t z = 0;
+	Float_t discriminator = 0;
+
+	if (kDataType == kMC) {
+		discriminator = getYmm();
+	}
+	else {
+		discriminator = getXmm();
+	}
 
 	if (layerNo_ > 0) {
-		if (getYmm() > 0)	{ z = firstUpperLayerZ + layerNo_*dz; }
-		else					{ z = firstLowerLayerZ + layerNo_*dz; }
+		
+		if (discriminator > 0)	{ z = firstUpperLayerZ + layerNo_*dz; }
+		else							{ z = firstLowerLayerZ + layerNo_*dz; }
 	}
 
 	return z;

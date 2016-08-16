@@ -80,6 +80,47 @@ Cluster * Track::getExtrapolatedClusterAt(Float_t mmBeforeDetector) {
 	return extrapolated;
 }
 
+vector<Float_t> Track::getLateralDeflectionFromExtrapolatedPosition(Int_t layer) {
+	Cluster			 	 *	clusterLastLayer = nullptr;
+	Cluster			 	 *	clusterLastLastLayer = nullptr;
+	Cluster			    *	clusterThisLayer = nullptr;
+	Cluster				 	extrapolatedClusterThisLayer;
+	Cluster					Slope;
+	Int_t						idxThis, idxLast, idxLastLast;
+	vector<Float_t>		deflection;
+
+	idxThis = getClusterFromLayer(layer);
+	idxLast = getClusterFromLayer(layer - 1);
+	idxLastLast = getClusterFromLayer(layer - 2);
+
+	if (idxThis < 0 || idxLast < 0) {
+		deflection.push_back(0);
+		deflection.push_back(0);
+		return deflection;
+	}
+
+	clusterThisLayer = At(idxThis);
+	clusterLastLayer = At(idxLast);
+
+	if (idxLastLast < 0) {
+		deflection.push_back(clusterThisLayer->getXmm() - clusterLastLayer->getXmm());
+		deflection.push_back(clusterThisLayer->getYmm() - clusterLastLayer->getYmm());
+		return deflection;
+	}
+
+	clusterLastLastLayer = At(idxLastLast);
+	Cluster slope(clusterLastLayer->getX() - clusterLastLastLayer->getX(),
+					  clusterLastLayer->getY() - clusterLastLastLayer->getY());
+
+	extrapolatedClusterThisLayer = Cluster(clusterLastLayer->getX() + slope.getX(),
+															 clusterLastLayer->getY() + slope.getY());
+
+	deflection.push_back(clusterThisLayer->getXmm() - extrapolatedClusterThisLayer.getXmm());
+	deflection.push_back(clusterThisLayer->getYmm() - extrapolatedClusterThisLayer.getYmm());
+
+	return deflection;
+}
+
 void Track::extrapolateToLayer0() {
    Int_t nTracks = GetEntriesFast();
    Int_t eventID = -1;

@@ -26,13 +26,20 @@ void Tracks::splitSharedClusters() {
 	// to be run as early as possible before joining Tracks* objects
 
 	Float_t		dist, minDist = 1e5;
-	Float_t		x, y, sizeFactor, size;
+	Float_t		x, y, clusterRadius, size, totalEdep, newSize;
 	Int_t			minIdx = 0, idx = 0, clusterIdx;
 	Int_t			nSplit = 0, nMissing = 0, nInterpolated = 0;
+	Int_t			trackIdx;
 	Bool_t		isMissing;
-	Cluster	 *	interpolatedCluster;
+	Cluster	 *	interpolatedCluster = nullptr;
+	Cluster	 *	interpolatedClosestCluster = nullptr;
+	Cluster	 *	closestCluster = nullptr;
+	Track		 *	missingTrack = nullptr;
+	Track		 *	closestTrack = nullptr;
+	Track		 *	thisTrack = nullptr;
 	Clusters  *	interpolatedClusters = new Clusters();
 	Clusters  *	interpolatedClosestClusters = new Clusters();
+
 	
 
 	for (Int_t layer=1; layer<nLayers; layer++) {
@@ -44,7 +51,7 @@ void Tracks::splitSharedClusters() {
 		missingClustersThisLayer.reserve(kEventsPerRun * 5);
 
 		for (Int_t i=0; i<GetEntriesFast(); i++) {
-			Track *thisTrack = At(i);
+			thisTrack = At(i);
 
 			if (!thisTrack) continue;
 			if (thisTrack->getLastLayer() < layer) continue;
@@ -64,9 +71,9 @@ void Tracks::splitSharedClusters() {
 		}
 		
 		for (UInt_t i=0; i<missingClustersThisLayer.size(); i++) {
-			Int_t trackIdx = missingClustersThisLayer.at(i).track;
-			Track *missingTrack = At(trackIdx);
-			if (!missingTrack ) continue;
+			trackIdx = missingClustersThisLayer.at(i).track;
+			missingTrack = At(trackIdx);
+			if (!missingTrack) continue;
 		
 			interpolatedCluster = missingTrack->getInterpolatedClusterAt(layer);
 			if (interpolatedCluster) {
@@ -75,29 +82,29 @@ void Tracks::splitSharedClusters() {
 				nInterpolated++;
 
 				interpolatedClusters->appendCluster(interpolatedCluster);
-				trackCluster closestTC= clustersThisLayer.at(minIdx); // THE CULPRIT
-				Track *closestTrack = At(closestTC.track);
-				Cluster *closestCluster = closestTrack->At(closestTC.cluster);
+				trackCluster closestTC = clustersThisLayer.at(minIdx); // THE CULPRIT
+				closestTrack = At(closestTC.track);
+				closestCluster = closestTrack->At(closestTC.cluster);
 				
 				minDist = diffmmXY(closestCluster, interpolatedCluster);
-				Float_t clusterRadius = closestCluster->getRadiusmm();
+				clusterRadius = closestCluster->getRadiusmm();
 				if (minDist < clusterRadius * 2) {
 					
-					Cluster *interpolatedClosestCluster = closestTrack->getInterpolatedClusterAt(layer);
+					interpolatedClosestCluster = closestTrack->getInterpolatedClusterAt(layer);
 					if (interpolatedClosestCluster) {
 						interpolatedClosestClusters->appendCluster(interpolatedClosestCluster);
 						
-						// cluster size stays the same if minDist = 0, and increases to 2x when they the projected clusters barely touch (minDist > clusterRadius)
-						sizeFactor = minDist / closestCluster->getRadiusmm() + 1;
-						if (sizeFactor > 2) sizeFactor = 2;
+						// Charge conservation: Each cluster gets half of the 'charge' ~ deposited energy
+						totalEdep = closestCluster->getDepositedEnergy();
+						newSize = getClusterSizeFromDepositedEnergy(totalEdep / 2);
 						x = ( closestCluster->getX() + interpolatedCluster->getX() ) / 2;
 						y = ( closestCluster->getY() + interpolatedCluster->getY() ) / 2;
-						size = closestCluster->getSize() / sizeFactor;
-						missingTrack->appendCluster(new Cluster(x, y, layer, size, -1));
+						cout << "Moved cluster " << closestCluster->getXmm() - (closestCluster->getXmm() + interpolatedCluster->getXmm())/2. << " mm.\n";
+						missingTrack->appendCluster(new Cluster(x, y, layer, newSize, -1));
 						nSplit++;
 						
 						// set size of closest cluster as well!
-						closestCluster->setSize(size);
+						closestCluster->setSize(newSize);
 						closestCluster->setEventID(-1);
 
 						sortTrackByLayer(trackIdx);

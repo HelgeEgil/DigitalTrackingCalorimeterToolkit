@@ -1357,22 +1357,33 @@ void drawAlignmentCheck(Int_t Runs, Int_t dataType, Bool_t recreate, Float_t ene
 	tracks->extrapolateToLayer0();
 
 	TCanvas	 *	c1 = new TCanvas("c1", "Alignment check", 1800, 1500);
-	c1->Divide(2, 2, 0.01, 0.01);
+	c1->Divide(2, 4, 0.01, 0.01);
    gStyle->SetOptStat(0);
 
 	TH1F		 *	alignmentX1 = new TH1F("alignmentX1", "Alignment check in X1 direction;Layer;Mean alignment in x1 [mm]", 8, 0, 8);
 	TH1F		 *	alignmentY1 = new TH1F("alignmentY1", "Alignment check in Y1 direction;Layer;Mean alignment in y1 [mm]", 8, 0, 8);
 	TH1F		 *	alignmentX2 = new TH1F("alignmentX2", "Alignment check in X2 direction;Layer;Mean alignment in x2 [mm]", 8, 0, 8);
 	TH1F		 *	alignmentY2 = new TH1F("alignmentY2", "Alignment check in Y2 direction;Layer;Mean alignment in y2 [mm]", 8, 0, 8);
+	TH1F		 *	alignmentX3 = new TH1F("alignmentX3", "Alignment check in X3 direction;Layer;Mean alignment in x3 [mm]", 8, 0, 8);
+	TH1F		 *	alignmentY3 = new TH1F("alignmentY3", "Alignment check in Y3 direction;Layer;Mean alignment in y3 [mm]", 8, 0, 8);
+	TH1F		 *	alignmentX4 = new TH1F("alignmentX4", "Alignment check in X4 direction;Layer;Mean alignment in x4 [mm]", 8, 0, 8);
+	TH1F		 *	alignmentY4 = new TH1F("alignmentY4", "Alignment check in Y4 direction;Layer;Mean alignment in y4 [mm]", 8, 0, 8);
 	TH1F		 *	normX1 = new TH1F("normX1", "Alignment check in X1 direction", 8, 0, 8);
 	TH1F		 *	normY1 = new TH1F("normY1", "Alignment check in Y1 direction", 8, 0, 8);
 	TH1F		 *	normX2 = new TH1F("normX2", "Alignment check in X2 direction", 8, 0, 8);
 	TH1F		 *	normY2 = new TH1F("normY2", "Alignment check in Y2 direction", 8, 0, 8);
+	TH1F		 *	normX3 = new TH1F("normX3", "Alignment check in X3 direction", 8, 0, 8);
+	TH1F		 *	normY3 = new TH1F("normY3", "Alignment check in Y3 direction", 8, 0, 8);
+	TH1F		 *	normX4 = new TH1F("normX4", "Alignment check in X4 direction", 8, 0, 8);
+	TH1F		 *	normY4 = new TH1F("normY4", "Alignment check in Y4 direction", 8, 0, 8);
+
 	Track		 *	thisTrack = nullptr;
 	Cluster	 *	thisCluster = nullptr;
 	Cluster	 *	nextCluster = nullptr;
 	Int_t			thisLayer;
 	Float_t		x, y, xp, yp, diffx, diffy;
+	Int_t			chip = 0;
+	vector<Float_t> deflection;
 
 	for (Int_t i=0; i<tracks->GetEntriesFast(); i++) {
 		thisTrack = tracks->At(i);
@@ -1391,19 +1402,42 @@ void drawAlignmentCheck(Int_t Runs, Int_t dataType, Bool_t recreate, Float_t ene
 				diffy = yp - y;	
 				thisLayer = nextCluster->getLayer();
 
+				deflection = thisTrack->getLateralDeflectionFromExtrapolatedPosition(thisLayer);
+				diffx = deflection.at(0);
+				diffy = deflection.at(1);
+
+				if			(x >  0 && y >  0) chip = 0;
+				else if	(x <= 0 && y >  0) chip = 1;
+				else if	(x <= 0 && y <= 0) chip = 2;
+				else if	(x >  0 && y <= 0) chip = 3;
+
 				if (thisLayer>9) continue;
 
-				if (y>0) {
+				if (chip == 0) {
 					alignmentX1->Fill(thisLayer, diffx);
 					alignmentY1->Fill(thisLayer, diffy);
 					normX1->Fill(thisLayer);
 					normY1->Fill(thisLayer);
 				}
-				else {
+				else if (chip == 1) {
 					alignmentX2->Fill(thisLayer, diffx);
 					alignmentY2->Fill(thisLayer, diffy);
 					normX2->Fill(thisLayer);
 					normY2->Fill(thisLayer);
+				}
+
+				else if (chip == 2) {
+					alignmentX3->Fill(thisLayer, diffx);
+					alignmentY3->Fill(thisLayer, diffy);
+					normX3->Fill(thisLayer);
+					normY3->Fill(thisLayer);
+				}
+
+				else if (chip == 3) {
+					alignmentX4->Fill(thisLayer, diffx);
+					alignmentY4->Fill(thisLayer, diffy);
+					normX4->Fill(thisLayer);
+					normY4->Fill(thisLayer);
 				}
 			}
 		}
@@ -1413,6 +1447,10 @@ void drawAlignmentCheck(Int_t Runs, Int_t dataType, Bool_t recreate, Float_t ene
 	alignmentY1->Divide(normY1);
 	alignmentX2->Divide(normX2);
 	alignmentY2->Divide(normY2);
+	alignmentX3->Divide(normX3);
+	alignmentY3->Divide(normY3);
+	alignmentX4->Divide(normX4);
+	alignmentY4->Divide(normY4);
 
 	c1->cd(1);
 	alignmentX1->GetYaxis()->SetRangeUser(-0.4, 0.4);
@@ -1474,6 +1512,66 @@ void drawAlignmentCheck(Int_t Runs, Int_t dataType, Bool_t recreate, Float_t ene
 	title4->SetTextFont(22);
 	gPad->Modified();
 
+	c1->cd(5);
+	alignmentX3->GetYaxis()->SetRangeUser(-0.4, 0.4);
+	alignmentX3->GetYaxis()->SetTitleOffset(1.2);
+	alignmentX3->GetYaxis()->SetTitleFont(22);
+	alignmentX3->GetYaxis()->SetLabelFont(22);
+	alignmentX3->GetXaxis()->SetTitleFont(22);
+	alignmentX3->GetXaxis()->SetLabelFont(22);
+	alignmentX3->SetFillColor(kGreen+3);
+	alignmentX3->SetLineColor(kBlack);
+	alignmentX3->Draw();
+	gPad->Update();
+	TPaveText *title5 = (TPaveText*) gPad->GetPrimitive("title");
+	title5->SetTextFont(22);
+	gPad->Modified();
+
+	c1->cd(6);
+	alignmentY3->GetYaxis()->SetRangeUser(-0.4, 0.4);
+	alignmentY3->GetYaxis()->SetTitleOffset(1.2);
+	alignmentY3->GetYaxis()->SetTitleFont(22);
+	alignmentY3->GetYaxis()->SetLabelFont(22);
+	alignmentY3->GetXaxis()->SetTitleFont(22);
+	alignmentY3->GetXaxis()->SetLabelFont(22);
+	alignmentY3->SetFillColor(kGreen+3);
+	alignmentY3->SetLineColor(kBlack);
+	alignmentY3->Draw();
+	gPad->Update();
+	TPaveText *title6 = (TPaveText*) gPad->GetPrimitive("title");
+	title6->SetTextFont(22);
+	gPad->Modified();
+	
+	c1->cd(7);
+	alignmentX4->GetYaxis()->SetRangeUser(-0.4, 0.4);
+	alignmentX4->GetYaxis()->SetTitleOffset(1.2);
+	alignmentX4->GetYaxis()->SetTitleFont(22);
+	alignmentX4->GetYaxis()->SetLabelFont(22);
+	alignmentX4->GetXaxis()->SetTitleFont(22);
+	alignmentX4->GetXaxis()->SetLabelFont(22);
+	alignmentX4->SetFillColor(kGreen+3);
+	alignmentX4->SetLineColor(kBlack);
+	alignmentX4->Draw();
+	gPad->Update();
+	TPaveText *title7 = (TPaveText*) gPad->GetPrimitive("title");
+	title7->SetTextFont(22);
+	gPad->Modified();
+	
+	c1->cd(8);
+	alignmentY4->GetYaxis()->SetRangeUser(-0.4, 0.4);
+	alignmentY4->GetYaxis()->SetTitleOffset(1.2);
+	alignmentY4->GetYaxis()->SetTitleFont(22);
+	alignmentY4->GetYaxis()->SetLabelFont(22);
+	alignmentY4->GetXaxis()->SetTitleFont(22);
+	alignmentY4->GetXaxis()->SetLabelFont(22);
+	alignmentY4->SetFillColor(kGreen+3);
+	alignmentY4->SetLineColor(kBlack);
+	alignmentY4->Draw();
+	gPad->Update();
+	TPaveText *title8 = (TPaveText*) gPad->GetPrimitive("title");
+	title8->SetTextFont(22);
+	gPad->Modified();
+
 	if (dataType == kMC) {
 		c1->SaveAs(Form("OutputFiles/figures/AlignmentCheck_MC_%.0fMeV.pdf", run_energy));
 	}
@@ -1485,25 +1583,41 @@ void drawAlignmentCheck(Int_t Runs, Int_t dataType, Bool_t recreate, Float_t ene
 	Float_t rmsX2 = 0;
 	Float_t rmsY1 = 0;
 	Float_t rmsY2 = 0;
+	Float_t rmsX3 = 0;
+	Float_t rmsX4 = 0;
+	Float_t rmsY3 = 0;
+	Float_t rmsY4 = 0;
 	for (Int_t i=0; i<7; i++) {
 		rmsX1 += pow(alignmentX1->GetBinContent(i), 2);
 		rmsX2 += pow(alignmentX2->GetBinContent(i), 2);
+		rmsX3 += pow(alignmentX3->GetBinContent(i), 2);
+		rmsX4 += pow(alignmentX4->GetBinContent(i), 2);
 		rmsY1 += pow(alignmentY1->GetBinContent(i), 2);
 		rmsY2 += pow(alignmentY2->GetBinContent(i), 2);
+		rmsY3 += pow(alignmentY3->GetBinContent(i), 2);
+		rmsY4 += pow(alignmentY4->GetBinContent(i), 2);
 	}
 	rmsX1 = sqrt(rmsX1);
 	rmsX2 = sqrt(rmsX2);
+	rmsX3 = sqrt(rmsX3);
+	rmsX4 = sqrt(rmsX4);
 	rmsY1 = sqrt(rmsY1);
 	rmsY2 = sqrt(rmsY2);
+	rmsY3 = sqrt(rmsY3);
+	rmsY4 = sqrt(rmsY4);
 	cout << "The RMS values for the distributions are: \n";
-	cout << "X1: " << rmsX1 << endl << "X2: " << rmsX2 << endl << "Y1: " << rmsY1 << endl << "Y2: " << rmsY2 << endl;
-	cout << "Total RMS = " << sqrt(pow(rmsX1, 2) + pow(rmsX2, 2) + pow(rmsY1, 2) + pow(rmsY2, 2)) << endl;
+	cout << "X1: " << rmsX1 << endl << "X2: " << rmsX2 << endl << "X3: " << rmsX3 << endl << "X4: " << rmsX4 << endl << "Y1: " << rmsY1 << endl << "Y2: " << rmsY2 << endl << "Y3: " << rmsY3 << endl << "Y4: " << rmsY4 << endl;
+	cout << "Total RMS = " << sqrt(pow(rmsX1, 2) + pow(rmsX2, 2) + pow(rmsX3, 2) + pow(rmsX4, 2) + pow(rmsY1, 2) + pow(rmsY2, 2 + pow(rmsY3, 2) + pow(rmsY4, 2))) << endl;
 	cout << "Better values: \n";
 	for (Int_t i=0; i<8; i++) {
 		cout << "X1[" << i << "] = " << Form("%.3f", -1 * alignmentX1->GetBinContent(i+1)) << endl;
 		cout << "X2[" << i << "] = " << Form("%.3f", -1 * alignmentX2->GetBinContent(i+1)) << endl;
+		cout << "X3[" << i << "] = " << Form("%.3f", -1 * alignmentX3->GetBinContent(i+1)) << endl;
+		cout << "X4[" << i << "] = " << Form("%.3f", -1 * alignmentX4->GetBinContent(i+1)) << endl;
 		cout << "Y1[" << i << "] = " << Form("%.3f", -1 * alignmentY1->GetBinContent(i+1)) << endl;
-		cout << "Y2[" << i << "] = " << Form("%.3f", -1 * alignmentY2->GetBinContent(i+1)) << endl << endl;
+		cout << "Y2[" << i << "] = " << Form("%.3f", -1 * alignmentY2->GetBinContent(i+1)) << endl;
+		cout << "Y3[" << i << "] = " << Form("%.3f", -1 * alignmentY3->GetBinContent(i+1)) << endl;
+		cout << "Y4[" << i << "] = " << Form("%.3f", -1 * alignmentY4->GetBinContent(i+1)) << endl << endl;
 	}
 }
 
@@ -2039,7 +2153,7 @@ Float_t  doNGaussianFit ( TH1F *h, Float_t *means, Float_t *sigmas) {
 //		TLine *l1 = new TLine(searchFrom, 0, searchFrom, 1000); l1->SetLineColor(kGreen); l1->Draw();
 //		TLine *l2 = new TLine(searchTo, 0, searchTo, 1000); l2->SetLineColor(kRed); l2->Draw();
 		
-		Float_t integral = h->Integral(bmin, bmax);
+		Float_t integral = h->Integral(bmin,bmax);
 		Float_t ratio = integral / fullIntegral;
 		
 		isLastLayer = ((getWEPLFromTL(getLayerPositionmm(i)) > getUnitFromEnergy(run_energy-10)) && !wasLastLayer && ratio > 0.01) ;
@@ -2061,15 +2175,18 @@ Float_t  doNGaussianFit ( TH1F *h, Float_t *means, Float_t *sigmas) {
 		
 		h->Fit(gauss, "M, B, WW, Q, 0", "", searchFrom, searchTo);
 		
-		Float_t chi2 = gauss->GetChisquare();
-		Float_t chi2n = chi2 / integral;
 		
 		sigma = gauss->GetParameter(2);
 		constant = gauss->GetParameter(0);
 		mean = gauss->GetParameter(1);
 		lEnergy = getEnergyFromUnit(mean);
 		
- 		cout << Form("Searching from %.1f to %.1f, with midpoint at %.1f. Found best fit @ %.1f with chi2 = %.2f and chi2/n = %.2f, ratio = %.2f.\n", searchFrom, searchTo,(searchTo+searchFrom)/2 , mean, chi2, chi2n, ratio);
+		Float_t integralSigma = h->Integral(axis->FindBin(mean - 2*sigma), axis->FindBin(mean + 2*sigma));
+		Float_t chi2 = gauss->GetChisquare();
+		Float_t chi2n = chi2 / integral;
+		Float_t chi2nSigma = chi2 / integralSigma;
+		
+ 		cout << Form("Searching from %.1f to %.1f, with midpoint at %.1f. Found best fit @ %.1f with chi2 = %.2f and chi2/n = %.2f and chi2/nSIGMA = %.2f, ratio = %.2f.\n", searchFrom, searchTo,(searchTo+searchFrom)/2 , mean, chi2, chi2n, chi2nSigma, ratio);
 //
 		if (run_energy > 182 && run_energy < 193) {
 			if (chi2n > 200 || sigma < 2.5 || constant < 3) {
