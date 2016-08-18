@@ -242,9 +242,9 @@ Tracks * getTracks(Int_t Runs, Int_t dataType, Int_t frameType, Float_t energy, 
 		}
 		
 		else if (dataType == kData) {
-			di->getDataFrame(i, cf, energy);
-			hits = cf->findHits();
-			clusters = hits->findClustersFromHits();
+			t1.Start(); di->getDataFrame(i, cf, energy); t1.Stop();
+			t3.Start(); hits = cf->findHits(); t3.Stop();
+			t4.Start(); clusters = hits->findClustersFromHits(); t4.Stop();
 			clusters->removeSmallClusters(2);
 			clusters->removeAllClustersAfterLayer(8); // bad data in layer 10 and 11
 			cout << "Found " << clusters->GetEntriesInLayer(0) << " clusters in the first layer.\n";

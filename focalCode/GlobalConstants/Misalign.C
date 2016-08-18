@@ -33,18 +33,14 @@ Misalign::Misalign() {
 	chipAlignment chip;
 
 	ifstream in;
-	in.open("Data/ExperimentalData/Alignment.txt");
+	in.open("Data/ExperimentalData/Alignment_mine.txt");
 	Int_t nlines = 0;
 	while (1) {
 		
 		in >> chip.idx >> chip.deltaX >> chip.deltaY >> chip.deltaTheta;
 
-		if (!in.good()) {
-			cout << in << endl;
-			break;
-		}
+		if (!in.good()) break;
 
-		// Units in file in cm
 		chip.deltaX *= 10;
 		chip.deltaY *= 10;
 
@@ -71,14 +67,15 @@ void Misalign::correctClusters(Clusters * clusters) {
 		oldY	= cluster->getYmm();
 		align = getMisalign(cluster);
 		
-		deltaX =  align.deltaY;
-		deltaY = -align.deltaX;
+		deltaX = align.deltaX;
+		deltaY = align.deltaY;
 		theta	 = align.deltaTheta;
 
-		// use (deltaX + oldX) to rotate
-		// Check more rotations to see if we can get to this........ 
-		newX	= deltaX + oldX * cos(theta) - oldY * sin(theta);
-		newY	= deltaY + oldX * sin(theta) + oldY * cos(theta);
+		newX = deltaX + oldX;
+		newY = deltaY + oldY;
+
+		newX = newX * cos(theta) - newY * sin(theta);
+		newY = newX * sin(theta) + newY * cos(theta);
 
 		cluster->setXmm(newX);
 		cluster->setYmm(newY);
@@ -92,13 +89,13 @@ chipAlignment Misalign::getMisalign(Cluster * cluster) {
 	Int_t		chipIdx = 0;
 	
 	// Layer 0
-	// 2 3
-	// 1 0
+	// 3 0
+	// 2 1
 	
-	if			( x>0 &&  y>0) chipIdx = 3;
-	else if	(x<=0 &&  y>0) chipIdx = 2;
-	else if	(x<=0 && y<=0) chipIdx = 1;
-	else if	( x>0 && y<=0) chipIdx = 0;
+	if			( x>0 &&  y>0) chipIdx = 0;
+	else if	(x<=0 &&  y>0) chipIdx = 3;
+	else if	(x<=0 && y<=0) chipIdx = 2;
+	else if	( x>0 && y<=0) chipIdx = 1;
 
 	chipIdx += layer*4;
 

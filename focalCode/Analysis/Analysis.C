@@ -31,6 +31,7 @@
 #include "Analysis/Analysis.h"
 #include "GlobalConstants/Constants.h"
 #include "GlobalConstants/MaterialConstants.h"
+#include "GlobalConstants/Misalign.h"
 #include "Classes/Track/conversionFunctions.h"
 #include "Classes/Track/Tracks.h"
 #include "Classes/Hit/Hits.h"
@@ -39,6 +40,7 @@
 #include "HelperFunctions/getTracks.h"
 
 using namespace std;
+
 
 void drawTrackAngleAtVaryingRunNumbers(Int_t dataType, Float_t energy) {
 	Int_t nRuns = 0;
@@ -1407,9 +1409,9 @@ void drawAlignmentCheck(Int_t Runs, Int_t dataType, Bool_t recreate, Float_t ene
 				diffy = deflection.at(1);
 
 				if			(x >  0 && y >  0) chip = 0;
-				else if	(x <= 0 && y >  0) chip = 1;
+				else if	(x <= 0 && y >  0) chip = 3;
 				else if	(x <= 0 && y <= 0) chip = 2;
-				else if	(x >  0 && y <= 0) chip = 3;
+				else if	(x >  0 && y <= 0) chip = 1;
 
 				if (thisLayer>9) continue;
 
@@ -1597,6 +1599,7 @@ void drawAlignmentCheck(Int_t Runs, Int_t dataType, Bool_t recreate, Float_t ene
 		rmsY3 += pow(alignmentY3->GetBinContent(i), 2);
 		rmsY4 += pow(alignmentY4->GetBinContent(i), 2);
 	}
+
 	rmsX1 = sqrt(rmsX1);
 	rmsX2 = sqrt(rmsX2);
 	rmsX3 = sqrt(rmsX3);
@@ -1605,9 +1608,10 @@ void drawAlignmentCheck(Int_t Runs, Int_t dataType, Bool_t recreate, Float_t ene
 	rmsY2 = sqrt(rmsY2);
 	rmsY3 = sqrt(rmsY3);
 	rmsY4 = sqrt(rmsY4);
+
 	cout << "The RMS values for the distributions are: \n";
 	cout << "X1: " << rmsX1 << endl << "X2: " << rmsX2 << endl << "X3: " << rmsX3 << endl << "X4: " << rmsX4 << endl << "Y1: " << rmsY1 << endl << "Y2: " << rmsY2 << endl << "Y3: " << rmsY3 << endl << "Y4: " << rmsY4 << endl;
-	cout << "Total RMS = " << sqrt(pow(rmsX1, 2) + pow(rmsX2, 2) + pow(rmsX3, 2) + pow(rmsX4, 2) + pow(rmsY1, 2) + pow(rmsY2, 2 + pow(rmsY3, 2) + pow(rmsY4, 2))) << endl;
+	cout << "Total RMS = " << sqrt(pow(rmsX1, 2) + pow(rmsX2, 2) + pow(rmsX3, 2) + pow(rmsX4, 2) + pow(rmsY1, 2) + pow(rmsY2, 2) + pow(rmsY3, 2) + pow(rmsY4, 2)) << endl;
 	cout << "Better values: \n";
 	for (Int_t i=0; i<8; i++) {
 		cout << "X1[" << i << "] = " << Form("%.3f", -1 * alignmentX1->GetBinContent(i+1)) << endl;
@@ -1619,6 +1623,42 @@ void drawAlignmentCheck(Int_t Runs, Int_t dataType, Bool_t recreate, Float_t ene
 		cout << "Y3[" << i << "] = " << Form("%.3f", -1 * alignmentY3->GetBinContent(i+1)) << endl;
 		cout << "Y4[" << i << "] = " << Form("%.3f", -1 * alignmentY4->GetBinContent(i+1)) << endl << endl;
 	}
+	ifstream in("Data/ExperimentalData/Alignment_mine.txt");
+
+	chipAlignment chipAlignmentArray[96];
+	chipAlignment chipFile;
+
+	while (1) {
+		in >> chipFile.idx >> chipFile.deltaX >> chipFile.deltaY >> chipFile.deltaTheta;
+		if (!in.good()) break;
+		chipFile.deltaX *= 10;
+		chipFile.deltaY *= 10;
+
+		chipAlignmentArray[chipFile.idx] = chipFile;
+	}
+	in.close();
+
+	ofstream file("Data/ExperimentalData/Alignment_mine.txt");
+
+	Float_t theta[32] = {0.0032, -0.00017, 0.0015, 0.0021, -0.0059, -0.007, -0.0037, -0.0032, -0.0056, -0.0060, 0.00016, -0.0007, -0.0003, -0.0014, -0.0006, -0.00015, 0.0008, 0.0007, -0.002, -0.005, -0.007, -0.049, -0.0038, -0.006, 0, 0, 0, 0, -0.0004, -0.00032, -0.007, -0.008};
+
+
+	Int_t deltaX, deltaY;
+	for (Int_t i=0; i<7; i++) {
+		deltaX = chipAlignmentArray[i*4+0].deltaX;
+		deltaY = chipAlignmentArray[i*4+0].deltaY;
+		file << i*4 + 0 << " " << -0.1 * (alignmentX1->GetBinContent(i+1) - deltaX) << " " << (alignmentY1->GetBinContent(i+1) - deltaY) << " " << theta[i*4+0] << endl;
+		deltaX = chipAlignmentArray[i*4+1].deltaX;
+		deltaY = chipAlignmentArray[i*4+1].deltaY;
+		file << i*4 + 1 << " " << -0.1 * (alignmentX2->GetBinContent(i+1) - deltaX) << " " << (alignmentY2->GetBinContent(i+1) - deltaY) << " " << theta[i*4+1] << endl;
+		deltaX = chipAlignmentArray[i*4+2].deltaX;
+		deltaY = chipAlignmentArray[i*4+2].deltaY;
+		file << i*4 + 2 << " " << -0.1 * (alignmentX3->GetBinContent(i+1) - deltaX) << " " << (alignmentY3->GetBinContent(i+1) - deltaY) << " " << theta[i*4+2] << endl;
+		deltaX = chipAlignmentArray[i*4+3].deltaX;
+		deltaY = chipAlignmentArray[i*4+3].deltaY;
+		file << i*4 + 3 << " " << -0.1 * (alignmentX4->GetBinContent(i+1) - deltaX) << " " << (alignmentY4->GetBinContent(i+1) - deltaY) << " " << theta[i*4+3] << endl;
+	}
+	file.close();
 }
 
 void drawDiffusionCheck(Int_t Runs, Int_t Layer, Float_t energy) {
