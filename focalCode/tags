@@ -3,7 +3,7 @@
 !_TAG_PROGRAM_AUTHOR	Darren Hiebert	/dhiebert@users.sourceforge.net/
 !_TAG_PROGRAM_NAME	Exuberant Ctags	//
 !_TAG_PROGRAM_URL	http://ctags.sourceforge.net	/official site/
-!_TAG_PROGRAM_VERSION	5.9~svn20110310	//
+!_TAG_PROGRAM_VERSION	5.8	//
 Analysis_cxx	Analysis/Analysis.C	1;"	d	file:
 Analysis_h	Analysis/Analysis.h	2;"	d
 At	Classes/CalorimeterFrame/CalorimeterFrame.h	/^      virtual Layer *At(Int_t i) { return (Layer*) calorimeterFrame_.At(i); }$/;"	f	class:CalorimeterFrame
@@ -72,7 +72,6 @@ GetEntry	Scripts/findRange.h	/^Int_t findRange::GetEntry(Long64_t entry)$/;"	f	c
 GetEntry	Scripts/include/Check.h	/^Int_t Check::GetEntry(Long64_t entry)$/;"	f	class:Check
 GetEntry	Scripts/include/findFilterEnergyLoss.h	/^Int_t findFilterEnergyLoss::GetEntry(Long64_t entry)$/;"	f	class:findFilterEnergyLoss
 GetEntry	Scripts/include/findRange.h	/^Int_t findRange::GetEntry(Long64_t entry)$/;"	f	class:findRange
-Gui	Gui/Gui.C	/^void Gui()$/;"	f
 Hit	Classes/Hit/Hit.C	/^Hit::Hit() {$/;"	f	class:Hit
 Hit	Classes/Hit/Hit.C	/^Hit::Hit(Hit* hit) {$/;"	f	class:Hit
 Hit	Classes/Hit/Hit.C	/^Hit::Hit(Int_t x, Int_t y, Int_t layerNo, Int_t eventID, Float_t edep) {$/;"	f	class:Hit
@@ -109,6 +108,9 @@ MCSMultiplicationFactor	Classes/Cluster/Clusters.h	/^	Float_t			MCSMultiplicatio
 MaterialConstants	GlobalConstants/MaterialConstants.C	/^void MaterialConstants() {$/;"	f
 MaterialConstants_h	GlobalConstants/MaterialConstants.h	2;"	d
 MaxTrackLength	Classes/Track/Track.h	/^const Int_t MaxTrackLength = 40;$/;"	v
+Misalign	GlobalConstants/Misalign.C	/^Misalign::Misalign() {$/;"	f	class:Misalign
+Misalign	GlobalConstants/Misalign.h	/^class Misalign : public TObject {$/;"	c
+Misalign_h	GlobalConstants/Misalign.h	2;"	d
 Notify	Classes/DataInterface/DataInterface.h	/^Bool_t DataInterface::Notify()$/;"	f	class:DataInterface
 Notify	Scripts/findLET.h	/^Bool_t findLET::Notify()$/;"	f	class:findLET
 Notify	Scripts/findRange.h	/^Bool_t findRange::Notify()$/;"	f	class:findRange
@@ -452,6 +454,8 @@ calculateMCS	HelperFunctions/Tools.C	/^Float_t calculateMCS(Float_t energy, Floa
 calorimeterFrame_	Classes/CalorimeterFrame/CalorimeterFrame.h	/^      TClonesArray calorimeterFrame_;$/;"	m	class:CalorimeterFrame
 checkAndAppendAllNextCandidates	Classes/Hit/findClusters.C	/^void Hits::checkAndAppendAllNextCandidates(vector<Int_t> * nextCandidates, vector<Int_t> *checkedIndices,$/;"	f	class:Hits
 checkLayerOrientation	Classes/Track/Tracks.C	/^void Tracks::checkLayerOrientation() {$/;"	f	class:Tracks
+chipAlignment	GlobalConstants/Misalign.h	/^struct chipAlignment {$/;"	s
+chipAlignmentArray_	GlobalConstants/Misalign.h	/^	  chipAlignment chipAlignmentArray_[96];$/;"	m	class:Misalign
 clearClusters	Classes/Cluster/Clusters.C	/^void Clusters::clearClusters() {$/;"	f	class:Clusters
 clearHits	Classes/Hit/Hits.h	/^	virtual void		clearHits()		   	{ hits_.Clear("C"); }$/;"	f	class:Hits
 clearTrack	Classes/Track/Track.h	/^		virtual void		clearTrack()							{ track_.Clear("C"); }$/;"	f	class:Track
@@ -462,6 +466,7 @@ clustersWithoutTrack_	Classes/Cluster/Clusters.h	/^	TClonesArray	clustersWithout
 clustersWithoutTrack_	Classes/Track/Tracks.h	/^      TClonesArray clustersWithoutTrack_;$/;"	m	class:Tracks
 clusters_	Classes/Cluster/Clusters.h	/^	TClonesArray	clusters_;$/;"	m	class:Clusters
 cm	GlobalConstants/Constants.h	/^const Float_t cm = 0.1;$/;"	v
+compareClusterSizes	Analysis/Analysis.C	/^void compareClusterSizes(Int_t Runs, Bool_t recreate, Float_t energy) {$/;"	f
 comptVolName	Classes/DataInterface/DataInterface.h	/^   Char_t          comptVolName[5];$/;"	m	class:DataInterface
 comptVolName	Scripts/findLET.h	/^   Char_t          comptVolName[5];$/;"	m	class:findLET
 comptVolName	Scripts/findRange.h	/^   Char_t          comptVolName[5];$/;"	m	class:findRange
@@ -469,8 +474,12 @@ comptVolName	Scripts/include/Check.h	/^   Char_t          comptVolName[5];$/;"	m
 comptVolName	Scripts/include/findFilterEnergyLoss.h	/^   Char_t          comptVolName[5];$/;"	m	class:findFilterEnergyLoss
 comptVolName	Scripts/include/findRange.h	/^   Char_t          comptVolName[5];$/;"	m	class:findRange
 convertXYToWEPL	HelperFunctions/Tools.C	/^void convertXYToWEPL(Float_t *x_energy, Float_t *y_energy, Int_t eventID) {$/;"	f
+correctClusters	GlobalConstants/Misalign.C	/^void Misalign::correctClusters(Clusters * clusters) {$/;"	f	class:Misalign
 correctForEnergyParameterisation	HelperFunctions/Tools.C	/^Double_t correctForEnergyParameterisation(Float_t energy) {$/;"	f
 dataType_	Classes/Layer/Layer.h	/^		Bool_t dataType_;$/;"	m	class:Layer
+deltaTheta	GlobalConstants/Misalign.h	/^	Float_t deltaX, deltaY, deltaTheta;$/;"	m	struct:chipAlignment
+deltaX	GlobalConstants/Misalign.h	/^	Float_t deltaX, deltaY, deltaTheta;$/;"	m	struct:chipAlignment
+deltaY	GlobalConstants/Misalign.h	/^	Float_t deltaX, deltaY, deltaTheta;$/;"	m	struct:chipAlignment
 diffXY	HelperFunctions/Tools.C	/^Float_t diffXY(Cluster *p, Hit *h) {$/;"	f
 diffXY	HelperFunctions/Tools.C	/^Float_t diffXY(Cluster *p1, Cluster *p2) {$/;"	f
 diffmmXY	HelperFunctions/Tools.C	/^Float_t diffmmXY(Cluster *p1, Cluster *p2) {$/;"	f
@@ -485,6 +494,7 @@ doRangeFit	Classes/Track/trackFitting.C	/^TGraphErrors * Track::doRangeFit() {$/
 doesTrackEndAbruptly	Classes/Track/trackProperties.C	/^Bool_t Track::doesTrackEndAbruptly() {$/;"	f	class:Track
 double_landau	HelperFunctions/Tools.C	/^Double_t double_landau(Double_t *v, Double_t *par) {$/;"	f
 draw2DProjection	Analysis/Analysis.C	/^void draw2DProjection(Int_t Runs, Int_t dataType, Bool_t recreate, Float_t energy) {$/;"	f
+drawAlignmentCheck	Analysis/Analysis.C	/^void drawAlignmentCheck(Int_t Runs, Int_t dataType, Bool_t recreate, Float_t energy) {$/;"	f
 drawBraggPeakGraphFit	Analysis/Analysis.C	/^Float_t drawBraggPeakGraphFit(Int_t Runs, Int_t dataType, Bool_t recreate, Float_t energy) {$/;"	f
 drawClusterShapes	Analysis/Analysis.C	/^void drawClusterShapes(Int_t Runs, Bool_t dataType, Bool_t recreate, Float_t energy) {$/;"	f
 drawClusterSizeDistribution	Analysis/Analysis.C	/^void drawClusterSizeDistribution(Int_t Runs, Int_t dataType, Bool_t recreate, Float_t energy) {$/;"	f
@@ -602,6 +612,8 @@ getClusterIdx	Classes/Cluster/Clusters.C	/^Int_t Clusters::getClusterIdx(Float_t
 getClusterIdx	Classes/Track/trackClusterProperties.C	/^Int_t Track::getClusterIdx(Cluster * cluster) {$/;"	f	class:Track
 getClusterIdx	Classes/Track/trackClusterProperties.C	/^Int_t Track::getClusterIdx(Float_t x, Float_t y, Int_t layer) {$/;"	f	class:Track
 getClusterSizeError	Classes/Track/Track.h	/^		virtual Int_t		getClusterSizeError(Int_t i)		{ return At(i)->getError(); } $/;"	f	class:Track
+getClusterSizeFromDepositedEnergy	HelperFunctions/Tools.C	/^Float_t getClusterSizeFromDepositedEnergy(Float_t edep) {$/;"	f
+getClusters	HelperFunctions/getTracks.C	/^Clusters * getClusters(Int_t Runs, Int_t dataType, Int_t frameType, Float_t energy) {$/;"	f
 getClustersWithoutTrack	Classes/Cluster/Clusters.h	/^	TClonesArray	 *	getClustersWithoutTrack()	{ return (TClonesArray*) &clustersWithoutTrack_; }$/;"	f	class:Clusters
 getClustersWithoutTrack	Classes/Track/Tracks.h	/^      TClonesArray	 *	getClustersWithoutTrack() { return (TClonesArray*) &clustersWithoutTrack_; }$/;"	f	class:Tracks
 getConflictClusters	Classes/Track/trackClusterProperties.C	/^Clusters * Track::getConflictClusters() { $/;"	f	class:Track
@@ -663,6 +675,7 @@ getLastIndexAfterY	Classes/Hit/Hits.C	/^Int_t Hits::getLastIndexAfterY(Int_t y) 
 getLastIndexOfLayer	Classes/Cluster/Clusters.C	/^Int_t Clusters::getLastIndexOfLayer(UInt_t layer) {$/;"	f	class:Clusters
 getLastIndexOfLayer	Classes/Hit/Hits.C	/^Int_t Hits::getLastIndexOfLayer(UInt_t layer) {$/;"	f	class:Hits
 getLastLayer	Classes/Track/trackProperties.C	/^Int_t Track::getLastLayer() {$/;"	f	class:Track
+getLateralDeflectionFromExtrapolatedPosition	Classes/Track/trackExtrapolations.C	/^vector<Float_t> Track::getLateralDeflectionFromExtrapolatedPosition(Int_t layer) {$/;"	f	class:Track
 getLayer	Classes/Cluster/Cluster.h	/^	Int_t		getLayer()				{ return layerNo_; }$/;"	f	class:Cluster
 getLayer	Classes/Cluster/Clusters.h	/^	virtual Int_t		getLayer(Int_t i)		{ return At(i)->getLayer(); }$/;"	f	class:Clusters
 getLayer	Classes/Hit/Hit.h	/^      Int_t		getLayer()		{ return layerNo_; }$/;"	f	class:Hit
@@ -678,6 +691,7 @@ getMaterialChar	HelperFunctions/Tools.C	/^char * getMaterialChar() {$/;"	f
 getMaximumSlopeAngleChange	Classes/Track/trackAngleCalculations.C	/^Float_t Track::getMaximumSlopeAngleChange() {$/;"	f	class:Track
 getMeanSizeToIdx	Classes/Track/trackClusterProperties.C	/^Float_t Track::getMeanSizeToIdx(Int_t toIdx) {$/;"	f	class:Track
 getMinimumTrackLength	HelperFunctions/Tools.C	/^Int_t getMinimumTrackLength(Float_t energy) {$/;"	f
+getMisalign	GlobalConstants/Misalign.C	/^chipAlignment Misalign::getMisalign(Cluster * cluster) {$/;"	f	class:Misalign
 getModeEventID	Classes/Track/Track.C	/^Int_t Track::getModeEventID() {$/;"	f	class:Track
 getNMissingLayers	Classes/Track/trackProperties.C	/^Int_t Track::getNMissingLayers() {$/;"	f	class:Track
 getNScintillators	Classes/Track/trackPreSensorMaterial.C	/^Int_t Track::getNScintillators() {$/;"	f	class:Track
@@ -764,6 +778,7 @@ growTrackFromLayer	Classes/Cluster/findTracks.C	/^void Clusters::growTrackFromLa
 hasLayer	Classes/Track/trackProperties.C	/^Bool_t Track::hasLayer(Int_t layer) {$/;"	f	class:Track
 hermite	Scripts/Check.C	/^double hermite(unsigned n, double x) {$/;"	f
 hits_	Classes/Hit/Hits.h	/^	TClonesArray hits_;$/;"	m	class:Hits
+idx	GlobalConstants/Misalign.h	/^	Int_t idx;$/;"	m	struct:chipAlignment
 initialSearchRadius	GlobalConstants/Constants.h	/^Float_t initialSearchRadius = 50 * dx; \/\/ 20 if dimensionless$/;"	v
 isClusterInTrack	Classes/Track/trackClusterProperties.C	/^Bool_t Track::isClusterInTrack(Cluster * cluster) {$/;"	f	class:Track
 isFirstAndLastEventIDEqual	Classes/Track/Track.C	/^Bool_t Track::isFirstAndLastEventIDEqual() {$/;"	f	class:Track
@@ -788,7 +803,7 @@ kData	GlobalConstants/Constants.h	/^enum eDataType {kMC, kData};$/;"	e	enum:eDat
 kDataType	GlobalConstants/Constants.h	/^Int_t kDataType = kMC;$/;"	v
 kDebug	GlobalConstants/Constants.h	/^Bool_t kDebug = false;$/;"	v
 kEnergy	GlobalConstants/Constants.h	/^enum eOutputUnit {kPhysical, kWEPL, kEnergy};$/;"	e	enum:eOutputUnit
-kEventsPerRun	GlobalConstants/Constants.h	/^Int_t kEventsPerRun = 100;$/;"	v
+kEventsPerRun	GlobalConstants/Constants.h	/^Int_t kEventsPerRun = 50;$/;"	v
 kFocalAluminum	GlobalConstants/Constants.h	/^enum eMaterial {kTungsten, kAluminum, kPMMA, kWater, kFocalTungsten, kFocalAluminum};$/;"	e	enum:eMaterial
 kFocalTungsten	GlobalConstants/Constants.h	/^enum eMaterial {kTungsten, kAluminum, kPMMA, kWater, kFocalTungsten, kFocalAluminum};$/;"	e	enum:eMaterial
 kIsAluminumPlate	GlobalConstants/Constants.h	/^Bool_t kIsAluminumPlate = true;$/;"	v
@@ -1045,8 +1060,8 @@ showDebug	Classes/Hit/findClusters.C	13;"	d	file:
 showDebug	Classes/Hit/findClusters.C	15;"	d	file:
 showDebug	Classes/Layer/Layer.C	10;"	d	file:
 showDebug	Classes/Layer/Layer.C	12;"	d	file:
-showDebug	HelperFunctions/getTracks.C	25;"	d	file:
 showDebug	HelperFunctions/getTracks.C	27;"	d	file:
+showDebug	HelperFunctions/getTracks.C	29;"	d	file:
 sizeOfEventID	GlobalConstants/Constants.h	/^const Int_t sizeOfEventID = 500;$/;"	v
 sortTrackByLayer	Classes/Track/Tracks.C	/^void Tracks::sortTrackByLayer(Int_t trackIdx) {$/;"	f	class:Tracks
 sourceID	Classes/DataInterface/DataInterface.h	/^   Int_t           sourceID;$/;"	m	class:DataInterface
@@ -1119,6 +1134,7 @@ y_	Classes/Hit/Hit.h	/^      Int_t x_, y_;$/;"	m	class:Hit
 ~Hit	Classes/Hit/Hit.C	/^Hit::~Hit() {$/;"	f	class:Hit
 ~Hits	Classes/Hit/Hits.C	/^Hits::~Hits() {$/;"	f	class:Hits
 ~Layer	Classes/Layer/Layer.C	/^Layer::~Layer() {$/;"	f	class:Layer
+~Misalign	GlobalConstants/Misalign.C	/^Misalign::~Misalign() {$/;"	f	class:Misalign
 ~Track	Classes/Track/Track.C	/^Track::~Track() {$/;"	f	class:Track
 ~Tracks	Classes/Track/Tracks.C	/^Tracks::~Tracks() {$/;"	f	class:Tracks
 ~findFilterEnergyLoss	Scripts/include/findFilterEnergyLoss.h	/^findFilterEnergyLoss::~findFilterEnergyLoss()$/;"	f	class:findFilterEnergyLoss

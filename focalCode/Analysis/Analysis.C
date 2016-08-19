@@ -1401,7 +1401,7 @@ void drawAlignmentCheck(Int_t Runs, Int_t dataType, Bool_t recreate, Float_t ene
 				yp = nextCluster->getYmm();
 
 				diffx = xp - x;
-				diffy = yp - y;	
+				diffy = yp - y;
 				thisLayer = nextCluster->getLayer();
 
 				deflection = thisTrack->getLateralDeflectionFromExtrapolatedPosition(thisLayer);
@@ -1590,39 +1590,24 @@ void drawAlignmentCheck(Int_t Runs, Int_t dataType, Bool_t recreate, Float_t ene
 	Float_t rmsY3 = 0;
 	Float_t rmsY4 = 0;
 	for (Int_t i=0; i<7; i++) {
-		rmsX1 += pow(alignmentX1->GetBinContent(i), 2);
-		rmsX2 += pow(alignmentX2->GetBinContent(i), 2);
-		rmsX3 += pow(alignmentX3->GetBinContent(i), 2);
-		rmsX4 += pow(alignmentX4->GetBinContent(i), 2);
-		rmsY1 += pow(alignmentY1->GetBinContent(i), 2);
-		rmsY2 += pow(alignmentY2->GetBinContent(i), 2);
-		rmsY3 += pow(alignmentY3->GetBinContent(i), 2);
-		rmsY4 += pow(alignmentY4->GetBinContent(i), 2);
+		rmsX1 += pow(alignmentX1->GetBinContent(i+1), 2);
+		rmsX2 += pow(alignmentX2->GetBinContent(i+1), 2);
+		rmsX3 += pow(alignmentX3->GetBinContent(i+1), 2);
+		rmsX4 += pow(alignmentX4->GetBinContent(i+1), 2);
+		rmsY1 += pow(alignmentY1->GetBinContent(i+1), 2);
+		rmsY2 += pow(alignmentY2->GetBinContent(i+1), 2);
+		rmsY3 += pow(alignmentY3->GetBinContent(i+1), 2);
+		rmsY4 += pow(alignmentY4->GetBinContent(i+1), 2);
 	}
 
-	rmsX1 = sqrt(rmsX1);
-	rmsX2 = sqrt(rmsX2);
-	rmsX3 = sqrt(rmsX3);
-	rmsX4 = sqrt(rmsX4);
-	rmsY1 = sqrt(rmsY1);
-	rmsY2 = sqrt(rmsY2);
-	rmsY3 = sqrt(rmsY3);
-	rmsY4 = sqrt(rmsY4);
+	rmsX1 = sqrt(rmsX1); rmsX2 = sqrt(rmsX2);
+	rmsX3 = sqrt(rmsX3);	rmsX4 = sqrt(rmsX4);
+	rmsY1 = sqrt(rmsY1); rmsY2 = sqrt(rmsY2);
+	rmsY3 = sqrt(rmsY3);	rmsY4 = sqrt(rmsY4);
 
 	cout << "The RMS values for the distributions are: \n";
-	cout << "X1: " << rmsX1 << endl << "X2: " << rmsX2 << endl << "X3: " << rmsX3 << endl << "X4: " << rmsX4 << endl << "Y1: " << rmsY1 << endl << "Y2: " << rmsY2 << endl << "Y3: " << rmsY3 << endl << "Y4: " << rmsY4 << endl;
 	cout << "Total RMS = " << sqrt(pow(rmsX1, 2) + pow(rmsX2, 2) + pow(rmsX3, 2) + pow(rmsX4, 2) + pow(rmsY1, 2) + pow(rmsY2, 2) + pow(rmsY3, 2) + pow(rmsY4, 2)) << endl;
-	cout << "Better values: \n";
-	for (Int_t i=0; i<8; i++) {
-		cout << "X1[" << i << "] = " << Form("%.3f", -1 * alignmentX1->GetBinContent(i+1)) << endl;
-		cout << "X2[" << i << "] = " << Form("%.3f", -1 * alignmentX2->GetBinContent(i+1)) << endl;
-		cout << "X3[" << i << "] = " << Form("%.3f", -1 * alignmentX3->GetBinContent(i+1)) << endl;
-		cout << "X4[" << i << "] = " << Form("%.3f", -1 * alignmentX4->GetBinContent(i+1)) << endl;
-		cout << "Y1[" << i << "] = " << Form("%.3f", -1 * alignmentY1->GetBinContent(i+1)) << endl;
-		cout << "Y2[" << i << "] = " << Form("%.3f", -1 * alignmentY2->GetBinContent(i+1)) << endl;
-		cout << "Y3[" << i << "] = " << Form("%.3f", -1 * alignmentY3->GetBinContent(i+1)) << endl;
-		cout << "Y4[" << i << "] = " << Form("%.3f", -1 * alignmentY4->GetBinContent(i+1)) << endl << endl;
-	}
+
 	ifstream in("Data/ExperimentalData/Alignment_mine.txt");
 
 	chipAlignment chipAlignmentArray[96];
@@ -1642,21 +1627,21 @@ void drawAlignmentCheck(Int_t Runs, Int_t dataType, Bool_t recreate, Float_t ene
 
 	Float_t theta[32] = {0.0032, -0.00017, 0.0015, 0.0021, -0.0059, -0.007, -0.0037, -0.0032, -0.0056, -0.0060, 0.00016, -0.0007, -0.0003, -0.0014, -0.0006, -0.00015, 0.0008, 0.0007, -0.002, -0.005, -0.007, -0.049, -0.0038, -0.006, 0, 0, 0, 0, -0.0004, -0.00032, -0.007, -0.008};
 
-
-	Int_t deltaX, deltaY;
+	Float_t deltaX, deltaY;
 	for (Int_t i=0; i<7; i++) {
 		deltaX = chipAlignmentArray[i*4+0].deltaX;
 		deltaY = chipAlignmentArray[i*4+0].deltaY;
-		file << i*4 + 0 << " " << -0.1 * (alignmentX1->GetBinContent(i+1) - deltaX) << " " << (alignmentY1->GetBinContent(i+1) - deltaY) << " " << theta[i*4+0] << endl;
+		cout << Form("In layer %d, old value was (%.4f, %.4f), with corrections (%.4f, %.4f) new value is (%.4f, %.4f)\n", i, deltaX, deltaY, alignmentX4->GetBinContent(i+1), alignmentY4->GetBinContent(i+1), deltaX - alignmentX1->GetBinContent(i+1), deltaY - alignmentY1->GetBinContent(i+1));
+		file << i*4 + 0 << " " << -0.1 * (alignmentX1->GetBinContent(i+1) - deltaX) << " " << -0.1 * (alignmentY1->GetBinContent(i+1) - deltaY) << " " << theta[i*4+0] << endl;
 		deltaX = chipAlignmentArray[i*4+1].deltaX;
 		deltaY = chipAlignmentArray[i*4+1].deltaY;
-		file << i*4 + 1 << " " << -0.1 * (alignmentX2->GetBinContent(i+1) - deltaX) << " " << (alignmentY2->GetBinContent(i+1) - deltaY) << " " << theta[i*4+1] << endl;
+		file << i*4 + 1 << " " << -0.1 * (alignmentX2->GetBinContent(i+1) - deltaX) << " " << -0.1 * (alignmentY2->GetBinContent(i+1) - deltaY) << " " << theta[i*4+1] << endl;
 		deltaX = chipAlignmentArray[i*4+2].deltaX;
 		deltaY = chipAlignmentArray[i*4+2].deltaY;
-		file << i*4 + 2 << " " << -0.1 * (alignmentX3->GetBinContent(i+1) - deltaX) << " " << (alignmentY3->GetBinContent(i+1) - deltaY) << " " << theta[i*4+2] << endl;
+		file << i*4 + 2 << " " << -0.1 * (alignmentX3->GetBinContent(i+1) - deltaX) << " " << -0.1 * (alignmentY3->GetBinContent(i+1) - deltaY) << " " << theta[i*4+2] << endl;
 		deltaX = chipAlignmentArray[i*4+3].deltaX;
 		deltaY = chipAlignmentArray[i*4+3].deltaY;
-		file << i*4 + 3 << " " << -0.1 * (alignmentX4->GetBinContent(i+1) - deltaX) << " " << (alignmentY4->GetBinContent(i+1) - deltaY) << " " << theta[i*4+3] << endl;
+		file << i*4 + 3 << " " << -0.1 * (alignmentX4->GetBinContent(i+1) - deltaX) << " " << -0.1 * (alignmentY4->GetBinContent(i+1) - deltaY) << " " << theta[i*4+3] << endl;
 	}
 	file.close();
 }

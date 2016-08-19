@@ -26,6 +26,7 @@ void makePlots() {
    TCanvas *c1	= new TCanvas("c1", "c1", 1200, 800);
 	TCanvas *c2 = new TCanvas("c2", "Correct Tracks fraction", 1200, 800);
 	TCanvas *c3 = new TCanvas("c3", "Reconstruction efficiency", 1200, 800);
+	TCanvas *c4 = new TCanvas("c4", "Chip alignment", 1200, 800);
 
 	Float_t arrayE[200] = {0}; // energy MC
 	Float_t arrayEE[200] = {0}; // error on energy MC
@@ -40,6 +41,12 @@ void makePlots() {
 	Float_t arrayEfficiencyEnergy[300];
 	Float_t arrayEfficiencyFinal[300];
 	Float_t arrayEfficiencyFinal2[300];
+	Float_t alignmentChipXOrig[96] = {0};
+	Float_t alignmentChipYOrig[96] = {0};
+	Float_t alignmentChipXMine[96] = {0};
+	Float_t alignmentChipYMine[96] = {0};
+	Float_t alignmentChipsMine[96] = {0};
+	Float_t alignmentChipsOrig[96] = {0};
 
 	Int_t	nThisEnergy = 0, lastEnergy = 0;
 	
@@ -176,6 +183,42 @@ void makePlots() {
 		}
 	}
 
+	in4.close();
+
+	ifstream in5;
+	in5.open("Data/ExperimentalData/Alignment.txt");
+	Int_t chip, nMine;
+	Float_t deltaX, deltaY, theta;
+	while (1) {
+		in5 >> chip >> deltaX >> deltaY >> theta;
+		if (!in5.good()) break;
+
+		alignmentChipXOrig[chip] = deltaX * 10000;
+		alignmentChipYOrig[chip] = deltaY * 10000;
+		alignmentChipsMine[chip] = chip;// - 0.1;
+		alignmentChipsOrig[chip] = chip;// + 0.1;
+	}
+
+	in5.close();
+
+	ifstream in6;
+	in6.open("Data/ExperimentalData/Alignment_mine.txt");
+	while (1) {
+		in6 >> chip >> deltaX >> deltaY >> theta;
+		if (!in6.good()) break;
+
+		alignmentChipXMine[chip] = deltaX * 10000;
+		alignmentChipYMine[chip] = deltaY * 10000;
+		nMine++;
+	}
+	in6.close():
+		
+	// chip 11 is dead
+	alignmentChipXOrig[11] = 1e5;
+	alignmentChipYOrig[11] = 1e5;
+	alignmentChipXMine[11] = 1e5;
+	alignmentChipYMine[11] = 1e5;
+
 	c1->cd();
 	
 	TGraphErrors *hMC = new TGraphErrors(MC2Data, arrayE, arrayMC, arrayEE, arrayEMC);
@@ -203,7 +246,7 @@ void makePlots() {
 	pstar->SetLineWidth(3);
 	pstar->SetLineColor(kRed);
 
-	gStyle->SetPadTickY(1);
+//	gStyle->SetPadTickY(1);
 	hMC->SetTitle("Range estimation of proton tracks using weighted Gaussian approach;Energy [MeV];Projected range [mm]");
 	hMC->Draw("AP");
 	hData->Draw("P");
@@ -295,6 +338,87 @@ void makePlots() {
 	gEfficiency2->SetLineWidth(3);
 	gEfficiency->Draw("AL");
 	gEfficiency2->Draw("L");
+
+	c4->Divide(1, 2, 0.01, 0.001);
+	c4->cd(1);
+
+	TGraph *gAlignmentXMine = new TGraph(nMine, alignmentChipsMine, alignmentChipXMine);
+	TGraph *gAlignmentYMine = new TGraph(nMine, alignmentChipsMine, alignmentChipYMine);
+	TGraph *gAlignmentXOrig = new TGraph(96, alignmentChipsOrig, alignmentChipXOrig);
+	TGraph *gAlignmentYOrig = new TGraph(96, alignmentChipsOrig, alignmentChipYOrig);
+
+	gAlignmentXMine->SetMarkerStyle(21);
+	gAlignmentYMine->SetMarkerStyle(21);
+	gAlignmentXOrig->SetMarkerStyle(22);
+	gAlignmentYOrig->SetMarkerStyle(22);
+	gAlignmentXMine->SetMarkerColor(kRed);
+	gAlignmentYMine->SetMarkerColor(kRed);
+	gAlignmentXOrig->SetMarkerColor(kBlue);
+	gAlignmentYOrig->SetMarkerColor(kBlue);
+	
+	gAlignmentXMine->SetTitle("Alignment correction for all chips");
+	gAlignmentXMine->GetXaxis()->SetTitle("Chip number");
+	gAlignmentXMine->GetXaxis()->SetLabelFont(22);
+	gAlignmentXMine->GetXaxis()->SetTitleFont(22);
+	gAlignmentXMine->GetYaxis()->SetTitleFont(22);
+	gAlignmentXMine->GetYaxis()->SetLabelFont(22);
+	gAlignmentXMine->GetYaxis()->SetTitle("Correction value in X direction [#mum]");
+	gAlignmentXMine->GetXaxis()->SetNdivisions(54);
+	gAlignmentXMine->Draw("AP");
+	gAlignmentXOrig->Draw("P");
+	
+	gPad->Update();
+	title = (TPaveText*) gPad->GetPrimitive("title");
+	title->SetTextFont(22);
+	gPad->Modified();
+
+	gAlignmentXMine->GetYaxis()->SetRangeUser(-1000, 1000);
+	gAlignmentXMine->GetXaxis()->SetRangeUser(0, 27.5);
+
+	Float_t x_value;
+	for (Int_t i=1; i<7; i++) {
+		x_value = i*4 - 0.5;
+		TLine *l = new TLine(x_value, -1000, x_value, 1000);
+		l->Draw();
+	}
+
+	TLine *vl = new TLine(0, 0, 27.5, 0);
+	vl->SetLineStyle(7);
+	vl->SetLineWidth(2);
+	vl->Draw();
+	
+	TLegend * leg3 = new TLegend(0.77, 0.71, 0.985, 0.94);
+	leg3->SetTextSize(0.035);
+	leg3->SetTextFont(22);
+	leg3->AddEntry(gAlignmentXOrig, "Original correction values", "P");
+	leg3->AddEntry(gAlignmentXMine, "My correction values", "P");
+	leg3->Draw();
+
+	c4->Update();
+
+	c4->cd(2);
+	gAlignmentYMine->SetTitle();
+	gAlignmentYMine->GetXaxis()->SetTitle("Chip number");
+	gAlignmentYMine->GetXaxis()->SetTitleFont(22);
+	gAlignmentYMine->GetXaxis()->SetLabelFont(22);
+	gAlignmentYMine->GetYaxis()->SetTitle("Correction value in Y direction [#mum]");
+	gAlignmentYMine->GetYaxis()->SetTitleFont(22);
+	gAlignmentYMine->GetYaxis()->SetLabelFont(22);
+	gAlignmentYMine->GetXaxis()->SetNdivisions(54);
+	gAlignmentYMine->Draw("AP");
+	gAlignmentYOrig->Draw("P");
+	gAlignmentYMine->GetYaxis()->SetRangeUser(-1000, 1000);
+	gAlignmentYMine->GetXaxis()->SetRangeUser(0, 27.5);
+	
+	for (Int_t i=1; i<7; i++) {
+		x_value = i*4 - 0.5;
+		TLine *l = new TLine(x_value, -1000, x_value, 1000);
+		l->Draw();
+	}
+	TLine *vl = new TLine(0, 0, 27.5, 0);
+	vl->SetLineStyle(7);
+	vl->SetLineWidth(2);
+	vl->Draw();
 
 	c1->SaveAs("OutputFiles/figures/finalPlotsForArticle/estimated_ranges_all_energies.eps");
 	c1->SaveAs("OutputFiles/figures/finalPlotsForArticle/estimated_ranges_all_energies.root");
