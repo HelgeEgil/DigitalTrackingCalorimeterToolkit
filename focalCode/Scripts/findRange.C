@@ -59,11 +59,11 @@ void findRange::Loop(Double_t energy, Double_t sigma_mev)
    TCanvas *c4 = new TCanvas("c4", "c4", 800, 600);
    TCanvas *c5 = new TCanvas("c5", "c5", 800, 600);
 
-   Int_t nbinsx = 5000;
-   Int_t xfrom = 0;
-   Int_t xto = 25;
+   Int_t nbinsx = 1000;
+   Int_t xfrom = -5;
+   Int_t xto = 4;
 
-	Float_t x_compensate = 0;
+	Float_t x_compensate = 1.4;
 
 	TH1F *hZ = new TH1F("hZ", "Z profile", nbinsx/3, xfrom + x_compensate, xto + x_compensate);
 	TH1F *hRange = new TH1F("hRange", "Primary ranges", nbinsx, xfrom + x_compensate, xto + x_compensate);

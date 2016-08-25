@@ -419,6 +419,191 @@ Bool_t isSameCluster(Cluster *a, Cluster *b) {
 	return x*y*z;
 }
 
+void getPValues() {
+	// create list with energies vs range
+
+	TCanvas *cCustom = new TCanvas("cCustom", "Range fit for custom range-energy list", 1200, 900);
+	TCanvas *cCustomInv = new TCanvas("cCustomInv", "Range fit for custom range-energy list", 1200, 900);
+	
+	TCanvas *cCustomW = new TCanvas("cCustomW", "Range fit for custom range-energy list tungsten", 1200, 900);
+	TCanvas *cCustomInvW = new TCanvas("cCustomInvW", "Range fit for custom range-energy list tungsten", 1200, 900);
+
+	TCanvas *cCustomAl = new TCanvas("cCustomAl", "Range fit for AL", 1200, 900);
+
+	Float_t energies[19] = {10, 20, 30, 40, 50, 75, 100, 125, 150, 175, 200, 225, 250, 275, 300, 325, 350, 375, 400};
+	Float_t ranges[13] = {1.047, 4.061, 8.639, 14.655, 22.022, 45.868, 76.789, 114.074, 157.148, 205.502, 258.75, 316.419, 378.225};
+	Float_t rangesW[15] = {3.027, 5.989, 9.691, 13.983, 18.899, 24.586, 30.541, 37.219, 43.945, 51.257, 59.058, 67.172, 75.522, 84.338, 93.62};
+
+	Float_t energiesAl[9] = {25, 50, 75, 100, 125, 150, 175, 200, 225};
+	Float_t rangesAl[9] = {1.66, 9.48, 21.12, 36.13, 54.14, 74.96, 98.20, 123.85, 151.35};
+
+	cCustom->cd();
+	TGraph *graph_custom = new TGraph(13, energies, ranges);
+	graph_custom->SetTitle("Range fit for custom range-energy list");
+	graph_custom->Draw("A*");
+
+	cCustomInv->cd();
+	TGraph *graph_inv = new TGraph(13, ranges, energies);
+	graph_inv->SetTitle("Energy fit for custom energy-range list");
+	graph_inv->Draw("A*");
+
+	cCustomW->cd();
+	TGraph *graph_custom_w = new TGraph(15, energies, rangesW);
+	graph_custom_w->SetTitle("Range fit for W");
+	graph_custom_w->Draw("A*");
+
+	cCustomInvW->cd();
+	TGraph *graph_inv_w = new TGraph(15, rangesW, energies);
+	graph_inv_w->SetTitle("Energy for for W");
+	graph_inv_w->Draw("A*");
+
+	cCustomAl->cd();
+	TGraph *graphAl = new TGraph(9, energiesAl, rangesAl);
+	graphAl->SetTitle("Range fit for Al;Energy [MeV];Range in Aluminuim DTC [mm]");
+	graphAl->Draw("A*");
+
+	TF1 *fCustom = new TF1("fCustom", "[0] * x * (1 + ([1] - [1]* exp(-[2] * x)) + ([3] - [3] * exp(-[4]*x)))", 10, 250);
+	TF1 *fCustomInv = new TF1("fCustomInv", "x * ([0] * exp ( - [1] * x) + [2] * exp( - [3] * x) + [4] * exp( - [5] * x) + [6] * exp(-[7] * x) + [8] * exp(-[9] * x))", 1, 400);
+	TF1 *fCustomW = new TF1("fCustomW", "[0] * x * (1 + ([1] - [1]* exp(-[2] * x)) + ([3] - [3] * exp(-[4]*x)))", 10, 250);
+	TF1 *fCustomInvW = new TF1("fCustomInvW", "x * ([0] * exp ( - 1./[1] * x) + [2] * exp( - 1./[3] * x) + [4] * exp( - 1./[5] * x) + [6] * exp(-1./[7] * x) + [8] * exp(-1./[9] * x))", 1, 400);
+	TF1 *fCustomAl = new TF1("fCustomAl", "[0] * x * (1 + ([1] - [1]* exp(-[2] * x)) + ([3] - [3] * exp(-[4]*x)))", 10, 250);
+	TF1 *fCustomInvAl = new TF1("fCustomInv", "x * ([0] * exp ( - [1] * x) + [2] * exp( - [3] * x) + [4] * exp( - [5] * x) + [6] * exp(-[7] * x) + [8] * exp(-[9] * x))", 1, 400);
+	fCustom->SetParameters(6.94656e-2, 15.14450027, 0.001260021, 29.84400076, 0.003260031);
+	fCustomInv->SetParameters(9.663872, 1/0.975, 2.50472, 1/12.4999, 0.880745, 1/57.001, 0.419001, 1/106.501, 0.92732, 1/1067.2784);
+	
+	fCustomW->SetParameters(6.94656e-2/9, 15.14450027, 0.001260021, 29.84400076, 0.003260031);
+	fCustomInvW->SetParameters(9.663872*9, 0.975/9, 2.50472*9, 12.4999/9, 0.880745*9, 57.001/9, 0.419001*9, 106.501/9, 0.92732*9, 1067.2784/9);
+	
+	fCustomAl->SetParameters(6.94656e-2/2, 15.14450027, 0.001260021, 29.84400076, 0.003260031);
+	fCustomInvAl->SetParameters(9.663872*2, 1/0.975*2, 2.50472*2, 1/12.4999*2, 0.880745*2, 1/57.001*2, 0.419001*2, 1/106.501*2, 0.92732*2, 1/1067.2784*2);
+	
+	fCustom->SetParLimits(0, 0.02, 0.1);
+	fCustom->SetParLimits(1, 5, 45);
+	fCustom->SetParLimits(2, 0.0005, 0.0045);
+	fCustom->SetParLimits(3, 10, 90);
+	fCustom->SetParLimits(4, 0.001, 0.01);
+	
+	fCustomAl->SetParLimits(0, 0.01, 0.1);
+	fCustomAl->SetParLimits(1, 5, 45);
+	fCustomAl->SetParLimits(2, 0.0005, 0.0045);
+	fCustomAl->SetParLimits(3, 10, 90);
+	fCustomAl->SetParLimits(4, 0.001, 0.01);
+	
+	fCustomInv->SetParLimits(0, 0.1, 100);
+	fCustomInv->SetParLimits(1, 0.001, 5);
+	fCustomInv->SetParLimits(2, 0.1, 100);
+	fCustomInv->SetParLimits(3, 0.001, 5);
+	fCustomInv->SetParLimits(4, 0.1, 100);
+	fCustomInv->SetParLimits(5, 0.001, 5);
+	fCustomInv->SetParLimits(6, 0.1, 100);
+	fCustomInv->SetParLimits(7, 0.001, 5);
+	fCustomInv->SetParLimits(8, 0.1, 100);
+	fCustomInv->SetParLimits(9, 0.001, 5);
+
+	fCustomInvW->SetParLimits(0, 1, 50);
+	fCustomInvW->SetParLimits(1, 0.01, 0.2);
+	fCustomInvW->SetParLimits(2, 5, 30);
+	fCustomInvW->SetParLimits(3, 1, 8);
+	fCustomInvW->SetParLimits(4, 1, 15);
+	fCustomInvW->SetParLimits(5, 5, 50);
+	fCustomInvW->SetParLimits(6, 0.1, 10);
+	fCustomInvW->SetParLimits(7, 0.5, 30);
+	fCustomInvW->SetParLimits(8, 1, 20);
+	fCustomInvW->SetParLimits(9, 30, 500);
+
+	cCustom->cd();
+	fCustom->SetNpx(500);
+	graph_custom->Fit("fCustom", "M, B");
+	cCustomInv->cd();
+	fCustomInv->SetNpx(500);
+	graph_inv->Fit("fCustomInv", "M, B");
+	cCustomW->cd();
+	fCustomW->SetNpx(500);
+	graph_custom_w->Fit("fCustomW", "M, B");
+	cCustomInvW->cd();
+	fCustomInvW->SetNpx(500);
+	graph_inv_w->Fit("fCustomInvW", "M, B");
+
+	cCustomAl->cd();
+	graphAl->Fit("fCustomAl", "M, B");
+
+	Float_t sqrt1 = 0, sqrt2 = 0, sqrt3 = 0, sqrt4 = 0; 
+	Float_t avgRangeSum = 0, avgRangeSumW = 0;
+	for (Int_t i=0; i<9; i++) {
+		sqrt1 += pow(ranges[i] - fCustom->Eval(energies[i]), 2);
+		sqrt2 += pow(energies[i] - fCustomInv->Eval(ranges[i]), 2);
+		sqrt3 += pow(rangesW[i] - fCustomW->Eval(energies[i]), 2);
+		sqrt4 += pow(energies[i] - fCustomInvW->Eval(rangesW[i]), 2);
+		avgRangeSum += fabs(ranges[i] - fCustom->Eval(energies[i]));
+		avgRangeSumW += fabs(rangesW[i] - fCustomW->Eval(energies[i]));
+	}
+
+	avgRangeSum /= 9;
+	avgRangeSumW /= 15;
+
+	sqrt1 = sqrt(sqrt1);
+	sqrt2 = sqrt(sqrt2);
+	sqrt3 = sqrt(sqrt3);
+	sqrt4 = sqrt(sqrt4);
+
+	cout << "RSQ of Gompertz-function = " << sqrt1 << endl;
+	cout << "RSQ of INV fitted Gompertz-function = " << sqrt2 << endl;
+	cout << "RSQ of Gompertz-function in tungsten = " << sqrt3 << endl;
+	cout << "RSQ of INV fitted Gompertz-function in tungsten = " << sqrt4 << endl;
+	cout << endl << "Average range error for fitted Gompertz is " << avgRangeSum << " mm.\n";
+	cout << "Average range error for fitted Gompertz in tungsten is " << avgRangeSumW << " mm.\n";
+
+	Float_t E1 = fCustomInv->Eval(fCustom->Eval(10));
+	Float_t E2 = fCustomInv->Eval(fCustom->Eval(30));
+	Float_t E3 = fCustomInv->Eval(fCustom->Eval(50));
+
+	Float_t E1w = fCustomInvW->Eval(fCustomW->Eval(10));
+	Float_t E2w = fCustomInvW->Eval(fCustomW->Eval(30));
+	Float_t E3w = fCustomInvW->Eval(fCustomW->Eval(50));
+
+	cout << Form("From energy of 10, 30, 50 MeV, the calc-invcalc values are %.10f, %.10f, %.10f.\n", E1, E2, E3);
+	cout << Form("TUNGSTEN - From energy of 10, 30, 50 MeV, the calc-invcalc values are %.10f, %.10f, %.10f.\n", E1w, E2w, E3w);
+
+	cout << " --- \033[1m VALUES FOR WATER \033[0m --- " << endl;
+	cout << "a1      = " << fCustom->GetParameter(0) << endl;
+	cout << "b1      = " << fCustom->GetParameter(1) << endl;
+	cout << "g1      = " << fCustom->GetParameter(2) << endl;
+	cout << "b2      = " << fCustom->GetParameter(3) << endl;
+	cout << "g2      = " << fCustom->GetParameter(4) << endl;
+	cout << endl;
+	cout << "c1      = " << fCustomInv->GetParameter(0) << endl;
+	cout << "lambda1 = " << 1/fCustomInv->GetParameter(1) << endl;
+	cout << "c2      = " << fCustomInv->GetParameter(2) << endl;
+	cout << "lambda2 = " << 1/fCustomInv->GetParameter(3) << endl;
+	cout << "c3      = " << fCustomInv->GetParameter(4) << endl;
+	cout << "lambda3 = " << 1/fCustomInv->GetParameter(5) << endl;
+	cout << "c4      = " << fCustomInv->GetParameter(6) << endl;
+	cout << "lambda4 = " << 1/fCustomInv->GetParameter(7) << endl;
+	cout << "c5      = " << fCustomInv->GetParameter(8) << endl;
+	cout << "lambda5 = " << 1/fCustomInv->GetParameter(9) << endl;
+
+	cout << endl << endl;
+
+	cout << " --- \033[1m VALUES FOR TUNGSTEN \033[0m --- " << endl;
+	cout << "a1      = " << fCustomW->GetParameter(0) << endl;
+	cout << "b1      = " << fCustomW->GetParameter(1) << endl;
+	cout << "g1      = " << fCustomW->GetParameter(2) << endl;
+	cout << "b2      = " << fCustomW->GetParameter(3) << endl;
+	cout << "g2      = " << fCustomW->GetParameter(4) << endl;
+	cout << endl;
+	cout << "c1      = " << fCustomInvW->GetParameter(0) << endl;
+	cout << "lambda1 = " << 1/fCustomInvW->GetParameter(1) << endl;
+	cout << "c2      = " << fCustomInvW->GetParameter(2) << endl;
+	cout << "lambda2 = " << 1/fCustomInvW->GetParameter(3) << endl;
+	cout << "c3      = " << fCustomInvW->GetParameter(4) << endl;
+	cout << "lambda3 = " << 1/fCustomInvW->GetParameter(5) << endl;
+	cout << "c4      = " << fCustomInvW->GetParameter(6) << endl;
+	cout << "lambda4 = " << 1/fCustomInvW->GetParameter(7) << endl;
+	cout << "c5      = " << fCustomInvW->GetParameter(8) << endl;
+	cout << "lambda5 = " << 1/fCustomInvW->GetParameter(9) << endl;
+}
+
+
 Float_t max(Float_t a, Float_t b) {
 	if (a > b) return a;
 	else return b;

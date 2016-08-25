@@ -33,7 +33,7 @@ Misalign::Misalign() {
 	chipAlignment chip;
 
 	ifstream in;
-	in.open("Data/ExperimentalData/Alignment_mine.txt");
+	in.open("Data/ExperimentalData/Alignment.txt");
 	Int_t nlines = 0;
 	while (1) {
 		

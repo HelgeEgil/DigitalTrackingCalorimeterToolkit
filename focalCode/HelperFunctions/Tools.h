@@ -45,6 +45,7 @@ Cluster	 *	getRetrogradeTrackExtrapolationToLayer(Track * track, Int_t layer);
 Bool_t		isPointOutOfBounds(Cluster * point, Float_t padding = 0);
 Float_t		getClusterSizeFromDepositedEnergy(Float_t edep);
 Bool_t		isSameCluster(Cluster *a, Cluster *b);
+void			getPValues();
 Float_t		max(Float_t a, Float_t b);
 Float_t		min(Float_t a, Float_t b);
 

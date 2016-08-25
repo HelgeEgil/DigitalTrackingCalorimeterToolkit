@@ -1,7 +1,7 @@
 #/gate/scintillator_F/attachCrystalSD
 #/gate/scintillator_H/attachCrystalSD
 #/gate/scintillator_V/attachCrystalSD
-#/gate/preabsorber/attachCrystalSD
+/gate/preabsorber/attachCrystalSD
 /gate/chip/attachCrystalSD
 /gate/glue_1/attachCrystalSD
 /gate/pcb/attachCrystalSD
