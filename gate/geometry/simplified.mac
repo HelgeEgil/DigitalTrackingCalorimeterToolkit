@@ -62,7 +62,7 @@
 /gate/chip/geometry/setXLength 38900.  um
 /gate/chip/geometry/setYLength 19149.5 um
 /gate/chip/geometry/setZLength  13.9 um # was 29.9, then -16 = 13.9
-/gate/chip/placement/setTranslation 0. 0. -97. um # was -105, then +8 = -97
+/gate/chip/placement/setTranslation 0. -100. -97. um # was -105, then +8 = -97
 /gate/chip/setMaterial Silicon
 /gate/chip/vis/setColor red
 

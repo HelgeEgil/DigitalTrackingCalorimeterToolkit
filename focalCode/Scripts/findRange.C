@@ -63,7 +63,7 @@ void findRange::Loop(Double_t energy, Double_t sigma_mev)
    Int_t xfrom = -5;
    Int_t xto = 4;
 
-	Float_t x_compensate = 1.4;
+	Float_t x_compensate = 0;
 
 	TH1F *hZ = new TH1F("hZ", "Z profile", nbinsx/3, xfrom + x_compensate, xto + x_compensate);
 	TH1F *hRange = new TH1F("hRange", "Primary ranges", nbinsx, xfrom + x_compensate, xto + x_compensate);

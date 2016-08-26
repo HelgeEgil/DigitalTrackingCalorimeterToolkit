@@ -1,5 +1,6 @@
-/vis/open OGL #1000x1000-0+0
+#/vis/open OGL #1000x1000-0+0
 #/vis/open DAWNFILE
+/vis/open RayTracer
 /vis/viewer/reset
 /vis/drawVolume
 /vis/viewer/zoom 2

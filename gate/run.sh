@@ -23,5 +23,6 @@ fi
 
 for i in `seq $2 $3 $4`;
 do
-	Gate -a "'[material,$1] [energy,$i] [npart,$5] [step_active,10] [step_passive,80] [sigma,$6]'" focal.mac > terminal_output.txt &
+	nice -n 10 Gate -a "'[material,$1] [energy,$i] [npart,$5] [step_active,10] [step_passive,80] [sigma,$6]'" focal.mac > terminal_output.txt &
+	echo "Running: $i"
 done
