@@ -1729,7 +1729,12 @@ void compareClusterSizes(Int_t Runs, Bool_t recreate, Float_t energy) {
 	Clusters	 *	MCClusters = nullptr;
 	Clusters	 *	DataClusters = nullptr;
 	Int_t		nTracksMC, nTracksData, thisLayer, thisSize;
-	const Int_t	nLayersToUse = 8;
+    Bool_t      useChip = true;
+
+    Int_t fChip = 1;
+    if (useChip) fChip = 4;
+
+    const Int_t nLayersToUse = 7*4;
 
 	MCTracks = loadOrCreateTracks(recreate, Runs, kMC, energy);
 	MCTracks->extrapolateToLayer0();
@@ -1758,28 +1763,34 @@ void compareClusterSizes(Int_t Runs, Bool_t recreate, Float_t energy) {
 
 	for (Int_t i=0; i<MCClusters->GetEntriesFast(); i++) {
 		thisCluster = MCClusters->At(i);
-		thisLayer = thisCluster->getLayer();
-		if (thisLayer >= nLayersToUse) {
-			cout << "Layer = " << thisLayer << ", skipping.\n";
-			continue;
-		}
+        if (useChip)    thisLayer = thisCluster->getChip();
+        else            thisLayer = thisCluster->getLayer();
+		
+        if (thisLayer >= nLayersToUse) continue;
+
 		thisSize = thisCluster->getSize();
 		hCSVectorMC->at(thisLayer)->Fill(thisSize);
 	}
 	
 	for (Int_t i=0; i<DataClusters->GetEntriesFast(); i++) {
 		thisCluster = DataClusters->At(i);
-		thisLayer = thisCluster->getLayer();
-		if (thisLayer >= nLayersToUse) {
-			cout << "Layer = " << thisLayer << ", skipping.\n";
-			continue;
-		}
-		thisSize = thisCluster->getSize();
+        if (useChip)    thisLayer = thisCluster->getChip();
+        else            thisLayer = thisCluster->getLayer();
+
+        if (thisLayer >= nLayersToUse) continue;
+		
+        thisSize = thisCluster->getSize();
 		hCSVectorData->at(thisLayer)->Fill(thisSize);
 	}
 
-	Float_t layerMC[nLayersToUse] = {0, 1, 2, 3, 4, 5, 6, 7};
-	Float_t layerData[nLayersToUse] = {0, 1, 2, 3, 4, 5, 6, 7};
+    Float_t layerMC[nLayersToUse]; //= {0, 1, 2, 3, 4, 5, 6, 7};
+	Float_t layerData[nLayersToUse];// = {0, 1, 2, 3, 4, 5, 6, 7};
+     
+    for (Int_t i=0; i<nLayersToUse; i++) {
+        layerMC[i] = i;
+        layerData[i] = i;
+    }
+
 	Float_t errorLayer[nLayersToUse] = {0};
 	Float_t clusterSizeMC[nLayersToUse] = {0};
 	Float_t errorClusterSizeMC[nLayersToUse] = {0};
@@ -1800,6 +1811,7 @@ void compareClusterSizes(Int_t Runs, Bool_t recreate, Float_t energy) {
 	TGraphErrors * graphCSData = new TGraphErrors(nLayersToUse-1, layerData, clusterSizeData, errorLayer, errorClusterSizeData);
 	
 	graphCSMC->SetTitle(Form("Cluster size distribution comparison at %.0f MeV;Layer number;Cluster size [# pixels]", run_energy));
+    if (useChip) graphCSMC->GetXaxis()->SetTitle("Chip number");
 	graphCSMC->SetMinimum(0);
 	graphCSMC->SetMaximum(40);
 	graphCSMC->SetMarkerStyle(21);
@@ -1835,7 +1847,6 @@ void compareClusterSizes(Int_t Runs, Bool_t recreate, Float_t energy) {
 		c3->cd(i+1);
 		hCSVectorData->at(i)->Draw();
 	}
-
 }
 
 Bool_t getCutTrackLength(Float_t energy, Track *track) {
@@ -1872,10 +1883,8 @@ Bool_t getCutBraggPeakInTrack(Track *track) {
 	if (lastBin < 4) return false;
 
 	Float_t lowStd = track->getStdSizeToIdx(lastBin-1);
-	Int_t nEmptyBins = track->getNMissingLayers();
+	Int_t   nEmptyBins = track->getNMissingLayers();
 
-//	cout << "The standard deviation for the first " << lastBin << " bins is " << lowStd << ".\n";
-//	cout << "Number of missing layers = " << nEmptyBins << endl;
 
 	if (lowStd > 4) return false;
 	if (nEmptyBins > 1) return false;
