@@ -43,1100 +43,1100 @@ using namespace std;
 
 
 void drawTrackAngleAtVaryingRunNumbers(Int_t dataType, Float_t energy) {
-	Int_t nRuns = 0;
-	Hits * eventIDs = nullptr;
+   Int_t nRuns = 0;
+   Hits * eventIDs = nullptr;
 
-	for (Int_t i=2; i<47; i++) {
-		nRuns = pow(2, 4 + 0.25 * i) + 0.5;
+   for (Int_t i=2; i<47; i++) {
+      nRuns = pow(2, 4 + 0.25 * i) + 0.5;
 
-		kEventsPerRun = nRuns;
-		Float_t factor = 2;
+      kEventsPerRun = nRuns;
+      Float_t factor = 2;
 
-		Int_t totalNumberOfRuns = 5000 / kEventsPerRun;
-		if (totalNumberOfRuns < 1) totalNumberOfRuns = 1;
-		if (totalNumberOfRuns > 75) totalNumberOfRuns = 75;
+      Int_t totalNumberOfRuns = 5000 / kEventsPerRun;
+      if (totalNumberOfRuns < 1) totalNumberOfRuns = 1;
+      if (totalNumberOfRuns > 75) totalNumberOfRuns = 75;
 
-		Tracks * tracks = loadOrCreateTracks(1, totalNumberOfRuns, dataType, energy);
-		tracks->extrapolateToLayer0();
+      Tracks * tracks = loadOrCreateTracks(1, totalNumberOfRuns, dataType, energy);
+      tracks->extrapolateToLayer0();
 
-		char * sDataType = getDataTypeChar(dataType);
-		TCanvas *c1 = new TCanvas("c1", "c1", 1200, 800);
-		TH1F *hAngles = new TH1F("hAngles", Form("Proton angle plot with %d protons in frame (%s)", nRuns, sDataType), 500, 0, 30);
-		TCanvas *c2 = new TCanvas("c2", "Number of correct proton tracks with depth", 1200, 800);
-		TH1F *hCorrectTracks = new TH1F("hCorrectTracks", "Number of correct proton tracks with depth", 10, 0, 10);
-		TH1F *normCorrectTracks = new TH1F("normCorrectTracks", "Normalisation histogram", 10,0,10);
+      char * sDataType = getDataTypeChar(dataType);
+      TCanvas *c1 = new TCanvas("c1", "c1", 1200, 800);
+      TH1F *hAngles = new TH1F("hAngles", Form("Proton angle plot with %d protons in frame (%s)", nRuns, sDataType), 500, 0, 30);
+      TCanvas *c2 = new TCanvas("c2", "Number of correct proton tracks with depth", 1200, 800);
+      TH1F *hCorrectTracks = new TH1F("hCorrectTracks", "Number of correct proton tracks with depth", 10, 0, 10);
+      TH1F *normCorrectTracks = new TH1F("normCorrectTracks", "Normalisation histogram", 10,0,10);
 
-		hAngles->SetXTitle("Protons angle from initial measurement to layer 2");
-		hAngles->SetYTitle("Number of protons");
-		hAngles->SetFillColor(kCyan-8);
-		hAngles->SetLineColor(kBlack);
-		gStyle->SetOptStat(0);
+      hAngles->SetXTitle("Protons angle from initial measurement to layer 2");
+      hAngles->SetYTitle("Number of protons");
+      hAngles->SetFillColor(kCyan-8);
+      hAngles->SetLineColor(kBlack);
+      gStyle->SetOptStat(0);
 
-		hCorrectTracks->SetTitle(Form("Tracks with same eventID using %d protons/run", kEventsPerRun));
-		hCorrectTracks->SetXTitle("Layer number");
-		hCorrectTracks->SetYTitle("Number of protons");
-		hCorrectTracks->SetFillColor(kBlue-7);
-		hCorrectTracks->SetLineColor(kBlack);
+      hCorrectTracks->SetTitle(Form("Tracks with same eventID using %d protons/run", kEventsPerRun));
+      hCorrectTracks->SetXTitle("Layer number");
+      hCorrectTracks->SetYTitle("Number of protons");
+      hCorrectTracks->SetFillColor(kBlue-7);
+      hCorrectTracks->SetLineColor(kBlack);
 
-		Track *thisTrack;
-		Int_t EID, thisEID;
-		Int_t nTotal = tracks->GetEntries();
-		Int_t nTotal2 = 0;
-		Int_t nFirstAndLast = 0;
-		Int_t nLastCloseToFirst = 0;
-		Int_t nCorrect = 0;
+      Track *thisTrack;
+      Int_t EID, thisEID;
+      Int_t nTotal = tracks->GetEntries();
+      Int_t nTotal2 = 0;
+      Int_t nFirstAndLast = 0;
+      Int_t nLastCloseToFirst = 0;
+      Int_t nCorrect = 0;
 
-		for (Int_t j=0; j<tracks->GetEntriesFast(); j++) {
-			thisTrack = tracks->At(j);
-			if (!thisTrack) continue;
-			hAngles->Fill(thisTrack->getSlopeAngleChangeBetweenLayers(2));
+      for (Int_t j=0; j<tracks->GetEntriesFast(); j++) {
+         thisTrack = tracks->At(j);
+         if (!thisTrack) continue;
+         hAngles->Fill(thisTrack->getSlopeAngleChangeBetweenLayers(2));
 
-			EID = thisTrack->getEventID(0);
-			if (EID > -1) { hCorrectTracks->Fill(0); }
-			normCorrectTracks->Fill(0);
-			nCorrect += (int) thisTrack->isOneEventID();
-			nFirstAndLast += (int) thisTrack->isFirstAndLastEventIDEqual();
-			nLastCloseToFirst += (Int_t) tracks->isLastEventIDCloseToFirst(j);
+         EID = thisTrack->getEventID(0);
+         if (EID > -1) { hCorrectTracks->Fill(0); }
+         normCorrectTracks->Fill(0);
+         nCorrect += (int) thisTrack->isOneEventID();
+         nFirstAndLast += (int) thisTrack->isFirstAndLastEventIDEqual();
+         nLastCloseToFirst += (Int_t) tracks->isLastEventIDCloseToFirst(j);
 
-			for (Int_t k=1; k<thisTrack->GetEntriesFast(); k++) {
-				if (!thisTrack->At(k)) continue;
-				normCorrectTracks->Fill(thisTrack->getLayer(k));
-				thisEID = thisTrack->getEventID(k);
-				if (thisEID == EID || EID == -1) {
-					hCorrectTracks->Fill(thisTrack->getLayer(k));
-				}
-			}
-		}
+         for (Int_t k=1; k<thisTrack->GetEntriesFast(); k++) {
+            if (!thisTrack->At(k)) continue;
+            normCorrectTracks->Fill(thisTrack->getLayer(k));
+            thisEID = thisTrack->getEventID(k);
+            if (thisEID == EID || EID == -1) {
+               hCorrectTracks->Fill(thisTrack->getLayer(k));
+            }
+         }
+      }
 
-		Float_t ratioCorrect = (float) nCorrect / nTotal;
-		Float_t ratioFirstAndLast = (float) nFirstAndLast / nTotal;
-		Float_t ratioLastCloseToFirst = (float) nLastCloseToFirst / nTotal;
+      Float_t ratioCorrect = (float) nCorrect / nTotal;
+      Float_t ratioFirstAndLast = (float) nFirstAndLast / nTotal;
+      Float_t ratioLastCloseToFirst = (float) nLastCloseToFirst / nTotal;
 
-		hCorrectTracks->Divide(normCorrectTracks);
+      hCorrectTracks->Divide(normCorrectTracks);
 
-		ofstream file2("OutputFiles/lastLayerCorrect_different_nRuns.csv", ofstream::out | ofstream::app);
-		file2 << factor << " " << nRuns << " " << ratioCorrect << " " << ratioFirstAndLast << " " << ratioLastCloseToFirst << endl;
-		file2.close();
+      ofstream file2("OutputFiles/lastLayerCorrect_different_nRuns.csv", ofstream::out | ofstream::app);
+      file2 << factor << " " << nRuns << " " << ratioCorrect << " " << ratioFirstAndLast << " " << ratioLastCloseToFirst << endl;
+      file2.close();
 
-		c1->cd();
-		hAngles->Draw();
-		c1->SaveAs(Form("OutputFiles/figures/angles/angles_layer%.1f_with_nRuns-%d.png", factor, nRuns));
-		c1->SaveAs(Form("OutputFiles/figures/angles/angles_layer%.1f_with_nRuns-%d.root", factor, nRuns));
+      c1->cd();
+      hAngles->Draw();
+      c1->SaveAs(Form("OutputFiles/figures/angles/angles_layer%.1f_with_nRuns-%d.png", factor, nRuns));
+      c1->SaveAs(Form("OutputFiles/figures/angles/angles_layer%.1f_with_nRuns-%d.root", factor, nRuns));
 
-		c2->cd();
-		hCorrectTracks->Draw();
+      c2->cd();
+      hCorrectTracks->Draw();
 
-		c2->SaveAs(Form("OutputFiles/figures/angles/correctTracks_factor%.1f_nruns%d.png", factor, nRuns));
+      c2->SaveAs(Form("OutputFiles/figures/angles/correctTracks_factor%.1f_nruns%d.png", factor, nRuns));
 
-		Float_t rms = hAngles->GetRMS();
-		Float_t mean = hAngles->GetMean();
-		Int_t binmax = hAngles->FindLastBinAbove(1);
-		Float_t maximum = hAngles->GetXaxis()->GetBinCenter(binmax);
+      Float_t rms = hAngles->GetRMS();
+      Float_t mean = hAngles->GetMean();
+      Int_t binmax = hAngles->FindLastBinAbove(1);
+      Float_t maximum = hAngles->GetXaxis()->GetBinCenter(binmax);
 
-		ofstream file("OutputFiles/angles_different_nRuns.csv", ofstream::out | ofstream::app);
-		file << factor << ";" << nRuns << ";" << rms << ";" << mean << ";"
-	   	  << maximum << endl;
+      ofstream file("OutputFiles/angles_different_nRuns.csv", ofstream::out | ofstream::app);
+      file << factor << ";" << nRuns << ";" << rms << ";" << mean << ";"
+           << maximum << endl;
 
-		file.close();
+      file.close();
 
-		delete tracks;
-		delete hAngles;
-		delete c1;
-		delete c2;
-	}
+      delete tracks;
+      delete hAngles;
+      delete c1;
+      delete c2;
+   }
 }
 
 void getTrackStatistics(Int_t Runs, Int_t dataType, Bool_t recreate, Float_t energy, Int_t epr) {
-	run_energy = energy;
-	kDataType = dataType;
-	
-	if (epr>0) {
-		kEventsPerRun = epr;
-	}
+   run_energy = energy;
+   kDataType = dataType;
+   
+   if (epr>0) {
+      kEventsPerRun = epr;
+   }
 
-	Tracks * tracks = loadOrCreateTracks(recreate, Runs, dataType, energy);
-	tracks->extrapolateToLayer0();
-	
-	Int_t nTracksToPlot = 25;
-	Int_t nTracksToPlot1D = 5;
+   Tracks * tracks = loadOrCreateTracks(recreate, Runs, dataType, energy);
+   tracks->extrapolateToLayer0();
+   
+   Int_t nTracksToPlot = 25;
+   Int_t nTracksToPlot1D = 5;
 
-	char * sDataType = getDataTypeChar(dataType);
+   char * sDataType = getDataTypeChar(dataType);
 
-	TCanvas *c1 = new TCanvas("c1", "c1", 800, 600);
-	TCanvas *c2 = new TCanvas("c2", "c2", 800, 600);
-	TCanvas *c3 = new TCanvas("c3", "c3", 800, 600);
-	TCanvas *c4 = new TCanvas("c4", "c4", 800, 600);
-	TCanvas *c5 = new TCanvas("c5", "c5", 800, 600);
-	TCanvas *c6 = new TCanvas("c6", "c6", 1000, 800);
-	TCanvas *c7 = new TCanvas("c7", "c7", 1000, 800);
-	TCanvas *c8 = new TCanvas("c8", "c8", 1000, 800);
+   TCanvas *c1 = new TCanvas("c1", "c1", 800, 600);
+   TCanvas *c2 = new TCanvas("c2", "c2", 800, 600);
+   TCanvas *c3 = new TCanvas("c3", "c3", 800, 600);
+   TCanvas *c4 = new TCanvas("c4", "c4", 800, 600);
+   TCanvas *c5 = new TCanvas("c5", "c5", 800, 600);
+   TCanvas *c6 = new TCanvas("c6", "c6", 1000, 800);
+   TCanvas *c7 = new TCanvas("c7", "c7", 1000, 800);
+   TCanvas *c8 = new TCanvas("c8", "c8", 1000, 800);
 
-	c5->Divide(2, 2, 0.01, 0.01, 0);
-	c6->Divide(3, 3, 0.01, 0.01, 0);
-	c7->Divide(nTracksToPlot1D, nTracksToPlot1D, 0.001, 0.001, 0);
-	c8->Divide(3,3,0.01,0.01,0);
+   c5->Divide(2, 2, 0.01, 0.01, 0);
+   c6->Divide(3, 3, 0.01, 0.01, 0);
+   c7->Divide(nTracksToPlot1D, nTracksToPlot1D, 0.001, 0.001, 0);
+   c8->Divide(3,3,0.01,0.01,0);
 
-	TH1F *hTrackLengths = new TH1F("hTrackLengths", Form("Track Lengths (%s)", sDataType), 100, 0, 120);
-	TH2F *hClusterSizeAlongTrack = new TH2F("hClusterSizeAlongTrack",
-				Form("Cluster size along track length (%s)", sDataType), 1.5*nLayers, 0, 1.5*nLayers*dz, 50, 0, 50);
-	TH1F *hStraightness = new TH1F("hStraightness", Form("Sinuosity plot (%s)", sDataType), 500, 1, 1.01);
-	TH1F *hSlope = new TH1F("hSlope", Form("Proton angle plot (%s)", sDataType), 500, 0, 20);
+   TH1F *hTrackLengths = new TH1F("hTrackLengths", Form("Track Lengths (%s)", sDataType), 100, 0, 120);
+   TH2F *hClusterSizeAlongTrack = new TH2F("hClusterSizeAlongTrack",
+            Form("Cluster size along track length (%s)", sDataType), 1.5*nLayers, 0, 1.5*nLayers*dz, 50, 0, 50);
+   TH1F *hStraightness = new TH1F("hStraightness", Form("Sinuosity plot (%s)", sDataType), 500, 1, 1.01);
+   TH1F *hSlope = new TH1F("hSlope", Form("Proton angle plot (%s)", sDataType), 500, 0, 20);
 
-	// Average cluster size
-	vector<TH1F*> *hAvgCS = new vector<TH1F*>;
-	hAvgCS->reserve(4);
-	for (Int_t chip=0; chip<4; chip++) {
-		hAvgCS->push_back(new TH1F(Form("hAvgCS_chip_%i",chip),
-				Form("Average Cluster Size vs Track Length for chip %i (%s)",chip, sDataType), 50, 0, 50));
-	}
+   // Average cluster size
+   vector<TH1F*> *hAvgCS = new vector<TH1F*>;
+   hAvgCS->reserve(4);
+   for (Int_t chip=0; chip<4; chip++) {
+      hAvgCS->push_back(new TH1F(Form("hAvgCS_chip_%i",chip),
+            Form("Average Cluster Size vs Track Length for chip %i (%s)",chip, sDataType), 50, 0, 50));
+   }
 
-	// Cluster size for individual layers
-	vector<TH1F*> *hCSLayer = new vector<TH1F*>;
-	hCSLayer->reserve(9);
-	for (Int_t layer=0; layer<9; layer++) {
-		hCSLayer->push_back(new TH1F(Form("hCSLayer_%i", layer),
-				Form("Cluster size for layer %i (%s)", layer, sDataType), 50, 0, 50));
-	}
+   // Cluster size for individual layers
+   vector<TH1F*> *hCSLayer = new vector<TH1F*>;
+   hCSLayer->reserve(9);
+   for (Int_t layer=0; layer<9; layer++) {
+      hCSLayer->push_back(new TH1F(Form("hCSLayer_%i", layer),
+            Form("Cluster size for layer %i (%s)", layer, sDataType), 50, 0, 50));
+   }
 
-	// Cluster size along track length for a single track
-	vector<TH1F*> *hFollowTrack = new vector<TH1F*>;
-	hFollowTrack->reserve(nTracksToPlot);
-	for (Int_t track=0; track<nTracksToPlot; track++) {
-		hFollowTrack->push_back(new TH1F(Form("hFollowTrack_%i", track),
-				Form("Cluster size along track length for a single track (%s)", sDataType), 50, 0, 50));
-		hFollowTrack->at(track)->SetXTitle("Track Length [mm]");
-		hFollowTrack->at(track)->SetYTitle("Cluster size [# of pixels]");
-	}
+   // Cluster size along track length for a single track
+   vector<TH1F*> *hFollowTrack = new vector<TH1F*>;
+   hFollowTrack->reserve(nTracksToPlot);
+   for (Int_t track=0; track<nTracksToPlot; track++) {
+      hFollowTrack->push_back(new TH1F(Form("hFollowTrack_%i", track),
+            Form("Cluster size along track length for a single track (%s)", sDataType), 50, 0, 50));
+      hFollowTrack->at(track)->SetXTitle("Track Length [mm]");
+      hFollowTrack->at(track)->SetYTitle("Cluster size [# of pixels]");
+   }
 
-	// Proton angle distribution in layer
-	vector<TH1F*> *hAngles = new vector<TH1F*>;
-	hAngles->reserve(9);
-	for (Int_t layer=0; layer<9; layer++) {
-		hAngles->push_back(new TH1F(Form("hAngles_%i", layer),
-				Form("Proton angle distribution in layer %i (%s)", layer, sDataType), 50, 0, 20));
-		hAngles->at(layer)->SetXTitle("Proton angle [deg]");
-		hAngles->at(layer)->SetYTitle("Cluster size [# of pixels]");
-	}
-	
-	hTrackLengths->SetXTitle("Track length [mm]");
-	hClusterSizeAlongTrack->SetXTitle("Track length [mm]");
-	hClusterSizeAlongTrack->SetYTitle("Cluster size [# of pixels]");
-	hStraightness->SetXTitle("Sinuosity parameter");
-	hSlope->SetXTitle("Total track angle (degree)");
+   // Proton angle distribution in layer
+   vector<TH1F*> *hAngles = new vector<TH1F*>;
+   hAngles->reserve(9);
+   for (Int_t layer=0; layer<9; layer++) {
+      hAngles->push_back(new TH1F(Form("hAngles_%i", layer),
+            Form("Proton angle distribution in layer %i (%s)", layer, sDataType), 50, 0, 20));
+      hAngles->at(layer)->SetXTitle("Proton angle [deg]");
+      hAngles->at(layer)->SetYTitle("Cluster size [# of pixels]");
+   }
+   
+   hTrackLengths->SetXTitle("Track length [mm]");
+   hClusterSizeAlongTrack->SetXTitle("Track length [mm]");
+   hClusterSizeAlongTrack->SetYTitle("Cluster size [# of pixels]");
+   hStraightness->SetXTitle("Sinuosity parameter");
+   hSlope->SetXTitle("Total track angle (degree)");
 
-	Float_t trackLengthSoFar = 0;
-	Int_t trackNum = 0;
-	Int_t chip = 0; // the quadrant
-	Bool_t cutTL = false;
-	Bool_t cutCHIP = false;
-	Int_t okTL = 0;
-	Int_t okCHIP = 0;
-	Float_t ang = 0;
+   Float_t trackLengthSoFar = 0;
+   Int_t trackNum = 0;
+   Int_t chip = 0; // the quadrant
+   Bool_t cutTL = false;
+   Bool_t cutCHIP = false;
+   Int_t okTL = 0;
+   Int_t okCHIP = 0;
+   Float_t ang = 0;
 
-	Track *thisTrack;
-	for (Int_t i=0; i<tracks->GetEntriesFast(); i++) {
-		thisTrack = tracks->At(i);
+   Track *thisTrack;
+   for (Int_t i=0; i<tracks->GetEntriesFast(); i++) {
+      thisTrack = tracks->At(i);
 
-		Float_t TL = thisTrack->getTrackLengthmm();
-		Int_t x0 = thisTrack->getX(0);
-		Int_t y0 = thisTrack->getY(0);
+      Float_t TL = thisTrack->getTrackLengthmm();
+      Int_t x0 = thisTrack->getX(0);
+      Int_t y0 = thisTrack->getY(0);
 
-		cutTL = (TL > kMinimumTracklength) ? true : false;
+      cutTL = (TL > kMinimumTracklength) ? true : false;
 
-		chip = (x0 >= nx) + 2 * (y0 < ny);
-		cutCHIP = (chip<2 || dataType == kMC) ? true : false;
+      chip = (x0 >= nx) + 2 * (y0 < ny);
+      cutCHIP = (chip<2 || dataType == kMC) ? true : false;
 
-		hTrackLengths->Fill(TL);
-		hStraightness->Fill(thisTrack->getSinuosity());
-		hSlope->Fill(thisTrack->getSlopeAngle());
+      hTrackLengths->Fill(TL);
+      hStraightness->Fill(thisTrack->getSinuosity());
+      hSlope->Fill(thisTrack->getSlopeAngle());
 
-		for (Int_t j=0; j<tracks->GetEntriesFast(i); j++) {
+      for (Int_t j=0; j<tracks->GetEntriesFast(i); j++) {
 
-			trackLengthSoFar += thisTrack->getTrackLengthmmAt(j);
-			if (cutTL && cutCHIP)
-				hClusterSizeAlongTrack->Fill(trackLengthSoFar, thisTrack->getSize(j));
+         trackLengthSoFar += thisTrack->getTrackLengthmmAt(j);
+         if (cutTL && cutCHIP)
+            hClusterSizeAlongTrack->Fill(trackLengthSoFar, thisTrack->getSize(j));
 
-			if (cutTL)
-				hAvgCS->at(chip)->Fill(trackLengthSoFar, thisTrack->getSize(j));
+         if (cutTL)
+            hAvgCS->at(chip)->Fill(trackLengthSoFar, thisTrack->getSize(j));
 
-			Int_t layer = thisTrack->getLayer(j);
-			if (layer<9) {
-				hCSLayer->at(layer)->Fill(thisTrack->getSize(j));
-//				hAngles->at(layer)->Fill(thisTrack->getSlopeAngleAtLayer(j));
-				ang = thisTrack->getSlopeAngleChangeBetweenLayers(j);
-				if (ang>=0) {
-					hAngles->at(layer)->Fill(ang);
-				}
-			}
+         Int_t layer = thisTrack->getLayer(j);
+         if (layer<9) {
+            hCSLayer->at(layer)->Fill(thisTrack->getSize(j));
+//          hAngles->at(layer)->Fill(thisTrack->getSlopeAngleAtLayer(j));
+            ang = thisTrack->getSlopeAngleChangeBetweenLayers(j);
+            if (ang>=0) {
+               hAngles->at(layer)->Fill(ang);
+            }
+         }
 
-			if (trackNum < nTracksToPlot && cutTL && cutCHIP) {
-				hFollowTrack->at(trackNum)->Fill(trackLengthSoFar, thisTrack->getSize(j));
-				hFollowTrack->at(trackNum)->SetTitle(Form("Track length histogram for run %i (%s)", i, sDataType));
-			}
-		}
-		trackLengthSoFar = 0;
+         if (trackNum < nTracksToPlot && cutTL && cutCHIP) {
+            hFollowTrack->at(trackNum)->Fill(trackLengthSoFar, thisTrack->getSize(j));
+            hFollowTrack->at(trackNum)->SetTitle(Form("Track length histogram for run %i (%s)", i, sDataType));
+         }
+      }
+      trackLengthSoFar = 0;
 
-		if (cutTL) okTL++;
-		if (cutCHIP) okCHIP++;
-		if (cutTL && cutCHIP) trackNum++;
-	}
+      if (cutTL) okTL++;
+      if (cutCHIP) okCHIP++;
+      if (cutTL && cutCHIP) trackNum++;
+   }
 
-	cout << "Total number of tracks: " << tracks->GetEntriesFast() << endl;
-	cout << "Passed track length: " << okTL << " (" << 100 * okTL / tracks->GetEntriesFast() << ")\n";
-	cout << "Passed chip #: " << okCHIP << " (" << 100 * okCHIP / tracks->GetEntriesFast() << ")\n";
+   cout << "Total number of tracks: " << tracks->GetEntriesFast() << endl;
+   cout << "Passed track length: " << okTL << " (" << 100 * okTL / tracks->GetEntriesFast() << ")\n";
+   cout << "Passed chip #: " << okCHIP << " (" << 100 * okCHIP / tracks->GetEntriesFast() << ")\n";
 
-	c1->cd();
-		hTrackLengths->Draw();
-	c2->cd();
-		gStyle->SetOptStat(0);
-		hClusterSizeAlongTrack->Draw("COLZ");
-	c3->cd();
-		hStraightness->Draw();
-	c4->cd();
-		hSlope->Draw();
+   c1->cd();
+      hTrackLengths->Draw();
+   c2->cd();
+      gStyle->SetOptStat(0);
+      hClusterSizeAlongTrack->Draw("COLZ");
+   c3->cd();
+      hStraightness->Draw();
+   c4->cd();
+      hSlope->Draw();
 
-	for (Int_t chip=0; chip<4; chip++) {
-		c5->cd(chip+1);
-		hAvgCS->at(chip)->SetFillColor(kRed-chip*2);
-		hAvgCS->at(chip)->Draw();
-	}
-	for (Int_t layer=0; layer<9; layer++) {
-		c6->cd(layer+1);
-		hCSLayer->at(layer)->SetFillColor(kRed-9+layer);
-		hCSLayer->at(layer)->Draw("same");
+   for (Int_t chip=0; chip<4; chip++) {
+      c5->cd(chip+1);
+      hAvgCS->at(chip)->SetFillColor(kRed-chip*2);
+      hAvgCS->at(chip)->Draw();
+   }
+   for (Int_t layer=0; layer<9; layer++) {
+      c6->cd(layer+1);
+      hCSLayer->at(layer)->SetFillColor(kRed-9+layer);
+      hCSLayer->at(layer)->Draw("same");
 
-//		cout << "Average cluster size and RMS for layer " << layer << " is \033[1m " << hCSLayer->at(layer)->GetMean() << " pixels \033[0m and \033[1m " << hCSLayer->at(layer)->GetRMS() << "pixels \033[0m\n";
-	}
+//    cout << "Average cluster size and RMS for layer " << layer << " is \033[1m " << hCSLayer->at(layer)->GetMean() << " pixels \033[0m and \033[1m " << hCSLayer->at(layer)->GetRMS() << "pixels \033[0m\n";
+   }
 
-	for (Int_t track=0; track<nTracksToPlot; track++) {
-		c7->cd(track+1);
-		gPad->DrawFrame(0, 0, 50, 35);
-		hFollowTrack->at(track)->SetFillColor(kBlue-2);
-		hFollowTrack->at(track)->Draw("same");
-	}
+   for (Int_t track=0; track<nTracksToPlot; track++) {
+      c7->cd(track+1);
+      gPad->DrawFrame(0, 0, 50, 35);
+      hFollowTrack->at(track)->SetFillColor(kBlue-2);
+      hFollowTrack->at(track)->Draw("same");
+   }
 
-	fillMCSRadiusList(1);
-	for (Int_t layer=0; layer<9; layer++) {
-		c8->cd(layer+1);
+   fillMCSRadiusList(1);
+   for (Int_t layer=0; layer<9; layer++) {
+      c8->cd(layer+1);
 
 
-		Float_t meanAngleAtLayer = findMCSAtLayerRad(layer, run_energy);
-		Float_t mcs = getMCSAngleForLayer(layer) / cos(meanAngleAtLayer);
+      Float_t meanAngleAtLayer = findMCSAtLayerRad(layer, run_energy);
+      Float_t mcs = getMCSAngleForLayer(layer) / cos(meanAngleAtLayer);
 
-//		cout << "The added MCS factor due to inclined crossing is " << 1/(cos(meanAngleAtLayer)) << ".\n";
+//    cout << "The added MCS factor due to inclined crossing is " << 1/(cos(meanAngleAtLayer)) << ".\n";
 
-		TF1 *mcsGauss = new TF1("mcsGauss", "gaus(0)", 0, 25);
-		if (hAngles->at(layer)->Integral()>0) {
-			mcsGauss->SetParameters(10, 0, mcs);
-			mcsGauss->SetParLimits(0, 1, 1000);
-			mcsGauss->SetParLimits(1, 0, 0);
-			mcsGauss->SetParLimits(2, mcs, mcs);
+      TF1 *mcsGauss = new TF1("mcsGauss", "gaus(0)", 0, 25);
+      if (hAngles->at(layer)->Integral()>0) {
+         mcsGauss->SetParameters(10, 0, mcs);
+         mcsGauss->SetParLimits(0, 1, 1000);
+         mcsGauss->SetParLimits(1, 0, 0);
+         mcsGauss->SetParLimits(2, mcs, mcs);
 
-			hAngles->at(layer)->Fit("mcsGauss", "M,B,Q");
-		}
+         hAngles->at(layer)->Fit("mcsGauss", "M,B,Q");
+      }
 
-		int maxHeight = hAngles->at(layer)->GetMaximum();
-		TLine *line = new TLine(mcs, 0, mcs, maxHeight * 1.05);
-		TLine *line2 = new TLine(mcs  * 2, 0, mcs * 2, maxHeight * 1.05);
-		TLine *line3 = new TLine(mcs  * 3, 0, mcs * 3, maxHeight * 1.05);
+      int maxHeight = hAngles->at(layer)->GetMaximum();
+      TLine *line = new TLine(mcs, 0, mcs, maxHeight * 1.05);
+      TLine *line2 = new TLine(mcs  * 2, 0, mcs * 2, maxHeight * 1.05);
+      TLine *line3 = new TLine(mcs  * 3, 0, mcs * 3, maxHeight * 1.05);
 
-		hAngles->at(layer)->SetFillColor(kRed-9+layer);
-		hAngles->at(layer)->Draw("same");
-		mcsGauss->Draw("same");
-		line->Draw("same");
-		line2->Draw("same");
-		line3->Draw("same");
-	}
+      hAngles->at(layer)->SetFillColor(kRed-9+layer);
+      hAngles->at(layer)->Draw("same");
+      mcsGauss->Draw("same");
+      line->Draw("same");
+      line2->Draw("same");
+      line3->Draw("same");
+   }
 
-	delete tracks;
+   delete tracks;
 }
 //
 void drawClusterShapes(Int_t Runs, Bool_t dataType, Bool_t recreate, Float_t energy) {
-	// get vector of TH2F's, each with a hits distribution and cluster size
-	// dataType = kMC (0) or kData (1)
+   // get vector of TH2F's, each with a hits distribution and cluster size
+   // dataType = kMC (0) or kData (1)
 
-	run_energy = energy;
-	kDataType = dataType;
+   run_energy = energy;
+   kDataType = dataType;
 
-  	Int_t nRows = 15;
-	Int_t nRepeats = 20;
-	Int_t nN = nRows * nRepeats;
-	vector<TH2C*> *hClusterMaps = new vector<TH2C*>;
-	hClusterMaps->reserve(nN);
-	for (Int_t i=0; i<nN; i++)
-		hClusterMaps->push_back(new TH2C(Form("hClusterMap_%i",i), "", 11, 0, 11, 11, 0, 11));
+   Int_t nRows = 15;
+   Int_t nRepeats = 20;
+   Int_t nN = nRows * nRepeats;
+   vector<TH2C*> *hClusterMaps = new vector<TH2C*>;
+   hClusterMaps->reserve(nN);
+   for (Int_t i=0; i<nN; i++)
+      hClusterMaps->push_back(new TH2C(Form("hClusterMap_%i",i), "", 11, 0, 11, 11, 0, 11));
 
-	Int_t nClusters = kEventsPerRun * 5;
-	Int_t nHits = kEventsPerRun * 50;
-	Int_t nTracks = kEventsPerRun * 2;
+   Int_t nClusters = kEventsPerRun * 5;
+   Int_t nHits = kEventsPerRun * 50;
+   Int_t nTracks = kEventsPerRun * 2;
 
-	DataInterface *di = new DataInterface();
-	CalorimeterFrame *cf = new CalorimeterFrame();
-	Hits *hits = new Hits(nHits);
-	vector<Hits*> * tempClusterHitMap;
-	vector<Hits*> * clusterHitMap = new vector<Hits*>;
-	clusterHitMap->reserve(Runs*500*kEventsPerRun);
+   DataInterface *di = new DataInterface();
+   CalorimeterFrame *cf = new CalorimeterFrame();
+   Hits *hits = new Hits(nHits);
+   vector<Hits*> * tempClusterHitMap;
+   vector<Hits*> * clusterHitMap = new vector<Hits*>;
+   clusterHitMap->reserve(Runs*500*kEventsPerRun);
 
-	for (Int_t i=0; i<Runs; i++) {
-		if (dataType == kMC) {
-			di->getMCFrame(i, cf);
-			cf->diffuseFrame(new TRandom3(0)); // THE MAGIC PART
-			hits = cf->findHits();
-			tempClusterHitMap = hits->findClustersHitMap();
-		}
+   for (Int_t i=0; i<Runs; i++) {
+      if (dataType == kMC) {
+         di->getMCFrame(i, cf);
+         cf->diffuseFrame(new TRandom3(0)); // THE MAGIC PART
+         hits = cf->findHits();
+         tempClusterHitMap = hits->findClustersHitMap();
+      }
 
-		else if (dataType == kData) {
-			di->getDataFrame(i, cf, energy);
-			hits = cf->findHits();
-			tempClusterHitMap = hits->findClustersHitMap();
-		}
-		else {
-		  std::cerr << "Please choose between dataType = kMC (0) or kData (1).\n" << endl;
-		  exit(1);
-		}
-	
-		for (UInt_t j=0; j<tempClusterHitMap->size(); j++)
-			clusterHitMap->push_back( tempClusterHitMap->at(j) );
-	}
-	// delete tempClusterHitMap;
-	delete hits;
-	delete cf;
-	delete di;
-	
-	// Here it is possible to access and modify the cluster shapes
-	// Each cluster is stored as a Hits (Hit collection) pointer in the vector collection clusterHitMap.
-	// To loop through each cluster use for (i=0; i<clusterHitMap->size(); i++) { Hits * myCluster = clusterHitMap->at(i); myCluster->....; }
-	// E.g. to count the number of hits in each cluster:
-	//
-	// for (int i=0; i<clusterHitMap->size(); i++) {
-	// 	Hits *myCluster = clusterHitMap->at(i);
-	//	if (!myCluster) continue;
-	//	int counter = 0;
-	//	for (int j=0; j<myCluster->GetEntriesFast(); j++) {
-	//		Hit *myHit = myCluster->At(j);
-	//		if (!myHit) continue;
-	//		counter++;
-	//	}
-	// }
-	//
-	
-	// fill hClusterMaps with cluster shapes from clusterHitMap
-	// sizes 3-5 in first row
-	// 6-8 in second row
-	// eg. up to 33-35 in 11th row
-	
-	Int_t size_from, size_to, nInRow, x, y;
+      else if (dataType == kData) {
+         di->getDataFrame(i, cf, energy);
+         hits = cf->findHits();
+         tempClusterHitMap = hits->findClustersHitMap();
+      }
+      else {
+        std::cerr << "Please choose between dataType = kMC (0) or kData (1).\n" << endl;
+        exit(1);
+      }
+   
+      for (UInt_t j=0; j<tempClusterHitMap->size(); j++)
+         clusterHitMap->push_back( tempClusterHitMap->at(j) );
+   }
+   // delete tempClusterHitMap;
+   delete hits;
+   delete cf;
+   delete di;
+   
+   // Here it is possible to access and modify the cluster shapes
+   // Each cluster is stored as a Hits (Hit collection) pointer in the vector collection clusterHitMap.
+   // To loop through each cluster use for (i=0; i<clusterHitMap->size(); i++) { Hits * myCluster = clusterHitMap->at(i); myCluster->....; }
+   // E.g. to count the number of hits in each cluster:
+   //
+   // for (int i=0; i<clusterHitMap->size(); i++) {
+   //    Hits *myCluster = clusterHitMap->at(i);
+   // if (!myCluster) continue;
+   // int counter = 0;
+   // for (int j=0; j<myCluster->GetEntriesFast(); j++) {
+   //    Hit *myHit = myCluster->At(j);
+   //    if (!myHit) continue;
+   //    counter++;
+   // }
+   // }
+   //
+   
+   // fill hClusterMaps with cluster shapes from clusterHitMap
+   // sizes 3-5 in first row
+   // 6-8 in second row
+   // eg. up to 33-35 in 11th row
+   
+   Int_t size_from, size_to, nInRow, x, y;
 
-	Int_t nTotal = 0;
-	for (Int_t i=0; i<nRows; i++) {
-		size_from = i*3;
-		size_to = size_from + 2;
-		nInRow = 0;
+   Int_t nTotal = 0;
+   for (Int_t i=0; i<nRows; i++) {
+      size_from = i*3;
+      size_to = size_from + 2;
+      nInRow = 0;
 
-		for (UInt_t j=0; j<clusterHitMap->size(); j++) {
-			Int_t csize = clusterHitMap->at(j)->GetEntriesFast();
-			if (csize >= size_from && csize <= size_to) {
-				// plot the cluster in the j'th row
-				for (Int_t k=0; k<clusterHitMap->at(j)->GetEntriesFast(); k++) {
-					x = clusterHitMap->at(j)->getX(k);
-					y = clusterHitMap->at(j)->getY(k);
-					hClusterMaps->at(nTotal)->Fill(x,y);
-				} // end loop through all points
-				hClusterMaps->at(nTotal)->SetTitle(Form("Cluster size [%i, %i]", size_from, size_to));
-				nInRow++; nTotal++;
-				if (nInRow >= nRepeats) break; // stop looping over clusters now
-			}
-		}
-		if (nInRow < nRepeats) {
- 			cout << "Only " << nInRow << " clusters with size [" << i*3 << "," << i*3+2 << "] with i = " << i << ". Setting nTotal from " << nTotal << " to " << (i+1)*nRepeats << ".\n";
-			nTotal = (i+1)*nRepeats;
-		}
-	}
+      for (UInt_t j=0; j<clusterHitMap->size(); j++) {
+         Int_t csize = clusterHitMap->at(j)->GetEntriesFast();
+         if (csize >= size_from && csize <= size_to) {
+            // plot the cluster in the j'th row
+            for (Int_t k=0; k<clusterHitMap->at(j)->GetEntriesFast(); k++) {
+               x = clusterHitMap->at(j)->getX(k);
+               y = clusterHitMap->at(j)->getY(k);
+               hClusterMaps->at(nTotal)->Fill(x,y);
+            } // end loop through all points
+            hClusterMaps->at(nTotal)->SetTitle(Form("Cluster size [%i, %i]", size_from, size_to));
+            nInRow++; nTotal++;
+            if (nInRow >= nRepeats) break; // stop looping over clusters now
+         }
+      }
+      if (nInRow < nRepeats) {
+         cout << "Only " << nInRow << " clusters with size [" << i*3 << "," << i*3+2 << "] with i = " << i << ". Setting nTotal from " << nTotal << " to " << (i+1)*nRepeats << ".\n";
+         nTotal = (i+1)*nRepeats;
+      }
+   }
 
-	// draw the canvas
-	
-	TCanvas *c = new TCanvas("c", "c", 1000, 800);
-	c->Divide(nRepeats, nRows, 0.0001, 0.0001);
-	for (Int_t i=0; i<nN; i++) {
-		c->cd(i+1);
-		hClusterMaps->at(i)->Draw("same, COL,ah,fb,bb");
-		gStyle->SetOptStat(0);
-	}
+   // draw the canvas
+   
+   TCanvas *c = new TCanvas("c", "c", 1000, 800);
+   c->Divide(nRepeats, nRows, 0.0001, 0.0001);
+   for (Int_t i=0; i<nN; i++) {
+      c->cd(i+1);
+      hClusterMaps->at(i)->Draw("same, COL,ah,fb,bb");
+      gStyle->SetOptStat(0);
+   }
 }
 
 void makeTracks(Int_t Runs, Int_t dataType, Bool_t recreate, Float_t energy) {
-	Tracks * tracks = loadOrCreateTracks(recreate, Runs, dataType, energy);
-	tracks->extrapolateToLayer0();
+   Tracks * tracks = loadOrCreateTracks(recreate, Runs, dataType, energy);
+   tracks->extrapolateToLayer0();
 }
 
 void drawTrackRanges(Int_t Runs, Int_t dataType, Bool_t recreate, Float_t energy) {
-	run_energy = energy;
-	kDataType = dataType;
-	
-	char * sDataType = getDataTypeChar(dataType);
-	char * sMaterial = getMaterialChar();
-	char * hTitle = Form("Fitted energy of a %.2f MeV beam in %s (%s)", energy, sMaterial, sDataType);
-	TCanvas *cFitResults = new TCanvas("cFitResults", hTitle, 1400, 1000);
-	
-	gStyle->SetPadBorderMode(0);
-	gStyle->SetFrameBorderMode(0);
-	gStyle->SetTitleH(0.06);
-	gStyle->SetTitleYOffset(1);
-	
-	TGraphErrors *outputGraph;
-	TH1F *hFitResults = new TH1F("fitResult", hTitle, 500, getWEPLFromEnergy(0), getWEPLFromEnergy(energy*1.2));
-	hFitResults->SetLineColor(kBlack);
-	hFitResults->SetFillColor(kGreen-5);
-	hFitResults->SetXTitle("Range in Water Equivalent Path Length [mm]");
-	hFitResults->SetYTitle("Number of protons");
-	hFitResults->Draw();
+   run_energy = energy;
+   kDataType = dataType;
+   
+   char * sDataType = getDataTypeChar(dataType);
+   char * sMaterial = getMaterialChar();
+   char * hTitle = Form("Fitted energy of a %.2f MeV beam in %s (%s)", energy, sMaterial, sDataType);
+   TCanvas *cFitResults = new TCanvas("cFitResults", hTitle, 1400, 1000);
+   
+   gStyle->SetPadBorderMode(0);
+   gStyle->SetFrameBorderMode(0);
+   gStyle->SetTitleH(0.06);
+   gStyle->SetTitleYOffset(1);
+   
+   TGraphErrors *outputGraph;
+   TH1F *hFitResults = new TH1F("fitResult", hTitle, 500, getWEPLFromEnergy(0), getWEPLFromEnergy(energy*1.2));
+   hFitResults->SetLineColor(kBlack);
+   hFitResults->SetFillColor(kGreen-5);
+   hFitResults->SetXTitle("Range in Water Equivalent Path Length [mm]");
+   hFitResults->SetYTitle("Number of protons");
+   hFitResults->Draw();
 
-	Tracks * tracks = loadOrCreateTracks(recreate, Runs, dataType, energy);
-	tracks->extrapolateToLayer0();
+   Tracks * tracks = loadOrCreateTracks(recreate, Runs, dataType, energy);
+   tracks->extrapolateToLayer0();
 
-	for (Int_t j=0; j<tracks->GetEntriesFast(); j++) {
-		Track *thisTrack = tracks->At(j);
-		if (!thisTrack) continue;
-		Float_t preEnergyLoss = thisTrack->getPreEnergyLoss();
+   for (Int_t j=0; j<tracks->GetEntriesFast(); j++) {
+      Track *thisTrack = tracks->At(j);
+      if (!thisTrack) continue;
+      Float_t preEnergyLoss = thisTrack->getPreEnergyLoss();
 
-		hFitResults->Fill(getWEPLFromEnergy(thisTrack->getEnergy() + preEnergyLoss));	
-	}
+      hFitResults->Fill(getWEPLFromEnergy(thisTrack->getEnergy() + preEnergyLoss)); 
+   }
 }
 
 void drawTungstenSpectrum(Int_t Runs, Int_t dataType, Bool_t recreate, Float_t energy) {
-	run_energy = energy;
-	kDataType = dataType;
-	
-	char * sDataType = getDataTypeChar(dataType);
-	char * sMaterial = getMaterialChar();
-	char * hTitle = Form("Fitted energy of a %.2f MeV beam in %s (%s)", energy, sMaterial, sDataType);
-	TCanvas *cFitResults = new TCanvas("cFitResults", hTitle, 1400, 1000);
-	
-	gStyle->SetPadBorderMode(0);
-	gStyle->SetFrameBorderMode(0);
-	gStyle->SetTitleH(0.06);
-	gStyle->SetTitleYOffset(1);
-	
-	
-	TGraphErrors *outputGraph;
-	TH1F *hFitResults = new TH1F("fitResult", hTitle, 500, getWEPLFromEnergy(0), getWEPLFromEnergy(energy*1.2));
-	hFitResults->SetLineColor(kBlack);
-	hFitResults->SetFillColor(kGreen-5);
-	hFitResults->SetXTitle("Range in Water Equivalent Path Length [mm]");
-	hFitResults->SetYTitle("Number of protons");
-	hFitResults->Draw();
+   run_energy = energy;
+   kDataType = dataType;
+   
+   char * sDataType = getDataTypeChar(dataType);
+   char * sMaterial = getMaterialChar();
+   char * hTitle = Form("Fitted energy of a %.2f MeV beam in %s (%s)", energy, sMaterial, sDataType);
+   TCanvas *cFitResults = new TCanvas("cFitResults", hTitle, 1400, 1000);
+   
+   gStyle->SetPadBorderMode(0);
+   gStyle->SetFrameBorderMode(0);
+   gStyle->SetTitleH(0.06);
+   gStyle->SetTitleYOffset(1);
+   
+   
+   TGraphErrors *outputGraph;
+   TH1F *hFitResults = new TH1F("fitResult", hTitle, 500, getWEPLFromEnergy(0), getWEPLFromEnergy(energy*1.2));
+   hFitResults->SetLineColor(kBlack);
+   hFitResults->SetFillColor(kGreen-5);
+   hFitResults->SetXTitle("Range in Water Equivalent Path Length [mm]");
+   hFitResults->SetYTitle("Number of protons");
+   hFitResults->Draw();
 
-	Tracks * tracks = loadOrCreateTracks(recreate, Runs, dataType, energy);
-	tracks->extrapolateToLayer0();
+   Tracks * tracks = loadOrCreateTracks(recreate, Runs, dataType, energy);
+   tracks->extrapolateToLayer0();
 
-	for (Int_t j=0; j<tracks->GetEntriesFast(); j++) {
-		Track *thisTrack = tracks->At(j);
-		if (!thisTrack) continue;
-		
-// 		if (thisTrack->doesTrackEndAbruptly()) {
-// 			hFitResults->Fill(getWEPLFromEnergy(thisTrack->getEnergy()));
-// 			continue;
-// 		}
-		
-		outputGraph = (TGraphErrors*) thisTrack->doRangeFit();
-		if (!outputGraph) continue;
-		
-		hFitResults->Fill(getWEPLFromEnergy(thisTrack->getFitParameterEnergy()));	
-	}
+   for (Int_t j=0; j<tracks->GetEntriesFast(); j++) {
+      Track *thisTrack = tracks->At(j);
+      if (!thisTrack) continue;
+      
+//       if (thisTrack->doesTrackEndAbruptly()) {
+//          hFitResults->Fill(getWEPLFromEnergy(thisTrack->getEnergy()));
+//          continue;
+//       }
+      
+      outputGraph = (TGraphErrors*) thisTrack->doRangeFit();
+      if (!outputGraph) continue;
+      
+      hFitResults->Fill(getWEPLFromEnergy(thisTrack->getFitParameterEnergy()));  
+   }
 }
 
 void drawScintillatorStatistics(Int_t Runs, Int_t dataType, Bool_t recreate, Float_t energy) {
-	kDataType = dataType;
-	run_energy = energy;
-	
-	char * sDataType = getDataTypeChar(dataType);
-	char * sMaterial = getMaterialChar();
-	char * hTitle = Form("Number of scintillators hit with a %.2f MeV beam in %s (%s)", energy, sMaterial, sDataType);
-	TCanvas *cFitResults = new TCanvas("cFitResults", hTitle, 1400, 1000);
-	
-	gStyle->SetPadBorderMode(0);
-	gStyle->SetFrameBorderMode(0);
-	gStyle->SetTitleH(0.06);
-	gStyle->SetTitleYOffset(1);
-	
-	TGraphErrors *outputGraph;
-	TH1I *hFitResults = new TH1I("fitResult", hTitle, 5, 0, 4);
-	hFitResults->SetLineColor(kBlack);
-	hFitResults->SetFillColor(kGreen-5);
-	hFitResults->SetXTitle("Number of scintillators hit");
-	hFitResults->SetYTitle("Number of protons");
-	hFitResults->Draw();
+   kDataType = dataType;
+   run_energy = energy;
+   
+   char * sDataType = getDataTypeChar(dataType);
+   char * sMaterial = getMaterialChar();
+   char * hTitle = Form("Number of scintillators hit with a %.2f MeV beam in %s (%s)", energy, sMaterial, sDataType);
+   TCanvas *cFitResults = new TCanvas("cFitResults", hTitle, 1400, 1000);
+   
+   gStyle->SetPadBorderMode(0);
+   gStyle->SetFrameBorderMode(0);
+   gStyle->SetTitleH(0.06);
+   gStyle->SetTitleYOffset(1);
+   
+   TGraphErrors *outputGraph;
+   TH1I *hFitResults = new TH1I("fitResult", hTitle, 5, 0, 4);
+   hFitResults->SetLineColor(kBlack);
+   hFitResults->SetFillColor(kGreen-5);
+   hFitResults->SetXTitle("Number of scintillators hit");
+   hFitResults->SetYTitle("Number of protons");
+   hFitResults->Draw();
 
-	Tracks * tracks = loadOrCreateTracks(recreate, Runs, dataType, energy);
-	tracks->extrapolateToLayer0();
+   Tracks * tracks = loadOrCreateTracks(recreate, Runs, dataType, energy);
+   tracks->extrapolateToLayer0();
 
-	Float_t nScintillators = 0;
-	
-	for (Int_t j=0; j<tracks->GetEntriesFast(); j++) {
-		Track *thisTrack = tracks->At(j);
-		if (!thisTrack) continue;
+   Float_t nScintillators = 0;
+   
+   for (Int_t j=0; j<tracks->GetEntriesFast(); j++) {
+      Track *thisTrack = tracks->At(j);
+      if (!thisTrack) continue;
 
-		nScintillators = thisTrack->getNScintillators();	
-		hFitResults->Fill(nScintillators);	
-	}
+      nScintillators = thisTrack->getNScintillators();   
+      hFitResults->Fill(nScintillators);  
+   }
 }
 
 void drawFitScale(Int_t Runs, Int_t dataType, Bool_t recreate, Float_t energy) {
-	TCanvas *cScale = new TCanvas("cScale", "Scale histogram", 1400, 1000);
-	run_energy = energy;
-	kDataType = dataType;
-	
-	TH1F *hScale = new TH1F("hScale", "Scale histogram", 800, 0, 50);
-	TGraphErrors *outputGraph;
+   TCanvas *cScale = new TCanvas("cScale", "Scale histogram", 1400, 1000);
+   run_energy = energy;
+   kDataType = dataType;
+   
+   TH1F *hScale = new TH1F("hScale", "Scale histogram", 800, 0, 50);
+   TGraphErrors *outputGraph;
 
-	Tracks * tracks = loadOrCreateTracks(recreate, Runs, dataType, energy);
-	tracks->extrapolateToLayer0();
-	
-	for (Int_t j=0; j<tracks->GetEntriesFast(); j++) {
-		Track *thisTrack = tracks->At(j);
-		if (!thisTrack) continue;
-		
-		outputGraph = (TGraphErrors*) thisTrack->doRangeFit();
-		if (!outputGraph) continue;
-			
-		Float_t fitScale = thisTrack->getFitParameterScale();
-		
-		hScale->Fill(fitScale);
-		delete outputGraph;
-	}
+   Tracks * tracks = loadOrCreateTracks(recreate, Runs, dataType, energy);
+   tracks->extrapolateToLayer0();
+   
+   for (Int_t j=0; j<tracks->GetEntriesFast(); j++) {
+      Track *thisTrack = tracks->At(j);
+      if (!thisTrack) continue;
+      
+      outputGraph = (TGraphErrors*) thisTrack->doRangeFit();
+      if (!outputGraph) continue;
+         
+      Float_t fitScale = thisTrack->getFitParameterScale();
+      
+      hScale->Fill(fitScale);
+      delete outputGraph;
+   }
 
-	cScale->cd();
-	hScale->SetYTitle("Number of protons");
-	hScale->SetXTitle("Parameter 1 of fit (SCALE)");
-	hScale->Draw();
-}	
+   cScale->cd();
+   hScale->SetYTitle("Number of protons");
+   hScale->SetXTitle("Parameter 1 of fit (SCALE)");
+   hScale->Draw();
+}  
 
 void drawTracksWithEnergyLoss(Int_t Runs, Int_t dataType, Bool_t recreate, Float_t energy) {
-	run_energy = energy;
-	kDataType = dataType;
-	
-	Float_t x_energy[sizeOfEventID*400] = {};
-	Float_t y_energy[sizeOfEventID*400] = {};
-	
-	Tracks * tracks = loadOrCreateTracks(recreate, Runs, dataType, energy, x_energy, y_energy);
-	tracks->extrapolateToLayer0();
-	
-	cout << "Using aluminum plate: " << kIsAluminumPlate << endl;
-	cout << "Using scintillators: " << kIsScintillator << endl;
+   run_energy = energy;
+   kDataType = dataType;
+   
+   Float_t x_energy[sizeOfEventID*400] = {};
+   Float_t y_energy[sizeOfEventID*400] = {};
+   
+   Tracks * tracks = loadOrCreateTracks(recreate, Runs, dataType, energy, x_energy, y_energy);
+   tracks->extrapolateToLayer0();
+   
+   cout << "Using aluminum plate: " << kIsAluminumPlate << endl;
+   cout << "Using scintillators: " << kIsScintillator << endl;
 
-	Int_t nPlotX = 2, nPlotY = 2;
-	Int_t fitIdx = 0, plotSize = nPlotX*nPlotY;
-	Int_t skipIdx = 0;
+   Int_t nPlotX = 2, nPlotY = 2;
+   Int_t fitIdx = 0, plotSize = nPlotX*nPlotY;
+   Int_t skipIdx = 0;
 
-	TGraphErrors *outputGraph;
-	TCanvas *cAccuracy = new TCanvas("cAccuracy", "Accuracy of fit", 1400, 1000);
-	TCanvas *cGraph = new TCanvas("cGraph", "Fitted data points", 1400, 1000);
-	TH2F *hAccuracy = new TH2F("hAccuracy", Form("Accuracy of fit in a %.0f MeV nominal beam", run_energy), 400, 0, 180, 400, 0, 180);
-	cGraph->Divide(nPlotX,nPlotY, 0.000001, 0.000001, 0);
-	gStyle->SetPadBorderMode(0); gStyle->SetFrameBorderMode(0);
-	gStyle->SetTitleH(0.06); gStyle->SetTitleYOffset(1);
-	hAccuracy->SetYTitle("Fit energy [MeV]"); hAccuracy->SetXTitle("Real energy [MeV]");
+   TGraphErrors *outputGraph;
+   TCanvas *cAccuracy = new TCanvas("cAccuracy", "Accuracy of fit", 1400, 1000);
+   TCanvas *cGraph = new TCanvas("cGraph", "Fitted data points", 1400, 1000);
+   TH2F *hAccuracy = new TH2F("hAccuracy", Form("Accuracy of fit in a %.0f MeV nominal beam", run_energy), 400, 0, 180, 400, 0, 180);
+   cGraph->Divide(nPlotX,nPlotY, 0.000001, 0.000001, 0);
+   gStyle->SetPadBorderMode(0); gStyle->SetFrameBorderMode(0);
+   gStyle->SetTitleH(0.06); gStyle->SetTitleYOffset(1);
+   hAccuracy->SetYTitle("Fit energy [MeV]"); hAccuracy->SetXTitle("Real energy [MeV]");
 
-	Float_t finalEnergy, realEnergy, preTL = 0;
-	Float_t fitEnergy, fitScale, fitError = 0;
-	Int_t eventID = -1;
-	
-	for (Int_t j=0; j<tracks->GetEntriesFast(); j++) {
-		Track *thisTrack = tracks->At(j);
-		if (!thisTrack) continue;
+   Float_t finalEnergy, realEnergy, preTL = 0;
+   Float_t fitEnergy, fitScale, fitError = 0;
+   Int_t eventID = -1;
+   
+   for (Int_t j=0; j<tracks->GetEntriesFast(); j++) {
+      Track *thisTrack = tracks->At(j);
+      if (!thisTrack) continue;
 
-		outputGraph = (TGraphErrors*) thisTrack->doRangeFit();
-		if (!outputGraph) {
-			continue;
-		}
+      outputGraph = (TGraphErrors*) thisTrack->doRangeFit();
+      if (!outputGraph) {
+         continue;
+      }
 
-		eventID = thisTrack->At(0)->getEventID()-1;
+      eventID = thisTrack->At(0)->getEventID()-1;
 
-		preTL = thisTrack->getPreTL() - 1.5;
-//		if 		(thisTrack->getYmm(0) > 0)		{ preTL = thisTrack->getPreTL() + firstUpperLayerZ; }
-//		else if 	(thisTrack->getYmm(0) < 0) 	{ preTL = thisTrack->getPreTL() + firstLowerLayerZ; }
-		for (Int_t i=eventID*sizeOfEventID; i<(eventID+1)*sizeOfEventID; i++) { x_energy[i] += preTL; }
+      preTL = thisTrack->getPreTL() - 1.5;
+//    if       (thisTrack->getYmm(0) > 0)    { preTL = thisTrack->getPreTL() + firstUpperLayerZ; }
+//    else if  (thisTrack->getYmm(0) < 0)    { preTL = thisTrack->getPreTL() + firstLowerLayerZ; }
+      for (Int_t i=eventID*sizeOfEventID; i<(eventID+1)*sizeOfEventID; i++) { x_energy[i] += preTL; }
 
-		convertXYToWEPL(x_energy, y_energy, eventID);
-		realEnergy = getEnergyFromXY(x_energy, y_energy, eventID);
+      convertXYToWEPL(x_energy, y_energy, eventID);
+      realEnergy = getEnergyFromXY(x_energy, y_energy, eventID);
 
-		fitEnergy = thisTrack->getFitParameterEnergy();
-		fitScale  = thisTrack->getFitParameterScale();
-		fitEnergy = quadratureAdd(thisTrack->getFitParameterError(), dz/sqrt(12));
-		
-		cout << "realEnergy = " << realEnergy << ", fitEnergy = " << fitEnergy << endl;
+      fitEnergy = thisTrack->getFitParameterEnergy();
+      fitScale  = thisTrack->getFitParameterScale();
+      fitEnergy = quadratureAdd(thisTrack->getFitParameterError(), dz/sqrt(12));
+      
+      cout << "realEnergy = " << realEnergy << ", fitEnergy = " << fitEnergy << endl;
 
-		hAccuracy->Fill(realEnergy, fitEnergy);
+      hAccuracy->Fill(realEnergy, fitEnergy);
 
-		if (fitIdx < plotSize) {
-			drawIndividualGraphs(cGraph, outputGraph, fitEnergy, fitScale, fitError, fitIdx++, eventID, x_energy, y_energy);
-		}
+      if (fitIdx < plotSize) {
+         drawIndividualGraphs(cGraph, outputGraph, fitEnergy, fitScale, fitError, fitIdx++, eventID, x_energy, y_energy);
+      }
 
-		else delete outputGraph;
-	}
-	cAccuracy->cd();
-	hAccuracy->Draw("COLZ");
+      else delete outputGraph;
+   }
+   cAccuracy->cd();
+   hAccuracy->Draw("COLZ");
 }
 
 Float_t drawBraggPeakGraphFit(Int_t Runs, Int_t dataType, Bool_t recreate, Float_t energy) {
-	run_energy = energy;
-	kDataType = dataType;
-	
- 	cout << "At energy " << run_energy << ", expecting TL = " << getTLFromEnergy(run_energy) << " and WEPL = " << getWEPLFromEnergy(run_energy) << endl;
+   run_energy = energy;
+   kDataType = dataType;
+   
+   cout << "At energy " << run_energy << ", expecting TL = " << getTLFromEnergy(run_energy) << " and WEPL = " << getWEPLFromEnergy(run_energy) << endl;
 
-	Tracks * tracks = loadOrCreateTracks(recreate, Runs, dataType, energy);
-	tracks->extrapolateToLayer0();
+   Tracks * tracks = loadOrCreateTracks(recreate, Runs, dataType, energy);
+   tracks->extrapolateToLayer0();
 
-	cout << *tracks->At(5) << endl;
+   cout << *tracks->At(5) << endl;
 
-	cout << "Using aluminum plate: " << kIsAluminumPlate << endl;
-	cout << "Using scintillators: " << kIsScintillator << endl;
-	
-	Bool_t kDrawHorizontalLines = false;
-	Bool_t kDrawVerticalLayerLines = false;
-	Bool_t kDrawIndividualGraphs = true;
-	Bool_t kUseTrackLength = false;
-	
-	Bool_t kOutsideScintillatorCross = false;
-	Bool_t kInsideScintillatorCross = false;
+   cout << "Using aluminum plate: " << kIsAluminumPlate << endl;
+   cout << "Using scintillators: " << kIsScintillator << endl;
+   
+   Bool_t kDrawHorizontalLines = false;
+   Bool_t kDrawVerticalLayerLines = false;
+   Bool_t kDrawIndividualGraphs = true;
+   Bool_t kUseTrackLength = false;
+   
+   Bool_t kOutsideScintillatorCross = false;
+   Bool_t kInsideScintillatorCross = false;
 
-	char * sDataType = getDataTypeChar(dataType); char * sMaterial = getMaterialChar();
-	char * hTitle = Form("Fitted energy of a %.2f MeV beam in %s (%s)", energy, sMaterial, sDataType);
+   char * sDataType = getDataTypeChar(dataType); char * sMaterial = getMaterialChar();
+   char * hTitle = Form("Fitted energy of a %.2f MeV beam in %s (%s)", energy, sMaterial, sDataType);
 
-	Int_t nPlotX = 3, nPlotY = 1;
-	Int_t fitIdx = 0, plotSize = nPlotX*nPlotY;
-	Int_t skipPlot = 5;
+   Int_t nPlotX = 3, nPlotY = 1;
+   Int_t fitIdx = 0, plotSize = nPlotX*nPlotY;
+   Int_t skipPlot = 5;
 
-	TGraphErrors *outputGraph;
-	TCanvas *cGraph = new TCanvas("cGraph", "Fitted data points", 1500, 500);
-	TCanvas *cFitResults = new TCanvas("cFitResults", hTitle, 1000, 1000);
-//	TCanvas *cMaxAngle = new TCanvas("cMaxAngle", "Maxium angle for proton track", 1400, 1000);
-	cGraph->Divide(nPlotX,nPlotY, 0.000001, 0.000001, 0);
-	gStyle->SetPadBorderMode(0); gStyle->SetFrameBorderMode(0);
-	gStyle->SetTitleH(0.06); gStyle->SetTitleYOffset(1);
-	gStyle->SetPadTickX(1); gStyle->SetPadTickY(1);
-	gStyle->SetPadTopMargin(0.05); gStyle->SetPadRightMargin(0.05);
-	gStyle->SetPadBottomMargin(0.05);
-	gStyle->SetPadLeftMargin(0.15);
-	
-	TH1F *hFitResults = new TH1F("fitResult", hTitle, 100, getUnitFromEnergy(0), getUnitFromEnergy(energy*1.2));
-	hFitResults->SetLineColor(kBlack); hFitResults->SetFillColor(kGreen-5);
+   TGraphErrors *outputGraph;
+   TCanvas *cGraph = new TCanvas("cGraph", "Fitted data points", 1500, 500);
+   TCanvas *cFitResults = new TCanvas("cFitResults", hTitle, 1000, 1000);
+// TCanvas *cMaxAngle = new TCanvas("cMaxAngle", "Maxium angle for proton track", 1400, 1000);
+   cGraph->Divide(nPlotX,nPlotY, 0.000001, 0.000001, 0);
+   gStyle->SetPadBorderMode(0); gStyle->SetFrameBorderMode(0);
+   gStyle->SetTitleH(0.06); gStyle->SetTitleYOffset(1);
+   gStyle->SetPadTickX(1); gStyle->SetPadTickY(1);
+   gStyle->SetPadTopMargin(0.05); gStyle->SetPadRightMargin(0.05);
+   gStyle->SetPadBottomMargin(0.05);
+   gStyle->SetPadLeftMargin(0.15);
+   
+   TH1F *hFitResults = new TH1F("fitResult", hTitle, 100, getUnitFromEnergy(0), getUnitFromEnergy(energy*1.2));
+   hFitResults->SetLineColor(kBlack); hFitResults->SetFillColor(kGreen-5);
 
-	TH1F *hMaxAngle = new TH1F("hMaxAngle", "Maximum angle for proton track", 200, 0, 25);
-	hMaxAngle->SetLineColor(kBlack); hMaxAngle->SetFillColor(kGreen-5);
+   TH1F *hMaxAngle = new TH1F("hMaxAngle", "Maximum angle for proton track", 200, 0, 25);
+   hMaxAngle->SetLineColor(kBlack); hMaxAngle->SetFillColor(kGreen-5);
 
-	Bool_t acceptAngle = false;
+   Bool_t acceptAngle = false;
 
-	Float_t finalEnergy = 0;
-	Int_t nCutDueToTrackEndingAbruptly = 0;
-	
-	for (Int_t j=0; j<tracks->GetEntriesFast(); j++) {
-		Track *thisTrack = tracks->At(j);
-		if (!thisTrack) continue;
-		
-		if (thisTrack->doesTrackEndAbruptly()) {
-			hFitResults->Fill(getUnitFromEnergy(thisTrack->getEnergy()));
-			nCutDueToTrackEndingAbruptly++;
-			continue;
-		}
-		
-		if (kOutsideScintillatorCross) {
-			if (thisTrack->isHitOnScintillators()) continue;
-		}
-		
-		if (kInsideScintillatorCross) {
-			if (!thisTrack->isHitOnScintillators()) continue;
-		}
-	
-		Float_t maxAngle = 0, thisAngle = 0;
-		for (Int_t i=0; i<thisTrack->GetEntriesFast(); i++) {
-			thisAngle = thisTrack->getSlopeAngleAtLayer(i);
-			maxAngle = max(thisAngle, maxAngle);
-		}
+   Float_t finalEnergy = 0;
+   Int_t nCutDueToTrackEndingAbruptly = 0;
+   
+   for (Int_t j=0; j<tracks->GetEntriesFast(); j++) {
+      Track *thisTrack = tracks->At(j);
+      if (!thisTrack) continue;
+      
+      if (thisTrack->doesTrackEndAbruptly()) {
+         hFitResults->Fill(getUnitFromEnergy(thisTrack->getEnergy()));
+         nCutDueToTrackEndingAbruptly++;
+         continue;
+      }
+      
+      if (kOutsideScintillatorCross) {
+         if (thisTrack->isHitOnScintillators()) continue;
+      }
+      
+      if (kInsideScintillatorCross) {
+         if (!thisTrack->isHitOnScintillators()) continue;
+      }
+   
+      Float_t maxAngle = 0, thisAngle = 0;
+      for (Int_t i=0; i<thisTrack->GetEntriesFast(); i++) {
+         thisAngle = thisTrack->getSlopeAngleAtLayer(i);
+         maxAngle = max(thisAngle, maxAngle);
+      }
 
-		acceptAngle = (maxAngle < 13);
+      acceptAngle = (maxAngle < 13);
 
-		hMaxAngle->Fill(maxAngle);
+      hMaxAngle->Fill(maxAngle);
 
-		if (kUseTrackLength)
-			outputGraph = (TGraphErrors*) thisTrack->doFit();
-		else
-			outputGraph = (TGraphErrors*) thisTrack->doRangeFit();
-		
-		if (!outputGraph) continue;
+      if (kUseTrackLength)
+         outputGraph = (TGraphErrors*) thisTrack->doFit();
+      else
+         outputGraph = (TGraphErrors*) thisTrack->doRangeFit();
+      
+      if (!outputGraph) continue;
 
-		Float_t fitEnergy = thisTrack->getFitParameterEnergy();
-		Float_t fitScale = thisTrack->getFitParameterScale();
-		
-		Float_t fitError = quadratureAdd(thisTrack->getFitParameterError(), dz/sqrt(12));
+      Float_t fitEnergy = thisTrack->getFitParameterEnergy();
+      Float_t fitScale = thisTrack->getFitParameterScale();
+      
+      Float_t fitError = quadratureAdd(thisTrack->getFitParameterError(), dz/sqrt(12));
 
-		if (acceptAngle || true) {
-			hFitResults->Fill(getUnitFromEnergy(fitEnergy));
+      if (acceptAngle || true) {
+         hFitResults->Fill(getUnitFromEnergy(fitEnergy));
 
-			if (fitIdx < plotSize && kDrawIndividualGraphs && j>=skipPlot) {
-				drawIndividualGraphs(cGraph, outputGraph, fitEnergy, fitScale, fitError, fitIdx++);
+         if (fitIdx < plotSize && kDrawIndividualGraphs && j>=skipPlot) {
+            drawIndividualGraphs(cGraph, outputGraph, fitEnergy, fitScale, fitError, fitIdx++);
 
-				if (fitIdx == 1) {
-					gPad->SetRightMargin(0.01);
-					gPad->SetLeftMargin(0.15);
-					outputGraph->GetXaxis()->SetTitle("");
-				}
+            if (fitIdx == 1) {
+               gPad->SetRightMargin(0.01);
+               gPad->SetLeftMargin(0.15);
+               outputGraph->GetXaxis()->SetTitle("");
+            }
 
-				else if (fitIdx == 2) {
-					gPad->SetLeftMargin(0.01);
-					gPad->SetRightMargin(0.01);
-					outputGraph->GetYaxis()->SetLabelOffset(2);
-					outputGraph->SetTitle("Bragg-Kleeman model fit to depth-dose data");
-					
-					gPad->Update();
-					TPaveText *title = (TPaveText*) gPad->GetPrimitive("title");
-					title->SetTextFont(22);
-					title->SetTextSize(0.06);
-					gPad->Modified();
-					
-				}
+            else if (fitIdx == 2) {
+               gPad->SetLeftMargin(0.01);
+               gPad->SetRightMargin(0.01);
+               outputGraph->GetYaxis()->SetLabelOffset(2);
+               outputGraph->SetTitle("Bragg-Kleeman model fit to depth-dose data");
+               
+               gPad->Update();
+               TPaveText *title = (TPaveText*) gPad->GetPrimitive("title");
+               title->SetTextFont(22);
+               title->SetTextSize(0.06);
+               gPad->Modified();
+               
+            }
 
-				else if (fitIdx == 3) {
-					gPad->SetRightMargin(0.1);
-					gPad->SetLeftMargin(0.01);
-					outputGraph->GetXaxis()->SetTitle("");
-					outputGraph->GetYaxis()->SetLabelOffset(2);
-				}
-			}
-		}
-		
-		else delete outputGraph;
+            else if (fitIdx == 3) {
+               gPad->SetRightMargin(0.1);
+               gPad->SetLeftMargin(0.01);
+               outputGraph->GetXaxis()->SetTitle("");
+               outputGraph->GetYaxis()->SetLabelOffset(2);
+            }
+         }
+      }
+      
+      else delete outputGraph;
 
-	}
-	
-	if (!kDrawIndividualGraphs) delete cGraph;
-	
-	cout << 100 * float(nCutDueToTrackEndingAbruptly) / tracks->GetEntriesFast() << " % of the tracks were cut due to seemingly inelastic nuclear interactions.\n";
+   }
+   
+   if (!kDrawIndividualGraphs) delete cGraph;
+   
+   cout << 100 * float(nCutDueToTrackEndingAbruptly) / tracks->GetEntriesFast() << " % of the tracks were cut due to seemingly inelastic nuclear interactions.\n";
 
-//	cMaxAngle->cd();
-//	hMaxAngle->Draw();
-	TF1 *fMaxAngle = new TF1("fMaxAngle", "gaus(0)", 0, 25);
-	fMaxAngle->SetParameters(100, 4, 6);
-	hMaxAngle->Fit(fMaxAngle, "M, W, Q, N", "", 0, 25);
+// cMaxAngle->cd();
+// hMaxAngle->Draw();
+   TF1 *fMaxAngle = new TF1("fMaxAngle", "gaus(0)", 0, 25);
+   fMaxAngle->SetParameters(100, 4, 6);
+   hMaxAngle->Fit(fMaxAngle, "M, W, Q, N", "", 0, 25);
 
-	Float_t angleTo = fMaxAngle->GetParameter(1) + 3 * fMaxAngle->GetParameter(2);
+   Float_t angleTo = fMaxAngle->GetParameter(1) + 3 * fMaxAngle->GetParameter(2);
 
-	cout << "3 sigma CL = " << angleTo << endl;
+   cout << "3 sigma CL = " << angleTo << endl;
 
-	Int_t nAccepted = hMaxAngle->Integral(0,hMaxAngle->GetXaxis()->FindBin(angleTo));
-	Float_t percentAccepted = 100 * nAccepted / hMaxAngle->Integral(0);
+   Int_t nAccepted = hMaxAngle->Integral(0,hMaxAngle->GetXaxis()->FindBin(angleTo));
+   Float_t percentAccepted = 100 * nAccepted / hMaxAngle->Integral(0);
 
-	cout << "Number of accepted events = " << nAccepted << " of total " << hMaxAngle->Integral()  << "(" <<  percentAccepted << " %) " << endl;
+   cout << "Number of accepted events = " << nAccepted << " of total " << hMaxAngle->Integral()  << "(" <<  percentAccepted << " %) " << endl;
 
-	cFitResults->cd();
+   cFitResults->cd();
 
-	if (kOutputUnit == kPhysical) hFitResults->SetXTitle("Physical range [mm]");
-	else if (kOutputUnit == kWEPL) hFitResults->SetXTitle("Range in Water Equivalent Path Length [mm]");
-	else if (kOutputUnit == kEnergy) { hFitResults->SetXTitle("Energy [MeV]"); }
-	hFitResults->SetYTitle("Number of protons");
+   if (kOutputUnit == kPhysical) hFitResults->SetXTitle("Physical range [mm]");
+   else if (kOutputUnit == kWEPL) hFitResults->SetXTitle("Range in Water Equivalent Path Length [mm]");
+   else if (kOutputUnit == kEnergy) { hFitResults->SetXTitle("Energy [MeV]"); }
+   hFitResults->SetYTitle("Number of protons");
 
-	hFitResults->GetXaxis()->SetTitleFont(22);
-	hFitResults->GetXaxis()->SetLabelFont(22);
-	hFitResults->GetYaxis()->SetTitleFont(22);
-	hFitResults->GetYaxis()->SetLabelFont(22);
-	hFitResults->GetYaxis()->SetTitleOffset(1.5);
-	
-	hFitResults->Draw();
+   hFitResults->GetXaxis()->SetTitleFont(22);
+   hFitResults->GetXaxis()->SetLabelFont(22);
+   hFitResults->GetYaxis()->SetTitleFont(22);
+   hFitResults->GetYaxis()->SetLabelFont(22);
+   hFitResults->GetYaxis()->SetTitleOffset(1.5);
+   
+   hFitResults->Draw();
 
-	gPad->Update();
-	TPaveText *title = (TPaveText*) gPad->GetPrimitive("title");
-	title->SetTextFont(22);
-	gPad->Modified();
-	
-	// Draw expected gaussian distribution of results from initial energy
-	
-	Float_t expectedStraggling = 0, expectedMean = 0, dlayer_down = 0, dlayer = 0;
-	Float_t separationFactor = 0.9, nullStraggling = 0;
-	
-	Float_t sigma_energy = getSigmaEnergy(energy);
-	
-	expectedMean = getUnitFromEnergy(energy);
-	expectedStraggling = getUnitStragglingFromEnergy(energy, sigma_energy);
-	nullStraggling = getUnitStragglingFromEnergy(energy, 0);
-	
-	cout << "OutputUnit is " << kOutputUnit << " and the expected mean value is " << expectedMean 
-		 << ". The straggling including / excluding energy variation is " << expectedStraggling << " / " << nullStraggling << ".\n";
-		 
-	Float_t means[10] = {};
-	Float_t sigmas[10] = {};
-	
-	Float_t nGaussianFitRange = doNGaussianFit(hFitResults, means, sigmas);
+   gPad->Update();
+   TPaveText *title = (TPaveText*) gPad->GetPrimitive("title");
+   title->SetTextFont(22);
+   gPad->Modified();
+   
+   // Draw expected gaussian distribution of results from initial energy
+   
+   Float_t expectedStraggling = 0, expectedMean = 0, dlayer_down = 0, dlayer = 0;
+   Float_t separationFactor = 0.9, nullStraggling = 0;
+   
+   Float_t sigma_energy = getSigmaEnergy(energy);
+   
+   expectedMean = getUnitFromEnergy(energy);
+   expectedStraggling = getUnitStragglingFromEnergy(energy, sigma_energy);
+   nullStraggling = getUnitStragglingFromEnergy(energy, 0);
+   
+   cout << "OutputUnit is " << kOutputUnit << " and the expected mean value is " << expectedMean 
+       << ". The straggling including / excluding energy variation is " << expectedStraggling << " / " << nullStraggling << ".\n";
+       
+   Float_t means[10] = {};
+   Float_t sigmas[10] = {};
+   
+   Float_t nGaussianFitRange = doNGaussianFit(hFitResults, means, sigmas);
 
-	Int_t nMean = 0;
-	for (Int_t i=0; i<10; i++) {
-		if (means[i]) nMean++;
-	}
-	
-	Float_t rangeSigma = 0;
-	for (Int_t i=0; i<nMean; i++) {
-		rangeSigma += pow(sigmas[i], 2);
-	}
-	rangeSigma = sqrt(rangeSigma);
+   Int_t nMean = 0;
+   for (Int_t i=0; i<10; i++) {
+      if (means[i]) nMean++;
+   }
+   
+   Float_t rangeSigma = 0;
+   for (Int_t i=0; i<nMean; i++) {
+      rangeSigma += pow(sigmas[i], 2);
+   }
+   rangeSigma = sqrt(rangeSigma);
 
-	Float_t energySigma = getEnergyFromUnit(nGaussianFitRange + rangeSigma / 2) - getEnergyFromUnit(nGaussianFitRange - rangeSigma / 2);
+   Float_t energySigma = getEnergyFromUnit(nGaussianFitRange + rangeSigma / 2) - getEnergyFromUnit(nGaussianFitRange - rangeSigma / 2);
 
-	cFitResults->Update();
-	
-	TLine *l = nullptr;
-	if (kDrawVerticalLayerLines) {
-		Float_t line_z = 0;
-		for (Int_t i=0; i<10; i++) {
-			line_z = getWEPLFromTL(getLayerPositionmm(i));
-			l = new TLine(line_z, 0, line_z, hFitResults->GetMaximum()*1.05);
-			l->SetLineColor(kBlack); l->SetLineWidth(2); l->Draw();
-		}
-	}
-	
-	TLegend *legend = new TLegend(0.16, 0.78, 0.38, 0.88);
+   cFitResults->Update();
+   
+   TLine *l = nullptr;
+   if (kDrawVerticalLayerLines) {
+      Float_t line_z = 0;
+      for (Int_t i=0; i<10; i++) {
+         line_z = getWEPLFromTL(getLayerPositionmm(i));
+         l = new TLine(line_z, 0, line_z, hFitResults->GetMaximum()*1.05);
+         l->SetLineColor(kBlack); l->SetLineWidth(2); l->Draw();
+      }
+   }
+   
+   TLegend *legend = new TLegend(0.16, 0.78, 0.38, 0.88);
 
-	gPad->Update();
-	TF1 *fit1 = (TF1*) gPad->GetPrimitive("Gaus_5");
-	
-	legend->SetTextSize(0.02);
-	legend->AddEntry(hFitResults, "Individual track fits", "F");
-	legend->AddEntry(fit1, "Weighted Gaussians", "L");
-	legend->SetTextFont(22);
-//  	legend->AddEntry(landau, Form("Fit with E = %.1f MeV and #sigma = %.1f mm ", landau_energy, landau->GetParameter(2)*1.7), "F");
-	if (kDrawVerticalLayerLines) legend->AddEntry(l, "Sensor layer positions", "L");
- 	legend->Draw();
+   gPad->Update();
+   TF1 *fit1 = (TF1*) gPad->GetPrimitive("Gaus_5");
+   
+   legend->SetTextSize(0.02);
+   legend->AddEntry(hFitResults, "Individual track fits", "F");
+   legend->AddEntry(fit1, "Weighted Gaussians", "L");
+   legend->SetTextFont(22);
+//    legend->AddEntry(landau, Form("Fit with E = %.1f MeV and #sigma = %.1f mm ", landau_energy, landau->GetParameter(2)*1.7), "F");
+   if (kDrawVerticalLayerLines) legend->AddEntry(l, "Sensor layer positions", "L");
+   legend->Draw();
 
-	TPaveStats *ps = (TPaveStats*) cFitResults->GetPrimitive("stats");
-	hFitResults->SetBit(TH1::kNoStats);
-	ps->SetY1NDC(0.53); ps->SetX1NDC(0.72);
-	ps->SetTextFont(22);
-	ps->AddText(Form("Nominal WEPL = %.2f", expectedMean));
-	ps->AddText(Form("Nominal straggling = %.2f", expectedStraggling));
-	
-	for (Int_t i=0; i<nMean; i++) {
-		ps->AddText(Form("Fit %d WEPL = %.2f", i+1, means[i]));
-		ps->AddText(Form("Fit %d #sigma_{WEPL} = %.2f", i+1, sigmas[i]));
-		ps->AddText(Form("Fit %d energy = %.2f", i+1, getEnergyFromUnit(means[i])));
-	}
+   TPaveStats *ps = (TPaveStats*) cFitResults->GetPrimitive("stats");
+   hFitResults->SetBit(TH1::kNoStats);
+   ps->SetY1NDC(0.53); ps->SetX1NDC(0.72);
+   ps->SetTextFont(22);
+   ps->AddText(Form("Nominal WEPL = %.2f", expectedMean));
+   ps->AddText(Form("Nominal straggling = %.2f", expectedStraggling));
+   
+   for (Int_t i=0; i<nMean; i++) {
+      ps->AddText(Form("Fit %d WEPL = %.2f", i+1, means[i]));
+      ps->AddText(Form("Fit %d #sigma_{WEPL} = %.2f", i+1, sigmas[i]));
+      ps->AddText(Form("Fit %d energy = %.2f", i+1, getEnergyFromUnit(means[i])));
+   }
 
-	ps->AddText(Form("Resulting WEPL = %.2f #pm %.2f", nGaussianFitRange, rangeSigma));
-	ps->AddText(Form("Resulting energy = %.2f #pm %.2f", getEnergyFromUnit(nGaussianFitRange), energySigma));
-		
-	if (kOutputUnit == kPhysical) {
-		cFitResults->SaveAs(Form("OutputFiles/figures/Fitted_energies_%.2f_MeV_%s_%s_physical.pdf", energy, getMaterialChar(), getDataTypeChar(dataType)));
-	}
-	else if (kOutputUnit == kEnergy) {
-		cFitResults->SaveAs(Form("OutputFiles/figures/Fitted_energies_%.2f_MeV_%s_%s_energy.pdf", energy, getMaterialChar(), getDataTypeChar(dataType)));
-	}
-	
-	else if (kOutputUnit == kWEPL) {
-		cFitResults->SaveAs(Form("OutputFiles/figures/Fitted_energies_%.2f_MeV_%s_%s_WEPL.png", energy, getMaterialChar(), getDataTypeChar(dataType)));
-	}
-	
-  	delete tracks;
-	
-	return nGaussianFitRange;
+   ps->AddText(Form("Resulting WEPL = %.2f #pm %.2f", nGaussianFitRange, rangeSigma));
+   ps->AddText(Form("Resulting energy = %.2f #pm %.2f", getEnergyFromUnit(nGaussianFitRange), energySigma));
+      
+   if (kOutputUnit == kPhysical) {
+      cFitResults->SaveAs(Form("OutputFiles/figures/Fitted_energies_%.2f_MeV_%s_%s_physical.pdf", energy, getMaterialChar(), getDataTypeChar(dataType)));
+   }
+   else if (kOutputUnit == kEnergy) {
+      cFitResults->SaveAs(Form("OutputFiles/figures/Fitted_energies_%.2f_MeV_%s_%s_energy.pdf", energy, getMaterialChar(), getDataTypeChar(dataType)));
+   }
+   
+   else if (kOutputUnit == kWEPL) {
+      cFitResults->SaveAs(Form("OutputFiles/figures/Fitted_energies_%.2f_MeV_%s_%s_WEPL.png", energy, getMaterialChar(), getDataTypeChar(dataType)));
+   }
+   
+   delete tracks;
+   
+   return nGaussianFitRange;
 }
 
 void writeClusterFile(Int_t Runs, Int_t dataType, Float_t energy) {
-	run_energy = energy;
-	kDataType = dataType;
-	
-	Int_t nClusters = kEventsPerRun * 5 * nLayers;
-	Int_t nHits = kEventsPerRun * 50;
-	Bool_t kRemoveSmallClusters = true;
-	
-	DataInterface *di = new DataInterface();
-	CalorimeterFrame *cf = new CalorimeterFrame();
-	Hits * hits = new Hits(nHits);
-	Clusters * clusters = new Clusters(nClusters);
-	
-	for (Int_t i=0; i<Runs; i++) {
-		if (dataType == kMC) {
-			di->getMCFrame(i, cf);	
-			cf->diffuseFrame(new TRandom3(0));
-			hits = cf->findHits();
-			clusters = hits->findClustersFromHits();
-		}
-		
-		else if (dataType == kData) {
-			di->getDataFrame(i, cf, energy);
-			hits = cf->findHits();
-			clusters = hits->findClustersFromHits();
-			
-			if (kRemoveSmallClusters) {
-				Int_t maxRemoveSize = 2;
-				clusters->removeSmallClusters(maxRemoveSize);
-			}
-		}
-	}
+   run_energy = energy;
+   kDataType = dataType;
+   
+   Int_t nClusters = kEventsPerRun * 5 * nLayers;
+   Int_t nHits = kEventsPerRun * 50;
+   Bool_t kRemoveSmallClusters = true;
+   
+   DataInterface *di = new DataInterface();
+   CalorimeterFrame *cf = new CalorimeterFrame();
+   Hits * hits = new Hits(nHits);
+   Clusters * clusters = new Clusters(nClusters);
+   
+   for (Int_t i=0; i<Runs; i++) {
+      if (dataType == kMC) {
+         di->getMCFrame(i, cf);  
+         cf->diffuseFrame(new TRandom3(0));
+         hits = cf->findHits();
+         clusters = hits->findClustersFromHits();
+      }
+      
+      else if (dataType == kData) {
+         di->getDataFrame(i, cf, energy);
+         hits = cf->findHits();
+         clusters = hits->findClustersFromHits();
+         
+         if (kRemoveSmallClusters) {
+            Int_t maxRemoveSize = 2;
+            clusters->removeSmallClusters(maxRemoveSize);
+         }
+      }
+   }
 
-	delete di;
+   delete di;
 
-	ofstream file("OutputFiles/output_all_layers.csv");
-	file << "layer;x;y;clustersize" << endl;
+   ofstream file("OutputFiles/output_all_layers.csv");
+   file << "layer;x;y;clustersize" << endl;
 
-	for (Int_t i=0; i<clusters->GetEntriesFast(); i++) {
-		file << clusters->getLayer(i) << ";" 
-		     << clusters->getX(i) << ";"
-			 << clusters->getY(i) << ";" 
-			 << clusters->getSize(i) << endl;
-	}
-	
-	file.close();
+   for (Int_t i=0; i<clusters->GetEntriesFast(); i++) {
+      file << clusters->getLayer(i) << ";" 
+           << clusters->getX(i) << ";"
+          << clusters->getY(i) << ";" 
+          << clusters->getSize(i) << endl;
+   }
+   
+   file.close();
 }
 
 void draw2DProjection(Int_t Runs, Int_t dataType, Bool_t recreate, Float_t energy) {
 
-	Tracks * tracks = loadOrCreateTracks(recreate, Runs, dataType, energy);
-	tracks->extrapolateToLayer0();
-	
-	Int_t hSizeX = nx/8;
-	Int_t hSizeY = ny/8;
+   Tracks * tracks = loadOrCreateTracks(recreate, Runs, dataType, energy);
+   tracks->extrapolateToLayer0();
+   
+   Int_t hSizeX = nx/8;
+   Int_t hSizeY = ny/8;
 
-	Float_t angleCut = 5.;
-	Float_t x0, y0, theta0;
-	Int_t nPoints = 0;
+   Float_t angleCut = 5.;
+   Float_t x0, y0, theta0;
+   Int_t nPoints = 0;
 
-	Float_t fit_energy;
+   Float_t fit_energy;
 
-	Int_t ntracks = tracks->GetEntriesFast();
-	Int_t nScintillatorHits = 0;
+   Int_t ntracks = tracks->GetEntriesFast();
+   Int_t nScintillatorHits = 0;
 
-	char * sDataType = getDataTypeChar(dataType); char * sMaterial = getMaterialChar();
-	char *title = (char*) Form("2D Projection of data from %.2f MeV proton beam in %s (%s)", energy, sMaterial, sDataType);
+   char * sDataType = getDataTypeChar(dataType); char * sMaterial = getMaterialChar();
+   char *title = (char*) Form("2D Projection of data from %.2f MeV proton beam in %s (%s)", energy, sMaterial, sDataType);
 
-	TCanvas *c1 = new TCanvas(title);
-	
-	TH2F *Frame2D = new TH2F("Frame2D", title, hSizeX, 0, nx*2, hSizeY, 0, ny*2);
-	TH2F *normalizeFrame = new TH2F("normalizeFrame", "title", hSizeX, 0, nx*2, hSizeY, 0, ny*2);
+   TCanvas *c1 = new TCanvas(title);
+   
+   TH2F *Frame2D = new TH2F("Frame2D", title, hSizeX, 0, nx*2, hSizeY, 0, ny*2);
+   TH2F *normalizeFrame = new TH2F("normalizeFrame", "title", hSizeX, 0, nx*2, hSizeY, 0, ny*2);
 
-	for (Int_t i=0; i<ntracks; i++) {
-		Track *thisTrack = tracks->At(i);
+   for (Int_t i=0; i<ntracks; i++) {
+      Track *thisTrack = tracks->At(i);
 
-		if (!thisTrack) continue;
-		
-		x0 = thisTrack->getX(0);
-		y0 = thisTrack->getY(0);
-		theta0 = thisTrack->getSlopeAngle();
+      if (!thisTrack) continue;
+      
+      x0 = thisTrack->getX(0);
+      y0 = thisTrack->getY(0);
+      theta0 = thisTrack->getSlopeAngle();
 
-		fit_energy = thisTrack->getEnergy();
-		if (fit_energy > 180) continue;
+      fit_energy = thisTrack->getEnergy();
+      if (fit_energy > 180) continue;
 
-		if (thisTrack->isHitOnScintillators())	{
-			nScintillatorHits ++;
+      if (thisTrack->isHitOnScintillators()) {
+         nScintillatorHits ++;
 
-	//		if (theta0 > angleCut) continue;
-		Frame2D->Fill(x0, y0, fit_energy);
-		normalizeFrame->Fill(x0, y0);
-		}
-		nPoints++;
+   //    if (theta0 > angleCut) continue;
+      Frame2D->Fill(x0, y0, fit_energy);
+      normalizeFrame->Fill(x0, y0);
+      }
+      nPoints++;
 
-	}
+   }
 
-	Frame2D->Divide(normalizeFrame);
+   Frame2D->Divide(normalizeFrame);
 
-	delete tracks;
+   delete tracks;
 
-	cout << "nPoints = " << nPoints << endl;
-	cout << "Estimated scintillator hits = " << nScintillatorHits << endl;
-	
-	Frame2D->Draw("COLZ");
-	gStyle->SetOptStat(0);
+   cout << "nPoints = " << nPoints << endl;
+   cout << "Estimated scintillator hits = " << nScintillatorHits << endl;
+   
+   Frame2D->Draw("COLZ");
+   gStyle->SetOptStat(0);
 
-	// draw lines from 474 to 806
-	TLine *l1 = new TLine(474, 0, 474, 1280);
-	TLine *l2 = new TLine(806, 0, 806, 1280);
-	TLine *l3 = new TLine(0, 474, 1280, 474);
-	TLine *l4 = new TLine(0, 806, 1280, 806);
-	l1->Draw(); l2->Draw(); l3->Draw(); l4->Draw();
+   // draw lines from 474 to 806
+   TLine *l1 = new TLine(474, 0, 474, 1280);
+   TLine *l2 = new TLine(806, 0, 806, 1280);
+   TLine *l3 = new TLine(0, 474, 1280, 474);
+   TLine *l4 = new TLine(0, 806, 1280, 806);
+   l1->Draw(); l2->Draw(); l3->Draw(); l4->Draw();
 
 }
 
 Hits * getEventIDs(Int_t Runs, Float_t energy) {
-	run_energy = energy;
-	DataInterface *di = new DataInterface();
+   run_energy = energy;
+   DataInterface *di = new DataInterface();
 
-	Hits * hits = new Hits(kEventsPerRun * sizeOfEventID * Runs);
+   Hits * hits = new Hits(kEventsPerRun * sizeOfEventID * Runs);
 
-	for (Int_t i=0; i<Runs; i++) {
-		di->getEventIDs(i, hits);
-	}
+   for (Int_t i=0; i<Runs; i++) {
+      di->getEventIDs(i, hits);
+   }
 
-	return hits;
+   return hits;
 }
 
 void drawClusterSizeDistribution(Int_t Runs, Int_t dataType, Bool_t recreate, Float_t energy) {
-	run_energy = energy;
-	DataInterface *di = new DataInterface();
+   run_energy = energy;
+   DataInterface *di = new DataInterface();
 
-	Int_t nClusters = kEventsPerRun * 5 * nLayers;
-	Int_t nHits = kEventsPerRun * 50;
+   Int_t nClusters = kEventsPerRun * 5 * nLayers;
+   Int_t nHits = kEventsPerRun * 50;
 
-	CalorimeterFrame *cf = new CalorimeterFrame();
-	Clusters * clusters = new Clusters(nClusters);
-	Hits * hits = new Hits(nHits);
-	TH2F * hClusterSizes = new TH2F("hClusterSizes", "Cluster sizes vs layer", nLayers, 0, nLayers-1, 50, 0, 50);
+   CalorimeterFrame *cf = new CalorimeterFrame();
+   Clusters * clusters = new Clusters(nClusters);
+   Hits * hits = new Hits(nHits);
+   TH2F * hClusterSizes = new TH2F("hClusterSizes", "Cluster sizes vs layer", nLayers, 0, nLayers-1, 50, 0, 50);
 
-	for (Int_t i=0; i<Runs; i++) {
-		if (dataType == kMC) {
-			di->getMCFrame(i, cf);
-			cf->diffuseFrame(new TRandom3(0));
-			hits = cf->findHits();
-			clusters = hits->findClustersFromHits();
-		}
+   for (Int_t i=0; i<Runs; i++) {
+      if (dataType == kMC) {
+         di->getMCFrame(i, cf);
+         cf->diffuseFrame(new TRandom3(0));
+         hits = cf->findHits();
+         clusters = hits->findClustersFromHits();
+      }
 
-		else if (dataType == kData) {
-			di->getDataFrame(i, cf, energy);
-			hits = cf->findHits();
-			clusters = hits->findClustersFromHits();
-			clusters->removeSmallClusters(2);
-			clusters->removeAllClustersAfterLayer(8);
-		}
-		
-		clusters->Compress();
+      else if (dataType == kData) {
+         di->getDataFrame(i, cf, energy);
+         hits = cf->findHits();
+         clusters = hits->findClustersFromHits();
+         clusters->removeSmallClusters(2);
+         clusters->removeAllClustersAfterLayer(8);
+      }
+      
+      clusters->Compress();
 
-		for (Int_t i=0; i<clusters->GetEntriesFast(); i++) {
-			hClusterSizes->Fill(clusters->getLayer(i), clusters->getSize(i));
-		}
-	}
+      for (Int_t i=0; i<clusters->GetEntriesFast(); i++) {
+         hClusterSizes->Fill(clusters->getLayer(i), clusters->getSize(i));
+      }
+   }
 
-	hClusterSizes->Draw("COLZ");
+   hClusterSizes->Draw("COLZ");
 }
-		
+      
 void drawTracks3D(Int_t Runs, Int_t dataType, Bool_t recreate, Float_t energy) {
-	Tracks * tracks = loadOrCreateTracks(recreate, Runs, dataType, energy);
+   Tracks * tracks = loadOrCreateTracks(recreate, Runs, dataType, energy);
 
-	Int_t switchLayer = 10;
+   Int_t switchLayer = 10;
 
-	TCanvas *c1 = new TCanvas("c1", "c1", 1600, 1200);
-	c1->SetTitle(Form("Tracks from %.2f MeV protons on %s", energy, getMaterialChar()));
-	TView *view = TView::CreateView(1);
-	view->SetRange(0, 0, 0, 2*nx, 10, 2*ny);
-	Int_t iret;
-	Float_t theta = 285;
-	Float_t phi = 80;
+   TCanvas *c1 = new TCanvas("c1", "c1", 1600, 1200);
+   c1->SetTitle(Form("Tracks from %.2f MeV protons on %s", energy, getMaterialChar()));
+   TView *view = TView::CreateView(1);
+   view->SetRange(0, 0, 0, 2*nx, 10, 2*ny);
+   Int_t iret;
+   Float_t theta = 285;
+   Float_t phi = 80;
 
-	view->SetView(theta, phi, 0, iret);
+   view->SetView(theta, phi, 0, iret);
 
-	TClonesArray *restPoints = tracks->getClustersWithoutTrack();
-	Clusters * conflictClusters = nullptr;
+   TClonesArray *restPoints = tracks->getClustersWithoutTrack();
+   Clusters * conflictClusters = nullptr;
 
-	Int_t nClusters = 0;
-	for (Int_t i=0; i<tracks->GetEntriesFast(); i++) {
-	   if (!tracks->At(i)) continue;
-		nClusters += tracks->GetEntriesFast(i);
-	}
+   Int_t nClusters = 0;
+   for (Int_t i=0; i<tracks->GetEntriesFast(); i++) {
+      if (!tracks->At(i)) continue;
+      nClusters += tracks->GetEntriesFast(i);
+   }
 
-	TPolyMarker3D *pMarker = new TPolyMarker3D(restPoints->GetEntriesFast(), 7);
-	TPolyMarker3D *EIDMarker = new TPolyMarker3D(nClusters, 7);
-	TPolyMarker3D *conflictMarker = new TPolyMarker3D(nClusters, 7);
+   TPolyMarker3D *pMarker = new TPolyMarker3D(restPoints->GetEntriesFast(), 7);
+   TPolyMarker3D *EIDMarker = new TPolyMarker3D(nClusters, 7);
+   TPolyMarker3D *conflictMarker = new TPolyMarker3D(nClusters, 7);
    pMarker->SetMarkerColor(kBlue); // Missing cluster
-	EIDMarker->SetMarkerColor(kRed);
-	conflictMarker->SetMarkerColor(kRed); // Conflicting cluster
-	
+   EIDMarker->SetMarkerColor(kRed);
+   conflictMarker->SetMarkerColor(kRed); // Conflicting cluster
+   
    for (Int_t i=0; i<restPoints->GetEntriesFast(); i++) {
       if (!restPoints->At(i))
-      	continue;
+         continue;
 
       Cluster *thisCluster = (Cluster*) restPoints->At(i);
       Float_t x = thisCluster->getX();
@@ -1148,502 +1148,502 @@ void drawTracks3D(Int_t Runs, Int_t dataType, Bool_t recreate, Float_t energy) {
 
    pMarker->Draw();
    
-	Int_t ntracks = tracks->GetEntriesFast();
-	Int_t firstEID;
-	Int_t EIDidx = 0;
-	Int_t conflictIdx = 0;
+   Int_t ntracks = tracks->GetEntriesFast();
+   Int_t firstEID;
+   Int_t EIDidx = 0;
+   Int_t conflictIdx = 0;
 
-	Int_t medianEventID = -1;
+   Int_t medianEventID = -1;
 
-	Int_t nTrueTracks = 0;
-	Int_t nOKTracks = 0;
-	Int_t nOKMinusTracks = 0;
-	Int_t nOKLastLayers = 0;
-	Int_t nOneWrong = 0;
+   Int_t nTrueTracks = 0;
+   Int_t nOKTracks = 0;
+   Int_t nOKMinusTracks = 0;
+   Int_t nOKLastLayers = 0;
+   Int_t nOneWrong = 0;
 
-	Track * thisTrack = nullptr;
+   Track * thisTrack = nullptr;
 
-	for (Int_t i=0; i<tracks->GetEntriesFast(); i++) {
-		thisTrack = tracks->At(i);
-		if (!thisTrack) continue;
+   for (Int_t i=0; i<tracks->GetEntriesFast(); i++) {
+      thisTrack = tracks->At(i);
+      if (!thisTrack) continue;
 
-		if (thisTrack->isOneEventID()) nTrueTracks++;
+      if (thisTrack->isOneEventID()) nTrueTracks++;
 
-		if (!thisTrack->isOneEventID()) {
-			medianEventID = thisTrack->getModeEventID();
-		}
+      if (!thisTrack->isOneEventID()) {
+         medianEventID = thisTrack->getModeEventID();
+      }
 
-		if (thisTrack->isFirstAndLastEventIDEqual()) nOKTracks++;
+      if (thisTrack->isFirstAndLastEventIDEqual()) nOKTracks++;
 
-		else {
-			if (!thisTrack->Last()) continue;
-			if (!thisTrack->At(thisTrack->GetEntriesFast() - 2)) continue;
+      else {
+         if (!thisTrack->Last()) continue;
+         if (!thisTrack->At(thisTrack->GetEntriesFast() - 2)) continue;
 
-			Int_t lastEID = thisTrack->Last()->getEventID();	
-			if (lastEID < 0) continue;
+         Int_t lastEID = thisTrack->Last()->getEventID();   
+         if (lastEID < 0) continue;
 
-			Int_t trackID = tracks->getTrackIdxFromFirstLayerEID(lastEID);
+         Int_t trackID = tracks->getTrackIdxFromFirstLayerEID(lastEID);
 
-			if (trackID < 0) continue;
-			if (!tracks->At(trackID)->At(0)) continue;
-	
-			Float_t delta = diffmmXY(tracks->At(trackID)->At(0), thisTrack->At(0));
-			Float_t phi0 = thisTrack->getSlopeAngleBetweenLayers(1);
-			Float_t phi1 = tracks->At(trackID)->getSlopeAngleBetweenLayers(1);
+         if (trackID < 0) continue;
+         if (!tracks->At(trackID)->At(0)) continue;
+   
+         Float_t delta = diffmmXY(tracks->At(trackID)->At(0), thisTrack->At(0));
+         Float_t phi0 = thisTrack->getSlopeAngleBetweenLayers(1);
+         Float_t phi1 = tracks->At(trackID)->getSlopeAngleBetweenLayers(1);
 
-			Float_t deltaphi = fabs(phi0 - phi1);
+         Float_t deltaphi = fabs(phi0 - phi1);
 
-			if (delta < 0.5 && deltaphi < 1) {
-				nOKMinusTracks++;
-				nOKLastLayers++;
-			}
-			else if (thisTrack->getWEPL() < 0.6 * getWEPLFromEnergy(run_energy)) {
-				// Bad track ends early. OK...
-				nOKLastLayers++;
-			}
-		}
-	}
+         if (delta < 0.5 && deltaphi < 1) {
+            nOKMinusTracks++;
+            nOKLastLayers++;
+         }
+         else if (thisTrack->getWEPL() < 0.6 * getWEPLFromEnergy(run_energy)) {
+            // Bad track ends early. OK...
+            nOKLastLayers++;
+         }
+      }
+   }
 
-	nOKMinusTracks += nOKTracks;
-	nOKLastLayers += nOKTracks;
+   nOKMinusTracks += nOKTracks;
+   nOKLastLayers += nOKTracks;
 
-	Int_t numberOfTracks = tracks->GetEntries();
+   Int_t numberOfTracks = tracks->GetEntries();
 
-	Float_t factorEID = 100 * ((float) nTrueTracks / numberOfTracks);
-	Float_t factorEIDOK = 100 * ((float) nOKTracks / numberOfTracks);
-	Float_t factorEIDOKMinus = 100 * ((float) nOKMinusTracks / numberOfTracks);
-	Float_t factorLastLayers = 100 * ((float) nOKLastLayers / numberOfTracks);
+   Float_t factorEID = 100 * ((float) nTrueTracks / numberOfTracks);
+   Float_t factorEIDOK = 100 * ((float) nOKTracks / numberOfTracks);
+   Float_t factorEIDOKMinus = 100 * ((float) nOKMinusTracks / numberOfTracks);
+   Float_t factorLastLayers = 100 * ((float) nOKLastLayers / numberOfTracks);
 
-	cout << nTrueTracks << " of total " << numberOfTracks << " tracks has the same event ID (" << factorEID << "%)\n";
-	cout << nOKTracks << " of total " << numberOfTracks << " tracks has the same first/last event ID (" << factorEIDOK << "%)\n";
-	cout << nOKMinusTracks << " of total " << numberOfTracks << " tracks has a close match (0.5 mm, 1 degree) on first / last cluster (" << factorEIDOKMinus << "%)\n";
-	cout << nOKLastLayers << " of total " << numberOfTracks << " tracks has a close match (0.5 mm, 1 degree) or is a very short tracr (" << factorLastLayers << "%)\n";
+   cout << nTrueTracks << " of total " << numberOfTracks << " tracks has the same event ID (" << factorEID << "%)\n";
+   cout << nOKTracks << " of total " << numberOfTracks << " tracks has the same first/last event ID (" << factorEIDOK << "%)\n";
+   cout << nOKMinusTracks << " of total " << numberOfTracks << " tracks has a close match (0.5 mm, 1 degree) on first / last cluster (" << factorEIDOKMinus << "%)\n";
+   cout << nOKLastLayers << " of total " << numberOfTracks << " tracks has a close match (0.5 mm, 1 degree) or is a very short tracr (" << factorLastLayers << "%)\n";
 
-	/*
-	cout << "Tracks with no EID in first layer: ";
-	for (Int_t i=0; i<ntracks; i++) {
-	   if (!tracks->At(i)) continue;
-		if (!tracks->At(i)->At(0) || !tracks->At(i)->At(1)) continue;
-		if (tracks->At(i)->getEventID(0) < 0) cout << tracks->At(i)->getEventID(1) << ", ";
-	}
-	cout << endl;
-	*/
+   /*
+   cout << "Tracks with no EID in first layer: ";
+   for (Int_t i=0; i<ntracks; i++) {
+      if (!tracks->At(i)) continue;
+      if (!tracks->At(i)->At(0) || !tracks->At(i)->At(1)) continue;
+      if (tracks->At(i)->getEventID(0) < 0) cout << tracks->At(i)->getEventID(1) << ", ";
+   }
+   cout << endl;
+   */
 
 
-	for (Int_t i=0; i<ntracks; i++) {
-		Track *thisTrack = tracks->At(i);
-		if (!thisTrack) continue;
-		if (thisTrack->getTrackLengthmm() < 2) continue;
-		Int_t n = thisTrack->GetEntriesFast();
+   for (Int_t i=0; i<ntracks; i++) {
+      Track *thisTrack = tracks->At(i);
+      if (!thisTrack) continue;
+      if (thisTrack->getTrackLengthmm() < 2) continue;
+      Int_t n = thisTrack->GetEntriesFast();
 
-		TPolyLine3D *l = new TPolyLine3D(n);
-		l->SetLineWidth(2);
-		TPolyMarker3D *trackPoints = new TPolyMarker3D(nClusters, 7);
+      TPolyLine3D *l = new TPolyLine3D(n);
+      l->SetLineWidth(2);
+      TPolyMarker3D *trackPoints = new TPolyMarker3D(nClusters, 7);
 
-		if (!thisTrack->isFirstAndLastEventIDEqual()) {
-			l->SetLineColor(kRed);
+      if (!thisTrack->isFirstAndLastEventIDEqual()) {
+         l->SetLineColor(kRed);
 
-			/*
-			cout << "Track from " << *thisTrack->At(0) << " is MC wrong\nEvent IDs: ";
-			for (Int_t j=0; j<thisTrack->GetEntriesFast(); j++) {
-				cout << thisTrack->getEventID(j) << ", ";
-			}
-			cout << endl;
-			*/
-		}
+         /*
+         cout << "Track from " << *thisTrack->At(0) << " is MC wrong\nEvent IDs: ";
+         for (Int_t j=0; j<thisTrack->GetEntriesFast(); j++) {
+            cout << thisTrack->getEventID(j) << ", ";
+         }
+         cout << endl;
+         */
+      }
 
-		firstEID = thisTrack->getEventID(0);
-		Int_t lineElementNumber = 0;
-		Int_t pointNumber = 0;
-		for (Int_t j=0; j<n; j++) {
-			if (!thisTrack->At(j)) continue;
+      firstEID = thisTrack->getEventID(0);
+      Int_t lineElementNumber = 0;
+      Int_t pointNumber = 0;
+      for (Int_t j=0; j<n; j++) {
+         if (!thisTrack->At(j)) continue;
 
-			Float_t x = thisTrack->getX(j);
-			Float_t z = thisTrack->getY(j);
-			Float_t y = thisTrack->getLayer(j);
-			
-			if (thisTrack->getLayer(j) < switchLayer) {
-				l->SetPoint(lineElementNumber++,x,y,z);
-			}
-			else {
-				trackPoints->SetPoint(pointNumber++, x, y, z);
-			}
-		}
+         Float_t x = thisTrack->getX(j);
+         Float_t z = thisTrack->getY(j);
+         Float_t y = thisTrack->getLayer(j);
+         
+         if (thisTrack->getLayer(j) < switchLayer) {
+            l->SetPoint(lineElementNumber++,x,y,z);
+         }
+         else {
+            trackPoints->SetPoint(pointNumber++, x, y, z);
+         }
+      }
 
-		conflictClusters = (Clusters*) thisTrack->getConflictClusters();
-		for (Int_t j=0; j<conflictClusters->GetEntriesFast(); j++) {
-			if (!conflictClusters->At(j)) continue;
-			
-			Float_t x = conflictClusters->getX(j);
-			Float_t z = conflictClusters->getY(j);
-			Float_t y = conflictClusters->getLayer(j);
-			
-			conflictMarker->SetPoint(conflictIdx++, x,y,z);
-		}
+      conflictClusters = (Clusters*) thisTrack->getConflictClusters();
+      for (Int_t j=0; j<conflictClusters->GetEntriesFast(); j++) {
+         if (!conflictClusters->At(j)) continue;
+         
+         Float_t x = conflictClusters->getX(j);
+         Float_t z = conflictClusters->getY(j);
+         Float_t y = conflictClusters->getLayer(j);
+         
+         conflictMarker->SetPoint(conflictIdx++, x,y,z);
+      }
 
-		l->Draw();
-		trackPoints->Draw();
-//		EIDMarker->Draw();
-		conflictMarker->Draw();
-	}
-	view->ShowAxis();
+      l->Draw();
+      trackPoints->Draw();
+//    EIDMarker->Draw();
+      conflictMarker->Draw();
+   }
+   view->ShowAxis();
    c1->Update();
 
    TAxis3D *axis = TAxis3D::GetPadAxis();
-	axis->SetTitle("3D view of tracks and clusters");
+   axis->SetTitle("3D view of tracks and clusters");
    axis->SetLabelColor(kBlack);
    axis->SetAxisColor(kBlack);
-	axis->SetXTitle("Pixels in X");
-	axis->SetYTitle("Layer number");
-	axis->SetZTitle("Pixels in Y");
-	axis->SetTitleOffset(2);
+   axis->SetXTitle("Pixels in X");
+   axis->SetYTitle("Layer number");
+   axis->SetZTitle("Pixels in Y");
+   axis->SetTitleOffset(2);
 
-	vector<Int_t> * conflictTracks = tracks->getTracksWithConflictClusters();
-	vector<Int_t> * oneConflictPair = nullptr;
-	vector<Int_t> * allConflictPairs = new vector<Int_t>;
-	
-	for (UInt_t i=0; i<conflictTracks->size(); i++) {
-		oneConflictPair = tracks->getConflictingTracksFromTrack(conflictTracks->at(i));
+   vector<Int_t> * conflictTracks = tracks->getTracksWithConflictClusters();
+   vector<Int_t> * oneConflictPair = nullptr;
+   vector<Int_t> * allConflictPairs = new vector<Int_t>;
+   
+   for (UInt_t i=0; i<conflictTracks->size(); i++) {
+      oneConflictPair = tracks->getConflictingTracksFromTrack(conflictTracks->at(i));
 
-		Int_t idx0 = oneConflictPair->at(0);
-		Int_t idx1 = -1;
-		if (oneConflictPair->size() > 1) {
-			idx1 = oneConflictPair->at(1);
-		}
+      Int_t idx0 = oneConflictPair->at(0);
+      Int_t idx1 = -1;
+      if (oneConflictPair->size() > 1) {
+         idx1 = oneConflictPair->at(1);
+      }
 
-		allConflictPairs->push_back(idx0);
-		allConflictPairs->push_back(idx1);
-	}
+      allConflictPairs->push_back(idx0);
+      allConflictPairs->push_back(idx1);
+   }
 
-	// PRINTING
-	/*
-	cout << "Found the following tracks with conflicting clusters: ";
-	for (UInt_t i=0; i<conflictTracks->size(); i++) {
-		cout << conflictTracks->at(i) << " (eventID " << tracks->At(conflictTracks->at(i))->getEventID(0) << "), ";
-	}
-	cout << "\n";
+   // PRINTING
+   /*
+   cout << "Found the following tracks with conflicting clusters: ";
+   for (UInt_t i=0; i<conflictTracks->size(); i++) {
+      cout << conflictTracks->at(i) << " (eventID " << tracks->At(conflictTracks->at(i))->getEventID(0) << "), ";
+   }
+   cout << "\n";
 
-	for (UInt_t i=0; i<allConflictPairs->size() / 2; i++) {
-		if (allConflictPairs->at(2*i+1) < 0) continue;
-		
-		Track * trackA = tracks->At(allConflictPairs->at(2*i));
-		Track * trackB = tracks->At(allConflictPairs->at(2*i+1));
+   for (UInt_t i=0; i<allConflictPairs->size() / 2; i++) {
+      if (allConflictPairs->at(2*i+1) < 0) continue;
+      
+      Track * trackA = tracks->At(allConflictPairs->at(2*i));
+      Track * trackB = tracks->At(allConflictPairs->at(2*i+1));
 
-		cout << "Track pair number " << i+1 << " found is: \n\tTRACK A: ";
-		for (Int_t j=0; j<trackA->GetEntriesFast(); j++) { 
-			if ( ! trackA->At(j) ) continue;
-			cout << *trackA->At(j) << ", ";
-		}
+      cout << "Track pair number " << i+1 << " found is: \n\tTRACK A: ";
+      for (Int_t j=0; j<trackA->GetEntriesFast(); j++) { 
+         if ( ! trackA->At(j) ) continue;
+         cout << *trackA->At(j) << ", ";
+      }
 
-		cout << "\n\tTRACK B: ";
-		for (Int_t j=0; j<trackB->GetEntriesFast(); j++) { 
-			if ( ! trackB->At(j) ) continue;
-			cout << *trackB->At(j) << ", ";
-		}
-		cout << endl;
-	}
-	*/
+      cout << "\n\tTRACK B: ";
+      for (Int_t j=0; j<trackB->GetEntriesFast(); j++) { 
+         if ( ! trackB->At(j) ) continue;
+         cout << *trackB->At(j) << ", ";
+      }
+      cout << endl;
+   }
+   */
 
-	c1->SaveAs(Form("OutputFiles/figures/testOutput_switchLayer%d.png", switchLayer));
+   c1->SaveAs(Form("OutputFiles/figures/testOutput_switchLayer%d.png", switchLayer));
 
    delete tracks;
-	delete conflictTracks;
-	delete allConflictPairs;
+   delete conflictTracks;
+   delete allConflictPairs;
 }
 
 void drawAlignmentCheck(Int_t Runs, Int_t dataType, Bool_t recreate, Float_t energy) {
-	run_energy = energy;
-	kDataType = dataType;
+   run_energy = energy;
+   kDataType = dataType;
 
-	Tracks * tracks = loadOrCreateTracks(recreate, Runs, dataType, energy);
-	tracks->extrapolateToLayer0();
+   Tracks * tracks = loadOrCreateTracks(recreate, Runs, dataType, energy);
+   tracks->extrapolateToLayer0();
 
-	TCanvas	 *	c1 = new TCanvas("c1", "Alignment check", 1800, 1500);
-	c1->Divide(2, 4, 0.01, 0.01);
+   TCanvas   * c1 = new TCanvas("c1", "Alignment check", 1800, 1500);
+   c1->Divide(2, 4, 0.01, 0.01);
    gStyle->SetOptStat(0);
 
-	TH1F		 *	alignmentX1 = new TH1F("alignmentX1", "Alignment check in X1 direction;Layer;Mean alignment in x1 [mm]", 8, 0, 8);
-	TH1F		 *	alignmentY1 = new TH1F("alignmentY1", "Alignment check in Y1 direction;Layer;Mean alignment in y1 [mm]", 8, 0, 8);
-	TH1F		 *	alignmentX2 = new TH1F("alignmentX2", "Alignment check in X2 direction;Layer;Mean alignment in x2 [mm]", 8, 0, 8);
-	TH1F		 *	alignmentY2 = new TH1F("alignmentY2", "Alignment check in Y2 direction;Layer;Mean alignment in y2 [mm]", 8, 0, 8);
-	TH1F		 *	alignmentX3 = new TH1F("alignmentX3", "Alignment check in X3 direction;Layer;Mean alignment in x3 [mm]", 8, 0, 8);
-	TH1F		 *	alignmentY3 = new TH1F("alignmentY3", "Alignment check in Y3 direction;Layer;Mean alignment in y3 [mm]", 8, 0, 8);
-	TH1F		 *	alignmentX4 = new TH1F("alignmentX4", "Alignment check in X4 direction;Layer;Mean alignment in x4 [mm]", 8, 0, 8);
-	TH1F		 *	alignmentY4 = new TH1F("alignmentY4", "Alignment check in Y4 direction;Layer;Mean alignment in y4 [mm]", 8, 0, 8);
-	TH1F		 *	normX1 = new TH1F("normX1", "Alignment check in X1 direction", 8, 0, 8);
-	TH1F		 *	normY1 = new TH1F("normY1", "Alignment check in Y1 direction", 8, 0, 8);
-	TH1F		 *	normX2 = new TH1F("normX2", "Alignment check in X2 direction", 8, 0, 8);
-	TH1F		 *	normY2 = new TH1F("normY2", "Alignment check in Y2 direction", 8, 0, 8);
-	TH1F		 *	normX3 = new TH1F("normX3", "Alignment check in X3 direction", 8, 0, 8);
-	TH1F		 *	normY3 = new TH1F("normY3", "Alignment check in Y3 direction", 8, 0, 8);
-	TH1F		 *	normX4 = new TH1F("normX4", "Alignment check in X4 direction", 8, 0, 8);
-	TH1F		 *	normY4 = new TH1F("normY4", "Alignment check in Y4 direction", 8, 0, 8);
+   TH1F      * alignmentX1 = new TH1F("alignmentX1", "Alignment check in X1 direction;Layer;Mean alignment in x1 [mm]", 8, 0, 8);
+   TH1F      * alignmentY1 = new TH1F("alignmentY1", "Alignment check in Y1 direction;Layer;Mean alignment in y1 [mm]", 8, 0, 8);
+   TH1F      * alignmentX2 = new TH1F("alignmentX2", "Alignment check in X2 direction;Layer;Mean alignment in x2 [mm]", 8, 0, 8);
+   TH1F      * alignmentY2 = new TH1F("alignmentY2", "Alignment check in Y2 direction;Layer;Mean alignment in y2 [mm]", 8, 0, 8);
+   TH1F      * alignmentX3 = new TH1F("alignmentX3", "Alignment check in X3 direction;Layer;Mean alignment in x3 [mm]", 8, 0, 8);
+   TH1F      * alignmentY3 = new TH1F("alignmentY3", "Alignment check in Y3 direction;Layer;Mean alignment in y3 [mm]", 8, 0, 8);
+   TH1F      * alignmentX4 = new TH1F("alignmentX4", "Alignment check in X4 direction;Layer;Mean alignment in x4 [mm]", 8, 0, 8);
+   TH1F      * alignmentY4 = new TH1F("alignmentY4", "Alignment check in Y4 direction;Layer;Mean alignment in y4 [mm]", 8, 0, 8);
+   TH1F      * normX1 = new TH1F("normX1", "Alignment check in X1 direction", 8, 0, 8);
+   TH1F      * normY1 = new TH1F("normY1", "Alignment check in Y1 direction", 8, 0, 8);
+   TH1F      * normX2 = new TH1F("normX2", "Alignment check in X2 direction", 8, 0, 8);
+   TH1F      * normY2 = new TH1F("normY2", "Alignment check in Y2 direction", 8, 0, 8);
+   TH1F      * normX3 = new TH1F("normX3", "Alignment check in X3 direction", 8, 0, 8);
+   TH1F      * normY3 = new TH1F("normY3", "Alignment check in Y3 direction", 8, 0, 8);
+   TH1F      * normX4 = new TH1F("normX4", "Alignment check in X4 direction", 8, 0, 8);
+   TH1F      * normY4 = new TH1F("normY4", "Alignment check in Y4 direction", 8, 0, 8);
 
-	Track		 *	thisTrack = nullptr;
-	Cluster	 *	thisCluster = nullptr;
-	Cluster	 *	nextCluster = nullptr;
-	Int_t			thisLayer;
-	Float_t		x, y, xp, yp, diffx, diffy;
-	Int_t			chip = 0;
-	vector<Float_t> deflection;
+   Track     * thisTrack = nullptr;
+   Cluster   * thisCluster = nullptr;
+   Cluster   * nextCluster = nullptr;
+   Int_t       thisLayer;
+   Float_t     x, y, xp, yp, diffx, diffy;
+   Int_t       chip = 0;
+   vector<Float_t> deflection;
 
-	for (Int_t i=0; i<tracks->GetEntriesFast(); i++) {
-		thisTrack = tracks->At(i);
+   for (Int_t i=0; i<tracks->GetEntriesFast(); i++) {
+      thisTrack = tracks->At(i);
 
-		for (Int_t j=0; j<thisTrack->GetEntriesFast()-1; j++) {
-			thisCluster = thisTrack->At(j);
-			nextCluster = thisTrack->At(j+1);
+      for (Int_t j=0; j<thisTrack->GetEntriesFast()-1; j++) {
+         thisCluster = thisTrack->At(j);
+         nextCluster = thisTrack->At(j+1);
 
-			if (thisCluster && nextCluster) {
-				x = thisCluster->getXmm();
-				y = thisCluster->getYmm();
-				xp = nextCluster->getXmm();
-				yp = nextCluster->getYmm();
+         if (thisCluster && nextCluster) {
+            x = thisCluster->getXmm();
+            y = thisCluster->getYmm();
+            xp = nextCluster->getXmm();
+            yp = nextCluster->getYmm();
 
-				diffx = xp - x;
-				diffy = yp - y;
-				thisLayer = nextCluster->getLayer();
+            diffx = xp - x;
+            diffy = yp - y;
+            thisLayer = nextCluster->getLayer();
 
-				deflection = thisTrack->getLateralDeflectionFromExtrapolatedPosition(thisLayer);
-				diffx = deflection.at(0);
-				diffy = deflection.at(1);
+            deflection = thisTrack->getLateralDeflectionFromExtrapolatedPosition(thisLayer);
+            diffx = deflection.at(0);
+            diffy = deflection.at(1);
 
-				if			(x >  0 && y >  0) chip = 0;
-				else if	(x <= 0 && y >  0) chip = 3;
-				else if	(x <= 0 && y <= 0) chip = 2;
-				else if	(x >  0 && y <= 0) chip = 1;
+            if       (x >  0 && y >  0) chip = 0;
+            else if  (x <= 0 && y >  0) chip = 3;
+            else if  (x <= 0 && y <= 0) chip = 2;
+            else if  (x >  0 && y <= 0) chip = 1;
 
-				if (thisLayer>9) continue;
+            if (thisLayer>9) continue;
 
-				if (chip == 0) {
-					alignmentX1->Fill(thisLayer, diffx);
-					alignmentY1->Fill(thisLayer, diffy);
-					normX1->Fill(thisLayer);
-					normY1->Fill(thisLayer);
-				}
-				else if (chip == 1) {
-					alignmentX2->Fill(thisLayer, diffx);
-					alignmentY2->Fill(thisLayer, diffy);
-					normX2->Fill(thisLayer);
-					normY2->Fill(thisLayer);
-				}
+            if (chip == 0) {
+               alignmentX1->Fill(thisLayer, diffx);
+               alignmentY1->Fill(thisLayer, diffy);
+               normX1->Fill(thisLayer);
+               normY1->Fill(thisLayer);
+            }
+            else if (chip == 1) {
+               alignmentX2->Fill(thisLayer, diffx);
+               alignmentY2->Fill(thisLayer, diffy);
+               normX2->Fill(thisLayer);
+               normY2->Fill(thisLayer);
+            }
 
-				else if (chip == 2) {
-					alignmentX3->Fill(thisLayer, diffx);
-					alignmentY3->Fill(thisLayer, diffy);
-					normX3->Fill(thisLayer);
-					normY3->Fill(thisLayer);
-				}
+            else if (chip == 2) {
+               alignmentX3->Fill(thisLayer, diffx);
+               alignmentY3->Fill(thisLayer, diffy);
+               normX3->Fill(thisLayer);
+               normY3->Fill(thisLayer);
+            }
 
-				else if (chip == 3) {
-					alignmentX4->Fill(thisLayer, diffx);
-					alignmentY4->Fill(thisLayer, diffy);
-					normX4->Fill(thisLayer);
-					normY4->Fill(thisLayer);
-				}
-			}
-		}
-	}
+            else if (chip == 3) {
+               alignmentX4->Fill(thisLayer, diffx);
+               alignmentY4->Fill(thisLayer, diffy);
+               normX4->Fill(thisLayer);
+               normY4->Fill(thisLayer);
+            }
+         }
+      }
+   }
 
-	alignmentX1->Divide(normX1);
-	alignmentY1->Divide(normY1);
-	alignmentX2->Divide(normX2);
-	alignmentY2->Divide(normY2);
-	alignmentX3->Divide(normX3);
-	alignmentY3->Divide(normY3);
-	alignmentX4->Divide(normX4);
-	alignmentY4->Divide(normY4);
+   alignmentX1->Divide(normX1);
+   alignmentY1->Divide(normY1);
+   alignmentX2->Divide(normX2);
+   alignmentY2->Divide(normY2);
+   alignmentX3->Divide(normX3);
+   alignmentY3->Divide(normY3);
+   alignmentX4->Divide(normX4);
+   alignmentY4->Divide(normY4);
 
-	c1->cd(1);
-	alignmentX1->GetYaxis()->SetRangeUser(-0.4, 0.4);
-	alignmentX1->GetYaxis()->SetTitleOffset(1.2);
-	alignmentX1->GetYaxis()->SetTitleFont(22);
-	alignmentX1->GetYaxis()->SetLabelFont(22);
-	alignmentX1->GetXaxis()->SetTitleFont(22);
-	alignmentX1->GetXaxis()->SetLabelFont(22);
-	alignmentX1->SetFillColor(kGreen+3);
-	alignmentX1->SetLineColor(kBlack);
-	alignmentX1->Draw();
-	gPad->Update();
-	TPaveText *title = (TPaveText*) gPad->GetPrimitive("title");
-	title->SetTextFont(22);
-	gPad->Modified();
+   c1->cd(1);
+   alignmentX1->GetYaxis()->SetRangeUser(-0.4, 0.4);
+   alignmentX1->GetYaxis()->SetTitleOffset(1.2);
+   alignmentX1->GetYaxis()->SetTitleFont(22);
+   alignmentX1->GetYaxis()->SetLabelFont(22);
+   alignmentX1->GetXaxis()->SetTitleFont(22);
+   alignmentX1->GetXaxis()->SetLabelFont(22);
+   alignmentX1->SetFillColor(kGreen+3);
+   alignmentX1->SetLineColor(kBlack);
+   alignmentX1->Draw();
+   gPad->Update();
+   TPaveText *title = (TPaveText*) gPad->GetPrimitive("title");
+   title->SetTextFont(22);
+   gPad->Modified();
 
-	c1->cd(2);
-	alignmentY1->GetYaxis()->SetRangeUser(-0.4, 0.4);
-	alignmentY1->GetYaxis()->SetTitleOffset(1.2);
-	alignmentY1->GetYaxis()->SetTitleFont(22);
-	alignmentY1->GetYaxis()->SetLabelFont(22);
-	alignmentY1->GetXaxis()->SetTitleFont(22);
-	alignmentY1->GetXaxis()->SetLabelFont(22);
-	alignmentY1->SetFillColor(kGreen+3);
-	alignmentY1->SetLineColor(kBlack);
-	alignmentY1->Draw();
-	gPad->Update();
-	TPaveText *title2 = (TPaveText*) gPad->GetPrimitive("title");
-	title2->SetTextFont(22);
-	gPad->Modified();
+   c1->cd(2);
+   alignmentY1->GetYaxis()->SetRangeUser(-0.4, 0.4);
+   alignmentY1->GetYaxis()->SetTitleOffset(1.2);
+   alignmentY1->GetYaxis()->SetTitleFont(22);
+   alignmentY1->GetYaxis()->SetLabelFont(22);
+   alignmentY1->GetXaxis()->SetTitleFont(22);
+   alignmentY1->GetXaxis()->SetLabelFont(22);
+   alignmentY1->SetFillColor(kGreen+3);
+   alignmentY1->SetLineColor(kBlack);
+   alignmentY1->Draw();
+   gPad->Update();
+   TPaveText *title2 = (TPaveText*) gPad->GetPrimitive("title");
+   title2->SetTextFont(22);
+   gPad->Modified();
 
-	c1->cd(3);
-	alignmentX2->GetYaxis()->SetRangeUser(-0.4, 0.4);
-	alignmentX2->GetYaxis()->SetTitleOffset(1.2);
-	alignmentX2->GetYaxis()->SetTitleFont(22);
-	alignmentX2->GetYaxis()->SetLabelFont(22);
-	alignmentX2->GetXaxis()->SetTitleFont(22);
-	alignmentX2->GetXaxis()->SetLabelFont(22);
-	alignmentX2->SetFillColor(kGreen+3);
-	alignmentX2->SetLineColor(kBlack);
-	alignmentX2->Draw();
-	gPad->Update();
-	TPaveText *title3 = (TPaveText*) gPad->GetPrimitive("title");
-	title3->SetTextFont(22);
-	gPad->Modified();
+   c1->cd(3);
+   alignmentX2->GetYaxis()->SetRangeUser(-0.4, 0.4);
+   alignmentX2->GetYaxis()->SetTitleOffset(1.2);
+   alignmentX2->GetYaxis()->SetTitleFont(22);
+   alignmentX2->GetYaxis()->SetLabelFont(22);
+   alignmentX2->GetXaxis()->SetTitleFont(22);
+   alignmentX2->GetXaxis()->SetLabelFont(22);
+   alignmentX2->SetFillColor(kGreen+3);
+   alignmentX2->SetLineColor(kBlack);
+   alignmentX2->Draw();
+   gPad->Update();
+   TPaveText *title3 = (TPaveText*) gPad->GetPrimitive("title");
+   title3->SetTextFont(22);
+   gPad->Modified();
 
-	c1->cd(4);
-	alignmentY2->GetYaxis()->SetRangeUser(-0.4, 0.4);
-	alignmentY2->GetYaxis()->SetTitleOffset(1.2);
-	alignmentY2->GetYaxis()->SetTitleFont(22);
-	alignmentY2->GetYaxis()->SetLabelFont(22);
-	alignmentY2->GetXaxis()->SetTitleFont(22);
-	alignmentY2->GetXaxis()->SetLabelFont(22);
-	alignmentY2->SetFillColor(kGreen+3);
-	alignmentY2->SetLineColor(kBlack);
-	alignmentY2->Draw();
-	gPad->Update();
-	TPaveText *title4 = (TPaveText*) gPad->GetPrimitive("title");
-	title4->SetTextFont(22);
-	gPad->Modified();
+   c1->cd(4);
+   alignmentY2->GetYaxis()->SetRangeUser(-0.4, 0.4);
+   alignmentY2->GetYaxis()->SetTitleOffset(1.2);
+   alignmentY2->GetYaxis()->SetTitleFont(22);
+   alignmentY2->GetYaxis()->SetLabelFont(22);
+   alignmentY2->GetXaxis()->SetTitleFont(22);
+   alignmentY2->GetXaxis()->SetLabelFont(22);
+   alignmentY2->SetFillColor(kGreen+3);
+   alignmentY2->SetLineColor(kBlack);
+   alignmentY2->Draw();
+   gPad->Update();
+   TPaveText *title4 = (TPaveText*) gPad->GetPrimitive("title");
+   title4->SetTextFont(22);
+   gPad->Modified();
 
-	c1->cd(5);
-	alignmentX3->GetYaxis()->SetRangeUser(-0.4, 0.4);
-	alignmentX3->GetYaxis()->SetTitleOffset(1.2);
-	alignmentX3->GetYaxis()->SetTitleFont(22);
-	alignmentX3->GetYaxis()->SetLabelFont(22);
-	alignmentX3->GetXaxis()->SetTitleFont(22);
-	alignmentX3->GetXaxis()->SetLabelFont(22);
-	alignmentX3->SetFillColor(kGreen+3);
-	alignmentX3->SetLineColor(kBlack);
-	alignmentX3->Draw();
-	gPad->Update();
-	TPaveText *title5 = (TPaveText*) gPad->GetPrimitive("title");
-	title5->SetTextFont(22);
-	gPad->Modified();
+   c1->cd(5);
+   alignmentX3->GetYaxis()->SetRangeUser(-0.4, 0.4);
+   alignmentX3->GetYaxis()->SetTitleOffset(1.2);
+   alignmentX3->GetYaxis()->SetTitleFont(22);
+   alignmentX3->GetYaxis()->SetLabelFont(22);
+   alignmentX3->GetXaxis()->SetTitleFont(22);
+   alignmentX3->GetXaxis()->SetLabelFont(22);
+   alignmentX3->SetFillColor(kGreen+3);
+   alignmentX3->SetLineColor(kBlack);
+   alignmentX3->Draw();
+   gPad->Update();
+   TPaveText *title5 = (TPaveText*) gPad->GetPrimitive("title");
+   title5->SetTextFont(22);
+   gPad->Modified();
 
-	c1->cd(6);
-	alignmentY3->GetYaxis()->SetRangeUser(-0.4, 0.4);
-	alignmentY3->GetYaxis()->SetTitleOffset(1.2);
-	alignmentY3->GetYaxis()->SetTitleFont(22);
-	alignmentY3->GetYaxis()->SetLabelFont(22);
-	alignmentY3->GetXaxis()->SetTitleFont(22);
-	alignmentY3->GetXaxis()->SetLabelFont(22);
-	alignmentY3->SetFillColor(kGreen+3);
-	alignmentY3->SetLineColor(kBlack);
-	alignmentY3->Draw();
-	gPad->Update();
-	TPaveText *title6 = (TPaveText*) gPad->GetPrimitive("title");
-	title6->SetTextFont(22);
-	gPad->Modified();
-	
-	c1->cd(7);
-	alignmentX4->GetYaxis()->SetRangeUser(-0.4, 0.4);
-	alignmentX4->GetYaxis()->SetTitleOffset(1.2);
-	alignmentX4->GetYaxis()->SetTitleFont(22);
-	alignmentX4->GetYaxis()->SetLabelFont(22);
-	alignmentX4->GetXaxis()->SetTitleFont(22);
-	alignmentX4->GetXaxis()->SetLabelFont(22);
-	alignmentX4->SetFillColor(kGreen+3);
-	alignmentX4->SetLineColor(kBlack);
-	alignmentX4->Draw();
-	gPad->Update();
-	TPaveText *title7 = (TPaveText*) gPad->GetPrimitive("title");
-	title7->SetTextFont(22);
-	gPad->Modified();
-	
-	c1->cd(8);
-	alignmentY4->GetYaxis()->SetRangeUser(-0.4, 0.4);
-	alignmentY4->GetYaxis()->SetTitleOffset(1.2);
-	alignmentY4->GetYaxis()->SetTitleFont(22);
-	alignmentY4->GetYaxis()->SetLabelFont(22);
-	alignmentY4->GetXaxis()->SetTitleFont(22);
-	alignmentY4->GetXaxis()->SetLabelFont(22);
-	alignmentY4->SetFillColor(kGreen+3);
-	alignmentY4->SetLineColor(kBlack);
-	alignmentY4->Draw();
-	gPad->Update();
-	TPaveText *title8 = (TPaveText*) gPad->GetPrimitive("title");
-	title8->SetTextFont(22);
-	gPad->Modified();
+   c1->cd(6);
+   alignmentY3->GetYaxis()->SetRangeUser(-0.4, 0.4);
+   alignmentY3->GetYaxis()->SetTitleOffset(1.2);
+   alignmentY3->GetYaxis()->SetTitleFont(22);
+   alignmentY3->GetYaxis()->SetLabelFont(22);
+   alignmentY3->GetXaxis()->SetTitleFont(22);
+   alignmentY3->GetXaxis()->SetLabelFont(22);
+   alignmentY3->SetFillColor(kGreen+3);
+   alignmentY3->SetLineColor(kBlack);
+   alignmentY3->Draw();
+   gPad->Update();
+   TPaveText *title6 = (TPaveText*) gPad->GetPrimitive("title");
+   title6->SetTextFont(22);
+   gPad->Modified();
+   
+   c1->cd(7);
+   alignmentX4->GetYaxis()->SetRangeUser(-0.4, 0.4);
+   alignmentX4->GetYaxis()->SetTitleOffset(1.2);
+   alignmentX4->GetYaxis()->SetTitleFont(22);
+   alignmentX4->GetYaxis()->SetLabelFont(22);
+   alignmentX4->GetXaxis()->SetTitleFont(22);
+   alignmentX4->GetXaxis()->SetLabelFont(22);
+   alignmentX4->SetFillColor(kGreen+3);
+   alignmentX4->SetLineColor(kBlack);
+   alignmentX4->Draw();
+   gPad->Update();
+   TPaveText *title7 = (TPaveText*) gPad->GetPrimitive("title");
+   title7->SetTextFont(22);
+   gPad->Modified();
+   
+   c1->cd(8);
+   alignmentY4->GetYaxis()->SetRangeUser(-0.4, 0.4);
+   alignmentY4->GetYaxis()->SetTitleOffset(1.2);
+   alignmentY4->GetYaxis()->SetTitleFont(22);
+   alignmentY4->GetYaxis()->SetLabelFont(22);
+   alignmentY4->GetXaxis()->SetTitleFont(22);
+   alignmentY4->GetXaxis()->SetLabelFont(22);
+   alignmentY4->SetFillColor(kGreen+3);
+   alignmentY4->SetLineColor(kBlack);
+   alignmentY4->Draw();
+   gPad->Update();
+   TPaveText *title8 = (TPaveText*) gPad->GetPrimitive("title");
+   title8->SetTextFont(22);
+   gPad->Modified();
 
-	if (dataType == kMC) {
-		c1->SaveAs(Form("OutputFiles/figures/AlignmentCheck_MC_%.0fMeV.pdf", run_energy));
-	}
-	else {
-		c1->SaveAs(Form("OutputFiles/figures/AlignmentCheck_EXP_Corrected_%.0fMeV.pdf", run_energy));
-	}
+   if (dataType == kMC) {
+      c1->SaveAs(Form("OutputFiles/figures/AlignmentCheck_MC_%.0fMeV.pdf", run_energy));
+   }
+   else {
+      c1->SaveAs(Form("OutputFiles/figures/AlignmentCheck_EXP_Corrected_%.0fMeV.pdf", run_energy));
+   }
 
-	Float_t rmsX1 = 0;
-	Float_t rmsX2 = 0;
-	Float_t rmsY1 = 0;
-	Float_t rmsY2 = 0;
-	Float_t rmsX3 = 0;
-	Float_t rmsX4 = 0;
-	Float_t rmsY3 = 0;
-	Float_t rmsY4 = 0;
-	for (Int_t i=0; i<7; i++) {
-		rmsX1 += pow(alignmentX1->GetBinContent(i+1), 2);
-		rmsX2 += pow(alignmentX2->GetBinContent(i+1), 2);
-		rmsX3 += pow(alignmentX3->GetBinContent(i+1), 2);
-		rmsX4 += pow(alignmentX4->GetBinContent(i+1), 2);
-		rmsY1 += pow(alignmentY1->GetBinContent(i+1), 2);
-		rmsY2 += pow(alignmentY2->GetBinContent(i+1), 2);
-		rmsY3 += pow(alignmentY3->GetBinContent(i+1), 2);
-		rmsY4 += pow(alignmentY4->GetBinContent(i+1), 2);
-	}
+   Float_t rmsX1 = 0;
+   Float_t rmsX2 = 0;
+   Float_t rmsY1 = 0;
+   Float_t rmsY2 = 0;
+   Float_t rmsX3 = 0;
+   Float_t rmsX4 = 0;
+   Float_t rmsY3 = 0;
+   Float_t rmsY4 = 0;
+   for (Int_t i=0; i<7; i++) {
+      rmsX1 += pow(alignmentX1->GetBinContent(i+1), 2);
+      rmsX2 += pow(alignmentX2->GetBinContent(i+1), 2);
+      rmsX3 += pow(alignmentX3->GetBinContent(i+1), 2);
+      rmsX4 += pow(alignmentX4->GetBinContent(i+1), 2);
+      rmsY1 += pow(alignmentY1->GetBinContent(i+1), 2);
+      rmsY2 += pow(alignmentY2->GetBinContent(i+1), 2);
+      rmsY3 += pow(alignmentY3->GetBinContent(i+1), 2);
+      rmsY4 += pow(alignmentY4->GetBinContent(i+1), 2);
+   }
 
-	rmsX1 = sqrt(rmsX1); rmsX2 = sqrt(rmsX2);
-	rmsX3 = sqrt(rmsX3);	rmsX4 = sqrt(rmsX4);
-	rmsY1 = sqrt(rmsY1); rmsY2 = sqrt(rmsY2);
-	rmsY3 = sqrt(rmsY3);	rmsY4 = sqrt(rmsY4);
+   rmsX1 = sqrt(rmsX1); rmsX2 = sqrt(rmsX2);
+   rmsX3 = sqrt(rmsX3); rmsX4 = sqrt(rmsX4);
+   rmsY1 = sqrt(rmsY1); rmsY2 = sqrt(rmsY2);
+   rmsY3 = sqrt(rmsY3); rmsY4 = sqrt(rmsY4);
 
-	cout << "The RMS values for the distributions are: \n";
-	cout << "Total RMS = " << sqrt(pow(rmsX1, 2) + pow(rmsX2, 2) + pow(rmsX3, 2) + pow(rmsX4, 2) + pow(rmsY1, 2) + pow(rmsY2, 2) + pow(rmsY3, 2) + pow(rmsY4, 2)) << endl;
+   cout << "The RMS values for the distributions are: \n";
+   cout << "Total RMS = " << sqrt(pow(rmsX1, 2) + pow(rmsX2, 2) + pow(rmsX3, 2) + pow(rmsX4, 2) + pow(rmsY1, 2) + pow(rmsY2, 2) + pow(rmsY3, 2) + pow(rmsY4, 2)) << endl;
 
-	ifstream in("Data/ExperimentalData/Alignment_mine.txt");
+   ifstream in("Data/ExperimentalData/Alignment_mine.txt");
 
-	chipAlignment chipAlignmentArray[96];
-	chipAlignment chipFile;
+   chipAlignment chipAlignmentArray[96];
+   chipAlignment chipFile;
 
-	while (1) {
-		in >> chipFile.idx >> chipFile.deltaX >> chipFile.deltaY >> chipFile.deltaTheta;
-		if (!in.good()) break;
-		chipFile.deltaX *= 10;
-		chipFile.deltaY *= 10;
+   while (1) {
+      in >> chipFile.idx >> chipFile.deltaX >> chipFile.deltaY >> chipFile.deltaTheta;
+      if (!in.good()) break;
+      chipFile.deltaX *= 10;
+      chipFile.deltaY *= 10;
 
-		chipAlignmentArray[chipFile.idx] = chipFile;
-	}
-	in.close();
+      chipAlignmentArray[chipFile.idx] = chipFile;
+   }
+   in.close();
 
-	ofstream file("Data/ExperimentalData/Alignment_mine.txt");
+   ofstream file("Data/ExperimentalData/Alignment_mine.txt");
 
-	Float_t theta[32] = {0.0032, -0.00017, 0.0015, 0.0021, -0.0059, -0.007, -0.0037, -0.0032, -0.0056, -0.0060, 0.00016, -0.0007, -0.0003, -0.0014, -0.0006, -0.00015, 0.0008, 0.0007, -0.002, -0.005, -0.007, -0.049, -0.0038, -0.006, 0, 0, 0, 0, -0.0004, -0.00032, -0.007, -0.008};
+   Float_t theta[32] = {0.0032, -0.00017, 0.0015, 0.0021, -0.0059, -0.007, -0.0037, -0.0032, -0.0056, -0.0060, 0.00016, -0.0007, -0.0003, -0.0014, -0.0006, -0.00015, 0.0008, 0.0007, -0.002, -0.005, -0.007, -0.049, -0.0038, -0.006, 0, 0, 0, 0, -0.0004, -0.00032, -0.007, -0.008};
 
-	Float_t deltaX, deltaY;
-	for (Int_t i=0; i<7; i++) {
-		deltaX = chipAlignmentArray[i*4+0].deltaX;
-		deltaY = chipAlignmentArray[i*4+0].deltaY;
-		cout << Form("In layer %d, old value was (%.4f, %.4f), with corrections (%.4f, %.4f) new value is (%.4f, %.4f)\n", i, deltaX, deltaY, alignmentX4->GetBinContent(i+1), alignmentY4->GetBinContent(i+1), deltaX - alignmentX1->GetBinContent(i+1), deltaY - alignmentY1->GetBinContent(i+1));
-		file << i*4 + 0 << " " << -0.1 * (alignmentX1->GetBinContent(i+1) - deltaX) << " " << -0.1 * (alignmentY1->GetBinContent(i+1) - deltaY) << " " << theta[i*4+0] << endl;
-		deltaX = chipAlignmentArray[i*4+1].deltaX;
-		deltaY = chipAlignmentArray[i*4+1].deltaY;
-		file << i*4 + 1 << " " << -0.1 * (alignmentX2->GetBinContent(i+1) - deltaX) << " " << -0.1 * (alignmentY2->GetBinContent(i+1) - deltaY) << " " << theta[i*4+1] << endl;
-		deltaX = chipAlignmentArray[i*4+2].deltaX;
-		deltaY = chipAlignmentArray[i*4+2].deltaY;
-		file << i*4 + 2 << " " << -0.1 * (alignmentX3->GetBinContent(i+1) - deltaX) << " " << -0.1 * (alignmentY3->GetBinContent(i+1) - deltaY) << " " << theta[i*4+2] << endl;
-		deltaX = chipAlignmentArray[i*4+3].deltaX;
-		deltaY = chipAlignmentArray[i*4+3].deltaY;
-		file << i*4 + 3 << " " << -0.1 * (alignmentX4->GetBinContent(i+1) - deltaX) << " " << -0.1 * (alignmentY4->GetBinContent(i+1) - deltaY) << " " << theta[i*4+3] << endl;
-	}
-	file.close();
+   Float_t deltaX, deltaY;
+   for (Int_t i=0; i<7; i++) {
+      deltaX = chipAlignmentArray[i*4+0].deltaX;
+      deltaY = chipAlignmentArray[i*4+0].deltaY;
+      cout << Form("In layer %d, old value was (%.4f, %.4f), with corrections (%.4f, %.4f) new value is (%.4f, %.4f)\n", i, deltaX, deltaY, alignmentX4->GetBinContent(i+1), alignmentY4->GetBinContent(i+1), deltaX - alignmentX1->GetBinContent(i+1), deltaY - alignmentY1->GetBinContent(i+1));
+      file << i*4 + 0 << " " << -0.1 * (alignmentX1->GetBinContent(i+1) - deltaX) << " " << -0.1 * (alignmentY1->GetBinContent(i+1) - deltaY) << " " << theta[i*4+0] << endl;
+      deltaX = chipAlignmentArray[i*4+1].deltaX;
+      deltaY = chipAlignmentArray[i*4+1].deltaY;
+      file << i*4 + 1 << " " << -0.1 * (alignmentX2->GetBinContent(i+1) - deltaX) << " " << -0.1 * (alignmentY2->GetBinContent(i+1) - deltaY) << " " << theta[i*4+1] << endl;
+      deltaX = chipAlignmentArray[i*4+2].deltaX;
+      deltaY = chipAlignmentArray[i*4+2].deltaY;
+      file << i*4 + 2 << " " << -0.1 * (alignmentX3->GetBinContent(i+1) - deltaX) << " " << -0.1 * (alignmentY3->GetBinContent(i+1) - deltaY) << " " << theta[i*4+2] << endl;
+      deltaX = chipAlignmentArray[i*4+3].deltaX;
+      deltaY = chipAlignmentArray[i*4+3].deltaY;
+      file << i*4 + 3 << " " << -0.1 * (alignmentX4->GetBinContent(i+1) - deltaX) << " " << -0.1 * (alignmentY4->GetBinContent(i+1) - deltaY) << " " << theta[i*4+3] << endl;
+   }
+   file.close();
 }
 
 void drawDiffusionCheck(Int_t Runs, Int_t Layer, Float_t energy) {
@@ -1652,7 +1652,7 @@ void drawDiffusionCheck(Int_t Runs, Int_t Layer, Float_t energy) {
    CalorimeterFrame *cf = new CalorimeterFrame();
    
    for (Int_t i=0; i<=Runs; i++) {
-   	di->getMCFrame(i, cf); // Remember to have MC data available at ./test.root
+      di->getMCFrame(i, cf); // Remember to have MC data available at ./test.root
    }
 
    delete di;
@@ -1680,17 +1680,17 @@ void drawDiffusionCheck(Int_t Runs, Int_t Layer, Float_t energy) {
 
 void drawFrame2D(Int_t Runs, Int_t Layer, Float_t energy) {
    run_energy = energy;
-	DataInterface *di = new DataInterface();
+   DataInterface *di = new DataInterface();
    CalorimeterFrame *cf = new CalorimeterFrame();
    
    TList *histogramList = new TList;
    
    for (Int_t i=0; i<Runs; i++) {
-	   di->getMCFrame(i, cf);
-	   histogramList->Add(cf->getTH2F(Layer));
+      di->getMCFrame(i, cf);
+      histogramList->Add(cf->getTH2F(Layer));
    }
  
-	delete di;
+   delete di;
 
    TH2F *Frame2D = new TH2F("Frame2D", Form("Hit distribution in layer %i", Layer),
                               nx*2, 0, nx*2, ny*2, 0, ny*2);
@@ -1701,7 +1701,7 @@ void drawFrame2D(Int_t Runs, Int_t Layer, Float_t energy) {
 }
 
 void drawData3D(Int_t Runs, Float_t energy) {
-	run_energy = energy;
+   run_energy = energy;
 
    DataInterface *di = new DataInterface();
 
@@ -1713,22 +1713,22 @@ void drawData3D(Int_t Runs, Float_t energy) {
    Frame3D->SetZTitle("Y axis"); 
 
    for (Int_t run=0; run<Runs; run++) {
-   	di->getMCData(run, Frame3D);
+      di->getMCData(run, Frame3D);
    }
-	
+   
    delete di;
 
    Frame3D->Draw("LEGO");
 }
 
 void compareClusterSizes(Int_t Runs, Bool_t recreate, Float_t energy) {
-	run_energy = energy;
-	Tracks	 *	MCTracks = nullptr;
-	Tracks	 *	DataTracks = nullptr;
-	Cluster	 *	thisCluster = nullptr;
-	Clusters	 *	MCClusters = nullptr;
-	Clusters	 *	DataClusters = nullptr;
-	Int_t		nTracksMC, nTracksData, thisLayer, thisSize;
+   run_energy = energy;
+   Tracks    * MCTracks = nullptr;
+   Tracks    * DataTracks = nullptr;
+   Cluster   * thisCluster = nullptr;
+   Clusters  * MCClusters = nullptr;
+   Clusters  * DataClusters = nullptr;
+   Int_t    nTracksMC, nTracksData, thisLayer, thisSize;
     Bool_t      useChip = false;
 
     Int_t fChip = 1;
@@ -1736,78 +1736,78 @@ void compareClusterSizes(Int_t Runs, Bool_t recreate, Float_t energy) {
 
     const Int_t nLayersToUse = 7*4;
 
-	cout << "Finding MC tracks...\n";
-	MCTracks = loadOrCreateTracks(recreate, Runs, kMC, energy);
-	MCTracks->extrapolateToLayer0();
-	
-	cout << "Finding EXP tracks...\n";
-	DataTracks = loadOrCreateTracks(recreate, Runs, kData, energy);
-	DataTracks->extrapolateToLayer0();
+   cout << "Finding MC tracks...\n";
+   MCTracks = loadOrCreateTracks(recreate, Runs, kMC, energy);
+   MCTracks->extrapolateToLayer0();
+   
+   cout << "Finding EXP tracks...\n";
+   DataTracks = loadOrCreateTracks(recreate, Runs, kData, energy);
+   DataTracks->extrapolateToLayer0();
 
-	MCClusters = getClusters(Runs, kMC, kCalorimeter, energy);
-	DataClusters = getClusters(Runs, kData, kCalorimeter, energy);
+   MCClusters = getClusters(Runs, kMC, kCalorimeter, energy);
+   DataClusters = getClusters(Runs, kData, kCalorimeter, energy);
 
-	TCanvas *c2 = new TCanvas("c2", "Individual cluster size distributions MC", 1200, 800);
-	c2->Divide(4, 2, 0.01, 0.01);
-	TCanvas *c3 = new TCanvas("c3", "Individual cluster size distributions DATA", 1200, 800);
-	c3->Divide(4, 2, 0.01, 0.01);
-	TCanvas *c1 = new TCanvas("c1", "Cluster size distribution comparison", 1022, 645);
+   TCanvas *c2 = new TCanvas("c2", "Individual cluster size distributions MC", 1200, 800);
+   c2->Divide(4, 2, 0.01, 0.01);
+   TCanvas *c3 = new TCanvas("c3", "Individual cluster size distributions DATA", 1200, 800);
+   c3->Divide(4, 2, 0.01, 0.01);
+   TCanvas *c1 = new TCanvas("c1", "Cluster size distribution comparison", 1022, 645);
 
-	vector<TH1F*> *hCSVectorMC = new vector<TH1F*>;
-	for (Int_t i=0; i<nLayersToUse; i++) {
-		hCSVectorMC->push_back(new TH1F(Form("hCSIndMC_%d", i), Form("CS histogram %d", i), 60, 0, 60));
-	}
-	
-	vector<TH1F*> *hCSVectorData = new vector<TH1F*>;
-	for (Int_t i=0; i<nLayersToUse; i++) {
-		hCSVectorData->push_back(new TH1F(Form("hCSIndData_%d", i), Form("CS histogram %d", i), 60, 0, 60));
-	}
+   vector<TH1F*> *hCSVectorMC = new vector<TH1F*>;
+   for (Int_t i=0; i<nLayersToUse; i++) {
+      hCSVectorMC->push_back(new TH1F(Form("hCSIndMC_%d", i), Form("CS histogram %d", i), 60, 0, 60));
+   }
+   
+   vector<TH1F*> *hCSVectorData = new vector<TH1F*>;
+   for (Int_t i=0; i<nLayersToUse; i++) {
+      hCSVectorData->push_back(new TH1F(Form("hCSIndData_%d", i), Form("CS histogram %d", i), 60, 0, 60));
+   }
 
-	for (Int_t i=0; i<MCClusters->GetEntriesFast(); i++) {
-		thisCluster = MCClusters->At(i);
+   for (Int_t i=0; i<MCClusters->GetEntriesFast(); i++) {
+      thisCluster = MCClusters->At(i);
         if (useChip)    thisLayer = thisCluster->getChip();
         else            thisLayer = thisCluster->getLayer();
-		
+      
         if (thisLayer >= nLayersToUse) continue;
 
-		thisSize = thisCluster->getSize();
-		hCSVectorMC->at(thisLayer)->Fill(thisSize);
-	}
-	
-	for (Int_t i=0; i<DataClusters->GetEntriesFast(); i++) {
-		thisCluster = DataClusters->At(i);
+      thisSize = thisCluster->getSize();
+      hCSVectorMC->at(thisLayer)->Fill(thisSize);
+   }
+   
+   for (Int_t i=0; i<DataClusters->GetEntriesFast(); i++) {
+      thisCluster = DataClusters->At(i);
         if (useChip)    thisLayer = thisCluster->getChip();
         else            thisLayer = thisCluster->getLayer();
 
         if (thisLayer >= nLayersToUse) continue;
-		
+      
         thisSize = thisCluster->getSize();
-		hCSVectorData->at(thisLayer)->Fill(thisSize);
-	}
+      hCSVectorData->at(thisLayer)->Fill(thisSize);
+   }
 
     Float_t layerMC[nLayersToUse]; //= {0, 1, 2, 3, 4, 5, 6, 7};
-	Float_t layerData[nLayersToUse];// = {0, 1, 2, 3, 4, 5, 6, 7};
+   Float_t layerData[nLayersToUse];// = {0, 1, 2, 3, 4, 5, 6, 7};
      
     for (Int_t i=0; i<nLayersToUse; i++) {
         layerMC[i] = i;
         layerData[i] = i;
     }
 
-	Float_t errorLayer[nLayersToUse] = {0};
-	Float_t clusterSizeMC[nLayersToUse] = {0};
-	Float_t errorClusterSizeMC[nLayersToUse] = {0};
-	Float_t clusterSizeData[nLayersToUse] = {0};
-	Float_t errorClusterSizeData[nLayersToUse] = {0};
+   Float_t errorLayer[nLayersToUse] = {0};
+   Float_t clusterSizeMC[nLayersToUse] = {0};
+   Float_t errorClusterSizeMC[nLayersToUse] = {0};
+   Float_t clusterSizeData[nLayersToUse] = {0};
+   Float_t errorClusterSizeData[nLayersToUse] = {0};
 
-	for (Int_t i=0; i<nLayersToUse; i++) {
-		layerMC[i] -= 0.07;
-		layerData[i] += 0.07;
+   for (Int_t i=0; i<nLayersToUse; i++) {
+      layerMC[i] -= 0.07;
+      layerData[i] += 0.07;
 
-		clusterSizeMC[i] = hCSVectorMC->at(i)->GetMean();
-		clusterSizeData[i] = hCSVectorData->at(i)->GetMean();
-		errorClusterSizeMC[i] = hCSVectorMC->at(i)->GetRMS();
-		errorClusterSizeData[i] = hCSVectorData->at(i)->GetRMS();
-	}
+      clusterSizeMC[i] = hCSVectorMC->at(i)->GetMean();
+      clusterSizeData[i] = hCSVectorData->at(i)->GetMean();
+      errorClusterSizeMC[i] = hCSVectorMC->at(i)->GetRMS();
+      errorClusterSizeData[i] = hCSVectorData->at(i)->GetRMS();
+   }
 
    Float_t sumMCLow = 0;
    Float_t sumMCHigh = 0;
@@ -1838,347 +1838,360 @@ void compareClusterSizes(Int_t Runs, Bool_t recreate, Float_t energy) {
    cout << "Ratio of HIGH RESISTIVITY CHIPS: " << sumMCHigh / sumEXPHigh << endl;
       
 
-	TGraphErrors * graphCSMC = new TGraphErrors(nLayersToUse, layerMC, clusterSizeMC, errorLayer, errorClusterSizeMC);
-	TGraphErrors * graphCSData = new TGraphErrors(nLayersToUse, layerData, clusterSizeData, errorLayer, errorClusterSizeData);
-	
-	graphCSMC->SetTitle(Form("Cluster size distribution comparison at %.0f MeV;Layer number;Cluster size [# pixels]", run_energy));
+   TGraphErrors * graphCSMC = new TGraphErrors(nLayersToUse, layerMC, clusterSizeMC, errorLayer, errorClusterSizeMC);
+   TGraphErrors * graphCSData = new TGraphErrors(nLayersToUse, layerData, clusterSizeData, errorLayer, errorClusterSizeData);
+   
+   graphCSMC->SetTitle(Form("Cluster size distribution comparison at %.0f MeV;Layer number;Cluster size [# pixels]", run_energy));
     if (useChip) graphCSMC->GetXaxis()->SetTitle("Chip number");
-	graphCSMC->SetMinimum(0);
-	graphCSMC->SetMaximum(40);
-	graphCSMC->SetMarkerStyle(21);
-	graphCSMC->SetMarkerColor(kBlue);
-	graphCSData->SetMarkerStyle(22);
-	graphCSData->SetMarkerColor(kRed);
-	graphCSData->SetMarkerSize(1.5);
-	graphCSMC->SetMarkerSize(1.25);
-	graphCSMC->GetXaxis()->SetTitleFont(22);
-	graphCSMC->GetXaxis()->SetLabelFont(22);
-	graphCSMC->GetYaxis()->SetTitleFont(22);
-	graphCSMC->GetYaxis()->SetLabelFont(22);
-	graphCSMC->GetXaxis()->SetNdivisions(10);
+   graphCSMC->SetMinimum(0);
+   graphCSMC->SetMaximum(40);
+   graphCSMC->SetMarkerStyle(21);
+   graphCSMC->SetMarkerColor(kBlue);
+   graphCSData->SetMarkerStyle(22);
+   graphCSData->SetMarkerColor(kRed);
+   graphCSData->SetMarkerSize(1.5);
+   graphCSMC->SetMarkerSize(1.25);
+   graphCSMC->GetXaxis()->SetTitleFont(22);
+   graphCSMC->GetXaxis()->SetLabelFont(22);
+   graphCSMC->GetYaxis()->SetTitleFont(22);
+   graphCSMC->GetYaxis()->SetLabelFont(22);
+   graphCSMC->GetXaxis()->SetNdivisions(10);
 
-	TLegend *leg = new TLegend(0.16, 0.70, 0.28, 0.86);
-	leg->SetTextFont(22);
-	leg->AddEntry(graphCSMC, "MC", "ep");
-	leg->AddEntry(graphCSData, "Exp. data", "ep");
+   TLegend *leg = new TLegend(0.16, 0.70, 0.28, 0.86);
+   leg->SetTextFont(22);
+   leg->AddEntry(graphCSMC, "MC", "ep");
+   leg->AddEntry(graphCSData, "Exp. data", "ep");
 
-	c1->cd();
-	graphCSMC->Draw("AP");
-	graphCSData->Draw("P");
-	leg->Draw();
+   c1->cd();
+   graphCSMC->Draw("AP");
+   graphCSData->Draw("P");
+   leg->Draw();
 
-	gPad->Update();
-	TPaveText *title = (TPaveText*) gPad->GetPrimitive("title");
-	title->SetTextFont(22);
-	gPad->Modified();
+   gPad->Update();
+   TPaveText *title = (TPaveText*) gPad->GetPrimitive("title");
+   title->SetTextFont(22);
+   gPad->Modified();
 
-	for (Int_t i=0; i<nLayersToUse; i++) {
-		c2->cd(i+1);
-		hCSVectorMC->at(i)->Draw();
-		c3->cd(i+1);
-		hCSVectorData->at(i)->Draw();
-	}
+   for (Int_t i=0; i<nLayersToUse; i++) {
+      c2->cd(i+1);
+      hCSVectorMC->at(i)->Draw();
+      c3->cd(i+1);
+      hCSVectorData->at(i)->Draw();
+   }
 }
 
 Bool_t getCutTrackLength(Float_t energy, Track *track) {
-	Int_t minTL = getMinimumTrackLength(energy);
-	Float_t TL = track->getTrackLengthmm();
+   Int_t minTL = getMinimumTrackLength(energy);
+   Float_t TL = track->getTrackLengthmm();
 
-	Bool_t cutTL = (TL > minTL) ? true : false;
+   Bool_t cutTL = (TL > minTL) ? true : false;
 
-	return cutTL;
+   return cutTL;
 }
 
 Bool_t getCutWEPL(Track *track) {
-	Float_t minTLWEPL = 150;
-	Float_t WEPL = track->getWEPL();
+   Float_t minTLWEPL = 150;
+   Float_t WEPL = track->getWEPL();
 
-	Bool_t cutTL = (WEPL > minTLWEPL) ? true : false;
+   Bool_t cutTL = (WEPL > minTLWEPL) ? true : false;
 
-	return cutTL;
+   return cutTL;
 }
 
 Bool_t getCutChipNumber(Track *track) {
-	Int_t x0 = track->getX(0);
-	Int_t y0 = track->getY(0);
-	Int_t chip = (x0 >= nx) + 2 * (y0 < ny);
-	Bool_t cutChipNumber = (chip<2) ? true : false;
+   Int_t x0 = track->getX(0);
+   Int_t y0 = track->getY(0);
+   Int_t chip = (x0 >= nx) + 2 * (y0 < ny);
+   Bool_t cutChipNumber = (chip<2) ? true : false;
 
-	return cutChipNumber;
+   return cutChipNumber;
 }
 
 Bool_t getCutBraggPeakInTrack(Track *track) {
-	Float_t braggPeakRatio = 2.5;
+   Float_t braggPeakRatio = 2.5;
 
-	Int_t lastBin = track->GetEntriesFast() - 1;
-	if (lastBin < 4) return false;
+   Int_t lastBin = track->GetEntriesFast() - 1;
+   if (lastBin < 4) return false;
 
-	Float_t lowStd = track->getStdSizeToIdx(lastBin-1);
-	Int_t   nEmptyBins = track->getNMissingLayers();
+   Float_t lowStd = track->getStdSizeToIdx(lastBin-1);
+   Int_t   nEmptyBins = track->getNMissingLayers();
 
 
-	if (lowStd > 4) return false;
-	if (nEmptyBins > 1) return false;
+   if (lowStd > 4) return false;
+   if (nEmptyBins > 1) return false;
 
-	Float_t rMean = track->getMeanSizeToIdx(lastBin - 1);
-	Float_t rrMean = track->getMeanSizeToIdx(lastBin - 2);
+   Float_t rMean = track->getMeanSizeToIdx(lastBin - 1);
+   Float_t rrMean = track->getMeanSizeToIdx(lastBin - 2);
 
-	Float_t r = track->getSize(lastBin) / rMean;
-	Float_t rr = track->getSize(lastBin-1) / rrMean;
+   Float_t r = track->getSize(lastBin) / rMean;
+   Float_t rr = track->getSize(lastBin-1) / rrMean;
 
-	if (r > braggPeakRatio) return true;
-	else {
-		if (rr > braggPeakRatio) return true;
-		else return false;
-	}
+   if (r > braggPeakRatio) return true;
+   else {
+      if (rr > braggPeakRatio) return true;
+      else return false;
+   }
 }
 
 void drawIndividualGraphs(TCanvas *cGraph, TGraphErrors* outputGraph, Float_t fitEnergy, Float_t fitScale, Float_t fitError, Int_t fitIdx, Int_t eventID, Float_t *x_energy, Float_t *y_energy) {
-	cGraph->cd(fitIdx+1);
-	Bool_t kDrawFit = true;
-	Bool_t kDrawText = true;
+   cGraph->cd(fitIdx+1);
+   Bool_t kDrawFit = true;
+   Bool_t kDrawText = true;
 
-	outputGraph->SetMinimum(0);
-	outputGraph->SetMaximum(30);
-	outputGraph->SetTitle("");
-	
-	if (kOutputUnit == kWEPL || kOutputUnit == kEnergy) {
-		outputGraph->GetXaxis()->SetTitle("Water Equivalent Path Length [mm]");
-	}
-	
-	else if (kOutputUnit == kPhysical) {
-		outputGraph->GetXaxis()->SetTitle("Physical path length [mm]");
-	}
+   outputGraph->SetMinimum(0);
+   outputGraph->SetMaximum(30);
+   outputGraph->SetTitle("");
+   
+   if (kOutputUnit == kWEPL || kOutputUnit == kEnergy) {
+      outputGraph->GetXaxis()->SetTitle("Water Equivalent Path Length [mm]");
+   }
+   
+   else if (kOutputUnit == kPhysical) {
+      outputGraph->GetXaxis()->SetTitle("Physical path length [mm]");
+   }
 
-	outputGraph->GetYaxis()->SetTitle("Deposited energy on layer [keV/#mum]");
-	outputGraph->GetYaxis()->SetTitleOffset(1);
-	outputGraph->GetXaxis()->SetTitleSize(0.05);
-	outputGraph->GetYaxis()->SetTitleSize(0.05);
-	outputGraph->GetXaxis()->SetLabelSize(0.04);
-	outputGraph->GetYaxis()->SetLabelSize(0.04);
-	outputGraph->GetXaxis()->SetTitleFont(22);
-	outputGraph->GetXaxis()->SetLabelFont(22);
-	outputGraph->GetYaxis()->SetTitleFont(22);
-	outputGraph->GetYaxis()->SetLabelFont(22);
+   outputGraph->GetYaxis()->SetTitle("Deposited energy on layer [keV/#mum]");
+   outputGraph->GetYaxis()->SetTitleOffset(1);
+   outputGraph->GetXaxis()->SetTitleSize(0.05);
+   outputGraph->GetYaxis()->SetTitleSize(0.05);
+   outputGraph->GetXaxis()->SetLabelSize(0.04);
+   outputGraph->GetYaxis()->SetLabelSize(0.04);
+   outputGraph->GetXaxis()->SetTitleFont(22);
+   outputGraph->GetXaxis()->SetLabelFont(22);
+   outputGraph->GetYaxis()->SetTitleFont(22);
+   outputGraph->GetYaxis()->SetLabelFont(22);
 
-	Float_t low = getUnitFromEnergy(0);
-	Float_t high = getUnitFromEnergy(run_energy * 1.2);
+   Float_t low = getUnitFromEnergy(0);
+   Float_t high = getUnitFromEnergy(run_energy * 1.2);
 
-	outputGraph->GetXaxis()->SetLimits(low, high);
+   outputGraph->GetXaxis()->SetLimits(low, high);
 
-	outputGraph->SetMarkerColor(4);
-	outputGraph->SetMarkerStyle(21);
-	outputGraph->Draw("AP");
+   outputGraph->SetMarkerColor(4);
+   outputGraph->SetMarkerStyle(21);
+   outputGraph->Draw("AP");
 
-	TF1 *func = new TF1("fit_BP", fitfunc_DBP, 0, 500, 2);
-	func->SetParameters(fitEnergy, fitScale);
+   TF1 *func = new TF1("fit_BP", fitfunc_DBP, 0, 500, 2);
+   func->SetParameters(fitEnergy, fitScale);
 
-	if (kDrawFit) {
-		func->Draw("same");
-	}
-	
-	if (x_energy) {
-		Float_t WEPLFactor = getWEPLFactorFromEnergy(run_energy);
-		Long64_t n=0;
-		Long64_t j=0;
-		
-		for (Long64_t i=eventID*sizeOfEventID; i<(eventID+1)*sizeOfEventID; i++) {
-			if (y_energy[i] == 0) {
-				n = j;
-				break;
-			}
-			y_energy[i] *=  2;
-			
-			j++;
-		}
-		
-		if (n>1) {
-			TGraph *energyLoss = new TGraph(n, (x_energy + eventID*sizeOfEventID), (y_energy + eventID*sizeOfEventID));
-			energyLoss->SetLineColor(kBlack); energyLoss->SetLineWidth(2);
-			energyLoss->Draw("same");
-		}
-		
-		Float_t lastX = x_energy[eventID*sizeOfEventID + n-1];
-		TLine *l = new TLine(lastX, 0, lastX, 600);
-		l->Draw();
-		
-		Float_t realEnergy = getEnergyFromWEPL(x_energy[eventID*sizeOfEventID + n-1]);
-		TLatex *text2 = new TLatex(15, 28, Form("'Real' energy: %.1f #pm MeV", realEnergy));
-		text2->SetTextSize(0.045);
-		text2->SetTextFont(22);
-		text2->Draw();
-	}
+   if (kDrawFit) {
+      func->Draw("same");
+   }
+   
+   if (x_energy) {
+      Float_t WEPLFactor = getWEPLFactorFromEnergy(run_energy);
+      Long64_t n=0;
+      Long64_t j=0;
+      
+      for (Long64_t i=eventID*sizeOfEventID; i<(eventID+1)*sizeOfEventID; i++) {
+         if (y_energy[i] == 0) {
+            n = j;
+            break;
+         }
+         y_energy[i] *=  2;
+         
+         j++;
+      }
+      
+      if (n>1) {
+         TGraph *energyLoss = new TGraph(n, (x_energy + eventID*sizeOfEventID), (y_energy + eventID*sizeOfEventID));
+         energyLoss->SetLineColor(kBlack); energyLoss->SetLineWidth(2);
+         energyLoss->Draw("same");
+      }
+      
+      Float_t lastX = x_energy[eventID*sizeOfEventID + n-1];
+      TLine *l = new TLine(lastX, 0, lastX, 600);
+      l->Draw();
+      
+      Float_t realEnergy = getEnergyFromWEPL(x_energy[eventID*sizeOfEventID + n-1]);
+      TLatex *text2 = new TLatex(15, 28, Form("'Real' energy: %.1f #pm MeV", realEnergy));
+      text2->SetTextSize(0.045);
+      text2->SetTextFont(22);
+      text2->Draw();
+   }
 
-	if (kDrawText) {
-		TLatex *text = new TLatex(15, 28, Form("Fitted energy: %.1f #pm %.1f MeV", fitEnergy, fitError));
-		text->SetTextSize(0.045);
-		text->SetTextFont(22);
-		text->Draw();
-	}
-	
-	outputGraph->GetXaxis()->SetRangeUser(0, 265);
+   if (kDrawText) {
+      TLatex *text = new TLatex(15, 28, Form("Fitted energy: %.1f #pm %.1f MeV", fitEnergy, fitError));
+      text->SetTextSize(0.045);
+      text->SetTextFont(22);
+      text->Draw();
+   }
+   
+   outputGraph->GetXaxis()->SetRangeUser(0, 265);
 
-	cGraph->Update();
+   cGraph->Update();
 }
 
 Float_t  doNGaussianFit ( TH1F *h, Float_t *means, Float_t *sigmas) {
-	TF1 *gauss;
-	cout << "Energy " << run_energy << endl;
-	cout << "Layer;\t Constant;\t Mean;\t\t Energy;\t Sigma;\t\t Fits in layer;\t Chi2/n\n";
-	
-	Float_t constant, mean, lEnergy, sigma;
-	Float_t meanValueFromSumming = 0;
-	
-	Float_t array_mean[3] = {};
-	Int_t	array_layer[3] = {};
-	Float_t array_constant[3] = {};
-	Float_t array_sigma[3] = {};
-	Float_t array_sum[3] = {};
-	Float_t array_energy[3] = {};
-	Float_t array_f[3] = {};
-	Float_t array_chi2n[3] = {};
-	
-	TAxis *axis = h->GetXaxis();
-	Float_t fullIntegral = h->Integral();
-	Int_t binSearchFrom = axis->FindBin(getWEPLFromEnergy(run_energy * 0.9));
-	Int_t binSearchTo   = axis->FindBin(getWEPLFromEnergy(run_energy * 1.1));
-	Float_t partialIntegral = h->Integral(binSearchFrom, binSearchTo);
+   TF1 *gauss;
+   cout << "Energy " << run_energy << endl;
+   cout << "Layer;\t Constant;\t Mean;\t\t Energy;\t Sigma;\t\t Fits in layer;\t Chi2/n\n";
+   
+   Float_t constant, mean, lEnergy, sigma;
+   Float_t meanValueFromSumming = 0;
+   
+   Float_t array_mean[3] = {};
+   Int_t array_layer[3] = {};
+   Float_t array_constant[3] = {};
+   Float_t array_sigma[3] = {};
+   Float_t array_sum[3] = {};
+   Float_t array_energy[3] = {};
+   Float_t array_f[3] = {};
+   Float_t array_chi2n[3] = {};
+   
+   TAxis *axis = h->GetXaxis();
+   Float_t fullIntegral = h->Integral();
+   Int_t binSearchFrom = axis->FindBin(getWEPLFromEnergy(run_energy * 0.9));
+   Int_t binSearchTo   = axis->FindBin(getWEPLFromEnergy(run_energy * 1.1));
+   Float_t partialIntegral = h->Integral(binSearchFrom, binSearchTo);
 
-	for (Int_t i=binSearchFrom; i<binSearchTo; i++) {
-		meanValueFromSumming += axis->GetBinCenter(i) * h->GetBinContent(i) / partialIntegral;
-	}
+   for (Int_t i=binSearchFrom; i<binSearchTo; i++) {
+      meanValueFromSumming += axis->GetBinCenter(i) * h->GetBinContent(i) / partialIntegral;
+   }
 
-	Float_t error = 100 * (meanValueFromSumming - getWEPLFromEnergy(run_energy)) / getWEPLFromEnergy(run_energy);
-	cout << "\033[1mUsing the sum method, the weighted mean value of the distribution is " << meanValueFromSumming << " mm. (" << error << ")\033[0m\n";
-	
-	Float_t maxBinHeight = h->GetMaximum();
+   Float_t error = 100 * (meanValueFromSumming - getWEPLFromEnergy(run_energy)) / getWEPLFromEnergy(run_energy);
+   cout << "\033[1mUsing the sum method, the weighted mean value of the distribution is " << meanValueFromSumming << " mm. (" << error << ")\033[0m\n";
+   
+   Float_t maxBinHeight = h->GetMaximum();
 
-	Bool_t isLastLayer, wasLastLayer = false;;
-	
+   Bool_t isLastLayer, wasLastLayer = false;;
+   
 
-	Int_t j=0;
-	for (Int_t i=0; i<15; i++) {
- 		if (getWEPLFromTL(getLayerPositionmm(i)) > getUnitFromEnergy(run_energy*1.1)) continue;
- 		if (getWEPLFromTL(getLayerPositionmm(i)) < getWEPLFromEnergy(run_energy * 0.8)) continue;
+   Int_t j=0;
+   for (Int_t i=0; i<15; i++) {
+      if (getWEPLFromTL(getLayerPositionmm(i)) > getUnitFromEnergy(run_energy*1.1)) continue;
+      if (getWEPLFromTL(getLayerPositionmm(i)) < getWEPLFromEnergy(run_energy * 0.8)) continue;
 
-		Float_t searchFrom = getWEPLFromTL(getLayerPositionmm(i))+10;
-		Float_t searchTo = getWEPLFromTL(getLayerPositionmm(i+1))+10;
-		
-		Int_t bmin = axis->FindBin(searchFrom);
-		Int_t bmax = axis->FindBin(searchTo);
-		
-//		TLine *l1 = new TLine(searchFrom, 0, searchFrom, 1000); l1->SetLineColor(kGreen); l1->Draw();
-//		TLine *l2 = new TLine(searchTo, 0, searchTo, 1000); l2->SetLineColor(kRed); l2->Draw();
-		
-		Float_t integral = h->Integral(bmin,bmax);
-		Float_t ratio = integral / fullIntegral;
-		
-		isLastLayer = ((getWEPLFromTL(getLayerPositionmm(i)) > getUnitFromEnergy(run_energy-10)) && !wasLastLayer && ratio > 0.01) ;
-	
- 		if (i<=3) continue;
- 		if (ratio < 0.05 && !isLastLayer) continue;
-		
-		gauss = new TF1(Form("Gaus_%d", i), "gaus(0)", searchFrom, searchTo);
-	
-		gauss->SetLineWidth(2.5);
+      Float_t searchFrom = getWEPLFromTL(getLayerPositionmm(i))+10;
+      Float_t searchTo = getWEPLFromTL(getLayerPositionmm(i+1))+10;
+      
+      Int_t bmin = axis->FindBin(searchFrom);
+      Int_t bmax = axis->FindBin(searchTo);
+      
+//    TLine *l1 = new TLine(searchFrom, 0, searchFrom, 1000); l1->SetLineColor(kGreen); l1->Draw();
+//    TLine *l2 = new TLine(searchTo, 0, searchTo, 1000); l2->SetLineColor(kRed); l2->Draw();
+      
+      Float_t integral = h->Integral(bmin,bmax);
+      Float_t ratio = integral / fullIntegral;
+      
+      isLastLayer = ((getWEPLFromTL(getLayerPositionmm(i)) > getUnitFromEnergy(run_energy-10)) && !wasLastLayer && ratio > 0.01) ;
+   
+      if (i<=3) continue;
+      if (ratio < 0.05 && !isLastLayer) continue;
+      
+      gauss = new TF1(Form("Gaus_%d", i), "gaus(0)", searchFrom, searchTo);
+   
+      gauss->SetLineWidth(2.5);
 
-		sigma = 3;
-		if (isLastLayer && ratio < 0.05) sigma = 0.2;
-		
-		gauss->SetParameters(10, (searchFrom+searchTo)/2, sigma);
-		gauss->SetParLimits(0, 0, maxBinHeight);
-		gauss->SetParLimits(1, searchFrom+8, searchTo-4);
-		gauss->SetParLimits(2, 2, 12);
-		
-		h->Fit(gauss, "M, B, WW, Q, 0", "", searchFrom, searchTo);
-		
-		sigma = gauss->GetParameter(2);
-		constant = gauss->GetParameter(0);
-		mean = gauss->GetParameter(1);
-		lEnergy = getEnergyFromUnit(mean);
-		
-		Float_t integralSigma = h->Integral(axis->FindBin(mean - sigma), axis->FindBin(mean + sigma));
-		Float_t chi2 = gauss->GetChisquare();
-		Float_t chi2n = chi2 / integral;
-		Float_t chi2nSigma = chi2 / integralSigma;
-		
- 		cout << Form("Searching from %.1f to %.1f, with midpoint at %.1f. Found best fit @ %.1f with chi2 = %.2f and chi2/n = %.2f and chi2/nSIGMA = %.2f, ratio = %.2f.\n", searchFrom, searchTo,(searchTo+searchFrom)/2 , mean, chi2, chi2n, chi2nSigma, ratio);
+      sigma = 3;
+      if (isLastLayer && ratio < 0.05) sigma = 0.2;
+      
+      gauss->SetParameters(10, (searchFrom+searchTo)/2, sigma);
+      gauss->SetParLimits(0, 0, maxBinHeight);
+      gauss->SetParLimits(1, searchFrom+12, searchTo-4);
+      gauss->SetParLimits(2, 2, 12);
+      
+      h->Fit(gauss, "M, B, WW, Q, 0", "", searchFrom, searchTo);
+      
+      sigma = gauss->GetParameter(2);
+      constant = gauss->GetParameter(0);
+      mean = gauss->GetParameter(1);
+      lEnergy = getEnergyFromUnit(mean);
+      
+      Float_t integralSigma = h->Integral(axis->FindBin(mean - sigma), axis->FindBin(mean + sigma));
+      Float_t chi2 = gauss->GetChisquare();
+      Float_t chi2n = chi2 / integral;
+      Float_t chi2nSigma = chi2 / integralSigma;
+      
+      cout << Form("Searching from %.1f to %.1f, with midpoint at %.1f. Found best fit @ %.1f with chi2 = %.2f and chi2/n = %.2f and chi2/nSIGMA = %.2f, ratio = %.2f.\n", searchFrom, searchTo,(searchTo+searchFrom)/2 , mean, chi2, chi2n, chi2nSigma, ratio);
 //
-		if (run_energy > 182 && run_energy < 193) {
-			if (chi2n > 200 || sigma < 2.5 || constant < 3) {
-				delete gauss;
-				continue;
-			}
-		}
+      if (run_energy > 182 && run_energy < 193) {
+         if (chi2n > 200 || sigma < 2.5 || constant < 3) {
+            delete gauss;
+            continue;
+         }
+      }
 
-//		if (kDataType == kData && chi2n > 7.5) { // less statistics in data
-//		delete gauss;
-//			continue;
-//		}
+//    if (kDataType == kData && chi2n > 7.5) { // less statistics in data
+//    delete gauss;
+//       continue;
+//    }
 
- 		if (ratio > 0.05) { //  || (isLastLayer && ratio>0.025)) {
- 			gauss->SetLineColor(kRed);
- 			gauss->SetLineWidth(3);
- 			gauss->Draw("same");
-			cout << Form("%d;\t %8.5f;\t %8.5f;\t %8.5f;\t %8.5f;\t %8.5f;\t %.2f\n", i, constant, mean, lEnergy, sigma, ratio, chi2n);
-			
-			if (j<3) {
-				array_mean[j] = mean;
-				array_layer[j] = i;
-				array_constant[j] = constant;
-				array_energy[j] = lEnergy;
-				array_sigma[j] = sigma;
-				array_f[j] = ratio;
-				array_sum[j] = integralSigma;
-			}
-			
-			sigmas[j] = sigma;
-			means[j++] = mean;
- 		}
- 		wasLastLayer = isLastLayer;
-	}
-	
-	Float_t estimated_energy = 0, estimated_range = 0;
-	Float_t estimated_energy_error = 0;
-	Float_t sum_constant = 0, sumSigma = 0;
-	for (Int_t i=0 ; i<3; i++) {
-//		estimated_range += array_constant[i] * array_mean[i];
-		estimated_range += array_sum[i] * array_mean[i];
-//		sum_constant += array_constant[i];
-		sum_constant += array_sum[i];
-		sumSigma += pow(array_sigma[i], 2);
-	}
+      if (ratio > 0.05) { //  || (isLastLayer && ratio>0.025)) {
+         gauss->SetLineColor(kRed);
+         gauss->SetLineWidth(3);
+         gauss->Draw("same");
+         cout << Form("%d;\t %8.5f;\t %8.5f;\t %8.5f;\t %8.5f;\t %8.5f;\t %.2f\n", i, constant, mean, lEnergy, sigma, ratio, chi2n);
+         
+         if (j<3) {
+            array_mean[j] = mean;
+            array_layer[j] = i;
+            array_constant[j] = constant;
+            array_energy[j] = lEnergy;
+            array_sigma[j] = sigma;
+            array_f[j] = ratio;
+            array_sum[j] = integralSigma;
+         }
+         
+         sigmas[j] = sigma;
+         means[j++] = mean;
+      }
+      wasLastLayer = isLastLayer;
+   }
 
-	sumSigma = sqrt(sumSigma);
+   Float_t estimated_energy = 0, estimated_range = 0;
+   Float_t estimated_energy_error = 0;
+   Float_t sum_constant = 0, sumSigma = 0;
+   for (Int_t i=0 ; i<3; i++) {
+//    estimated_range += array_constant[i] * array_mean[i];
+      estimated_range += array_sum[i] * array_mean[i];
+//    sum_constant += array_constant[i];
+      sum_constant += array_sum[i];
+      sumSigma += pow(array_sigma[i], 2);
+   }
 
-	estimated_range /= sum_constant;
+   sumSigma = sqrt(sumSigma);
 
-	estimated_energy = getEnergyFromUnit(estimated_range);
-	estimated_energy_error = getEnergyFromWEPL(estimated_range + sumSigma/2) - getEnergyFromWEPL(estimated_range - sumSigma/2);
-	cout << "ESTIMATED ENERGY FROM RUN IS " << estimated_energy << " +- " << estimated_energy_error << endl;
-	cout << "Estimated range = " << estimated_range << " +- " << sumSigma << endl;
-	
-	ofstream file("OutputFiles/output_gauss.csv", ofstream::out | ofstream::app);
-	// run_energy; layer[i], constant[i], mpv[i], energy[i], sigma[i], ratio[i];  i 1->3
-	
-	file << run_energy << "; ";
-	for (Int_t j=0; j<3; j++) {
-		file << Form("%d; %.5f; %.5f; %.5f; %.5f; %.5f; %.5f",
-					 array_layer[j], array_constant[j], array_mean[j],
-					 array_energy[j], array_sigma[j], array_f[j], array_chi2n[j]);
-	}
+   estimated_range /= sum_constant;
 
-	file << endl;
-	file.close();
-	
-	Float_t last_range = array_mean[0];
-	if (array_constant[1] > 0.1) last_range = array_mean[1];
-	if (array_constant[2] > 0.1) last_range = array_mean[2];
+   estimated_energy = getEnergyFromUnit(estimated_range);
+   estimated_energy_error = getEnergyFromWEPL(estimated_range + sumSigma/2) - getEnergyFromWEPL(estimated_range - sumSigma/2);
+   cout << "ESTIMATED ENERGY FROM RUN IS " << estimated_energy << " +- " << estimated_energy_error << endl;
+   cout << "Estimated range = " << estimated_range << " +- " << sumSigma << endl;
+  
+   Int_t binSigmaFrom = axis->FindBin(array_mean[0] - 3*array_sigma[0]);
+   Int_t binSigmaTo = axis->FindBin(array_mean[1] + 3*array_sigma[0]);
+   Float_t squareMeanDifference = 0;
+   Int_t N = 0;
+   for (Int_t i=binSigmaFrom; i<=binSigmaTo; i++) {
+      cout << "Adding " << h->GetBinContent(i) << " * (" << axis->GetBinCenter(i) << " - " << estimated_range << " )^2 to variance.\n";
+      squareMeanDifference += h->GetBinContent(i) * pow(axis->GetBinCenter(i) - estimated_range, 2);
+      N += h->GetBinContent(i);
+   }
 
-	ofstream file2("OutputFiles/result_makebraggpeakfit.csv", ofstream::out | ofstream::app);
-	// energy; nominal range; estimated range; range sigma; last_range
-	file2 << run_energy << " " << getWEPLFromEnergy(run_energy) << " " << estimated_range << " " << sumSigma << " " << last_range << endl;
-	file2.close();
+   Float_t empiricalSigma = sqrt(squareMeanDifference / N);
+   cout << "The empirical standard deviation is " << empiricalSigma << " mm.\n";
+   
+   ofstream file("OutputFiles/output_gauss.csv", ofstream::out | ofstream::app);
+   // run_energy; layer[i], constant[i], mpv[i], energy[i], sigma[i], ratio[i];  i 1->3
+   
+   file << run_energy << "; ";
+   for (Int_t j=0; j<3; j++) {
+      file << Form("%d; %.5f; %.5f; %.5f; %.5f; %.5f; %.5f",
+                array_layer[j], array_constant[j], array_mean[j],
+                array_energy[j], array_sigma[j], array_f[j], array_chi2n[j]);
+   }
 
-	return estimated_range;
+   file << endl;
+   file.close();
+   
+   Float_t last_range = array_mean[0];
+   if (array_constant[1] > 0.1) last_range = array_mean[1];
+   if (array_constant[2] > 0.1) last_range = array_mean[2];
+
+   ofstream file2("OutputFiles/result_makebraggpeakfit.csv", ofstream::out | ofstream::app);
+   // energy; nominal range; estimated range; range sigma; last_range
+   file2 << run_energy << " " << getWEPLFromEnergy(run_energy) << " " << estimated_range << " " << sumSigma << " " << last_range << endl;
+   file2.close();
+
+   return estimated_range;
 }

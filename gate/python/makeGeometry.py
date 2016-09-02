@@ -154,7 +154,7 @@ class Copy:
     def makeString(self):
         string =  "/gate/{}/repeaters/insert linear\n".format(self.name)
         string += "/gate/{}/linear/setRepeatNumber {}\n".format(self.name, self.nlayers)
-        string += "/gate/{}/linear/setRepeatVector {}\n".format(self.name, self.translation)
+        string += "/gate/{}/linear/setRepeatVector {} mm\n".format(self.name, self.translation)
 
         string += "\n"
 
@@ -195,13 +195,13 @@ class Box:
         if self.material:
             string += "/gate/{}/setMaterial {}\n".format(self.name, self.material)
         if self.color:
-            string += "/gate/{}/setColor {}\n".format(self.name, self.color)
+            string += "/gate/{}/vis/setColor {}\n".format(self.name, self.color)
         if not self.visible:
             string += "/gate/{}/vis/setVisible false\n".format(self.name)
 
         if self.genericRepeater:
             string += "\n/gate/{}/repeaters/insert genericRepeater\n".format(self.name)
-            string += "/gate/{}/genericRepeater/setPlacementsFilename geometry/Module.placements\n".format(self.name)
+            string += "/gate/{}/genericRepeater/setPlacementsFilename Module.placements\n".format(self.name)
 
         string += "\n"
 
@@ -221,11 +221,14 @@ class Box:
     def addRotation(self):
         self.genericRepeater = True
 
-    def rotatePosition(self, mat, deg, gapY, minY, maxY, minZ, maxZ):
+    def rotatePosition(self, mat, deg, gapY, minY, maxY, minZ, maxZ, i=0, cop=0):
         if mat == "1 0 0" and deg == 180:
             mean = (maxZ + minZ)/2.
             delta = maxZ - minZ
-            newPos = Pos(self.pos.x, -(self.pos.y + gapY) + (maxY + minY), -self.pos.z + (maxZ + minZ) + delta)
+            z = self.pos.z
+            if cop:
+                z += (i+1) * float(cop.translation.split()[2])
+            newPos = Pos(self.pos.x, -(self.pos.y + gapY) + (maxY + minY), -z + (maxZ + minZ) + delta)
             return newPos
         else:
             return self.pos
@@ -277,25 +280,6 @@ class Module:
         self.mother = mother
         self.absorberMaterial = absorberMaterial
         self.firstAbsorberMaterial = firstAbsorberMaterial
-
-    def setChipSizes(self, dx, dy):
-        self.chipSize = Size(dx, dy)
-        self.chipLeftPos  = Pos(-self.chipSize.dx/2 - self.chipGap.dx/2, self.chipSize.dy/2)
-        self.chipRightPos = Pos( self.chipSize.dx/2 + self.chipGap.dx/2, self.chipSize.dy/2)
-
-    def setChipGaps(self, dx, dy):
-        self.chipGap = Size(dx, dy)
-        self.chipLeftPos  = Pos(-self.chipSize.dx/2 - self.chipGap.dx/2, self.chipSize.dy/2)
-        self.chipRightPos = Pos( self.chipSize.dx/2 + self.chipGap.dx/2, self.chipSize.dy/2)
-
-    def setThicknesses(self, absorber, glue, pcb, passive, active, fillerglue, filler):
-        self.absorberThickness = absorber
-        self.glueThickness = glue
-        self.pcbThickness = pcb
-        self.activeChipThickness = active
-        self.passiveChipThickness = passive
-        self.fillerGlueThickness = fillerglue
-        self.fillerThickness = filler
 
     def getLeftSide(self):
         return self.pos - self.size / 2.
@@ -355,12 +339,12 @@ class Module:
         print("\033[1mAdded {} with mean pos {}\033[0m".format(self.objects[-1], self.objects[-1].pos))
 
     def makeMotherModule(self):
-        self.objects.append(Box(self.name, self.mother, self.pos, self.size))
+        self.objects.append(Box(self.name, "Layer", self.pos, self.size))
         self.objects[-1].genericRepeater = True
         print("Added {}".format(self.objects[-1]))
 
     def makeMotherLayer(self):
-        self.objects.append(Box("Layer", self.name, self.pos, self.size))
+        self.objects.append(Box("Layer", self.mother, self.pos, self.size))
         print("Added {}".format(self.objects[-1]))
 
     def makeAbsorber(self, n):
@@ -448,7 +432,7 @@ class Module:
 
     def addCopies(self, nlayers):
         translation = "0 0 {}".format(self.size.dz)
-        self.objects.append(Copy(self.name, nlayers, translation))
+        self.objects.append(Copy("Layer", nlayers, translation))
         print("\033[1mAdded repeater of {} with {} layers with translation {}\033[0m".format(self.name, nlayers, translation))
    
     def moveAllBoxes(self, fromZ = 0):
@@ -487,9 +471,11 @@ class Module:
 
     def correctAllNames(self):
         for obj in self.objects:
-            if obj.name == "FirstModule": continue
-            obj.name = "FM_" + obj.name
-            print(obj.name)
+            if obj.name != "FirstModule":
+                obj.name = "FM_" + obj.name
+            if obj.type == "Box":
+                if obj.mother == "Layer":
+                    obj.mother = "FM_" + obj.mother
 
     def writeGeometry(self):
         for obj in self.objects:
@@ -502,7 +488,7 @@ class Module:
         ax1 = fig.add_subplot(121)
 
         for obj in self.objects:
-            if obj.type == "Rotation" or obj.type == "Copy": continue
+            if obj.type == "Rotation" or obj.type == "Copy" or obj.name == "Absorber2": continue
 
             x1 = obj.pos.x - obj.size.dx/2
             y1 = obj.pos.y - obj.size.dy/2
@@ -513,21 +499,6 @@ class Module:
 
         minZ = self.getLeftSideNoAbsorber()
         maxZ = self.getLastObjectRightSide()
-
-        for rot in self.objects:
-            if rot.type == "Rotation":
-                for obj in self.objects:
-                    if obj.type == "Box" and obj.name[:-1] != "Absorber":
-                        pos = obj.pos
-                        size = obj.size
-                        newPos = obj.rotatePosition(rot.rotationmatrix, rot.rotation, self.chipGap.dy, -2, 2, minZ, maxZ)
-                        
-                        x1 = newPos.x - obj.size.dx/2
-                        y1 = newPos.y - obj.size.dy/2
-                        if obj.color:
-                            ax1.add_patch(patches.Rectangle((x1, y1), obj.size.dx, obj.size.dy, facecolor=obj.color))
-                        else:
-                            ax1.add_patch(patches.Rectangle((x1, y1), obj.size.dx, obj.size.dy, fill=False))
 
         ax2 = fig.add_subplot(122)
 
@@ -592,22 +563,28 @@ class DigitalTrackingCalorimeter:
     def __init__(self, dx = 15*cm, dy = 15*cm, dz = 80*cm):
         self.size = Size(dx, dy, dz)
         self.name = "DigitalTrackingCalorimeter"
-        self.mother = "World"
+        self.mother = "world"
         self.pos = Pos()
         self.box = Box("DigitalTrackingCalorimeter", self.mother, self.pos, self.size)
 
     def printBox(self):
         self.box.printBox()
 
+    def writeBox(self):
+        self.box.writeBox()
+
 class World:
     def __init__(self, dx = 100*cm, dy = 100*cm, dz = 100*cm):
-        self.name = "World"
+        self.name = "world"
         self.size = Size(dz, dy, dz)
         self.pos = Pos()
-        self.box = Box("World", kNoMother, self.pos, self.size)
+        self.box = Box(self.name, kNoMother, self.pos, self.size)
 
     def printBox(self):
         self.box.printBox()
+
+    def writeBox(self):
+        self.box.writeBox()
 
 
 class MainMenu(Frame):
@@ -725,7 +702,6 @@ class MainMenu(Frame):
 
     def write_files(self):
         self.readyModule()
-        self.firstModule.clearFile()
         self.firstModule.writeGeometry()
         self.module.writeGeometry()
 
@@ -784,6 +760,10 @@ def main():
     DTC = DigitalTrackingCalorimeter()
 
     firstModule = Module("FirstModule", DTC.name, Pos(0,0,0), kTungsten, 1, kAluminium)
+    firstModule.clearFile()
+    world.writeBox()
+    DTC.writeBox()
+
     lastPos = firstModule.getLastObjectRightSide()
     module = Module("Module", DTC.name, Pos(0,0,0), kTungsten, 20)
     
