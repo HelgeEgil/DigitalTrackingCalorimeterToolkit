@@ -23,7 +23,7 @@
 using namespace std;
 
 void makePlots() {
-   TCanvas *c1	= new TCanvas("c1", "c1", 1200, 800);
+   TCanvas *c1	= new TCanvas("c1", "Fit results", 1200, 800);
 	TCanvas *c2 = new TCanvas("c2", "Correct Tracks fraction", 1200, 800);
 	TCanvas *c3 = new TCanvas("c3", "Reconstruction efficiency", 1200, 800);
 	TCanvas *c4 = new TCanvas("c4", "Chip alignment", 1200, 800);
@@ -65,13 +65,20 @@ void makePlots() {
 	
 	Int_t MC2Data = 61;
 
+	Float_t meanError = 0;
+	Float_t meanAbsError = 0;
+	Float_t meanSigma = 0;
+
 	while (1) {
 		in >> energy_ >> nomrange_ >> estrange_ >> sigmaRange_ >> lastRange_ ;
 
 		if (!in.good()) {
-			cout << energy_ << ", " << nomrange_ << ", " << estrange_ << ", " << sigmaRange_ << ", " << lastRange_ << endl;
 			break;
 		}
+
+		meanError += ( estrange_ - nomrange_ ) / nomrange_;
+		meanAbsError += fabs(( estrange_ - nomrange_ ) / nomrange_);
+		meanSigma += sigmaRange_;
 
 		if (nlines < MC2Data) {
 			cout << "Line " << nlines << ", energy " << energy_ << ",  MC" << endl;
@@ -93,6 +100,13 @@ void makePlots() {
 
 		nlines++;
 	}
+
+	meanError /= nlines;
+	meanSigma /= nlines;
+
+	cout << "Mean error on fit range is " << meanError << " mm.\n";
+	cout << "Mean | error | on fit range is " << meanAbsError << " mm.\n";
+	cout << "Mean SIGMA on fit range is " << meanSigma << " mm.\n";
 
 	in.close();
 	

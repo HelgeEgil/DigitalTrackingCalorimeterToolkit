@@ -606,6 +606,8 @@ getAllNeighboursFromCluster	Classes/Hit/findClusters.C	/^vector<Int_t> * Hits::g
 getAverageCS	Classes/Track/trackClusterProperties.C	/^Float_t Track::getAverageCS() {$/;"	f	class:Track
 getAverageCSLastN	Classes/Track/trackClusterProperties.C	/^Float_t Track::getAverageCSLastN(Int_t last_n) {$/;"	f	class:Track
 getAverageEnergyLoss	HelperFunctions/Tools.C	/^Float_t getAverageEnergyLoss(Float_t energy) {$/;"	f
+getChip	Classes/Cluster/Cluster.C	/^Int_t Cluster::getChip() {$/;"	f	class:Cluster
+getChip	Classes/Hit/Hit.C	/^Int_t Hit::getChip() {$/;"	f	class:Hit
 getClosestCluster	Classes/Track/Tracks.C	/^Int_t Tracks::getClosestCluster(vector<trackCluster> clusters, Cluster* interpolatedCluster) {$/;"	f	class:Tracks
 getClusterFromLayer	Classes/Track/trackClusterProperties.C	/^Int_t Track::getClusterFromLayer(Int_t layer) {$/;"	f	class:Track
 getClusterIdx	Classes/Cluster/Clusters.C	/^Int_t Clusters::getClusterIdx(Float_t x, Float_t y, Int_t layer) {$/;"	f	class:Clusters
@@ -648,8 +650,8 @@ getEnergyStragglingFromEnergy	Classes/Track/conversionFunctions.C	/^Float_t getE
 getEnergyStragglingFromTL	Classes/Track/conversionFunctions.C	/^Float_t getEnergyStragglingFromTL(Float_t tl, Float_t sigma_energy) {$/;"	f
 getEnergyStragglingFromTLStraggling	Classes/Track/conversionFunctions.C	/^Float_t getEnergyStragglingFromTLStraggling(Float_t tl, Float_t TLStraggling) {$/;"	f
 getEnergyStragglingFromWEPLStraggling	Classes/Track/conversionFunctions.C	/^Float_t getEnergyStragglingFromWEPLStraggling(Float_t wepl, Float_t WEPLStraggling) {$/;"	f
-getError	Classes/Cluster/Cluster.h	/^	Int_t		getError()				{ return sqrt(clusterSize_); }$/;"	f	class:Cluster
-getEventID	Classes/Cluster/Cluster.h	/^	Int_t		getEventID()			{ return eventID_; }$/;"	f	class:Cluster
+getError	Classes/Cluster/Cluster.h	/^	Int_t		getError()			{ return sqrt(clusterSize_); }$/;"	f	class:Cluster
+getEventID	Classes/Cluster/Cluster.h	/^	Int_t		getEventID()		{ return eventID_; }$/;"	f	class:Cluster
 getEventID	Classes/Cluster/Clusters.h	/^	virtual Int_t		getEventID(Int_t i)	{ return At(i)->getEventID(); }$/;"	f	class:Clusters
 getEventID	Classes/Hit/Hit.h	/^      Int_t		getEventID()	{ return eventID_; }$/;"	f	class:Hit
 getEventID	Classes/Hit/Hits.h	/^	virtual Int_t		getEventID(Int_t i)	{ return At(i)->getEventID(); }$/;"	f	class:Hits
@@ -676,7 +678,7 @@ getLastIndexOfLayer	Classes/Cluster/Clusters.C	/^Int_t Clusters::getLastIndexOfL
 getLastIndexOfLayer	Classes/Hit/Hits.C	/^Int_t Hits::getLastIndexOfLayer(UInt_t layer) {$/;"	f	class:Hits
 getLastLayer	Classes/Track/trackProperties.C	/^Int_t Track::getLastLayer() {$/;"	f	class:Track
 getLateralDeflectionFromExtrapolatedPosition	Classes/Track/trackExtrapolations.C	/^vector<Float_t> Track::getLateralDeflectionFromExtrapolatedPosition(Int_t layer) {$/;"	f	class:Track
-getLayer	Classes/Cluster/Cluster.h	/^	Int_t		getLayer()				{ return layerNo_; }$/;"	f	class:Cluster
+getLayer	Classes/Cluster/Cluster.h	/^	Int_t		getLayer()			{ return layerNo_; }$/;"	f	class:Cluster
 getLayer	Classes/Cluster/Clusters.h	/^	virtual Int_t		getLayer(Int_t i)		{ return At(i)->getLayer(); }$/;"	f	class:Clusters
 getLayer	Classes/Hit/Hit.h	/^      Int_t		getLayer()		{ return layerNo_; }$/;"	f	class:Hit
 getLayer	Classes/Hit/Hits.h	/^	virtual Int_t		getLayer(Int_t i)		{ return At(i)->getLayer(); }$/;"	f	class:Hits
@@ -699,7 +701,7 @@ getNumberOfConflictClusters	Classes/Track/Tracks.h	/^		virtual Int_t		getNumberO
 getNumberOfConflictClusters	Classes/Track/trackClusterProperties.C	/^Int_t Track::getNumberOfConflictClusters() { $/;"	f	class:Track
 getOccupancy	Classes/Layer/Layer.C	/^Float_t Layer::getOccupancy() {$/;"	f	class:Layer
 getOccupancyLastLayer	Classes/CalorimeterFrame/CalorimeterFrame.C	/^Float_t CalorimeterFrame::getOccupancyLastLayer() {$/;"	f	class:CalorimeterFrame
-getPValues	Analysis/Analysis.C	/^void getPValues() {$/;"	f
+getPValues	HelperFunctions/Tools.C	/^void getPValues() {$/;"	f
 getPreEnergyLoss	Classes/Track/trackPreSensorMaterial.C	/^Float_t Track::getPreEnergyLoss() {$/;"	f	class:Track
 getPreEnergyLossError	Classes/Track/trackPreSensorMaterial.C	/^Float_t Track::getPreEnergyLossError() {$/;"	f	class:Track
 getPreTL	Classes/Track/trackPreSensorMaterial.C	/^Float_t Track::getPreTL() {$/;"	f	class:Track
@@ -715,7 +717,7 @@ getSearchRadiusForLayer	HelperFunctions/Tools.C	/^Float_t getSearchRadiusForLaye
 getSigmaEnergy	GlobalConstants/MaterialConstants.C	/^Float_t getSigmaEnergy(Int_t energy) { $/;"	f
 getSinuosity	Classes/Track/Tracks.h	/^		Float_t				getSinuosity(Int_t i)						{ return At(i)->getSinuosity(); }$/;"	f	class:Tracks
 getSinuosity	Classes/Track/trackAngleCalculations.C	/^Float_t Track::getSinuosity() {$/;"	f	class:Track
-getSize	Classes/Cluster/Cluster.h	/^	Int_t		getSize()				{ return clusterSize_; }$/;"	f	class:Cluster
+getSize	Classes/Cluster/Cluster.h	/^	Int_t		getSize()			{ return clusterSize_; }$/;"	f	class:Cluster
 getSize	Classes/Cluster/Clusters.h	/^	virtual Int_t		getSize(Int_t i)		{ return At(i)->getSize(); }$/;"	f	class:Clusters
 getSize	Classes/Track/Track.h	/^		virtual Int_t		getSize(Int_t i)						{ return At(i)->getSize(); }$/;"	f	class:Track
 getSlopeAngle	Classes/Track/Tracks.h	/^      Float_t				getSlopeAngle(Int_t i)						{ return At(i)->getSlopeAngle(); }$/;"	f	class:Tracks
@@ -758,20 +760,20 @@ getWEPLFromEnergy	Classes/Track/conversionFunctions.C	/^Float_t getWEPLFromEnerg
 getWEPLFromTL	Classes/Track/conversionFunctions.C	/^Float_t getWEPLFromTL(Float_t tl) {$/;"	f
 getWEPLStragglingFromEnergy	Classes/Track/conversionFunctions.C	/^Float_t getWEPLStragglingFromEnergy(Float_t energy, Float_t sigma_energy) {$/;"	f
 getWEPLStragglingFromWEPL	Classes/Track/conversionFunctions.C	/^Float_t getWEPLStragglingFromWEPL(Float_t wepl, Float_t sigma_energy) {$/;"	f
-getX	Classes/Cluster/Cluster.h	/^	Float_t	getX()					{ return x_; }$/;"	f	class:Cluster
+getX	Classes/Cluster/Cluster.h	/^	Float_t	    getX()				{ return x_; }$/;"	f	class:Cluster
 getX	Classes/Cluster/Clusters.h	/^	virtual Float_t	getX(Int_t i)			{ return At(i)->getX(); }$/;"	f	class:Clusters
 getX	Classes/Hit/Hit.h	/^      Int_t		getX()			{ return x_; }$/;"	f	class:Hit
 getX	Classes/Hit/Hits.h	/^	virtual Int_t		getX(Int_t i)			{ return At(i)->getX(); }$/;"	f	class:Hits
 getX	Classes/Track/Track.h	/^		virtual Float_t	getX(Int_t i)							{ return At(i)->getX(); }$/;"	f	class:Track
-getXmm	Classes/Cluster/Cluster.h	/^	Double_t	getXmm()					{ return (x_ - nx) * dx; } \/\/ from -nx*dx to nx*dx$/;"	f	class:Cluster
+getXmm	Classes/Cluster/Cluster.h	/^	Double_t	getXmm()			{ return (x_ - nx) * dx; } \/\/ from -nx*dx to nx*dx$/;"	f	class:Cluster
 getXmm	Classes/Hit/Hit.h	/^      Double_t	getXmm()			{ return (x_ - nx) * dx; }$/;"	f	class:Hit
 getXmm	Classes/Track/Track.h	/^		Float_t				getXmm(Int_t i)						{ return At(i)->getXmm(); }$/;"	f	class:Track
-getY	Classes/Cluster/Cluster.h	/^	Float_t	getY()					{ return y_; }$/;"	f	class:Cluster
+getY	Classes/Cluster/Cluster.h	/^	Float_t	    getY()				{ return y_; }$/;"	f	class:Cluster
 getY	Classes/Cluster/Clusters.h	/^	virtual Float_t	getY(Int_t i)			{ return At(i)->getY(); }$/;"	f	class:Clusters
 getY	Classes/Hit/Hit.h	/^      Int_t		getY()			{ return y_; }$/;"	f	class:Hit
 getY	Classes/Hit/Hits.h	/^	virtual Int_t		getY(Int_t i)			{ return At(i)->getY(); }$/;"	f	class:Hits
 getY	Classes/Track/Track.h	/^		virtual Float_t	getY(Int_t i)							{ return At(i)->getY(); }$/;"	f	class:Track
-getYmm	Classes/Cluster/Cluster.h	/^	Double_t	getYmm()					{ return (y_ - ny) * dy; } \/\/ from -ny*dy to ny*dy$/;"	f	class:Cluster
+getYmm	Classes/Cluster/Cluster.h	/^	Double_t	getYmm()			{ return (y_ - ny) * dy; } \/\/ from -ny*dy to ny*dy$/;"	f	class:Cluster
 getYmm	Classes/Hit/Hit.h	/^      Double_t	getYmm()			{ return (y_ - ny) * dy; }$/;"	f	class:Hit
 getYmm	Classes/Track/Track.h	/^		Float_t				getYmm(Int_t i)						{ return At(i)->getYmm(); }$/;"	f	class:Track
 growTrackFromLayer	Classes/Cluster/findTracks.C	/^void Clusters::growTrackFromLayer(Track *track, Int_t fromLayer) {$/;"	f	class:Clusters
@@ -780,6 +782,7 @@ hermite	Scripts/Check.C	/^double hermite(unsigned n, double x) {$/;"	f
 hits_	Classes/Hit/Hits.h	/^	TClonesArray hits_;$/;"	m	class:Hits
 idx	GlobalConstants/Misalign.h	/^	Int_t idx;$/;"	m	struct:chipAlignment
 initialSearchRadius	GlobalConstants/Constants.h	/^Float_t initialSearchRadius = 50 * dx; \/\/ 20 if dimensionless$/;"	v
+isChipLowResistivity	GlobalConstants/MaterialConstants.C	/^Bool_t isChipLowResistivity(Int_t chipIdx) {$/;"	f
 isClusterInTrack	Classes/Track/trackClusterProperties.C	/^Bool_t Track::isClusterInTrack(Cluster * cluster) {$/;"	f	class:Track
 isFirstAndLastEventIDEqual	Classes/Track/Track.C	/^Bool_t Track::isFirstAndLastEventIDEqual() {$/;"	f	class:Track
 isHitOnScintillatorH	Classes/Track/trackPreSensorMaterial.C	/^Bool_t Track::isHitOnScintillatorH() {$/;"	f	class:Track
@@ -790,7 +793,7 @@ isLastEventIDCloseToFirst	Classes/Track/Tracks.C	/^Bool_t Tracks::isLastEventIDC
 isOneEventID	Classes/Track/Track.C	/^Bool_t Track::isOneEventID() {$/;"	f	class:Track
 isPointOutOfBounds	HelperFunctions/Tools.C	/^Bool_t isPointOutOfBounds(Cluster *point, Float_t padding) {$/;"	f
 isSameCluster	HelperFunctions/Tools.C	/^Bool_t isSameCluster(Cluster *a, Cluster *b) {$/;"	f
-isUsed	Classes/Cluster/Cluster.h	/^	Bool_t	isUsed()					{ return isUsed_; }$/;"	f	class:Cluster
+isUsed	Classes/Cluster/Cluster.h	/^	Bool_t	    isUsed()			{ return isUsed_; }$/;"	f	class:Cluster
 isUsed	Classes/Cluster/Clusters.h	/^	virtual Bool_t		isUsed(Int_t i)		{ return At(i)->isUsed(); }$/;"	f	class:Clusters
 isUsed	Classes/Track/Track.h	/^		Bool_t				isUsed(Int_t i)						{ return At(i)->isUsed(); }$/;"	f	class:Track
 isUsedClustersInTrack	Classes/Track/Tracks.h	/^		virtual Bool_t		isUsedClustersInTrack(Int_t i)			{ return At(i)->isUsedClustersInTrack(); }$/;"	f	class:Tracks
@@ -803,7 +806,7 @@ kData	GlobalConstants/Constants.h	/^enum eDataType {kMC, kData};$/;"	e	enum:eDat
 kDataType	GlobalConstants/Constants.h	/^Int_t kDataType = kMC;$/;"	v
 kDebug	GlobalConstants/Constants.h	/^Bool_t kDebug = false;$/;"	v
 kEnergy	GlobalConstants/Constants.h	/^enum eOutputUnit {kPhysical, kWEPL, kEnergy};$/;"	e	enum:eOutputUnit
-kEventsPerRun	GlobalConstants/Constants.h	/^Int_t kEventsPerRun = 50;$/;"	v
+kEventsPerRun	GlobalConstants/Constants.h	/^Int_t kEventsPerRun = 500;$/;"	v
 kFocalAluminum	GlobalConstants/Constants.h	/^enum eMaterial {kTungsten, kAluminum, kPMMA, kWater, kFocalTungsten, kFocalAluminum};$/;"	e	enum:eMaterial
 kFocalTungsten	GlobalConstants/Constants.h	/^enum eMaterial {kTungsten, kAluminum, kPMMA, kWater, kFocalTungsten, kFocalAluminum};$/;"	e	enum:eMaterial
 kIsAluminumPlate	GlobalConstants/Constants.h	/^Bool_t kIsAluminumPlate = true;$/;"	v
@@ -1045,12 +1048,12 @@ set	Classes/Hit/Hit.C	/^void Hit::set(Int_t x, Int_t y, Int_t layerNo, Int_t eve
 setEdep	Classes/Hit/Hit.h	/^      void		setEdep(Float_t edep)		{ edep_ = edep; }$/;"	f	class:Hit
 setEventID	Classes/Cluster/Cluster.h	/^	void		setEventID(Int_t id)	{ eventID_ = id; }$/;"	f	class:Cluster
 setEventID	Classes/Hit/Hit.h	/^      void		setEventID(Int_t event)	{ eventID_ = event; }$/;"	f	class:Hit
-setLayer	Classes/Cluster/Cluster.h	/^	void		setLayer(Int_t l)		{ layerNo_ = l; }$/;"	f	class:Cluster
-setSize	Classes/Cluster/Cluster.h	/^	void		setSize(Int_t size)	{ clusterSize_ = size; }$/;"	f	class:Cluster
+setLayer	Classes/Cluster/Cluster.h	/^	void		setLayer(Int_t l)	    { layerNo_ = l; }$/;"	f	class:Cluster
+setSize	Classes/Cluster/Cluster.h	/^	void		setSize(Int_t size)	    { clusterSize_ = size; }$/;"	f	class:Cluster
 setTrack	Classes/Track/Track.C	/^void Track::setTrack(Track *copyTrack, Int_t startOffset \/* default 0 *\/) {$/;"	f	class:Track
-setX	Classes/Cluster/Cluster.h	/^	void		setX(Float_t x)		{ x_ = x; }$/;"	f	class:Cluster
+setX	Classes/Cluster/Cluster.h	/^	void		setX(Float_t x)		    { x_ = x; }$/;"	f	class:Cluster
 setXmm	Classes/Cluster/Cluster.h	/^	void		setXmm(Float_t x)		{ x_ = x \/ dx + nx; }$/;"	f	class:Cluster
-setY	Classes/Cluster/Cluster.h	/^	void		setY(Float_t y)		{ y_ = y; }$/;"	f	class:Cluster
+setY	Classes/Cluster/Cluster.h	/^	void		setY(Float_t y)		    { y_ = y; }$/;"	f	class:Cluster
 setYmm	Classes/Cluster/Cluster.h	/^	void		setYmm(Float_t y)		{ y_ = y \/ dy + ny; }$/;"	f	class:Cluster
 showDebug	Classes/Cluster/findTracks.C	14;"	d	file:
 showDebug	Classes/Cluster/findTracks.C	16;"	d	file:
@@ -1058,8 +1061,8 @@ showDebug	Classes/Hit/Hits.C	13;"	d	file:
 showDebug	Classes/Hit/Hits.C	15;"	d	file:
 showDebug	Classes/Hit/findClusters.C	13;"	d	file:
 showDebug	Classes/Hit/findClusters.C	15;"	d	file:
-showDebug	Classes/Layer/Layer.C	10;"	d	file:
-showDebug	Classes/Layer/Layer.C	12;"	d	file:
+showDebug	Classes/Layer/Layer.C	11;"	d	file:
+showDebug	Classes/Layer/Layer.C	13;"	d	file:
 showDebug	HelperFunctions/getTracks.C	27;"	d	file:
 showDebug	HelperFunctions/getTracks.C	29;"	d	file:
 sizeOfEventID	GlobalConstants/Constants.h	/^const Int_t sizeOfEventID = 500;$/;"	v

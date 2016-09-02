@@ -3,6 +3,7 @@
 #include <TH2F.h>
 #include <TRandom3.h>
 
+#include "GlobalConstants/MaterialConstants.h"
 #include "Classes/Layer/Layer.h"
 #include "Classes/Hit/Hits.h"
 
@@ -23,7 +24,8 @@ Layer::~Layer() {
 
 Int_t Layer::diffuseLayer(TRandom3 *gRandom) {
 	Int_t repeatFactor, x, y, z, randX, randY;
-	Float_t EnergyFactor = 2.67;
+//	Float_t EnergyFactor = 2.67;
+	Float_t EnergyFactor;
 	Float_t newSigma, eDep;
 
    Hits *hits = new Hits();
@@ -38,6 +40,13 @@ Int_t Layer::diffuseLayer(TRandom3 *gRandom) {
 		x = hits->getX(h);
 		y = hits->getY(h);
 		eDep = hits->getEdep(h);
+
+		if (isChipLowResistivity(hits->At(h)->getChip())) {
+			EnergyFactor = 3.4;
+		}
+		else {
+			EnergyFactor = 1.65;
+		}
 		
 		repeatFactor = eDep * EnergyFactor;
 		newSigma = pow(repeatFactor, 0.35) / 6;

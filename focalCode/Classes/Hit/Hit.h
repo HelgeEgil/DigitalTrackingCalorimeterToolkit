@@ -25,6 +25,7 @@ class Hit : public TObject {
       Int_t		getLayer()		{ return layerNo_; }
       Int_t		getEventID()	{ return eventID_; }
       Float_t	getEdep()		{ return edep_; }
+      Int_t		getChip();
 
       void		setEventID(Int_t event)	{ eventID_ = event; }
       void		setEdep(Float_t edep)		{ edep_ = edep; }

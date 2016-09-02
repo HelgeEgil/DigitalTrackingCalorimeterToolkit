@@ -249,3 +249,18 @@ Float_t getSigmaEnergy(Int_t energy) {
 	
 	return sigma_energy;
 }
+
+Bool_t isChipLowResistivity(Int_t chipIdx) {
+	Bool_t isHigh = false;
+
+	if (chipIdx == 2  || chipIdx == 3  ||
+		 chipIdx == 8  || chipIdx == 9  ||
+		 chipIdx == 16 || chipIdx == 17 ||
+		 chipIdx == 18 || chipIdx == 21 ||
+		 chipIdx == 23 || chipIdx == 24 ||
+		 chipIdx == 27) {
+		isHigh = true;
+	}
+
+	return isHigh;
+}

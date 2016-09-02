@@ -203,13 +203,14 @@ Tracks * getTracks(Int_t Runs, Int_t dataType, Int_t frameType, Float_t energy, 
 	ofstream				file("OutputFiles/efficiency.csv", ofstream::out | ofstream::app);
 
 	// file: np; number of reconstructed tracks; tracks after removeTracksLeavingDetector; tracks after removeTrackCollisions
-
+	
 	for (Int_t i=0; i<Runs; i++) {
 
 		cout << "Finding track " << (i+1)*kEventsPerRun << " of " << Runs*kEventsPerRun << "... ";
 		
 		if (dataType == kMC) {
 			t1.Start();
+			
 
 			eventID = di->getMCFrame(i, cf, x, y);
 			di->getEventIDs(i, eventIDs);

@@ -1729,16 +1729,18 @@ void compareClusterSizes(Int_t Runs, Bool_t recreate, Float_t energy) {
 	Clusters	 *	MCClusters = nullptr;
 	Clusters	 *	DataClusters = nullptr;
 	Int_t		nTracksMC, nTracksData, thisLayer, thisSize;
-    Bool_t      useChip = true;
+    Bool_t      useChip = false;
 
     Int_t fChip = 1;
     if (useChip) fChip = 4;
 
     const Int_t nLayersToUse = 7*4;
 
+	cout << "Finding MC tracks...\n";
 	MCTracks = loadOrCreateTracks(recreate, Runs, kMC, energy);
 	MCTracks->extrapolateToLayer0();
-
+	
+	cout << "Finding EXP tracks...\n";
 	DataTracks = loadOrCreateTracks(recreate, Runs, kData, energy);
 	DataTracks->extrapolateToLayer0();
 
@@ -1807,8 +1809,37 @@ void compareClusterSizes(Int_t Runs, Bool_t recreate, Float_t energy) {
 		errorClusterSizeData[i] = hCSVectorData->at(i)->GetRMS();
 	}
 
-	TGraphErrors * graphCSMC = new TGraphErrors(nLayersToUse-1, layerMC, clusterSizeMC, errorLayer, errorClusterSizeMC);
-	TGraphErrors * graphCSData = new TGraphErrors(nLayersToUse-1, layerData, clusterSizeData, errorLayer, errorClusterSizeData);
+   Float_t sumMCLow = 0;
+   Float_t sumMCHigh = 0;
+   Float_t sumEXPLow = 0;
+   Float_t sumEXPHigh = 0;
+   Int_t nHigh = 0;
+   Int_t nLow = 0;
+
+   for (Int_t i=0; i<nLayersToUse; i++) {
+      if (isChipLowResistivity(i)) {
+         sumMCLow += clusterSizeMC[i];
+         sumEXPLow += clusterSizeData[i];
+         nLow++;
+      }
+      else {
+         sumMCHigh += clusterSizeMC[i];
+         sumEXPHigh += clusterSizeData[i];
+         nHigh++;
+      }
+   }
+
+   sumMCLow /= nLow;
+   sumEXPLow /= nLow;
+   sumMCHigh /= nHigh;
+   sumEXPHigh /= nHigh;
+
+   cout << "Ratio of LOW RESISTIVITY CHIPS: " << sumMCLow / sumEXPLow << endl;
+   cout << "Ratio of HIGH RESISTIVITY CHIPS: " << sumMCHigh / sumEXPHigh << endl;
+      
+
+	TGraphErrors * graphCSMC = new TGraphErrors(nLayersToUse, layerMC, clusterSizeMC, errorLayer, errorClusterSizeMC);
+	TGraphErrors * graphCSData = new TGraphErrors(nLayersToUse, layerData, clusterSizeData, errorLayer, errorClusterSizeData);
 	
 	graphCSMC->SetTitle(Form("Cluster size distribution comparison at %.0f MeV;Layer number;Cluster size [# pixels]", run_energy));
     if (useChip) graphCSMC->GetXaxis()->SetTitle("Chip number");
@@ -2066,7 +2097,7 @@ Float_t  doNGaussianFit ( TH1F *h, Float_t *means, Float_t *sigmas) {
 		mean = gauss->GetParameter(1);
 		lEnergy = getEnergyFromUnit(mean);
 		
-		Float_t integralSigma = h->Integral(axis->FindBin(mean - 0.75*sigma), axis->FindBin(mean + 0.75*sigma));
+		Float_t integralSigma = h->Integral(axis->FindBin(mean - sigma), axis->FindBin(mean + sigma));
 		Float_t chi2 = gauss->GetChisquare();
 		Float_t chi2n = chi2 / integral;
 		Float_t chi2nSigma = chi2 / integralSigma;

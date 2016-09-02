@@ -30,6 +30,22 @@ Hit::Hit(Hit* hit) {
 Hit::~Hit() {
 }
 
+Int_t Hit::getChip() {
+	Int_t x = getX();
+	Int_t y = getY();
+	Int_t layer = getLayer();
+	Int_t chipIdx = 0;
+
+	if			(x >  nx && y >  ny) chipIdx = 0;
+	else if	(x <= nx && y >  ny) chipIdx = 3;
+	else if	(x <= nx && y <= ny)	chipIdx = 2;
+	else if	(x >  nx && y <= ny)	chipIdx = 1;
+
+	chipIdx += layer*4;
+
+	return chipIdx;
+}
+
 void Hit::set(Int_t x, Int_t y, Int_t layerNo, Int_t eventID, Float_t edep) {
 	x_ = x;
 	y_ = y;
