@@ -83,21 +83,7 @@ void Misalign::correctClusters(Clusters * clusters) {
 }
 
 chipAlignment Misalign::getMisalign(Cluster * cluster) {
-	Float_t	y = cluster->getYmm();
-	Float_t	x = cluster->getXmm();
-	Int_t		layer = cluster->getLayer();
-	Int_t		chipIdx = 0;
-	
-	// Layer 0
-	// 3 0
-	// 2 1
-	
-	if			( x>0 &&  y>0) chipIdx = 0;
-	else if	(x<=0 &&  y>0) chipIdx = 3;
-	else if	(x<=0 && y<=0) chipIdx = 2;
-	else if	( x>0 && y<=0) chipIdx = 1;
+    Int_t chipIdx = cluster->getChip();
 
-	chipIdx += layer*4;
-
-	return chipAlignmentArray_[chipIdx];
+    return chipAlignmentArray_[chipIdx];
 }

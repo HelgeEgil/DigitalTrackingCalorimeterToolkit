@@ -57,6 +57,22 @@ Double_t Cluster::getLayermm() {
 	return z;
 }
 
+Int_t Cluster::getChip() {
+    Int_t   layer = getLayer();
+    Int_t   chipIdx = 0;
+	Float_t	y = getYmm();
+	Float_t	x = getXmm();
+	
+    if  	( x>0 &&  y>0) chipIdx = 0;
+	else if	(x<=0 &&  y>0) chipIdx = 3;
+	else if	(x<=0 && y<=0) chipIdx = 2;
+	else if	( x>0 && y<=0) chipIdx = 1;
+
+	chipIdx += layer*4;
+
+    return chipIdx;
+}
+
 Float_t Cluster::getRadiusmm() {
   Float_t A = getSize();
   Float_t r = sqrt( A / 3.141592653);
