@@ -719,7 +719,7 @@ Float_t drawBraggPeakGraphFit(Int_t Runs, Int_t dataType, Bool_t recreate, Float
 	gStyle->SetPadBottomMargin(0.05);
 	gStyle->SetPadLeftMargin(0.15);
 	
-	TH1F *hFitResults = new TH1F("fitResult", hTitle, 200, getUnitFromEnergy(0), getUnitFromEnergy(energy*1.2));
+	TH1F *hFitResults = new TH1F("fitResult", hTitle, 100, getUnitFromEnergy(0), getUnitFromEnergy(energy*1.2));
 	hFitResults->SetLineColor(kBlack); hFitResults->SetFillColor(kGreen-5);
 
 	TH1F *hMaxAngle = new TH1F("hMaxAngle", "Maximum angle for proton track", 200, 0, 25);
@@ -1987,22 +1987,35 @@ Float_t  doNGaussianFit ( TH1F *h, Float_t *means, Float_t *sigmas) {
 	cout << "Layer;\t Constant;\t Mean;\t\t Energy;\t Sigma;\t\t Fits in layer;\t Chi2/n\n";
 	
 	Float_t constant, mean, lEnergy, sigma;
+	Float_t meanValueFromSumming = 0;
 	
 	Float_t array_mean[3] = {};
-	Int_t array_layer[3] = {};
+	Int_t	array_layer[3] = {};
 	Float_t array_constant[3] = {};
 	Float_t array_sigma[3] = {};
+	Float_t array_sum[3] = {};
 	Float_t array_energy[3] = {};
 	Float_t array_f[3] = {};
 	Float_t array_chi2n[3] = {};
 	
 	TAxis *axis = h->GetXaxis();
 	Float_t fullIntegral = h->Integral();
+	Int_t binSearchFrom = axis->FindBin(getWEPLFromEnergy(run_energy * 0.9));
+	Int_t binSearchTo   = axis->FindBin(getWEPLFromEnergy(run_energy * 1.1));
+	Float_t partialIntegral = h->Integral(binSearchFrom, binSearchTo);
+
+	for (Int_t i=binSearchFrom; i<binSearchTo; i++) {
+		meanValueFromSumming += axis->GetBinCenter(i) * h->GetBinContent(i) / partialIntegral;
+	}
+
+	Float_t error = 100 * (meanValueFromSumming - getWEPLFromEnergy(run_energy)) / getWEPLFromEnergy(run_energy);
+	cout << "\033[1mUsing the sum method, the weighted mean value of the distribution is " << meanValueFromSumming << " mm. (" << error << ")\033[0m\n";
 	
 	Float_t maxBinHeight = h->GetMaximum();
 
 	Bool_t isLastLayer, wasLastLayer = false;;
 	
+
 	Int_t j=0;
 	for (Int_t i=0; i<15; i++) {
  		if (getWEPLFromTL(getLayerPositionmm(i)) > getUnitFromEnergy(run_energy*1.1)) continue;
@@ -2034,18 +2047,17 @@ Float_t  doNGaussianFit ( TH1F *h, Float_t *means, Float_t *sigmas) {
 		
 		gauss->SetParameters(10, (searchFrom+searchTo)/2, sigma);
 		gauss->SetParLimits(0, 0, maxBinHeight);
-		gauss->SetParLimits(1, searchFrom+8, searchTo-8);
+		gauss->SetParLimits(1, searchFrom+8, searchTo-4);
 		gauss->SetParLimits(2, 2, 12);
 		
 		h->Fit(gauss, "M, B, WW, Q, 0", "", searchFrom, searchTo);
-		
 		
 		sigma = gauss->GetParameter(2);
 		constant = gauss->GetParameter(0);
 		mean = gauss->GetParameter(1);
 		lEnergy = getEnergyFromUnit(mean);
 		
-		Float_t integralSigma = h->Integral(axis->FindBin(mean - 2*sigma), axis->FindBin(mean + 2*sigma));
+		Float_t integralSigma = h->Integral(axis->FindBin(mean - 0.75*sigma), axis->FindBin(mean + 0.75*sigma));
 		Float_t chi2 = gauss->GetChisquare();
 		Float_t chi2n = chi2 / integral;
 		Float_t chi2nSigma = chi2 / integralSigma;
@@ -2077,6 +2089,7 @@ Float_t  doNGaussianFit ( TH1F *h, Float_t *means, Float_t *sigmas) {
 				array_energy[j] = lEnergy;
 				array_sigma[j] = sigma;
 				array_f[j] = ratio;
+				array_sum[j] = integralSigma;
 			}
 			
 			sigmas[j] = sigma;
@@ -2089,8 +2102,10 @@ Float_t  doNGaussianFit ( TH1F *h, Float_t *means, Float_t *sigmas) {
 	Float_t estimated_energy_error = 0;
 	Float_t sum_constant = 0, sumSigma = 0;
 	for (Int_t i=0 ; i<3; i++) {
-		estimated_range += array_constant[i] * array_mean[i];
-		sum_constant += array_constant[i];
+//		estimated_range += array_constant[i] * array_mean[i];
+		estimated_range += array_sum[i] * array_mean[i];
+//		sum_constant += array_constant[i];
+		sum_constant += array_sum[i];
 		sumSigma += pow(array_sigma[i], 2);
 	}
 
