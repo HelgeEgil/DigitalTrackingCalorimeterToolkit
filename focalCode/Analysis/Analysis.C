@@ -720,7 +720,9 @@ Float_t drawBraggPeakGraphFit(Int_t Runs, Int_t dataType, Bool_t recreate, Float
    gStyle->SetPadLeftMargin(0.15);
    
    TH1F *hFitResults = new TH1F("fitResult", hTitle, 100, getUnitFromEnergy(0), getUnitFromEnergy(energy*1.2));
+   TH1F *hFitResultsDroppedData = new TH1F("fitResultsDroppedData", hTitle, 100, getUnitFromEnergy(0), getUnitFromEnergy(energy*1.2));
    hFitResults->SetLineColor(kBlack); hFitResults->SetFillColor(kGreen-5);
+   hFitResultsDroppedData->SetLineColor(kBlack); hFitResultsDroppedData->SetFillColor(kYellow-2);
 
    TH1F *hMaxAngle = new TH1F("hMaxAngle", "Maximum angle for proton track", 200, 0, 25);
    hMaxAngle->SetLineColor(kBlack); hMaxAngle->SetFillColor(kGreen-5);
@@ -735,7 +737,7 @@ Float_t drawBraggPeakGraphFit(Int_t Runs, Int_t dataType, Bool_t recreate, Float
       if (!thisTrack) continue;
       
       if (thisTrack->doesTrackEndAbruptly()) {
-         hFitResults->Fill(getUnitFromEnergy(thisTrack->getEnergy()));
+         hFitResultsDroppedData->Fill(getUnitFromEnergy(thisTrack->getEnergy()));
          nCutDueToTrackEndingAbruptly++;
          continue;
       }
@@ -830,18 +832,20 @@ Float_t drawBraggPeakGraphFit(Int_t Runs, Int_t dataType, Bool_t recreate, Float
 
    cFitResults->cd();
 
-   if (kOutputUnit == kPhysical) hFitResults->SetXTitle("Physical range [mm]");
-   else if (kOutputUnit == kWEPL) hFitResults->SetXTitle("Range in Water Equivalent Path Length [mm]");
-   else if (kOutputUnit == kEnergy) { hFitResults->SetXTitle("Energy [MeV]"); }
-   hFitResults->SetYTitle("Number of protons");
+   if (kOutputUnit == kPhysical) hFitResultsDroppedData->SetXTitle("Physical range [mm]");
+   else if (kOutputUnit == kWEPL) hFitResultsDroppedData->SetXTitle("Range in Water Equivalent Path Length [mm]");
+   else if (kOutputUnit == kEnergy) { hFitResultsDroppedData->SetXTitle("Energy [MeV]"); }
+   hFitResultsDroppedData->SetYTitle("Number of protons");
 
-   hFitResults->GetXaxis()->SetTitleFont(22);
-   hFitResults->GetXaxis()->SetLabelFont(22);
-   hFitResults->GetYaxis()->SetTitleFont(22);
-   hFitResults->GetYaxis()->SetLabelFont(22);
-   hFitResults->GetYaxis()->SetTitleOffset(1.5);
+   hFitResultsDroppedData->GetXaxis()->SetTitleFont(22);
+   hFitResultsDroppedData->GetXaxis()->SetLabelFont(22);
+   hFitResultsDroppedData->GetYaxis()->SetTitleFont(22);
+   hFitResultsDroppedData->GetYaxis()->SetLabelFont(22);
+   hFitResultsDroppedData->GetYaxis()->SetTitleOffset(1.5);
    
-   hFitResults->Draw();
+   hFitResultsDroppedData->Draw();
+   hFitResults->Draw("same");
+   hFitResultsDroppedData->GetYaxis()->SetRangeUser(0, max(hFitResultsDroppedData->GetMaximum()*1.05, hFitResults->GetMaximum()*1.05));
 
    gPad->Update();
    TPaveText *title = (TPaveText*) gPad->GetPrimitive("title");
@@ -892,13 +896,14 @@ Float_t drawBraggPeakGraphFit(Int_t Runs, Int_t dataType, Bool_t recreate, Float
       }
    }
    
-   TLegend *legend = new TLegend(0.16, 0.78, 0.38, 0.88);
+   TLegend *legend = new TLegend(0.16, 0.78, 0.42, 0.88);
 
    gPad->Update();
    TF1 *fit1 = (TF1*) gPad->GetPrimitive("Gaus_5");
    
    legend->SetTextSize(0.02);
    legend->AddEntry(hFitResults, "Individual track fits", "F");
+   legend->AddEntry(hFitResultsDroppedData, "Tracks w/o Bragg Peak", "F");
    legend->AddEntry(fit1, "Weighted Gaussians", "L");
    legend->SetTextFont(22);
 //    legend->AddEntry(landau, Form("Fit with E = %.1f MeV and #sigma = %.1f mm ", landau_energy, landau->GetParameter(2)*1.7), "F");
@@ -906,7 +911,7 @@ Float_t drawBraggPeakGraphFit(Int_t Runs, Int_t dataType, Bool_t recreate, Float
    legend->Draw();
 
    TPaveStats *ps = (TPaveStats*) cFitResults->GetPrimitive("stats");
-   hFitResults->SetBit(TH1::kNoStats);
+   hFitResultsDroppedData->SetBit(TH1::kNoStats);
    ps->SetY1NDC(0.53); ps->SetX1NDC(0.72);
    ps->SetTextFont(22);
    ps->AddText(Form("Nominal WEPL = %.2f", expectedMean));
@@ -1729,12 +1734,12 @@ void compareClusterSizes(Int_t Runs, Bool_t recreate, Float_t energy) {
    Clusters  * MCClusters = nullptr;
    Clusters  * DataClusters = nullptr;
    Int_t    nTracksMC, nTracksData, thisLayer, thisSize;
-    Bool_t      useChip = false;
+   Bool_t      useChip = true;
 
-    Int_t fChip = 1;
-    if (useChip) fChip = 4;
+   Int_t fChip = 1;
+   if (useChip) fChip = 4;
 
-    const Int_t nLayersToUse = 7*4;
+   const Int_t nLayersToUse = 7*4;
 
    cout << "Finding MC tracks...\n";
    MCTracks = loadOrCreateTracks(recreate, Runs, kMC, energy);
@@ -1752,6 +1757,7 @@ void compareClusterSizes(Int_t Runs, Bool_t recreate, Float_t energy) {
    TCanvas *c3 = new TCanvas("c3", "Individual cluster size distributions DATA", 1200, 800);
    c3->Divide(4, 2, 0.01, 0.01);
    TCanvas *c1 = new TCanvas("c1", "Cluster size distribution comparison", 1022, 645);
+   c1->Divide(1,2,0.01, 0.01);
 
    vector<TH1F*> *hCSVectorMC = new vector<TH1F*>;
    for (Int_t i=0; i<nLayersToUse; i++) {
@@ -1770,7 +1776,8 @@ void compareClusterSizes(Int_t Runs, Bool_t recreate, Float_t energy) {
       
         if (thisLayer >= nLayersToUse) continue;
 
-      thisSize = thisCluster->getSize();
+//      thisSize = thisCluster->getSize();
+      thisSize = thisCluster->getDepositedEnergy(false);
       hCSVectorMC->at(thisLayer)->Fill(thisSize);
    }
    
@@ -1781,23 +1788,26 @@ void compareClusterSizes(Int_t Runs, Bool_t recreate, Float_t energy) {
 
         if (thisLayer >= nLayersToUse) continue;
       
-        thisSize = thisCluster->getSize();
+//        thisSize = thisCluster->getSize();
+        thisSize = thisCluster->getDepositedEnergy(true);
       hCSVectorData->at(thisLayer)->Fill(thisSize);
    }
 
-    Float_t layerMC[nLayersToUse]; //= {0, 1, 2, 3, 4, 5, 6, 7};
+   Float_t layerMC[nLayersToUse]; //= {0, 1, 2, 3, 4, 5, 6, 7};
    Float_t layerData[nLayersToUse];// = {0, 1, 2, 3, 4, 5, 6, 7};
      
-    for (Int_t i=0; i<nLayersToUse; i++) {
+   for (Int_t i=0; i<nLayersToUse; i++) {
         layerMC[i] = i;
         layerData[i] = i;
-    }
+   }
 
    Float_t errorLayer[nLayersToUse] = {0};
    Float_t clusterSizeMC[nLayersToUse] = {0};
    Float_t errorClusterSizeMC[nLayersToUse] = {0};
    Float_t clusterSizeData[nLayersToUse] = {0};
    Float_t errorClusterSizeData[nLayersToUse] = {0};
+   Float_t clusterSizeRatio[nLayersToUse] = {0};
+   Float_t errorClusterSizeRatio[nLayersToUse] = {0};
 
    for (Int_t i=0; i<nLayersToUse; i++) {
       layerMC[i] -= 0.07;
@@ -1807,6 +1817,10 @@ void compareClusterSizes(Int_t Runs, Bool_t recreate, Float_t energy) {
       clusterSizeData[i] = hCSVectorData->at(i)->GetMean();
       errorClusterSizeMC[i] = hCSVectorMC->at(i)->GetRMS();
       errorClusterSizeData[i] = hCSVectorData->at(i)->GetRMS();
+      clusterSizeRatio[i] = clusterSizeData[i] / clusterSizeMC[i];
+      Float_t e_high = (clusterSizeData[i] + errorClusterSizeData[i]/2) / (clusterSizeMC[i] - errorClusterSizeMC[i]/2);
+      Float_t e_low  = (clusterSizeData[i] - errorClusterSizeData[i]/2) / (clusterSizeMC[i] + errorClusterSizeMC[i]/2);
+      errorClusterSizeRatio[i] = (e_high - e_low);
    }
 
    Float_t sumMCLow = 0;
@@ -1835,16 +1849,16 @@ void compareClusterSizes(Int_t Runs, Bool_t recreate, Float_t energy) {
    sumEXPHigh /= nHigh;
 
    cout << "Ratio of LOW RESISTIVITY CHIPS: " << sumMCLow / sumEXPLow << endl;
-   cout << "Ratio of HIGH RESISTIVITY CHIPS: " << sumMCHigh / sumEXPHigh << endl;
-      
+   cout << "Ratio of HIGH RESISTIVITY CHIPS: " << sumMCHigh / sumEXPHigh << endl; 
 
    TGraphErrors * graphCSMC = new TGraphErrors(nLayersToUse, layerMC, clusterSizeMC, errorLayer, errorClusterSizeMC);
    TGraphErrors * graphCSData = new TGraphErrors(nLayersToUse, layerData, clusterSizeData, errorLayer, errorClusterSizeData);
+   TGraph       * graphRatios = new TGraphErrors(nLayersToUse, layerMC, clusterSizeRatio);
    
    graphCSMC->SetTitle(Form("Cluster size distribution comparison at %.0f MeV;Layer number;Cluster size [# pixels]", run_energy));
     if (useChip) graphCSMC->GetXaxis()->SetTitle("Chip number");
    graphCSMC->SetMinimum(0);
-   graphCSMC->SetMaximum(40);
+   graphCSMC->SetMaximum(70);
    graphCSMC->SetMarkerStyle(21);
    graphCSMC->SetMarkerColor(kBlue);
    graphCSData->SetMarkerStyle(22);
@@ -1856,13 +1870,19 @@ void compareClusterSizes(Int_t Runs, Bool_t recreate, Float_t energy) {
    graphCSMC->GetYaxis()->SetTitleFont(22);
    graphCSMC->GetYaxis()->SetLabelFont(22);
    graphCSMC->GetXaxis()->SetNdivisions(10);
+   graphRatios->SetMinimum(0.5);
+   graphRatios->SetMaximum(1.5);
+   graphRatios->SetTitle("Cluster size distribution ratios (DATA / MC) at 188 MeV;Layer Number;Cluster Size Ratio (DATA/MC)");
+   graphRatios->SetMarkerStyle(21);
+   graphRatios->SetMarkerColor(kBlue);
+   graphRatios->SetMarkerSize(1.5);
 
    TLegend *leg = new TLegend(0.16, 0.70, 0.28, 0.86);
    leg->SetTextFont(22);
    leg->AddEntry(graphCSMC, "MC", "ep");
    leg->AddEntry(graphCSData, "Exp. data", "ep");
 
-   c1->cd();
+   c1->cd(1);
    graphCSMC->Draw("AP");
    graphCSData->Draw("P");
    leg->Draw();
@@ -1871,6 +1891,11 @@ void compareClusterSizes(Int_t Runs, Bool_t recreate, Float_t energy) {
    TPaveText *title = (TPaveText*) gPad->GetPrimitive("title");
    title->SetTextFont(22);
    gPad->Modified();
+
+   c1->cd(2);
+   graphRatios->Draw("AP");
+   TLine *tl = new TLine(-3, 1, 29.5, 1);
+   tl->Draw();
 
    for (Int_t i=0; i<nLayersToUse; i++) {
       c2->cd(i+1);
@@ -2088,7 +2113,7 @@ Float_t  doNGaussianFit ( TH1F *h, Float_t *means, Float_t *sigmas) {
       gauss->SetParameters(10, (searchFrom+searchTo)/2, sigma);
       gauss->SetParLimits(0, 0, maxBinHeight);
       gauss->SetParLimits(1, searchFrom+12, searchTo-4);
-      gauss->SetParLimits(2, 2, 12);
+      gauss->SetParLimits(2, 3, 9);
       
       h->Fit(gauss, "M, B, WW, Q, 0", "", searchFrom, searchTo);
       
@@ -2161,14 +2186,23 @@ Float_t  doNGaussianFit ( TH1F *h, Float_t *means, Float_t *sigmas) {
    Int_t binSigmaFrom = axis->FindBin(array_mean[0] - 3*array_sigma[0]);
    Int_t binSigmaTo = axis->FindBin(array_mean[1] + 3*array_sigma[0]);
    Float_t squareMeanDifference = 0;
+   Float_t empiricalMean = 0;
    Int_t N = 0;
-   for (Int_t i=binSigmaFrom; i<=binSigmaTo; i++) {
-      cout << "Adding " << h->GetBinContent(i) << " * (" << axis->GetBinCenter(i) << " - " << estimated_range << " )^2 to variance.\n";
-      squareMeanDifference += h->GetBinContent(i) * pow(axis->GetBinCenter(i) - estimated_range, 2);
+   
+   for (Int_t i=binSigmaFrom; i<=h->GetNbinsX(); i++) {
+      empiricalMean += h->GetBinContent(i) * axis->GetBinCenter(i);
       N += h->GetBinContent(i);
+   } 
+  
+   empiricalMean /= N; 
+
+   for (Int_t i=binSigmaFrom; i<=h->GetNbinsX(); i++) {
+      cout << "Adding " << h->GetBinContent(i) << " * (" << axis->GetBinCenter(i) << " - " << empiricalMean << " )^2 to variance.\n";
+      squareMeanDifference += h->GetBinContent(i) * pow(axis->GetBinCenter(i) - empiricalMean, 2);
    }
 
    Float_t empiricalSigma = sqrt(squareMeanDifference / N);
+   cout << "The empirical estimated range is " << empiricalMean << " mm. (which is " << getEnergyFromWEPL(empiricalMean) << " MeV).\n";
    cout << "The empirical standard deviation is " << empiricalSigma << " mm.\n";
    
    ofstream file("OutputFiles/output_gauss.csv", ofstream::out | ofstream::app);

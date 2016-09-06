@@ -101,12 +101,18 @@ TGraphErrors * Track::doRangeFit() {
 	Float_t			maxEnergy, estimatedEnergy;
 	Float_t			scaleParameter = 0;
 	Float_t			WEPLFactor;
+   Bool_t         checkResistivity = false;
+
+   if (kDataType == kData) {
+      checkResistivity = true;
+   }
+
 	
 	for (Int_t i=0; i<n; i++) {
 		if (!At(i)) continue;
 		x[i] = preTL + getLayermm(i);
-		y[i] = getDepositedEnergy(i) / 14.; // normalize to per um
-		ery[i] = getDepositedEnergyError(i) / 14.;
+		y[i] = getDepositedEnergy(i, checkResistivity) / 14.; // normalize to per um
+		ery[i] = getDepositedEnergyError(i, checkResistivity) / 14.;
 		erx[i] = dz / sqrt(12);
 	}
 	

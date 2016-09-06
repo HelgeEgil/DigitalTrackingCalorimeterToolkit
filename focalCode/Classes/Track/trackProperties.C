@@ -52,7 +52,8 @@ Bool_t Track::doesTrackEndAbruptly() {
 	Float_t actualTL = getTLFromEnergy(getEnergy());
 	Float_t riseFactor = getRiseFactor();
 
-	Bool_t endsAbruptly = (actualTL < expectedTL * 0.6 && riseFactor < 1.5);
+//	Bool_t endsAbruptly = (actualTL < expectedTL * 0.6 && riseFactor < 1.5);
+   Bool_t endsAbruptly = (Last()->getDepositedEnergy() < 50);
 	
 	if (endsAbruptly)	return true;
 	else					return false;

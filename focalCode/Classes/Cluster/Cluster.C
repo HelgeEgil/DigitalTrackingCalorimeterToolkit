@@ -81,20 +81,49 @@ Float_t Cluster::getRadiusmm() {
   return r_mm;
 }  
 
-Float_t Cluster::getDepositedEnergy() {
+Float_t Cluster::getDepositedEnergy(Bool_t checkResistivity) {
 	// An inverse fit to the charge diffusion algorithm defined in Layer.C
 	// Returns the local dEdx value in keV.
-	
-	return 2.854 * clusterSize_ + 0.06641 * pow(clusterSize_, 2) - 0.001156 * pow(clusterSize_, 3) + 8.246e-6 * pow(clusterSize_, 4);
+
+	Float_t  edep = 0;
+   Int_t    n = clusterSize_;
+
+   if (checkResistivity) {
+      if (isChipLowResistivity(getChip())) {
+         edep = -3.293 + 3.075 * n - 0.00497 * pow(n,2) + 0.000536 * pow(n,3) - 5.428e-6 * pow(n,4);
+      }
+
+      else {
+         edep = -5.676 + 6.203 * n - 0.0412 * pow(n,2) + 0.00428 * pow(n,3) - 8.199e-5 * pow(n,4);
+      }
+   }
+   else { // find mean value (i.e. Monte Carlo)
+      edep = -3.993 + 3.883 * n - 0.0124 * pow(n,2) + 0.00114 * pow(n,3) - 1.420e-5 * pow(n,4);
+   }
+
+   return edep;
 }
 
-Float_t Cluster::getDepositedEnergyError() {
+Float_t Cluster::getDepositedEnergyError(Bool_t checkResistivity) {
 	// sigma_E = sigma_N (dE / dN)
 	
-	Float_t sigma_n = sqrt(clusterSize_);
-	Float_t diff_n = 2.854 + 2 * 0.06641 * clusterSize_ - 3 * 0.001156 * pow(clusterSize_, 2) + 4 * 8.246e-6 * pow(clusterSize_, 3);
+	Float_t  sn = sqrt(clusterSize_);
+   Int_t    n = clusterSize_;
+   Float_t  diff_n;
+  
+   if (checkResistivity) {
+      if (isChipLowResistivity(getChip())) {
+         diff_n = 3.075 - 2 * 0.00497 * n + 3 * 0.000536 * pow(n,2) - 4 * 5.428e-6 * pow(n,3);
+      }
+      else {
+         diff_n = 6.203 - 2 * 0.04120 * n + 3 * 0.004280 * pow(n,2) - 4 * 8.199e-5 * pow(n,3);
+      }
+   }
+   else { // find mean value (i.e. Monte Carlo)
+      diff_n = 3.883 - 2 * 0.0124 * n + 3 * 0.00114 * pow(n,2) - 4 * 1.420e-5 * pow(n,3);
+   }
 
-	return sigma_n * diff_n;
+	return sn * diff_n;
 }
 
 void Cluster::set(Cluster* copyCluster) {
@@ -114,7 +143,7 @@ void Cluster::set(Float_t x, Float_t y, Int_t layer, Int_t size) {
 }
 
 ostream& operator<< (ostream &os, Cluster& c) {
-   os << "(" << c.x_ << ", " << c.y_ << ", " << c.layerNo_ << ", EID " << c.eventID_ << ", CS " << c.clusterSize_ << ")";
+   os << "(" << c.getXmm() << ", " << c.getYmm() << ", " << c.layerNo_ << ", EID " << c.eventID_ << ", CS " << c.clusterSize_ << ")";
    return os;
 }
 

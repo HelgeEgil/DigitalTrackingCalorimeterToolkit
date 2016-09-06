@@ -38,12 +38,14 @@ Float_t mcs_radius_per_layer[100]; // change if max(nLayers) > 100
 
 Double_t firstUpperLayerZ, firstLowerLayerZ;
 
-Float_t getEnergyLossFromScintillators(Float_t energy, Int_t nScintillators);
-Float_t getEnergyLossErrorFromScintillators(Int_t nScintillators);
-Float_t getEnergyLossFromAluminumAbsorber(Float_t energy);
-Float_t getEnergyLossErrorFromAluminumAbsorber();
+
+Float_t  getEnergyLossFromScintillators(Float_t energy, Int_t nScintillators);
+Float_t  getEnergyLossErrorFromScintillators(Int_t nScintillators);
+Float_t  getEnergyLossFromAluminumAbsorber(Float_t energy);
+Float_t  getEnergyLossErrorFromAluminumAbsorber();
 Double_t getLayerPositionmm(Int_t i);
-Float_t getSigmaEnergy(Int_t energy);
-Bool_t isChipLowResistivity(Int_t chipIdx);
+Float_t  getSigmaEnergy(Int_t energy);
+Bool_t   isChipLowResistivity(Int_t chipIdx);
+Bool_t   isBadData(Cluster * estimatedPosition);
 
 #endif

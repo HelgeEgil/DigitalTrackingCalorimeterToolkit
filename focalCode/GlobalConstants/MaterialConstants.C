@@ -258,9 +258,60 @@ Bool_t isChipLowResistivity(Int_t chipIdx) {
 		 chipIdx == 16 || chipIdx == 17 ||
 		 chipIdx == 18 || chipIdx == 21 ||
 		 chipIdx == 23 || chipIdx == 24 ||
-		 chipIdx == 27) {
+		 chipIdx == 27 || chipIdx == 25) {
 		isHigh = true;
 	}
 
 	return isHigh;
+}
+
+Bool_t isBadData(Cluster *estimatedPosition) {
+   Float_t   x = estimatedPosition->getXmm();
+   Float_t   y = estimatedPosition->getYmm();
+   Int_t     layer = estimatedPosition->getLayer();
+   Bool_t    isBad = false;
+
+   // gap between the chips
+   if (fabs(y) < 0.05) isBad = true;
+
+   switch (layer) {
+      case 1:
+         if (x<0) {
+            if (y > 4.7 && y < 9.7) isBad = true;
+            else if (y > -2.9 && y < 0.0) isBad = true;
+            else if (y < -15) isBad = true;
+         }
+         else {
+            if (y > 0 && y < 5.2) isBad = true;
+         }
+         break;
+
+      case 2:
+         if (x < 0 && y >  0 ) isBad = true;
+         else if (x > 0 && y < -14.7) isBad = true;
+         break;
+
+      case 3:
+         if (x < 0 && y < -14.7) isBad = true;
+         break;
+
+      case 5:
+         if (x > 0 && y > 4.7 && y < 9.7) isBad = true;
+         else if (x > 0 && y < -4.7 && y > -9.7) isBad = true;
+         break;
+
+      case 6:
+         if (x < 0 && y > 14.7) isBad = true;
+         else if (x > 0 && y > -9.7 && y < -4.7) isBad = true;
+         break;
+
+      case 7:
+         if (x < 0) {
+            if (y < -4.8 && y > -9.8) isBad = true;
+            else if (y < -14.8) isBad = true;
+         }
+         break;
+   }
+   
+   return isBad;
 }
