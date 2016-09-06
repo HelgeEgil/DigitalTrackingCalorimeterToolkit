@@ -870,6 +870,8 @@ Float_t drawBraggPeakGraphFit(Int_t Runs, Int_t dataType, Bool_t recreate, Float
    Float_t sigmas[10] = {};
    
    Float_t nGaussianFitRange = doNGaussianFit(hFitResults, means, sigmas);
+   Float_t empiricalMean = means[9];
+   Float_t empiricalSigma = sigmas[9];
 
    Int_t nMean = 0;
    for (Int_t i=0; i<10; i++) {
@@ -883,6 +885,7 @@ Float_t drawBraggPeakGraphFit(Int_t Runs, Int_t dataType, Bool_t recreate, Float
    rangeSigma = sqrt(rangeSigma);
 
    Float_t energySigma = getEnergyFromUnit(nGaussianFitRange + rangeSigma / 2) - getEnergyFromUnit(nGaussianFitRange - rangeSigma / 2);
+   energySigma = getEnergyFromUnit(empiricalMean +  empiricalSigma/ 2) - getEnergyFromUnit(empiricalMean - empiricalSigma / 2);
 
    cFitResults->Update();
    
@@ -901,10 +904,15 @@ Float_t drawBraggPeakGraphFit(Int_t Runs, Int_t dataType, Bool_t recreate, Float
    gPad->Update();
    TF1 *fit1 = (TF1*) gPad->GetPrimitive("Gaus_5");
    
+   Float_t bip_value = means[0] - 3*sigmas[0];
+   TLine *bip = new TLine(bip_value, hFitResultsDroppedData->GetMaximum(), bip_value, 0);
+   bip->Draw();
+
    legend->SetTextSize(0.02);
-   legend->AddEntry(hFitResults, "Individual track fits", "F");
-   legend->AddEntry(hFitResultsDroppedData, "Tracks w/o Bragg Peak", "F");
-   legend->AddEntry(fit1, "Weighted Gaussians", "L");
+   legend->AddEntry(hFitResults, "Accepted tracks", "F");
+   legend->AddEntry(hFitResultsDroppedData, "Tracks without BP rise", "F");
+   legend->AddEntry(fit1, "Fitted Gaussians", "L");
+   legend->AddEntry(bip, "b_{i'} bin", "L");
    legend->SetTextFont(22);
 //    legend->AddEntry(landau, Form("Fit with E = %.1f MeV and #sigma = %.1f mm ", landau_energy, landau->GetParameter(2)*1.7), "F");
    if (kDrawVerticalLayerLines) legend->AddEntry(l, "Sensor layer positions", "L");
@@ -917,14 +925,16 @@ Float_t drawBraggPeakGraphFit(Int_t Runs, Int_t dataType, Bool_t recreate, Float
    ps->AddText(Form("Nominal WEPL = %.2f", expectedMean));
    ps->AddText(Form("Nominal straggling = %.2f", expectedStraggling));
    
-   for (Int_t i=0; i<nMean; i++) {
+   for (Int_t i=0; i<2; i++) {
       ps->AddText(Form("Fit %d WEPL = %.2f", i+1, means[i]));
       ps->AddText(Form("Fit %d #sigma_{WEPL} = %.2f", i+1, sigmas[i]));
       ps->AddText(Form("Fit %d energy = %.2f", i+1, getEnergyFromUnit(means[i])));
    }
 
-   ps->AddText(Form("Resulting WEPL = %.2f #pm %.2f", nGaussianFitRange, rangeSigma));
-   ps->AddText(Form("Resulting energy = %.2f #pm %.2f", getEnergyFromUnit(nGaussianFitRange), energySigma));
+//   ps->AddText(Form("Resulting WEPL = %.2f #pm %.2f", nGaussianFitRange, rangeSigma));
+//   ps->AddText(Form("Resulting energy = %.2f #pm %.2f", getEnergyFromUnit(nGaussianFitRange), energySigma));
+   ps->AddText(Form("Resulting WEPL = %.2f #pm %.2f", empiricalMean, empiricalSigma));
+   ps->AddText(Form("Resulting energy = %.2f #pm %.2f", getEnergyFromUnit(empiricalMean), energySigma));
       
    if (kOutputUnit == kPhysical) {
       cFitResults->SaveAs(Form("OutputFiles/figures/Fitted_energies_%.2f_MeV_%s_%s_physical.pdf", energy, getMaterialChar(), getDataTypeChar(dataType)));
@@ -2226,6 +2236,9 @@ Float_t  doNGaussianFit ( TH1F *h, Float_t *means, Float_t *sigmas) {
    // energy; nominal range; estimated range; range sigma; last_range
    file2 << run_energy << " " << getWEPLFromEnergy(run_energy) << " " << estimated_range << " " << sumSigma << " " << last_range << endl;
    file2.close();
+
+   means[9] = empiricalMean;
+   sigmas[9] = empiricalSigma;
 
    return estimated_range;
 }
