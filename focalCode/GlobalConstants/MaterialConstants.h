@@ -46,6 +46,7 @@ Float_t  getEnergyLossErrorFromAluminumAbsorber();
 Double_t getLayerPositionmm(Int_t i);
 Float_t  getSigmaEnergy(Int_t energy);
 Bool_t   isChipLowResistivity(Int_t chipIdx);
+Float_t  getChipCalibrationFactor(Int_t chipIdx);
 Bool_t   isBadData(Cluster * estimatedPosition);
 
 #endif

@@ -265,6 +265,32 @@ Bool_t isChipLowResistivity(Int_t chipIdx) {
 	return isHigh;
 }
 
+Float_t getChipCalibrationFactor(Int_t chip) {
+/*
+   Float_t f[28] = {1.265, 1.253, 0.802, 0.836,
+                    1.292, 1.271, 1.660, 1.420,
+                    0.813, 0.837, 1.182, 0.000,
+                    1.402, 1.421, 1.325, 1.362,
+                    0.858, 0.828, 0.876, 1.222,
+                    1.189, 1.497, 1.259, 1.315,
+                    1.164, 1.042, 1.122, 1.082};
+*/
+   Float_t f[28] = {1.273, 1.253, 0.836, 0.834,
+                    1.267, 1.267, 1.656, 1.417,
+                    0.813, 0.835, 1.180, 0.000,
+                    1.403, 1.412, 1.328, 1.366,
+                    0.874, 0.829, 1.020, 1.221,
+                    1.188, 1.510, 1.261, 1.316,
+                    1.112, 0.976, 1.097, 1.013};
+   
+   if (chip > 27) {
+      cout << "CHIP NUMBER TOO HIGH, CANNOT CALIBRATE!\n";
+      return 0;
+   }
+
+   return f[chip];
+}
+
 Bool_t isBadData(Cluster *estimatedPosition) {
    Float_t   x = estimatedPosition->getXmm();
    Float_t   y = estimatedPosition->getYmm();

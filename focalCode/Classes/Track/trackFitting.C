@@ -88,10 +88,6 @@ TGraphErrors * Track::doRangeFit() {
 	// The difference should be minimal! However this is how the conversion functions
 	// are defined.
 
-	Bool_t			newCutBraggPeak = (getAverageCSLastN(2) > getAverageCS()*kBPFactorAboveAverage);
-	Bool_t			cutNPointsInTrack = (GetEntries()>3);
-	Bool_t			cut = newCutBraggPeak * cutNPointsInTrack;
-//	if (!cut) return 0;
 
 	TGraphErrors * graph = nullptr;
 	Int_t				n = GetEntriesFast();
@@ -106,13 +102,12 @@ TGraphErrors * Track::doRangeFit() {
    if (kDataType == kData) {
       checkResistivity = true;
    }
-
 	
 	for (Int_t i=0; i<n; i++) {
 		if (!At(i)) continue;
 		x[i] = preTL + getLayermm(i);
-		y[i] = getDepositedEnergy(i, checkResistivity) / 14.; // normalize to per um
-		ery[i] = getDepositedEnergyError(i, checkResistivity) / 14.;
+		y[i] = getDepositedEnergy(i, checkResistivity); // normalize to per um
+		ery[i] = getDepositedEnergyError(i, checkResistivity);
 		erx[i] = dz / sqrt(12);
 	}
 	

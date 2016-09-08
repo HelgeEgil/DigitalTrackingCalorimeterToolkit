@@ -25,7 +25,6 @@ Layer::~Layer() {
 Int_t Layer::diffuseLayer(TRandom3 *gRandom) {
    Int_t repeatFactor, x, y, z, randX, randY;
    Float_t EnergyFactor = 2.67;
-// Float_t EnergyFactor;
    Float_t newSigma, eDep;
 
    Hits *hits = new Hits();
@@ -40,14 +39,7 @@ Int_t Layer::diffuseLayer(TRandom3 *gRandom) {
       x = hits->getX(h);
       y = hits->getY(h);
       eDep = hits->getEdep(h);
-/*
-      if (isChipLowResistivity(hits->At(h)->getChip())) {
-         EnergyFactor = 3.4;
-      }
-      else {
-         EnergyFactor = 1.65;
-      }
-*/    
+      if (eDep/14 > 10) cout << "Edep is " << eDep/14. << " keV/um in layer " << layerNo_ << ".\n";
       repeatFactor = eDep * EnergyFactor;
       newSigma = pow(repeatFactor, 0.35) / 6;
 

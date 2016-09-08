@@ -81,49 +81,36 @@ Float_t Cluster::getRadiusmm() {
   return r_mm;
 }  
 
-Float_t Cluster::getDepositedEnergy(Bool_t checkResistivity) {
+Float_t Cluster::getDepositedEnergy(Bool_t correctSensitivity) {
 	// An inverse fit to the charge diffusion algorithm defined in Layer.C
 	// Returns the local dEdx value in keV.
 
 	Float_t  edep = 0;
    Int_t    n = clusterSize_;
 
-   if (checkResistivity) {
-      if (isChipLowResistivity(getChip())) {
-         edep = -3.293 + 3.075 * n - 0.00497 * pow(n,2) + 0.000536 * pow(n,3) - 5.428e-6 * pow(n,4);
-      }
-
-      else {
-         edep = -5.676 + 6.203 * n - 0.0412 * pow(n,2) + 0.00428 * pow(n,3) - 8.199e-5 * pow(n,4);
-      }
-   }
-   else { // find mean value (i.e. Monte Carlo)
-      edep = -3.993 + 3.883 * n - 0.0124 * pow(n,2) + 0.00114 * pow(n,3) - 1.420e-5 * pow(n,4);
+   edep = -3.993 + 3.883 * n - 0.0124 * pow(n,2) + 0.00114 * pow(n,3) - 1.420e-5 * pow(n,4);
+   
+   if (correctSensitivity) {
+      edep *= getChipCalibrationFactor(getChip());
    }
 
-   return edep;
+   return edep / 14.; // layer is 14 modelled as um thick
 }
 
-Float_t Cluster::getDepositedEnergyError(Bool_t checkResistivity) {
+Float_t Cluster::getDepositedEnergyError(Bool_t correctSensitivity) {
 	// sigma_E = sigma_N (dE / dN)
 	
 	Float_t  sn = sqrt(clusterSize_);
    Int_t    n = clusterSize_;
    Float_t  diff_n;
   
-   if (checkResistivity) {
-      if (isChipLowResistivity(getChip())) {
-         diff_n = 3.075 - 2 * 0.00497 * n + 3 * 0.000536 * pow(n,2) - 4 * 5.428e-6 * pow(n,3);
-      }
-      else {
-         diff_n = 6.203 - 2 * 0.04120 * n + 3 * 0.004280 * pow(n,2) - 4 * 8.199e-5 * pow(n,3);
-      }
-   }
-   else { // find mean value (i.e. Monte Carlo)
-      diff_n = 3.883 - 2 * 0.0124 * n + 3 * 0.00114 * pow(n,2) - 4 * 1.420e-5 * pow(n,3);
+   diff_n = 3.883 - 2 * 0.0124 * n + 3 * 0.00114 * pow(n,2) - 4 * 1.420e-5 * pow(n,3);
+
+   if (correctSensitivity) {
+      diff_n *= getChipCalibrationFactor(getChip());
    }
 
-	return sn * diff_n;
+	return sn * diff_n / 14.; // layer is modelled as 14 um thick
 }
 
 void Cluster::set(Cluster* copyCluster) {
