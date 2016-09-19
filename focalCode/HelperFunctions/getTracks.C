@@ -262,6 +262,7 @@ Tracks * getTracks(Int_t Runs, Int_t dataType, Int_t frameType, Float_t energy, 
 
       // Track improvements
       Int_t nTracksBefore = 0, nTracksAfter = 0;
+      Int_t nIsInelastic = 0, nIsNotInelastic = 0;
       
       calorimeterTracks->extrapolateToLayer0();
       calorimeterTracks->splitSharedClusters();
@@ -274,14 +275,24 @@ Tracks * getTracks(Int_t Runs, Int_t dataType, Int_t frameType, Float_t energy, 
       calorimeterTracks->removeTrackCollisions();
 
       if (kDataType == kData) {
-         nTracksBefore = calorimeterTracks->GetEntries();
+     //    nTracksBefore = calorimeterTracks->GetEntries();
          calorimeterTracks->removeTracksEndingInBadChannels();
          nTracksAfter = calorimeterTracks->GetEntries();
          cout << "Of " << nTracksBefore << " tracks, " << nTracksBefore - nTracksAfter << " (" << 100* ( nTracksBefore - nTracksAfter) / ( (float) nTracksBefore ) << "%) were removed due to ending just before a bad channel.\n";
-      }
- 
 
-      file << energy << " " << kEventsPerRun << " " << nTracksBefore << " " << nTracksAfter << " " << calorimeterTracks->GetEntries() << endl;
+      }
+      
+      for (Int_t k=0; k<calorimeterTracks->GetEntriesFast(); k++) {
+         if (calorimeterTracks->At(k)) {
+            if (calorimeterTracks->At(k)->doesTrackEndAbruptly()) {
+               nIsInelastic++;
+            }
+            else nIsNotInelastic++;
+         }
+      }
+      cout << "Of these, " << nIsInelastic << " end abruptly and " << nIsNotInelastic << " does not.\n";
+
+      file << energy << " " << kEventsPerRun << " " << nTracksBefore << " " << nTracksAfter << " " << calorimeterTracks->GetEntries() << " " <<  nIsInelastic << " " << nIsNotInelastic << endl;
 
       // calorimeterTracks->retrogradeTrackImprovement(clusters);
 

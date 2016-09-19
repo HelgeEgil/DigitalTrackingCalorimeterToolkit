@@ -34,6 +34,9 @@ void makePlots() {
    Float_t  arrayMC[200] = {0}; // range MC
    Float_t  arrayEMC[200] = {0}; // error on range MC
    Float_t  arrayPSTAR[200] = {0};
+   Float_t  arrayPSTARshade[400] = {0};
+   Float_t  arrayPSTARmin[200] = {0};
+   Float_t  arrayPSTARmax[200] = {0};
    Float_t  arrayEPstar[200] = {0};
    Float_t  arrayE2[200] = {0}; // energy data 
    Float_t  arrayEE2[200] = {0}; // error on energy data
@@ -81,6 +84,7 @@ void makePlots() {
 
    Float_t nomrange_, estrange_, sigmaRange_, lastRange_;
    Int_t energy_;
+   Float_t estimatedStraggling;
 
    Int_t nlines = 0;
    TNtuple *ntuple = new TNtuple("ntuple", "data from file", "energy_:nomrange_:estrange_:sigmaRange:lastRange_");
@@ -101,6 +105,7 @@ void makePlots() {
       meanError += ( estrange_ - nomrange_ ) / nomrange_;
       meanAbsError += fabs(( estrange_ - nomrange_ ) / nomrange_);
       meanSigma += sigmaRange_;
+      estimatedStraggling = 0.017 * pow(nomrange_, 0.935);
 
       if (nlines < MC2Data) {
          cout << "Line " << nlines << ", energy " << energy_ << ",  MC" << endl;
@@ -109,6 +114,8 @@ void makePlots() {
          arrayMC[nlines] = estrange_;
          arrayEMC[nlines] = sigmaRange_;
          arrayPSTAR[nlines] = nomrange_;
+         arrayPSTARmin[nlines] = nomrange_ - estimatedStraggling;
+         arrayPSTARmax[nlines] = nomrange_ + estimatedStraggling;
          arrayEPstar[nlines] = 0;
       }
 
@@ -323,17 +330,30 @@ void makePlots() {
    
    TGraphErrors *hMC = new TGraphErrors(MC2Data, arrayE, arrayMC, arrayEE, arrayEMC);
    TGraphErrors *hData = new TGraphErrors(nlines-MC2Data, arrayE2, arrayData, arrayEE2, arrayEData);
-   TGraphErrors *pstar = new TGraphErrors(MC2Data, arrayE, arrayPSTAR, arrayEE, arrayEPstar);
+//   TGraphErrors *pstar = new TGraphErrors(MC2Data, arrayE, arrayPSTAR, arrayEE, arrayEPstar);
+   TGraph *pstar = new TGraph(MC2Data, arrayE, arrayPSTAR);
+   TGraph *pstarmin = new TGraph(MC2Data, arrayE, arrayPSTARmin);
+   TGraph *pstarmax = new TGraph(MC2Data, arrayE, arrayPSTARmax);
+   TGraph *pstarshade = new TGraph(MC2Data*2);
    
-   hMC->GetXaxis()->SetTitleFont(22);
-   hMC->GetYaxis()->SetTitleFont(22);
-   hMC->GetXaxis()->SetTitleOffset(1.2);
-   hMC->GetYaxis()->SetTitleOffset(1.2);
-   hMC->GetXaxis()->SetLabelFont(22);
-   hMC->GetYaxis()->SetLabelFont(22);
+   for (Int_t i=0; i<MC2Data; i++) {
+      pstarshade->SetPoint(i, arrayE[i], arrayPSTARmax[i]);
+      pstarshade->SetPoint(MC2Data+i, arrayE[MC2Data-i-1], arrayPSTARmin[MC2Data-i-1]);
+   }
 
-   hMC->GetXaxis()->SetRangeUser(145, 200);
-   hMC->GetYaxis()->SetRangeUser(145, 270);
+   pstarshade->GetXaxis()->SetTitleFont(22);
+   pstarshade->GetYaxis()->SetTitleFont(22);
+   pstarshade->GetXaxis()->SetTitleOffset(0.9);
+   pstarshade->GetYaxis()->SetTitleOffset(0.9);
+   pstarshade->GetXaxis()->SetLabelFont(22);
+   pstarshade->GetXaxis()->SetTitleSize(0.05);
+   pstarshade->GetXaxis()->SetLabelSize(0.05);
+   pstarshade->GetYaxis()->SetLabelFont(22);
+   pstarshade->GetYaxis()->SetTitleSize(0.05);
+   pstarshade->GetYaxis()->SetLabelSize(0.05);
+
+   pstarshade->GetXaxis()->SetRangeUser(145, 200);
+   pstarshade->GetYaxis()->SetRangeUser(145, 270);
 
    hMC->SetMarkerColor(kBlue);
    hMC->SetMarkerStyle(21);
@@ -342,15 +362,23 @@ void makePlots() {
    hData->SetMarkerColor(kRed);
    hData->SetMarkerStyle(22);
    hData->SetMarkerSize(2);
+   hData->SetLineColor(kBlack);
    
    pstar->SetLineWidth(3);
-   pstar->SetLineColor(kRed);
+   pstar->SetLineColor(kMagenta-10);
+   pstarshade->SetTitle("Range estimation of proton tracks using weighted Gaussian approach;Energy [MeV];Projected range [mm]");
+   
+//   pstarshade->SetFillColorAlpha(kRed, 0.35);
+   pstarshade->SetFillColor(kMagenta-10);
+   pstarshade->Draw("FA");
+   pstarmin->Draw("L");
+   pstarmax->Draw("L");
+//   pstar->Draw("CP");
 
 // gStyle->SetPadTickY(1);
    hMC->SetTitle("Range estimation of proton tracks using weighted Gaussian approach;Energy [MeV];Projected range [mm]");
-   hMC->Draw("AP");
+   hMC->Draw("P");
    hData->Draw("P");
-   pstar->Draw("L");
 
    gPad->Update();
    TPaveText *title = (TPaveText*) gPad->GetPrimitive("title");

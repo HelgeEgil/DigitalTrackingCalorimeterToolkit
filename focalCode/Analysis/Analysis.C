@@ -2128,7 +2128,7 @@ Float_t  doNGaussianFit ( TH1F *h, Float_t *means, Float_t *sigmas) {
       isLastLayer = ((getWEPLFromTL(getLayerPositionmm(i)) > getUnitFromEnergy(run_energy-10)) && !wasLastLayer && ratio > 0.01) ;
    
       if (i<=3) continue;
-      if (ratio < 0.05 && !isLastLayer) continue;
+      if (ratio < 0.2 && !isLastLayer) continue;
       
       gauss = new TF1(Form("Gaus_%d", i), "gaus(0)", searchFrom, searchTo);
    
@@ -2168,7 +2168,7 @@ Float_t  doNGaussianFit ( TH1F *h, Float_t *means, Float_t *sigmas) {
 //       continue;
 //    }
 
-      if (ratio > 0.2) { //  || (isLastLayer && ratio>0.025)) {
+      if (ratio > 0.1) { //  || (isLastLayer && ratio>0.025)) {
          gauss->SetLineColor(kRed);
          gauss->SetLineWidth(3);
          gauss->Draw("same");
@@ -2215,7 +2215,8 @@ Float_t  doNGaussianFit ( TH1F *h, Float_t *means, Float_t *sigmas) {
    Float_t lastSigma = array_sigma[1];
    if (lastSigma == 0) lastSigma = array_sigma[0];
 
-   Int_t binSigmaFrom = axis->FindBin(array_mean[0] - 3*array_sigma[0]);
+//   Int_t binSigmaFrom = axis->FindBin(array_mean[0] - 3*array_sigma[0]);
+   Int_t binSigmaFrom = axis->FindBin(lastMean - 3*lastSigma);
    Float_t squareMeanDifference = 0;
    Float_t empiricalMean = 0;
    Int_t N = 0;
@@ -2227,6 +2228,7 @@ Float_t  doNGaussianFit ( TH1F *h, Float_t *means, Float_t *sigmas) {
   
    empiricalMean /= N; 
 
+   binSigmaFrom = axis->FindBin(array_mean[0] - 3*array_sigma[0]);
 //   for (Int_t i=binSigmaFrom; i<=h->GetNbinsX(); i++) {
    for (Int_t i=binSigmaFrom; i<=h->GetNbinsX(); i++) {
       cout << "Adding " << h->GetBinContent(i) << " * (" << axis->GetBinCenter(i) << " - " << empiricalMean << " )^2 to variance.\n";
