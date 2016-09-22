@@ -64,7 +64,7 @@
 /gate/source/uniformBeam/gps/centre 0. 0. -15. cm # -20 cm for scintillator
 
 /gate/output/root/enable
-/gate/output/root/setFileName ../../focalCode/Data/WaterBox/water_{energy}MeV
+/gate/output/root/setFileName ../../focalCode/Data/WaterBox/tungsten_{energy}MeV
 
 /gate/random/setEngineName MersenneTwister
 /gate/random/setEngineSeed auto

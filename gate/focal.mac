@@ -19,9 +19,9 @@
 /gate/systems/scanner/level2/attach layer
 /gate/systems/scanner/level3/attach chip
 
-/control/execute readout_chip.mac
+#/control/execute readout_chip.mac
 #/control/execute readout_chip_scintillators.mac
-#/control/execute readout_full.mac
+/control/execute readout_full.mac
 
 #=================#
 # Physics			#

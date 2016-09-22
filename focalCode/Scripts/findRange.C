@@ -6,6 +6,7 @@
 #include <TF1.h>
 #include <TStyle.h>
 #include <TCanvas.h>
+#include <TLine.h>
 #include <iostream>
 #include <string.h>
 #include <TString.h>
@@ -59,9 +60,9 @@ void findRange::Loop(Double_t energy, Double_t sigma_mev)
    TCanvas *c4 = new TCanvas("c4", "c4", 800, 600);
    TCanvas *c5 = new TCanvas("c5", "c5", 800, 600);
 
-   Int_t nbinsx = 1000;
+   Int_t nbinsx = 100;
    Int_t xfrom = -5;
-   Int_t xto = 30;
+   Int_t xto = 35;
 
 	Float_t x_compensate = 0;
 
@@ -84,9 +85,11 @@ void findRange::Loop(Double_t energy, Double_t sigma_mev)
 	Float_t dE = 0;
 	Float_t dTL = 0;
 	Float_t dE_random = 0;
-	
+	Int_t ignoreID = -5;
+
 	Float_t tl = 0;
 	Int_t n = 0;
+	Char_t lastProcessName[17];
 	
 	TRandom3 *gRandom = new TRandom3();
 
@@ -96,6 +99,8 @@ void findRange::Loop(Double_t energy, Double_t sigma_mev)
 	firstX = posX;
 	firstY = posY;
 	firstZ = posZ;
+
+	Int_t lastP = 0;
 	
    for (Long64_t jentry=0; jentry<nentries;jentry++) {
 	Long64_t ientry = LoadTree(jentry);
@@ -119,28 +124,27 @@ void findRange::Loop(Double_t energy, Double_t sigma_mev)
 		Float_t z = posZ;
 		Float_t y = posY;
 		Float_t x = posX;
-		
-		
+	
 		if (fabs(x) < 20 && fabs(y) < 20 && volumeID[4] == 4 || 1) hZ->Fill(z + x_compensate, edep);
 		n++;
-		
-		if (processName == "ProtonInelastic") {
-		   hTracklength->Fill(tl + firstZ);
+
+		if (processName[0] == 'P') {
+		   hTracklength->Fill(z + firstZ);
       }
-      else cout << "-" << processName << "-" << endl;
-			
-		if (eventID != lastID) {
+	
+		if (eventID != lastID && fabs(lastX) < 10 && fabs(lastY) < 10) {
 			n = 0;
 			
 			Float_t diff = sqrt( pow(firstX - lastX, 2) + pow(firstY - lastY, 2) + pow(0 - lastZ, 2));
+
 			hRange->Fill(lastRange);
 			hActualTracklength->Fill(tl + firstZ);
+			if (lastProcessName[0] == 'P') { lastP++; }
 
 			firstX = posX;
 			firstY = posY;
 			firstZ = posZ;
 			tl = 0;
-
 		}
 
 		else if (jentry>0) {
@@ -153,6 +157,7 @@ void findRange::Loop(Double_t energy, Double_t sigma_mev)
 		lastID = eventID;
 		lastY = posY;
 		lastZ = posZ;
+		for (Int_t j=0; j<17; j++) lastProcessName[j] = processName[j];
 		}
    }
    
@@ -176,20 +181,23 @@ void findRange::Loop(Double_t energy, Double_t sigma_mev)
 	
 // 	hTracklength->Fit("fit_range", "Q,M,WW,B", "", xfrom, xto);
  //	cout << Form("Straight line: %.3f mm +- %.3f mm.\n", fRange->GetParameter(1), fRange->GetParameter(2));
-	
+
+   Float_t percent = 100 * hTracklength->Integral() / 50000;
+   cout << "Of " << 50000 << ", there are " << hTracklength->Integral() << " inelastic proton collision (" << percent << "%)\n";
+
  	hActualTracklength->Fit("fit_range", "Q,M,WW,B", "", xfrom, xto);
  	fit_tl = fRange->GetParameter(1);
  	cout << Form("Tracklength: \033[1m%.3f\033[0m mm +- %.3f mm.\n", fit_tl, fRange->GetParameter(2));
    
  	Float_t cutoff = fRange->GetParameter(1) - 3*fabs(fRange->GetParameter(2));
  	Float_t total = hActualTracklength->Integral();
-
  	Float_t attenuation = hActualTracklength->Integral(0, hActualTracklength->GetXaxis()->FindBin(cutoff));
 
    cout << "Mean = " << fRange->GetParameter(1) << endl;
    cout << "3 sigma = " << cutoff << endl;
  	cout << "Number of protons attenuated (more than 4 sigma below) = \033[1m" << 100 * attenuation / total << " %\033[0m.\n";
-	
+   cout << "lastP = " << lastP << endl;
+
 	c1->cd();
 		hZ->SetXTitle("Z [mm]");
 		hZ->SetYTitle("Edep [MeV]");
@@ -217,6 +225,10 @@ void findRange::Loop(Double_t energy, Double_t sigma_mev)
 		hActualTracklength->SetFillColor(kBlue-7);
 		hActualTracklength->SetLineColor(kBlack);
 		hActualTracklength->Draw();
+		TLine *l = new TLine(cutoff, 0, cutoff, hActualTracklength->GetMaximum()*1.95);
+		l->SetLineWidth(2);
+		l->SetLineStyle(9);
+		l->Draw("same");
 		
 	c5->cd();
 		hStepLength->SetXTitle("Steplength [mm]");

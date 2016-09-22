@@ -1,22 +1,22 @@
 # world
-/gate/world/geometry/setXLength 300. cm
-/gate/world/geometry/setYLength 300. cm
+/gate/world/geometry/setXLength 1000. cm
+/gate/world/geometry/setYLength 1000. cm
 /gate/world/geometry/setZLength 300. cm
 
 # system
 /gate/world/daughters/name scanner
 /gate/world/daughters/insert box
-/gate/scanner/geometry/setXLength 250. cm
-/gate/scanner/geometry/setYLength 250. cm
+/gate/scanner/geometry/setXLength 900. cm
+/gate/scanner/geometry/setYLength 900. cm
 /gate/scanner/geometry/setZLength 250. cm
 /gate/scanner/setMaterial Air
 /gate/scanner/vis/forceWireframe
 
 /gate/scanner/daughters/name waterbox
 /gate/scanner/daughters/insert box
-/gate/waterbox/geometry/setXLength 100. cm
-/gate/waterbox/geometry/setYLength 100. cm
+/gate/waterbox/geometry/setXLength 800. cm
+/gate/waterbox/geometry/setYLength 800. cm
 /gate/waterbox/geometry/setZLength 100. cm
 /gate/waterbox/placement/setTranslation 0. 0. 50. cm
-/gate/waterbox/setMaterial Water
+/gate/waterbox/setMaterial Tungsten
 /gate/waterbox/vis/forceWireframe

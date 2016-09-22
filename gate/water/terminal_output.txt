@@ -22,14 +22,27 @@ http://wiki.opengatecollaboration.org/index.php/Users_Guide_V7.0:Setting_up_the_
 [Core-0] **********************************************************************
 [Core-0] 
 [Core-0] You are using Geant4 version 9.6.4
-/control/alias energy 20
-/control/alias npart 25000
+/control/alias energy 188
+/control/alias npart 10000
 /control/alias step_active 0
 /control/alias sigma 0
 [Core-0] Starting macro focal_script.mac
+WARNING: G4VisCommandSceneHandlerCreate::SetNewValue: using fallback graphics system.
 WARNING: The vis manager will keep up to 25 events.
   This may use a lot of memory.
   It may be changed with, e.g., "/vis/scene/endOfEventAction accumulate 10".
+===== XML PATH ====: ./Materials.xml
+===== XML PATH ====: 0x345aed0
+===== XML PATH ====: ./Materials.xml
+===== XML PATH ====: 0x348f380
+ABSLENGTH
+1.84e-06	50000
+4.08e-06	50000
+RINDEX
+1.84e-06	1.00028
+4.08e-06	1.00028
+===== XML PATH ====: ./Materials.xml
+===== XML PATH ====: 0x35d7760
 [Physic-0] The following Geant4's physic-list is enabled :QGSP_BIC_EMY
 [Core-0] Initialization of geometry
 G4PhysicalVolumeModel::Validate(): A volume of the same name and

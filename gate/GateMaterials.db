@@ -54,6 +54,9 @@ Vacuum: d=0.000001 mg/cm3 ; n=1
 Aluminium: d=2.7 g/cm3 ; n=1 ; state=solid
         +el: name=auto       ; n=1
 
+Copper: d=8.96 g/cm3; n=1; state=solid
+        +el: name=Copper     ; n=1
+
 AluminiumEGS: d=2.702 g/cm3 ; n=1 ; state=solid
         +el: name=Aluminium  ; n=1
 
