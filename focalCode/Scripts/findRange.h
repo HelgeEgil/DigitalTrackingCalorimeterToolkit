@@ -137,8 +137,8 @@ findRange::findRange(Int_t energy, TTree *tree) : fChain(0)
       // of trees.
       TChain * chain = new TChain("Hits","");
 //      chain->Add(Form("../Data/MonteCarlo/focal_Tungsten_energy%d_sigma0.root/Hits", energy));
-      chain->Add(Form("../Data/MonteCarlo/focal_Aluminium_energy%d_sigma0.root/Hits", energy));
-//      chain->Add(Form("../Data/WaterBox/water_%dMeV.root/Hits", energy));
+//      chain->Add(Form("../Data/MonteCarlo/focal_Aluminium_energy%d_sigma0.root/Hits", energy));
+      chain->Add(Form("../Data/WaterBox/tungsten_%dMeV.root/Hits", energy));
       tree = chain;
 #endif // SINGLE_TREE
 

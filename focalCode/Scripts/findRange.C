@@ -61,7 +61,7 @@ void findRange::Loop(Double_t energy, Double_t sigma_mev)
 
    Int_t nbinsx = 1000;
    Int_t xfrom = -5;
-   Int_t xto = 4;
+   Int_t xto = 30;
 
 	Float_t x_compensate = 0;
 
@@ -123,13 +123,17 @@ void findRange::Loop(Double_t energy, Double_t sigma_mev)
 		
 		if (fabs(x) < 20 && fabs(y) < 20 && volumeID[4] == 4 || 1) hZ->Fill(z + x_compensate, edep);
 		n++;
+		
+		if (processName == "ProtonInelastic") {
+		   hTracklength->Fill(tl + firstZ);
+      }
+      else cout << "-" << processName << "-" << endl;
 			
 		if (eventID != lastID) {
 			n = 0;
 			
 			Float_t diff = sqrt( pow(firstX - lastX, 2) + pow(firstY - lastY, 2) + pow(0 - lastZ, 2));
 			hRange->Fill(lastRange);
-			hTracklength->Fill(diff);
 			hActualTracklength->Fill(tl + firstZ);
 
 			firstX = posX;
@@ -151,47 +155,39 @@ void findRange::Loop(Double_t energy, Double_t sigma_mev)
 		lastZ = posZ;
 		}
    }
-
-   
    
 	// range 1: 80 % of maximum for bragg peak on distal edge
-	Double_t range_1 = hZ->GetXaxis()->GetBinCenter(hZ->FindLastBinAbove(hZ->GetMaximum() * 0.8));
+	Double_t range_1 = hActualTracklength->GetXaxis()->GetBinCenter(hActualTracklength->FindLastBinAbove(hActualTracklength->GetMaximum() * 0.8));
 	Double_t range_3 = hRange->GetXaxis()->GetBinCenter(hRange->GetMaximumBin());
 	
  	cout << "Maximum from bragg peak plot, 80\% of maximum on distal edge: " << range_1 << " mm.\n";
 
 	c2->cd();
 	
-	Float_t fit_tl = 0, fit_range = 0;
+	Float_t fit_tl = 0;;
 
 	TF1 *fRange = new TF1("fit_range", "gaus", xfrom, xto);
-//	fRange->SetParameters(100, 157, 0.5);
+	fRange->SetParameters(100, range_1, 0.5);
 //	fRange->SetParLimits(2, 0, 3);
 //	fRange->SetParLimits(1, range_1 * 0.6, range_1 * 1.5);
 //	fRange->SetParLimits(0, 0, 250);
-	hRange->Fit("fit_range", "Q,M,WW,B", "", xfrom, xto);
- 	fit_range = fRange->GetParameter(1);
-	cout << Form("Range: \033[1m%.3f mm +- %.3f\033[0m mm.\n", fRange->GetParameter(1), fRange->GetParameter(2));
+//	hRange->Fit("fit_range", "Q,M,WW,B", "", xfrom, xto);
+//	cout << Form("Range: \033[1m%.3f mm +- %.3f\033[0m mm.\n", fRange->GetParameter(1), fRange->GetParameter(2));
 	
- 	hTracklength->Fit("fit_range", "Q,M,WW,B", "", xfrom, xto);
- 	cout << Form("Straight line: %.3f mm +- %.3f mm.\n", fRange->GetParameter(1), fRange->GetParameter(2));
+// 	hTracklength->Fit("fit_range", "Q,M,WW,B", "", xfrom, xto);
+ //	cout << Form("Straight line: %.3f mm +- %.3f mm.\n", fRange->GetParameter(1), fRange->GetParameter(2));
 	
  	hActualTracklength->Fit("fit_range", "Q,M,WW,B", "", xfrom, xto);
  	fit_tl = fRange->GetParameter(1);
  	cout << Form("Tracklength: \033[1m%.3f\033[0m mm +- %.3f mm.\n", fit_tl, fRange->GetParameter(2));
-	
- 	cout << "Detour factor = " << fit_range / fit_tl << endl;
- 	Float_t straggling =  sqrt( alphaprime * (pow(p, 2) * pow(alpha, 2/p) / (3-2/p) * pow(fit_range, 3-2/p)) );
-	Float_t straggling2 = sqrt( alphaprime * (pow(p, 2) * pow(alpha, 2/p) / (3-2/p) * pow(fit_range, 3-2/p)) + (2*pow(p, 2) * pow(alpha, 1/p) / (938.27)) / ( 3 - 1/p) * pow(fit_range, 3-1/p));
+   
+ 	Float_t cutoff = fRange->GetParameter(1) - 3*fabs(fRange->GetParameter(2));
+ 	Float_t total = hActualTracklength->Integral();
 
- 	cout << "Expected Energy from Bortfeld = " << getEnergyFromTLQuadratic(fit_range) << endl;
- 	cout << "Expected straggling from Bortfeld = " << straggling << endl;
-	cout << "Expeced straggling from rel. Bortfeld = " << straggling2 << endl;
+ 	Float_t attenuation = hActualTracklength->Integral(0, hActualTracklength->GetXaxis()->FindBin(cutoff));
 
- 	Float_t cutoff = fit_range - 4*straggling;
- 	Float_t total = hRange->Integral();
- 	Float_t attenuation = hRange->Integral(0, hRange->GetXaxis()->FindBin(cutoff));
-
+   cout << "Mean = " << fRange->GetParameter(1) << endl;
+   cout << "3 sigma = " << cutoff << endl;
  	cout << "Number of protons attenuated (more than 4 sigma below) = \033[1m" << 100 * attenuation / total << " %\033[0m.\n";
 	
 	c1->cd();
