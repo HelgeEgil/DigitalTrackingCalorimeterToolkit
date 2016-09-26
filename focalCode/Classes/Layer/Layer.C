@@ -39,7 +39,6 @@ Int_t Layer::diffuseLayer(TRandom3 *gRandom) {
       x = hits->getX(h);
       y = hits->getY(h);
       eDep = hits->getEdep(h);
-      if (eDep/14 > 10) cout << "Edep is " << eDep/14. << " keV/um in layer " << layerNo_ << ".\n";
       repeatFactor = eDep * EnergyFactor;
       newSigma = pow(repeatFactor, 0.35) / 6;
 

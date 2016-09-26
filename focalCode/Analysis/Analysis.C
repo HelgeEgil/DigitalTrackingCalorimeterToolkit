@@ -1863,20 +1863,32 @@ void compareClusterSizes(Int_t Runs, Bool_t recreate, Float_t energy) {
    }
 
    TGraphErrors * graphCSMC = new TGraphErrors(nLayersToUse, layerMC, clusterSizeMC, errorLayer, errorClusterSizeMC);
+   TGraphErrors * graphCSMC2 = new TGraphErrors(nLayersToUse, layerMC, clusterSizeMC, errorLayer, errorClusterSizeMC);
    TGraphErrors * graphCSData = new TGraphErrors(nLayersToUse, layerData, clusterSizeData, errorLayer, errorClusterSizeData);
    TGraphErrors * graphCSDataCorrected = new TGraphErrors(nLayersToUse, layerData, clusterSizeDataCorrected, errorLayer, errorClusterSizeDataCorrected);
    TGraph       * graphRatios = new TGraphErrors(nLayersToUse, layerMC, clusterSizeRatio);
    
-   graphCSMC->SetTitle(Form("Uncalibrated energy deposition distribution comparison at %.0f MeV;Chip number; Cluster size [#pixels]", run_energy));
-   graphCSDataCorrected->SetTitle(Form("Calibrated energy deposition distribution comparison at %.0f MeV;Chip number; Cluster size [#pixels]", run_energy));
+   graphCSMC->SetTitle(Form("Uncalibrated energy deposition distribution comparison at %.0f MeV;Chip number; Energy deposition [keV/#mum]", run_energy));
+   graphCSMC2->SetTitle(Form("Calibrated energy deposition distribution comparison at %.0f MeV;Chip number; Energy deposition [keV/#mum]", run_energy));
 
    graphCSMC->SetMinimum(-2);
    graphCSMC->SetMaximum(10);
    graphCSMC->SetMarkerStyle(21);
    graphCSMC->SetMarkerColor(kBlue);
+   graphCSMC2->SetMinimum(-2);
+   graphCSMC2->SetMaximum(10);
+   graphCSMC2->SetMarkerStyle(21);
+   graphCSMC2->SetMarkerColor(kBlue);
    graphCSData->SetMarkerStyle(22);
    graphCSData->SetMarkerColor(kRed);
    graphCSData->SetMarkerSize(1.5);
+   graphCSData->GetXaxis()->SetTitleFont(22);
+   graphCSData->GetXaxis()->SetLabelFont(22);
+   graphCSData->GetYaxis()->SetTitleFont(22);
+   graphCSData->GetYaxis()->SetTitleSize(0.07);
+   graphCSData->GetYaxis()->SetTitleOffset(0.3);
+   graphCSData->GetYaxis()->SetLabelFont(22);
+   graphCSData->GetXaxis()->SetNdivisions(54);
    graphCSDataCorrected->SetMarkerStyle(22);
    graphCSDataCorrected->SetMarkerColor(kRed);
    graphCSDataCorrected->SetMarkerSize(1.5);
@@ -1884,8 +1896,22 @@ void compareClusterSizes(Int_t Runs, Bool_t recreate, Float_t energy) {
    graphCSMC->GetXaxis()->SetTitleFont(22);
    graphCSMC->GetXaxis()->SetLabelFont(22);
    graphCSMC->GetYaxis()->SetTitleFont(22);
+   graphCSMC->GetXaxis()->SetTitleSize(0.07);
+   graphCSMC->GetXaxis()->SetLabelSize(0.07);
+   graphCSMC->GetYaxis()->SetTitleSize(0.07);
+   graphCSMC->GetYaxis()->SetTitleOffset(0.3);
    graphCSMC->GetYaxis()->SetLabelFont(22);
    graphCSMC->GetXaxis()->SetNdivisions(54);
+   graphCSMC2->SetMarkerSize(1.25);
+   graphCSMC2->GetXaxis()->SetTitleFont(22);
+   graphCSMC2->GetXaxis()->SetTitleSize(0.07);
+   graphCSMC2->GetXaxis()->SetLabelSize(0.07);
+   graphCSMC2->GetXaxis()->SetLabelFont(22);
+   graphCSMC2->GetYaxis()->SetTitleFont(22);
+   graphCSMC2->GetYaxis()->SetTitleSize(0.07);
+   graphCSMC2->GetYaxis()->SetTitleOffset(0.3);
+   graphCSMC2->GetYaxis()->SetLabelFont(22);
+   graphCSMC2->GetXaxis()->SetNdivisions(54);
    graphRatios->SetMinimum(0.5);
    graphRatios->SetMaximum(1.5);
    graphRatios->SetTitle("Cluster size distribution ratios (DATA / MC) at 188 MeV;Layer Number;Cluster Size Ratio (DATA/MC)");
@@ -1918,11 +1944,13 @@ void compareClusterSizes(Int_t Runs, Bool_t recreate, Float_t energy) {
    gPad->Modified();
 
    c1->cd(2);
-   graphCSMC->Draw("AP");
+   graphCSMC2->Draw("AP");
    graphCSDataCorrected->Draw("P");
-//   graphRatios->Draw("AP");
-  // TLine *tl = new TLine(-3, 1, 29.5, 1);
-//   tl->Draw();
+   
+   gPad->Update();
+   TPaveText *title2 = (TPaveText*) gPad->GetPrimitive("title");
+   title2->SetTextFont(22);
+   gPad->Modified();
 
    for (Int_t i=0; i<nLayersToUse; i++) {
       c2->cd(i+1);
@@ -1995,14 +2023,14 @@ void drawIndividualGraphs(TCanvas *cGraph, TGraphErrors* outputGraph, Float_t fi
    outputGraph->SetTitle("");
    
    if (kOutputUnit == kWEPL || kOutputUnit == kEnergy) {
-      outputGraph->GetXaxis()->SetTitle("Water Equivalent Path Length [mm]");
+      outputGraph->GetXaxis()->SetTitle("Water Equivalent Thickness [mm]");
    }
    
    else if (kOutputUnit == kPhysical) {
       outputGraph->GetXaxis()->SetTitle("Physical path length [mm]");
    }
 
-   outputGraph->GetYaxis()->SetTitle("Deposited energy on layer [keV/#mum]");
+   outputGraph->GetYaxis()->SetTitle("Energy deposition [keV/#mum]");
    outputGraph->GetYaxis()->SetTitleOffset(1);
    outputGraph->GetXaxis()->SetTitleSize(0.05);
    outputGraph->GetYaxis()->SetTitleSize(0.05);
@@ -2020,15 +2048,14 @@ void drawIndividualGraphs(TCanvas *cGraph, TGraphErrors* outputGraph, Float_t fi
 
    outputGraph->SetMarkerColor(4);
    outputGraph->SetMarkerStyle(21);
-   outputGraph->Draw("AP");
-
+   outputGraph->Draw("PA");
+   
    TF1 *func = new TF1("fit_BP", fitfunc_DBP, 0, 500, 2);
    func->SetParameters(fitEnergy, fitScale);
+   func->SetNpx(500);
 
-   if (kDrawFit) {
-      func->Draw("same");
-   }
-   
+   func->Draw("same");
+
    if (x_energy) {
       Float_t WEPLFactor = getWEPLFactorFromEnergy(run_energy);
       Long64_t n=0;

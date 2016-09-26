@@ -366,7 +366,7 @@ void makePlots() {
    
    pstar->SetLineWidth(3);
    pstar->SetLineColor(kMagenta-10);
-   pstarshade->SetTitle("Range estimation of proton tracks using weighted Gaussian approach;Energy [MeV];Projected range [mm]");
+   pstarshade->SetTitle("Reconstructed ranges of proton beams with different energies;Energy [MeV];Reconstructed WET range [mm]");
    
 //   pstarshade->SetFillColorAlpha(kRed, 0.35);
    pstarshade->SetFillColor(kMagenta-10);
@@ -376,7 +376,7 @@ void makePlots() {
 //   pstar->Draw("CP");
 
 // gStyle->SetPadTickY(1);
-   hMC->SetTitle("Range estimation of proton tracks using weighted Gaussian approach;Energy [MeV];Projected range [mm]");
+   hMC->SetTitle("Reconstructed ranges #LT#hat{R_{0}}#GT of proton tracks;Energy [MeV];Projected range [mm]");
    hMC->Draw("P");
    hData->Draw("P");
 
