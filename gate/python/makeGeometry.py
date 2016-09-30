@@ -1,4 +1,5 @@
 import matplotlib
+import copy
 import matplotlib.pyplot as plt
 import matplotlib.patches as patches
 from Tkinter import *
@@ -99,9 +100,9 @@ class Size:
         return Size(dx, dy, dz)
 
     def __sub__(self, other):
-        dx = self.dx + other.dx
-        dy = self.dy + other.dy
-        dz = self.dz + other.dz
+        dx = self.dx - other.dx
+        dy = self.dy - other.dy
+        dz = self.dz - other.dz
         return Size(dx, dy, dz)
 
     def __div__(self, f):
@@ -221,15 +222,19 @@ class Box:
     def addRotation(self):
         self.genericRepeater = True
 
-    def rotatePosition(self, mat, deg, gapY, minY, maxY, minZ, maxZ, i=0, cop=0):
+    def rotatePosition(self, mat, deg, gapY, minY, maxY, minZ, maxZ, i=0, cop=0, fromZ=0):
         if mat == "1 0 0" and deg == 180:
-            mean = (maxZ + minZ)/2.
+            meanZ = maxZ
+            meanY = (maxY + minY)/2.
             delta = maxZ - minZ
-            z = self.pos.z
+
             if cop:
                 z += (i+1) * float(cop.translation.split()[2])
-            newPos = Pos(self.pos.x, -(self.pos.y + gapY) + (maxY + minY), -z + (maxZ + minZ) + delta)
+
+            newPos = Pos(self.pos.x, 2*meanY - self.pos.y - gapY, 2*meanZ - self.pos.z)
+
             return newPos
+
         else:
             return self.pos
 
@@ -257,26 +262,31 @@ class Box:
         return "BOX {} ({} -> {}, {} -> {}, {} -> {})".format(self.name, x1, x2, y1, y2, z1, z2)
 
 class Module:
-    def __init__(self, name, mother, pos, absorberMaterial, nlayers = 40, firstAbsorberMaterial = kNoMaterial):
+    def __init__(self, name, mother, pos, absorberMaterial, nlayers = 40, firstAbsorberMaterial = kNoMaterial, absorberThickness = 1.5):
         self.objects = []
         self.nlayers = 40
         self.pos = pos
-        self.size = Size(6*cm, 6*cm, 3.975*mm)
         self.name = name
         self.chipSize = Size(19145 * um, 19145 * um)
         self.chipGap = Size(100. * um, -90 * um)
         self.chipLeftPos  = Pos(-self.chipSize.dx/2 - self.chipGap.dx/2, self.chipSize.dy/2)
         self.chipRightPos = Pos( self.chipSize.dx/2 + self.chipGap.dx/2, self.chipSize.dy/2)
         self.fillerPos    = Pos(0, -self.chipSize.dy/2)
-        self.absorberThickness = 1.5 * mm
+        self.absorberThickness = absorberThickness
         self.glueThickness = 40 * um
         self.pcbThickness = 160 * um
         self.passiveChipThickness = 106 * um
         self.activeChipThickness = 14 * um
         self.airGapAfterChipThickness = 90 * um
         self.airGapAfterFillerThickness = 80 * um
+        self.absorberAirGapThickness = 75 * um
+        self.fromZ = 0
         self.fillerGlueThickness = 70 * um
         self.fillerThickness = 300 * um
+        self.thickness = 2*self.glueThickness + self.pcbThickness + self.passiveChipThickness + self.activeChipThickness + self.airGapAfterChipThickness + self.airGapAfterFillerThickness + self.fillerThickness + self.fillerGlueThickness + 2 * self.absorberThickness + self.absorberAirGapThickness
+        self.moduleThickness = 2 * self.glueThickness + self.pcbThickness + self.passiveChipThickness + self.activeChipThickness + self.airGapAfterChipThickness
+
+        self.size = Size(6*cm, 6*cm, self.thickness)
         self.mother = mother
         self.absorberMaterial = absorberMaterial
         self.firstAbsorberMaterial = firstAbsorberMaterial
@@ -289,8 +299,11 @@ class Module:
 
     def getLeftSideNoAbsorber(self):
         for obj in self.objects:
-            if obj.name != "Layer" and obj.name != self.name and obj.name[:-1] != "Absorber":
+            if not obj.name.endswith("Layer") and obj.name != self.name and not "Absorber" in obj.name:
                 return obj.pos.z - obj.size.dz / 2
+
+    def getFirstObjectLeftSide(self):
+        return self.object[0].pos.z - self.object[0].size.dz/2.
 
     def getLastObjectCenter(self):
         sumPoint = self.getLeftSide()
@@ -302,10 +315,20 @@ class Module:
     def getLastObjectRightSide(self):
         rightSide = -1000
         for obj in self.objects:
-            if obj.name != self.name and obj.name != "Layer" and obj.type == "Box" and obj.name[:-1] != "Absorber":
+            if obj.name != self.name and not obj.name.endswith("Layer") and obj.type == "Box" and not "Absorber" in obj.name:
                 rightSide = max(rightSide, obj.pos.z + obj.size.dz/2)
 
         return rightSide
+
+    def getLayerThickness(self):
+        rightSide = -1000
+        leftSide = 1000
+        for obj in self.objects:
+            if obj.name != self.name and not "Layer" in obj.name and obj.type == "Box":
+                rightSide = max(rightSide, obj.pos.z + obj.size.dz/2.)
+                leftSide = min(leftSide, obj.pos.z - obj.size.dz/2.)
+
+        return rightSide - leftSide
 
     def getThisObjectCenter(self, box):
         """Add objects from left to the right IFF the object overlaps in x,y with this object"""
@@ -316,7 +339,7 @@ class Module:
         print("Searching for overlaps with {}.".format(box))
         for obj in self.objects:
             if obj.type != "Box": continue
-            if obj.Contains(box) and obj.name != self.name and obj.name != "Layer":
+            if obj.Contains(box) and obj.name != self.name and not "Layer" in obj.name:
                 sumPoint.z = obj.pos.z + obj.size.dz/2. + box.size.dz/2.
                 print("{} overlaps with {}! New z is {}. ".format(box, obj, sumPoint.z))
 
@@ -339,7 +362,10 @@ class Module:
         print("\033[1mAdded {} with mean pos {}\033[0m".format(self.objects[-1], self.objects[-1].pos))
 
     def makeMotherModule(self):
-        self.objects.append(Box(self.name, "Layer", self.pos, self.size))
+        size = copy.copy(self.size)
+        size.dz = self.moduleThickness
+        pos = self.getPosDepth(0, 0, size, self.name)
+        self.objects.append(Box(self.name, "Layer", pos, size))
         self.objects[-1].genericRepeater = True
         print("Added {}".format(self.objects[-1]))
 
@@ -349,7 +375,7 @@ class Module:
 
     def makeAbsorber(self, n):
         name = "Absorber" + str(n)
-        size = Size(5 * cm, 5 * cm, 1.5 * mm)
+        size = Size(5 * cm, 5 * cm, self.absorberThickness)
         pos = self.getPosDepth(0, 0, size, name)
         if n == 2: 
             pos.z += self.getLastObjectRightSide() - self.getLeftSideNoAbsorber()
@@ -359,6 +385,14 @@ class Module:
             material = self.firstAbsorberMaterial
         
         self.addAbsorber(name, pos, size, material, kVisible, kGrey)
+
+    def makeAbsorberAirGap(self):
+        name = "AbsorberAirGap"
+        size = Size(5 * cm, 5*cm, self.absorberAirGapThickness)
+        pos = Pos(0, 0, self.objects[-1].pos.z + self.objects[-1].size.dz/2 + size.dz/2)
+
+        self.objects.append(Box(name, "Layer", pos, size, "Air", kNotVisible, kNoColor))
+        print("\033[1mAdded {} with mean pos {}\033[0m".format(self.objects[-1], self.objects[-1].pos))
 
     def makePCBGlue(self):
         name = "PCBGlue"
@@ -422,6 +456,12 @@ class Module:
         pos = self.getPosDepth(self.fillerPos.x, self.fillerPos.y, size, name)
         self.addObject(name, pos, size, kAir, kNotVisible, kNoColor)
 
+    def recalculateSize(self):
+        self.thickness = 2*self.glueThickness + self.pcbThickness + self.passiveChipThickness + self.activeChipThickness + self.airGapAfterChipThickness + self.airGapAfterFillerThickness + self.fillerThickness + self.fillerGlueThickness + 2 * self.absorberThickness + self.absorberAirGapThickness
+        self.moduleThickness = 2 * self.glueThickness + self.pcbThickness + self.passiveChipThickness + self.activeChipThickness + self.airGapAfterChipThickness
+
+        self.size = Size(6*cm, 6*cm, self.thickness)
+
     def addRotation(self):
         filename = "{}.placements".format(self.name)
         rotation = 180
@@ -436,13 +476,61 @@ class Module:
         print("\033[1mAdded repeater of {} with {} layers with translation {}\033[0m".format(self.name, nlayers, translation))
    
     def moveAllBoxes(self, fromZ = 0):
-        leftSide = self.getLeftSide().z - fromZ
-        print("Moving all boxes in {} to start from {} to {}.".format(self.name, self.getLeftSide().z, leftSide))
+        leftSide = self.getLeftSide().z + fromZ
+        print("Moving all boxes in {} to start from {} to {} with fromZ {}.".format(self.name, self.getLeftSide().z, leftSide, fromZ))
+        print self.objects[0].pos.z - self.objects[0].size.dz/2
         for obj in self.objects:
             if obj.type == "Box":
-                obj.move(Pos(0, 0, -leftSide))
+                obj.move(Pos(0, 0, fromZ))
+
+        print self.objects[0].pos.z - self.objects[0].size.dz/2
+
+    def reduceAllSizes(self, reduceInUm):
+        sizeDiff = Size(reduceInUm * um , reduceInUm * um, reduceInUm * um)
+        for obj in self.objects:
+            if obj.type == "Box" and not "Layer" in obj.name:
+                if "Module" in obj.name:
+                    obj.size.dz -= sizeDiff.dz/2.
+                else:
+                    obj.size.dz -= sizeDiff.dz
+
+
+    def moveAllModuleDaughters(self):
+        modulePos = 0
+
+        for obj in self.objects:
+            if obj.type == "Box":
+                if "Module" in obj.name:
+                    modulePos = obj.pos.z
+                    print obj.name, modulePos
+                    break
+
+        for obj in self.objects:
+            if obj.type == "Box":
+                if "Module" in obj.mother:
+                    print "Moving ", obj.name, " from ", obj.pos.z, 
+                    obj.pos.z -= modulePos
+                    print "to ", obj.pos.z
+
+    def moveAllLayerDaughters(self):
+        layerPos = 0
+
+        for obj in self.objects:
+            if obj.type == "Box":
+                if "Layer" in obj.name:
+                    layerPos = obj.pos.z
+                    print obj.name, layerPos
+
+        for obj in self.objects:
+            if obj.type == "Box":
+                if "Layer" in obj.mother:
+                    print "Moving ", obj.name, " from ", obj.pos.z, 
+                    obj.pos.z -= layerPos
+                    print "to ", obj.pos.z
+
 
     def buildModule(self):
+        self.recalculateSize()
         self.makeMotherLayer()
         self.makeAbsorber(1)
         self.makeMotherModule()
@@ -456,9 +544,11 @@ class Module:
         self.makeFiller()
         self.makeAirGapAfterFiller()
         self.makeAbsorber(2)
+        self.makeAbsorberAirGap()
+        self.recalculateSize()
         self.addRotation()
         self.addCopies(self.nlayers)
-        self.moveAllBoxes()
+        self.moveAllBoxes(self.fromZ)
 
     def printGeometry(self):
         for obj in self.objects:
@@ -487,6 +577,7 @@ class Module:
         
         ax1 = fig.add_subplot(121)
 
+        # (X,Y) plot
         for obj in self.objects:
             if obj.type == "Rotation" or obj.type == "Copy" or obj.name == "Absorber2": continue
 
@@ -500,24 +591,30 @@ class Module:
         minZ = self.getLeftSideNoAbsorber()
         maxZ = self.getLastObjectRightSide()
 
+        print "minZ", minZ, "maxZ", maxZ
+
         ax2 = fig.add_subplot(122)
 
+        # (Z,Y) plot
         for obj in self.objects:
             if obj.type == "Rotation" or obj.type == "Copy": continue
             x1 = obj.pos.x - obj.size.dx/2
             y1 = obj.pos.y - obj.size.dy/2
             z1 = obj.pos.z - obj.size.dz/2
 
+            print("Drawing object {} from Z {} to Z {}.".format(obj.name, z1, z1+obj.size.dz))
+
             if obj.color:
                 ax2.add_patch(patches.Rectangle((z1, y1), obj.size.dz, obj.size.dy, facecolor=obj.color))
             else:
                 ax2.add_patch(patches.Rectangle((z1, y1), obj.size.dz, obj.size.dy, fill=False))
 
+        # DRAW ROTATION
         for rot in self.objects:
             if rot.type == "Rotation":
                 print("Starting rotation for {}".format(self.name))
                 for obj in self.objects:
-                    if obj.type == "Box" and obj.name[:-1] != "Absorber":
+                    if obj.type == "Box" and not "Absorber" in obj.name and not "Layer" in obj.name:
                         pos = obj.pos
                         size = obj.size
                         newPos = obj.rotatePosition(rot.rotationmatrix, rot.rotation, self.chipGap.dy, -2, 2, minZ, maxZ)
@@ -526,13 +623,14 @@ class Module:
                         y1 = newPos.y - obj.size.dy/2.
                         z1 = newPos.z - obj.size.dz/2.
 
-                        print("Adding {} {} {} for rotation".format(x1, y1, z1))
+                        print("Adding {} {} {} {}->{} for rotation".format(obj.name, x1, y1, z1, z1+obj.size.dz))
 
                         if obj.color:
                             ax2.add_patch(patches.Rectangle((z1, y1), obj.size.dz, obj.size.dy, facecolor=obj.color))
                         else:
                             ax2.add_patch(patches.Rectangle((z1, y1), obj.size.dz, obj.size.dy, fill=False))
 
+        # DRAW COPIES
         for cop in self.objects:
             if cop.type == "Copy":
                 for obj in self.objects:
@@ -552,20 +650,20 @@ class Module:
                             else:
                                 ax2.add_patch(patches.Rectangle((z1, y1), obj.size.dz, obj.size.dy, fill=False))
 
-        ax1.set_xlim([-25, 25])
-        ax1.set_ylim([-25, 25])
-        ax2.set_xlim([0,  4*self.nlayers])
-        ax2.set_ylim([-25, 25])
+        ax1.set_xlim([-30, 30])
+        ax1.set_ylim([-30, 30])
+        ax2.set_xlim([-5,  10])
+        ax2.set_ylim([-30, 30])
 
         return fig
 
-class DigitalTrackingCalorimeter:
+class scanner:
     def __init__(self, dx = 15*cm, dy = 15*cm, dz = 80*cm):
         self.size = Size(dx, dy, dz)
-        self.name = "DigitalTrackingCalorimeter"
+        self.name = "scanner"
         self.mother = "world"
         self.pos = Pos()
-        self.box = Box("DigitalTrackingCalorimeter", self.mother, self.pos, self.size)
+        self.box = Box("scanner", self.mother, self.pos, self.size)
 
     def printBox(self):
         self.box.printBox()
@@ -618,6 +716,7 @@ class MainMenu(Frame):
         self.var_nlayers = IntVar()
         self.var_chipThickness = DoubleVar()
         self.var_material = StringVar()
+        self.var_absorberThickness = DoubleVar()
         self.var_firstmaterial = StringVar()
 
         self.labeltext_xsize = StringVar()
@@ -626,6 +725,7 @@ class MainMenu(Frame):
         self.labeltext_ygap = StringVar()
         self.labeltext_nlayers = StringVar()
         self.labeltext_material = StringVar()
+        self.labeltext_absorberThickness = StringVar()
         self.labeltext_firstmaterial = StringVar()
         self.labeltext_chipThickness = StringVar()
 
@@ -635,6 +735,7 @@ class MainMenu(Frame):
         self.var_xgap.set(0.1)
         self.var_ygap.set(-0.09)
         self.var_material.set("Tungsten")
+        self.var_absorberThickness.set(1.5)
         self.var_firstmaterial.set("Aluminium")
         self.var_chipThickness.set(0.014)
         
@@ -646,6 +747,7 @@ class MainMenu(Frame):
         self.labeltext_ygap.set("Gap between Y chips [mm]")
         self.labeltext_nlayers.set("Number of layers")
         self.labeltext_material.set("Absorber material")
+        self.labeltext_absorberThickness.set("Absorber thickness [mm]")
         self.labeltext_firstmaterial.set("First absorber material")
         self.labeltext_chipThickness.set("Sensor chip thickness [mm]")
 
@@ -657,6 +759,7 @@ class MainMenu(Frame):
         self.label_ygap = Entry(self.leftLabelContainer, textvariable=self.labeltext_ygap, state=DISABLED, width=labelHeight)
         self.label_nlayers = Entry(self.leftLabelContainer, textvariable=self.labeltext_nlayers, state=DISABLED, width=labelHeight)
         self.label_material = Entry(self.leftLabelContainer, textvariable=self.labeltext_material, state=DISABLED, width=labelHeight)
+        self.label_absorberThickness = Entry(self.leftLabelContainer, textvariable=self.labeltext_absorberThickness, state=DISABLED, width=labelHeight)
         self.label_firstmaterial = Entry(self.leftLabelContainer, textvariable=self.labeltext_firstmaterial, state=DISABLED, width=labelHeight)
         self.label_chipThickness = Entry(self.leftLabelContainer, textvariable=self.labeltext_chipThickness, state=DISABLED, width=labelHeight)
         
@@ -666,6 +769,7 @@ class MainMenu(Frame):
         self.entry_ygap = Entry(self.leftEntryContainer, textvariable=self.var_ygap, width=15)
         self.entry_nlayers = Entry(self.leftEntryContainer, textvariable=self.var_nlayers, width=15)
         self.entry_material = Entry(self.leftEntryContainer, textvariable=self.var_material, width=15)
+        self.entry_absorberThickness = Entry(self.leftEntryContainer, textvariable=self.var_absorberThickness, width=15)
         self.entry_firstmaterial = Entry(self.leftEntryContainer, textvariable=self.var_firstmaterial, width=15)
         self.entry_chipThickness = Entry(self.leftEntryContainer, textvariable=self.var_chipThickness, width=15)
 
@@ -681,6 +785,8 @@ class MainMenu(Frame):
         self.entry_nlayers.pack()
         self.label_material.pack()
         self.entry_material.pack()
+        self.label_absorberThickness.pack()
+        self.entry_absorberThickness.pack()
         self.label_firstmaterial.pack()
         self.entry_firstmaterial.pack()
         self.label_chipThickness.pack()
@@ -702,6 +808,13 @@ class MainMenu(Frame):
 
     def write_files(self):
         self.readyModule()
+        
+        self.firstModule.moveAllModuleDaughters()
+        self.module.moveAllModuleDaughters()
+        
+        self.firstModule.moveAllLayerDaughters()
+        self.module.moveAllLayerDaughters()
+
         self.firstModule.writeGeometry()
         self.module.writeGeometry()
 
@@ -712,25 +825,36 @@ class MainMenu(Frame):
         self.drawPlot(figure)
 
     def readyModule(self):
-        self.returnDictionary = {"xsize" : self.var_xsize.get(), "ysize" : self.var_ysize.get(), "nlayers" : self.var_nlayers.get(), "xgap" : self.var_xgap.get(), "ygap" : self.var_ygap.get(), "chipthickness" : self.var_chipThickness.get(), "material" : self.var_material.get(), "firstmaterial" : self.var_firstmaterial.get()}
+        self.returnDictionary = {"xsize" : self.var_xsize.get(), "ysize" : self.var_ysize.get(), "nlayers" : self.var_nlayers.get(), "xgap" : self.var_xgap.get(), "ygap" : self.var_ygap.get(), "chipthickness" : self.var_chipThickness.get(), "material" : self.var_material.get(), "absorberThickness" : self.var_absorberThickness.get(), "firstmaterial" : self.var_firstmaterial.get()}
         
         self.firstModule.nlayers = 1
         self.firstModule.chipSize = Size(self.returnDictionary["xsize"], self.returnDictionary["ysize"])
         self.firstModule.chipGap = Size(self.returnDictionary["xgap"], self.returnDictionary["ygap"])
         self.firstModule.absorberMaterial = self.returnDictionary["material"]
+        self.firstModule.absorberThickness = self.returnDictionary["absorberThickness"]
         self.firstModule.activeChipThickness = self.returnDictionary["chipthickness"]
         self.firstModule.firstmaterial = self.returnDictionary["firstmaterial"]
+        self.firstModule.recalculateSize()
         self.firstModule.buildModule()
+        lastPos = self.firstModule.getLayerThickness()
+        self.firstModule.fromZ = lastPos/2.
+        self.firstModule.moveAllBoxes(self.firstModule.fromZ)
+        self.firstModule.reduceAllSizes(0.1)
         self.firstModule.correctAllNames()
-        lastPos = self.firstModule.getLastObjectRightSide()
-        print("Lastpost of firstModule is {}.".format(lastPos))
-        
+
         self.module.nlayers = self.returnDictionary["nlayers"]
         self.module.chipSize = Size(self.returnDictionary["xsize"], self.returnDictionary["ysize"])
         self.module.chipGap = Size(self.returnDictionary["xgap"], self.returnDictionary["ygap"])
         self.module.absorberMaterial = self.returnDictionary["material"]
+        self.module.absorberThickness = self.returnDictionary["absorberThickness"]
         self.module.activeChipThickness = self.returnDictionary["chipthickness"]
+        self.module.recalculateSize()
         self.module.buildModule()
+        lastPos = self.module.getLayerThickness()
+        self.module.fromZ = lastPos/2 + self.firstModule.getLayerThickness()
+        self.module.moveAllBoxes(self.module.fromZ)
+        self.module.reduceAllSizes(0.1)
+
 
     def getState(self):
         return self.state
@@ -757,14 +881,15 @@ def main():
     # Cross check geometry and Module.mac (filename should be constant)
 
     world = World()
-    DTC = DigitalTrackingCalorimeter()
+    DTC = scanner()
 
     firstModule = Module("FirstModule", DTC.name, Pos(0,0,0), kTungsten, 1, kAluminium)
     firstModule.clearFile()
     world.writeBox()
     DTC.writeBox()
 
-    lastPos = firstModule.getLastObjectRightSide()
+    # calculate X0, range straggling, expected range, ..... .... ......
+
     module = Module("Module", DTC.name, Pos(0,0,0), kTungsten, 20)
     
     root = Tk()

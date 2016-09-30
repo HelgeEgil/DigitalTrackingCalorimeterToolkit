@@ -60,9 +60,9 @@ void findRange::Loop(Double_t energy, Double_t sigma_mev)
    TCanvas *c4 = new TCanvas("c4", "c4", 800, 600);
    TCanvas *c5 = new TCanvas("c5", "c5", 800, 600);
 
-   Int_t nbinsx = 100;
+   Int_t nbinsx = 500;
    Int_t xfrom = -5;
-   Int_t xto = 35;
+   Int_t xto = 60;
 
 	Float_t x_compensate = 0;
 

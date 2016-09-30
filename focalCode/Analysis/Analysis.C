@@ -2100,7 +2100,7 @@ void drawIndividualGraphs(TCanvas *cGraph, TGraphErrors* outputGraph, Float_t fi
    cGraph->Update();
 }
 
-Float_t  doNGaussianFit ( TH1F *h, Float_t *means, Float_t *sigmas) {
+Float_t doNGaussianFit ( TH1F *h, Float_t *means, Float_t *sigmas) {
    TF1 *gauss;
    cout << "Energy " << run_energy << endl;
    cout << "Layer;\t Constant;\t Mean;\t\t Energy;\t Sigma;\t\t Fits in layer;\t Chi2/n\n";
@@ -2146,9 +2146,6 @@ Float_t  doNGaussianFit ( TH1F *h, Float_t *means, Float_t *sigmas) {
       Int_t bmin = axis->FindBin(searchFrom);
       Int_t bmax = axis->FindBin(searchTo);
       
-//    TLine *l1 = new TLine(searchFrom, 0, searchFrom, 1000); l1->SetLineColor(kGreen); l1->Draw();
-//    TLine *l2 = new TLine(searchTo, 0, searchTo, 1000); l2->SetLineColor(kRed); l2->Draw();
-      
       Float_t integral = h->Integral(bmin,bmax);
       Float_t ratio = integral / fullIntegral;
       
@@ -2190,12 +2187,7 @@ Float_t  doNGaussianFit ( TH1F *h, Float_t *means, Float_t *sigmas) {
          }
       }
 
-//    if (kDataType == kData && chi2n > 7.5) { // less statistics in data
-//    delete gauss;
-//       continue;
-//    }
-
-      if (ratio > 0.1) { //  || (isLastLayer && ratio>0.025)) {
+      if (ratio > 0.1) {
          gauss->SetLineColor(kRed);
          gauss->SetLineWidth(3);
          gauss->Draw("same");
@@ -2221,9 +2213,7 @@ Float_t  doNGaussianFit ( TH1F *h, Float_t *means, Float_t *sigmas) {
    Float_t estimated_energy_error = 0;
    Float_t sum_constant = 0, sumSigma = 0;
    for (Int_t i=0 ; i<3; i++) {
-//    estimated_range += array_constant[i] * array_mean[i];
       estimated_range += array_sum[i] * array_mean[i];
-//    sum_constant += array_constant[i];
       sum_constant += array_sum[i];
       sumSigma += pow(array_sigma[i], 2);
    }
@@ -2242,7 +2232,6 @@ Float_t  doNGaussianFit ( TH1F *h, Float_t *means, Float_t *sigmas) {
    Float_t lastSigma = array_sigma[1];
    if (lastSigma == 0) lastSigma = array_sigma[0];
 
-//   Int_t binSigmaFrom = axis->FindBin(array_mean[0] - 3*array_sigma[0]);
    Int_t binSigmaFrom = axis->FindBin(lastMean - 3*lastSigma);
    Float_t squareMeanDifference = 0;
    Float_t empiricalMean = 0;
@@ -2256,7 +2245,6 @@ Float_t  doNGaussianFit ( TH1F *h, Float_t *means, Float_t *sigmas) {
    empiricalMean /= N; 
 
    binSigmaFrom = axis->FindBin(array_mean[0] - 3*array_sigma[0]);
-//   for (Int_t i=binSigmaFrom; i<=h->GetNbinsX(); i++) {
    for (Int_t i=binSigmaFrom; i<=h->GetNbinsX(); i++) {
       cout << "Adding " << h->GetBinContent(i) << " * (" << axis->GetBinCenter(i) << " - " << empiricalMean << " )^2 to variance.\n";
       squareMeanDifference += h->GetBinContent(i) * pow(axis->GetBinCenter(i) - empiricalMean, 2);
