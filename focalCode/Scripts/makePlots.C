@@ -402,13 +402,17 @@ void makePlots() {
    gFraction->GetXaxis()->SetRangeUser(10, 6000);
    gFraction->SetMaximum(100);
    gFraction->SetMinimum(0);
+   gFraction->GetXaxis()->SetTitleSize(0.045);
+   gFraction->GetYaxis()->SetTitleSize(0.045);
+   gFraction->GetXaxis()->SetLabelSize(0.045);
+   gFraction->GetYaxis()->SetLabelSize(0.045);
    gFraction->GetXaxis()->SetTitleFont(22);
    gFraction->GetYaxis()->SetTitleFont(22);
-   gFraction->GetXaxis()->SetTitleOffset(1.2);
-   gFraction->GetYaxis()->SetTitleOffset(1.2);
+   gFraction->GetXaxis()->SetTitleOffset(0.9);
+   gFraction->GetYaxis()->SetTitleOffset(1.1);
    gFraction->GetXaxis()->SetLabelFont(22);
    gFraction->GetYaxis()->SetLabelFont(22);
-   gFraction->SetTitle("Fraction of correctly reconstructed tracks;Number of protons in frame;Fraction of correctly reconstructed tracks");
+   gFraction->SetTitle("f;Number of protons in frame;Fraction of correctly reconstructed tracks");
    gFraction->SetLineColor(kGreen+2);
    gFraction->SetLineWidth(3);
    gFraction2->SetLineColor(kAzure+4);
@@ -423,7 +427,7 @@ void makePlots() {
    TText *t = new TText();
    gFraction->GetYaxis()->SetLabelOffset(5);
    t->SetTextAlign(32);
-   t->SetTextSize(0.035);
+   t->SetTextSize(0.04);
    t->SetTextFont(22);
    for (Int_t i=0; i<6;i++) {
       cout << "Drawing text at " << -0.42 << ", " << i*20 << endl;
@@ -439,7 +443,7 @@ void makePlots() {
    gPad->Modified();
    
    TLegend * leg2 = new TLegend(0.67, 0.76, 0.97, 0.93);
-   leg2->SetTextSize(0.025);
+   leg2->SetTextSize(0.04);
    leg2->SetTextFont(22);
    leg2->AddEntry(gFraction, "Whole track correct", "L");
    leg2->AddEntry(gFraction2, "Correct endpoints (ID_{first} = ID_{last})", "L");

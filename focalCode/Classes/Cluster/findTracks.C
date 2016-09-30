@@ -268,8 +268,7 @@ Cluster * Clusters::findNearestNeighbour(Cluster *projectedPoint, Bool_t rejectU
 	Int_t		layerIdxTo = getLastIndexOfLayer(searchLayer);
 	Float_t	maxDelta = getSearchRadiusForLayer(searchLayer) * MCSMultiplicationFactor;
 
-	if (layerIdxFrom < 0)
-		return 0;
+	if (layerIdxFrom < 0) return 0;
 
 	for (Int_t i=layerIdxFrom; i<layerIdxTo; i++) {
 		if (!At(i))

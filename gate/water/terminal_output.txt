@@ -22,38 +22,35 @@ http://wiki.opengatecollaboration.org/index.php/Users_Guide_V7.0:Setting_up_the_
 [Core-0] **********************************************************************
 [Core-0] 
 [Core-0] You are using Geant4 version 9.6.4
-/control/alias energy 188
-/control/alias npart 10000
+/control/alias energy 180
+/control/alias npart 25000
 /control/alias step_active 0
 /control/alias sigma 0
 [Core-0] Starting macro focal_script.mac
-WARNING: G4VisCommandSceneHandlerCreate::SetNewValue: using fallback graphics system.
 WARNING: The vis manager will keep up to 25 events.
   This may use a lot of memory.
   It may be changed with, e.g., "/vis/scene/endOfEventAction accumulate 10".
-===== XML PATH ====: ./Materials.xml
-===== XML PATH ====: 0x345aed0
-===== XML PATH ====: ./Materials.xml
-===== XML PATH ====: 0x348f380
-ABSLENGTH
-1.84e-06	50000
-4.08e-06	50000
-RINDEX
-1.84e-06	1.00028
-4.08e-06	1.00028
-===== XML PATH ====: ./Materials.xml
-===== XML PATH ====: 0x35d7760
-[Physic-0] The following Geant4's physic-list is enabled :QGSP_BIC_EMY
+[Physic-0] The following Geant4's physic-list is enabled :QGSP_INCLXX_EMY
 [Core-0] Initialization of geometry
 G4PhysicalVolumeModel::Validate(): A volume of the same name and
   copy number ("world_phys", copy 0) still exists and is being used.
   But it is not the same volume you originally specified
   in /vis/scene/add/.
 [Core-0] Initialization of physics
-G4PhysListFactory::GetReferencePhysList <QGSP_BIC_EMY>  EMoption= 3
-<<< Geant4 Physics List simulation engine: QGSP_BIC 4.0
+G4PhysListFactory::GetReferencePhysList <QGSP_INCLXX_EMY>  EMoption= 3
+<<< Geant4 Physics List simulation engine: QGSP_INCLXX 1.0
 
-<<< Reference Physics List QGSP_BIC_EMY is built
+*=====================================================================
+*                                                                     
+*   The Physics list QGSP_INCLXX is an experimental physics list !   
+*                                                                      
+*   Please  report your use case for, and your experience with this    
+*    physics list on the Geant4 User Forum dedicated to physics lists: 
+*  http://hypernews.slac.stanford.edu/HyperNews/geant4/get/phys-list.html
+*                                                                      
+*=====================================================================*
+
+<<< Reference Physics List QGSP_INCLXX_EMY is built
 
 G4VUserPhysicsList::SetDefaultCutValue: negative cut values  :-1[mm]
 WARNING: model G4LENeutronInelastic is being deprecated and will
@@ -135,6 +132,12 @@ disappear in Geant4 version 10.0
 WARNING: model G4LEAntiOmegaMinusInelastic is being deprecated and will
 disappear in Geant4 version 10.0
 WARNING: model G4HEAntiOmegaMinusInelastic is being deprecated and will
+disappear in Geant4 version 10.0
+WARNING: model G4LEDeuteronInelastic is being deprecated and will
+disappear in Geant4 version 10.0
+WARNING: model G4LETritonInelastic is being deprecated and will
+disappear in Geant4 version 10.0
+WARNING: model G4LEAlphaInelastic is being deprecated and will
 disappear in Geant4 version 10.0
 ### Adding tracking cuts for neutron  TimeCut(ns)= 10000  KinEnergyCut(MeV)= 0
 [Core-0] Initialization of actors
@@ -479,10 +482,11 @@ hPairProd:   for  pi-    SubType= 4
 
                                   Hadronic Processes for <GenericIon>
                                   -----------------------------------
-        ionInelastic  Models:     Binary Light Ion Cascade: Emin(GeV)=    0  Emax(GeV)= 4
-                                                      FTFP: Emin(GeV)=    2  Emax(GeV)= 100000
+        ionInelastic  Models: INCL++ cascade with G4ExcitationHandler: Emin(GeV)=    0  Emax(GeV)= 48
 
-        ionInelastic  Crs sctns: Glauber-Gribov nucleus nucleus: Emin(GeV)=    0  Emax(GeV)= 100000
+        ionInelastic  Crs sctns:         TripathiLightIons: Emin(GeV)=    0  Emax(GeV)= 100000
+                                                  Tripathi: Emin(GeV)=    0  Emax(GeV)= 100000
+                                                  IonsShen: Emin(GeV)=    0  Emax(GeV)= 100000
                                           GheishaInelastic: Emin(GeV)=    0  Emax(GeV)= 100000
 
 
@@ -547,7 +551,9 @@ AntiNeutronInelastic  Crs sctns:              AntiAGlauber: Emin(GeV)=    0  Ema
           hadElastic  Crs sctns:            GheishaElastic: Emin(GeV)=    0  Emax(GeV)= 100000
 
    KaonPlusInelastic  Models:                         QGSP: Emin(GeV)=   12  Emax(GeV)= 100000
-                                     G4LEKaonPlusInelastic: Emin(GeV)=    0  Emax(GeV)= 25
+                                     G4LEKaonPlusInelastic: Emin(GeV)=  9.5  Emax(GeV)= 25
+                                            BertiniCascade: Emin(GeV)=  2.9  Emax(GeV)= 9.9
+                                            BertiniCascade: Emin(GeV)=    0  Emax(GeV)= 3
 
    KaonPlusInelastic  Crs sctns:  ChipsKaonPlusInelasticXS: Emin(GeV)=    0  Emax(GeV)= 100000
                                           GheishaInelastic: Emin(GeV)=    0  Emax(GeV)= 100000
@@ -560,7 +566,9 @@ AntiNeutronInelastic  Crs sctns:              AntiAGlauber: Emin(GeV)=    0  Ema
           hadElastic  Crs sctns:            GheishaElastic: Emin(GeV)=    0  Emax(GeV)= 100000
 
   KaonMinusInelastic  Models:                         QGSP: Emin(GeV)=   12  Emax(GeV)= 100000
-                                    G4LEKaonMinusInelastic: Emin(GeV)=    0  Emax(GeV)= 25
+                                    G4LEKaonMinusInelastic: Emin(GeV)=  9.5  Emax(GeV)= 25
+                                            BertiniCascade: Emin(GeV)=  2.9  Emax(GeV)= 9.9
+                                            BertiniCascade: Emin(GeV)=    0  Emax(GeV)= 3
 
   KaonMinusInelastic  Crs sctns: ChipsKaonMinusInelasticXS: Emin(GeV)=    0  Emax(GeV)= 100000
                                           GheishaInelastic: Emin(GeV)=    0  Emax(GeV)= 100000
@@ -592,9 +600,11 @@ AntiNeutronInelastic  Crs sctns:              AntiAGlauber: Emin(GeV)=    0  Ema
 
     NeutronInelastic  Models:                         QGSP: Emin(GeV)=   12  Emax(GeV)= 100000
                                       G4LENeutronInelastic: Emin(GeV)=  9.5  Emax(GeV)= 25
-                                            Binary Cascade: Emin(GeV)=    0  Emax(GeV)= 9.9
+                                            BertiniCascade: Emin(GeV)=  2.9  Emax(GeV)= 9.9
+                              INCL++ cascade with G4ExcitationHandler: Emin(GeV)=    0  Emax(GeV)= 3
 
     NeutronInelastic  Crs sctns:       Barashenkov-Glauber: Emin(GeV)=    0  Emax(GeV)= 100000
+                                       Barashenkov-Glauber: Emin(GeV)=    0  Emax(GeV)= 100000
                                           GheishaInelastic: Emin(GeV)=    0  Emax(GeV)= 100000
 
             nCapture  Models:                   G4LCapture: Emin(GeV)=    0  Emax(GeV)= 20000
@@ -615,7 +625,9 @@ AntiNeutronInelastic  Crs sctns:              AntiAGlauber: Emin(GeV)=    0  Ema
                                             GheishaElastic: Emin(GeV)=    0  Emax(GeV)= 100000
 
    PionPlusInelastic  Models:                         QGSP: Emin(GeV)=   12  Emax(GeV)= 100000
-                                     G4LEPionPlusInelastic: Emin(GeV)=    0  Emax(GeV)= 25
+                                     G4LEPionPlusInelastic: Emin(GeV)=  9.5  Emax(GeV)= 25
+                                            BertiniCascade: Emin(GeV)=  2.9  Emax(GeV)= 9.9
+                              INCL++ cascade with G4ExcitationHandler: Emin(GeV)=    0  Emax(GeV)= 3
 
    PionPlusInelastic  Crs sctns:      G4CrossSectionPairGG: Emin(GeV)=    0  Emax(GeV)= 100000
                          G4CrossSectionPairGG: G4PiNuclearCrossSection cross sections 
@@ -632,9 +644,12 @@ AntiNeutronInelastic  Crs sctns:              AntiAGlauber: Emin(GeV)=    0  Ema
                                             GheishaElastic: Emin(GeV)=    0  Emax(GeV)= 100000
 
   PionMinusInelastic  Models:                         QGSP: Emin(GeV)=   12  Emax(GeV)= 100000
-                                    G4LEPionMinusInelastic: Emin(GeV)=    0  Emax(GeV)= 25
+                                    G4LEPionMinusInelastic: Emin(GeV)=  9.5  Emax(GeV)= 25
+                                            BertiniCascade: Emin(GeV)=  2.9  Emax(GeV)= 9.9
+                              INCL++ cascade with G4ExcitationHandler: Emin(GeV)=    0  Emax(GeV)= 3
 
-  PionMinusInelastic  Crs sctns:      G4CrossSectionPairGG: Emin(GeV)=    0  Emax(GeV)= 100000
+  PionMinusInelastic  Crs sctns:   G4PiNuclearCrossSection: Emin(GeV)=    0  Emax(GeV)= 99900
+                                      G4CrossSectionPairGG: Emin(GeV)=    0  Emax(GeV)= 100000
                          G4CrossSectionPairGG: G4PiNuclearCrossSection cross sections 
                            below 91 GeV, Glauber-Gribov above 
                                           GheishaInelastic: Emin(GeV)=    0  Emax(GeV)= 100000
@@ -650,9 +665,11 @@ AntiNeutronInelastic  Crs sctns:              AntiAGlauber: Emin(GeV)=    0  Ema
 
      ProtonInelastic  Models:                         QGSP: Emin(GeV)=   12  Emax(GeV)= 100000
                                        G4LEProtonInelastic: Emin(GeV)=  9.5  Emax(GeV)= 25
-                                            Binary Cascade: Emin(GeV)=    0  Emax(GeV)= 9.9
+                                            BertiniCascade: Emin(GeV)=  2.9  Emax(GeV)= 9.9
+                              INCL++ cascade with G4ExcitationHandler: Emin(GeV)=    0  Emax(GeV)= 3
 
      ProtonInelastic  Crs sctns:       Barashenkov-Glauber: Emin(GeV)=    0  Emax(GeV)= 100000
+                                       Barashenkov-Glauber: Emin(GeV)=    0  Emax(GeV)= 100000
                                           GheishaInelastic: Emin(GeV)=    0  Emax(GeV)= 100000
 
 ============================================================================================
@@ -663,6 +680,9 @@ AntiNeutronInelastic  Crs sctns:              AntiAGlauber: Emin(GeV)=    0  Ema
           DefaultRegionForTheWorld
 WARNING: G4VisManager::EndOfEvent: Automatic event keeping suspended.
   The number of events exceeds the maximum, 25, that can be kept by the vis manager.
+[INCL++] Warning: maximum number of tries exceeded for the proposed 6.00515-MeV proton + W182[0.0] inelastic reaction, in direct kinematics.
+[INCL++] Warning: maximum number of tries exceeded for the proposed 4.47794-MeV proton + W183[0.0] inelastic reaction, in direct kinematics.
+[INCL++] Warning: maximum number of tries exceeded for the proposed 2.48414-MeV proton + W184[0.0] inelastic reaction, in direct kinematics.
 WARNING: G4VisManager::EndOfRun: Automatic event keeping has been suspended.
   The number of events in the run exceeded the maximum, 25, that can be kept by the vis manager.
   The number of events kept by the vis manager can be changed with
@@ -672,7 +692,3 @@ WARNING: G4VisManager::EndOfRun: Automatic event keeping has been suspended.
 [Core-0] End of macro focal_script.mac
 Graphics systems deleted.
 Visualization Manager deleting...
-WARNING - Attempt to delete the physical volume store while geometry closed !
-WARNING - Attempt to delete the logical volume store while geometry closed !
-WARNING - Attempt to delete the solid store while geometry closed !
-WARNING - Attempt to delete the region store while geometry closed !

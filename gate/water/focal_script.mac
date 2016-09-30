@@ -41,7 +41,8 @@
 #===============#
 
 /gate/geometry/setIonisationPotential Water 75 eV
-/gate/physics/addPhysicsList QGSP_BIC_EMY
+#/gate/physics/addPhysicsList QGSP_BIC_EMY
+/gate/physics/addPhysicsList QGSP_INCLXX_EMY
 
 /gate/run/initialize
 

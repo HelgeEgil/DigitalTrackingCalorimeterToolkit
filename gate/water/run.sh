@@ -17,5 +17,5 @@ fi
 
 for i in `seq $1 $2 $3`;
 do
-	time Gate -a "'[energy,$i] [npart,$4] [step_active,$5] [sigma,$6]'" focal_script.mac > terminal_output.txt &
+	Gate -a "'[energy,$i] [npart,$4] [step_active,$5] [sigma,$6]'" focal_script.mac > terminal_output.txt &
 done
