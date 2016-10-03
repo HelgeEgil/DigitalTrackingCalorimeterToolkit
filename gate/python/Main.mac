@@ -2,7 +2,6 @@
 #/vis/viewer/reset
 #/vis/drawVolume
 #/vis/viewer/zoom 2
-#/vis/viewer/set/viewpointThetaPhi 200 -30 # 90 0
 #/vis/viewer/set/style surface
 #/vis/viewer/set/hiddenEdge true
 #/tracking/storeTrajectory 1
@@ -14,13 +13,17 @@
 
 /control/execute Module.mac
 
-/gate/systems/scanner/level1/attach Layer
-/gate/systems/scanner/level2/attach Module
+/gate/systems/scanner_1/level1/attach FM_Layer
+/gate/systems/scanner_2/level1/attach Layer
+/gate/systems/scanner_1/level2/attach FirstModule
+/gate/systems/scanner_2/level2/attach Module
 
 /gate/ActiveChipLeft/attachCrystalSD
 /gate/FM_ActiveChipLeft/attachCrystalSD
 /gate/ActiveChipRight/attachCrystalSD
 /gate/FM_ActiveChipRight/attachCrystalSD
+
+#/control/execute readout_full.mac
 
 #=================#
 # Physics			#
@@ -31,7 +34,8 @@
 
 /gate/run/initialize
 
-#/geometry/test/recursive_test
+/geometry/test/recursive_test
+/geometry/test/run
 
 #=======================#
 # ADD PROTON BEAM	      #
@@ -40,17 +44,17 @@
 /gate/source/addSource uniformBeam gps
 /gate/source/uniformBeam/gps/particle proton
 /gate/source/uniformBeam/gps/ene/type Gauss
-/gate/source/uniformBeam/gps/ene/mono 150 MeV
+/gate/source/uniformBeam/gps/ene/mono {energy} MeV
 /gate/source/uniformBeam/gps/ene/sigma 0 MeV
 /gate/source/uniformBeam/gps/type Plane
 /gate/source/uniformBeam/gps/shape Square
 /gate/source/uniformBeam/gps/direction 0 0 1
 /gate/source/uniformBeam/gps/halfx 20. mm
 /gate/source/uniformBeam/gps/halfy 20. mm
-/gate/source/uniformBeam/gps/centre 0. 0. -30.0 cm
+/gate/source/uniformBeam/gps/centre 0. 0. -3.0 cm
 
 /gate/output/root/enable
-/gate/output/root/setFileName pythonTest
+/gate/output/root/setFileName ../../focalCode/Data/MonteCarlo/optimize_{energy}MeV_{absorberthickness}mm
 
 #===============#
 # START BEAMS	#
@@ -58,5 +62,5 @@
 
 /gate/random/setEngineName MersenneTwister
 /gate/random/setEngineSeed auto
-/gate/application/setTotalNumberOfPrimaries 4000
-/gate/application/start
+/gate/application/setTotalNumberOfPrimaries 15000
+#/gate/application/start

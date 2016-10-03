@@ -37,6 +37,7 @@ kNoMaterial = False
 kNoMother = False
 kVisible = True
 kNotVisible = False
+kIsFirstAbsorber = True
 
 class Pos:
     def __init__(self, x = 0, y = 0, z = 0):
@@ -154,6 +155,7 @@ class Copy:
 
     def makeString(self):
         string =  "/gate/{}/repeaters/insert linear\n".format(self.name)
+        string =  "/gate/{}/linear/autoCenter false\n".format(self.name) # this addition of line cost me 5 hours of debugging. DON'T REMOVE
         string += "/gate/{}/linear/setRepeatNumber {}\n".format(self.name, self.nlayers)
         string += "/gate/{}/linear/setRepeatVector {} mm\n".format(self.name, self.translation)
 
@@ -185,6 +187,10 @@ class Box:
         string = ""
         if self.mother:
             string += "/gate/{}/daughters/name {}\n".format(self.mother, self.name)
+
+            if "scanner" in self.name:
+                string += "/gate/{}/daughters/systemType scanner\n".format(self.mother)
+
             string += "/gate/{}/daughters/insert box\n".format(self.mother)
         
         string += "/gate/{}/geometry/setXLength {} mm\n".format(self.name, self.size.dx)
@@ -273,6 +279,7 @@ class Module:
         self.chipRightPos = Pos( self.chipSize.dx/2 + self.chipGap.dx/2, self.chipSize.dy/2)
         self.fillerPos    = Pos(0, -self.chipSize.dy/2)
         self.absorberThickness = absorberThickness
+        self.firstAbsorberThickness = absorberThickness
         self.glueThickness = 40 * um
         self.pcbThickness = 160 * um
         self.passiveChipThickness = 106 * um
@@ -373,7 +380,7 @@ class Module:
         self.objects.append(Box("Layer", self.mother, self.pos, self.size))
         print("Added {}".format(self.objects[-1]))
 
-    def makeAbsorber(self, n):
+    def makeAbsorber(self, n, isFirstAbsorber=False):
         name = "Absorber" + str(n)
         size = Size(5 * cm, 5 * cm, self.absorberThickness)
         pos = self.getPosDepth(0, 0, size, name)
@@ -381,8 +388,9 @@ class Module:
             pos.z += self.getLastObjectRightSide() - self.getLeftSideNoAbsorber()
 
         material = self.absorberMaterial
-        if self.firstAbsorberMaterial:
+        if self.firstAbsorberMaterial and isFirstAbsorber:
             material = self.firstAbsorberMaterial
+            size.dz = self.firstAbsorberThickness
         
         self.addAbsorber(name, pos, size, material, kVisible, kGrey)
 
@@ -512,27 +520,74 @@ class Module:
                     obj.pos.z -= modulePos
                     print "to ", obj.pos.z
 
-    def moveAllLayerDaughters(self):
+    def getModulePosition(self):
+        modulePos = 0
+        
+        for obj in self.objects:
+            if obj.type == "Box":
+                if "Module" in obj.name:
+                    modulePos = obj.pos
+                    break
+
+        return modulePos
+
+    def getLayerPosition(self):
+        layerPos = 0
+        for obj in self.objects:
+            if obj.type == "Box":
+                if "Layer" in obj.name:
+                    layerPos = obj.pos
+                    break;
+
+        return layerPos
+
+    def getLayerSize(self):
+        layerSize = 0
+        for obj in self.objects:
+            if obj.type == "Box":
+                if "Layer" in obj.name:
+                    layerSize = obj.size
+                    break
+
+        return layerSize
+
+    def getModuleSize(self):
+        moduleSize = 0
+        
+        for obj in self.objects:
+            if obj.type == "Box":
+                if "Module" in obj.name:
+                    moduleSize = obj.size
+                    break
+        
+        return moduleSize
+
+    def moveAllLayerDaughters(self, doMoveLayer = False, moveLayerTo = 0):
+        layerSize = 0
         layerPos = 0
 
         for obj in self.objects:
             if obj.type == "Box":
                 if "Layer" in obj.name:
                     layerPos = obj.pos.z
-                    print obj.name, layerPos
+                    if doMoveLayer:
+                        print("Moving LAYER {} from {} to {}.".format(obj.name, obj.pos.z, moveLayerTo))
+                        obj.pos.z = moveLayerTo
+                        
+                    layerSize = obj.size.dz
 
         for obj in self.objects:
             if obj.type == "Box":
                 if "Layer" in obj.mother:
                     print "Moving ", obj.name, " from ", obj.pos.z, 
-                    obj.pos.z -= layerPos
+                    obj.pos.z += - layerPos
                     print "to ", obj.pos.z
 
 
     def buildModule(self):
         self.recalculateSize()
         self.makeMotherLayer()
-        self.makeAbsorber(1)
+        self.makeAbsorber(1, kIsFirstAbsorber)
         self.makeMotherModule()
         self.makePCBGlue()
         self.makePCB()
@@ -547,7 +602,8 @@ class Module:
         self.makeAbsorberAirGap()
         self.recalculateSize()
         self.addRotation()
-        self.addCopies(self.nlayers)
+        if (self.nlayers>1):
+            self.addCopies(self.nlayers)
         self.moveAllBoxes(self.fromZ)
 
     def printGeometry(self):
@@ -658,35 +714,35 @@ class Module:
         return fig
 
 class scanner:
-    def __init__(self, dx = 15*cm, dy = 15*cm, dz = 80*cm):
+    def __init__(self, i=1, dx = 15*cm, dy = 15*cm, dz = 150*cm):
         self.size = Size(dx, dy, dz)
-        self.name = "scanner"
+        self.name = "scanner_{}".format(i)
         self.mother = "world"
-        self.pos = Pos()
-        self.box = Box("scanner", self.mother, self.pos, self.size)
+        self.pos = Pos(0, 0, 40*cm)
+        self.box = Box("{}".format(self.name), self.mother, self.pos, self.size)
 
-    def printBox(self):
+    def printGeometry(self):
         self.box.printBox()
 
-    def writeBox(self):
+    def writeGeometry(self):
         self.box.writeBox()
 
 class World:
-    def __init__(self, dx = 100*cm, dy = 100*cm, dz = 100*cm):
+    def __init__(self, dx = 150*cm, dy = 150*cm, dz = 350*cm):
         self.name = "world"
         self.size = Size(dz, dy, dz)
         self.pos = Pos()
         self.box = Box(self.name, kNoMother, self.pos, self.size)
 
-    def printBox(self):
+    def printGeometry(self):
         self.box.printBox()
 
-    def writeBox(self):
+    def writeGeometry(self):
         self.box.writeBox()
 
 
 class MainMenu(Frame):
-    def __init__(self, parent, firstModule, module):
+    def __init__(self, parent, firstModule, module, world, scanner1, scanner2):
         Frame.__init__(self, parent)
         self.parent = parent
         self.parent.protocol("WM_DELETE_WINDOW", self.myQuit)
@@ -695,7 +751,12 @@ class MainMenu(Frame):
         self.returnDictionary = {}
         self.firstModule = firstModule
         self.module = module
+        self.world = world
+        self.scanner1 = scanner1
+        self.scanner2 = scanner2
         self.state = None
+
+        self.firstLayerPosition = 0
 
         self.leftContainer = Frame(self, borderwidth=10)
         self.leftLabelContainer = Frame(self.leftContainer, borderwidth=5)
@@ -714,10 +775,11 @@ class MainMenu(Frame):
         self.var_xgap = DoubleVar()
         self.var_ygap = DoubleVar()
         self.var_nlayers = IntVar()
-        self.var_chipThickness = DoubleVar()
         self.var_material = StringVar()
         self.var_absorberThickness = DoubleVar()
         self.var_firstmaterial = StringVar()
+        self.var_firstAbsorberThickness = DoubleVar()
+        self.var_chipThickness = DoubleVar()
 
         self.labeltext_xsize = StringVar()
         self.labeltext_ysize = StringVar()
@@ -727,6 +789,7 @@ class MainMenu(Frame):
         self.labeltext_material = StringVar()
         self.labeltext_absorberThickness = StringVar()
         self.labeltext_firstmaterial = StringVar()
+        self.labeltext_firstAbsorberThickness = StringVar()
         self.labeltext_chipThickness = StringVar()
 
         self.var_nlayers.set(40)
@@ -737,7 +800,8 @@ class MainMenu(Frame):
         self.var_material.set("Tungsten")
         self.var_absorberThickness.set(1.5)
         self.var_firstmaterial.set("Aluminium")
-        self.var_chipThickness.set(0.014)
+        self.var_firstAbsorberThickness.set(1.5)
+        self.var_chipThickness.set(14)
         
         self.optionsTitle = Label(self.leftContainer, text="Geometry options")
 
@@ -749,7 +813,8 @@ class MainMenu(Frame):
         self.labeltext_material.set("Absorber material")
         self.labeltext_absorberThickness.set("Absorber thickness [mm]")
         self.labeltext_firstmaterial.set("First absorber material")
-        self.labeltext_chipThickness.set("Sensor chip thickness [mm]")
+        self.labeltext_firstAbsorberThickness.set("First absorber thickness [mm]")
+        self.labeltext_chipThickness.set("Sensor chip thickness [um]")
 
         labelHeight = 25
 
@@ -761,6 +826,7 @@ class MainMenu(Frame):
         self.label_material = Entry(self.leftLabelContainer, textvariable=self.labeltext_material, state=DISABLED, width=labelHeight)
         self.label_absorberThickness = Entry(self.leftLabelContainer, textvariable=self.labeltext_absorberThickness, state=DISABLED, width=labelHeight)
         self.label_firstmaterial = Entry(self.leftLabelContainer, textvariable=self.labeltext_firstmaterial, state=DISABLED, width=labelHeight)
+        self.label_firstAbsorberThickness = Entry(self.leftLabelContainer, textvariable=self.labeltext_firstAbsorberThickness, state=DISABLED, width=labelHeight)
         self.label_chipThickness = Entry(self.leftLabelContainer, textvariable=self.labeltext_chipThickness, state=DISABLED, width=labelHeight)
         
         self.entry_xsize = Entry(self.leftEntryContainer, textvariable=self.var_xsize, width=15)
@@ -771,6 +837,7 @@ class MainMenu(Frame):
         self.entry_material = Entry(self.leftEntryContainer, textvariable=self.var_material, width=15)
         self.entry_absorberThickness = Entry(self.leftEntryContainer, textvariable=self.var_absorberThickness, width=15)
         self.entry_firstmaterial = Entry(self.leftEntryContainer, textvariable=self.var_firstmaterial, width=15)
+        self.entry_firstAbsorberThickness = Entry(self.leftEntryContainer, textvariable=self.var_firstAbsorberThickness, width=15)
         self.entry_chipThickness = Entry(self.leftEntryContainer, textvariable=self.var_chipThickness, width=15)
 
         self.label_xsize.pack()
@@ -789,6 +856,8 @@ class MainMenu(Frame):
         self.entry_absorberThickness.pack()
         self.label_firstmaterial.pack()
         self.entry_firstmaterial.pack()
+        self.label_firstAbsorberThickness.pack()
+        self.entry_firstAbsorberThickness.pack()
         self.label_chipThickness.pack()
         self.entry_chipThickness.pack()
 
@@ -807,16 +876,23 @@ class MainMenu(Frame):
         self.module.printGeometry()
 
     def write_files(self):
+        self.firstModule.clearFile()
+
         self.readyModule()
-        
+       
         self.firstModule.moveAllModuleDaughters()
         self.module.moveAllModuleDaughters()
         
-        self.firstModule.moveAllLayerDaughters()
-        self.module.moveAllLayerDaughters()
+        self.firstModule.moveAllLayerDaughters(True, 0)
+        self.module.moveAllLayerDaughters(True, self.firstLayerPosition)
+
+        self.world.writeGeometry()
+        self.scanner1.writeGeometry()
+        self.scanner2.writeGeometry()
 
         self.firstModule.writeGeometry()
         self.module.writeGeometry()
+
 
     def show_geometry(self):
         self.readyModule()
@@ -825,21 +901,22 @@ class MainMenu(Frame):
         self.drawPlot(figure)
 
     def readyModule(self):
-        self.returnDictionary = {"xsize" : self.var_xsize.get(), "ysize" : self.var_ysize.get(), "nlayers" : self.var_nlayers.get(), "xgap" : self.var_xgap.get(), "ygap" : self.var_ygap.get(), "chipthickness" : self.var_chipThickness.get(), "material" : self.var_material.get(), "absorberThickness" : self.var_absorberThickness.get(), "firstmaterial" : self.var_firstmaterial.get()}
+        self.returnDictionary = {"xsize" : self.var_xsize.get(), "ysize" : self.var_ysize.get(), "nlayers" : self.var_nlayers.get(), "xgap" : self.var_xgap.get(), "ygap" : self.var_ygap.get(), "chipthickness" : self.var_chipThickness.get(), "material" : self.var_material.get(), "absorberThickness" : self.var_absorberThickness.get(), "firstmaterial" : self.var_firstmaterial.get(), "firstabsorberthickness" : self.var_firstAbsorberThickness.get()}
         
         self.firstModule.nlayers = 1
         self.firstModule.chipSize = Size(self.returnDictionary["xsize"], self.returnDictionary["ysize"])
         self.firstModule.chipGap = Size(self.returnDictionary["xgap"], self.returnDictionary["ygap"])
         self.firstModule.absorberMaterial = self.returnDictionary["material"]
         self.firstModule.absorberThickness = self.returnDictionary["absorberThickness"]
-        self.firstModule.activeChipThickness = self.returnDictionary["chipthickness"]
+        self.firstModule.activeChipThickness = self.returnDictionary["chipthickness"] / 1000.
         self.firstModule.firstmaterial = self.returnDictionary["firstmaterial"]
+        self.firstModule.firstAbsorberThickness = self.returnDictionary["firstabsorberthickness"]
         self.firstModule.recalculateSize()
         self.firstModule.buildModule()
         lastPos = self.firstModule.getLayerThickness()
-        self.firstModule.fromZ = lastPos/2.
+        self.firstModule.fromZ = -lastPos/2.
         self.firstModule.moveAllBoxes(self.firstModule.fromZ)
-        self.firstModule.reduceAllSizes(0.1)
+        self.firstModule.reduceAllSizes(1)
         self.firstModule.correctAllNames()
 
         self.module.nlayers = self.returnDictionary["nlayers"]
@@ -847,14 +924,26 @@ class MainMenu(Frame):
         self.module.chipGap = Size(self.returnDictionary["xgap"], self.returnDictionary["ygap"])
         self.module.absorberMaterial = self.returnDictionary["material"]
         self.module.absorberThickness = self.returnDictionary["absorberThickness"]
-        self.module.activeChipThickness = self.returnDictionary["chipthickness"]
+        self.module.activeChipThickness = self.returnDictionary["chipthickness"] / 1000.
+        self.module.firstAbsorberThickness= self.returnDictionary["firstabsorberthickness"]
         self.module.recalculateSize()
         self.module.buildModule()
         lastPos = self.module.getLayerThickness()
-        self.module.fromZ = lastPos/2 + self.firstModule.getLayerThickness()
+        self.module.fromZ = -lastPos/2 + self.firstModule.getLayerThickness()/2.
         self.module.moveAllBoxes(self.module.fromZ)
-        self.module.reduceAllSizes(0.1)
+        self.module.reduceAllSizes(1)
+        
+        self.scanner1.size.dz = self.firstModule.thickness
+        self.scanner1.pos.z = self.scanner1.size.dz/2
+        self.scanner2.size.dz = self.module.thickness * self.module.nlayers*5
+        self.scanner2.pos.z = self.scanner2.size.dz/2. + self.scanner1.pos.z + self.scanner1.size.dz/2.
+        self.firstLayerPosition = -self.scanner2.size.dz/2 + self.module.thickness/2
+        
+        print("Scanner 1 position: {} and size: {}. Scanner 2 position: {} and size: {}. First layer position: {} and size: {}".format(self.scanner1.pos, self.scanner1.size, self.scanner2.pos, self.scanner2.size, self.firstLayerPosition, self.firstModule.thickness))
 
+        # TODO
+        # - Check alignment for FM_Layer vs Layer(0)
+        # - Check output volumeIDs and layer1IDs 
 
     def getState(self):
         return self.state
@@ -881,19 +970,17 @@ def main():
     # Cross check geometry and Module.mac (filename should be constant)
 
     world = World()
-    DTC = scanner()
+    scanner1 = scanner(1)
+    scanner2 = scanner(2)
 
-    firstModule = Module("FirstModule", DTC.name, Pos(0,0,0), kTungsten, 1, kAluminium)
-    firstModule.clearFile()
-    world.writeBox()
-    DTC.writeBox()
+    firstModule = Module("FirstModule", scanner1.name, Pos(0,0,0), kTungsten, 1, kAluminium)
 
     # calculate X0, range straggling, expected range, ..... .... ......
 
-    module = Module("Module", DTC.name, Pos(0,0,0), kTungsten, 20)
+    module = Module("Module", scanner2.name, Pos(0,0,0), kTungsten, 20)
     
     root = Tk()
-    mainmenu = MainMenu(root, firstModule, module)
+    mainmenu = MainMenu(root, firstModule, module, world, scanner1, scanner2)
     root.mainloop()
 
 main()
