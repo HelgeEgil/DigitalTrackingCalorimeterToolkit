@@ -10,6 +10,7 @@
 #include <TROOT.h>
 #include <TChain.h>
 #include <TFile.h>
+#include <vector>
 
 Float_t getTLFromEnergyQuadratic(Float_t energy);
 Double_t getEnergyFromTLQuadratic(Float_t tl);
@@ -101,22 +102,22 @@ public :
    TBranch        *b_comptVolName;   //!
    TBranch        *b_RayleighVolName;   //!
 
-   findRange(Int_t energy, TTree *tree=0);
+   findRange(Int_t energy, Int_t thickness, TTree *tree=0);
    virtual ~findRange();
-   virtual Int_t    Cut(Long64_t entry);
-   virtual Int_t    GetEntry(Long64_t entry);
-   virtual Long64_t LoadTree(Long64_t entry);
-   virtual void     Init(TTree *tree);
-   virtual void     Loop(Double_t energy = 100, Double_t sigma_mev = 0);
-   virtual Bool_t   Notify();
-   virtual void     Show(Long64_t entry = -1);
+   virtual Int_t     Cut(Long64_t entry);
+   virtual Int_t     GetEntry(Long64_t entry);
+   virtual Long64_t  LoadTree(Long64_t entry);
+   virtual void      Init(TTree *tree);
+   virtual vector<Float_t> Run(Double_t energy = 100, Double_t sigma_mev = 0);
+   virtual Bool_t    Notify();
+   virtual void      Show(Long64_t entry = -1);
    
 };
 
 #endif
 
 #ifdef findRange_cxx
-findRange::findRange(Int_t energy, TTree *tree) : fChain(0)
+findRange::findRange(Int_t energy, Int_t thickness, TTree *tree) : fChain(0)
 {
 // if parameter tree is not specified (or zero), connect the file
 // used to generate this class and read the Tree.
@@ -139,7 +140,7 @@ findRange::findRange(Int_t energy, TTree *tree) : fChain(0)
 //      chain->Add(Form("../Data/MonteCarlo/focal_Tungsten_energy%d_sigma0.root/Hits", energy));
 //      chain->Add(Form("../Data/MonteCarlo/focal_Aluminium_energy%d_sigma0.root/Hits", energy));
 //      chain->Add(Form("../Data/WaterBox/tungsten_%dMeV.root/Hits", energy));
-      chain->Add(Form("aluminium_%dMeV.root/Hits", energy));
+      chain->Add(Form("../Data/MonteCarlo/optimize_%dMeV_%dmm.root/Hits", energy, thickness));
 //      chain->Add(Form("../Data/WaterBox/copper_%dMeV.root/Hits", energy));
       tree = chain;
 #endif // SINGLE_TREE
