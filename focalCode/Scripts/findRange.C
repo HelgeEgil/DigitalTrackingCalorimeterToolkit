@@ -64,7 +64,7 @@ vector<Float_t> findRange::Run(Double_t energy, Double_t sigma_mev)
 
    Int_t nbinsx = 750;
    Int_t xfrom = -5;
-   Int_t xto = 200;
+   Int_t xto = 30; // was 200
 
    Float_t x_compensate = 0;
 

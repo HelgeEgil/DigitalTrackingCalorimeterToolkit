@@ -27,29 +27,29 @@ void getPValues() {
    TF1             * braggKleeman = nullptr;
    TF1             * fitFunction = nullptr;
    TF1             * fitInvFunction = nullptr;
-   Float_t           range_1mm[13] = {};
-   Float_t           range_2mm[13] = {};
-   Float_t           range_3mm[13] = {};
-   Float_t           range_4mm[13] = {};
-   Float_t           range_5mm[13] = {};
-   Float_t           range_6mm[13] = {};
-   Float_t           range_7mm[13] = {};
-   Float_t           range_8mm[13] = {};
-   Float_t           range_9mm[13] = {};
-   Float_t           range_10mm[13] = {};
+   Float_t           range_1mm[17] = {};
+   Float_t           range_2mm[17] = {};
+   Float_t           range_3mm[17] = {};
+   Float_t           range_4mm[17] = {};
+   Float_t           range_5mm[17] = {};
+   Float_t           range_6mm[17] = {};
+   Float_t           range_7mm[17] = {};
+   Float_t           range_8mm[17] = {};
+   Float_t           range_9mm[17] = {};
+   Float_t           range_10mm[17] = {};
    
-   Float_t           sigma_1mm[13] = {};
-   Float_t           sigma_2mm[13] = {};
-   Float_t           sigma_3mm[13] = {};
-   Float_t           sigma_4mm[13] = {};
-   Float_t           sigma_5mm[13] = {};
-   Float_t           sigma_6mm[13] = {};
-   Float_t           sigma_7mm[13] = {};
-   Float_t           sigma_8mm[13] = {};
-   Float_t           sigma_9mm[13] = {};
-   Float_t           sigma_10mm[13] = {};
-   Float_t           energies[13] = {0, 90, 100, 110, 120, 130, 140, 150, 160, 170, 180, 190, 200};
-   Float_t           energyError[13] = {};
+   Float_t           sigma_1mm[17] = {};
+   Float_t           sigma_2mm[17] = {};
+   Float_t           sigma_3mm[17] = {};
+   Float_t           sigma_4mm[17] = {};
+   Float_t           sigma_5mm[17] = {};
+   Float_t           sigma_6mm[17] = {};
+   Float_t           sigma_7mm[17] = {};
+   Float_t           sigma_8mm[17] = {};
+   Float_t           sigma_9mm[17] = {};
+   Float_t           sigma_10mm[17] = {};
+   Float_t           energies[17] = {0, 10, 30, 50, 70, 90, 100, 110, 120, 130, 140, 150, 160, 170, 180, 190, 200};
+   Float_t           energyError[17] = {};
 
    for (Int_t i=1; i<=10; i++) {
       canvasVector.push_back(new TCanvas(Form("canvas_%d_mm_absorber", i), Form("%d mm absorber", i), 1200, 900));
@@ -61,7 +61,8 @@ void getPValues() {
       in >> energy >> absorber >> range >> sigma >> nuclearfraction;
       if (!in.good()) break;
 
-      idx = energy/10-9 + 1;
+      if (energy<90) idx = energy/20+1;
+      else           idx = energy/10-4;
 
       switch (absorber) {
          case 1:
@@ -107,27 +108,27 @@ void getPValues() {
       }
    }
 
-   graphVector.push_back(new TGraphErrors(12, energies, range_1mm, energyError, sigma_1mm));
-   graphVector.push_back(new TGraphErrors(13, energies, range_2mm, energyError, sigma_2mm));
-   graphVector.push_back(new TGraphErrors(13, energies, range_3mm, energyError, sigma_3mm));
-   graphVector.push_back(new TGraphErrors(13, energies, range_4mm, energyError, sigma_4mm));
-   graphVector.push_back(new TGraphErrors(13, energies, range_5mm, energyError, sigma_5mm));
-   graphVector.push_back(new TGraphErrors(13, energies, range_6mm, energyError, sigma_6mm));
-   graphVector.push_back(new TGraphErrors(13, energies, range_7mm, energyError, sigma_7mm));
-   graphVector.push_back(new TGraphErrors(13, energies, range_8mm, energyError, sigma_8mm));
-   graphVector.push_back(new TGraphErrors(13, energies, range_9mm, energyError, sigma_9mm));
-   graphVector.push_back(new TGraphErrors(13, energies, range_10mm, energyError, sigma_10mm));
+   graphVector.push_back(new TGraphErrors(16, energies, range_1mm, energyError, sigma_1mm));
+   graphVector.push_back(new TGraphErrors(17, energies, range_2mm, energyError, sigma_2mm));
+   graphVector.push_back(new TGraphErrors(17, energies, range_3mm, energyError, sigma_3mm));
+   graphVector.push_back(new TGraphErrors(17, energies, range_4mm, energyError, sigma_4mm));
+   graphVector.push_back(new TGraphErrors(17, energies, range_5mm, energyError, sigma_5mm));
+   graphVector.push_back(new TGraphErrors(17, energies, range_6mm, energyError, sigma_6mm));
+   graphVector.push_back(new TGraphErrors(17, energies, range_7mm, energyError, sigma_7mm));
+   graphVector.push_back(new TGraphErrors(17, energies, range_8mm, energyError, sigma_8mm));
+   graphVector.push_back(new TGraphErrors(17, energies, range_9mm, energyError, sigma_9mm));
+   graphVector.push_back(new TGraphErrors(17, energies, range_10mm, energyError, sigma_10mm));
    
-   graphInvVector.push_back(new TGraphErrors(12, range_1mm, energies, sigma_1mm, energyError));
-   graphInvVector.push_back(new TGraphErrors(13, range_2mm, energies, sigma_2mm, energyError));
-   graphInvVector.push_back(new TGraphErrors(13, range_3mm, energies, sigma_3mm, energyError));
-   graphInvVector.push_back(new TGraphErrors(13, range_4mm, energies, sigma_4mm, energyError));
-   graphInvVector.push_back(new TGraphErrors(13, range_5mm, energies, sigma_5mm, energyError));
-   graphInvVector.push_back(new TGraphErrors(13, range_6mm, energies, sigma_6mm, energyError));
-   graphInvVector.push_back(new TGraphErrors(13, range_7mm, energies, sigma_7mm, energyError));
-   graphInvVector.push_back(new TGraphErrors(13, range_8mm, energies, sigma_8mm, energyError));
-   graphInvVector.push_back(new TGraphErrors(13, range_9mm, energies, sigma_9mm, energyError));
-   graphInvVector.push_back(new TGraphErrors(13, range_10mm, energies, sigma_10mm, energyError));
+   graphInvVector.push_back(new TGraphErrors(16, range_1mm, energies, sigma_1mm, energyError));
+   graphInvVector.push_back(new TGraphErrors(17, range_2mm, energies, sigma_2mm, energyError));
+   graphInvVector.push_back(new TGraphErrors(17, range_3mm, energies, sigma_3mm, energyError));
+   graphInvVector.push_back(new TGraphErrors(17, range_4mm, energies, sigma_4mm, energyError));
+   graphInvVector.push_back(new TGraphErrors(17, range_5mm, energies, sigma_5mm, energyError));
+   graphInvVector.push_back(new TGraphErrors(17, range_6mm, energies, sigma_6mm, energyError));
+   graphInvVector.push_back(new TGraphErrors(17, range_7mm, energies, sigma_7mm, energyError));
+   graphInvVector.push_back(new TGraphErrors(17, range_8mm, energies, sigma_8mm, energyError));
+   graphInvVector.push_back(new TGraphErrors(17, range_9mm, energies, sigma_9mm, energyError));
+   graphInvVector.push_back(new TGraphErrors(17, range_10mm, energies, sigma_10mm, energyError));
 
    for (Int_t i=0; i<10; i++) {
       canvasVector.at(i)->cd();
