@@ -25,11 +25,12 @@ const Float_t kRad = 3.14159265/180.;
 const Int_t nx = 640;
 const Int_t ny = 640;
 const Int_t nTrackers = 4;
+const Int_t kAbsorbatorThickness = 2; // mm // FOCAL IS 1.5 mm
 
 // nLayers are loaded in MaterialConstants.C according to the detector geometry
 const Float_t dx = 0.03; // mm
 const Float_t dy = 0.03; // mm
-const Float_t dz = 3.975; // mm // was 3.84
+const Float_t dz = 0.975 + 2 * kAbsorbatorThickness;
 Int_t kEventsPerRun = 500;
 
 // Used for treatment of available experimental data files

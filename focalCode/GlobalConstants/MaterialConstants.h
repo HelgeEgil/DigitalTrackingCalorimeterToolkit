@@ -38,7 +38,8 @@ Float_t mcs_radius_per_layer[100]; // change if max(nLayers) > 100
 
 Double_t firstUpperLayerZ, firstLowerLayerZ;
 
-
+void     loadRangeValuesForTungsten();
+void     loadRangeValuesForAluminium();
 Float_t  getEnergyLossFromScintillators(Float_t energy, Int_t nScintillators);
 Float_t  getEnergyLossErrorFromScintillators(Int_t nScintillators);
 Float_t  getEnergyLossFromAluminumAbsorber(Float_t energy);

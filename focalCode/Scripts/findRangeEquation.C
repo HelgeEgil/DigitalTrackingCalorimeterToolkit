@@ -177,12 +177,40 @@ void getPValues() {
       canvasInvVector.at(i)->cd();
       graphInvVector.at(i)->Fit("fitInvFunction", "M, Q, B");
 
+      Double_t alpha, p, a1, b1, g1, b2, g2;
+      Double_t c1, c2, c3, c4, c5;
+      Double_t l1, l2, l3, l4, l5;
+
+      alpha = braggKleeman->GetParameter(0);
+      p     = braggKleeman->GetParameter(1);
+      a1    = fitFunction->GetParameter(0);
+      b1    = fitFunction->GetParameter(1);
+      g1    = fitFunction->GetParameter(2);
+      b2    = fitFunction->GetParameter(3);
+      g2    = fitFunction->GetParameter(4);
+      c1    = fitInvFunction->GetParameter(0);
+      c2    = fitInvFunction->GetParameter(2);
+      c3    = fitInvFunction->GetParameter(4);
+      c4    = fitInvFunction->GetParameter(6);
+      c5    = fitInvFunction->GetParameter(8);
+      l1    = 1/fitInvFunction->GetParameter(1);
+      l2    = 1/fitInvFunction->GetParameter(3);
+      l3    = 1/fitInvFunction->GetParameter(5);
+      l4    = 1/fitInvFunction->GetParameter(7);
+      l5    = 1/fitInvFunction->GetParameter(9);
+
+      ofstream file("../OutputFiles/RangeEnergyParameters.csv", ofstream::out | ofstream::app);
+      file << i+1 << " " << alpha << " " << p << " ";
+      file << a1 << " " << b1 << " " << g1 << " " << b2 << " " << g2 << " ";
+      file << c1 << " " << c2 << " " << c3 << " " << c4 << " " << c5 << " ";
+      file << l1 << " " << l2 << " " << l3 << " " << l4 << " " << l5 << endl;
+      file.close();
+
       // CALCULATE CHI SQUARE FOR THE DIFFERENT MODELS
 
       chi2_BK = graphVector.at(i)->Chisquare(braggKleeman);
       chi2_Ulmer = graphVector.at(i)->Chisquare(fitFunction);
       chi2_UlmerInv = graphInvVector.at(i)->Chisquare(fitInvFunction);
-
 
       cout << " --- \033[1m VALUES FOR " << i+1 << " mm ABSORBER \033[0m --- " << endl;
       cout << "BRAGG-KLEEMAN MODEL: " << endl;
