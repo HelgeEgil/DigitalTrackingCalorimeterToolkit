@@ -1,39 +1,26 @@
-#===============================#
-# FOCAL prototype		#
-# First try at doing the	#
-# simulation in GATE.		#
-# Based on technical drawings	#
-# and different MSc theses.	#
-#				#
-#            Helge Pettersen	#
-#         me@helgepettersen.no	#
-#     FEB 2015			#
-#===============================#
-
-#=======================#
-#   Some aliases	#
-#=======================#
-#/control/alias chip0 /vis/viewer/panTo -0.02 -0.01
-
-
-/vis/open OGL
-#/vis/open OGLSQt
-/vis/viewer/reset
-/vis/viewer/panTo 0.03 -0.05
-/vis/viewer/set/viewpointThetaPhi 90 0
-/vis/viewer/set/style surface
-/vis/drawVolume
-/tracking/storeTrajectory 1
-/vis/scene/endOfEventAction accumulate 25
-#/vis/scene/add/trajectories
-/vis/viewer/update
-
 /gate/geometry/setMaterialDatabase ../GateMaterials.db
 
-/control/execute geometry_script.mac
-/gate/scanner/vis/setColor black
+/gate/world/geometry/setXLength 1000. cm
+/gate/world/geometry/setYLength 1000. cm
+/gate/world/geometry/setZLength 300. cm
 
-#/gate/systems/scanner/level1/attach waterbox
+/gate/world/daughters/name scanner
+/gate/world/daughters/insert box
+/gate/scanner/geometry/setXLength 900. cm
+/gate/scanner/geometry/setYLength 900. cm
+/gate/scanner/geometry/setZLength 250. cm
+/gate/scanner/setMaterial Air
+/gate/scanner/vis/forceWireframe
+
+/gate/scanner/daughters/name waterbox
+/gate/scanner/daughters/insert box
+/gate/waterbox/geometry/setXLength 800. cm
+/gate/waterbox/geometry/setYLength 800. cm
+/gate/waterbox/geometry/setZLength 100. cm
+/gate/waterbox/placement/setTranslation 0. 0. 50. cm
+/gate/waterbox/setMaterial Water
+/gate/waterbox/vis/forceWireframe
+
 /gate/waterbox/attachCrystalSD
 
 #===============#
@@ -41,12 +28,11 @@
 #===============#
 
 /gate/geometry/setIonisationPotential Water 75 eV
-#/gate/physics/addPhysicsList QGSP_BIC_EMY
-/gate/physics/addPhysicsList QGSP_INCLXX_EMY
+/gate/physics/addPhysicsList QGSP_BIC_EMY
+/gate/physics/SetMaxStepSizeInRegion scanner 1 mm
+/gate/physics/ActivateStepLimiter proton
 
 /gate/run/initialize
-
-#/geometry/test/recursive_test
 
 #=======================#
 # ADD PROTON BEAM	      #
@@ -65,7 +51,8 @@
 /gate/source/uniformBeam/gps/centre 0. 0. -15. cm # -20 cm for scintillator
 
 /gate/output/root/enable
-/gate/output/root/setFileName ../../focalCode/Data/WaterBox/tungsten_{energy}MeV
+#/gate/output/root/setFileName ../../focalCode/Data/WaterBox/tungsten_{energy}MeV
+/gate/output/root/setFileName GATE
 
 /gate/random/setEngineName MersenneTwister
 /gate/random/setEngineSeed auto
