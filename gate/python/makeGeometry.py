@@ -155,7 +155,7 @@ class Copy:
 
     def makeString(self):
         string =  "/gate/{}/repeaters/insert linear\n".format(self.name)
-        string =  "/gate/{}/linear/autoCenter false\n".format(self.name) # this addition of line cost me 5 hours of debugging. DON'T REMOVE
+        string +=  "/gate/{}/linear/autoCenter false\n".format(self.name) # this addition of line cost me 5 hours of debugging. DON'T REMOVE
         string += "/gate/{}/linear/setRepeatNumber {}\n".format(self.name, self.nlayers)
         string += "/gate/{}/linear/setRepeatVector {} mm\n".format(self.name, self.translation)
 
@@ -797,7 +797,7 @@ class MainMenu(Frame):
         self.var_ysize.set(19.145)
         self.var_xgap.set(0.1)
         self.var_ygap.set(-0.09)
-        self.var_material.set("Tungsten")
+        self.var_material.set("Aluminium")
         self.var_absorberThickness.set(1.5)
         self.var_firstmaterial.set("Aluminium")
         self.var_firstAbsorberThickness.set(1.5)
@@ -916,7 +916,7 @@ class MainMenu(Frame):
         lastPos = self.firstModule.getLayerThickness()
         self.firstModule.fromZ = -lastPos/2.
         self.firstModule.moveAllBoxes(self.firstModule.fromZ)
-        self.firstModule.reduceAllSizes(1)
+        self.firstModule.reduceAllSizes(0.1)
         self.firstModule.correctAllNames()
 
         self.module.nlayers = self.returnDictionary["nlayers"]
@@ -931,7 +931,7 @@ class MainMenu(Frame):
         lastPos = self.module.getLayerThickness()
         self.module.fromZ = -lastPos/2 + self.firstModule.getLayerThickness()/2.
         self.module.moveAllBoxes(self.module.fromZ)
-        self.module.reduceAllSizes(1)
+        self.module.reduceAllSizes(0.1)
         
         self.scanner1.size.dz = self.firstModule.thickness
         self.scanner1.pos.z = self.scanner1.size.dz/2

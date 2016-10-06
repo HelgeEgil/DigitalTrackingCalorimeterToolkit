@@ -11,6 +11,6 @@ fi
 
 for i in `seq $2 $3 $4`;
 do
-	nice -n 10 Gate -a "'[absorberthickness,$1] [energy,$i]" Main.mac > terminal_output.txt &
+	time nice -n 10 Gate -a "'[absorberthickness,$1] [energy,$i]" Main.mac > terminal_output.txt &
 	echo "Running: $i"
 done
