@@ -77,12 +77,11 @@ Float_t diffmmXYZ(Cluster *p1, Cluster *p2) {
 Double_t fitfunc_DBP(Double_t *v, Double_t *par) {
 
 	Float_t depth = v[0];
-	Float_t energy = par[0];
+	Float_t range = par[0];
 	Float_t scale = par[1];
 
 	Double_t fitval = 0;
 
-	Float_t range = getWEPLFromEnergy(energy);
 	fitval = scale / ( p_water * pow(alpha_water, 1/p_water) * pow((range - depth), 1-1/p_water) ); // power calculation, less accurate but with the depth dose function
 
 	/*

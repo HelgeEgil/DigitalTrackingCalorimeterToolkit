@@ -542,7 +542,7 @@ void drawTungstenSpectrum(Int_t Runs, Int_t dataType, Bool_t recreate, Float_t e
       outputGraph = (TGraphErrors*) thisTrack->doRangeFit();
       if (!outputGraph) continue;
       
-      hFitResults->Fill(getWEPLFromEnergy(thisTrack->getFitParameterEnergy()));  
+      hFitResults->Fill(getUnitFromWEPL(thisTrack->getFitParameterRange()));
    }
 }
 
@@ -639,7 +639,7 @@ void drawTracksWithEnergyLoss(Int_t Runs, Int_t dataType, Bool_t recreate, Float
    hAccuracy->SetYTitle("Fit energy [MeV]"); hAccuracy->SetXTitle("Real energy [MeV]");
 
    Float_t finalEnergy, realEnergy, preTL = 0;
-   Float_t fitEnergy, fitScale, fitError = 0;
+   Float_t fitEnergy, fitRange, fitScale, fitError = 0;
    Int_t eventID = -1;
    
    for (Int_t j=0; j<tracks->GetEntriesFast(); j++) {
@@ -661,16 +661,15 @@ void drawTracksWithEnergyLoss(Int_t Runs, Int_t dataType, Bool_t recreate, Float
       convertXYToWEPL(x_energy, y_energy, eventID);
       realEnergy = getEnergyFromXY(x_energy, y_energy, eventID);
 
-      fitEnergy = thisTrack->getFitParameterEnergy();
+      fitRange = thisTrack->getFitParameterRange();
+      fitEnergy = getEnergyFromWEPL(fitRange);
       fitScale  = thisTrack->getFitParameterScale();
-      fitEnergy = quadratureAdd(thisTrack->getFitParameterError(), dz/sqrt(12));
+      fitError = quadratureAdd(thisTrack->getFitParameterError(), dz/sqrt(12));
       
-      cout << "realEnergy = " << realEnergy << ", fitEnergy = " << fitEnergy << endl;
-
       hAccuracy->Fill(realEnergy, fitEnergy);
 
       if (fitIdx < plotSize) {
-         drawIndividualGraphs(cGraph, outputGraph, fitEnergy, fitScale, fitError, fitIdx++, eventID, x_energy, y_energy);
+         drawIndividualGraphs(cGraph, outputGraph, fitRange, fitScale, fitError, fitIdx++, eventID, x_energy, y_energy);
       }
 
       else delete outputGraph;
@@ -768,16 +767,16 @@ Float_t drawBraggPeakGraphFit(Int_t Runs, Int_t dataType, Bool_t recreate, Float
       
       if (!outputGraph) continue;
 
-      Float_t fitEnergy = thisTrack->getFitParameterEnergy();
+      Float_t fitRange = thisTrack->getFitParameterRange();
       Float_t fitScale = thisTrack->getFitParameterScale();
       
-      Float_t fitError = quadratureAdd(thisTrack->getFitParameterError(), dz/sqrt(12));
+      Float_t fitError = quadratureAdd(thisTrack->getFitParameterError(), dz/sqrt(12)); // latter term from error on layer position
 
       if (acceptAngle || true) {
-         hFitResults->Fill(getUnitFromEnergy(fitEnergy));
+         hFitResults->Fill(getUnitFromWEPL(fitRange));
 
          if (fitIdx < plotSize && kDrawIndividualGraphs && j>=skipPlot) {
-            drawIndividualGraphs(cGraph, outputGraph, fitEnergy, fitScale, fitError, fitIdx++);
+            drawIndividualGraphs(cGraph, outputGraph, fitRange, fitScale, fitError, fitIdx++);
 
             if (fitIdx == 1) {
                gPad->SetRightMargin(0.01);
@@ -2014,7 +2013,7 @@ Bool_t getCutBraggPeakInTrack(Track *track) {
    }
 }
 
-void drawIndividualGraphs(TCanvas *cGraph, TGraphErrors* outputGraph, Float_t fitEnergy, Float_t fitScale, Float_t fitError, Int_t fitIdx, Int_t eventID, Float_t *x_energy, Float_t *y_energy) {
+void drawIndividualGraphs(TCanvas *cGraph, TGraphErrors* outputGraph, Float_t fitRange, Float_t fitScale, Float_t fitError, Int_t fitIdx, Int_t eventID, Float_t *x_energy, Float_t *y_energy) {
    cGraph->cd(fitIdx+1);
    Bool_t kDrawFit = true;
    Bool_t kDrawText = true;
@@ -2052,7 +2051,7 @@ void drawIndividualGraphs(TCanvas *cGraph, TGraphErrors* outputGraph, Float_t fi
    outputGraph->Draw("PA");
    
    TF1 *func = new TF1("fit_BP", fitfunc_DBP, 0, 500, 2);
-   func->SetParameters(fitEnergy, fitScale);
+   func->SetParameters(fitRange, fitScale);
    func->SetNpx(500);
 
    func->Draw("same");
@@ -2090,7 +2089,7 @@ void drawIndividualGraphs(TCanvas *cGraph, TGraphErrors* outputGraph, Float_t fi
    }
 
    if (kDrawText) {
-      TLatex *text = new TLatex(15, 18, Form("Fitted energy: %.1f #pm %.1f MeV", fitEnergy, fitError));
+      TLatex *text = new TLatex(15, 18, Form("Fitted energy: %.1f #pm %.1f MeV", getEnergyFromWEPL(fitRange), fitError));
       text->SetTextSize(0.05);
       text->SetTextFont(22);
       text->Draw();

@@ -29,7 +29,7 @@ TGraphErrors * Track::doFit() {
 	Float_t			erx[n], ery[n];
 	Float_t			preTL = getPreTL();
 	Float_t			trackLength = preTL;
-	Float_t			maxEnergy, estimatedEnergy;
+	Float_t			maxEnergy, estimatedEnergy, estimatedRange;
 	Float_t			scaleParameter = 0;
 	Float_t			WEPLFactor;
 	
@@ -44,6 +44,7 @@ TGraphErrors * Track::doFit() {
 	
 	maxEnergy = getEnergyFromTL(trackLength + 0.75*dz);
 	estimatedEnergy = getEnergyFromTL(trackLength + 0.5*dz);
+   estimatedRange = getWEPLFromTL(x[n-1] + 0.5*dz);
 
 	if (kOutputUnit == kWEPL || kOutputUnit == kEnergy) {
 		WEPLFactor = getWEPLFactorFromEnergy(estimatedEnergy);
@@ -65,7 +66,7 @@ TGraphErrors * Track::doFit() {
 	}
 	
 	TF1 *func = new TF1("fit_BP", fitfunc_DBP, 0, 500, 2);
-	func->SetParameter(0, estimatedEnergy);
+	func->SetParameter(0, estimatedRange);
 	func->SetParameter(1, scaleParameter);
 	func->SetParLimits(0, 0, maxEnergy);
 	func->SetParLimits(1, scaleParameter, scaleParameter);
@@ -73,8 +74,8 @@ TGraphErrors * Track::doFit() {
 
 	graph->Fit("fit_BP", "B, Q, N, WW", "", 0, 500);
 	
- 	fitEnergy_ = correctForEnergyParameterisation(func->GetParameter(0));
-	fitScale_ = func->GetParameter(1);
+	fitRange_ = func->GetParameter(0);
+   fitScale_ = func->GetParameter(1);
 	fitError_ = func->GetParError(0);
 
 	return graph;
@@ -94,7 +95,7 @@ TGraphErrors * Track::doRangeFit(Bool_t isScaleVariable) {
 	Float_t			x[n], y[n];
 	Float_t			erx[n], ery[n];
 	Float_t			preTL = getPreTL();
-	Float_t			maxEnergy, estimatedEnergy;
+	Float_t			maxEnergy, maxRange, estimatedEnergy, estimatedRange;
 	Float_t			scaleParameter = 0;
 	Float_t			WEPLFactor;
    Bool_t         checkResistivity = false;
@@ -106,14 +107,20 @@ TGraphErrors * Track::doRangeFit(Bool_t isScaleVariable) {
 	for (Int_t i=0; i<n; i++) {
 		if (!At(i)) continue;
 		x[i] = preTL + getLayermm(i);
-		y[i] = getDepositedEnergy(i, checkResistivity); // normalize to per um
+		y[i] = getDepositedEnergy(i, checkResistivity);
 		ery[i] = getDepositedEnergyError(i, checkResistivity);
 		erx[i] = dz / sqrt(12);
 	}
 	
 	maxEnergy = getEnergyFromTL(x[n-1] + 0.75*dz);
+	maxRange = getWEPLFromTL(x[n-1] + 0.75*dz);
 	estimatedEnergy = getEnergyFromTL(x[n-1] + 0.5*dz);
+   estimatedRange = getWEPLFromTL(x[n-1] + 0.5*dz);
 
+   cout << "ESTIMATED RANGE IS " << estimatedRange << " mm WEPL.\n";
+   cout << "-> FROM ENERGY " << estimatedEnergy << " MeV.\n";
+
+   // WE CONVERT FROM PROJECTED RANGE TO WATER EQUIVALENT RANGE HERE
 	if (kOutputUnit == kWEPL || kOutputUnit == kEnergy) {
 		WEPLFactor = getWEPLFactorFromEnergy(estimatedEnergy);
 		for (Int_t i=0; i<n; i++) {
@@ -137,27 +144,27 @@ TGraphErrors * Track::doRangeFit(Bool_t isScaleVariable) {
 	if (kDataType == kData) scaleParameter = 2.7;
 
 	TF1 *func = new TF1("fit_BP", fitfunc_DBP, 0, getWEPLFromEnergy(maxEnergy*1.2), 2);
-	func->SetParameter(0, estimatedEnergy);
+	func->SetParameter(0, estimatedRange);
 	func->SetParameter(1, scaleParameter);
-	func->SetParLimits(0, 0, maxEnergy);
+	func->SetParLimits(0, 0, maxRange);
 	func->SetParLimits(1, scaleParameter, scaleParameter);
    if (isScaleVariable) {
       func->SetParLimits(1, 0.01 * scaleParameter, 100 * scaleParameter);
    }
-	func->SetNpx(500);
+	func->SetNpx(750);
 
 	graph->Fit("fit_BP", "B, N, Q, W", "", 0, getWEPLFromEnergy(maxEnergy*1.2));
 	
-	fitEnergy_ = correctForEnergyParameterisation(func->GetParameter(0));
-//	fitEnergy_ = func->GetParameter(0);
+//	fitEnergy_ = correctForEnergyParameterisation(func->GetParameter(0));
+	fitRange_ = func->GetParameter(0);
 	fitScale_ = func->GetParameter(1);
 	fitError_ = func->GetParError(0);
 
 	return graph;
 }
 
-Float_t Track::getFitParameterEnergy() {
-	if (!fitEnergy_) {
+Float_t Track::getFitParameterRange() {
+	if (!fitRange_) {
 		if (!run_energy) {
 			return 0;
 		}
@@ -166,7 +173,7 @@ Float_t Track::getFitParameterEnergy() {
 		}
 	}
 
-	return fitEnergy_;
+	return fitRange_;
 }
 
 Float_t Track::getFitParameterScale() {

@@ -42,10 +42,10 @@ void MaterialConstants() {
    c5_water = 0.733621;
    l5_water = 0.000523239;
 
-   createSplines();
-
    loadRangeValuesForTungsten();
    loadRangeValuesForAluminium();
+   
+   createSplines();
 
    // USING VALUES FOR WATER FOR PMMA FIXME
    
@@ -68,13 +68,9 @@ void MaterialConstants() {
    firstUpperLayerZ = 0.3;
    firstLowerLayerZ = 0.6;
 
-   // these values are still used for calculating the range and energy straggling!
-   // The Bortfeld approximation will introduce small errors, but they are without importance (Ulmer 2007)
-
    p_water = 1.7547;
    alpha_water = 0.02387;
    alpha_prime_water = 0.0087;
-   
 
    proton_mass = 938.27;
    X0_firstlayer = 33.36;
@@ -106,6 +102,9 @@ void MaterialConstants() {
       l4_material = l4_tungsten;
       c5_material = c5_tungsten;
       l5_material = l5_tungsten;
+
+      splineMaterial = splineWater; // FIX WITH UPDATED W VALUES
+      splineMaterialInv = splineWaterInv; // FIX WITH UPDATED W VALUES
    }
 
    else if (kMaterial == kAluminium) {
@@ -131,6 +130,8 @@ void MaterialConstants() {
       c5_material = c5_aluminium;
       l5_material = l5_aluminium;
 
+      splineMaterial = spline2mmAl;
+      splineMaterialInv = spline2mmAlInv;
    }
 
    else if (kMaterial == kPMMA) {
@@ -155,6 +156,9 @@ void MaterialConstants() {
       l4_material = l4_pmma;
       c5_material = c5_pmma;
       l5_material = l5_pmma;
+
+      splineMaterial = splineWater; // FIX
+      splineMaterialInv = splineWaterInv; // FIX
    }
 }
 
@@ -163,18 +167,63 @@ void  createSplines() {
    // create forward and backwards splines
    // store them in .h
 
-   Float_t energies[20] = { .. .. .. .. .. .. . ... .. }
-   Float_t rangeWater[20] = { .. .. .. .. .}
-   Float_t rangeTungsten[20] = { .. .. .. ..}
-   Float_t rangeAluminium_2mm[20] = { .. .. .. .. .. . .}
+   cout << "Creating SPLINE files\n";
+   ifstream in;
+   Float_t    energy;
+   Int_t    idx2mmAl = 0;
+   Int_t    idxWater = 0;
+   Int_t    idxPureAl = 0;
+   Double_t  range;
+   Double_t  ranges2mmAl[250];
+   Double_t  energies2mmAl[250];
+   Double_t  rangesWater[250];
+   Double_t  energiesWater[250];
+   Double_t  rangesPureAl[250];
+   Double_t  energiesPureAl[250];
 
-   TSpline3 *tungstenSpline = new TSpline3("tungstenSpline", energies, rangeTungsten, 20);
-   TSpline3 *tungstenInvSpline = new TSpline3("tungstenSpline", rangeTungsten, energies, 20);
-   TSpline3 *waterSpline = new TSpline3("tungstenSpline", energies, rangeTungsten, 20);
-   TSpline3 *waterInvSpline = new TSpline3("tungstenSpline", energies, rangeTungsten, 20);
-   TSpline3 *aluminium_2mmSpline = new TSpline3("tungstenSpline", energies, rangeTungsten, 20);
-   TSpline3 *aluminium_2mmInvSpline = new TSpline3("tungstenSpline", energies, rangeTungsten, 20);
+   in.open("Data/Ranges/2mm_Al.csv");
 
+   while (1) {
+      in >> energy >> range;
+      if (!in.good()) break;
+
+      ranges2mmAl[idx2mmAl] = range;
+      energies2mmAl[idx2mmAl++] = energy;
+   }
+
+   in.close();
+
+   in.open("Data/Ranges/Water.csv");
+   while (1) {
+      in >> energy >> range;
+      if (!in.good()) break;
+
+      rangesWater[idxWater] = range*10; // cm to mm
+      energiesWater[idxWater++] = energy;
+   }
+   in.close();
+   
+   in.open("Data/Ranges/PureAl.csv");
+   while (1) {
+      in >> energy >> range;
+      if (!in.good()) break;
+
+      rangesPureAl[idxPureAl] = range*10; // cm to mm
+      energiesPureAl[idxPureAl++] = energy;
+   }
+   
+
+   in.close();
+
+   spline2mmAl = new TSpline3("spline2mmAl", energies2mmAl, ranges2mmAl, idx2mmAl);
+   splineWater = new TSpline3("splineWater", energiesWater, rangesWater, idxWater);
+   splinePureAl = new TSpline3("splinePureAl", energiesPureAl, rangesPureAl, idxPureAl);
+   spline2mmAlInv = new TSpline3("spline2mmAlInv", ranges2mmAl, energies2mmAl, idx2mmAl);
+   splineWaterInv = new TSpline3("splineWaterInv", rangesWater, energiesWater, idxWater);
+   splinePureAlInv = new TSpline3("splineWaterInv", rangesPureAl, energiesPureAl, idxPureAl);
+
+   alpha_aluminum = 0.0140203;
+   p_aluminum = 1.72903;
 }
 
 void loadRangeValuesForTungsten() {

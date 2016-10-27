@@ -2,6 +2,7 @@
 #define MaterialConstants_h
 
 #include <TObject.h>
+#include <TSpline.h>
 
 class Hit;
 class Cluster;
@@ -35,6 +36,17 @@ Double_t a1_pmma, b1_pmma, b2_pmma, g1_pmma, g2_pmma;
 Double_t c1_pmma, c2_pmma, c3_pmma, c4_pmma, c5_pmma;
 Double_t l1_pmma, l2_pmma, l3_pmma, l4_pmma, l5_pmma;
 
+TSpline3 *spline2mmAl;
+TSpline3 *spline2mmAlInv;
+TSpline3 *splineWater;
+TSpline3 *splineWaterInv;
+TSpline3 *splineW;
+TSpline3 *splineWInv;
+TSpline3 *splineMaterial;
+TSpline3 *splineMaterialInv;
+TSpline3 *splinePureAl;
+TSpline3 *splinePureAlInv;
+
 Double_t X0, X0_tungsten, X0_aluminum, X0_pmma, X0_firstlayer;
 Double_t proton_mass;
 
@@ -44,6 +56,7 @@ Double_t firstUpperLayerZ, firstLowerLayerZ;
 
 void     loadRangeValuesForTungsten();
 void     loadRangeValuesForAluminium();
+void     createSplines();
 Double_t getLayerPositionmm(Int_t i);
 Float_t  getSigmaEnergy(Int_t energy);
 Bool_t   isChipLowResistivity(Int_t chipIdx);

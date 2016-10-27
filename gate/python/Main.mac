@@ -18,12 +18,12 @@
 /gate/systems/scanner_1/level2/attach FirstModule
 /gate/systems/scanner_2/level2/attach Module
 
-/gate/FM_ActiveChipLeft/attachCrystalSD
-/gate/FM_ActiveChipRight/attachCrystalSD
-/gate/ActiveChipLeft/attachCrystalSD
-/gate/ActiveChipRight/attachCrystalSD
+#/gate/FM_ActiveChipLeft/attachCrystalSD
+#/gate/FM_ActiveChipRight/attachCrystalSD
+#/gate/ActiveChipLeft/attachCrystalSD
+#/gate/ActiveChipRight/attachCrystalSD
 
-#/control/execute readout_full.mac
+/control/execute readout_full.mac
 
 #=================#
 # Physics			#
@@ -54,7 +54,7 @@
 /gate/source/uniformBeam/gps/centre 0. 0. -3.0 cm
 
 /gate/output/root/enable
-/gate/output/root/setFileName ../../focalCode/Data/MonteCarlo/optimize_{energy}MeV_{absorberthickness}mm
+/gate/output/root/setFileName ../../focalCode/Data/MonteCarlo/full_sim_{energy}MeV_{absorberthickness}mm
 
 #===============#
 # START BEAMS	#
@@ -62,5 +62,5 @@
 
 /gate/random/setEngineName MersenneTwister
 /gate/random/setEngineSeed auto
-/gate/application/setTotalNumberOfPrimaries 25000
+/gate/application/setTotalNumberOfPrimaries 10000
 /gate/application/start

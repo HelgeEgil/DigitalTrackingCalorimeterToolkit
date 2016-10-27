@@ -155,9 +155,14 @@ void Run() {
    Double_t           deltaLinearInv[numberOfEnergies] = {};
 
    cout << "Reading file\n";
-   in.open("ranges_water_pstar.csv");
+//   in.open("ranges_water_pstar.csv");
+   in.open("Ranges_2mm_Al.csv");
    idx = 0;
-   Bool_t useCSDA = false;
+   Bool_t useCSDA = true;
+   Bool_t useCompleteDataset = true;
+   Int_t idxPara = 0;
+   Int_t idxCtrl = 0;
+   
    Int_t counter = 0;
    while (1) {
 
@@ -171,30 +176,30 @@ void Run() {
 
       if (useCSDA) range = range_csda;
 
-      if (idx%2 == 0) { // even
-         ranges[idx/2] = range;
-         energies[idx/2] = energy;
+      if (idx%2 == 0 || useCompleteDataset) { // even
+         ranges[idxPara] = range;
+         energies[idxPara] = energy;
+         idxPara++;
       }
 
-      else { // odd
-         ranges_control[idx/2] = range;
-         energies_control[idx/2] = energy;
+      if (idx%2 != 0 || useCompleteDataset) { // odd
+         ranges_control[idxCtrl] = range;
+         energies_control[idxCtrl] = energy;
+         idxCtrl++;
       }
-
       idx++;
-
    }
 
-   TGraph *gBK = new TGraph(idx/2, energies, ranges);
-   TGraph *gBKInv = new TGraph(idx/2, ranges, energies);
-   TGraph *gUlmer = new TGraph(idx/2, energies, ranges);
-   TGraph *gUlmerInv = new TGraph(idx/2, ranges, energies);
-   TGraph *gSpline = new TGraph(idx/2, energies, ranges);
-   TGraph *gSplineInv = new TGraph(idx/2, ranges, energies);
-   TGraph *gLinear = new TGraph(idx/2, energies, ranges);
-   TGraph *gLinearInv = new TGraph(idx/2, ranges, energies);
-   TSpline3 *spline = new TSpline3("spline", energies, ranges, idx/2);
-   TSpline3 *splineInv = new TSpline3("splineInv", ranges, energies, idx/2);
+   TGraph *gBK = new TGraph(idxPara, energies, ranges);
+   TGraph *gBKInv = new TGraph(idxPara, ranges, energies);
+   TGraph *gUlmer = new TGraph(idxPara, energies, ranges);
+   TGraph *gUlmerInv = new TGraph(idxPara, ranges, energies);
+   TGraph *gSpline = new TGraph(idxPara, energies, ranges);
+   TGraph *gSplineInv = new TGraph(idxPara, ranges, energies);
+   TGraph *gLinear = new TGraph(idxPara, energies, ranges);
+   TGraph *gLinearInv = new TGraph(idxPara, ranges, energies);
+   TSpline3 *spline = new TSpline3("spline", energies, ranges, idxPara);
+   TSpline3 *splineInv = new TSpline3("splineInv", ranges, energies, idxPara);
 
    pad11->cd();
    gBK->SetTitle("Bragg-Kleeman fit;Energy [MeV];Range [cm]");
@@ -293,7 +298,7 @@ void Run() {
 
    // calculate the difference between the models and the CONTROL points
    Float_t controlValue;
-   for (Int_t i=0; i<idx/2; i++) {
+   for (Int_t i=0; i<idxCtrl; i++) {
       energy = energies_control[i];
       controlValue = ranges_control[i];
 
@@ -307,16 +312,16 @@ void Run() {
       deltaLinearInv[i] = 100*fabs(gLinearInv->Eval(controlValue) - energy) / energy;
    }
 
-   cout << "THE NUMBER OF DATA POINTS TO OBTAIN THE MODEL IS THUS: " << idx/2 << endl;
+   cout << "THE NUMBER OF DATA POINTS TO OBTAIN THE MODEL IS THUS: " << idxPara << endl;
 
-   TGraph *gBKControl = new TGraph(idx/2, energies_control, deltaBK);
-   TGraph *gBKInvControl = new TGraph(idx/2, ranges_control, deltaBKInv);
-   TGraph *gUlmerControl = new TGraph(idx/2, energies_control, deltaUlmer);
-   TGraph *gUlmerInvControl = new TGraph(idx/2, ranges_control, deltaUlmerInv);
-   TGraph *gSplineControl = new TGraph(idx/2, energies_control, deltaSpline);
-   TGraph *gSplineInvControl = new TGraph(idx/2, ranges_control, deltaSplineInv);
-   TGraph *gLinearControl = new TGraph(idx/2, energies_control, deltaLinear);
-   TGraph *gLinearInvControl = new TGraph(idx/2, ranges_control, deltaLinearInv);
+   TGraph *gBKControl = new TGraph(idxCtrl, energies_control, deltaBK);
+   TGraph *gBKInvControl = new TGraph(idxCtrl, ranges_control, deltaBKInv);
+   TGraph *gUlmerControl = new TGraph(idxCtrl, energies_control, deltaUlmer);
+   TGraph *gUlmerInvControl = new TGraph(idxCtrl, ranges_control, deltaUlmerInv);
+   TGraph *gSplineControl = new TGraph(idxCtrl, energies_control, deltaSpline);
+   TGraph *gSplineInvControl = new TGraph(idxCtrl, ranges_control, deltaSplineInv);
+   TGraph *gLinearControl = new TGraph(idxCtrl, energies_control, deltaLinear);
+   TGraph *gLinearInvControl = new TGraph(idxCtrl, ranges_control, deltaLinearInv);
 
    pad12->cd();
    gBKControl->SetTitle("Deviation from PSTAR;Energy [MeV];Range deviation [%]"); 
@@ -418,7 +423,7 @@ void Run() {
    Float_t rms_BK = 0, rms_BKInv = 0, rms_Ulmer = 0, rms_UlmerInv = 0;
    Float_t rms_Spline = 0, rms_SplineInv = 0, rms_Linear = 0, rms_LinearInv = 0;
 
-   for (Int_t i=0; i<idx/2; i++) {
+   for (Int_t i=0; i<idxCtrl; i++) {
       energy = energies_control[i];
       controlValue = ranges_control[i];
 
@@ -432,14 +437,14 @@ void Run() {
       rms_LinearInv += pow(deltaLinearInv[i]/100*energy, 2);
    }
 
-   rms_BK /= idx/2;
-   rms_BKInv /= idx/2;
-   rms_Ulmer /= idx/2;
-   rms_UlmerInv /= idx/2;
-   rms_Spline /= idx/2;
-   rms_SplineInv /= idx/2;
-   rms_Linear /= idx/2;
-   rms_LinearInv /= idx/2;
+   rms_BK /= idxCtrl;
+   rms_BKInv /= idxCtrl;
+   rms_Ulmer /= idxCtrl;
+   rms_UlmerInv /= idxCtrl;
+   rms_Spline /= idxCtrl;
+   rms_SplineInv /= idxCtrl;
+   rms_Linear /= idxCtrl;
+   rms_LinearInv /= idxCtrl;
 
    rms_BK = sqrt(rms_BK);
    rms_BKInv = sqrt(rms_BKInv);
@@ -482,14 +487,14 @@ void Run() {
    TCanvas *cCompare = new TCanvas("cCompare", "Error comparison", 800, 800);
    cCompare->Divide(1,2,0.01,0.01);
 
-   TGraph *gBKCompare = new TGraph(idx/2, energies_control, deltaBK);
-   TGraph *gBKInvCompare = new TGraph(idx/2, ranges_control, deltaBKInv);
-   TGraph *gUlmerCompare = new TGraph(idx/2, energies_control, deltaUlmer);
-   TGraph *gUlmerInvCompare = new TGraph(idx/2, ranges_control, deltaUlmerInv);
-   TGraph *gSplineCompare = new TGraph(idx/2, energies_control, deltaSpline);
-   TGraph *gSplineInvCompare = new TGraph(idx/2, ranges_control, deltaSplineInv);
-   TGraph *gLinearCompare = new TGraph(idx/2, energies_control, deltaLinear);
-   TGraph *gLinearInvCompare = new TGraph(idx/2, ranges_control, deltaLinearInv);
+   TGraph *gBKCompare = new TGraph(idxCtrl, energies_control, deltaBK);
+   TGraph *gBKInvCompare = new TGraph(idxCtrl, ranges_control, deltaBKInv);
+   TGraph *gUlmerCompare = new TGraph(idxCtrl, energies_control, deltaUlmer);
+   TGraph *gUlmerInvCompare = new TGraph(idxCtrl, ranges_control, deltaUlmerInv);
+   TGraph *gSplineCompare = new TGraph(idxCtrl, energies_control, deltaSpline);
+   TGraph *gSplineInvCompare = new TGraph(idxCtrl, ranges_control, deltaSplineInv);
+   TGraph *gLinearCompare = new TGraph(idxCtrl, energies_control, deltaLinear);
+   TGraph *gLinearInvCompare = new TGraph(idxCtrl, ranges_control, deltaLinearInv);
 
    gBKCompare->SetLineColor(kRed);
    gBKInvCompare->SetLineColor(kRed);
@@ -565,6 +570,8 @@ void Run() {
    l3    = fitInvFunction->GetParameter(5);
    l4    = fitInvFunction->GetParameter(7);
    l5    = fitInvFunction->GetParameter(9);
+
+   cout << "ALPHA = " << alpha << ", p = " << p << endl;
 
    TCanvas *cDepth = new TCanvas("cDepth", "depth-dose curves", 800, 800);
    cDepth->Divide(1,5,0.001,0.001);

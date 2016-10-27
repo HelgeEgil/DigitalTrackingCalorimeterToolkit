@@ -63,8 +63,8 @@ vector<Float_t> findRange::Run(Double_t energy, Double_t sigma_mev)
    TCanvas *c5 = new TCanvas("c5", "hSteplength", 800, 600);
 
    Int_t nbinsx = 750;
-   Int_t xfrom = -5;
-   Int_t xto = 30; // was 200
+   Int_t xfrom = 150;
+   Int_t xto = 250; // was 200
 
    Float_t x_compensate = 0;
 
@@ -132,8 +132,6 @@ vector<Float_t> findRange::Run(Double_t energy, Double_t sigma_mev)
          hTracklength->Fill(z + firstZ);
       }
 
-      cout << "z = " << z << " (layer = " << z / (2*2 + 0.975) << ") and level1ID = " << level1ID + baseID<< endl;
-   
       if (eventID != lastID) {
          n = 0;
          

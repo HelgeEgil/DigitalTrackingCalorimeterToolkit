@@ -16,9 +16,10 @@ class Track : public TObject {
 
    private:
       TClonesArray track_;
-      Float_t fitEnergy_;
-      Float_t fitScale_;
-      Float_t fitError_;
+      Float_t  fitEnergy_;
+      Float_t  fitRange_;
+      Float_t  fitScale_;
+      Float_t  fitError_;
 
    public:
       Track();
@@ -133,7 +134,7 @@ class Track : public TObject {
       // trackFitting.C
       TGraphErrors    * doFit();
       TGraphErrors    * doRangeFit(Bool_t isScaleVariable = false);
-      Float_t           getFitParameterEnergy();
+      Float_t           getFitParameterRange();
       Float_t           getFitParameterScale();
       Float_t           getFitParameterError();
       Float_t           getTrackScore();
