@@ -31,8 +31,9 @@
 #include "Analysis/Analysis.h"
 #include "GlobalConstants/Constants.h"
 #include "GlobalConstants/MaterialConstants.h"
+#include "GlobalConstants/RangeAndEnergyCalculations.h"
 #include "GlobalConstants/Misalign.h"
-#include "Classes/Track/conversionFunctions.h"
+//#include "Classes/Track/conversionFunctions.h"
 #include "Classes/Track/Tracks.h"
 #include "Classes/Hit/Hits.h"
 #include "Classes/DataInterface/DataInterface.h"
@@ -596,7 +597,7 @@ void drawFitScale(Int_t Runs, Int_t dataType, Bool_t recreate, Float_t energy) {
       Track *thisTrack = tracks->At(j);
       if (!thisTrack) continue;
       
-      outputGraph = (TGraphErrors*) thisTrack->doRangeFit();
+      outputGraph = (TGraphErrors*) thisTrack->doRangeFit(true);
       if (!outputGraph) continue;
          
       Float_t fitScale = thisTrack->getFitParameterScale();
@@ -719,8 +720,8 @@ Float_t drawBraggPeakGraphFit(Int_t Runs, Int_t dataType, Bool_t recreate, Float
    gStyle->SetPadBottomMargin(0.05);
    gStyle->SetPadLeftMargin(0.15);
    
-   TH1F *hFitResults = new TH1F("fitResult", hTitle, 100, getUnitFromEnergy(0), getUnitFromEnergy(energy*1.2));
-   TH1F *hFitResultsDroppedData = new TH1F("fitResultsDroppedData", hTitle, 100, getUnitFromEnergy(0), getUnitFromEnergy(energy*1.2));
+   TH1F *hFitResults = new TH1F("fitResult", hTitle, 200, getUnitFromEnergy(0), getUnitFromEnergy(energy*1.2));
+   TH1F *hFitResultsDroppedData = new TH1F("fitResultsDroppedData", hTitle, 200, getUnitFromEnergy(0), getUnitFromEnergy(energy*1.2));
    hFitResults->SetLineColor(kBlack); hFitResults->SetFillColor(kGreen-5);
    hFitResultsDroppedData->SetLineColor(kBlack); hFitResultsDroppedData->SetFillColor(kYellow-2);
 
@@ -2095,7 +2096,7 @@ void drawIndividualGraphs(TCanvas *cGraph, TGraphErrors* outputGraph, Float_t fi
       text->Draw();
    }
    
-   outputGraph->GetXaxis()->SetRangeUser(0, 265);
+   outputGraph->GetXaxis()->SetRangeUser(0, 280);
 
    cGraph->Update();
 }
@@ -2136,7 +2137,7 @@ Float_t doNGaussianFit ( TH1F *h, Float_t *means, Float_t *sigmas) {
    
 
    Int_t j=0;
-   for (Int_t i=0; i<15; i++) {
+   for (Int_t i=0; i<nLayers; i++) {
       if (getWEPLFromTL(getLayerPositionmm(i)) > getUnitFromEnergy(run_energy*1.1)) continue;
       if (getWEPLFromTL(getLayerPositionmm(i)) < getWEPLFromEnergy(run_energy * 0.8)) continue;
 
@@ -2152,7 +2153,7 @@ Float_t doNGaussianFit ( TH1F *h, Float_t *means, Float_t *sigmas) {
       isLastLayer = ((getWEPLFromTL(getLayerPositionmm(i)) > getUnitFromEnergy(run_energy-10)) && !wasLastLayer && ratio > 0.01) ;
    
       if (i<=3) continue;
-      if (ratio < 0.2 && !isLastLayer) continue;
+      if (ratio < 0.1 && !isLastLayer) continue;
       
       gauss = new TF1(Form("Gaus_%d", i), "gaus(0)", searchFrom, searchTo);
    
@@ -2163,7 +2164,7 @@ Float_t doNGaussianFit ( TH1F *h, Float_t *means, Float_t *sigmas) {
       
       gauss->SetParameters(10, (searchFrom+searchTo)/2, sigma);
       gauss->SetParLimits(0, 0, maxBinHeight);
-      gauss->SetParLimits(1, searchFrom+9, searchTo-4);
+      gauss->SetParLimits(1, searchFrom+5, searchTo);
       gauss->SetParLimits(2, 2, 9);
       
       h->Fit(gauss, "M, B, WW, Q, 0", "", searchFrom, searchTo);
@@ -2179,13 +2180,15 @@ Float_t doNGaussianFit ( TH1F *h, Float_t *means, Float_t *sigmas) {
       Float_t chi2nSigma = chi2 / integralSigma;
       
       cout << Form("Searching from %.1f to %.1f, with midpoint at %.1f. Found best fit @ %.1f with chi2 = %.2f and chi2/n = %.2f and chi2/nSIGMA = %.2f, ratio = %.2f.\n", searchFrom, searchTo,(searchTo+searchFrom)/2 , mean, chi2, chi2n, chi2nSigma, ratio);
-//
+
+   /*
       if (run_energy > 182 && run_energy < 193) {
          if (chi2n > 200 || sigma < 2.5 || constant < 3) {
             delete gauss;
             continue;
          }
       }
+   */
 
       if (ratio > 0.1) {
          gauss->SetLineColor(kRed);

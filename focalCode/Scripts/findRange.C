@@ -131,6 +131,8 @@ vector<Float_t> findRange::Run(Double_t energy, Double_t sigma_mev)
       if (processName[0] == 'P') {
          hTracklength->Fill(z + firstZ);
       }
+
+      cout << "z = " << z << " (layer = " << z / (2*2 + 0.975) << ") and level1ID = " << level1ID + baseID<< endl;
    
       if (eventID != lastID) {
          n = 0;

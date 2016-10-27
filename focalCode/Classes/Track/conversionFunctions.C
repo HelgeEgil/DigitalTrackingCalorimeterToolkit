@@ -23,7 +23,7 @@ using namespace std;
 //////////////////////////////////
 // Actual calculation functions //
 //////////////////////////////////
-
+/*
 Float_t getTLFromEnergy(Float_t energy, Double_t a1, Double_t b1, Double_t b2, Double_t g1, Double_t g2) {
 	Double_t sum1 = b1 * (1 - exp( -g1 * energy ));
 	Double_t sum2 = b2 * (1 - exp( -g2 * energy ));
@@ -48,7 +48,6 @@ Float_t getEnergyAtTL(Float_t E0, Float_t depth, Double_t c1, Double_t c2, Doubl
 													Double_t l1, Double_t l2, Double_t l3, Double_t l4, Double_t l5) {
 
 	Double_t range = getTLFromEnergy(E0);
-
 	if (range < depth) return 0;
 
 	Double_t sum1 = c1 * exp(-l1 * (range - depth));
@@ -57,6 +56,8 @@ Float_t getEnergyAtTL(Float_t E0, Float_t depth, Double_t c1, Double_t c2, Doubl
 	Double_t sum4 = c4 * exp(-l4 * (range - depth));
 	Double_t sum5 = c5 * exp(-l5 * (range - depth));
 	Float_t energy = (range - depth) * (sum1 + sum2 + sum3 + sum4 + sum5);
+
+   cout << "energy = (" << range << " - " << depth << ") * " << sum1+sum2+sum3+sum4+sum5 << " = " << energy << endl;
 
 	return energy;
 }
@@ -231,3 +232,4 @@ Float_t getUnitStragglingFromEnergy(Float_t energy, Float_t sigma_energy) {
 
 	return res;
 }
+*/

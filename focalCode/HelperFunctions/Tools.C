@@ -7,11 +7,12 @@
 #include <TH1F.h>
 #include <TMath.h>
 
-#include "../Classes/Cluster/Cluster.h"
-#include "../Classes/Hit/Hit.h"
-#include "../GlobalConstants/Constants.h"
-#include "../GlobalConstants/MaterialConstants.h"
-#include "../Classes/Track/conversionFunctions.h"
+#include "GlobalConstants/Constants.h"
+#include "GlobalConstants/MaterialConstants.h"
+#include "GlobalConstants/RangeAndEnergyCalculations.h"
+#include "Classes/Cluster/Cluster.h"
+#include "Classes/Hit/Hit.h"
+// #include "Classes/Track/conversionFunctions.h"
 
 
 using namespace std;
@@ -115,7 +116,7 @@ char * getMaterialChar() {
 	char *sMaterial;
 
 	if (kMaterial == kTungsten) sMaterial = (char*) "Tungsten";
-	if (kMaterial == kAluminum) sMaterial = (char*) "Aluminium";
+	if (kMaterial == kAluminium) sMaterial = (char*) "Aluminium";
 	if (kMaterial == kPMMA) sMaterial = (char*) "PMMA";
 
 	return sMaterial;

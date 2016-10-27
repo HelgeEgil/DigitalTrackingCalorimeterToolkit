@@ -10,13 +10,14 @@
 
 
 #include "GlobalConstants/Constants.h"
+#include "GlobalConstants/RangeAndEnergyCalculations.h"
 #include "Classes/Hit/Hit.h"
 #include "Classes/Hit/Hits.h"
 #include "Classes/Cluster/Cluster.h"
 #include "Classes/Cluster/Clusters.h"
 #include "Classes/Track/Track.h"
 #include "Classes/Track/Tracks.h"
-#include "Classes/Track/conversionFunctions.h"
+// #include "Classes/Track/conversionFunctions.h"
 #include "HelperFunctions/Tools.h"
 #include "Classes/Layer/Layer.h"
 #include "Classes/CalorimeterFrame/CalorimeterFrame.h"
@@ -157,7 +158,7 @@ DataInterface::DataInterface(TTree *tree) : fChain(0)
 	  
 	  //
       TChain * chain = new TChain("Hits","");
-      chain->Add(Form("Data/MonteCarlo/focal_%s_energy%.0f_sigma0.root/Hits", materialChar, run_energy));
+      chain->Add(Form("Data/MonteCarlo/optimized_%s_%.0fMeV_%.0fmm.root/Hits", materialChar, run_energy, kAbsorbatorThickness));
       tree = chain;
 #endif // SINGLE_TREE
 

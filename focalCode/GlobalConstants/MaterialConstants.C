@@ -1,13 +1,15 @@
 #include <cmath>
 #include <vector>
 #include <iostream>
+#include <fstream>
 
 #include <TObject.h>
 
-#include "MaterialConstants.h"
+#include "GlobalConstants/MaterialConstants.h"
+#include "GlobalConstants/Constants.h"
 #include "Classes/Hit/Hit.h"
 #include "Classes/Cluster/Cluster.h"
-#include "Constants.h"
+// #include "Classes/Track/conversionFunctions.h"
 
 using namespace std;
    
@@ -40,8 +42,10 @@ void MaterialConstants() {
    c5_water = 0.733621;
    l5_water = 0.000523239;
 
+   createSplines();
 
-   loadRangeValuesForAluminum();
+   loadRangeValuesForTungsten();
+   loadRangeValuesForAluminium();
 
    // USING VALUES FOR WATER FOR PMMA FIXME
    
@@ -104,7 +108,7 @@ void MaterialConstants() {
       l5_material = l5_tungsten;
    }
 
-   else if (kMaterial == kAluminum) {
+   else if (kMaterial == kAluminium) {
       nLayers = 41;
       p = p_aluminum;
       alpha = alpha_aluminum;
@@ -154,7 +158,26 @@ void MaterialConstants() {
    }
 }
 
-void loadRangeValuesForTungsten() 
+void  createSplines() {
+   // load energies and ranges for water, orig geometry + AL optimized
+   // create forward and backwards splines
+   // store them in .h
+
+   Float_t energies[20] = { .. .. .. .. .. .. . ... .. }
+   Float_t rangeWater[20] = { .. .. .. .. .}
+   Float_t rangeTungsten[20] = { .. .. .. ..}
+   Float_t rangeAluminium_2mm[20] = { .. .. .. .. .. . .}
+
+   TSpline3 *tungstenSpline = new TSpline3("tungstenSpline", energies, rangeTungsten, 20);
+   TSpline3 *tungstenInvSpline = new TSpline3("tungstenSpline", rangeTungsten, energies, 20);
+   TSpline3 *waterSpline = new TSpline3("tungstenSpline", energies, rangeTungsten, 20);
+   TSpline3 *waterInvSpline = new TSpline3("tungstenSpline", energies, rangeTungsten, 20);
+   TSpline3 *aluminium_2mmSpline = new TSpline3("tungstenSpline", energies, rangeTungsten, 20);
+   TSpline3 *aluminium_2mmInvSpline = new TSpline3("tungstenSpline", energies, rangeTungsten, 20);
+
+}
+
+void loadRangeValuesForTungsten() {
    X0_tungsten = 4.2;
    p_tungsten = 1.6677;
    alpha_tungsten = 0.004461;
@@ -178,67 +201,40 @@ void loadRangeValuesForTungsten()
    l5_tungsten = 0.00293302;
 }
 
-void  loadRangeValuesForAluminium() {
+void loadRangeValuesForAluminium() {
    // Parameterization of X0 calculation
-   Int_t m = kAbsorbatorThickness;
+   Int_t       m = kAbsorbatorThickness;
+   Float_t     mm_thickness;
+   ifstream in;
+   
    X0_aluminum = 5.4775 + 1.3109*m - 0.2608 * pow(m,2) + 0.0248 * pow(m,3) - 0.0009 * pow(m,4);
    alpha_prime_aluminum = 0.017102; // HOW DID I FIND THIS!!!
 
-   Int_t mm_thickness;
-   ifstream in;
-   in.open("../OutputFiles/RangeEnergyParameters.csv");
+   in.open("OutputFiles/RangeEnergyParameters.csv");
    while (1) {
       in >> mm_thickness;
+
+      if (!in.good()) continue;
 
       if (mm_thickness == kAbsorbatorThickness) {
          in >> alpha_aluminum >> p_aluminum;
          in >> a1_aluminium >> b1_aluminium >> g1_aluminium >> b2_aluminium >> g2_aluminium;
          in >> c1_aluminium >> c2_aluminium >> c3_aluminium >> c4_aluminium >> c5_aluminium;
-         in >> l1_aluminium >> l2_aluminium >> l3_aluminium >> l4_aluminium >> l5_aluminium; 
-         break;
+         in >> l1_aluminium >> l2_aluminium >> l3_aluminium >> l4_aluminium >> l5_aluminium;
+         continue; 
       }
 
-      else {
-         continue;
+      else if (mm_thickness == 10) {
+         in >> alpha_pure_aluminum >> p_pure_aluminum;
+         in >> a1_pure_aluminium >> b1_pure_aluminium >> g1_pure_aluminium >> b2_pure_aluminium >> g2_pure_aluminium;
+         in >> c1_pure_aluminium >> c2_pure_aluminium >> c3_pure_aluminium >> c4_pure_aluminium >> c5_pure_aluminium;
+         in >> l1_pure_aluminium >> l2_pure_aluminium >> l3_pure_aluminium >> l4_pure_aluminium >> l5_pure_aluminium; 
+         break;
       }
    }
    in.close();
 }
 
-Float_t getEnergyLossFromScintillators(Float_t energy, Int_t nScintillators) {
-   Float_t energyLoss = 0;
-   
-   if      (nScintillators == 0) energyLoss = 0;
-   else if (nScintillators == 1) energyLoss = 214.88444 * pow(energy, -0.7264956);
-   else if (nScintillators == 2) energyLoss = 341.79255 * pow(energy, -0.7357198);
-   else if (nScintillators == 3) energyLoss = 482.63531 * pow(energy, -0.7453624);
-   
-   else {
-      cout << "ASSERTION ERROR ON NUMBER OF SCINTILLATORS!\n";
-      energyLoss = 0;
-   }
-   
-   return energyLoss;
-}
-
-Float_t getEnergyLossErrorFromScintillators(Int_t nScintillators) {
-   Float_t energyLossError = 0;
-
-   if       (nScintillators == 0) energyLossError = 0;
-   else if (nScintillators == 1) energyLossError = 0.30;
-   else if (nScintillators == 2) energyLossError = 0.38;
-   else if (nScintillators == 3) energyLossError = 0.44;
-   
-   return energyLossError;
-}
-
-Float_t getEnergyLossFromAluminumAbsorber(Float_t energy) {
-   return 62.00441 * pow(energy, -0.7158403);
-}
-
-Float_t getEnergyLossErrorFromAluminumAbsorber() {
-   return 0.135;
-}
 
 Double_t getLayerPositionmm(Int_t i) {
    Double_t z = 0;

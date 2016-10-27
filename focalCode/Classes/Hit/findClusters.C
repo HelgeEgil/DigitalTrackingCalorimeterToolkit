@@ -9,12 +9,6 @@
 #include "GlobalConstants/MaterialConstants.h"
 #include "HelperFunctions/Tools.h"
 
-#ifdef USEDEBUG
-#define showDebug(x) std::cout << x
-#else
-#define showDebug(x)
-#endif
-
 Clusters * Hits::findClustersFromHits() {
 	Clusters			 *	clusters = new Clusters(kEventsPerRun * 20);
 	vector<Int_t>   *	expandedCluster = nullptr;

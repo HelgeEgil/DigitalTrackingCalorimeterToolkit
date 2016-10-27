@@ -51,7 +51,7 @@ Bool_t Track::doesTrackEndAbruptly() {
    Float_t  expectedTL = getTLFromEnergy(run_energy);
    Float_t  actualTL = getTLFromEnergy(getEnergy());
    Float_t  riseFactor = getRiseFactor();
-   Bool_t   endsAbruptly = (Last()->getDepositedEnergy() < 3);
+   Bool_t   endsAbruptly = (Last()->getDepositedEnergy() < 5); // 3 in tungsten
    
    if (endsAbruptly) return true;
    else              return false;

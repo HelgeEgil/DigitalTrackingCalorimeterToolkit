@@ -5,12 +5,20 @@
 #include <vector>
 #include <TObject.h>
 
+#define USEDEBUG
+
+#ifdef USEDEBUG
+#define showDebug(x) std::cout << x
+#else
+#define showDebug(x)
+#endif
+
 enum eFrameType {kCalorimeter, kTracker};
 enum eDataType {kMC, kData};
 
 Float_t run_energy = 0;
 Bool_t kIsAluminumPlate = true;
-Bool_t kIsScintillator = true;
+Bool_t kIsScintillator = false;
 
 Bool_t kDebug = false;
 
@@ -25,7 +33,7 @@ const Float_t kRad = 3.14159265/180.;
 const Int_t nx = 640;
 const Int_t ny = 640;
 const Int_t nTrackers = 4;
-const Int_t kAbsorbatorThickness = 2; // mm // FOCAL IS 1.5 mm
+const Float_t kAbsorbatorThickness = 2; // mm // FOCAL IS 1.5 mm
 
 // nLayers are loaded in MaterialConstants.C according to the detector geometry
 const Float_t dx = 0.03; // mm
@@ -43,8 +51,8 @@ Int_t energies[nEnergies] = {122, 140, 150, 160, 170, 180, 188, 190};
  * 
 */
 
-enum eMaterial {kTungsten, kAluminum, kPMMA, kWater, kFocalTungsten, kFocalAluminum};
-const Int_t kMaterial = kTungsten;
+enum eMaterial {kTungsten, kAluminium, kPMMA, kWater};
+const Int_t kMaterial = kAluminium;
 
 Int_t kDataType = kMC;
 

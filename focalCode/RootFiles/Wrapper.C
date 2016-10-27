@@ -2,6 +2,8 @@
 // include all the .C files to compile
 
 #include "GlobalConstants/Constants.h"
+#include "GlobalConstants/RangeAndEnergyCalculations.h"
+#include "GlobalConstants/RangeAndEnergyCalculations.C"
 #include "GlobalConstants/Misalign.h"
 #include "GlobalConstants/Misalign.C"
 #include "Classes/Hit/Hit.h"
@@ -14,8 +16,8 @@
 #include "Classes/Cluster/Clusters.h"
 #include "Classes/Cluster/Clusters.C"
 #include "Classes/Cluster/findTracks.C"
-#include "Classes/Track/conversionFunctions.h"
-#include "Classes/Track/conversionFunctions.C"
+// #include "Classes/Track/conversionFunctions.h"
+// #include "Classes/Track/conversionFunctions.C"
 #include "Classes/Track/Track.h"
 #include "Classes/Track/Track.C"
 #include "Classes/Track/Tracks.h"

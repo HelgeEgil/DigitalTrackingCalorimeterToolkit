@@ -9,12 +9,6 @@
 #include "GlobalConstants/MaterialConstants.h"
 #include "HelperFunctions/Tools.h"
 
-#ifdef USEDEBUG
-#define showDebug(x) std::cout << x
-#else
-#define showDebug(x)
-#endif
-
 Hits::~Hits() {
    hits_.Delete();
 }

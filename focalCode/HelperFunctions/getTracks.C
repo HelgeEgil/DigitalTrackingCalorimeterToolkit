@@ -14,20 +14,14 @@
 
 #include "GlobalConstants/Constants.h"
 #include "GlobalConstants/MaterialConstants.h"
+#include "GlobalConstants/RangeAndEnergyCalculations.h"
 #include "GlobalConstants/Misalign.h"
-#include "Classes/Track/conversionFunctions.h"
+// #include "Classes/Track/conversionFunctions.h"
 #include "Classes/Track/Tracks.h"
 #include "Classes/Hit/Hits.h"
 #include "Classes/DataInterface/DataInterface.h"
 #include "HelperFunctions/Tools.h"
 #include "HelperFunctions/getTracks.h"
-
-
-#ifdef USEDEBUG
-#define showDebug(x) std::cout << x
-#else
-#define showDebug(x)
-#endif
 
 using namespace std;
 

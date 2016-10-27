@@ -18,12 +18,12 @@
 /gate/systems/scanner_1/level2/attach FirstModule
 /gate/systems/scanner_2/level2/attach Module
 
-#/gate/FM_ActiveChipLeft/attachCrystalSD
-#/gate/FM_ActiveChipRight/attachCrystalSD
-#/gate/ActiveChipLeft/attachCrystalSD
-#/gate/ActiveChipRight/attachCrystalSD
+/gate/FM_ActiveChipLeft/attachCrystalSD
+/gate/FM_ActiveChipRight/attachCrystalSD
+/gate/ActiveChipLeft/attachCrystalSD
+/gate/ActiveChipRight/attachCrystalSD
 
-/control/execute readout_full.mac
+#/control/execute readout_full.mac
 
 #=================#
 # Physics			#

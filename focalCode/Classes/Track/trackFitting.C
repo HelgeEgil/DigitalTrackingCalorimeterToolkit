@@ -56,12 +56,12 @@ TGraphErrors * Track::doFit() {
 	
 	if (kOutputUnit == kPhysical) {
 		if (kMaterial == kTungsten) scaleParameter = 14;
-		if (kMaterial == kAluminum) scaleParameter = 65;
+		if (kMaterial == kAluminium) scaleParameter = 65;
 	}
 	
 	else if (kOutputUnit == kWEPL || kOutputUnit == kEnergy) {
 		if (kMaterial == kTungsten) scaleParameter = 100;
-		if (kMaterial == kAluminum) scaleParameter = 126;
+		if (kMaterial == kAluminium) scaleParameter = 126;
 	}
 	
 	TF1 *func = new TF1("fit_BP", fitfunc_DBP, 0, 500, 2);
@@ -80,7 +80,7 @@ TGraphErrors * Track::doFit() {
 	return graph;
 }
 
-TGraphErrors * Track::doRangeFit() {
+TGraphErrors * Track::doRangeFit(Bool_t isScaleVariable) {
 	// Fit a bragg curve on the clusters in this track
 	// See HelperFunctions/Tools.C::fitfunc_DBP for the BC function used
 	//
@@ -126,12 +126,12 @@ TGraphErrors * Track::doRangeFit() {
 	
 	if (kOutputUnit == kPhysical) {
 		if (kMaterial == kTungsten) scaleParameter = 14/14.;
-		if (kMaterial == kAluminum) scaleParameter = 65/14.;
+		if (kMaterial == kAluminium) scaleParameter = 65/14.;
 	}
 	
 	else if (kOutputUnit == kWEPL || kOutputUnit == kEnergy) {
 		if (kMaterial == kTungsten) scaleParameter = 3.1; // validated through drawFitScale
-		if (kMaterial == kAluminum) scaleParameter = 126/14.;
+		if (kMaterial == kAluminium) scaleParameter = 3.1;
 	}
 
 	if (kDataType == kData) scaleParameter = 2.7;
@@ -141,6 +141,9 @@ TGraphErrors * Track::doRangeFit() {
 	func->SetParameter(1, scaleParameter);
 	func->SetParLimits(0, 0, maxEnergy);
 	func->SetParLimits(1, scaleParameter, scaleParameter);
+   if (isScaleVariable) {
+      func->SetParLimits(1, 0.01 * scaleParameter, 100 * scaleParameter);
+   }
 	func->SetNpx(500);
 
 	graph->Fit("fit_BP", "B, N, Q, W", "", 0, getWEPLFromEnergy(maxEnergy*1.2));

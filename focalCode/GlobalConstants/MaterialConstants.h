@@ -13,6 +13,7 @@ Int_t nLayers;
 Double_t p, alpha, alpha_prime;
 Double_t p_water, alpha_water, alpha_prime_water;
 Double_t p_aluminum, alpha_aluminum, alpha_prime_aluminum;
+Double_t p_pure_aluminum, alpha_pure_aluminum, alpha_prime_pure_aluminum;
 Double_t p_tungsten, alpha_tungsten, alpha_prime_tungsten;
 
 Double_t a1_water, b1_water, b2_water, g1_water, g2_water;
@@ -27,6 +28,9 @@ Double_t l1_tungsten, l2_tungsten, l3_tungsten, l4_tungsten, l5_tungsten;
 Double_t a1_aluminium, b1_aluminium, b2_aluminium, g1_aluminium, g2_aluminium;
 Double_t c1_aluminium, c2_aluminium, c3_aluminium, c4_aluminium, c5_aluminium;
 Double_t l1_aluminium, l2_aluminium, l3_aluminium, l4_aluminium, l5_aluminium;
+Double_t a1_pure_aluminium, b1_pure_aluminium, b2_pure_aluminium, g1_pure_aluminium, g2_pure_aluminium;
+Double_t c1_pure_aluminium, c2_pure_aluminium, c3_pure_aluminium, c4_pure_aluminium, c5_pure_aluminium;
+Double_t l1_pure_aluminium, l2_pure_aluminium, l3_pure_aluminium, l4_pure_aluminium, l5_pure_aluminium;
 Double_t a1_pmma, b1_pmma, b2_pmma, g1_pmma, g2_pmma;
 Double_t c1_pmma, c2_pmma, c3_pmma, c4_pmma, c5_pmma;
 Double_t l1_pmma, l2_pmma, l3_pmma, l4_pmma, l5_pmma;
@@ -40,10 +44,6 @@ Double_t firstUpperLayerZ, firstLowerLayerZ;
 
 void     loadRangeValuesForTungsten();
 void     loadRangeValuesForAluminium();
-Float_t  getEnergyLossFromScintillators(Float_t energy, Int_t nScintillators);
-Float_t  getEnergyLossErrorFromScintillators(Int_t nScintillators);
-Float_t  getEnergyLossFromAluminumAbsorber(Float_t energy);
-Float_t  getEnergyLossErrorFromAluminumAbsorber();
 Double_t getLayerPositionmm(Int_t i);
 Float_t  getSigmaEnergy(Int_t energy);
 Bool_t   isChipLowResistivity(Int_t chipIdx);

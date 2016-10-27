@@ -10,11 +10,6 @@
 #include "GlobalConstants/MaterialConstants.h"
 #include "HelperFunctions/Tools.h"
 
-#ifdef USEDEBUG
-#define showDebug(x) std::cout << x
-#else
-#define showDebug(x)
-#endif
 
 using namespace std;
 
@@ -68,6 +63,7 @@ void Clusters::findTracksFromLayer(Tracks * tracks, Int_t layer, Bool_t kUsedClu
 	}
 
 	seeds = findSeeds(layer, kUsedClustersInSeeds);
+   showDebug("Found " << seeds->GetEntriesFast() << " seeds in layer " << layer << endl);
 	
 	for (Int_t i=0; i<seeds->GetEntriesFast(); i++) {
 		if (!seeds->At(i))
@@ -181,6 +177,7 @@ Clusters * Clusters::findClustersFromSeedInLayer(Cluster *seed, Int_t nextLayer)
 	Clusters *clustersFromThisLayer = new Clusters(50);
 
 	Float_t maxDelta = getSearchRadiusForLayer(nextLayer) * 0.75 * MCSMultiplicationFactor;
+//   showDebug("Search radius is " << maxDelta << " mm.\n");
 
 	if (layerIdxFrom < 0)
 		return clustersFromThisLayer; // empty

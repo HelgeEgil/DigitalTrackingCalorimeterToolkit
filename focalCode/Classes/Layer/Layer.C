@@ -7,12 +7,6 @@
 #include "Classes/Layer/Layer.h"
 #include "Classes/Hit/Hits.h"
 
-#ifdef SETDEBUG
-#define showDebug(x) std::cout << x
-#else
-#define showDebug(x)
-#endif
-
 Layer::Layer(Int_t layerNo, Bool_t frameType, Bool_t dataType) : frame2D_(Form("%d_frame2D_%i",frameType, layerNo), Form("frame2D_layer_%i", layerNo), 2*nx, 0, 2*nx, 2*ny, 0, 2*ny) {
    dataType_ = dataType;
    frameType_ = frameType;

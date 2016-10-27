@@ -2,9 +2,10 @@
 #define Track_h
 
 #include <TClonesArray.h>
+#include <vector>
 
 #include "Classes/Cluster/Cluster.h"
-#include "Classes/Track/conversionFunctions.h"
+// #include "Classes/Track/conversionFunctions.h"
 
 const Int_t MaxTrackLength = 40;
 class TGraph;
@@ -131,7 +132,7 @@ class Track : public TObject {
       // TRACK PROPERTIES - Track fitting, scoring
       // trackFitting.C
       TGraphErrors    * doFit();
-      TGraphErrors    * doRangeFit();
+      TGraphErrors    * doRangeFit(Bool_t isScaleVariable = false);
       Float_t           getFitParameterEnergy();
       Float_t           getFitParameterScale();
       Float_t           getFitParameterError();

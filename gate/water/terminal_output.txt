@@ -22,8 +22,8 @@ http://wiki.opengatecollaboration.org/index.php/Users_Guide_V7.0:Setting_up_the_
 [Core-0] **********************************************************************
 [Core-0] 
 [Core-0] You are using Geant4 version 9.6.4
-/control/alias energy 190
-/control/alias npart 10000
+/control/alias energy 250
+/control/alias npart 100000
 /control/alias step_active 0
 /control/alias sigma 0
 [Core-0] Starting macro focal_script.mac
@@ -644,6 +644,11 @@ WARNING: Scene "none" not found.
           waterbox
           DefaultRegionForTheWorld
 ERROR: G4VisCommandsViewerUpdate::SetNewValue: no current viewer.
+[Core-0] End of macro focal_script.mac
+Graphics systems deleted.
+Visualization Manager deleting...
+WARNING - Attempt to delete the physical volume store while geometry closed !
+WARNERROR: G4VisCommandsViewerUpdate::SetNewValue: no current viewer.
 [Core-0] End of macro focal_script.mac
 Graphics systems deleted.
 Visualization Manager deleting...
