@@ -58,7 +58,6 @@ void drawTrackAngleAtVaryingRunNumbers(Int_t dataType, Float_t energy) {
       if (totalNumberOfRuns > 75) totalNumberOfRuns = 75;
 
       Tracks * tracks = loadOrCreateTracks(1, totalNumberOfRuns, dataType, energy);
-      tracks->extrapolateToLayer0();
 
       char * sDataType = getDataTypeChar(dataType);
       TCanvas *c1 = new TCanvas("c1", "c1", 1200, 800);
@@ -156,7 +155,6 @@ void getTrackStatistics(Int_t Runs, Int_t dataType, Bool_t recreate, Float_t ene
    }
 
    Tracks * tracks = loadOrCreateTracks(recreate, Runs, dataType, energy);
-   tracks->extrapolateToLayer0();
    
    Int_t nTracksToPlot = 25;
    Int_t nTracksToPlot1D = 5;
@@ -467,7 +465,6 @@ void drawClusterShapes(Int_t Runs, Bool_t dataType, Bool_t recreate, Float_t ene
 
 void makeTracks(Int_t Runs, Int_t dataType, Bool_t recreate, Float_t energy) {
    Tracks * tracks = loadOrCreateTracks(recreate, Runs, dataType, energy);
-   tracks->extrapolateToLayer0();
 }
 
 void drawTrackRanges(Int_t Runs, Int_t dataType, Bool_t recreate, Float_t energy) {
@@ -493,7 +490,6 @@ void drawTrackRanges(Int_t Runs, Int_t dataType, Bool_t recreate, Float_t energy
    hFitResults->Draw();
 
    Tracks * tracks = loadOrCreateTracks(recreate, Runs, dataType, energy);
-   tracks->extrapolateToLayer0();
 
    for (Int_t j=0; j<tracks->GetEntriesFast(); j++) {
       Track *thisTrack = tracks->At(j);
@@ -528,7 +524,6 @@ void drawTungstenSpectrum(Int_t Runs, Int_t dataType, Bool_t recreate, Float_t e
    hFitResults->Draw();
 
    Tracks * tracks = loadOrCreateTracks(recreate, Runs, dataType, energy);
-   tracks->extrapolateToLayer0();
 
    for (Int_t j=0; j<tracks->GetEntriesFast(); j++) {
       Track *thisTrack = tracks->At(j);
@@ -569,7 +564,6 @@ void drawScintillatorStatistics(Int_t Runs, Int_t dataType, Bool_t recreate, Flo
    hFitResults->Draw();
 
    Tracks * tracks = loadOrCreateTracks(recreate, Runs, dataType, energy);
-   tracks->extrapolateToLayer0();
 
    Float_t nScintillators = 0;
    
@@ -591,7 +585,6 @@ void drawFitScale(Int_t Runs, Int_t dataType, Bool_t recreate, Float_t energy) {
    TGraphErrors *outputGraph;
 
    Tracks * tracks = loadOrCreateTracks(recreate, Runs, dataType, energy);
-   tracks->extrapolateToLayer0();
    
    for (Int_t j=0; j<tracks->GetEntriesFast(); j++) {
       Track *thisTrack = tracks->At(j);
@@ -620,7 +613,6 @@ void drawTracksWithEnergyLoss(Int_t Runs, Int_t dataType, Bool_t recreate, Float
    Float_t y_energy[sizeOfEventID*400] = {};
    
    Tracks * tracks = loadOrCreateTracks(recreate, Runs, dataType, energy, x_energy, y_energy);
-   tracks->extrapolateToLayer0();
    
    cout << "Using aluminum plate: " << kIsAluminumPlate << endl;
    cout << "Using scintillators: " << kIsScintillator << endl;
@@ -681,36 +673,31 @@ void drawTracksWithEnergyLoss(Int_t Runs, Int_t dataType, Bool_t recreate, Float
 Float_t drawBraggPeakGraphFit(Int_t Runs, Int_t dataType, Bool_t recreate, Float_t energy) {
    run_energy = energy;
    kDataType = dataType;
+   Bool_t         kDrawHorizontalLines = false;
+   Bool_t         kDrawVerticalLayerLines = false;
+   Bool_t         kDrawIndividualGraphs = true;
+   Bool_t         acceptAngle = false;
+   Float_t        maxAngle, thisAngle;
+   Float_t        finalEnergy = 0;
+   Float_t        fitRange, fitScale, fitError;
+   Int_t          nCutDueToTrackEndingAbruptly = 0;
+   Int_t          nPlotX = 3, nPlotY = 1;
+   Int_t          fitIdx = 0, plotSize = nPlotX*nPlotY;
+   Int_t          skipPlot = 20; 
+   TGraphErrors * outputGraph;
+   TCanvas      * cGraph = new TCanvas("cGraph", "Fitted data points", 1500, 500);
+   TCanvas      * cFitResults = new TCanvas("cFitResults", hTitle, 1000, 1000);
+   TH1F         * hFitResults = new TH1F("fitResult", hTitle, 200, getUnitFromEnergy(0), getUnitFromEnergy(energy*1.2));
+   TH1F         * hFitResultsDroppedData = new TH1F("fitResultsDroppedData", hTitle, 200, getUnitFromEnergy(0), getUnitFromEnergy(energy*1.2));
+   TH1F         * hMaxAngle = new TH1F("hMaxAngle", "Maximum angle for proton track", 200, 0, 25);
+   char         * sDataType = getDataTypeChar(dataType); char * sMaterial = getMaterialChar();
+   char         * hTitle = Form("Fitted energy of a %.2f MeV beam in %s (%s)", energy, sMaterial, sDataType);
    
    cout << "At energy " << run_energy << ", expecting TL = " << getTLFromEnergy(run_energy) << " and WEPL = " << getWEPLFromEnergy(run_energy) << endl;
+   cout << "Correcting for aluminum plate: " << kIsAluminumPlate << endl;
+   cout << "Correcting for scintillators: " << kIsScintillator << endl;
 
-   Tracks * tracks = loadOrCreateTracks(recreate, Runs, dataType, energy);
-   tracks->extrapolateToLayer0();
-
-   cout << *tracks->At(5) << endl;
-
-   cout << "Using aluminum plate: " << kIsAluminumPlate << endl;
-   cout << "Using scintillators: " << kIsScintillator << endl;
-   
-   Bool_t kDrawHorizontalLines = false;
-   Bool_t kDrawVerticalLayerLines = false;
-   Bool_t kDrawIndividualGraphs = true;
-   Bool_t kUseTrackLength = false;
-   
-   Bool_t kOutsideScintillatorCross = false;
-   Bool_t kInsideScintillatorCross = false;
-
-   char * sDataType = getDataTypeChar(dataType); char * sMaterial = getMaterialChar();
-   char * hTitle = Form("Fitted energy of a %.2f MeV beam in %s (%s)", energy, sMaterial, sDataType);
-
-   Int_t nPlotX = 3, nPlotY = 1;
-   Int_t fitIdx = 0, plotSize = nPlotX*nPlotY;
-   Int_t skipPlot = 20;
-
-   TGraphErrors *outputGraph;
-   TCanvas *cGraph = new TCanvas("cGraph", "Fitted data points", 1500, 500);
-   TCanvas *cFitResults = new TCanvas("cFitResults", hTitle, 1000, 1000);
-// TCanvas *cMaxAngle = new TCanvas("cMaxAngle", "Maxium angle for proton track", 1400, 1000);
+   // Histogram options
    cGraph->Divide(nPlotX,nPlotY, 0.000001, 0.000001, 0);
    gStyle->SetPadBorderMode(0); gStyle->SetFrameBorderMode(0);
    gStyle->SetTitleH(0.06); gStyle->SetTitleYOffset(1);
@@ -718,19 +705,12 @@ Float_t drawBraggPeakGraphFit(Int_t Runs, Int_t dataType, Bool_t recreate, Float
    gStyle->SetPadTopMargin(0.05); gStyle->SetPadRightMargin(0.05);
    gStyle->SetPadBottomMargin(0.05);
    gStyle->SetPadLeftMargin(0.15);
-   
-   TH1F *hFitResults = new TH1F("fitResult", hTitle, 200, getUnitFromEnergy(0), getUnitFromEnergy(energy*1.2));
-   TH1F *hFitResultsDroppedData = new TH1F("fitResultsDroppedData", hTitle, 200, getUnitFromEnergy(0), getUnitFromEnergy(energy*1.2));
    hFitResults->SetLineColor(kBlack); hFitResults->SetFillColor(kGreen-5);
    hFitResultsDroppedData->SetLineColor(kBlack); hFitResultsDroppedData->SetFillColor(kYellow-2);
-
-   TH1F *hMaxAngle = new TH1F("hMaxAngle", "Maximum angle for proton track", 200, 0, 25);
    hMaxAngle->SetLineColor(kBlack); hMaxAngle->SetFillColor(kGreen-5);
 
-   Bool_t acceptAngle = false;
-
-   Float_t finalEnergy = 0;
-   Int_t nCutDueToTrackEndingAbruptly = 0;
+   // Create or load all tracks
+   Tracks * tracks = loadOrCreateTracks(recreate, Runs, dataType, energy);
    
    for (Int_t j=0; j<tracks->GetEntriesFast(); j++) {
       Track *thisTrack = tracks->At(j);
@@ -741,69 +721,56 @@ Float_t drawBraggPeakGraphFit(Int_t Runs, Int_t dataType, Bool_t recreate, Float
          nCutDueToTrackEndingAbruptly++;
          continue;
       }
-      
-      if (kOutsideScintillatorCross) {
-         if (thisTrack->isHitOnScintillators()) continue;
-      }
-      
-      if (kInsideScintillatorCross) {
-         if (!thisTrack->isHitOnScintillators()) continue;
-      }
    
-      Float_t maxAngle = 0, thisAngle = 0;
+      maxAngle = 0;
+      thisAngle = 0;
+      
       for (Int_t i=0; i<thisTrack->GetEntriesFast(); i++) {
          thisAngle = thisTrack->getSlopeAngleAtLayer(i);
          maxAngle = max(thisAngle, maxAngle);
       }
 
-      acceptAngle = (maxAngle < 13);
-
       hMaxAngle->Fill(maxAngle);
 
-      if (kUseTrackLength)
-         outputGraph = (TGraphErrors*) thisTrack->doFit();
-      else
-         outputGraph = (TGraphErrors*) thisTrack->doRangeFit();
-      
+      // Do track fit, extract all parameters for this track
+      outputGraph = (TGraphErrors*) thisTrack->doRangeFit();
       if (!outputGraph) continue;
 
-      Float_t fitRange = thisTrack->getFitParameterRange();
-      Float_t fitScale = thisTrack->getFitParameterScale();
-      
-      Float_t fitError = quadratureAdd(thisTrack->getFitParameterError(), dz/sqrt(12)); // latter term from error on layer position
+      fitRange = thisTrack->getFitParameterRange();
+      fitScale = thisTrack->getFitParameterScale();
+      fitError = quadratureAdd(thisTrack->getFitParameterError(), dz/sqrt(12)); // latter term from error on layer position
 
-      if (acceptAngle || true) {
-         hFitResults->Fill(getUnitFromWEPL(fitRange));
+      hFitResults->Fill(getUnitFromWEPL(fitRange));
 
-         if (fitIdx < plotSize && kDrawIndividualGraphs && j>=skipPlot) {
-            drawIndividualGraphs(cGraph, outputGraph, fitRange, fitScale, fitError, fitIdx++);
+      if (fitIdx < plotSize && kDrawIndividualGraphs && j>=skipPlot) {
+         drawIndividualGraphs(cGraph, outputGraph, fitRange, fitScale, fitError, fitIdx++);
 
-            if (fitIdx == 1) {
-               gPad->SetRightMargin(0.01);
-               gPad->SetLeftMargin(0.15);
-               outputGraph->GetXaxis()->SetTitle("");
-            }
+         // Drawing of three panels with individual range-Edep graphs
+         if (fitIdx == 1) {
+            gPad->SetRightMargin(0.01);
+            gPad->SetLeftMargin(0.15);
+            outputGraph->GetXaxis()->SetTitle("");
+         }
 
-            else if (fitIdx == 2) {
-               gPad->SetLeftMargin(0.01);
-               gPad->SetRightMargin(0.01);
-               outputGraph->GetYaxis()->SetLabelOffset(2);
-               outputGraph->SetTitle(Form("Bragg-Kleeman fit to exp. data at %.0f MeV", run_energy));
-               
-               gPad->Update();
-               TPaveText *title = (TPaveText*) gPad->GetPrimitive("title");
-               title->SetTextFont(22);
-               title->SetTextSize(0.06);
-               gPad->Modified();
-               
-            }
+         else if (fitIdx == 2) {
+            gPad->SetLeftMargin(0.01);
+            gPad->SetRightMargin(0.01);
+            outputGraph->GetYaxis()->SetLabelOffset(2);
+            outputGraph->SetTitle(Form("Bragg-Kleeman fit to exp. data at %.0f MeV", run_energy));
+            
+            gPad->Update();
+            TPaveText *title = (TPaveText*) gPad->GetPrimitive("title");
+            title->SetTextFont(22);
+            title->SetTextSize(0.06);
+            gPad->Modified();
+            
+         }
 
-            else if (fitIdx == 3) {
-               gPad->SetRightMargin(0.1);
-               gPad->SetLeftMargin(0.01);
-               outputGraph->GetXaxis()->SetTitle("");
-               outputGraph->GetYaxis()->SetLabelOffset(2);
-            }
+         else if (fitIdx == 3) {
+            gPad->SetRightMargin(0.1);
+            gPad->SetLeftMargin(0.01);
+            outputGraph->GetXaxis()->SetTitle("");
+            outputGraph->GetYaxis()->SetLabelOffset(2);
          }
       }
       
@@ -815,15 +782,13 @@ Float_t drawBraggPeakGraphFit(Int_t Runs, Int_t dataType, Bool_t recreate, Float
    
    cout << 100 * float(nCutDueToTrackEndingAbruptly) / tracks->GetEntriesFast() << " % of the tracks were cut due to seemingly inelastic nuclear interactions.\n";
 
-// cMaxAngle->cd();
-// hMaxAngle->Draw();
    TF1 *fMaxAngle = new TF1("fMaxAngle", "gaus(0)", 0, 25);
    fMaxAngle->SetParameters(100, 4, 6);
    hMaxAngle->Fit(fMaxAngle, "M, W, Q, N", "", 0, 25);
 
    Float_t angleTo = fMaxAngle->GetParameter(1) + 3 * fMaxAngle->GetParameter(2);
 
-   cout << "3 sigma CL = " << angleTo << endl;
+   cout << "3 sigma Confidence Limit for angular spread  = " << angleTo << endl;
 
    Int_t nAccepted = hMaxAngle->Integral(0,hMaxAngle->GetXaxis()->FindBin(angleTo));
    Float_t percentAccepted = 100 * nAccepted / hMaxAngle->Integral(0);
@@ -832,9 +797,10 @@ Float_t drawBraggPeakGraphFit(Int_t Runs, Int_t dataType, Bool_t recreate, Float
 
    cFitResults->cd();
 
-   if (kOutputUnit == kPhysical) hFitResultsDroppedData->SetXTitle("Physical range [mm]");
-   else if (kOutputUnit == kWEPL) hFitResultsDroppedData->SetXTitle("Range in Water Equivalent Path Length [mm]");
-   else if (kOutputUnit == kEnergy) { hFitResultsDroppedData->SetXTitle("Energy [MeV]"); }
+   if       (kOutputUnit == kPhysical) hFitResultsDroppedData->SetXTitle("Physical range [mm]");
+   else if  (kOutputUnit == kWEPL)     hFitResultsDroppedData->SetXTitle("Range in Water Equivalent Path Length [mm]");
+   else if  (kOutputUnit == kEnergy)   hFitResultsDroppedData->SetXTitle("Energy [MeV]");
+
    hFitResultsDroppedData->SetYTitle("Number of protons");
 
    hFitResultsDroppedData->GetXaxis()->SetTitleFont(22);
@@ -847,16 +813,15 @@ Float_t drawBraggPeakGraphFit(Int_t Runs, Int_t dataType, Bool_t recreate, Float
    hFitResults->Draw("same");
    hFitResultsDroppedData->GetYaxis()->SetRangeUser(0, max(hFitResultsDroppedData->GetMaximum()*1.05, hFitResults->GetMaximum()*1.05));
 
+   // Change title font to 22 (Times New Roman)
    gPad->Update();
    TPaveText *title = (TPaveText*) gPad->GetPrimitive("title");
    title->SetTextFont(22);
    gPad->Modified();
    
    // Draw expected gaussian distribution of results from initial energy
-   
    Float_t expectedStraggling = 0, expectedMean = 0, dlayer_down = 0, dlayer = 0;
    Float_t separationFactor = 0.9, nullStraggling = 0;
-   
    Float_t sigma_energy = getSigmaEnergy(energy);
    
    expectedMean = getUnitFromEnergy(energy);
@@ -868,24 +833,12 @@ Float_t drawBraggPeakGraphFit(Int_t Runs, Int_t dataType, Bool_t recreate, Float
        
    Float_t means[10] = {};
    Float_t sigmas[10] = {};
-   
+
    Float_t nGaussianFitRange = doNGaussianFit(hFitResults, means, sigmas);
    Float_t empiricalMean = means[9];
    Float_t empiricalSigma = sigmas[9];
-
-   Int_t nMean = 0;
-   for (Int_t i=0; i<10; i++) {
-      if (means[i]) nMean++;
-   }
    
-   Float_t rangeSigma = 0;
-   for (Int_t i=0; i<nMean; i++) {
-      rangeSigma += pow(sigmas[i], 2);
-   }
-   rangeSigma = sqrt(rangeSigma);
-
-   Float_t energySigma = getEnergyFromUnit(nGaussianFitRange + rangeSigma / 2) - getEnergyFromUnit(nGaussianFitRange - rangeSigma / 2);
-   energySigma = getEnergyFromUnit(empiricalMean +  empiricalSigma/ 2) - getEnergyFromUnit(empiricalMean - empiricalSigma / 2);
+   Float_t energySigma = getEnergyFromUnit(empiricalMean +  empiricalSigma/ 2) - getEnergyFromUnit(empiricalMean - empiricalSigma / 2);
 
    cFitResults->Update();
    
@@ -899,15 +852,14 @@ Float_t drawBraggPeakGraphFit(Int_t Runs, Int_t dataType, Bool_t recreate, Float
       }
    }
    
-   TLegend *legend = new TLegend(0.16, 0.78, 0.42, 0.88);
 
    gPad->Update();
    TF1 *fit1 = (TF1*) gPad->GetPrimitive("Gaus_6");
-   
    Float_t bip_value = means[0] - 3*sigmas[0];
    TLine *bip = new TLine(bip_value, hFitResultsDroppedData->GetMaximum(), bip_value, 0);
    bip->Draw();
 
+   TLegend *legend = new TLegend(0.16, 0.78, 0.42, 0.88);
    legend->SetTextSize(0.028);
    legend->AddEntry(hFitResults, "Accepted tracks", "F");
    legend->AddEntry(hFitResultsDroppedData, "Tracks without BP rise", "F");
@@ -931,8 +883,6 @@ Float_t drawBraggPeakGraphFit(Int_t Runs, Int_t dataType, Bool_t recreate, Float
       ps->AddText(Form("Fit %d energy = %.2f", i+1, getEnergyFromUnit(means[i])));
    }
 
-//   ps->AddText(Form("Resulting WEPL = %.2f #pm %.2f", nGaussianFitRange, rangeSigma));
-//   ps->AddText(Form("Resulting energy = %.2f #pm %.2f", getEnergyFromUnit(nGaussianFitRange), energySigma));
    ps->AddText(Form("Resulting WEPL = %.2f #pm %.2f", empiricalMean, empiricalSigma));
    ps->AddText(Form("Resulting energy = %.2f #pm %.2f", getEnergyFromUnit(empiricalMean), energySigma));
       
@@ -1003,7 +953,6 @@ void writeClusterFile(Int_t Runs, Int_t dataType, Float_t energy) {
 void draw2DProjection(Int_t Runs, Int_t dataType, Bool_t recreate, Float_t energy) {
 
    Tracks * tracks = loadOrCreateTracks(recreate, Runs, dataType, energy);
-   tracks->extrapolateToLayer0();
    
    Int_t hSizeX = nx/8;
    Int_t hSizeY = ny/8;
@@ -1371,7 +1320,6 @@ void drawAlignmentCheck(Int_t Runs, Int_t dataType, Bool_t recreate, Float_t ene
    kDataType = dataType;
 
    Tracks * tracks = loadOrCreateTracks(recreate, Runs, dataType, energy);
-   tracks->extrapolateToLayer0();
 
    TCanvas   * c1 = new TCanvas("c1", "Alignment check", 1800, 1500);
    c1->Divide(2, 4, 0.01, 0.01);
@@ -1764,11 +1712,9 @@ void compareClusterSizes(Int_t Runs, Bool_t recreate, Float_t energy) {
    
    cout << "Finding MC tracks...\n";
    MCTracks = loadOrCreateTracks(recreate, Runs, kMC, altEnergy);
-   MCTracks->extrapolateToLayer0();
 
    cout << "Finding EXP tracks...\n";
    DataTracks = loadOrCreateTracks(recreate, Runs, kData, energy);
-   DataTracks->extrapolateToLayer0();
 
    MCClusters = getClusters(Runs, kMC, kCalorimeter, energy);
    DataClusters = getClusters(Runs, kData, kCalorimeter, energy);

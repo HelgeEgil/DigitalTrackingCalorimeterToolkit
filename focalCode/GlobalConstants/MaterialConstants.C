@@ -252,8 +252,8 @@ void loadRangeValuesForTungsten() {
 
 void loadRangeValuesForAluminium() {
    // Parameterization of X0 calculation
-   Int_t       m = kAbsorbatorThickness;
-   Float_t     mm_thickness;
+   Int_t    m = kAbsorbatorThickness;
+   Float_t  mm_thickness;
    ifstream in;
    
    X0_aluminum = 5.4775 + 1.3109*m - 0.2608 * pow(m,2) + 0.0248 * pow(m,3) - 0.0009 * pow(m,4);
