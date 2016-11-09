@@ -1,29 +1,26 @@
-#/vis/open OGL #1000x1000-0+0
-#/vis/viewer/reset
-#/vis/drawVolume
-#/vis/viewer/zoom 2
-#/vis/viewer/set/style surface
-#/vis/viewer/set/hiddenEdge true
-#/tracking/storeTrajectory 1
-#/vis/scene/endOfEventAction accumulate 25
-#/vis/scene/add/trajectories
-#/vis/viewer/update
-
+/vis/open DAWNFILE
+/vis/viewer/reset
+/vis/viewer/set/viewpointThetaPhi 30 0
+/vis/viewer/zoom 1.5
+/vis/drawVolume
+/tracking/storeTrajectory 1
+/vis/scene/endOfEventAction accumulate
+/vis/viewer/update /vis/viewer/refresh 
 /gate/geometry/setMaterialDatabase GateMaterials.db
 
 /control/execute Module.mac
 
 /gate/systems/scanner_1/level1/attach FM_Layer
-/gate/systems/scanner_2/level1/attach Layer
+#/gate/systems/scanner_2/level1/attach Layer
 /gate/systems/scanner_1/level2/attach FirstModule
-/gate/systems/scanner_2/level2/attach Module
+#/gate/systems/scanner_2/level2/attach Module
 
-#/gate/FM_ActiveChipLeft/attachCrystalSD
-#/gate/FM_ActiveChipRight/attachCrystalSD
+/gate/FM_ActiveChipLeft/attachCrystalSD
+/gate/FM_ActiveChipRight/attachCrystalSD
 #/gate/ActiveChipLeft/attachCrystalSD
 #/gate/ActiveChipRight/attachCrystalSD
 
-/control/execute readout_full.mac
+#/control/execute readout_full.mac
 
 #=================#
 # Physics			#
@@ -44,7 +41,8 @@
 /gate/source/addSource uniformBeam gps
 /gate/source/uniformBeam/gps/particle proton
 /gate/source/uniformBeam/gps/ene/type Gauss
-/gate/source/uniformBeam/gps/ene/mono {energy} MeV
+#/gate/source/uniformBeam/gps/ene/mono {energy} MeV
+/gate/source/uniformBeam/gps/ene/mono 30 MeV
 /gate/source/uniformBeam/gps/ene/sigma 0 MeV
 /gate/source/uniformBeam/gps/type Plane
 /gate/source/uniformBeam/gps/shape Square
@@ -54,7 +52,7 @@
 /gate/source/uniformBeam/gps/centre 0. 0. -3.0 cm
 
 /gate/output/root/enable
-/gate/output/root/setFileName ../../focalCode/Data/MonteCarlo/full_sim_{energy}MeV_{absorberthickness}mm
+/gate/output/root/setFileName ../../focalCode/Data/MonteCarlo/chip_LET_30MeV
 
 #===============#
 # START BEAMS	#
@@ -62,5 +60,5 @@
 
 /gate/random/setEngineName MersenneTwister
 /gate/random/setEngineSeed auto
-/gate/application/setTotalNumberOfPrimaries 10000
+/gate/application/setTotalNumberOfPrimaries 100000
 /gate/application/start

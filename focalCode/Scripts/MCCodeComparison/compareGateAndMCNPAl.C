@@ -93,7 +93,7 @@ void Run()
          nominalRange = 0.012 * pow(nominalEnergy, 1.7483);
          TH1F *hGATE = new TH1F("hGATE", "Proton ranges in single GATE dataset;Range [cm];Number of primaries", 400, fmin(0, nominalRange - 5), nominalRange + 5);
          
-         cout << "Reading file " << Form("Data/GATE/aluminium/compressed_aluminum_%dMeV.root\n", nominalEnergy);
+         cout << "Reading file " << Form("Data/GATE/aluminium/compressed_aluminium_%dMeV.root\n", nominalEnergy);
          TFile   *f1 = new TFile(Form("Data/GATE/aluminium/compressed_aluminium_%dMeV.root", nominalEnergy));
          cout << "Opening tree...\n";
 
