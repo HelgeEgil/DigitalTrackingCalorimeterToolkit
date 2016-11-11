@@ -36,10 +36,10 @@ Int_t Hit::getChip() {
 	Int_t layer = getLayer();
 	Int_t chipIdx = 0;
 
-	if			(x >  nx && y >  ny) chipIdx = 0;
-	else if	(x <= nx && y >  ny) chipIdx = 3;
-	else if	(x <= nx && y <= ny)	chipIdx = 2;
-	else if	(x >  nx && y <= ny)	chipIdx = 1;
+	if			(x >  nx/2 && y >  ny/2) chipIdx = 0;
+	else if	(x <= nx/2 && y >  ny/2) chipIdx = 3;
+	else if	(x <= nx/2 && y <= ny/2)	chipIdx = 2;
+	else if	(x >  nx/2 && y <= ny/2)	chipIdx = 1;
 
 	chipIdx += layer*4;
 

@@ -96,7 +96,7 @@ void Tracks::splitSharedClusters() {
                   
                   // Charge conservation: Each cluster gets half of the 'charge' ~ deposited energy
                   totalEdep = closestCluster->getDepositedEnergy();
-                  newSize = getClusterSizeFromDepositedEnergy(totalEdep / 2);
+                  newSize = getCSFromEdep(totalEdep / 2);
                   x = ( closestCluster->getX() + interpolatedCluster->getX() ) / 2;
                   y = ( closestCluster->getY() + interpolatedCluster->getY() ) / 2;
                   cout << "Moved cluster " << closestCluster->getXmm() - (closestCluster->getXmm() + interpolatedCluster->getXmm())/2. << " mm.\n";

@@ -7,12 +7,12 @@
 #include "GlobalConstants/MaterialConstants.h"
 
 Cluster::Cluster() {
-	x_ = -1;
-	y_ = -1;
-	layerNo_ = -1;
-	clusterSize_ -1;
-	eventID_ = -1;
-	isUsed_ = false;
+   x_ = -1;
+   y_ = -1;
+   layerNo_ = -1;
+   clusterSize_ -1;
+   eventID_ = -1;
+   isUsed_ = false;
 }
 
 Cluster::Cluster(Cluster* cluster) {
@@ -21,7 +21,7 @@ Cluster::Cluster(Cluster* cluster) {
    layerNo_ = cluster->getLayer();
    clusterSize_ = cluster->getSize();
    eventID_ = -1;
-	isUsed_ = false;
+   isUsed_ = false;
 }
 
 Cluster::Cluster(Float_t x, Float_t y, Int_t layer, Int_t size, Int_t eventID) {
@@ -30,7 +30,7 @@ Cluster::Cluster(Float_t x, Float_t y, Int_t layer, Int_t size, Int_t eventID) {
    layerNo_ = layer;
    clusterSize_ = size;
    eventID_ = eventID;
-	isUsed_ = false;
+   isUsed_ = false;
 }
 
 Cluster::~Cluster() {
@@ -38,37 +38,43 @@ Cluster::~Cluster() {
 }
 
 Double_t Cluster::getLayermm() {
-	Double_t z = 0;
-	Float_t discriminator = 0;
+   Double_t z = 0;
+   Float_t discriminator = 0;
 
-	if (kDataType == kMC) {
-		discriminator = getYmm();
-	}
-	else {
-		discriminator = getXmm();
-	}
+   if (!kUseAlpide) {
+      if (kDataType == kMC) {
+         discriminator = getYmm();
+      }
+      else {
+         discriminator = getXmm();
+      }
 
-	if (layerNo_ > 0) {
-		
-		if (discriminator > 0)	{ z = firstUpperLayerZ + layerNo_*dz; }
-		else							{ z = firstLowerLayerZ + layerNo_*dz; }
-	}
+      if (layerNo_ > 0) {
+         
+         if (discriminator > 0)  { z = firstUpperLayerZ + layerNo_*dz; }
+         else                    { z = firstLowerLayerZ + layerNo_*dz; }
+      }
+   }
 
-	return z;
+   else {
+      z = layerNo_*dz;
+   }
+
+   return z;
 }
 
 Int_t Cluster::getChip() {
-    Int_t   layer = getLayer();
-    Int_t   chipIdx = 0;
-	Float_t	y = getYmm();
-	Float_t	x = getXmm();
-	
-    if  	( x>0 &&  y>0) chipIdx = 0;
-	else if	(x<=0 &&  y>0) chipIdx = 3;
-	else if	(x<=0 && y<=0) chipIdx = 2;
-	else if	( x>0 && y<=0) chipIdx = 1;
+   Int_t    layer = getLayer();
+   Int_t    chipIdx = 0;
+   Float_t  y = getYmm();
+   Float_t  x = getXmm();
+   
+    if   ( x>0 &&  y>0) chipIdx = 0;
+   else if  (x<=0 &&  y>0) chipIdx = 3;
+   else if  (x<=0 && y<=0) chipIdx = 2;
+   else if  ( x>0 && y<=0) chipIdx = 1;
 
-	chipIdx += layer*4;
+   chipIdx += layer*4;
 
     return chipIdx;
 }
@@ -82,14 +88,14 @@ Float_t Cluster::getRadiusmm() {
 }  
 
 Float_t Cluster::getDepositedEnergy(Bool_t correctSensitivity) {
-	// An inverse fit to the charge diffusion algorithm defined in Layer.C
-	// Returns the local dEdx value in keV.
+   // An inverse fit to the charge diffusion algorithm defined in Layer.C
+   // Returns the local dEdx value in keV.
 
-	Float_t  edep = 0;
+   Float_t  edep = 0;
    Int_t    n = clusterSize_;
 
-   edep = -3.993 + 3.883 * n - 0.0124 * pow(n,2) + 0.00114 * pow(n,3) - 1.420e-5 * pow(n,4);
-   
+   edep = getEdepFromCS(n);
+
    if (correctSensitivity) {
       edep *= getChipCalibrationFactor(getChip());
    }
@@ -98,9 +104,9 @@ Float_t Cluster::getDepositedEnergy(Bool_t correctSensitivity) {
 }
 
 Float_t Cluster::getDepositedEnergyError(Bool_t correctSensitivity) {
-	// sigma_E = sigma_N (dE / dN)
-	
-	Float_t  sn = sqrt(clusterSize_);
+   // sigma_E = sigma_N (dE / dN)
+   
+   Float_t  sn = sqrt(clusterSize_);
    Int_t    n = clusterSize_;
    Float_t  diff_n;
   
@@ -110,7 +116,7 @@ Float_t Cluster::getDepositedEnergyError(Bool_t correctSensitivity) {
       diff_n *= getChipCalibrationFactor(getChip());
    }
 
-	return sn * diff_n / 14.; // layer is modelled as 14 um thick
+   return sn * diff_n / 14.; // layer is modelled as 14 um thick
 }
 
 void Cluster::set(Cluster* copyCluster) {
@@ -119,14 +125,15 @@ void Cluster::set(Cluster* copyCluster) {
    layerNo_ = copyCluster->getLayer();
    clusterSize_ = copyCluster->getSize();
    eventID_ = copyCluster->getEventID();
-	isUsed_ = copyCluster->isUsed();	
+   isUsed_ = copyCluster->isUsed(); 
 }
 
-void Cluster::set(Float_t x, Float_t y, Int_t layer, Int_t size) {
+void Cluster::set(Float_t x, Float_t y, Int_t layer, Int_t size, Int_t eventID) {
    x_ = x;
    y_ = y;
    if (layer>=0) layerNo_ = layer;
    if(size>=0) clusterSize_ = size;
+   if (eventID>=0) eventID_ = eventID;
 }
 
 ostream& operator<< (ostream &os, Cluster& c) {

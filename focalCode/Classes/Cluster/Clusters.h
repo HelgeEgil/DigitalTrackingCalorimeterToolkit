@@ -48,7 +48,8 @@ public:
 	void					removeTrackFromClustersWithoutTrack(Track *track);
 	void					removeSmallClusters(Int_t size);
 	void					removeAllClustersAfterLayer(Int_t afterLayer);
-	virtual void		appendCluster(Float_t x, Float_t y, Int_t layer = -1, Int_t size = -1);
+	virtual void		appendCluster(Float_t x, Float_t y, Int_t layer = -1, Int_t size = -1, Int_t eventID = -1);
+	virtual void		appendClusterEdep(Float_t x, Float_t y, Int_t layer = -1, Float_t edep = -1, Int_t eventID = -1);
 	virtual void		appendCluster(Cluster *cluster);
 	virtual void		appendClusterWithoutTrack(Cluster *cluster);
 

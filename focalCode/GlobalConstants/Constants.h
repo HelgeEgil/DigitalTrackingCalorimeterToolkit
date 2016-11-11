@@ -13,14 +13,24 @@
 #define showDebug(x)
 #endif
 
+#define USEALIPDE
+
+#ifdef USEALPIDE
+#define NX 3072
+#define NY 1024
+#define DZ 0.435
+#else
+#define NX 1280
+#define NY 1280
+#define DZ 0.975
+#endif
+
 enum eFrameType {kCalorimeter, kTracker};
 enum eDataType {kMC, kData};
 
 Float_t run_energy = 0;
-Bool_t kIsAluminumPlate = true;
+Bool_t kIsAluminumPlate = false;
 Bool_t kIsScintillator = false;
-
-Bool_t kDebug = false;
 
 const Int_t sizeOfEventID = 500;
 
@@ -30,26 +40,21 @@ const Float_t um = 1000;
 const Float_t kRad = 3.14159265/180.;
 
 // Some general run parameters
-const Int_t nx = 640;
-const Int_t ny = 640;
+const Int_t nx = NX;
+const Int_t ny = NY;
 const Int_t nTrackers = 4;
-const Float_t kAbsorbatorThickness = 2; // mm // FOCAL IS 1.5 mm
+Bool_t kUseAlpide = true;
+const Float_t kAbsorbatorThickness = 3; // mm // FOCAL IS 3 mm (2x absorbers = 3 mm)
 
 // nLayers are loaded in MaterialConstants.C according to the detector geometry
-const Float_t dx = 0.03; // mm
-const Float_t dy = 0.03; // mm
-const Float_t dz = 0.975 + 2 * kAbsorbatorThickness;
-Int_t kEventsPerRun = 100;
+const Float_t dx = 3/1024; // mm
+const Float_t dy = 1.5/512; // mm
+const Float_t dz = DZ + kAbsorbatorThickness;
+Int_t kEventsPerRun = 50;
 
 // Used for treatment of available experimental data files
 const Int_t nEnergies = 8;
 Int_t energies[nEnergies] = {122, 140, 150, 160, 170, 180, 188, 190};
-
-/*
- * Material used for the conversion between the absorber material and the energy
- * and/or the water equivalent path length of the detector
- * 
-*/
 
 enum eMaterial {kTungsten, kAluminium, kPMMA, kWater};
 const Int_t kMaterial = kAluminium;

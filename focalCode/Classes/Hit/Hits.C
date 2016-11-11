@@ -129,9 +129,9 @@ void Hits::makeVerticalIndexOnLayer(Int_t layer) {
 	layerIdxTo = getLastIndexOfLayer(layer);
 
 	if (verticalIndexOfLayer_.size() == 0)
-		for (Int_t i=0; i<2*ny+1; i++) verticalIndexOfLayer_.push_back(-1);
+		for (Int_t i=0; i<ny+1; i++) verticalIndexOfLayer_.push_back(-1);
 	else
-		for (Int_t i=0; i<2*ny+1; i++) verticalIndexOfLayer_.at(i) = -1;
+		for (Int_t i=0; i<ny+1; i++) verticalIndexOfLayer_.at(i) = -1;
 
 	if (!GetEntriesFast()) return;
 
@@ -178,9 +178,9 @@ Int_t Hits::getFirstIndexBeforeY(Int_t y) {
 Int_t Hits::getLastIndexAfterY(Int_t y) {
 	Int_t idx = GetEntriesFast()-1;
 
-	if (y>2*ny-2) return idx;
+	if (y>ny-2) return idx;
 
-	for (Int_t i=y+2; i<2*ny; i++) {
+	for (Int_t i=y+2; i<ny; i++) {
 		idx = verticalIndexOfLayer_.at(i);
 		if (idx>=0) break;
 	}

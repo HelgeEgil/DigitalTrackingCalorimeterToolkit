@@ -318,9 +318,12 @@ Float_t getEnergyLossErrorFromScintillators(Int_t nScintillators) {
 }
 
 Float_t getEnergyLossFromAluminumAbsorber(Float_t energy) {
-   Float_t EL = 62.00441 * pow(energy, -0.7158403);
-   
-   return EL;
+   // We assume that the energy loss function is constant in the high energy range
+   // (somewhat true)
+   // and calculate the energy loss of kAbsorbatorThickness mm Aluminum by scaling the
+   // measured MC energy loss in a 1.5 mm Al absorber
+
+   return  62.00441 * pow(energy, -0.7158403) * (kAbsorbatorThickness/1.5);
 }
 
 Float_t getEnergyLossErrorFromAluminumAbsorber() {

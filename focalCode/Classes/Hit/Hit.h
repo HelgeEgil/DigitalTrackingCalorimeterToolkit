@@ -20,8 +20,8 @@ class Hit : public TObject {
 
       Int_t		getX()			{ return x_; }
       Int_t		getY()			{ return y_; }
-      Double_t	getXmm()			{ return (x_ - nx) * dx; }
-      Double_t	getYmm()			{ return (y_ - ny) * dy; }
+      Double_t	getXmm()			{ return (x_ - nx/2) * dx; }
+      Double_t	getYmm()			{ return (y_ - ny/2) * dy; }
       Int_t		getLayer()		{ return layerNo_; }
       Int_t		getEventID()	{ return eventID_; }
       Float_t	getEdep()		{ return edep_; }

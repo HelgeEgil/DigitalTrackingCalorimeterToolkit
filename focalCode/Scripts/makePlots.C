@@ -89,7 +89,7 @@ void makePlots() {
    Int_t nlines = 0;
    TNtuple *ntuple = new TNtuple("ntuple", "data from file", "energy_:nomrange_:estrange_:sigmaRange:lastRange_");
    
-   Int_t MC2Data = 61;
+   Int_t MC2Data = 32;
 
    Float_t meanError = 0;
    Float_t meanAbsError = 0;
@@ -105,7 +105,8 @@ void makePlots() {
       meanError += ( estrange_ - nomrange_ ) / nomrange_;
       meanAbsError += fabs(( estrange_ - nomrange_ ) / nomrange_);
       meanSigma += sigmaRange_;
-      estimatedStraggling = 0.017 * pow(nomrange_, 0.935);
+//      estimatedStraggling = 0.017 * pow(nomrange_, 0.935);
+      estimatedStraggling = 0.012 * pow(nomrange_, 0.935); // using water values for minimized straggling limit
 
       if (nlines < MC2Data) {
          cout << "Line " << nlines << ", energy " << energy_ << ",  MC" << endl;
@@ -352,8 +353,8 @@ void makePlots() {
    pstarshade->GetYaxis()->SetTitleSize(0.05);
    pstarshade->GetYaxis()->SetLabelSize(0.05);
 
-   pstarshade->GetXaxis()->SetRangeUser(145, 200);
-   pstarshade->GetYaxis()->SetRangeUser(145, 270);
+   pstarshade->GetXaxis()->SetRangeUser(40, 200); // 145 - 200
+   pstarshade->GetYaxis()->SetRangeUser(5, 270); // 145 - 270
 
    hMC->SetMarkerColor(kBlue);
    hMC->SetMarkerStyle(21);
@@ -366,7 +367,8 @@ void makePlots() {
    
    pstar->SetLineWidth(3);
    pstar->SetLineColor(kMagenta-10);
-   pstarshade->SetTitle("Reconstructed ranges of proton beams with different energies;Energy [MeV];Reconstructed WET range [mm]");
+//   pstarshade->SetTitle("Reconstructed ranges of proton beams with different energies;Energy [MeV];Reconstructed WET range [mm]");
+   pstarshade->SetTitle("Reconstructed ranges of proton beams with 2 mm Al absorbator;Energy [MeV];Reconstructed WET range [mm]");
    
 //   pstarshade->SetFillColorAlpha(kRed, 0.35);
    pstarshade->SetFillColor(kMagenta-10);
@@ -390,7 +392,7 @@ void makePlots() {
    leg->SetTextFont(22);
    leg->AddEntry(pstar, "PSTAR range", "L");
    leg->AddEntry(hMC, "Monte Carlo", "PE");
-   leg->AddEntry(hData, "Experimental data", "PE");
+//   leg->AddEntry(hData, "Experimental data", "PE");
    leg->Draw();
 
    c1->Update();

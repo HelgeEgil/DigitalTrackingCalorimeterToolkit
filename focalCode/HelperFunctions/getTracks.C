@@ -37,9 +37,11 @@ void saveTracks(Tracks *tracks, Int_t dataType, Float_t energy) {
 
    TString sEnergy = Form("_%.2fMeV", energy);
    TString fileName = "Data/Tracks/tracks";
+   TString sAbsThick = Form("_%.0fmm", kAbsorbatorThickness);
    TString sMaterial = getMaterialChar();
    fileName.Append(sDataType);
    fileName.Append(sMaterial);
+   fileName.Append(sAbsThick);
    fileName.Append(sEnergy);
    fileName.Append(".root");
    
@@ -54,11 +56,13 @@ void saveTracks(Tracks *tracks, Int_t dataType, Float_t energy) {
 
 Tracks * loadTracks(Int_t Runs, Int_t dataType, Float_t energy) {
    TString sDataType = (dataType == 0) ? "_MC_" : "_data_";
+   TString sAbsThick = Form("_%.0fmm", kAbsorbatorThickness);
    TString sEnergy = Form("_%.2fMeV", energy);
    TString fileName = "Data/Tracks/tracks";
    TString sMaterial = getMaterialChar();
    fileName.Append(sDataType);
    fileName.Append(sMaterial);
+   fileName.Append(sAbsThick);
    fileName.Append(sEnergy);
    fileName.Append(".root");
    
@@ -82,7 +86,13 @@ Tracks * loadOrCreateTracks(Bool_t recreate, Int_t Runs, Int_t dataType, Float_t
    Tracks * tracks = nullptr;
    
    if (recreate) {
-      tracks = getTracks(Runs, dataType, kCalorimeter, energy, x, y);
+      printf("kUseAlpide = %d\n", kUseAlpide);
+      if (!kUseAlpide) {
+         tracks = getTracks(Runs, dataType, kCalorimeter, energy, x, y);
+      }
+      else {
+         tracks = getTracksFromClusters(Runs, dataType, kCalorimeter, energy);
+      }
 
       if (tracks->GetEntries()) {
          cout << "Saving " << tracks->GetEntries() << " tracks.\n";
@@ -95,7 +105,14 @@ Tracks * loadOrCreateTracks(Bool_t recreate, Int_t Runs, Int_t dataType, Float_t
    
       if (!tracks) {
          cout << "!tracks, creating new file\n";
-         tracks = getTracks(Runs, dataType, kCalorimeter, energy);
+
+         if (!kUseAlpide) {
+            tracks = getTracks(Runs, dataType, kCalorimeter, energy, x, y);
+         }
+         else {
+            tracks = getTracksFromClusters(Runs, dataType, kCalorimeter, energy);
+         }
+
          saveTracks(tracks, dataType, energy);
       }
    }
@@ -172,6 +189,64 @@ Clusters * getClusters(Int_t Runs, Int_t dataType, Int_t frameType, Float_t ener
    return allClusters;
 }
 
+Tracks * getTracksFromClusters(Int_t Runs, Int_t dataType, Int_t frameType, Float_t energy) {
+   run_energy = energy;
+
+   DataInterface   * di = new DataInterface();
+   Int_t             nClusters = kEventsPerRun * 5 * nLayers;
+   Int_t             nTracks = kEventsPerRun * 2;
+   Bool_t            breakSignal = false;
+   Clusters        * clusters = new Clusters(nClusters);
+   Tracks          * tracks = new Tracks(nTracks);
+   Tracks          * allTracks = new Tracks(nTracks * Runs);
+
+   for (Int_t i=0; i<Runs; i++) {
+      showDebug("Start getMCClusters\n");
+      di->getMCClusters(i, clusters);
+
+      showDebug("Finding calorimeter tracks\n");
+      tracks = clusters->findCalorimeterTracks();
+
+      if (tracks->GetEntriesFast() == 0) breakSignal = kTRUE; // to stop running
+
+      // Track improvements
+      Int_t nTracksBefore = 0, nTracksAfter = 0;
+      Int_t nIsInelastic = 0, nIsNotInelastic = 0;
+      
+      tracks->extrapolateToLayer0();
+      tracks->splitSharedClusters();
+      nTracksBefore = tracks->GetEntries();
+      tracks->removeTracksLeavingDetector();
+      nTracksAfter = tracks->GetEntries();
+      
+      cout << "Of " << nTracksBefore << " tracks, " << nTracksBefore - nTracksAfter << " (" << 100* ( nTracksBefore - nTracksAfter) / ( (float) nTracksBefore ) << "%) were lost when leaving the detector.\n";
+      
+      tracks->removeTrackCollisions();
+      // tracks->retrogradeTrackImprovement(clusters);
+
+      tracks->Compress();
+      tracks->CompressClusters();
+      
+      for (Int_t j=0; j<tracks->GetEntriesFast(); j++) {
+         if (!tracks->At(j)) continue;
+
+         allTracks->appendTrack(tracks->At(j));
+      }
+
+      allTracks->appendClustersWithoutTrack(clusters->getClustersWithoutTrack());
+
+      clusters->clearClusters();
+      tracks->clearTracks();
+
+      if (breakSignal) break;
+   }
+
+   delete clusters;
+   delete tracks;
+   delete di;
+
+   return allTracks;
+}
 
 Tracks * getTracks(Int_t Runs, Int_t dataType, Int_t frameType, Float_t energy, Float_t *x, Float_t *y) {
    run_energy = energy;

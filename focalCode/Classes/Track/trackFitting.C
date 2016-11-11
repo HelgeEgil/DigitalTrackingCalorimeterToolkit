@@ -117,9 +117,6 @@ TGraphErrors * Track::doRangeFit(Bool_t isScaleVariable) {
 	estimatedEnergy = getEnergyFromTL(x[n-1] + 0.5*dz);
    estimatedRange = getWEPLFromTL(x[n-1] + 0.5*dz);
 
-   cout << "ESTIMATED RANGE IS " << estimatedRange << " mm WEPL.\n";
-   cout << "-> FROM ENERGY " << estimatedEnergy << " MeV.\n";
-
    // WE CONVERT FROM PROJECTED RANGE TO WATER EQUIVALENT RANGE HERE
 	if (kOutputUnit == kWEPL || kOutputUnit == kEnergy) {
 		WEPLFactor = getWEPLFactorFromEnergy(estimatedEnergy);

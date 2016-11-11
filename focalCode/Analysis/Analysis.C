@@ -47,7 +47,7 @@ void drawTrackAngleAtVaryingRunNumbers(Int_t dataType, Float_t energy) {
    Int_t nRuns = 0;
    Hits * eventIDs = nullptr;
 
-   for (Int_t i=2; i<47; i++) {
+   for (Int_t i=13; i<25; i++) {
       nRuns = pow(2, 4 + 0.25 * i) + 0.5;
 
       kEventsPerRun = nRuns;
@@ -242,7 +242,7 @@ void getTrackStatistics(Int_t Runs, Int_t dataType, Bool_t recreate, Float_t ene
 
       cutTL = (TL > kMinimumTracklength) ? true : false;
 
-      chip = (x0 >= nx) + 2 * (y0 < ny);
+      chip = (x0 >= nx/2) + 2 * (y0 < ny/2);
       cutCHIP = (chip<2 || dataType == kMC) ? true : false;
 
       hTrackLengths->Fill(TL);
@@ -685,13 +685,14 @@ Float_t drawBraggPeakGraphFit(Int_t Runs, Int_t dataType, Bool_t recreate, Float
    Int_t          fitIdx = 0, plotSize = nPlotX*nPlotY;
    Int_t          skipPlot = 20; 
    TGraphErrors * outputGraph;
+   char         * sDataType = getDataTypeChar(dataType);
+   char         * sMaterial = getMaterialChar();
+   char         * hTitle = Form("Fitted energy of a %.2f MeV beam in %s (%s)", energy, sMaterial, sDataType);
    TCanvas      * cGraph = new TCanvas("cGraph", "Fitted data points", 1500, 500);
    TCanvas      * cFitResults = new TCanvas("cFitResults", hTitle, 1000, 1000);
    TH1F         * hFitResults = new TH1F("fitResult", hTitle, 200, getUnitFromEnergy(0), getUnitFromEnergy(energy*1.2));
    TH1F         * hFitResultsDroppedData = new TH1F("fitResultsDroppedData", hTitle, 200, getUnitFromEnergy(0), getUnitFromEnergy(energy*1.2));
    TH1F         * hMaxAngle = new TH1F("hMaxAngle", "Maximum angle for proton track", 200, 0, 25);
-   char         * sDataType = getDataTypeChar(dataType); char * sMaterial = getMaterialChar();
-   char         * hTitle = Form("Fitted energy of a %.2f MeV beam in %s (%s)", energy, sMaterial, sDataType);
    
    cout << "At energy " << run_energy << ", expecting TL = " << getTLFromEnergy(run_energy) << " and WEPL = " << getWEPLFromEnergy(run_energy) << endl;
    cout << "Correcting for aluminum plate: " << kIsAluminumPlate << endl;
@@ -856,6 +857,7 @@ Float_t drawBraggPeakGraphFit(Int_t Runs, Int_t dataType, Bool_t recreate, Float
    gPad->Update();
    TF1 *fit1 = (TF1*) gPad->GetPrimitive("Gaus_6");
    Float_t bip_value = means[0] - 3*sigmas[0];
+   if (bip_value == 0) bip_value = getWEPLFromEnergy(run_energy)*0.9;
    TLine *bip = new TLine(bip_value, hFitResultsDroppedData->GetMaximum(), bip_value, 0);
    bip->Draw();
 
@@ -954,8 +956,8 @@ void draw2DProjection(Int_t Runs, Int_t dataType, Bool_t recreate, Float_t energ
 
    Tracks * tracks = loadOrCreateTracks(recreate, Runs, dataType, energy);
    
-   Int_t hSizeX = nx/8;
-   Int_t hSizeY = ny/8;
+   Int_t hSizeX = nx/16;
+   Int_t hSizeY = ny/16;
 
    Float_t angleCut = 5.;
    Float_t x0, y0, theta0;
@@ -971,8 +973,8 @@ void draw2DProjection(Int_t Runs, Int_t dataType, Bool_t recreate, Float_t energ
 
    TCanvas *c1 = new TCanvas(title);
    
-   TH2F *Frame2D = new TH2F("Frame2D", title, hSizeX, 0, nx*2, hSizeY, 0, ny*2);
-   TH2F *normalizeFrame = new TH2F("normalizeFrame", "title", hSizeX, 0, nx*2, hSizeY, 0, ny*2);
+   TH2F *Frame2D = new TH2F("Frame2D", title, hSizeX, 0, nx, hSizeY, 0, ny);
+   TH2F *normalizeFrame = new TH2F("normalizeFrame", "title", hSizeX, 0, nx, hSizeY, 0, ny);
 
    for (Int_t i=0; i<ntracks; i++) {
       Track *thisTrack = tracks->At(i);
@@ -1070,12 +1072,12 @@ void drawClusterSizeDistribution(Int_t Runs, Int_t dataType, Bool_t recreate, Fl
 void drawTracks3D(Int_t Runs, Int_t dataType, Bool_t recreate, Float_t energy) {
    Tracks * tracks = loadOrCreateTracks(recreate, Runs, dataType, energy);
 
-   Int_t switchLayer = 10;
+   Int_t switchLayer = 30;
 
    TCanvas *c1 = new TCanvas("c1", "c1", 1600, 1200);
    c1->SetTitle(Form("Tracks from %.2f MeV protons on %s", energy, getMaterialChar()));
    TView *view = TView::CreateView(1);
-   view->SetRange(0, 0, 0, 2*nx, 10, 2*ny);
+   view->SetRange(0, 0, 0, nx, 30, ny);
    Int_t iret;
    Float_t theta = 285;
    Float_t phi = 80;
@@ -1656,7 +1658,7 @@ void drawFrame2D(Int_t Runs, Int_t Layer, Float_t energy) {
    delete di;
 
    TH2F *Frame2D = new TH2F("Frame2D", Form("Hit distribution in layer %i", Layer),
-                              nx*2, 0, nx*2, ny*2, 0, ny*2);
+                              nx, 0, nx, ny, 0, ny);
 
    Frame2D->Merge(histogramList);
    Frame2D->Draw("COLZ");
@@ -1669,7 +1671,7 @@ void drawData3D(Int_t Runs, Float_t energy) {
    DataInterface *di = new DataInterface();
 
    TH3F *Frame3D = new TH3F("Frame3D", "3D map of energy deposition [keV]", 
-                              100, -120, -50, 100, 0, 2*nx, 100, 0, 2*ny);
+                              100, -120, -50, 100, 0, nx, 100, 0, ny);
 
    Frame3D->SetXTitle("Z axis");
    Frame3D->SetYTitle("X axis"); // to get projection right (Z is depth, not up)
@@ -1927,7 +1929,7 @@ Bool_t getCutWEPL(Track *track) {
 Bool_t getCutChipNumber(Track *track) {
    Int_t x0 = track->getX(0);
    Int_t y0 = track->getY(0);
-   Int_t chip = (x0 >= nx) + 2 * (y0 < ny);
+   Int_t chip = (x0 >= nx/2) + 2 * (y0 < ny/2);
    Bool_t cutChipNumber = (chip<2) ? true : false;
 
    return cutChipNumber;
@@ -2181,6 +2183,12 @@ Float_t doNGaussianFit ( TH1F *h, Float_t *means, Float_t *sigmas) {
    if (lastSigma == 0) lastSigma = array_sigma[0];
 
    Int_t binSigmaFrom = axis->FindBin(lastMean - 3*lastSigma);
+
+   if (lastMean == 0) {
+      binSigmaFrom = axis->FindBin(getWEPLFromEnergy(run_energy)*0.9);
+      cout << "Setting binSigmaFrom to " << binSigmaFrom;
+   }
+
    Float_t squareMeanDifference = 0;
    Float_t empiricalMean = 0;
    Int_t N = 0;
@@ -2192,9 +2200,9 @@ Float_t doNGaussianFit ( TH1F *h, Float_t *means, Float_t *sigmas) {
   
    empiricalMean /= N; 
 
-   binSigmaFrom = axis->FindBin(array_mean[0] - 3*array_sigma[0]);
+//   binSigmaFrom = axis->FindBin(array_mean[0] - 3*array_sigma[0]);
    for (Int_t i=binSigmaFrom; i<=h->GetNbinsX(); i++) {
-      cout << "Adding " << h->GetBinContent(i) << " * (" << axis->GetBinCenter(i) << " - " << empiricalMean << " )^2 to variance.\n";
+//      cout << "Adding " << h->GetBinContent(i) << " * (" << axis->GetBinCenter(i) << " - " << empiricalMean << " )^2 to variance.\n";
       squareMeanDifference += h->GetBinContent(i) * pow(axis->GetBinCenter(i) - empiricalMean, 2);
    }
 
@@ -2227,5 +2235,5 @@ Float_t doNGaussianFit ( TH1F *h, Float_t *means, Float_t *sigmas) {
    means[9] = empiricalMean;
    sigmas[9] = empiricalSigma;
 
-   return estimated_range;
+   return empiricalMean;
 }

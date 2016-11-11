@@ -151,10 +151,21 @@ void Clusters::removeAllClustersAfterLayer(Int_t afterLayer) {
 	}
 }
 
-void Clusters::appendCluster(Float_t x, Float_t y, Int_t layer, Int_t size) {
+void Clusters::appendCluster(Float_t x, Float_t y, Int_t layer, Int_t size, Int_t eventID) {
    Int_t i = GetEntriesFast();
    Cluster *c = (Cluster*) clusters_.ConstructedAt(i);
-   c->set(x,y,layer,size);
+   c->set(x,y,layer,size, eventID);
+}
+
+void Clusters::appendClusterEdep(Float_t x, Float_t y, Int_t layer, Float_t edep, Int_t eventID) {
+   Int_t i = GetEntriesFast();
+   Cluster *c = (Cluster*) clusters_.ConstructedAt(i);
+   
+   // calculate size from edep
+   
+   Int_t size = getCSFromEdep(edep);
+
+   c->set(x,y,layer,size, eventID);
 }
 
 void Clusters::appendCluster(Cluster *cluster) {

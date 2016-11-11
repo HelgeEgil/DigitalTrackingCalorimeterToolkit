@@ -5,6 +5,7 @@
 #include "Classes/Hit/Hits.h"
 
 Tracks	 *	getTracks(Int_t Runs, Int_t dataType = kMC, Int_t frameType = kCalorimeter, Float_t energy = 188, Float_t *x = 0, Float_t *y = 0);
+Tracks	 *	getTracksFromClusters(Int_t Runs, Int_t dataType = kMC, Int_t frameType = kCalorimeter, Float_t energy = 188);
 Clusters	 * getClusters(Int_t Runs, Int_t dataType = kMC, Int_t frameType = kCalorimeter, Float_t energy = 188);
 void			saveTracks(Tracks* tracks, Int_t dataType, Float_t energy);
 Tracks	 *	loadTracks(Int_t Runs, Int_t dataType, Float_t energy);

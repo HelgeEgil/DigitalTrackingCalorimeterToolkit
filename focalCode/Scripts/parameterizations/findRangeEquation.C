@@ -156,7 +156,8 @@ void Run() {
 
    cout << "Reading file\n";
 //   in.open("ranges_water_pstar.csv");
-   in.open("Ranges_2mm_Al.csv");
+//   in.open("Ranges_2mm_Al.csv");
+   in.open("Ranges_3mm_Al.csv");
    idx = 0;
    Bool_t useCSDA = true;
    Bool_t useCompleteDataset = true;

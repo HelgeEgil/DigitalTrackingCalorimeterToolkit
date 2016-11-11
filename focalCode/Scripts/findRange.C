@@ -63,10 +63,15 @@ vector<Float_t> findRange::Run(Double_t energy, Double_t sigma_mev)
    TCanvas *c5 = new TCanvas("c5", "hSteplength", 800, 600);
 
    Int_t nbinsx = 750;
-   Int_t xfrom = 150;
-   Int_t xto = 250; // was 200
+   // 2 mm: 0.0119, 1.783
+   // 3 mm: 0.0144, 1.8157
+   Float_t expectedRange = 0.0144 * pow(run_energy, 1.8157);
+   Float_t xfrom = expectedRange * 0.5;
+   Float_t xto = expectedRange * 2;
 
    Float_t x_compensate = 0;
+
+   printf("RUNNING WITH ENERGY %d.\n", run_energy);
 
    TH1F *hZ = new TH1F("hZ", "Z profile", nbinsx/3, xfrom + x_compensate, xto + x_compensate);
    TH1F *hRange = new TH1F("hRange", "Primary ranges", nbinsx, xfrom + x_compensate, xto + x_compensate);
@@ -161,20 +166,14 @@ vector<Float_t> findRange::Run(Double_t energy, Double_t sigma_mev)
       }
    }
    
-   // range 1: 80 % of maximum for bragg peak on distal edge
-   Double_t range_1 = hActualTracklength->GetXaxis()->GetBinCenter(hActualTracklength->FindLastBinAbove(hActualTracklength->GetMaximum() * 0.8));
-   
-   cout << "Maximum from bragg peak plot, 80\% of maximum on distal edge: " << range_1 << " mm.\n";
-
    c2->cd();
    
    TF1 *fRange = new TF1("fit_range", "gaus", xfrom, xto);
-   fRange->SetParameters(100, range_1, 4);
-   hRange->Fit("fit_range", "Q,M,WW,B", "", xfrom, xto);
-   cout << "range_1 = " << range_1 << endl;
+   fRange->SetParameters(100, expectedRange, 4);
+   hRange->Fit("fit_range", "Q,M,W,B", "", xfrom, xto);
 
-   Float_t cutoff = fRange->GetParameter(1) - 3*fabs(fRange->GetParameter(2));
-   Float_t cutoffHigh = fRange->GetParameter(1) + 3*fabs(fRange->GetParameter(2));
+   Float_t cutoff = fRange->GetParameter(1) - 6*fabs(fRange->GetParameter(2));
+   Float_t cutoffHigh = fRange->GetParameter(1) + 6*fabs(fRange->GetParameter(2));
    Int_t binLow = hRange->GetXaxis()->FindBin(cutoff);
    Int_t binHigh = hRange->GetXaxis()->FindBin(cutoffHigh);
    Float_t total = hRange->Integral();
@@ -199,7 +198,7 @@ vector<Float_t> findRange::Run(Double_t energy, Double_t sigma_mev)
    cout << "Mean = " << fRange->GetParameter(1) << endl;
    cout << "3 sigma = " << cutoff << " to " << cutoffHigh << endl;
    cout << "Number of protons attenuated (more than 4 sigma below) = \033[1m" << 100 * attenuation / total << " %\033[0m.\n";
-   cout << "Estimated range from histogram weighing = " << sumRangeWeight << " +- " << sigmaRangeWeight << endl;
+   printf("Estimated range from histogram weighing = %.3f +- %.3f\n",sumRangeWeight, sigmaRangeWeight);
 
    returnValues.push_back(sumRangeWeight);
    returnValues.push_back(sigmaRangeWeight);

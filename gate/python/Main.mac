@@ -1,25 +1,21 @@
-/vis/open DAWNFILE
-/vis/viewer/reset
-/vis/viewer/set/viewpointThetaPhi 30 0
-/vis/viewer/zoom 1.5
-/vis/drawVolume
-/tracking/storeTrajectory 1
-/vis/scene/endOfEventAction accumulate
-/vis/viewer/update /vis/viewer/refresh 
-/gate/geometry/setMaterialDatabase GateMaterials.db
+#/vis/open DAWNFILE
+#/vis/viewer/reset
+#/vis/viewer/set/viewpointThetaPhi 30 0
+#/vis/viewer/zoom 1.5
+#/vis/drawVolume
+#/tracking/storeTrajectory 1
+#/vis/scene/endOfEventAction accumulate
+#/vis/viewer/update /vis/viewer/refresh 
 
+/gate/geometry/setMaterialDatabase GateMaterials.db
 /control/execute Module.mac
 
 /gate/systems/scanner_1/level1/attach FM_Layer
-#/gate/systems/scanner_2/level1/attach Layer
 /gate/systems/scanner_1/level2/attach FirstModule
-#/gate/systems/scanner_2/level2/attach Module
+/gate/systems/scanner_2/level1/attach Layer
+/gate/systems/scanner_2/level2/attach Module
 
-/gate/FM_ActiveChipLeft/attachCrystalSD
-/gate/FM_ActiveChipRight/attachCrystalSD
-#/gate/ActiveChipLeft/attachCrystalSD
-#/gate/ActiveChipRight/attachCrystalSD
-
+/control/execute readout.mac
 #/control/execute readout_full.mac
 
 #=================#
@@ -31,7 +27,7 @@
 
 /gate/run/initialize
 
-#/geometry/test/recursive_test
+/geometry/test/recursive_test
 #/geometry/test/run
 
 #=======================#
@@ -41,18 +37,21 @@
 /gate/source/addSource uniformBeam gps
 /gate/source/uniformBeam/gps/particle proton
 /gate/source/uniformBeam/gps/ene/type Gauss
-#/gate/source/uniformBeam/gps/ene/mono {energy} MeV
-/gate/source/uniformBeam/gps/ene/mono 30 MeV
+/gate/source/uniformBeam/gps/ene/mono {energy} MeV
 /gate/source/uniformBeam/gps/ene/sigma 0 MeV
 /gate/source/uniformBeam/gps/type Plane
 /gate/source/uniformBeam/gps/shape Square
 /gate/source/uniformBeam/gps/direction 0 0 1
-/gate/source/uniformBeam/gps/halfx 20. mm
-/gate/source/uniformBeam/gps/halfy 20. mm
+/gate/source/uniformBeam/gps/halfx 45. mm
+/gate/source/uniformBeam/gps/halfy 15. mm
 /gate/source/uniformBeam/gps/centre 0. 0. -3.0 cm
 
 /gate/output/root/enable
-/gate/output/root/setFileName ../../focalCode/Data/MonteCarlo/chip_LET_30MeV
+/gate/output/root/setRootSinglesFlag 0
+/gate/output/root/setFileName ../../focalCode/Data/MonteCarlo/DTC_Aluminium_{energy}MeV_{absorberthickness}mm
+#/gate/output/root/setFileName ../../focalCode/Data/MonteCarlo/DTC_full_{energy}MeV_{absorberthickness}mm
+#/gate/output/root/setFileName ../../focalCode/Data/MonteCarlo/optimized_Aluminium_{energy}MeV_{absorberthickness}mm
+#/gate/output/root/setFileName ../../focalCode/Data/MonteCarlo/full_optimized_Aluminium_{energy}MeV_{absorberthickness}mm
 
 #===============#
 # START BEAMS	#
@@ -60,5 +59,5 @@
 
 /gate/random/setEngineName MersenneTwister
 /gate/random/setEngineSeed auto
-/gate/application/setTotalNumberOfPrimaries 100000
+/gate/application/setTotalNumberOfPrimaries 2500
 /gate/application/start

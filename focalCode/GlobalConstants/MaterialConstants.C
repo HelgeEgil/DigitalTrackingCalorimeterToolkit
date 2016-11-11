@@ -108,7 +108,7 @@ void MaterialConstants() {
    }
 
    else if (kMaterial == kAluminium) {
-      nLayers = 41;
+      nLayers = 100;
       p = p_aluminum;
       alpha = alpha_aluminum;
       alpha_prime = alpha_prime_aluminum;
@@ -181,7 +181,17 @@ void  createSplines() {
    Double_t  rangesPureAl[250];
    Double_t  energiesPureAl[250];
 
-   in.open("Data/Ranges/2mm_Al.csv");
+   if (kAbsorbatorThickness == 2) {
+      in.open("Data/Ranges/2mm_Al.csv");
+   }
+
+   else if ( kAbsorbatorThickness == 3) {
+      in.open("Data/Ranges/3mm_Al.csv");
+   }
+
+   else {
+      in.open("Data/Range/2mm_Al.csv");
+   }
 
    while (1) {
       in >> energy >> range;
@@ -222,8 +232,18 @@ void  createSplines() {
    splineWaterInv = new TSpline3("splineWaterInv", rangesWater, energiesWater, idxWater);
    splinePureAlInv = new TSpline3("splineWaterInv", rangesPureAl, energiesPureAl, idxPureAl);
 
-   alpha_aluminum = 0.0140203;
-   p_aluminum = 1.72903;
+   if (kAbsorbatorThickness == 2) {
+      alpha_aluminum = 0.0154651;
+      p_aluminum = 1.73118;
+   }
+
+   else if (kAbsorbatorThickness == 3) {
+      alpha_aluminum = 0.0173389;
+      p_aluminum = 1.7751;
+   }
+
+//   alpha_aluminum = 0.0140203;
+//   p_aluminum = 1.72903;
 }
 
 void loadRangeValuesForTungsten() {

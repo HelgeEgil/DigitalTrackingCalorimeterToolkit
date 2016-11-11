@@ -275,9 +275,11 @@ class Module:
         self.name = name
         self.chipSize = Size(19145 * um, 19145 * um)
         self.chipGap = Size(100. * um, -90 * um)
+        self.chipSize = Size(19145 * um, 19145 * um)
         self.chipLeftPos  = Pos(-self.chipSize.dx/2 - self.chipGap.dx/2, self.chipSize.dy/2)
         self.chipRightPos = Pos( self.chipSize.dx/2 + self.chipGap.dx/2, self.chipSize.dy/2)
         self.fillerPos    = Pos(0, -self.chipSize.dy/2)
+
         self.absorberThickness = absorberThickness
         self.firstAbsorberThickness = absorberThickness
         self.glueThickness = 40 * um
@@ -410,7 +412,7 @@ class Module:
 
     def makePCB(self):
         name = "PCB"
-        size = Size(2 * self.chipSize.dx + self.chipGap.dx, self.chipSize.dx, self.pcbThickness)
+        size = Size(2 * self.chipSize.dx + self.chipGap.dx, self.chipSize.dy, self.pcbThickness)
         pos = self.getPosDepth(0, self.chipLeftPos.y, size, name)
         self.addObject(name, pos, size, kPCB, kVisible, kGreen)
 
@@ -792,9 +794,10 @@ class MainMenu(Frame):
         self.labeltext_firstAbsorberThickness = StringVar()
         self.labeltext_chipThickness = StringVar()
 
+        self.var_ALPIDE.set(1)
         self.var_nlayers.set(40)
-        self.var_xsize.set(19.145)
-        self.var_ysize.set(19.145)
+        self.var_xsize.set(19.145) # was 19.145
+        self.var_ysize.set(19.145) # was 19.145
         self.var_xgap.set(0.1)
         self.var_ygap.set(-0.09)
         self.var_material.set("Aluminium")

@@ -126,10 +126,11 @@ public :
    virtual void      Show(Long64_t entry = -1);
 
    // My own functions in DataInterface.C
-   virtual Int_t getMCFrame(Int_t runNo, CalorimeterFrame *cf, Float_t *x_energy = 0, Float_t *y_energy = 0);
-   virtual void getDataFrame(Int_t runNo, CalorimeterFrame *cf, Int_t energy = 190);
-   virtual void getMCData(Int_t runNo, TH3F* Frame3D);
-	virtual void getEventIDs(Int_t runNo, Hits* hits);
+   virtual Int_t     getMCFrame(Int_t runNo, CalorimeterFrame *cf, Float_t *x_energy = 0, Float_t *y_energy = 0);
+   virtual void      getMCClusters(Int_t runNo, Clusters *clusters);
+   virtual void      getDataFrame(Int_t runNo, CalorimeterFrame *cf, Int_t energy = 190);
+   virtual void      getMCData(Int_t runNo, TH3F* Frame3D);
+   virtual void      getEventIDs(Int_t runNo, Hits* hits);
 };
 
 #endif
@@ -154,11 +155,11 @@ DataInterface::DataInterface(TTree *tree) : fChain(0)
 
       // The following code should be used if you want this class to access a chain
       // of trees.
-	  char *materialChar = getMaterialChar();
-	  
-	  //
+     char *materialChar = getMaterialChar();
+     
+     //
       TChain * chain = new TChain("Hits","");
-      chain->Add(Form("Data/MonteCarlo/optimized_%s_%.0fMeV_%.0fmm.root/Hits", materialChar, run_energy, kAbsorbatorThickness));
+      chain->Add(Form("Data/MonteCarlo/DTC_%s_%.0fMeV_%.0fmm.root/Hits", materialChar, run_energy, kAbsorbatorThickness));
       tree = chain;
 #endif // SINGLE_TREE
 
