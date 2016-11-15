@@ -171,7 +171,7 @@ void  createSplines() {
    // store them in .h
 
    cout << "Creating SPLINE files\n";
-   ifstream in, inW;
+   ifstream in;
    Float_t    energy;
    Int_t    idx2mmAl = 0;
    Int_t    idxWater = 0;
@@ -236,7 +236,7 @@ void  createSplines() {
       if (!in.good()) break;
 
       rangesW[idxW] = range*10;
-      energiesW[idxW] = energy;
+      energiesW[idxW++] = energy;
    }
 
    in.close();
@@ -248,7 +248,7 @@ void  createSplines() {
    spline2mmAlInv = new TSpline3("spline2mmAlInv", ranges2mmAl, energies2mmAl, idx2mmAl);
    splineWaterInv = new TSpline3("splineWaterInv", rangesWater, energiesWater, idxWater);
    splinePureAlInv = new TSpline3("splineWaterInv", rangesPureAl, energiesPureAl, idxPureAl);
-   splineWInv = new TSpline("splineWInv", rangesW, energiesW, idxW);
+   splineWInv = new TSpline3("splineWInv", rangesW, energiesW, idxW);
 
    if (kAbsorbatorThickness == 2) {
       alpha_aluminum = 0.0154651;

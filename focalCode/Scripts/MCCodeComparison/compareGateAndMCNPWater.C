@@ -26,8 +26,10 @@ void Run()
    // GATE PART
    Bool_t activateGATE = true;
    Bool_t activateMCNP = true;
-   Bool_t activateFLUKA = false;
+   Bool_t activateFLUKA = true;
    Bool_t activateTRIM = false;
+
+   Bool_t   useAluminium =true;
 
    Int_t    nbinsxy = 400;
    Int_t    xyfrom = -60;
@@ -42,33 +44,51 @@ void Run()
    Int_t    nominalEnergy;
    Float_t  nominalRange;
       
-   Float_t  energies[14] = {50, 70, 90, 110, 130, 150, 170, 190, 210, 230, 250, 270, 290, 310};
-   Float_t  energiesMCNP[14];
-   Float_t  energiesFLUKA[14];
-   Float_t  energiesGATE[14];
-   Float_t  energiesPSTAR[14];
-   Float_t  energyError[14] = {};
-   Float_t  rangesMCNP[14] = {};
-   Float_t  rangesMCNPdiff[14] = {};
-   Float_t  sigmaMCNP[14] = {};
-   Float_t  rangesFLUKA[14] = {};
-   Float_t  rangesFLUKAdiff[14] = {};
-   Float_t  sigmaFLUKA[14] = {};
-   Float_t  rangesGATE[14] = {};
-   Float_t  rangesGATEdiff[14] = {};
-   Float_t  sigmaGATE[14] = {};
-   Float_t  rangesPSTAR[14] = {2.224, 4.075, 6.389, 9.128, 12.26, 15.76, 19.59, 23.74, 28.19, 32.91, 37.90, 43.12, 48.58, 54.26};
-   Float_t  sigmaPSTAR[14] = {};
+   Float_t  energies[19]; 
+   Float_t  energiesMCNP[19];
+   Float_t  energiesFLUKA[19];
+   Float_t  energiesGATE[19];
+   Float_t  energiesPSTAR[19];
+   Float_t  energyError[19] = {};
+   Float_t  rangesMCNP[19] = {};
+   Float_t  rangesMCNPdiff[19] = {};
+   Float_t  sigmaMCNP[19] = {};
+   Float_t  rangesFLUKA[19] = {};
+   Float_t  rangesFLUKAdiff[19] = {};
+   Float_t  sigmaFLUKA[19] = {};
+   Float_t  rangesGATE[19] = {};
+   Float_t  rangesGATEdiff[19] = {};
+   Float_t  sigmaGATE[19] = {};
+//   Float_t  rangesPSTAR[19] = {2.224, 4.075, 6.389, 9.128, 12.26, 15.76, 19.59, 23.74, 28.19, 32.91, 37.90, 43.12, 48.58, 54.26};
+   Float_t  rangesPSTARWater[19] = {2.224, 3.089, 4.075, 5.176, 6.389, 7.707, 9.128, 10.65, 12.26, 13.96, 15.76, 17.63, 19.59, 21.63, 23.74, 25.93, 28.19, 30.52, 32.91};
+   Float_t  rangesPSTARAl[19] = {1.08, 1.5, 1.97, 2.49, 3.07, 3.7, 4.37, 5.09, 5.85, 6.66, 7.51, 8.4, 9.32, 10.28, 11.28, 12.31, 13.38, 14.47, 15.60};
+   Float_t  rangesPSTAR[19] = {};
 
-   for (Int_t i=0; i<14; i++) {
+   if (useAluminium) {
+      for (Int_t i=0; i<19; i++) {
+         rangesPSTAR[i] = rangesPSTARAl[i];
+      }
+   }
+   else {
+      for (Int_t i=0; i<19; i++) {
+         rangesPSTAR[i] = rangesPSTARWater[i];
+      }
+   }
+
+   Float_t  sigmaPSTAR[19] = {};
+
+   Float_t separation = 1.15;
+
+   for (Int_t i=0; i<19; i++) {
+      energies[i] = (i+5)*10;
       sigmaPSTAR[i] = rangesPSTAR[i] * pow(energies[i], -0.104) * 0.0188; // FIT TO YANNI
    }
 
-   for (Int_t i=0; i<14; i++) {
-      energiesMCNP[i] = energies[i] - 3;
-      energiesGATE[i] = energies[i];
-      energiesFLUKA[i] = energies[i] + 3;
-      energiesPSTAR[i] = energies[i] + 6;
+   for (Int_t i=0; i<19; i++) {
+      energiesFLUKA[i] = energies[i] + separation*3;
+      energiesMCNP[i] = energies[i] + separation;
+      energiesGATE[i] = energies[i] - separation;
+      energiesPSTAR[i] = energies[i] - separation*3;
    }
    
    TCanvas *c2 = new TCanvas("c2", "test", 800, 800);
@@ -85,16 +105,25 @@ void Run()
       Float_t  x,y,z,edep;
       Int_t    parentID, eventID;
       Bool_t   isInelastic;
+      TFile   *f1 = nullptr;
      
-      for (Int_t i=0; i<12; i++) {
+      for (Int_t i=0; i<19; i++) {
          printf("i = %d\n", i);
          nominalEnergy = (i+5) * 10;
-         nominalRange = 0.0022 * pow(nominalEnergy, 1.77);
-         TH1F *hGATE = new TH1F("hGATE", "Proton ranges in single GATE dataset;Range [cm];Number of primaries", 400, fmin(0, nominalRange - 5), nominalRange + 5);
-         
-         cout << "Reading file " << Form("Data/GATE/Water/compressed_water_%dMeV.root\n", nominalEnergy);
-         TFile   *f1 = new TFile(Form("Data/GATE/Water/compressed_water_%dMeV.root", nominalEnergy));
-         cout << "Opening tree...\n";
+         if (useAluminium) {
+            nominalRange = 0.0012 * pow(nominalEnergy, 1.7483);
+         }
+         else {
+            nominalRange = 0.0022 * pow(nominalEnergy, 1.77);
+         }
+         TH1F *hGATE = new TH1F("hGATE", "Proton ranges in single GATE dataset;Range [cm];Number of primaries", 400, fmax(0, nominalRange - 5), nominalRange + 5);
+
+         if (useAluminium) {
+            f1 = new TFile(Form("Data/GATE/Aluminium/compressed_aluminium163eV_%dMeV.root", nominalEnergy));
+         }
+         else {
+            f1 = new TFile(Form("Data/GATE/Water/compressed_water70eV_%dMeV.root", nominalEnergy));
+         }
 
          TTree   *treeBic = (TTree*) f1->Get("treeOut");
 
@@ -113,16 +142,22 @@ void Run()
          }
       
          TF1 *fit = new TF1("fit", "gaus");
-         hGATE->Fit("fit", "N,M", "", nominalRange-5, nominalRange+5);
-         mu = fit->GetParameter(1);
-         sigma = fit->GetParameter(2);
 
-         cout << "IN " << nominalEnergy << " DATASET, MU = " << mu << ", SIGMA = " << sigma << endl;
+         fit->SetParameter(1, nominalRange);
+         fit->SetParameter(2, 0.1);
+         fit->SetParLimits(1, nominalRange-2, nominalRange+2);
+
+         hGATE->Fit("fit", "B, N,M,Q", "", nominalRange-5, nominalRange+5);
+         mu = fit->GetParameter(1);
+         sigma = fabs(fit->GetParameter(2));
+
+         printf("GATE, %d MeV. nominal Range is %.1f, fit range is %.1f.\n", nominalEnergy, nominalRange, mu);
+
          rangesGATE[i] = mu;
          sigmaGATE[i] = sigma;
             
          delete f1;
-         if (i == 12) {
+         if (nominalEnergy == 230) {
             c2->cd();
             hGATE->Draw();
          }
@@ -144,7 +179,7 @@ void Run()
       Int_t    EOLIdentifier;
       Int_t    historyType;
       Int_t    branchNumber;
-      Float_t  startZ = -40;
+      Float_t  startZ = 0;
       string   line;
       Float_t  x, y, z;
       Float_t  u, v, w; // vectors
@@ -152,14 +187,24 @@ void Run()
       Float_t  nFilling = 0;
 
       cout << "READING MCNP FILES...\n";
-      for (Int_t i=0; i<15; i++) {
+      for (Int_t i=0; i<19; i++) {
          nominalEnergy = (i+5) * 10;
          cout << "Nominal energy " << nominalEnergy << endl;
-         nominalRange = 0.0022 * pow(nominalEnergy, 1.77);
+         if (useAluminium) {
+            nominalRange = 0.0012 * pow(nominalEnergy, 1.7483);
+         }
+         else {
+            nominalRange = 0.0022 * pow(nominalEnergy, 1.77);
+         }
          cout << nominalEnergy << "... ";
-         TH1F    *hMCNP = new TH1F("hMCNP", "Proton ranges in single MCNP dataset;Range [cm];Number of primaries", 400, fmin(0, nominalRange - 5), nominalRange + 5);
-
-         in.open(Form("Data/MCNP/Water/%dMeV_Alp", nominalEnergy));
+         TH1F    *hMCNP = new TH1F("hMCNP", "Proton ranges in single MCNP dataset;Range [cm];Number of primaries", 400, fmax(0, nominalRange - 5), nominalRange + 5);
+         
+         if (useAluminium) {
+            in.open(Form("Data/MCNP/Aluminium/%dMeV_Alp", nominalEnergy));
+         }
+         else {
+            in.open(Form("Data/MCNP/Water/%dMeV_vannp", nominalEnergy));
+         }
 
          while (! in.eof() ) {
             getline(in, line);
@@ -180,7 +225,7 @@ void Run()
                if (branchNumber == 1 && terminationType != 13 && terminationType != 16) { // primary particle
                   in >> x >> y >> z >> u >> v >> w >> energy >> weight >> time;
 
-                  hMCNP->Fill((z - startZ)/10.);
+                  hMCNP->Fill((z - startZ));
                }
             }
          }
@@ -201,19 +246,28 @@ void Run()
          sigma /= hMCNP->Integral();
          sigma = sqrt(sigma);
 
+
          TF1 *fit = new TF1("fit", "gaus");
-         hMCNP->Fit("fit", "N");
+         fit->SetParameter(1, mu);
+         fit->SetParameter(2, sigma);
+
+         fit->SetParLimits(1, mu-2, mu+2);
+         hMCNP->Fit("fit", "N,Q,M,B");
          mu = fit->GetParameter(1);
-         sigma = fit->GetParameter(2);
+         sigma = fabs(fit->GetParameter(2));
 
          cout << "IN " << nominalEnergy << " DATASET, MU = " << mu << ", SIGMA = " << sigma << endl;
          rangesMCNP[i] = mu;
          sigmaMCNP[i] = sigma;
-
-         delete hMCNP;
+         if (i == 17-5) {
+            c2->cd();
+//            hMCNP->Draw();
+         }
+         else {
+            delete hMCNP;
+         }
       }
    }
-/*
    if (activateFLUKA) {
       //
       // FLUKA PART
@@ -227,225 +281,71 @@ void Run()
       Float_t  mu;
       Float_t  sigma; 
 
-      TH1F    *hFLUKAPrecisio = new TH1F("hFLUKAPrecisio", "All protons in FLUKA PRECISIO dataset;Range [cm];Number of primaries", nbinsz, zfrom, zto);
-      TH1F    *hFLUKAPrecisioStop = new TH1F("hFLUKAPrecisioStop", "Protons in FLUKA PRECISIO dataset with termination type 11;Range [cm];Number of primaries", nbinsz, zfrom, zto);
-      TH2F    *hFLUKAPrecisioLateral = new TH2F("hFLUKAPrecisioLateral", "2D distribution of BP position in FLUKA PRECISIO dataset;X position [mm];Y position [mm]", nbinsxy, xyfrom, xyto, nbinsxy, xyfrom, xyto);
-      TH1F    *hFLUKAHadrothe = new TH1F("hFLUKAHadrothe", "All protons in FLUKA HADROTHE dataset;Range [cm];Number of primaries", nbinsz, zfrom, zto);
-      TH1F    *hFLUKAHadrotheStop = new TH1F("hFLUKAHadrotheStop", "Protons in FLUKA HADROTHE dataset with termination type 11;Range [cm];Number of primaries", nbinsz, zfrom, zto);
-      TH2F    *hFLUKAHadrotheLateral = new TH2F("hFLUKAHadrotheLateral", "2D distribution of BP position in FLUKA HADROTHE dataset;X position [mm];Y position [mm]", nbinsxy, xyfrom, xyto, nbinsxy, xyfrom, xyto);
-      TH1F    *hFLUKACalorime = new TH1F("hFLUKACalorime", "All protons in FLUKA CALORIME dataset;Range [cm];Number of primaries", nbinsz, zfrom, zto);
-      TH1F    *hFLUKACalorimeStop = new TH1F("hFLUKACalorimeStop", "Protons in FLUKA CALORIME dataset with termination type 11;Range [cm];Number of primaries", nbinsz, zfrom, zto);
-      TH2F    *hFLUKACalorimeLateral = new TH2F("hFLUKACalorimeLateral", "2D distribution of BP position in FLUKA CALORIME dataset;X position [mm];Y position [mm]", nbinsxy, xyfrom, xyto, nbinsxy, xyfrom, xyto);
+      for (Int_t i=0; i<19; i++) {
+         nominalEnergy = (i+5)*10;
+         cout << "Nominal energy " << nominalEnergy << endl;
+         if (useAluminium) {
+            nominalRange = 0.0012 * pow(nominalEnergy, 1.7483);
+         }
+         else {
+            nominalRange = 0.0022 * pow(nominalEnergy, 1.77);
+         }
+         TH1F    *hFLUKA= new TH1F("hFLUKA", "All protons in FLUKA dataset;Range [cm];Number of primaries", 400, fmax(0, nominalRange-5), nominalRange+5);
 
-      cout << "READING PRECISIO FILE\n";
-      in.open("Data/FLUKA/FLUKA_PRECISIO.txt");
+         if (useAluminium) {
+            printf("Opening file Data/FLUKA/Aluminium/aluminium%dMeV.txt\n", nominalEnergy);
+            in.open(Form("Data/FLUKA/Aluminium/aluminium%dMeV.txt", nominalEnergy));
+         }
+         else {
+            printf("Opening file Data/FLUKA/Water/water%dMeV.txt\n", nominalEnergy);
+            in.open(Form("Data/FLUKA/Water/water%dMeV.txt", nominalEnergy));
+         }
 
-      while (! in.eof() ) {
-         in >> historyNumber >> x >> y >> z >> terminationType;
+         while (! in.eof() ) {
+            in >> historyNumber >> x >> y >> z >> terminationType;
 
-         if (lastHistoryNumber < 0) lastHistoryNumber = historyNumber;
+            if (!in.good()) break;
 
-         if (historyNumber != lastHistoryNumber && terminationType != 23) { // primary particle
-            hFLUKAPrecisio->Fill(z);
-
-            if (terminationType == 11) {
-               hFLUKAPrecisioStop->Fill(z);
-            }
-
-            else {
-               hFLUKAPrecisioLateral->Fill(10*x,10*y);
+            if (terminationType != 11) {
+               hFLUKA->Fill(z);
             }
          }
 
-         lastHistoryNumber = historyNumber; // all following entries with same history number are 2ndies
-      }
+         in.close();
 
-      in.close();
+         mu = nominalRange;
+         sigma = 0.2;
 
-      lastHistoryNumber = -1;
-      in.open("Data/FLUKA/FLUKA_HADROTHE.txt");
-      while (! in.eof() ) {
-         in >> historyNumber >> x >> y >> z >> terminationType;
+         TF1 *fit = new TF1("fit", "gaus");
+         fit->SetParameter(1, mu);
+         fit->SetParameter(2, sigma);
 
-         if (lastHistoryNumber < 0) lastHistoryNumber = historyNumber;
+         fit->SetParLimits(1, mu-3, mu+3);
+         fit->SetParLimits(2, 0, 3);
+         hFLUKA->Fit("fit", "N,Q,M,B");
+         mu = fit->GetParameter(1);
+         sigma = fabs(fit->GetParameter(2));
 
-         if (historyNumber != lastHistoryNumber && terminationType != 23) { // primary particle
-            hFLUKAHadrothe->Fill(z);
-
-            if (terminationType == 11) {
-               hFLUKAHadrotheStop->Fill(z);
-            }
-
-            else {
-               hFLUKAHadrotheLateral->Fill(10*x,10*y);
-            }
+         cout << "IN " << nominalEnergy << " DATASET, MU = " << mu << ", SIGMA = " << sigma << endl;
+         rangesFLUKA[i] = mu;
+         sigmaFLUKA[i] = sigma;
+        
+         if (nominalEnergy == 130) {
+            c2->cd();
+//            hFLUKA->Draw();
          }
-
-         lastHistoryNumber = historyNumber; // all following entries with same history number are 2ndies
-      }
-      in.close();
-
-      lastHistoryNumber = -1;
-      in.open("Data/FLUKA/FLUKA_CALORIME.txt");
-//      in.open("Data/FLUKA/WATER_PRECISIO.txt");
-      while (! in.eof() ) {
-         in >> historyNumber >> x >> y >> z >> terminationType;
-
-         if (lastHistoryNumber < 0) lastHistoryNumber = historyNumber;
-
-         if (historyNumber != lastHistoryNumber && terminationType != 23) { // primary particle
-            hFLUKACalorime->Fill(z);
-
-            if (terminationType == 11) {
-               hFLUKACalorimeStop->Fill(z);
-            }
-
-            else {
-               hFLUKACalorimeLateral->Fill(10*x,10*y);
-            }
+         else {
+            delete hFLUKA;
          }
-
-         lastHistoryNumber = historyNumber; // all following entries with same history number are 2ndies
       }
-      in.close();
-
-      cout << "PLOTTING\n";
-
-      c3->cd(1);
-      hFLUKAPrecisio->SetFillColor(kGreen-3);
-      hFLUKAPrecisio->Draw();
-
-      fitFunction = new TF1("fitFunction", "gaus");
-      fitFunction->SetParameter(1, 11.5);
-      fitFunction->SetParameter(2, 0.15);
-      fitFunction->SetParLimits(1, 9, 13);
-      fitFunction->SetParLimits(2, 0.05, 0.4);
-
-      hFLUKAPrecisio->Fit("fitFunction", "B, M,Q");
-
-      mu = fitFunction->GetParameter(1);
-      sigma = fabs(fitFunction->GetParameter(2));
-
-      distributionCutoff = mu - 3*sigma;
-      distributionCutoffBin = hFLUKAPrecisio->GetXaxis()->FindBin(distributionCutoff);
-      totalIntegral = hFLUKAPrecisio->Integral();
-      cutoffIntegral = hFLUKAPrecisio->Integral(0, distributionCutoffBin);
-      stoppedIntegral = hFLUKAPrecisioStop->Integral();
-      fraction = cutoffIntegral / float(totalIntegral);
-
-      TLegend *leg4 = new TLegend(.18, .7, .68, .84);
-      leg4->AddEntry(hFLUKAPrecisio, Form("Fraction below 3#sigma = %.2f%%", 100*fraction), "F");
-      leg4->AddEntry(fitFunction, Form("(#mu, #sigma) = (%.2f cm, %.2f cm)", mu, sigma), "L");
-      leg4->Draw();
-
-      cout << Form("Total number of events: %d. Number of events with terminationType == (13, 16): %.0f. Fraction: %.2f.", totalIntegral, hFLUKAPrecisioStop->Integral(), fraction) << endl;
-      
-      c3->cd(2);
-      hFLUKAPrecisioStop->SetFillColor(kGreen-3);
-      hFLUKAPrecisioStop->Draw();
-
-      c3->cd(3);
-      hFLUKAPrecisioLateral->Draw("COLZ");
-
-      c3->cd(4);
-      hFLUKAHadrothe->SetFillColor(kGreen-3);
-      hFLUKAHadrothe->Draw();
-
-      fitFunction = new TF1("fitFunction", "gaus");
-      fitFunction->SetParameter(1, 11.5);
-      fitFunction->SetParameter(2, 0.15);
-      fitFunction->SetParLimits(1, 9, 13);
-      fitFunction->SetParLimits(2, 0.05, 0.4);
-
-      hFLUKAHadrothe->Fit("fitFunction", "B, M,Q");
-
-      mu = fitFunction->GetParameter(1);
-      sigma = fabs(fitFunction->GetParameter(2));
-
-      distributionCutoff = mu - 3*sigma;
-      distributionCutoffBin = hFLUKAHadrothe->GetXaxis()->FindBin(distributionCutoff);
-      totalIntegral = hFLUKAHadrothe->Integral();
-      cutoffIntegral = hFLUKAHadrothe->Integral(0, distributionCutoffBin);
-      stoppedIntegral = hFLUKAHadrotheStop->Integral();
-      fraction = cutoffIntegral / float(totalIntegral);
-
-      TLegend *leg5 = new TLegend(.18, .7, .68, .84);
-      leg5->AddEntry(hFLUKAHadrothe, Form("Fraction below 3#sigma = %.2f%%", 100*fraction), "F");
-      leg5->AddEntry(fitFunction, Form("(#mu, #sigma) = (%.2f cm, %.2f cm)", mu, sigma), "L");
-      leg5->Draw();
-
-      cout << Form("Total number of events: %d. Number of events with terminationType == (13, 16): %.0f. Fraction: %.2f.", totalIntegral, hFLUKAHadrotheStop->Integral(), fraction) << endl;
-      
-      c3->cd(5);
-      hFLUKAHadrotheStop->SetFillColor(kGreen-3);
-      hFLUKAHadrotheStop->Draw();
-
-      c3->cd(6);
-      hFLUKAHadrotheLateral->Draw("COLZ");
-
-      c3->cd(7);
-      hFLUKACalorime->SetFillColor(kGreen-3);
-      hFLUKACalorime->Draw();
-
-      fitFunction = new TF1("fitFunction", "gaus");
-      fitFunction->SetParameter(1, 11.5);
-      fitFunction->SetParameter(2, 0.15);
-      fitFunction->SetParLimits(1, 9, 13);
-      fitFunction->SetParLimits(2, 0.05, 0.4);
-
-      hFLUKACalorime->Fit("fitFunction", "B, M,Q");
-
-      mu = fitFunction->GetParameter(1);
-      sigma = fabs(fitFunction->GetParameter(2));
-
-      distributionCutoff = mu - 3*sigma;
-      distributionCutoffBin = hFLUKACalorime->GetXaxis()->FindBin(distributionCutoff);
-      totalIntegral = hFLUKACalorime->Integral();
-      cutoffIntegral = hFLUKACalorime->Integral(0, distributionCutoffBin);
-      stoppedIntegral = hFLUKACalorimeStop->Integral();
-      fraction = cutoffIntegral / float(totalIntegral);
-
-      TLegend *leg6 = new TLegend(.18, .7, .68, .84);
-      leg6->AddEntry(hFLUKACalorime, Form("Fraction below 3#sigma = %.2f%%", 100*fraction), "F");
-      leg6->AddEntry(fitFunction, Form("(#mu, #sigma) = (%.2f cm, %.2f cm)", mu, sigma), "L");
-      leg6->Draw();
-
-      cout << Form("Total number of events: %d. Number of events with terminationType == (13, 16): %.0f. Fraction: %.2f.", totalIntegral, hFLUKACalorimeStop->Integral(), fraction) << endl;
-      
-      c3->cd(8);
-      hFLUKACalorimeStop->SetFillColor(kGreen-3);
-      hFLUKACalorimeStop->Draw();
-
-      c3->cd(9);
-      hFLUKACalorimeLateral->Draw("COLZ");
-
-      TH1D *hProfile = hFLUKACalorimeLateral->ProjectionX();
-      int bin1 = hProfile->FindFirstBinAbove(hProfile->GetMaximum()/2);
-      int bin2 = hProfile->FindLastBinAbove(hProfile->GetMaximum()/2);
-      double fwhm = hProfile->GetBinCenter(bin2) - hProfile->GetBinCenter(bin1);
-      cout << "FWHM FLUKA CALORIMETER 2D = " << fwhm << " mm." << endl;
-      hProfile = hFLUKAPrecisioLateral->ProjectionX();
-      bin1 = hProfile->FindFirstBinAbove(hProfile->GetMaximum()/2);
-      bin2 = hProfile->FindLastBinAbove(hProfile->GetMaximum()/2);
-      fwhm = hProfile->GetBinCenter(bin2) - hProfile->GetBinCenter(bin1);
-      cout << "FWHM FLUKA PRECISION 2D = " << fwhm << " mm." << endl;
-      hProfile = hFLUKAHadrotheLateral->ProjectionX();
-      bin1 = hProfile->FindFirstBinAbove(hProfile->GetMaximum()/2);
-      bin2 = hProfile->FindLastBinAbove(hProfile->GetMaximum()/2);
-      cout << "Maximum/2 for HADRO = " << hProfile->GetMaximum()/2 << endl;
-      fwhm = hProfile->GetBinCenter(bin2) - hProfile->GetBinCenter(bin1);
-      cout << "FWHM FLUKA HADROTHERAPY 2D = " << fwhm << " mm." << endl;
-      TCanvas *c10 = new TCanvas("c10", "c10", 800, 800);
-      c10->cd(); hProfile->Draw();
    }
-   */
 
    cout << "Drawing in pad1\n";
    pad1->cd();
    cout << "Opened pad1\n";
 
    Float_t errorScalingFactor = 10;
-   for (int i=0; i<14; i++) {
+   for (int i=0; i<19; i++) {
       sigmaMCNP[i] *= errorScalingFactor;
       sigmaGATE[i] *= errorScalingFactor;
       sigmaPSTAR[i] *= errorScalingFactor;
@@ -453,49 +353,74 @@ void Run()
 
       rangesMCNPdiff[i] = (rangesMCNP[i] - rangesPSTAR[i]) * 10;
       rangesGATEdiff[i] = (rangesGATE[i] - rangesPSTAR[i]) * 10;
-      rangesFLUKAdiff[i] = (rangesFLUKA[i] - rangesPSTAR[i] * 10);
+      rangesFLUKAdiff[i] = (rangesFLUKA[i] - rangesPSTAR[i]) * 10;
    }
 
-
-   TGraphErrors *gMCNP = new TGraphErrors(14, energiesMCNP, rangesMCNP, energyError, sigmaMCNP);
+   TGraphErrors *gMCNP = new TGraphErrors(19, energiesMCNP, rangesMCNP, energyError, sigmaMCNP);
    gMCNP->SetTitle(Form("Water range comparison between different codes (%.1fx error bars); Energy [MeV];Range [cm]", errorScalingFactor));
+   if (useAluminium) {
+      gMCNP->SetTitle(Form("Aluminium range comparison between different codes (%.1fx error bars); Energy [MeV];Range [cm]", errorScalingFactor));
+   }
+
    gMCNP->SetMarkerColor(kRed);
    gMCNP->SetMarkerStyle(22);
+   gMCNP->GetXaxis()->SetNdivisions(30);
    gMCNP->Draw("AP");
    
-   TGraphErrors *gGATE = new TGraphErrors(14, energiesGATE, rangesGATE, energyError, sigmaGATE);
+   TGraphErrors *gGATE = new TGraphErrors(19, energiesGATE, rangesGATE, energyError, sigmaGATE);
    gGATE->SetMarkerColor(kBlue);
    gGATE->SetMarkerStyle(22);
    gGATE->Draw("same, P");
    
-   TGraphErrors *gPSTAR = new TGraphErrors(14, energiesPSTAR, rangesPSTAR, energyError, sigmaPSTAR);
+   TGraphErrors *gPSTAR = new TGraphErrors(19, energiesPSTAR, rangesPSTAR, energyError, sigmaPSTAR);
    gPSTAR->SetMarkerColor(kBlack);
    gPSTAR->SetMarkerStyle(22);
    gPSTAR->Draw("same, P");
 
+   TGraphErrors *gFLUKA = new TGraphErrors(19, energiesFLUKA, rangesFLUKA, energyError, sigmaFLUKA);
+   gFLUKA->SetMarkerColor(kOrange);
+   gFLUKA->SetMarkerStyle(22);
+   gFLUKA->Draw("same, P");
+   Int_t height = (useAluminium) ? 19 : 40;
+   for (Int_t i=0; i<20; i++) {
+      nominalEnergy = (i+5)*10 - 5;
+      TLine *l = new TLine(nominalEnergy, 0, nominalEnergy, height);
+      l->Draw();
+   }
+
    TLegend *leg = new TLegend(0.17, 0.72, 0.35, 0.88);
    leg->AddEntry(gMCNP, "MCNP", "Pel");
-   leg->AddEntry(gGATE, "GATE", "Pel");
+   leg->AddEntry(gGATE, "GATE 163 eV", "Pel");
+   leg->AddEntry(gFLUKA, "FLUKA", "Pel");
    leg->AddEntry(gPSTAR, "PSTAR", "Ple");
    leg->Draw();
 
    pad2->cd();
    cout << "Drawing in pad2\n";
 
-   TGraph *gMCNPdiff = new TGraph(14, energiesMCNP, rangesMCNPdiff);
-   gMCNPdiff->SetTitle("Difference between MC codes and PSTAR range; Energy [MeV];Range [mm]");
-   gMCNPdiff->SetMarkerColor(kRed);
-   gMCNPdiff->SetMarkerStyle(22);
+   TGraph *gMCNPdiff = new TGraph(19, energiesMCNP, rangesMCNPdiff);
+   gMCNPdiff->SetTitle("; Energy [MeV];Range error [mm]");
+   gMCNPdiff->SetLineColor(kRed);
+   gMCNPdiff->SetLineWidth(3);
    gMCNPdiff->GetXaxis()->SetTitleSize(0.09);
    gMCNPdiff->GetYaxis()->SetTitleSize(0.09);
    gMCNPdiff->GetYaxis()->SetTitleOffset(0.35);
    gMCNPdiff->GetXaxis()->SetTitleOffset(0.8);
    gMCNPdiff->GetXaxis()->SetLabelSize(0.08);
    gMCNPdiff->GetYaxis()->SetLabelSize(0.08);
+   if (useAluminium) gMCNPdiff->GetYaxis()->SetRangeUser(-0.5, 1);
+   gMCNPdiff->GetXaxis()->SetNdivisions(30);
    gMCNPdiff->Draw("AL");
    
-   TGraph *gGATEdiff = new TGraph(14, energiesGATE, rangesGATEdiff);
-   gGATEdiff->SetMarkerColor(kBlue);
-   gGATEdiff->SetMarkerStyle(22);
+   TGraph *gGATEdiff = new TGraph(19, energiesGATE, rangesGATEdiff);
+   gGATEdiff->SetLineColor(kBlue);
+   gGATEdiff->SetLineWidth(3);
    gGATEdiff->Draw("same, L");
+
+   TGraph *gFLUKAdiff = new TGraph(19, energiesFLUKA, rangesFLUKAdiff);
+   gFLUKAdiff->SetLineColor(kOrange);
+   gFLUKAdiff->SetLineWidth(3);
+   gFLUKAdiff->Draw("same,L");
+
+   pad2->Update();
 }
