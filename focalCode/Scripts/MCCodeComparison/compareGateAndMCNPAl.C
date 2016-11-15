@@ -42,7 +42,7 @@ void Run()
    Int_t    nominalEnergy;
    Float_t  nominalRange;
       
-   Float_t  energies[19] = {50, 60, 70, 80, 90, 100, 110, 120, 130, 140, 150, 160, 170, 180, 190, 200, 210, 220, 230};
+   Float_t  energies[19]; 
    Float_t  energiesMCNP[19];
    Float_t  energiesFLUKA[19];
    Float_t  energiesGATE[19];
@@ -58,10 +58,12 @@ void Run()
    Float_t  rangesGATEdiff[19] = {};
    Float_t  sigmaGATE[19] = {};
    Float_t  rangesPSTAR[19] = {1.08, 1.5, 1.97, 2.49, 3.07, 3.7, 4.37, 5.09, 5.85, 6.66, 7.51, 8.4, 9.32, 10.28, 11.28, 12.31, 13.38, 14.47, 15.60};
+//   Float_t  rangesPSTAR[19] = {1.08, 1.97, 3.07, 4.37, 5.85, 7.51, 9.32, 11.28, 13.38, 15.60, 17.94, 20.40, 22.97, 25.64};
    Float_t  sigmaPSTAR[19] = {};
 
    for (Int_t i=0; i<19; i++) {
-      rangesPSTAR[i] *= 10;
+      energies[i] = (i+5)*10;
+//      rangesPSTAR[i] *= 10;
       sigmaPSTAR[i] = rangesPSTAR[i] * pow(energies[i], -0.104) * 0.0188; // FIT TO YANNI
    }
 
@@ -87,14 +89,14 @@ void Run()
       Int_t    parentID, eventID;
       Bool_t   isInelastic;
       
-      for (Int_t i=50; i<240; i += 10) {
-         nominalEnergy = i;
+      for (Int_t i=0; i<18; i++) {
+         nominalEnergy = (i+5)*10;
          cout << "Nominal energy " << nominalEnergy << endl;
-         nominalRange = 0.012 * pow(nominalEnergy, 1.7483);
+         nominalRange = 0.0012 * pow(nominalEnergy, 1.7483);
          TH1F *hGATE = new TH1F("hGATE", "Proton ranges in single GATE dataset;Range [cm];Number of primaries", 400, fmin(0, nominalRange - 5), nominalRange + 5);
          
-         cout << "Reading file " << Form("Data/GATE/aluminium/compressed_aluminium_%dMeV.root\n", nominalEnergy);
-         TFile   *f1 = new TFile(Form("Data/GATE/aluminium/compressed_aluminium_%dMeV.root", nominalEnergy));
+         cout << "Reading file " << Form("Data/GATE/Aluminium/compressed_aluminium_%dMeV.root\n", nominalEnergy);
+         TFile   *f1 = new TFile(Form("Data/GATE/Aluminium/compressed_aluminium_%dMeV.root", nominalEnergy));
          cout << "Opening tree...\n";
 
          TTree   *treeBic = (TTree*) f1->Get("treeOut");
@@ -108,22 +110,46 @@ void Run()
          treeBic->SetBranchAddress("parentID",&parentID);
          treeBic->SetBranchAddress("isInelastic",&isInelastic);
 
+         printf("Reading %d entries from GATE file.\n", treeBic->GetEntries());
          for (Int_t j=0, N = treeBic->GetEntries(); j<N; ++j) {
             treeBic->GetEntry(j);
-            if (!isInelastic) hGATE->Fill(z/10.);
+            if (!isInelastic) hGATE->Fill(z/10.0);
          }
+         
+         mu = 0; sigma = 0;
+         for (Int_t j=0; j<hGATE->GetNbinsX(); j++) {
+            mu += hGATE->GetBinContent(j) * hGATE->GetBinCenter(j);
+         }
+         
+         mu /= hGATE->Integral();
+         
+         for (Int_t j=0; j<hGATE->GetNbinsX(); j++) {
+            sigma += hGATE->GetBinContent(j) * pow(hGATE->GetBinCenter(j) - mu, 2);
+         }
+
+         sigma /= hGATE->Integral();
+         sigma = sqrt(sigma);
+
+         printf("before fit GATE, mu = %.2f, sigma = %.2f.\n", mu, sigma);
       
          TF1 *fit = new TF1("fit", "gaus");
-         hGATE->Fit("fit", "N,M", "", nominalRange-5, nominalRange+5);
+         fit->SetParameter(1, mu); fit->SetParameter(2, sigma);
+         fit->SetParameter(0, 1000);
+         fit->SetParLimits(1, mu*0.75, mu*1.5);
+         fit->SetParLimits(2, sigma*0.75, sigma*1.5);
+         fit->SetNpx(1000);
+
+         hGATE->Fit("fit", "N,M,B");
          mu = fit->GetParameter(1);
          sigma = fit->GetParameter(2);
+         printf("after fit GATE, mu = %.2f, sigma = %.2f.\n", mu, sigma);
 
          cout << "IN " << nominalEnergy << " DATASET, MU = " << mu << ", SIGMA = " << sigma << endl;
          rangesGATE[i] = mu;
          sigmaGATE[i] = sigma;
             
          delete f1;
-         if (i == 12) {
+         if (nominalEnergy == 110) {
             c2->cd();
             hGATE->Draw();
          }
@@ -153,14 +179,14 @@ void Run()
       Float_t  nFilling = 0;
 
       cout << "READING MCNP FILES...\n";
-      for (Int_t i=0; i<18; i++) {
+      for (Int_t i=0; i<19; i++) {
          nominalEnergy = (i+5) * 10;
          cout << "Nominal energy " << nominalEnergy << endl;
-         nominalRange = 0.012 * pow(nominalEnergy, 1.7483);
+         nominalRange = 0.0012 * pow(nominalEnergy, 1.7341);
          cout << nominalEnergy << "... ";
          TH1F    *hMCNP = new TH1F("hMCNP", "Proton ranges in single MCNP dataset;Range [cm];Number of primaries", 400, fmin(0, nominalRange - 5), nominalRange + 5);
 
-         in.open(Form("Data/MCNP/aluminium/%dMeV_Alp", nominalEnergy));
+         in.open(Form("Data/MCNP/Aluminium/%dMeV_Alp", nominalEnergy));
 
          while (! in.eof() ) {
             getline(in, line);
@@ -181,7 +207,7 @@ void Run()
                if (branchNumber == 1 && terminationType != 13 && terminationType != 16) { // primary particle
                   in >> x >> y >> z >> u >> v >> w >> energy >> weight >> time;
 
-                  hMCNP->Fill(z - startZ);
+                  hMCNP->Fill((z - startZ)/10.);
                }
             }
          }
@@ -202,15 +228,17 @@ void Run()
          sigma /= hMCNP->Integral();
          sigma = sqrt(sigma);
 
+         printf("before fit MCNP, mu = %.2f, sigma = %.2f.\n", mu, sigma);
+
          TF1 *fit = new TF1("fit", "gaus");
          hMCNP->Fit("fit", "N");
          mu = fit->GetParameter(1);
          sigma = fit->GetParameter(2);
+         printf("after fit MCNP, mu = %.2f, sigma = %.2f.\n", mu, sigma);
 
-         cout << "IN " << nominalEnergy << " DATASET, MU = " << mu << ", SIGMA = " << sigma << endl;
          rangesMCNP[i] = mu;
          sigmaMCNP[i] = sigma;
-
+         
          delete hMCNP;
       }
    }

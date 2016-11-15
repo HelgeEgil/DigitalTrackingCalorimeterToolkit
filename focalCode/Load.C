@@ -4,6 +4,7 @@ void Load() {
 
    cout << "LOADING MATERIALCONSTANTS\n";
    gROOT->LoadMacro("GlobalConstants/MaterialConstants.C+");
+   cout << "Running MaterialConstants()\n";
    gROOT->ProcessLine("MaterialConstants()");
 
    cout << "LOADING WRAPPER\n";

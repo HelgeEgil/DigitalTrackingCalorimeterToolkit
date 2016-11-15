@@ -36,8 +36,8 @@ void Run()
       nominalEnergy = (j+5) * 10;
 
       cout << "Compressing tree with " << nominalEnergy << " MeV.\n";
-      TFile *f = new TFile(Form("Data/GATE/aluminium/aluminium_%dMeV.root", nominalEnergy));
-      TFile *fOut = new TFile(Form("Data/GATE/aluminium/compressed_aluminium_%dMeV.root", nominalEnergy), "recreate");
+      TFile *f = new TFile(Form("Data/GATE/Aluminium/aluminium_%dMeV.root", nominalEnergy));
+      TFile *fOut = new TFile(Form("Data/GATE/Aluminium/compressed_aluminium_%dMeV.root", nominalEnergy), "recreate");
 
       TTree   *tree = (TTree*) f->Get("Hits");
       TTree    treeOut("treeOut", "Compressed GATE tree");

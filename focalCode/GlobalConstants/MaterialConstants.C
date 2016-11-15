@@ -42,9 +42,12 @@ void MaterialConstants() {
    c5_water = 0.733621;
    l5_water = 0.000523239;
 
+   cout << "LoadRangeValues 1\n";
    loadRangeValuesForTungsten();
+   cout << "LoadRangeValues 2\n";
    loadRangeValuesForAluminium();
-   
+
+   cout << "create splines\n";
    createSplines();
 
    // USING VALUES FOR WATER FOR PMMA FIXME
@@ -279,6 +282,7 @@ void loadRangeValuesForAluminium() {
    X0_aluminum = 5.4775 + 1.3109*m - 0.2608 * pow(m,2) + 0.0248 * pow(m,3) - 0.0009 * pow(m,4);
    alpha_prime_aluminum = 0.017102; // HOW DID I FIND THIS!!!
 
+   /*
    in.open("OutputFiles/RangeEnergyParameters.csv");
    while (1) {
       in >> mm_thickness;
@@ -302,6 +306,7 @@ void loadRangeValuesForAluminium() {
       }
    }
    in.close();
+   */
 }
 
 
