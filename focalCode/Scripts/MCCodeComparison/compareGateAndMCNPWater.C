@@ -85,14 +85,15 @@ void Run()
       Float_t  x,y,z,edep;
       Int_t    parentID, eventID;
       Bool_t   isInelastic;
-      
-      for (Int_t i=0; i<18; i++) {
+     
+      for (Int_t i=0; i<12; i++) {
+         printf("i = %d\n", i);
          nominalEnergy = (i+5) * 10;
          nominalRange = 0.0022 * pow(nominalEnergy, 1.77);
          TH1F *hGATE = new TH1F("hGATE", "Proton ranges in single GATE dataset;Range [cm];Number of primaries", 400, fmin(0, nominalRange - 5), nominalRange + 5);
          
-         cout << "Reading file " << Form("Data/GATE/aluminium/compressed_water_%dMeV.root\n", nominalEnergy);
-         TFile   *f1 = new TFile(Form("Data/GATE/aluminium/compressed_aluminium_%dMeV.root", nominalEnergy));
+         cout << "Reading file " << Form("Data/GATE/Water/compressed_water_%dMeV.root\n", nominalEnergy);
+         TFile   *f1 = new TFile(Form("Data/GATE/Water/compressed_water_%dMeV.root", nominalEnergy));
          cout << "Opening tree...\n";
 
          TTree   *treeBic = (TTree*) f1->Get("treeOut");
@@ -151,14 +152,14 @@ void Run()
       Float_t  nFilling = 0;
 
       cout << "READING MCNP FILES...\n";
-      for (Int_t i=0; i<18; i++) {
+      for (Int_t i=0; i<15; i++) {
          nominalEnergy = (i+5) * 10;
          cout << "Nominal energy " << nominalEnergy << endl;
          nominalRange = 0.0022 * pow(nominalEnergy, 1.77);
          cout << nominalEnergy << "... ";
          TH1F    *hMCNP = new TH1F("hMCNP", "Proton ranges in single MCNP dataset;Range [cm];Number of primaries", 400, fmin(0, nominalRange - 5), nominalRange + 5);
 
-         in.open(Form("Data/MCNP/aluminium/%dMeV_Alp", nominalEnergy));
+         in.open(Form("Data/MCNP/Water/%dMeV_Alp", nominalEnergy));
 
          while (! in.eof() ) {
             getline(in, line);
@@ -179,7 +180,7 @@ void Run()
                if (branchNumber == 1 && terminationType != 13 && terminationType != 16) { // primary particle
                   in >> x >> y >> z >> u >> v >> w >> energy >> weight >> time;
 
-                  hMCNP->Fill(z - startZ);
+                  hMCNP->Fill((z - startZ)/10.);
                }
             }
          }

@@ -106,8 +106,8 @@ void MaterialConstants() {
       c5_material = c5_tungsten;
       l5_material = l5_tungsten;
 
-      splineMaterial = splineWater; // FIX WITH UPDATED W VALUES
-      splineMaterialInv = splineWaterInv; // FIX WITH UPDATED W VALUES
+      splineMaterial = splineW;
+      splineMaterialInv = splineWInv;
    }
 
    else if (kMaterial == kAluminium) {
@@ -171,19 +171,22 @@ void  createSplines() {
    // store them in .h
 
    cout << "Creating SPLINE files\n";
-   ifstream in;
+   ifstream in, inW;
    Float_t    energy;
    Int_t    idx2mmAl = 0;
    Int_t    idxWater = 0;
    Int_t    idxPureAl = 0;
+   Int_t    idxW = 0;
    Double_t  range;
    Double_t  ranges2mmAl[250];
    Double_t  energies2mmAl[250];
+   Double_t  rangesW[250];
+   Double_t  energiesW[250];
    Double_t  rangesWater[250];
    Double_t  energiesWater[250];
    Double_t  rangesPureAl[250];
    Double_t  energiesPureAl[250];
-
+   
    if (kAbsorbatorThickness == 2) {
       in.open("Data/Ranges/2mm_Al.csv");
    }
@@ -224,16 +227,28 @@ void  createSplines() {
       rangesPureAl[idxPureAl] = range*10; // cm to mm
       energiesPureAl[idxPureAl++] = energy;
    }
-   
+
+   in.close();
+
+   in.open("Data/Ranges/3mm_W.csv");
+   while (1) {
+      in >> energy >> range;
+      if (!in.good()) break;
+
+      rangesW[idxW] = range*10;
+      energiesW[idxW] = energy;
+   }
 
    in.close();
 
    spline2mmAl = new TSpline3("spline2mmAl", energies2mmAl, ranges2mmAl, idx2mmAl);
    splineWater = new TSpline3("splineWater", energiesWater, rangesWater, idxWater);
    splinePureAl = new TSpline3("splinePureAl", energiesPureAl, rangesPureAl, idxPureAl);
+   splineW = new TSpline3("splineW", energiesW, rangesW, idxW);
    spline2mmAlInv = new TSpline3("spline2mmAlInv", ranges2mmAl, energies2mmAl, idx2mmAl);
    splineWaterInv = new TSpline3("splineWaterInv", rangesWater, energiesWater, idxWater);
    splinePureAlInv = new TSpline3("splineWaterInv", rangesPureAl, energiesPureAl, idxPureAl);
+   splineWInv = new TSpline("splineWInv", rangesW, energiesW, idxW);
 
    if (kAbsorbatorThickness == 2) {
       alpha_aluminum = 0.0154651;
