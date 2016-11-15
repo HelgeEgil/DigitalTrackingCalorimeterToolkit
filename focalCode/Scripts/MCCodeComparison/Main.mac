@@ -1,0 +1,66 @@
+#/vis/open OGL #1000x1000-0+0
+#/vis/viewer/reset
+#/vis/drawVolume
+#/vis/viewer/zoom 2
+#/vis/viewer/set/style surface
+#/vis/viewer/set/hiddenEdge true
+#/tracking/storeTrajectory 1
+#/vis/scene/endOfEventAction accumulate 25
+#/vis/scene/add/trajectories
+#/vis/viewer/update
+
+/gate/geometry/setMaterialDatabase GateMaterials.db
+
+/control/execute Module.mac
+
+/gate/systems/scanner/level1/attach Layer
+
+/control/execute readout_full.mac
+
+#=================#
+# Physics			#
+#=================#
+
+/gate/geometry/setIonisationPotential Water 75 eV
+/gate/physics/addPhysicsList QGSP_BIC_EMY
+
+#/gate/physics/Proton/SetCutInRegion   scanner 0.1 mm
+#/gate/physics/SetMaxStepSizeInRegion  scanner 0.1 mm
+#/gate/physics/ActivateStepLimiter proton
+
+/gate/physics/addProcess SingleScattering proton
+
+/gate/run/initialize
+
+#/geometry/test/recursive_test
+#/geometry/test/run
+
+#=======================#
+# ADD PROTON BEAM	      #
+#=======================#
+
+/gate/source/addSource uniformBeam gps
+/gate/source/uniformBeam/gps/particle proton
+/gate/source/uniformBeam/gps/ene/type Gauss
+/gate/source/uniformBeam/gps/ene/mono 190 MeV
+/gate/source/uniformBeam/gps/ene/sigma 0 MeV
+/gate/source/uniformBeam/gps/type Plane
+/gate/source/uniformBeam/gps/shape Square
+/gate/source/uniformBeam/gps/direction 0 0 1
+/gate/source/uniformBeam/gps/halfx 35. mm
+/gate/source/uniformBeam/gps/halfy 35. mm
+/gate/source/uniformBeam/gps/centre 0. 0. -0.1 cm
+
+/gate/output/root/enable
+/gate/output/root/setFileName Data/GATE/complex_geometry_emy_nolimit_singlescatter_1k
+/gate/output/root/setRootSinglesFlag 0
+/gate/output/root/setRootNtupleFlag 0
+
+#===============#
+# START BEAMS	#
+#===============#
+
+/gate/random/setEngineName MersenneTwister
+/gate/random/setEngineSeed auto
+/gate/application/setTotalNumberOfPrimaries 100000
+/gate/application/start

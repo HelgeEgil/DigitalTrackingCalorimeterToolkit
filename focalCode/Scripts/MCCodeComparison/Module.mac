@@ -1,0 +1,128 @@
+/gate/world/geometry/setXLength 3500.0 mm
+/gate/world/geometry/setYLength 1500.0 mm
+/gate/world/geometry/setZLength 3500.0 mm
+/gate/world/placement/setTranslation 0 0 0 mm
+/gate/world/vis/setVisible false
+
+/gate/world/daughters/name scanner
+/gate/world/daughters/insert box
+/gate/scanner/geometry/setXLength 150.0 mm
+/gate/scanner/geometry/setYLength 150.0 mm
+/gate/scanner/geometry/setZLength 150 mm
+/gate/scanner/placement/setTranslation 0 0 75 mm
+/gate/scanner/setMaterial Air
+/gate/scanner/vis/setVisible false
+
+/gate/scanner/daughters/name Layer
+/gate/scanner/daughters/insert box
+/gate/Layer/geometry/setXLength 110.0 mm
+/gate/Layer/geometry/setYLength 110.0 mm
+/gate/Layer/geometry/setZLength 4.975 mm
+/gate/Layer/placement/setTranslation 0 0 -72.5125 mm
+/gate/Layer/setMaterial Air
+/gate/Layer/vis/setVisible false
+
+/gate/Layer/daughters/name Absorber1
+/gate/Layer/daughters/insert box
+/gate/Absorber1/geometry/setXLength 100.0 mm
+/gate/Absorber1/geometry/setYLength 100.0 mm
+/gate/Absorber1/geometry/setZLength 1.9999 mm
+/gate/Absorber1/placement/setTranslation 0 0 -1.4875 mm
+/gate/Absorber1/setMaterial Aluminium
+/gate/Absorber1/vis/setColor grey
+
+/gate/Layer/daughters/name PCBGlue
+/gate/Layer/daughters/insert box
+/gate/PCBGlue/geometry/setXLength 100. mm
+/gate/PCBGlue/geometry/setYLength 100. mm
+/gate/PCBGlue/geometry/setZLength 0.03999 mm
+/gate/PCBGlue/placement/setTranslation 0 0 -0.4675 mm
+/gate/PCBGlue/setMaterial Glue
+/gate/PCBGlue/vis/setColor yellow
+
+/gate/Layer/daughters/name PCB
+/gate/Layer/daughters/insert box
+/gate/PCB/geometry/setXLength 100. mm
+/gate/PCB/geometry/setYLength 100. mm
+/gate/PCB/geometry/setZLength 0.15999 mm
+/gate/PCB/placement/setTranslation 0 0 -0.3675 mm
+/gate/PCB/setMaterial PCB
+/gate/PCB/vis/setColor green
+
+/gate/Layer/daughters/name ChipGlue
+/gate/Layer/daughters/insert box
+/gate/ChipGlue/geometry/setXLength 100. mm
+/gate/ChipGlue/geometry/setYLength 100. mm
+/gate/ChipGlue/geometry/setZLength 0.03999 mm
+/gate/ChipGlue/placement/setTranslation 0 0 -0.2675 mm
+/gate/ChipGlue/setMaterial Glue
+/gate/ChipGlue/vis/setColor yellow
+
+/gate/Layer/daughters/name PassiveChip
+/gate/Layer/daughters/insert box
+/gate/PassiveChip/geometry/setXLength 100. mm
+/gate/PassiveChip/geometry/setYLength 100. mm
+/gate/PassiveChip/geometry/setZLength 0.10599 mm
+/gate/PassiveChip/placement/setTranslation 0 0 -0.1945 mm
+/gate/PassiveChip/setMaterial Silicon
+/gate/PassiveChip/vis/setColor blue
+
+/gate/Layer/daughters/name ActiveChip
+/gate/Layer/daughters/insert box
+/gate/ActiveChip/geometry/setXLength 100. mm
+/gate/ActiveChip/geometry/setYLength 100. mm
+/gate/ActiveChip/geometry/setZLength 0.01399 mm
+/gate/ActiveChip/placement/setTranslation 0 0 -0.1345 mm
+/gate/ActiveChip/setMaterial Silicon
+/gate/ActiveChip/vis/setColor red
+
+/gate/Layer/daughters/name AirGapAfterChip
+/gate/Layer/daughters/insert box
+/gate/AirGapAfterChip/geometry/setXLength 38.39 mm
+/gate/AirGapAfterChip/geometry/setYLength 19.145 mm
+/gate/AirGapAfterChip/geometry/setZLength 0.16999 mm
+/gate/AirGapAfterChip/placement/setTranslation 0 0 -0.0425 mm
+/gate/AirGapAfterChip/setMaterial Air
+/gate/AirGapAfterChip/vis/setVisible false
+
+/gate/Layer/daughters/name Filler
+/gate/Layer/daughters/insert box
+/gate/Filler/geometry/setXLength 100. mm
+/gate/Filler/geometry/setYLength 100. mm
+/gate/Filler/geometry/setZLength 0.29999 mm
+/gate/Filler/placement/setTranslation 0 0 0.1925 mm
+/gate/Filler/setMaterial Aluminium
+/gate/Filler/vis/setColor grey
+
+/gate/Layer/daughters/name FillerGlue
+/gate/Layer/daughters/insert box
+/gate/FillerGlue/geometry/setXLength 100. mm
+/gate/FillerGlue/geometry/setYLength 100. mm
+/gate/FillerGlue/geometry/setZLength 0.06999 mm
+/gate/FillerGlue/placement/setTranslation 0 0 0.3775 mm
+/gate/FillerGlue/setMaterial Superglue
+/gate/FillerGlue/vis/setColor yellow
+
+/gate/Layer/daughters/name Absorber2
+/gate/Layer/daughters/insert box
+/gate/Absorber2/geometry/setXLength 100.0 mm
+/gate/Absorber2/geometry/setYLength 100.0 mm
+/gate/Absorber2/geometry/setZLength 1.9999 mm
+/gate/Absorber2/placement/setTranslation 0 0 1.4125 mm
+/gate/Absorber2/setMaterial Aluminium
+/gate/Absorber2/vis/setColor grey
+
+/gate/Layer/daughters/name AbsorberAirGap
+/gate/Layer/daughters/insert box
+/gate/AbsorberAirGap/geometry/setXLength 100.0 mm
+/gate/AbsorberAirGap/geometry/setYLength 100.0 mm
+/gate/AbsorberAirGap/geometry/setZLength 0.07499 mm
+/gate/AbsorberAirGap/placement/setTranslation 0 0 2.45 mm
+/gate/AbsorberAirGap/setMaterial Air
+/gate/AbsorberAirGap/vis/setVisible false
+
+/gate/Layer/repeaters/insert linear
+/gate/Layer/linear/autoCenter false
+/gate/Layer/linear/setRepeatNumber 30
+/gate/Layer/linear/setRepeatVector 0 0 4.975 mm
+

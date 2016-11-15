@@ -1,0 +1,11 @@
+/gate/Absorber1/attachCrystalSD
+/gate/PCBGlue/attachCrystalSD
+/gate/PCB/attachCrystalSD
+/gate/ChipGlue/attachCrystalSD
+/gate/PassiveChip/attachCrystalSD
+/gate/ActiveChip/attachCrystalSD
+/gate/AirGapAfterChip/attachCrystalSD
+/gate/Filler/attachCrystalSD
+/gate/FillerGlue/attachCrystalSD
+/gate/Absorber2/attachCrystalSD
+/gate/AbsorberAirGap/attachCrystalSD
