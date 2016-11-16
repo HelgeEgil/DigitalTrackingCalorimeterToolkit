@@ -131,6 +131,36 @@ void DataInterface::getEventIDs(Int_t runNo, Hits * hits) {
 
 }
 
+void DataInterface::getDataProfile(TH2F *h2, Int_t energy) {
+   if (!existsEnergyFile(energy)) {
+      coug << "There are no data files with energy " << energy << endl;
+      return;
+   }
+
+   TString fn = Form("Data/ExperimentalData/DataFrame_%i_MeV.root", energy);
+   TFile *f = new TFile(fn);
+   TTree *tree = (TTree*) f->Get("tree");
+
+   Int_t nentries = tree->GetEntries();
+   printf("Found %d frames in the DataFrame.\n", nentries);
+
+   TLeaf *lY = tree->GetLeaf("fDataFrame.fY");
+   TLeaf *lLayer = tree->GetLeaf("fDataFrame.fLayer");
+
+   Float_t y, layer;
+
+   for (Int_t i=0; i<nentries; i++) {
+      tree->GetEntry(i);
+
+      for (Int_t j=0; j<lY->GetLen(); j++) {
+         Float_t y = lY->GetValue(j) + nx/2;
+         Float_t layer = lLayer-GetValue(j);
+
+         h2->Fill(y, layer);
+      }
+   }
+}
+
 void DataInterface::getDataFrame(Int_t runNo, CalorimeterFrame * cf, Int_t energy) {
 
    if (!existsEnergyFile(energy)) {

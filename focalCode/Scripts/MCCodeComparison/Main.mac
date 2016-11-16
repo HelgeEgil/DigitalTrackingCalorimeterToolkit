@@ -42,7 +42,7 @@
 /gate/source/addSource uniformBeam gps
 /gate/source/uniformBeam/gps/particle proton
 /gate/source/uniformBeam/gps/ene/type Gauss
-/gate/source/uniformBeam/gps/ene/mono 190 MeV
+/gate/source/uniformBeam/gps/ene/mono {energy} MeV
 /gate/source/uniformBeam/gps/ene/sigma 0 MeV
 /gate/source/uniformBeam/gps/type Plane
 /gate/source/uniformBeam/gps/shape Square
@@ -52,7 +52,7 @@
 /gate/source/uniformBeam/gps/centre 0. 0. -0.1 cm
 
 /gate/output/root/enable
-/gate/output/root/setFileName Data/GATE/complex_geometry_emy_nolimit_singlescatter_1k
+/gate/output/root/setFileName Data/GATE/ComplexGeometry/complex_{energy}MeV
 /gate/output/root/setRootSinglesFlag 0
 /gate/output/root/setRootNtupleFlag 0
 
@@ -62,5 +62,5 @@
 
 /gate/random/setEngineName MersenneTwister
 /gate/random/setEngineSeed auto
-/gate/application/setTotalNumberOfPrimaries 100000
+/gate/application/setTotalNumberOfPrimaries {npart}
 /gate/application/start

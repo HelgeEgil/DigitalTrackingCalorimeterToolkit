@@ -35,13 +35,15 @@ void Run()
    for (Int_t j=0; j<19; j++) {
       nominalEnergy = (j+5) * 10;
 
-      cout << "Compressing tree with " << nominalEnergy << " MeV.\n";
-      TFile *f = new TFile(Form("Data/GATE/Aluminium/aluminium163eV_%dMeV.root", nominalEnergy));
-      TFile *fOut = new TFile(Form("Data/GATE/Aluminium/compressed_aluminium163eV_%dMeV.root", nominalEnergy), "recreate");
+      cout << "Compressing tree with " << nominalEnergy << " MeV -> ";
+      TFile *f = new TFile(Form("Data/GATE/ComplexGeometry/complex_%dMeV.root", nominalEnergy));
+      TFile *fOut = new TFile(Form("Data/GATE/ComplexGeometry/compressed_complex_%dMeV.root", nominalEnergy), "recreate");
 
       TTree   *tree = (TTree*) f->Get("Hits");
       TTree    treeOut("treeOut", "Compressed GATE tree");
 
+      Float_t  allZ = 0;
+      Int_t    fillN = 0;
       Float_t  x,y,z,edep, lastEdep;
       Int_t    parentID, eventID;
       Char_t   processName[17];
@@ -83,6 +85,7 @@ void Run()
             }
 
             if (eventID != lastEventID) { // new event ID - we know last interaction was the history's last
+               allZ += lastZ; fillN++;
                treeOut.Fill();
             }
 
@@ -101,5 +104,7 @@ void Run()
 
       delete f;
       delete fOut;
+
+      cout << "range = " << allZ/fillN << " mm.\n";
    }
 }

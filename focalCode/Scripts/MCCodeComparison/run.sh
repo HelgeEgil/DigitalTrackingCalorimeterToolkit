@@ -1,13 +1,15 @@
 #!/bin/bash
 # Usage: run.sh material energy_from energy_increment energy_to
 
-echo "Usage: ./run.sh <file_number>"
-echo File Number: $1
+echo "Usage: ./run.sh <energy_from> <energy_step> <energy_to> <file_number>"
+echo Energy From: $1, Energy Step: $2, Energy To: $3, File Number: $4
 
-if [ $# -ne 1 ]; then
+if [ $# -ne 4 ]; then
 	echo Invalid number of arguments: $#
 	exit
 fi
-
-nice -n 10 Gate -a "'[nfile,$1]" Main.mac > terminal_output.txt &
-echo "Running: $1"
+for i in `seq $1 $2 $3`;
+do
+   nice -n 10 Gate -a "'[npart,$4] [energy,$i]'" Main.mac > terminal_output.txt &
+   echo "Running: $i"
+done
