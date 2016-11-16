@@ -131,9 +131,9 @@ void DataInterface::getEventIDs(Int_t runNo, Hits * hits) {
 
 }
 
-void DataInterface::getDataProfile(TH2F *h2, Int_t energy) {
+void DataInterface::getDataProfile(TH2F *hProfile, TH2F *hProjection, Int_t energy) {
    if (!existsEnergyFile(energy)) {
-      coug << "There are no data files with energy " << energy << endl;
+      cout << "There are no data files with energy " << energy << endl;
       return;
    }
 
@@ -144,19 +144,22 @@ void DataInterface::getDataProfile(TH2F *h2, Int_t energy) {
    Int_t nentries = tree->GetEntries();
    printf("Found %d frames in the DataFrame.\n", nentries);
 
+   TLeaf *lX = tree->GetLeaf("fDataFrame.fX");
    TLeaf *lY = tree->GetLeaf("fDataFrame.fY");
    TLeaf *lLayer = tree->GetLeaf("fDataFrame.fLayer");
 
-   Float_t y, layer;
+   Float_t x, y, layer;
 
    for (Int_t i=0; i<nentries; i++) {
       tree->GetEntry(i);
 
       for (Int_t j=0; j<lY->GetLen(); j++) {
-         Float_t y = lY->GetValue(j) + nx/2;
-         Float_t layer = lLayer-GetValue(j);
+         x = lX->GetValue(j)  + nx/2;
+         y = lY->GetValue(j)  + ny/2;
+         layer = lLayer->GetValue(j);
 
-         h2->Fill(y, layer);
+         hProfile->Fill(y, layer);
+         hProjection->Fill(x, y);
       }
    }
 }

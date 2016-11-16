@@ -25,6 +25,7 @@ void			getTrackStatistics(Int_t Runs, Int_t dataType = kMC, Bool_t recreate = 0,
 void			drawClusterSizeDistribution(Int_t Runs, Int_t dataType, Bool_t recreate, Float_t energy);
 void			compareClusterSizes(Int_t Runs, Bool_t recreate, Float_t energy);
 void			drawFitScale(Int_t Runs, Int_t dataType, Bool_t recreate, Float_t energy);
+void        drawDataProfile(Float_t energy);
 Bool_t		getCutTrackLength(Float_t energy, Track *track);
 Bool_t		getCutWEPL(Track *track);
 Bool_t		getCutChipNumber(Track *track);

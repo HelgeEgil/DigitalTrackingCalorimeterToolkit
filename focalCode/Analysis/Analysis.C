@@ -1686,6 +1686,30 @@ void drawData3D(Int_t Runs, Float_t energy) {
    Frame3D->Draw("LEGO");
 }
 
+void drawDataProfile(Float_t energy) {
+   run_energy = energy;
+
+   TCanvas *c1 = new TCanvas("c1", "Beam profiles", 1200, 700);
+   c1->Divide(2,1,0.0001,0.0001);
+
+   DataInterface *di = new DataInterface();
+
+   gStyle->SetOptStat(0);
+
+   Float_t scaleFactor = 15;
+
+   TH2F *hProfile = new TH2F("h2", "Beam profile in detector;Y posizion;Layer number", ny/scaleFactor,0,ny,20,0,20);
+   TH2F *hProjection = new TH2F("hProjection", "Beam projection in detector;X position;Y position", nx/scaleFactor,0,nx, ny/scaleFactor,0,ny);
+   di->getDataProfile(hProfile, hProjection, energy);
+
+   c1->cd(1);
+   hProfile->Draw("colz");
+
+   c1->cd(2);
+   hProjection->Draw("colz");
+}
+
+
 void compareClusterSizes(Int_t Runs, Bool_t recreate, Float_t energy) {
    run_energy = energy;
    Tracks    * MCTracks = nullptr;

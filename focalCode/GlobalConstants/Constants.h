@@ -5,7 +5,6 @@
 #include <vector>
 #include <TObject.h>
 
-#define USEDEBUG
 
 #ifdef USEDEBUG
 #define showDebug(x) std::cout << x
@@ -13,7 +12,6 @@
 #define showDebug(x)
 #endif
 
-#define USEALIPDE
 
 #ifdef USEALPIDE
 #define NX 3072
@@ -43,14 +41,14 @@ const Float_t kRad = 3.14159265/180.;
 const    Int_t nx = NX;
 const    Int_t ny = NY;
 const    Int_t nTrackers = 4;
-Bool_t   kUseAlpide = true;
+Bool_t   kUseAlpide = false;
 const    Float_t kAbsorbatorThickness = 3; // mm // FOCAL IS 3 mm (2x absorbers = 3 mm)
 
 // nLayers are loaded in MaterialConstants.C according to the detector geometry
 const Float_t dx = 3/1024; // mm
 const Float_t dy = 1.5/512; // mm
 const Float_t dz = DZ + kAbsorbatorThickness;
-Int_t kEventsPerRun = 50;
+Int_t kEventsPerRun = 150;
 
 // Used for treatment of available experimental data files
 const Int_t nEnergies = 8;
