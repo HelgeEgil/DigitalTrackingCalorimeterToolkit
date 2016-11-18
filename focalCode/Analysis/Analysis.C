@@ -695,6 +695,7 @@ Float_t drawBraggPeakGraphFit(Int_t Runs, Int_t dataType, Bool_t recreate, Float
    TH1F         * hMaxAngle = new TH1F("hMaxAngle", "Maximum angle for proton track", 200, 0, 25);
    
    cout << "At energy " << run_energy << ", expecting TL = " << getTLFromEnergy(run_energy) << " and WEPL = " << getWEPLFromEnergy(run_energy) << endl;
+   printf("This corresponds to a WEPL factor of %.2f.\n", getWEPLFactorFromEnergy(run_energy));
    cout << "Correcting for aluminum plate: " << kIsAluminumPlate << endl;
    cout << "Correcting for scintillators: " << kIsScintillator << endl;
 
@@ -953,69 +954,155 @@ void writeClusterFile(Int_t Runs, Int_t dataType, Float_t energy) {
 }
 
 void draw2DProjection(Int_t Runs, Int_t dataType, Bool_t recreate, Float_t energy) {
-
-   Tracks * tracks = loadOrCreateTracks(recreate, Runs, dataType, energy);
+   Tracks * tracks1 = loadOrCreateTracks(recreate, Runs, dataType, 170);
+   Tracks * tracks2 = loadOrCreateTracks(recreate, Runs, dataType, 188);
+   Tracks * tracks3 = loadOrCreateTracks(recreate, Runs, dataType, 190);
+   Tracks * tracks4 = loadOrCreateTracks(recreate, Runs, dataType, 150);
+   Tracks * tracks5 = loadOrCreateTracks(recreate, Runs, dataType, 160);
+   tracks1->extrapolateToLayer0();
+   tracks2->extrapolateToLayer0();
+   tracks3->extrapolateToLayer0();
+   tracks4->extrapolateToLayer0();
+   tracks5->extrapolateToLayer0();
    
-   Int_t hSizeX = nx/16;
-   Int_t hSizeY = ny/16;
+   Int_t hSizeX = nx/12;
+   Int_t hSizeY = ny/12;
 
    Float_t angleCut = 5.;
-   Float_t x0, y0, theta0;
+   Float_t x0, y0, xL, yL, theta0;
    Int_t nPoints = 0;
 
    Float_t fit_energy;
 
-   Int_t ntracks = tracks->GetEntriesFast();
-   Int_t nScintillatorHits = 0;
+   TCanvas *c1 = new TCanvas("c1", "Entry points", 1500, 1000);
+   c1->Divide(2, 1, 0.001, 0.001);
+   TCanvas *c2 = new TCanvas("c2", "1D entry points", 1200, 1200);
+   c2->Divide(2,1,0.001,0.001);
 
-   char * sDataType = getDataTypeChar(dataType); char * sMaterial = getMaterialChar();
-   char *title = (char*) Form("2D Projection of data from %.2f MeV proton beam in %s (%s)", energy, sMaterial, sDataType);
+   TH2F *normalizeFrame = new TH2F("normalizeFrame", "2D Projection of entry position from multiple proton beams on FOCAL;X position [mm];Y position [mm]", hSizeX, -30, 30, hSizeY, -30, 30);
+   TH2F *normalizeFrameLast = new TH2F("normalizeFrameLast", "2D Projection of stopping position from multiple proton beams on FOCAL;X position [mm]; Y posision [mm]", hSizeX, -30, 30, hSizeY, -30, 30);
 
-   TCanvas *c1 = new TCanvas(title);
-   
-   TH2F *Frame2D = new TH2F("Frame2D", title, hSizeX, 0, nx, hSizeY, 0, ny);
-   TH2F *normalizeFrame = new TH2F("normalizeFrame", "title", hSizeX, 0, nx, hSizeY, 0, ny);
+   TH1F *beamSpec = new TH1F("beamSpec", "1D projection of entry positions from multiple proton beams on FOCAL;X position [mm];Entries", hSizeX, -30, 30);
+   TH1F *beamSpecLast = new TH1F("beamSpecLast", "1D projection of exit positions from multiple proton beams on FOCAL;X position [mm];Entries", hSizeX, -30, 30);
 
-   for (Int_t i=0; i<ntracks; i++) {
-      Track *thisTrack = tracks->At(i);
-
+   for (Int_t i=0; i<tracks1->GetEntriesFast(); i++) {
+      Track *thisTrack = tracks1->At(i);
       if (!thisTrack) continue;
-      
-      x0 = thisTrack->getX(0);
-      y0 = thisTrack->getY(0);
-      theta0 = thisTrack->getSlopeAngle();
-
-      fit_energy = thisTrack->getEnergy();
-      if (fit_energy > 180) continue;
-
-      if (thisTrack->isHitOnScintillators()) {
-         nScintillatorHits ++;
-
-   //    if (theta0 > angleCut) continue;
-      Frame2D->Fill(x0, y0, fit_energy);
+      x0 = thisTrack->getXmm(0);
+      y0 = thisTrack->getYmm(0);
+      xL = thisTrack->Last()->getXmm();
+      yL = thisTrack->Last()->getYmm();
       normalizeFrame->Fill(x0, y0);
-      }
-      nPoints++;
-
+      normalizeFrameLast->Fill(xL, yL);
+      beamSpec->Fill(x0);
+      beamSpecLast->Fill(xL);
+   }
+   
+   for (Int_t i=0; i<tracks2->GetEntriesFast(); i++) {
+      Track *thisTrack = tracks2->At(i);
+      if (!thisTrack) continue;
+      x0 = thisTrack->getXmm(0);
+      y0 = thisTrack->getYmm(0);
+      xL = thisTrack->Last()->getXmm();
+      yL = thisTrack->Last()->getYmm();
+      normalizeFrame->Fill(x0, y0);
+      normalizeFrameLast->Fill(xL, yL);
+      beamSpec->Fill(x0);
+      beamSpecLast->Fill(xL);
+   }
+   
+   for (Int_t i=0; i<tracks3->GetEntriesFast(); i++) {
+      Track *thisTrack = tracks3->At(i);
+      if (!thisTrack) continue;
+      x0 = thisTrack->getXmm(0);
+      y0 = thisTrack->getYmm(0);
+      xL = thisTrack->Last()->getXmm();
+      yL = thisTrack->Last()->getYmm();
+      normalizeFrame->Fill(x0, y0);
+      normalizeFrameLast->Fill(xL, yL);
+      beamSpec->Fill(x0);
+      beamSpecLast->Fill(xL);
+   }
+   
+   for (Int_t i=0; i<tracks4->GetEntriesFast(); i++) {
+      Track *thisTrack = tracks4->At(i);
+      if (!thisTrack) continue;
+      x0 = thisTrack->getXmm(0);
+      y0 = thisTrack->getYmm(0);
+      xL = thisTrack->Last()->getXmm();
+      yL = thisTrack->Last()->getYmm();
+      normalizeFrame->Fill(x0, y0);
+      normalizeFrameLast->Fill(xL, yL);
+      beamSpec->Fill(x0);
+      beamSpecLast->Fill(xL);
+   }
+   
+   for (Int_t i=0; i<tracks5->GetEntriesFast(); i++) {
+      Track *thisTrack = tracks5->At(i);
+      if (!thisTrack) continue;
+      x0 = thisTrack->getXmm(0);
+      y0 = thisTrack->getYmm(0);
+      xL = thisTrack->Last()->getXmm();
+      yL = thisTrack->Last()->getYmm();
+      normalizeFrame->Fill(x0, y0);
+      normalizeFrameLast->Fill(xL, yL);
+      beamSpec->Fill(x0);
+      beamSpecLast->Fill(xL);
    }
 
-   Frame2D->Divide(normalizeFrame);
-
-   delete tracks;
-
-   cout << "nPoints = " << nPoints << endl;
-   cout << "Estimated scintillator hits = " << nScintillatorHits << endl;
+   delete tracks1;
+   delete tracks2;
+   delete tracks3;
+   delete tracks4;
+   delete tracks5;
    
-   Frame2D->Draw("COLZ");
-   gStyle->SetOptStat(0);
+   normalizeFrame->GetXaxis()->SetTitleFont(22);
+   normalizeFrame->GetXaxis()->SetLabelFont(22);
+   normalizeFrame->GetYaxis()->SetTitleFont(22);
+   normalizeFrame->GetYaxis()->SetLabelFont(22);
+   
+   normalizeFrameLast->GetXaxis()->SetTitleFont(22);
+   normalizeFrameLast->GetXaxis()->SetLabelFont(22);
+   normalizeFrameLast->GetYaxis()->SetTitleFont(22);
+   normalizeFrameLast->GetYaxis()->SetLabelFont(22);
+  
+   beamSpec->GetXaxis()->SetTitleFont(22);
+   beamSpec->GetXaxis()->SetLabelFont(22);
+   beamSpec->GetYaxis()->SetTitleFont(22);
+   beamSpec->GetYaxis()->SetLabelFont(22);
+  
+   beamSpecLast->GetXaxis()->SetTitleFont(22);
+   beamSpecLast->GetXaxis()->SetLabelFont(22);
+   beamSpecLast->GetYaxis()->SetTitleFont(22);
+   beamSpecLast->GetYaxis()->SetLabelFont(22);
 
+   /*
+   gPad->Update();
+   TPaveText *title = (TPaveText*) gPad->GetPrimitive("title");
+   title->SetTextFont(22);
+   gPad->Modified();
+*/
+   gStyle->SetOptStat(0);
+   
+   c1->cd(1);
+   normalizeFrame->Draw("colz");
+   c1->cd(2);
+   normalizeFrameLast->Draw("colz");
+
+   c2->cd(1);
+   beamSpec->Draw();
+
+   c2->cd(2);
+   beamSpecLast->Draw();
+
+   /*
    // draw lines from 474 to 806
    TLine *l1 = new TLine(474, 0, 474, 1280);
    TLine *l2 = new TLine(806, 0, 806, 1280);
    TLine *l3 = new TLine(0, 474, 1280, 474);
    TLine *l4 = new TLine(0, 806, 1280, 806);
    l1->Draw(); l2->Draw(); l3->Draw(); l4->Draw();
-
+   */
 }
 
 Hits * getEventIDs(Int_t Runs, Float_t energy) {
@@ -2109,7 +2196,7 @@ Float_t doNGaussianFit ( TH1F *h, Float_t *means, Float_t *sigmas) {
 
    Int_t j=0;
    for (Int_t i=0; i<nLayers; i++) {
-      if (getWEPLFromTL(getLayerPositionmm(i)) > getUnitFromEnergy(run_energy*1.1)) continue;
+      if (getWEPLFromTL(getLayerPositionmm(i)) > getUnitFromEnergy(run_energy*1.2)) continue;
       if (getWEPLFromTL(getLayerPositionmm(i)) < getWEPLFromEnergy(run_energy * 0.8)) continue;
 
       Float_t searchFrom = getWEPLFromTL(getLayerPositionmm(i))+10;

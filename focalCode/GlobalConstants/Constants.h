@@ -15,11 +15,15 @@
 
 #ifdef USEALPIDE
 #define NX 3072
+#define DX 0.00293
+#define DY 0.00293
 #define NY 1024
 #define DZ 0.435
 #else
 #define NX 1280
 #define NY 1280
+#define DX 0.003
+#define DY 0.003
 #define DZ 0.975
 #endif
 
@@ -27,8 +31,8 @@ enum eFrameType {kCalorimeter, kTracker};
 enum eDataType {kMC, kData};
 
 Float_t run_energy = 0;
-Bool_t kIsAluminumPlate = false;
-Bool_t kIsScintillator = false;
+Bool_t kIsAluminumPlate = true;
+Bool_t kIsScintillator = true;
 
 const Int_t sizeOfEventID = 500;
 
@@ -45,8 +49,8 @@ Bool_t   kUseAlpide = false;
 const    Float_t kAbsorbatorThickness = 3; // mm // FOCAL IS 3 mm (2x absorbers = 3 mm)
 
 // nLayers are loaded in MaterialConstants.C according to the detector geometry
-const Float_t dx = 3/1024; // mm
-const Float_t dy = 1.5/512; // mm
+const Float_t dx = DX; // mm
+const Float_t dy = DY; // mm
 const Float_t dz = DZ + kAbsorbatorThickness;
 Int_t kEventsPerRun = 150;
 
@@ -55,7 +59,7 @@ const Int_t nEnergies = 8;
 Int_t energies[nEnergies] = {122, 140, 150, 160, 170, 180, 188, 190};
 
 enum eMaterial {kTungsten, kAluminium, kPMMA, kWater};
-const Int_t kMaterial = kAluminium;
+const Int_t kMaterial = kTungsten;
 
 Int_t kDataType = kMC;
 

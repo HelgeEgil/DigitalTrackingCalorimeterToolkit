@@ -235,7 +235,7 @@ void  createSplines() {
       in >> energy >> range;
       if (!in.good()) break;
 
-      rangesW[idxW] = range*10;
+      rangesW[idxW] = range;
       energiesW[idxW++] = energy;
    }
 

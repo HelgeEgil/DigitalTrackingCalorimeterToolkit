@@ -125,7 +125,9 @@ TGraphErrors * Track::doRangeFit(Bool_t isScaleVariable) {
 			erx[i] = erx[i] * WEPLFactor;
 		}
 	}
-	
+
+   // for (int i=0; i<n; i++) printf("y(%.1f mm) = %.1f.\n", x[i], y[i]); 
+
 	graph = new TGraphErrors(n, x, y, erx, ery);
 	
 	if (kOutputUnit == kPhysical) {
@@ -140,7 +142,7 @@ TGraphErrors * Track::doRangeFit(Bool_t isScaleVariable) {
 
 	if (kDataType == kData) scaleParameter = 2.7;
 
-	TF1 *func = new TF1("fit_BP", fitfunc_DBP, 0, getWEPLFromEnergy(maxEnergy*1.2), 2);
+	TF1 *func = new TF1("fit_BP", fitfunc_DBP, 0, maxRange, 2);
 	func->SetParameter(0, estimatedRange);
 	func->SetParameter(1, scaleParameter);
 	func->SetParLimits(0, 0, maxRange);
@@ -150,9 +152,8 @@ TGraphErrors * Track::doRangeFit(Bool_t isScaleVariable) {
    }
 	func->SetNpx(750);
 
-	graph->Fit("fit_BP", "B, N, Q, W", "", 0, getWEPLFromEnergy(maxEnergy*1.2));
+	graph->Fit("fit_BP", "B, N, Q, W", "", 0, maxRange);
 	
-//	fitEnergy_ = correctForEnergyParameterisation(func->GetParameter(0));
 	fitRange_ = func->GetParameter(0);
 	fitScale_ = func->GetParameter(1);
 	fitError_ = func->GetParError(0);
