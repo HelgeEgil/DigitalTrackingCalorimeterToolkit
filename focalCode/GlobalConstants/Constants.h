@@ -11,8 +11,6 @@
 #define showDebug(x)
 #endif
 
-#define USEALPIDE
-
 #ifdef USEALPIDE
 #define NX 3072
 #define DX 0.0293
@@ -31,9 +29,9 @@ enum eFrameType {kCalorimeter, kTracker};
 enum eDataType {kMC, kData};
 
 Float_t  run_energy = 0;
-Bool_t   kIsAluminumPlate = false;
-Bool_t   kIsScintillator = false;
-Bool_t   kUseAlpide = true;
+Bool_t   kIsAluminumPlate = true;
+Bool_t   kIsScintillator = true;
+Bool_t   kUseAlpide = false;
 
 const Int_t sizeOfEventID = 500;
 
@@ -59,7 +57,7 @@ const Int_t nEnergies = 8;
 Int_t energies[nEnergies] = {122, 140, 150, 160, 170, 180, 188, 190};
 
 enum eMaterial {kTungsten, kAluminium, kPMMA, kWater};
-const Int_t kMaterial = kAluminium;
+const Int_t kMaterial = kTungsten;
 
 Int_t kDataType = kMC;
 

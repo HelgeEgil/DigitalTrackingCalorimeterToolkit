@@ -694,7 +694,7 @@ Float_t drawBraggPeakGraphFit(Int_t Runs, Int_t dataType, Bool_t recreate, Float
    TH1F         * hFitResultsDroppedData = new TH1F("fitResultsDroppedData", hTitle, 200, getUnitFromEnergy(0), getUnitFromEnergy(energy*1.2));
    TH1F         * hMaxAngle = new TH1F("hMaxAngle", "Maximum angle for proton track", 200, 0, 25);
    
-   cout << "At energy " << run_energy << ", expecting TL = " << getTLFromEnergy(run_energy) << " and WEPL = " << getWEPLFromEnergy(run_energy) << endl;
+   printf("At energy %.0f, expecting range %.2f mm and WEPL %.2f mm.\n", run_energy, getTLFromEnergy(run_energy), getWEPLFromEnergy(run_energy));
    printf("This corresponds to a WEPL factor of %.2f.\n", getWEPLFactorFromEnergy(run_energy));
    cout << "Correcting for aluminum plate: " << kIsAluminumPlate << endl;
    cout << "Correcting for scintillators: " << kIsScintillator << endl;
