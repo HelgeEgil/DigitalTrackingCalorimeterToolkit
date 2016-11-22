@@ -28,7 +28,7 @@
 /gate/run/initialize
 
 #/geometry/test/recursive_test
-#/geometry/test/run
+/geometry/test/run
 
 #=======================#
 # ADD PROTON BEAM	      #

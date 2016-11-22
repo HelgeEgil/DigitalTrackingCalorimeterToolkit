@@ -31,8 +31,8 @@ enum eFrameType {kCalorimeter, kTracker};
 enum eDataType {kMC, kData};
 
 Float_t  run_energy = 0;
-Bool_t   kIsAluminumPlate = true;
-Bool_t   kIsScintillator = true;
+Bool_t   kIsAluminumPlate = false;
+Bool_t   kIsScintillator = false;
 Bool_t   kUseAlpide = true;
 
 const Int_t sizeOfEventID = 500;
