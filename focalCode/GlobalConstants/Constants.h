@@ -5,34 +5,35 @@
 #include <vector>
 #include <TObject.h>
 
-
 #ifdef USEDEBUG
 #define showDebug(x) std::cout << x
 #else
 #define showDebug(x)
 #endif
 
+#define USEALPIDE
 
 #ifdef USEALPIDE
 #define NX 3072
-#define DX 0.00293
-#define DY 0.00293
+#define DX 0.0293
+#define DY 0.0293
 #define NY 1024
 #define DZ 0.435
 #else
 #define NX 1280
 #define NY 1280
-#define DX 0.003
-#define DY 0.003
+#define DX 0.03
+#define DY 0.03
 #define DZ 0.975
 #endif
 
 enum eFrameType {kCalorimeter, kTracker};
 enum eDataType {kMC, kData};
 
-Float_t run_energy = 0;
-Bool_t kIsAluminumPlate = true;
-Bool_t kIsScintillator = true;
+Float_t  run_energy = 0;
+Bool_t   kIsAluminumPlate = true;
+Bool_t   kIsScintillator = true;
+Bool_t   kUseAlpide = true;
 
 const Int_t sizeOfEventID = 500;
 
@@ -45,21 +46,20 @@ const Float_t kRad = 3.14159265/180.;
 const    Int_t nx = NX;
 const    Int_t ny = NY;
 const    Int_t nTrackers = 4;
-Bool_t   kUseAlpide = false;
 const    Float_t kAbsorbatorThickness = 3; // mm // FOCAL IS 3 mm (2x absorbers = 3 mm)
 
 // nLayers are loaded in MaterialConstants.C according to the detector geometry
 const Float_t dx = DX; // mm
 const Float_t dy = DY; // mm
 const Float_t dz = DZ + kAbsorbatorThickness;
-Int_t kEventsPerRun = 150;
+Int_t kEventsPerRun = 125;
 
 // Used for treatment of available experimental data files
 const Int_t nEnergies = 8;
 Int_t energies[nEnergies] = {122, 140, 150, 160, 170, 180, 188, 190};
 
 enum eMaterial {kTungsten, kAluminium, kPMMA, kWater};
-const Int_t kMaterial = kTungsten;
+const Int_t kMaterial = kAluminium;
 
 Int_t kDataType = kMC;
 

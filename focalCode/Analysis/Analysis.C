@@ -1159,12 +1159,12 @@ void drawClusterSizeDistribution(Int_t Runs, Int_t dataType, Bool_t recreate, Fl
 void drawTracks3D(Int_t Runs, Int_t dataType, Bool_t recreate, Float_t energy) {
    Tracks * tracks = loadOrCreateTracks(recreate, Runs, dataType, energy);
 
-   Int_t switchLayer = 30;
+   Int_t switchLayer = 100;
 
    TCanvas *c1 = new TCanvas("c1", "c1", 1600, 1200);
    c1->SetTitle(Form("Tracks from %.2f MeV protons on %s", energy, getMaterialChar()));
    TView *view = TView::CreateView(1);
-   view->SetRange(0, 0, 0, nx, 30, ny);
+   view->SetRange(0, 0, 0, nx, 100, ny);
    Int_t iret;
    Float_t theta = 285;
    Float_t phi = 80;
@@ -1287,6 +1287,7 @@ void drawTracks3D(Int_t Runs, Int_t dataType, Bool_t recreate, Float_t energy) {
       Track *thisTrack = tracks->At(i);
       if (!thisTrack) continue;
       if (thisTrack->getTrackLengthmm() < 2) continue;
+
       Int_t n = thisTrack->GetEntriesFast();
 
       TPolyLine3D *l = new TPolyLine3D(n);
@@ -1294,16 +1295,38 @@ void drawTracks3D(Int_t Runs, Int_t dataType, Bool_t recreate, Float_t energy) {
       TPolyMarker3D *trackPoints = new TPolyMarker3D(nClusters, 7);
 
       if (!thisTrack->isFirstAndLastEventIDEqual()) {
-         l->SetLineColor(kRed);
+         if (!thisTrack->Last()) continue;
+         if (!thisTrack->At(thisTrack->GetEntriesFast() - 2)) continue;
 
-         /*
-         cout << "Track from " << *thisTrack->At(0) << " is MC wrong\nEvent IDs: ";
-         for (Int_t j=0; j<thisTrack->GetEntriesFast(); j++) {
-            cout << thisTrack->getEventID(j) << ", ";
+         Int_t lastEID = thisTrack->Last()->getEventID();   
+         if (lastEID < 0) continue;
+
+         Int_t trackID = tracks->getTrackIdxFromFirstLayerEID(lastEID);
+
+         if (trackID < 0) continue;
+         if (!tracks->At(trackID)->At(0)) continue;
+   
+         Float_t delta = diffmmXY(tracks->At(trackID)->At(0), thisTrack->At(0));
+         Float_t phi0 = thisTrack->getSlopeAngleBetweenLayers(1);
+         Float_t phi1 = tracks->At(trackID)->getSlopeAngleBetweenLayers(1);
+         Float_t deltaphi = fabs(phi0 - phi1);
+
+         if (delta < 0.5 && deltaphi < 1) {
          }
-         cout << endl;
-         */
+
+         else if (thisTrack->getWEPL() < 0.6 * getWEPLFromEnergy(run_energy)) {
+            // Bad track ends early. OK...
+         }
+
+         else {
+            l->SetLineColor(kRed);
+         }
       }
+      /* Old method, draw all tracks with different event IDs red
+      if (!thisTrack->isFirstAndLastEventIDEqual()) {
+            l->SetLineColor(kRed);
+      }
+      */
 
       firstEID = thisTrack->getEventID(0);
       Int_t lineElementNumber = 0;
@@ -1734,22 +1757,64 @@ void drawFrame2D(Int_t Runs, Int_t Layer, Float_t energy) {
    run_energy = energy;
    DataInterface *di = new DataInterface();
    CalorimeterFrame *cf = new CalorimeterFrame();
-   
+  
+   TCanvas *c1 = new TCanvas("c1", "Hit distribution in layer", 1200, 800);
+   TCanvas *c2 = new TCanvas("c2", "Region dependent occupancy", 1200, 800);
+
    TList *histogramList = new TList;
+      Int_t counterOverall = 0;
+      Int_t fromX =0;
+      Int_t toX = 0;
+      Int_t counter;
+      Int_t nPixels = ny*2;
+   TH1F *hCount = new TH1F("hCount", "Priority Encoding (FOCAL) region occupancy @ 1000 protons/event;Occupancy (%);Counts",30,0,15);
+      Float_t occupancy;
    
-   for (Int_t i=0; i<Runs; i++) {
-      di->getDataFrame(i, cf);
-      histogramList->Add(cf->getTH2F(Layer));
+   for (Int_t k=0; k<Runs; k++) {
+      di->getDataFrame(k, cf, energy);
+      TH2F *Frame2D = cf->getTH2F(Layer);
+      if (Frame2D->Integral() == 0) break;
+      cout << "Hits in calorimeterframe = " << Frame2D->Integral();
+
+      for (Int_t i=0; i<nx/2; i++) { 
+         counter = 0;
+         fromX = i*2;
+         toX = (i+1)*2;
+
+         for (Int_t j=0; j<ny; j++) {
+            if (Frame2D->GetBinContent(Frame2D->FindBin(i, j)) > 0){
+               counter++;
+               counterOverall++;
+            }
+         }
+
+         occupancy = (float) counter / nPixels * 100;
+         hCount->Fill(occupancy);
+      }
+//      histogramList->Add(cf->getTH2F(Layer));
+      cf->Reset();
    }
  
    delete di;
-
+/*
    TH2F *Frame2D = new TH2F("Frame2D", Form("Hit distribution in layer %i", Layer),
                               nx, 0, nx, ny, 0, ny);
 
+   c1->cd();
    Frame2D->Merge(histogramList);
    Frame2D->Draw("COLZ");
    gStyle->SetOptStat(0);
+
+*/
+   c2->cd();
+   hCount->SetFillColor(kBlue-7);
+   hCount->Draw();
+      
+   printf("The overall occupancy is %.2f %", 100*(float) counterOverall / nx / ny);
+
+   gPad->Update();
+   TLine *l = new TLine(12.5, 0, 12.5, 500);
+   l->Draw();
 }
 
 void drawData3D(Int_t Runs, Float_t energy) {

@@ -31,7 +31,7 @@ void Run()
 
    enum phantomType {kAluminium, kWater, kComplex};
 
-   Int_t phantom = kWater;
+   Int_t phantom = kComplex;
 
    Int_t    nbinsxy = 400;
    Int_t    xyfrom = -60;
@@ -350,7 +350,7 @@ void Run()
             nominalRange = 0.0022 * pow(nominalEnergy, 1.77);
          }
          else if (phantom == kComplex) {
-            nominalRange = 0.0013 * pow(nominalEnergy, 1.7447);
+            nominalRange = 0.0013 * pow(nominalEnergy, 1.7447) * 0.97;
          }
 
          TH1F    *hFLUKA= new TH1F("hFLUKA", "All protons in FLUKA dataset;Range [cm];Number of primaries", 100, fmax(0, nominalRange-2), nominalRange+2);

@@ -264,7 +264,7 @@ void Clusters::makeLayerIndex() {
 
 	for (Int_t i=0; i<GetEntriesFast(); i++) {
 		if (!At(i)) continue;
-
+         
 		if (lastLayer != getLayer(i)) {
 			layerIndex_.at(getLayer(i)) = i;
 			lastLayer = getLayer(i);
@@ -287,6 +287,14 @@ void Clusters::makeLayerIndex() {
 			layerIndex_.at(i) = 0;
 		}
 	}
+
+#ifdef USEDEBUG
+   printf("Layer Index -------\n");
+   for (UInt_t i=0; i<layerIndex_.size(); i++) {
+      printf("layer %d: Layer Index = %d.\n", i, layerIndex_.at(i));
+   }
+#endif
+
 }
 
 void Clusters::matchWithEventIDs(Hits * eventIDs) {	

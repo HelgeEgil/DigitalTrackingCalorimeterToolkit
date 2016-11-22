@@ -205,7 +205,7 @@ Tracks * getTracksFromClusters(Int_t Runs, Int_t dataType, Int_t frameType, Floa
       di->getMCClusters(i, clusters);
 
       showDebug("Finding calorimeter tracks\n");
-      tracks = clusters->findCalorimeterTracks();
+      tracks = clusters->findCalorimeterTracksWithMCTruth();
 
       if (tracks->GetEntriesFast() == 0) breakSignal = kTRUE; // to stop running
 
@@ -214,7 +214,6 @@ Tracks * getTracksFromClusters(Int_t Runs, Int_t dataType, Int_t frameType, Floa
       Int_t nIsInelastic = 0, nIsNotInelastic = 0;
       
       tracks->extrapolateToLayer0();
-      tracks->splitSharedClusters();
       nTracksBefore = tracks->GetEntries();
       tracks->removeTracksLeavingDetector();
       nTracksAfter = tracks->GetEntries();
@@ -236,7 +235,7 @@ Tracks * getTracksFromClusters(Int_t Runs, Int_t dataType, Int_t frameType, Floa
       allTracks->appendClustersWithoutTrack(clusters->getClustersWithoutTrack());
 
       clusters->clearClusters();
-      tracks->clearTracks();
+      tracks->Clear();
 
       if (breakSignal) break;
    }
@@ -384,8 +383,8 @@ Tracks * getTracks(Int_t Runs, Int_t dataType, Int_t frameType, Float_t energy, 
       trackerHits->clearHits();
       clusters->clearClusters();
       trackerClusters->clearClusters();
-      calorimeterTracks->clearTracks();
-      trackerTracks->clearTracks();
+      calorimeterTracks->Clear();
+      trackerTracks->Clear();
 
       if (breakSignal) break;
    }

@@ -13,6 +13,45 @@
 
 using namespace std;
 
+Tracks * Clusters::findCalorimeterTracksWithMCTruth() {
+   // Now clusters is sorted by event ID
+   // Loop through list, and fill to track when new event ID is encountered
+
+   Cluster   * cluster = nullptr;
+   Track     * track = new Track();
+   Tracks    * tracks = new Tracks(kEventsPerRun * 5);
+   Int_t       lastEventID, eventID;
+
+   lastEventID = At(0)->getEventID();
+
+   for (Int_t i=0; i<GetEntriesFast(); i++) {
+      if (!At(i)) {
+         cout << "Clusters::findCalorimeterTracksWithMCTruth could not find cluster at " << i << endl;
+         continue;
+      }
+
+      cluster = At(i);
+      eventID = cluster->getEventID();
+
+      if (eventID != lastEventID) {
+         // Cluster from new event ID encountered, store what we have already
+         showDebug("Track at  is full, storing the pointer to tracks having currently " << tracks->GetEntriesFast() << " elements.\n");
+         tracks->appendTrack(track);
+         track->Clear();
+      }
+
+      showDebug("Appending cluster at " << *cluster << " with  number " << track->GetEntriesFast() + 1 << " to track.\n");
+      track->appendCluster(cluster);
+
+      lastEventID = eventID;
+   }
+
+   // Store last track
+   tracks->appendTrack(track);
+
+   return tracks;
+}
+
 Tracks * Clusters::findCalorimeterTracks() {
 	Tracks * tracks = new Tracks(kEventsPerRun * 5);
 	Int_t		startOffset = 0;
@@ -98,7 +137,7 @@ Clusters * Clusters::findSeeds(Int_t layer, Bool_t kUsedClustersInSeeds) {
 	Int_t layerIdxFrom = getFirstIndexOfLayer(layer);
 	Int_t layerIdxTo = getLastIndexOfLayer(layer);
 
-	showDebug("Layer Index From , To: (" << layerIdxFrom << "," << layerIdxTo << ")\n");
+	showDebug("Layer Index of layer " << layer << " from " << layerIdxFrom << ", to " << layerIdxTo << ")\n");
 	
 	if (layerIdxFrom<0)
 		return seeds;

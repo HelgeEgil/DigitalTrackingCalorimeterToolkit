@@ -227,16 +227,17 @@ void  DataInterface::getMCClusters(Int_t runNo, Clusters *clusters) {
       nb = fChain->GetEntry(jentry);
       nbytes += nb;
 
-      layer = level1ID + baseID;
+      layer = level1ID + baseID - 1;
       if (parentID != 0) continue;
       
       if (lastID != eventID || lastLayer != layer) {
-//         showDebug(Form("Adding point (x,y,z,ID,edep) = (%.2f, %.2f, %d, %d, %.2f)\n", sumX/n,sumY/n,lastLayer,lastID,sum_edep));
+//         showDebug(Form("Adding point (x,y,z,ID,edep) = (%.2f, %.2f, %d, %d, %.2f)\n", sumX/n/dx+nx/2,sumY/n/dy+ny/2,lastLayer,lastID,sum_edep));
 
          x = sumX/n / dx + nx/2;
-         y = sumY/n / dy + ny/2;
+         y = sumY/n / dy + ny/2;         
       
          clusters->appendClusterEdep(x, y, lastLayer, sum_edep, lastID);
+         // FIXME FIND BETTER WAY TO READ OUT FIRST LAYER!!!!! CANNOT SUBTRACT 1 HERE!!!
 
          sum_edep = 0;
          sumY = 0;

@@ -133,6 +133,8 @@ void Tracks::removeTracksLeavingDetector() {
 
       lastLayer = lastCluster->getLayer();
       nextPoint = getTrackExtrapolationToLayer(At(i), lastLayer + 1);
+
+      if (!nextPoint) continue;
       
       if (isPointOutOfBounds(nextPoint, -15)) {
          removeTrack(At(i));
