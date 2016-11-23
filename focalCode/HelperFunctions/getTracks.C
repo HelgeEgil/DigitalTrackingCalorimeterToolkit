@@ -278,7 +278,6 @@ Tracks * getTracks(Int_t Runs, Int_t dataType, Int_t frameType, Float_t energy, 
       
       if (dataType == kMC) {
          t1.Start();
-         
 
          eventID = di->getMCFrame(i, cf, x, y);
          di->getEventIDs(i, eventIDs);

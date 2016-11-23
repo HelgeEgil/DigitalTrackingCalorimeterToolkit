@@ -227,7 +227,7 @@ void  DataInterface::getMCClusters(Int_t runNo, Clusters *clusters) {
       nb = fChain->GetEntry(jentry);
       nbytes += nb;
 
-      layer = level1ID + baseID - 1;
+      layer = level1ID + baseID;// - 1;
       if (parentID != 0) continue;
       
       if (lastID != eventID || lastLayer != layer) {

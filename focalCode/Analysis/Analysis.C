@@ -1163,7 +1163,7 @@ void drawTracks3D(Int_t Runs, Int_t dataType, Bool_t recreate, Float_t energy) {
 
    Tracks * tracks = loadOrCreateTracks(recreate, Runs, dataType, energy);
 
-   Int_t switchLayer = 100;
+   Int_t switchLayer =  100;
 
    TCanvas *c1 = new TCanvas("c1", "c1", 1600, 1200);
    c1->SetTitle(Form("Tracks from %.2f MeV protons on %s", energy, getMaterialChar()));
