@@ -1,8 +1,0 @@
-- Many of the tracks are upward bent. Why...?
-- If a point is layer skipped, often a wrong point is chosen instead of doing
-  the correct layer skip!
-- Port rest of the code (but wait with the phantom layer)
-	- Include kData
-- Bragg Peak fitting - template Gaussian fit, one sided
-- Re-evaluate the refactoring
-- Phantom layer analysis

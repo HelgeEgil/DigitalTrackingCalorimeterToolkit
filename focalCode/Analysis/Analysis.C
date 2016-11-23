@@ -954,6 +954,8 @@ void writeClusterFile(Int_t Runs, Int_t dataType, Float_t energy) {
 }
 
 void draw2DProjection(Int_t Runs, Int_t dataType, Bool_t recreate, Float_t energy) {
+   run_energy = energy;
+   
    Tracks * tracks1 = loadOrCreateTracks(recreate, Runs, dataType, 170);
    Tracks * tracks2 = loadOrCreateTracks(recreate, Runs, dataType, 188);
    Tracks * tracks3 = loadOrCreateTracks(recreate, Runs, dataType, 190);
@@ -1157,6 +1159,8 @@ void drawClusterSizeDistribution(Int_t Runs, Int_t dataType, Bool_t recreate, Fl
 }
       
 void drawTracks3D(Int_t Runs, Int_t dataType, Bool_t recreate, Float_t energy) {
+   run_energy = energy;
+
    Tracks * tracks = loadOrCreateTracks(recreate, Runs, dataType, energy);
 
    Int_t switchLayer = 100;
@@ -1753,22 +1757,19 @@ void drawDiffusionCheck(Int_t Runs, Int_t Layer, Float_t energy) {
    c1->Update();
 }
 
-void drawFrame2D(Int_t Runs, Int_t Layer, Float_t energy) {
+void drawRegionOccupancy(Int_t Runs, Int_t Layer, Float_t energy) {
    run_energy = energy;
    DataInterface *di = new DataInterface();
    CalorimeterFrame *cf = new CalorimeterFrame();
   
-   TCanvas *c1 = new TCanvas("c1", "Hit distribution in layer", 1200, 800);
    TCanvas *c2 = new TCanvas("c2", "Region dependent occupancy", 1200, 800);
-
-   TList *histogramList = new TList;
-      Int_t counterOverall = 0;
-      Int_t fromX =0;
-      Int_t toX = 0;
-      Int_t counter;
-      Int_t nPixels = ny*2;
+   Int_t counterOverall = 0;
+   Int_t fromX =0;
+   Int_t toX = 0;
+   Int_t counter;
+   Int_t nPixels = ny*2;
    TH1F *hCount = new TH1F("hCount", "Priority Encoding (FOCAL) region occupancy @ 1000 protons/event;Occupancy (%);Counts",30,0,15);
-      Float_t occupancy;
+   Float_t occupancy;
    
    for (Int_t k=0; k<Runs; k++) {
       di->getDataFrame(k, cf, energy);
@@ -1791,21 +1792,11 @@ void drawFrame2D(Int_t Runs, Int_t Layer, Float_t energy) {
          occupancy = (float) counter / nPixels * 100;
          hCount->Fill(occupancy);
       }
-//      histogramList->Add(cf->getTH2F(Layer));
       cf->Reset();
    }
  
    delete di;
-/*
-   TH2F *Frame2D = new TH2F("Frame2D", Form("Hit distribution in layer %i", Layer),
-                              nx, 0, nx, ny, 0, ny);
 
-   c1->cd();
-   Frame2D->Merge(histogramList);
-   Frame2D->Draw("COLZ");
-   gStyle->SetOptStat(0);
-
-*/
    c2->cd();
    hCount->SetFillColor(kBlue-7);
    hCount->Draw();
@@ -1815,6 +1806,36 @@ void drawFrame2D(Int_t Runs, Int_t Layer, Float_t energy) {
    gPad->Update();
    TLine *l = new TLine(12.5, 0, 12.5, 500);
    l->Draw();
+}
+
+void drawFrame2D(Int_t Runs, Int_t dataType, Int_t Layer, Float_t energy) {
+   run_energy = energy;
+   DataInterface *di = new DataInterface();
+   CalorimeterFrame *cf = new CalorimeterFrame();
+  
+   TCanvas *c1 = new TCanvas("c1", "Hit distribution in layer", 1200, 800);
+
+   TList *histogramList = new TList;
+   for (Int_t k=0; k<Runs; k++) {
+      if (dataType == kData) {
+         di->getDataFrame(k, cf, energy);
+      }
+      else {
+         di->getMCFrame(k, cf);
+      }
+
+      TH2F *Frame2D = cf->getTH2F(Layer);
+      histogramList->Add(Frame2D);
+   }
+
+   delete di;
+   TH2F *Frame2D = new TH2F("Frame2D", Form("Hit distribution in layer %i", Layer),
+                              nx, 0, nx, ny, 0, ny);
+
+   c1->cd();
+   Frame2D->Merge(histogramList);
+   Frame2D->Draw("COLZ");
+   gStyle->SetOptStat(0);
 }
 
 void drawData3D(Int_t Runs, Float_t energy) {
@@ -2316,7 +2337,7 @@ Float_t doNGaussianFit ( TH1F *h, Float_t *means, Float_t *sigmas) {
       if (ratio > 0.1) {
          gauss->SetLineColor(kRed);
          gauss->SetLineWidth(3);
-         gauss->Draw("same");
+//         gauss->Draw("same");
          cout << Form("%d;\t %8.5f;\t %8.5f;\t %8.5f;\t %8.5f;\t %8.5f;\t %.2f\n", i, constant, mean, lEnergy, sigma, ratio, chi2n);
          
          if (j<3) {
