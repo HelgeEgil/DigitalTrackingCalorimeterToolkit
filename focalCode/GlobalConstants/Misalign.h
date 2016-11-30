@@ -9,22 +9,22 @@
 #include "Classes/Cluster/Clusters.h"
 
 struct chipAlignment {
-	Float_t deltaX, deltaY, deltaTheta;
-	Int_t idx;
+   Float_t deltaX, deltaY, deltaTheta;
+   Int_t idx;
 };
 
 class Misalign : public TObject {
   private:
-//	  Float_t misalignX[2][24];
-//	  Float_t misalignY[2][24];
-	  chipAlignment chipAlignmentArray_[96];
+//   Float_t misalignX[2][24];
+//   Float_t misalignY[2][24];
+     chipAlignment chipAlignmentArray_[96];
 
   public:
       Misalign();
       virtual ~Misalign(); 
 
-		void				correctClusters(Clusters * clusters);
-		chipAlignment	getMisalign(Cluster * cluster);
+      void           correctClusters(Clusters * clusters);
+      chipAlignment  getMisalign(Cluster * cluster);
 
 //      ClassDef(Misalign,1)
 };

@@ -41,7 +41,7 @@ TGraphErrors * Track::doFit() {
       ery[i] = getDepositedEnergyError(i);
       erx[i] = getAbsorberLength(i);
    }
-   
+
    maxEnergy = getEnergyFromTL(trackLength + 0.75*dz);
    estimatedEnergy = getEnergyFromTL(trackLength + 0.5*dz);
    estimatedRange = getWEPLFromTL(x[n-1] + 0.5*dz);
@@ -98,6 +98,7 @@ TGraphErrors * Track::doRangeFit(Bool_t isScaleVariable) {
    Float_t        maxEnergy, maxRange, estimatedEnergy, estimatedRange;
    Float_t        scaleParameter = 0;
    Float_t        WEPLFactor;
+   Float_t        overFittingDistance;
    Bool_t         checkResistivity = false;
 
    if (kDataType == kData) {
@@ -111,9 +112,12 @@ TGraphErrors * Track::doRangeFit(Bool_t isScaleVariable) {
       ery[i] = getDepositedEnergyError(i, checkResistivity);
       erx[i] = dz / sqrt(12);
    }
-   
-   maxEnergy = getEnergyFromTL(x[n-1] + 0.75*dz);
-   maxRange = getWEPLFromTL(x[n-1] + 0.75*dz);
+
+   // how much beyond the last measurement the fit is allowed to go
+   overFittingDistance = 1.00 * dz;
+
+   maxEnergy = getEnergyFromTL(x[n-1] + overFittingDistance);
+   maxRange = getWEPLFromTL(x[n-1] + overFittingDistance);
    estimatedEnergy = getEnergyFromTL(x[n-1] + 0.5*dz);
    estimatedRange = getWEPLFromTL(x[n-1] + 0.5*dz);
 
@@ -131,7 +135,7 @@ TGraphErrors * Track::doRangeFit(Bool_t isScaleVariable) {
    scaleParameter = 3.1; // found through drawFitScale and finding distribution mean value
 
    if (kDataType == kData) scaleParameter = 2.7;
-   if (kUseAlpide) scaleParameter = 1.2;
+   if (kUseAlpide) scaleParameter = 1.58;
 
    TF1 *func = new TF1("fit_BP", fitfunc_DBP, 0, maxRange, 2);
    func->SetParameter(0, estimatedRange);

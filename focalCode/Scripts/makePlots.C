@@ -24,19 +24,34 @@ using namespace std;
 
 void makePlots() {
    TCanvas *c1 = new TCanvas("c1", "Fit results", 1200, 800);
+   TPad *pad1 = new TPad("pad1", "70", 0.0, 0.3, 1.0, 1.0, 0);
+   TPad *pad2 = new TPad("pad2", "30", 0.0, 0.0, 1.0, 0.3, 0);
+   pad1->Draw();
+   pad2->Draw();
+   
    TCanvas *c2 = new TCanvas("c2", "Correct Tracks fraction", 1200, 800);
    TCanvas *c3 = new TCanvas("c3", "Reconstruction efficiency", 1200, 800);
    TCanvas *c4 = new TCanvas("c4", "Chip alignment", 1200, 800);
    TCanvas *c5 = new TCanvas("c5", "Chip sensitivity calibration", 1200, 800);
+   TCanvas *c6 = new TCanvas("c6", "Resolution", 1200, 800);
+   c6->Divide(2,1,0.0001,0.0001);
 
    Float_t  arrayE[200] = {0}; // energy MC
    Float_t  arrayEE[200] = {0}; // error on energy MC
    Float_t  arrayMC[200] = {0}; // range MC
    Float_t  arrayEMC[200] = {0}; // error on range MC
+   Float_t  arrayEMCRatio[200] = {0}; // error on range MC
+   Float_t  arrayEMCSub[200] = {0}; // error on range MC
+   Float_t  arrayEMCSubRatio[200] = {0}; // error on range MC
+   Float_t  arrayMCDelta[200] = {0}; // range MC
    Float_t  arrayPSTAR[200] = {0};
+   Float_t  arrayPSTARDelta[200] = {0};
    Float_t  arrayPSTARshade[400] = {0};
    Float_t  arrayPSTARmin[200] = {0};
    Float_t  arrayPSTARmax[200] = {0};
+   Float_t  arrayPSTARminDelta[200] = {0};
+   Float_t  arrayPSTARmaxDelta[200] = {0};
+   Float_t  arrayPSTARmaxDeltaRatio[200] = {0};
    Float_t  arrayEPstar[200] = {0};
    Float_t  arrayE2[200] = {0}; // energy data 
    Float_t  arrayEE2[200] = {0}; // error on energy data
@@ -73,8 +88,8 @@ void makePlots() {
    Float_t  chipCalibrationError180[27] = {0};
    Float_t  chipCalibrationError188[27] = {0};
 
-   Int_t nThisEnergy = 0, lastEnergy = 0;
-   
+   Int_t nThisEnergy = 0, lastEnergy = 0, mmAbsorbator;
+
    gStyle->SetOptStat(0);
 
    ifstream in;
@@ -83,40 +98,53 @@ void makePlots() {
    cout << "Opened file.\n";
 
    Float_t nomrange_, estrange_, sigmaRange_, lastRange_;
-   Int_t energy_;
+   Int_t energy_, thickness_;
    Float_t estimatedStraggling;
 
    Int_t nlines = 0;
    TNtuple *ntuple = new TNtuple("ntuple", "data from file", "energy_:nomrange_:estrange_:sigmaRange:lastRange_");
    
-   Int_t MC2Data = 32;
+   Int_t MC2Data = -1;
 
    Float_t meanError = 0;
    Float_t meanAbsError = 0;
    Float_t meanSigma = 0;
 
    while (1) {
-      in >> energy_ >> nomrange_ >> estrange_ >> sigmaRange_ >> lastRange_ ;
+      in >> thickness_ >> energy_ >> nomrange_ >> estrange_ >> sigmaRange_;
 
       if (!in.good()) {
          break;
       }
 
+      mmAbsorbator = thickness_;
       meanError += ( estrange_ - nomrange_ ) / nomrange_;
       meanAbsError += fabs(( estrange_ - nomrange_ ) / nomrange_);
       meanSigma += sigmaRange_;
-//      estimatedStraggling = 0.017 * pow(nomrange_, 0.935);
-      estimatedStraggling = 0.012 * pow(nomrange_, 0.935); // using water values for minimized straggling limit
+      if       (mmAbsorbator == 5) estimatedStraggling = 1.57e-2 * nomrange_ + 7.54e-6 * pow(nomrange_,2);
+      else if  (mmAbsorbator == 4) estimatedStraggling = 1.73e-2 * nomrange_ + 2.28e-6 * pow(nomrange_,2);
+      else if  (mmAbsorbator == 3) estimatedStraggling = 1.52e-2 * nomrange_ + 1.02e-5 * pow(nomrange_,2);
+      else if  (mmAbsorbator == 2) estimatedStraggling = 1.53e-2 * nomrange_ + 9.59e-6 * pow(nomrange_,2);
 
-      if (nlines < MC2Data) {
+//      estimatedStraggling = 0.012 * pow(nomrange_, 0.935); // using water values for minimized straggling limit
+
+      if (nlines < MC2Data || MC2Data<0) {
          cout << "Line " << nlines << ", energy " << energy_ << ",  MC" << endl;
          arrayE[nlines] = energy_;
          arrayEE[nlines] = 0;
          arrayMC[nlines] = estrange_;
+         arrayMCDelta[nlines] = estrange_ - nomrange_;
          arrayEMC[nlines] = sigmaRange_;
+         arrayEMCRatio[nlines] = sigmaRange_ / nomrange_ * 100;
+         arrayEMCSub[nlines] = sqrt(abs(pow(estimatedStraggling, 2) - pow(sigmaRange_, 2)));
+         arrayEMCSubRatio[nlines] = sqrt(abs(pow(estimatedStraggling, 2) - pow(sigmaRange_, 2))) / nomrange_ * 100;
          arrayPSTAR[nlines] = nomrange_;
          arrayPSTARmin[nlines] = nomrange_ - estimatedStraggling;
          arrayPSTARmax[nlines] = nomrange_ + estimatedStraggling;
+         arrayPSTARDelta[nlines] = 0;
+         arrayPSTARminDelta[nlines] = -estimatedStraggling;
+         arrayPSTARmaxDelta[nlines] = estimatedStraggling;
+         arrayPSTARmaxDeltaRatio[nlines] = estimatedStraggling / nomrange_ * 100;
          arrayEPstar[nlines] = 0;
       }
 
@@ -129,6 +157,10 @@ void makePlots() {
       }
 
       nlines++;
+   }
+
+   if (MC2Data<0) {
+      MC2Data = nlines;
    }
 
    meanError /= nlines;
@@ -255,7 +287,7 @@ void makePlots() {
       alignmentChipYMine[chip] = deltaY * 10000;
       nMine++;
    }
-   in6.close():
+   in6.close();
       
    // chip 11 is dead
    alignmentChipXOrig[11] = 1e5;
@@ -327,7 +359,7 @@ void makePlots() {
    TGraphErrors *cal180 = new TGraphErrors(27, chipCalibrationChip180, chipCalibrationFactor180, calibrationErrorX, chipCalibrationError180);
    TGraphErrors *cal188 = new TGraphErrors(27, chipCalibrationChip188, chipCalibrationFactor188, calibrationErrorX, chipCalibrationError188);
 
-   c1->cd();
+   pad1->cd();
    
    TGraphErrors *hMC = new TGraphErrors(MC2Data, arrayE, arrayMC, arrayEE, arrayEMC);
    TGraphErrors *hData = new TGraphErrors(nlines-MC2Data, arrayE2, arrayData, arrayEE2, arrayEData);
@@ -353,12 +385,9 @@ void makePlots() {
    pstarshade->GetYaxis()->SetTitleSize(0.05);
    pstarshade->GetYaxis()->SetLabelSize(0.05);
 
-   pstarshade->GetXaxis()->SetRangeUser(40, 200); // 145 - 200
-   pstarshade->GetYaxis()->SetRangeUser(5, 270); // 145 - 270
-
    hMC->SetMarkerColor(kBlue);
    hMC->SetMarkerStyle(21);
-   hMC->SetMarkerSize(1.5);
+   hMC->SetMarkerSize(0.8);
 
    hData->SetMarkerColor(kRed);
    hData->SetMarkerStyle(22);
@@ -367,17 +396,13 @@ void makePlots() {
    
    pstar->SetLineWidth(3);
    pstar->SetLineColor(kMagenta-10);
-//   pstarshade->SetTitle("Reconstructed ranges of proton beams with different energies;Energy [MeV];Reconstructed WET range [mm]");
-   pstarshade->SetTitle("Reconstructed ranges of proton beams with 2 mm Al absorbator;Energy [MeV];Reconstructed WET range [mm]");
+   pstarshade->SetTitle(Form("Reconstructed ranges of proton beams with %d mm Al absorbator;Energy [MeV];Reconstructed WET range [mm]", mmAbsorbator));
    
-//   pstarshade->SetFillColorAlpha(kRed, 0.35);
    pstarshade->SetFillColor(kMagenta-10);
    pstarshade->Draw("FA");
    pstarmin->Draw("L");
    pstarmax->Draw("L");
-//   pstar->Draw("CP");
 
-// gStyle->SetPadTickY(1);
    hMC->SetTitle("Reconstructed ranges #LT#hat{R_{0}}#GT of proton tracks;Energy [MeV];Projected range [mm]");
    hMC->Draw("P");
    hData->Draw("P");
@@ -388,14 +413,123 @@ void makePlots() {
    gPad->Modified();
 
    TLegend *leg = new TLegend(0.15, 0.68, 0.40, 0.85);
-   leg->SetTextSize(0.035);
+   leg->SetTextSize(0.03);
    leg->SetTextFont(22);
-   leg->AddEntry(pstar, "PSTAR range", "L");
+   leg->AddEntry(pstar, "Range straggling from MC", "L");
    leg->AddEntry(hMC, "Monte Carlo", "PE");
 //   leg->AddEntry(hData, "Experimental data", "PE");
    leg->Draw();
 
-   c1->Update();
+   pad1->Update();
+   
+   pad2->cd();
+
+   TGraphErrors *hMCD = new TGraphErrors(MC2Data, arrayE, arrayMCDelta, arrayEE, arrayEMC);
+   TGraph *pstarD = new TGraph(MC2Data, arrayE, arrayPSTARDelta);
+   TGraph *pstarminD = new TGraph(MC2Data, arrayE, arrayPSTARminDelta);
+   TGraph *pstarmaxD = new TGraph(MC2Data, arrayE, arrayPSTARmaxDelta);
+   TGraph *pstarshadeD = new TGraph(MC2Data*2);
+
+   for (Int_t i=0; i<MC2Data; i++) {
+      pstarshadeD->SetPoint(i, arrayE[i], arrayPSTARmaxDelta[i]);
+      pstarshadeD->SetPoint(MC2Data+i, arrayE[MC2Data-i-1], arrayPSTARminDelta[MC2Data-i-1]);
+   }
+
+   pstarshadeD->GetXaxis()->SetTitleFont(22);
+   pstarshadeD->GetYaxis()->SetTitleFont(22);
+   pstarshadeD->GetXaxis()->SetTitleOffset(0.9);
+   pstarshadeD->GetYaxis()->SetTitleOffset(0.9);
+   pstarshadeD->GetXaxis()->SetLabelFont(22);
+   pstarshadeD->GetXaxis()->SetTitleSize(0.05);
+   pstarshadeD->GetXaxis()->SetLabelSize(0.05);
+   pstarshadeD->GetYaxis()->SetLabelFont(22);
+   pstarshadeD->GetYaxis()->SetTitleSize(0.05);
+   pstarshadeD->GetYaxis()->SetLabelSize(0.05);
+
+   pstarshadeD->GetYaxis()->SetRangeUser(-10, 10); // 145 - 270
+
+   hMCD->SetMarkerColor(kBlue);
+   hMCD->SetMarkerStyle(21);
+   hMCD->SetMarkerSize(1);
+
+   pstarD->SetLineWidth(3);
+   pstarD->SetLineColor(kMagenta-10);
+   pstarshadeD->SetTitle(Form("Reconstructed ranges of proton beams with %d mm Al absorbator;Reconstructed WET range [mm];WET error [mm]", mmAbsorbator));
+   
+   pstarshadeD->SetFillColor(kMagenta-10);
+   pstarshadeD->Draw("FA");
+   pstarminD->Draw("L");
+   pstarmaxD->Draw("L");
+   
+   pad2->Update();
+   TLine *zeroLine = new TLine(pad2->GetUxmin(), 0, pad2->GetUxmax(), 0);
+   zeroLine->Draw();
+
+   hMCD->SetTitle("Reconstructed ranges #LT#hat{R_{0}}#GT of proton tracks;WET error [mm];Projected range [mm]");
+   hMCD->Draw("P");
+
+   gPad->Update();
+   TPaveText *title = (TPaveText*) gPad->GetPrimitive("title");
+   title->SetTextFont(22);
+   title->SetTextSize(0.08);
+   gPad->Modified();
+   pad2->Update();
+
+   c6->cd(1);
+   TGraph *gResolution = new TGraph(MC2Data, arrayMC, arrayEMC);
+   gResolution->SetTitle(Form("WEPL resolution using %d mm Al absorber;WEPL [mm];#Delta WEPL [mm]", mmAbsorbator));
+   gResolution->GetYaxis()->SetRangeUser(0,7);
+   gResolution->SetMarkerColor(kBlue);
+   gResolution->SetMarkerStyle(21);
+   gResolution->SetMarkerSize(1);
+   gResolution->Draw("PA");
+   
+   TGraph *gResolutionSub = new TGraph(MC2Data, arrayMC, arrayEMCSub);
+   gResolutionSub->SetMarkerColor(kRed);
+   gResolutionSub->SetMarkerStyle(21);
+   gResolutionSub->SetMarkerSize(1);
+//   gResolutionSub->Draw("P");
+   
+   TGraph *gResolutionStraggling = new TGraph(MC2Data, arrayMC, arrayPSTARmaxDelta);
+   gResolutionStraggling->SetLineWidth(2);
+   gResolutionStraggling->SetLineColor(kRed);
+   gResolutionStraggling->Draw("L");
+
+   TLegend *legRes = new TLegend(0.17, 0.77, 0.69, 0.88);
+   legRes->SetTextSize(0.03);
+   legRes->SetTextFont(22);
+   legRes->AddEntry(gResolution, "#Delta WEPL", "P");
+//   legRes->AddEntry(gResolutionSub, "#Delta WEPL - Range straggling", "P");
+   legRes->AddEntry(gResolutionStraggling, "Range straggling", "L");
+   legRes->Draw();
+
+   c6->cd(2);
+   TGraph *gResolutionRatio = new TGraph(MC2Data, arrayMC, arrayEMCRatio);
+   gResolutionRatio->SetTitle(Form("WEPL resolution using %d mm Al absorber;WEPL [mm];#Delta WEPL / WEPL [%]", mmAbsorbator));
+   gResolutionRatio->GetYaxis()->SetTitleOffset(1.5);
+   gResolutionRatio->SetMarkerColor(kBlue);
+   gResolutionRatio->SetMarkerStyle(21);
+   gResolutionRatio->SetMarkerSize(1);
+   gResolutionRatio->Draw("PA");
+   
+   TGraph *gResolutionSubRatio = new TGraph(MC2Data, arrayMC, arrayEMCSubRatio);
+   gResolutionSubRatio->SetMarkerColor(kRed);
+   gResolutionSubRatio->SetMarkerStyle(21);
+   gResolutionSubRatio->SetMarkerSize(1);
+//   gResolutionSubRatio->Draw("P");
+   
+   TGraph *gResolutionStragglingRatio = new TGraph(MC2Data, arrayMC, arrayPSTARmaxDeltaRatio);
+   gResolutionStragglingRatio->SetLineWidth(2);
+   gResolutionStragglingRatio->SetLineColor(kRed);
+   gResolutionStragglingRatio->Draw("L");
+
+   TLegend *legResRatio = new TLegend(0.36, 0.76, 0.88, 0.88);
+   legResRatio->SetTextSize(0.03);
+   legResRatio->SetTextFont(22);
+   legResRatio->AddEntry(gResolutionRatio, "#Delta WEPL", "P");
+//   legResRatio->AddEntry(gResolutionSubRatio, "#Delta WEPL - Range straggling", "P");
+   legResRatio->AddEntry(gResolutionStragglingRatio, "Range straggling", "L");
+   legResRatio->Draw();
 
    c2->cd();
    TGraph *gFraction = new TGraph(nlines2, arrayFractionX, arrayFractionY);

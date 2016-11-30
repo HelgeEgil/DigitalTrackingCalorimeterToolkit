@@ -63,9 +63,10 @@ vector<Float_t> findRange::Run(Double_t energy, Double_t sigma_mev)
    TCanvas *c5 = new TCanvas("c5", "hSteplength", 800, 600);
 
    Int_t nbinsx = 750;
-   // 2 mm: 0.0119, 1.783
-   // 3 mm: 0.0144, 1.8157
-   Float_t expectedRange = 0.0144 * pow(run_energy, 1.8157);
+   // 2 mm: 0.0096, 1.784
+   // 3 mm: 0.0097, 1.7825
+   // 4 mm: 0.0098, 1.7806
+   Float_t expectedRange = 0.0096 * pow(run_energy, 1.784);
    Float_t xfrom = expectedRange * 0.5;
    Float_t xto = expectedRange * 2;
 

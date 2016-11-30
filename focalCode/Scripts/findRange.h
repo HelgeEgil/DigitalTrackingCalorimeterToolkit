@@ -103,7 +103,7 @@ public :
    TBranch        *b_comptVolName;   //!
    TBranch        *b_RayleighVolName;   //!
 
-   findRange(Int_t energy, Int_t thickness, TTree *tree=0);
+   findRange(Int_t energy, Int_t thickness, Bool_t useDegrader = false, TTree *tree=0);
    virtual ~findRange();
    virtual Int_t     Cut(Long64_t entry);
    virtual Int_t     GetEntry(Long64_t entry);
@@ -118,7 +118,7 @@ public :
 #endif
 
 #ifdef findRange_cxx
-findRange::findRange(Int_t energy, Int_t thickness, TTree *tree) : fChain(0)
+findRange::findRange(Int_t energy, Int_t thickness, Bool_t useDegrader, TTree *tree) : fChain(0)
 {
 // if parameter tree is not specified (or zero), connect the file
 // used to generate this class and read the Tree.
@@ -138,11 +138,13 @@ findRange::findRange(Int_t energy, Int_t thickness, TTree *tree) : fChain(0)
       // The following code should be used if you want this class to access a chain
       // of trees.
       TChain * chain = new TChain("Hits","");
-//      chain->Add(Form("../Data/MonteCarlo/focal_Tungsten_energy%d_sigma0.root/Hits", energy));
-//      chain->Add(Form("../Data/MonteCarlo/focal_Aluminium_energy%d_sigma0.root/Hits", energy));
-//      chain->Add(Form("../Data/WaterBox/tungsten_%dMeV.root/Hits", energy));
-      chain->Add(Form("../Data/MonteCarlo/DTC_full_%dMeV_%dmm.root/Hits", energy, thickness));
-//      chain->Add(Form("../Data/WaterBox/copper_%dMeV.root/Hits", energy));
+      if (!useDegrader) {
+         chain->Add(Form("../Data/MonteCarlo/DTC_full_Aluminium_%dMeV_%dmm.root/Hits", energy, thickness));
+      }
+      else { // degrader is used, then energy -> degrader thickness and init energy = 230 MeV
+         chain->Add(Form("../Data/MonteCarlo/DTC_full_Aluminium_%dmmDegrader_230MeV_%dmm.root/Hits", energy, thickness));
+      }
+
       tree = chain;
       run_energy = energy;
 #endif // SINGLE_TREE

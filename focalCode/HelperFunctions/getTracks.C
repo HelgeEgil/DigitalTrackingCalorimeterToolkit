@@ -269,6 +269,14 @@ Tracks * getTracks(Int_t Runs, Int_t dataType, Int_t frameType, Float_t energy, 
    TRandom3        * gRandom = new TRandom3(0);
    TStopwatch        t1, t2, t3, t4, t5, t6;
    ofstream          file("OutputFiles/efficiency.csv", ofstream::out | ofstream::app);
+   Int_t             totalNumberOfFrames = 0;
+   Int_t             tracksTotalNumberAfterRecon = 0;
+   Int_t             tracksRemovedDueToBadChannels = 0;
+   Int_t             tracksGivenToReconstruction = 0;
+   Int_t             tracksRemovedDueToLeavingDetector = 0;
+   Int_t             tracksRemovedDueToNuclearInteractions = 0;
+   Int_t             clustersInFirstLayer = 0;
+   Int_t             tracksRemovedDueToCollisions = 0;
 
    // file: np; number of reconstructed tracks; tracks after removeTracksLeavingDetector; tracks after removeTrackCollisions
    
@@ -324,6 +332,8 @@ Tracks * getTracks(Int_t Runs, Int_t dataType, Int_t frameType, Float_t energy, 
       t5.Start();
       calorimeterTracks = clusters->findCalorimeterTracks();
       t5.Stop();
+      
+      tracksTotalNumberAfterRecon += calorimeterTracks->GetEntries();
 
       if (calorimeterTracks->GetEntriesFast() == 0) breakSignal = kTRUE; // to stop running
 
@@ -337,15 +347,22 @@ Tracks * getTracks(Int_t Runs, Int_t dataType, Int_t frameType, Float_t energy, 
       calorimeterTracks->removeTracksLeavingDetector();
       nTracksAfter = calorimeterTracks->GetEntries();
       
+      tracksRemovedDueToLeavingDetector += nTracksBefore - nTracksAfter;
+      
       cout << "Of " << nTracksBefore << " tracks, " << nTracksBefore - nTracksAfter << " (" << 100* ( nTracksBefore - nTracksAfter) / ( (float) nTracksBefore ) << "%) were lost when leaving the detector.\n";
       
+      nTracksBefore = calorimeterTracks->GetEntries();
       calorimeterTracks->removeTrackCollisions();
+      nTracksAfter = calorimeterTracks->GetEntries();
+      
+      tracksRemovedDueToCollisions += nTracksBefore - nTracksAfter;
 
       if (kDataType == kData) {
-     //    nTracksBefore = calorimeterTracks->GetEntries();
+         nTracksBefore = calorimeterTracks->GetEntries();
          calorimeterTracks->removeTracksEndingInBadChannels();
          nTracksAfter = calorimeterTracks->GetEntries();
          cout << "Of " << nTracksBefore << " tracks, " << nTracksBefore - nTracksAfter << " (" << 100* ( nTracksBefore - nTracksAfter) / ( (float) nTracksBefore ) << "%) were removed due to ending just before a bad channel.\n";
+         tracksRemovedDueToBadChannels += nTracksBefore - nTracksAfter;
 
       }
       
@@ -357,6 +374,8 @@ Tracks * getTracks(Int_t Runs, Int_t dataType, Int_t frameType, Float_t energy, 
             else nIsNotInelastic++;
          }
       }
+      
+      tracksRemovedDueToNuclearInteractions += nIsInelastic;
       cout << "Of these, " << nIsInelastic << " end abruptly and " << nIsNotInelastic << " does not.\n";
 
       file << energy << " " << kEventsPerRun << " " << nTracksBefore << " " << nTracksAfter << " " << calorimeterTracks->GetEntries() << " " <<  nIsInelastic << " " << nIsNotInelastic << endl;
@@ -370,6 +389,7 @@ Tracks * getTracks(Int_t Runs, Int_t dataType, Int_t frameType, Float_t energy, 
          if (!calorimeterTracks->At(j)) continue;
 
          allTracks->appendTrack(calorimeterTracks->At(j));
+         tracksGivenToReconstruction++;
       }
 
       allTracks->appendClustersWithoutTrack(clusters->getClustersWithoutTrack());
@@ -387,6 +407,7 @@ Tracks * getTracks(Int_t Runs, Int_t dataType, Int_t frameType, Float_t energy, 
 
       if (breakSignal) break;
    }
+   printf("\033[1mTrack statics for article. Clusters found in first layer (= N protons) = %d. Total number of tracks found = %d. Total number of tracks given to reconstruction = %d. Tracks removed due to bad channels = %d. Tracks removed due to nuclear interactions = %d. Tracks removed due to leaving the detector laterally = %d. Tracks removed due to collisions = %d. Sum = %d.\033[0m\n", clustersInFirstLayer, tracksTotalNumberAfterRecon, tracksGivenToReconstruction, tracksRemovedDueToBadChannels, tracksRemovedDueToNuclearInteractions, tracksRemovedDueToLeavingDetector, tracksRemovedDueToCollisions, tracksGivenToReconstruction + tracksRemovedDueToBadChannels + tracksRemovedDueToLeavingDetector + tracksRemovedDueToCollisions); 
 
    file.close();
 

@@ -26,76 +26,6 @@ Float_t getEnergyAtTL(Float_t E0, Float_t depth, TSpline3 *spline, TSpline3 *inv
    return energy;
 }
 
-/*
-Float_t getTLFromEnergy(Float_t energy, Double_t a1, Double_t b1, Double_t b2, Double_t g1, Double_t g2) {
-   Double_t sum1 = b1 * (1 - exp( -g1 * energy ));
-   Double_t sum2 = b2 * (1 - exp( -g2 * energy ));
-   Float_t tl = a1 * energy * (1 + sum1 + sum2);
-
-   return tl;  
-}
-
-Float_t getEnergyFromTL(Float_t range, Double_t c1, Double_t c2, Double_t c3, 
-                        Double_t c4, Double_t c5, Double_t l1, Double_t l2, 
-                        Double_t l3, Double_t l4, Double_t l5) {
-   Double_t sum1 = c1 * exp(-l1 * range);
-   Double_t sum2 = c2 * exp(-l2 * range);
-   Double_t sum3 = c3 * exp(-l3 * range);
-   Double_t sum4 = c4 * exp(-l4 * range);
-   Double_t sum5 = c5 * exp(-l5 * range);
-   Float_t energy = range * (sum1 + sum2 + sum3 + sum4 + sum5);
-
-   return energy;
-}
-
-Float_t getEnergyAtTL(Float_t E0, Float_t depth, Double_t c1, Double_t c2, 
-                      Double_t c3, Double_t c4, Double_t c5, Double_t l1, 
-                      Double_t l2, Double_t l3, Double_t l4, Double_t l5, 
-                      Double_t a1, Double_t b1, Double_t b2, Double_t g1, Double_t g2) {
-   Double_t range = getTLFromEnergy(E0, a1, b1, b2, g1, g2);
-   cout << "RANGE = " << range << endl;
-   if (range < depth) return 0;
-
-   Double_t sum1 = c1 * exp(-l1 * (range - depth));
-   Double_t sum2 = c2 * exp(-l2 * (range - depth));
-   Double_t sum3 = c3 * exp(-l3 * (range - depth));
-   Double_t sum4 = c4 * exp(-l4 * (range - depth));
-   Double_t sum5 = c5 * exp(-l5 * (range - depth));
-
-   Float_t energy = (range - depth) * (sum1 + sum2 + sum3 + sum4 + sum5);
-
-   return energy;
-}
-*/
-
-/*
-//////////////////////////
-// Conversion to energy //
-//////////////////////////
-
-Float_t getEnergyFromTL(Float_t range) {
-   return getEnergyFromTL(range, c1_material, c2_material, c3_material, c4_material, c5_material,
-                                 l1_material, l2_material, l3_material, l4_material, l5_material);
-}
-
-Float_t getEnergyFromWEPL(Float_t wepl) {
-   return getEnergyFromTL(wepl, c1_water, c2_water, c3_water, c4_water, c5_water,
-                                 l1_water, l2_water, l3_water, l4_water, l5_water);
-}
-
-Float_t getEnergyAtTL(Float_t E0, Float_t depth) {
-   return getEnergyAtTL(E0, depth, c1_material, c2_material, c3_material, c4_material, c5_material,
-                                 l1_material, l2_material, l3_material, l4_material, l5_material,
-                                 a1_material, b1_material, b2_material, g1_material, g2_material);
-}
-
-Float_t getEnergyAtTLFromPureAluminium(Float_t E0, Float_t depth) {
-   return getEnergyAtTL(E0, depth, c1_pure_aluminium, c2_pure_aluminium, c3_pure_aluminium, c4_pure_aluminium, c5_pure_aluminium,
-                                 l1_pure_aluminium, l2_pure_aluminium, l3_pure_aluminium, l4_pure_aluminium, l5_pure_aluminium,
-                                 a1_pure_aluminium, b1_pure_aluminium, b2_pure_aluminium, g1_pure_aluminium, g2_pure_aluminium);
-}
-*/
-
 Float_t  getEnergyFromTL(Float_t range) {
    return getEnergyFromTL(range, splineMaterialInv);
 }
@@ -115,15 +45,6 @@ Float_t getEnergyAtTLFromPureAluminium(Float_t E0, Float_t depth) {
 //////////////////////////
 // Conversion to range  //
 //////////////////////////
-/*
-Float_t getTLFromEnergy(Float_t energy) {
-   return getTLFromEnergy(energy, a1_material, b1_material, b2_material, g1_material, g2_material);
-}
-
-Float_t getWEPLFromEnergy(Float_t energy) {
-   return getTLFromEnergy(energy, a1_water, b1_water, b2_water, g1_water, g2_water);
-}
-*/
 
 Float_t getTLFromEnergy(Float_t energy) {
    return getTLFromEnergy(energy, splineMaterial);
@@ -183,6 +104,7 @@ Float_t getTLStragglingFromEnergy(Float_t energy, Float_t sigma_energy) {
 // Conversion to WEPL straggling   //
 /////////////////////////////////////
 
+/*
 Float_t getWEPLStragglingFromWEPL(Float_t wepl, Float_t sigma_energy) {
    Float_t energy = getEnergyFromWEPL(wepl);
    
@@ -196,6 +118,20 @@ Float_t getWEPLStragglingFromWEPL(Float_t wepl, Float_t sigma_energy) {
 
    return weplStraggling;
 }
+*/
+
+Float_t getWEPLStragglingFromWEPL(Float_t wepl, Float_t sigma_energy) {
+   Float_t estimatedStraggling;
+
+   if       (kAbsorbatorThickness == 5)   estimatedStraggling = 1.57e-2 * wepl + 7.54e-6 * pow(wepl,2);
+   else if  (kAbsorbatorThickness == 4)   estimatedStraggling = 1.73e-2 * wepl + 2.28e-6 * pow(wepl,2);
+   else if  (kAbsorbatorThickness == 3)   estimatedStraggling = 1.52e-2 * wepl + 1.02e-5 * pow(wepl,2);
+   else if  (kAbsorbatorThickness == 2)   estimatedStraggling = 1.53e-2 * wepl + 9.59e-6 * pow(wepl,2);
+   else                                   estimatedStraggling = 0.017 * wepl;
+
+   return estimatedStraggling;
+}
+   
 
 Float_t getWEPLStragglingFromEnergy(Float_t energy, Float_t sigma_energy) {
    Float_t wepl = getWEPLFromEnergy(energy);

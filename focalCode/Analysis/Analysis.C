@@ -717,8 +717,8 @@ Float_t drawBraggPeakGraphFit(Int_t Runs, Int_t dataType, Bool_t recreate, Float
    for (Int_t j=0; j<tracks->GetEntriesFast(); j++) {
       Track *thisTrack = tracks->At(j);
       if (!thisTrack) continue;
-      
-      if (thisTrack->doesTrackEndAbruptly()) {
+     
+      if (thisTrack->doesTrackEndAbruptly() && thisTrack->getEnergy() < 200) {
          hFitResultsDroppedData->Fill(getUnitFromEnergy(thisTrack->getEnergy()));
          nCutDueToTrackEndingAbruptly++;
          continue;
@@ -731,12 +731,13 @@ Float_t drawBraggPeakGraphFit(Int_t Runs, Int_t dataType, Bool_t recreate, Float
          thisAngle = thisTrack->getSlopeAngleAtLayer(i);
          maxAngle = max(thisAngle, maxAngle);
       }
-
+      
       hMaxAngle->Fill(maxAngle);
 
       // Do track fit, extract all parameters for this track
-      outputGraph = (TGraphErrors*) thisTrack->doRangeFit();
+      outputGraph = (TGraphErrors*) thisTrack->doRangeFit(true);
       if (!outputGraph) continue;
+
 
       fitRange = thisTrack->getFitParameterRange();
       fitScale = thisTrack->getFitParameterScale();
@@ -843,7 +844,12 @@ Float_t drawBraggPeakGraphFit(Int_t Runs, Int_t dataType, Bool_t recreate, Float
    Float_t energySigma = getEnergyFromUnit(empiricalMean +  empiricalSigma/ 2) - getEnergyFromUnit(empiricalMean - empiricalSigma / 2);
 
    cFitResults->Update();
-   
+  
+   TF1 *nominalStragglingFunction = new TF1("nominalStragglingFunction", "gaus", 0, 350);
+   nominalStragglingFunction->SetParameters(hFitResults->GetMaximum(), expectedMean, expectedStraggling);
+   nominalStragglingFunction->Draw("SAME");
+   cFitResults->Update();
+
    TLine *l = nullptr;
    if (kDrawVerticalLayerLines) {
       Float_t line_z = 0;
@@ -2187,7 +2193,7 @@ void drawIndividualGraphs(TCanvas *cGraph, TGraphErrors* outputGraph, Float_t fi
    outputGraph->GetYaxis()->SetLabelFont(22);
 
    Float_t low = getUnitFromEnergy(0);
-   Float_t high = getUnitFromEnergy(run_energy * 1.2);
+   Float_t high = getUnitFromEnergy(run_energy) * 1.7;
 
    outputGraph->GetXaxis()->SetLimits(low, high);
 
@@ -2272,7 +2278,7 @@ Float_t doNGaussianFit ( TH1F *h, Float_t *means, Float_t *sigmas) {
       meanValueFromSumming += axis->GetBinCenter(i) * h->GetBinContent(i) / partialIntegral;
    }
 
-   Float_t error = 100 * (meanValueFromSumming - getWEPLFromEnergy(run_energy)) / getWEPLFromEnergy(run_energy);
+   Float_t error = abs(100 * (meanValueFromSumming - getWEPLFromEnergy(run_energy)) / getWEPLFromEnergy(run_energy));
    cout << "\033[1mUsing the sum method, the weighted mean value of the distribution is " << meanValueFromSumming << " mm. (" << error << ")\033[0m\n";
    
    Float_t maxBinHeight = h->GetMaximum();
@@ -2375,9 +2381,14 @@ Float_t doNGaussianFit ( TH1F *h, Float_t *means, Float_t *sigmas) {
    cout << "Estimated range = " << estimated_range << " +- " << sumSigma << endl;
   
    Float_t lastMean = array_mean[1];
-   if (lastMean == 0) lastMean = array_mean[0];
    Float_t lastSigma = array_sigma[1];
-   if (lastSigma == 0) lastSigma = array_sigma[0];
+   if (lastMean == 0 || axis->FindBin(lastMean) > h->GetNbinsX()) {
+      lastMean = array_mean[0];
+      lastSigma = array_sigma[0];
+   }
+
+   printf("lastMean = %.2f. lastSigma = %.2f\n", lastMean, lastSigma);
+   printf("sigmaFrom = %.2f\n", lastMean - 3* lastSigma);
 
    Int_t binSigmaFrom = axis->FindBin(lastMean - 3*lastSigma);
 
@@ -2389,21 +2400,24 @@ Float_t doNGaussianFit ( TH1F *h, Float_t *means, Float_t *sigmas) {
    Float_t squareMeanDifference = 0;
    Float_t empiricalMean = 0;
    Int_t N = 0;
-   
+
+   printf("Looping from %d to %d.\n", binSigmaFrom, h->GetNbinsX());
+
    for (Int_t i=binSigmaFrom; i<=h->GetNbinsX(); i++) {
       empiricalMean += h->GetBinContent(i) * axis->GetBinCenter(i);
       N += h->GetBinContent(i);
    } 
   
-   empiricalMean /= N; 
+   empiricalMean /= N;
 
-//   binSigmaFrom = axis->FindBin(array_mean[0] - 3*array_sigma[0]);
+   printf("empiricalMean = %.2f\n", empiricalMean);
+
    for (Int_t i=binSigmaFrom; i<=h->GetNbinsX(); i++) {
-//      cout << "Adding " << h->GetBinContent(i) << " * (" << axis->GetBinCenter(i) << " - " << empiricalMean << " )^2 to variance.\n";
       squareMeanDifference += h->GetBinContent(i) * pow(axis->GetBinCenter(i) - empiricalMean, 2);
    }
+   printf("squareMeanDifference = %.2f\n", squareMeanDifference);
 
-   Float_t empiricalSigma = sqrt(squareMeanDifference / N);
+   Float_t empiricalSigma = sqrt(abs(squareMeanDifference / N));
    cout << "The empirical estimated range is " << empiricalMean << " mm. (which is " << getEnergyFromWEPL(empiricalMean) << " MeV).\n";
    cout << "The empirical standard deviation is " << empiricalSigma << " mm.\n";
    
@@ -2425,8 +2439,8 @@ Float_t doNGaussianFit ( TH1F *h, Float_t *means, Float_t *sigmas) {
    if (array_constant[2] > 0.1) last_range = array_mean[2];
 
    ofstream file2("OutputFiles/result_makebraggpeakfit.csv", ofstream::out | ofstream::app);
-   // energy; nominal range; estimated range; range sigma; last_range
-   file2 << run_energy << " " << getWEPLFromEnergy(run_energy) << " " << empiricalMean << " " << empiricalSigma << " " << last_range << endl;
+   // absorber thickness; energy; nominal range; estimated range; range sigma
+   file2 << kAbsorbatorThickness << " " << run_energy << " " << getWEPLFromEnergy(run_energy) << " " << empiricalMean << " " << empiricalSigma << " " << endl;
    file2.close();
 
    means[9] = empiricalMean;

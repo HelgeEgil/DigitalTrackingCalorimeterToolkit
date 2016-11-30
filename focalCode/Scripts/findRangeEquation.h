@@ -5,4 +5,4 @@ class TH1F;
 
 using namespace std;
 
-void			getPValues();
+void        getPValues();

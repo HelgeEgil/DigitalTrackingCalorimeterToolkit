@@ -278,6 +278,7 @@ class Module:
         self.chipPos = Pos(0, 0)
 
         self.absorberThickness = absorberThickness
+        self.firstAbsorberThickness = absorberThickness
         self.absorberSize = Size(self.chipSize.dx + 1 * cm, self.chipSize.dy + 1*cm, self.absorberThickness)
         self.glueThickness = 40 * um
         self.pcbThickness = 160 * um
@@ -368,7 +369,6 @@ class Module:
         size.dz = self.moduleThickness
         pos = self.getPosDepth(0, 0, size, self.name)
         self.objects.append(Box(self.name, "Layer", pos, size))
-        self.objects[-1].genericRepeater = True
         print("Added {}".format(self.objects[-1]))
 
     def makeMotherLayer(self):
@@ -378,6 +378,7 @@ class Module:
     def makeAbsorber(self, n, isFirstAbsorber=False):
         name = "Absorber" + str(n)
         size = self.absorberSize
+        size.dz = self.absorberThickness
         pos = self.getPosDepth(0, 0, size, name)
         # pos.z += self.getLastObjectRightSide() - self.getLeftSideNoAbsorber()
 

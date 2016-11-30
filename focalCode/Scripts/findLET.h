@@ -106,7 +106,7 @@ public :
    virtual void     Init(TTree *tree);
    virtual void     Loop(Double_t energy = 100);
    virtual Bool_t   Notify();
-   virtual void		BinLogX(TH1 *h);
+   virtual void      BinLogX(TH1 *h);
    virtual void     Show(Long64_t entry = -1);
    
 };

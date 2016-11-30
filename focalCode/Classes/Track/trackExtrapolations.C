@@ -15,110 +15,110 @@
 #include "GlobalConstants/MaterialConstants.h"
 
 Cluster * Track::getInterpolatedClusterAt(Int_t layer) {
-	Cluster   *	pre = 0;
-	Cluster   *	post = 0;
-	Int_t			lastIdx = 0;
-	Int_t			firstLayer = getFirstLayer();
-	Int_t			lastLayer = getLastLayer();
-	Int_t			firstIdx = getClusterFromLayer(firstLayer);
-	Float_t		x, y;
-	
-	if (firstLayer == layer) return 0;
-	if (lastLayer <= layer) return 0;
-	
-	for (Int_t i=firstIdx; i<GetEntriesFast(); i++) {
-		if (!At(i)) continue;
+   Cluster   * pre = 0;
+   Cluster   * post = 0;
+   Int_t       lastIdx = 0;
+   Int_t       firstLayer = getFirstLayer();
+   Int_t       lastLayer = getLastLayer();
+   Int_t       firstIdx = getClusterFromLayer(firstLayer);
+   Float_t     x, y;
+   
+   if (firstLayer == layer) return 0;
+   if (lastLayer <= layer) return 0;
+   
+   for (Int_t i=firstIdx; i<GetEntriesFast(); i++) {
+      if (!At(i)) continue;
 
-		if (getLayer(i) > layer) {
-			post = At(i);
-			lastIdx = i;
-			break;
-		}
-	}
+      if (getLayer(i) > layer) {
+         post = At(i);
+         lastIdx = i;
+         break;
+      }
+   }
 
-	for (Int_t i=lastIdx; i>=firstIdx; i--) {
-		if (!At(i)) continue;
+   for (Int_t i=lastIdx; i>=firstIdx; i--) {
+      if (!At(i)) continue;
 
-		if (getLayer(i) < layer) {
-			pre = At(i);
-			break;
-		}
-	}
+      if (getLayer(i) < layer) {
+         pre = At(i);
+         break;
+      }
+   }
 
-	x = ( pre->getX() + post->getX() ) / 2.;
-	y = ( pre->getY() + post->getY() ) / 2.;
+   x = ( pre->getX() + post->getX() ) / 2.;
+   y = ( pre->getY() + post->getY() ) / 2.;
 
-	return new Cluster(x, y, layer);
+   return new Cluster(x, y, layer);
 }
 
 Cluster * Track::getExtrapolatedClusterAt(Float_t mmBeforeDetector) {
-	Int_t		firstLayer = getFirstLayer();
-	Int_t		firstIdx = getClusterFromLayer(firstLayer);
-	Int_t		nextIdx = 0;
-	Float_t	diffx, diffy, diffz;
-	Float_t	extra_mm = getLayermm(firstLayer);
+   Int_t    firstLayer = getFirstLayer();
+   Int_t    firstIdx = getClusterFromLayer(firstLayer);
+   Int_t    nextIdx = 0;
+   Float_t  diffx, diffy, diffz;
+   Float_t  extra_mm = getLayermm(firstLayer);
 
-	for (Int_t i=firstIdx+1; i<GetEntriesFast(); i++) {
-		if (!At(i)) continue;
+   for (Int_t i=firstIdx+1; i<GetEntriesFast(); i++) {
+      if (!At(i)) continue;
 
-		nextIdx = i;
-		break;
-	}
-	
-	Cluster *first = At(firstIdx);
-	Cluster *next = At(nextIdx);
+      nextIdx = i;
+      break;
+   }
+   
+   Cluster *first = At(firstIdx);
+   Cluster *next = At(nextIdx);
 
-	diffz = (next->getLayermm() - first->getLayermm());
-	diffx = (first->getX() - next->getX()) / diffz;
-	diffy = (first->getY() - next->getY()) / diffz;
+   diffz = (next->getLayermm() - first->getLayermm());
+   diffx = (first->getX() - next->getX()) / diffz;
+   diffy = (first->getY() - next->getY()) / diffz;
 
-	Float_t new_x = first->getX() + diffx * (mmBeforeDetector + extra_mm);
-	Float_t new_y = first->getY() + diffy * (mmBeforeDetector + extra_mm);
+   Float_t new_x = first->getX() + diffx * (mmBeforeDetector + extra_mm);
+   Float_t new_y = first->getY() + diffy * (mmBeforeDetector + extra_mm);
 
-	Cluster *extrapolated = new Cluster(new_x, new_y);	
-	
-	return extrapolated;
+   Cluster *extrapolated = new Cluster(new_x, new_y); 
+   
+   return extrapolated;
 }
 
 vector<Float_t> Track::getLateralDeflectionFromExtrapolatedPosition(Int_t layer) {
-	Cluster			 	 *	clusterLastLayer = nullptr;
-	Cluster			 	 *	clusterLastLastLayer = nullptr;
-	Cluster			    *	clusterThisLayer = nullptr;
-	Cluster				 	extrapolatedClusterThisLayer;
-	Cluster					Slope;
-	Int_t						idxThis, idxLast, idxLastLast;
-	vector<Float_t>		deflection;
+   Cluster            * clusterLastLayer = nullptr;
+   Cluster            * clusterLastLastLayer = nullptr;
+   Cluster            * clusterThisLayer = nullptr;
+   Cluster              extrapolatedClusterThisLayer;
+   Cluster              Slope;
+   Int_t                idxThis, idxLast, idxLastLast;
+   vector<Float_t>      deflection;
 
-	idxThis = getClusterFromLayer(layer);
-	idxLast = getClusterFromLayer(layer - 1);
-	idxLastLast = getClusterFromLayer(layer - 2);
+   idxThis = getClusterFromLayer(layer);
+   idxLast = getClusterFromLayer(layer - 1);
+   idxLastLast = getClusterFromLayer(layer - 2);
 
-	if (idxThis < 0 || idxLast < 0) {
-		deflection.push_back(0);
-		deflection.push_back(0);
-		return deflection;
-	}
+   if (idxThis < 0 || idxLast < 0) {
+      deflection.push_back(0);
+      deflection.push_back(0);
+      return deflection;
+   }
 
-	clusterThisLayer = At(idxThis);
-	clusterLastLayer = At(idxLast);
+   clusterThisLayer = At(idxThis);
+   clusterLastLayer = At(idxLast);
 
-	if (idxLastLast < 0) {
-		deflection.push_back(clusterThisLayer->getXmm() - clusterLastLayer->getXmm());
-		deflection.push_back(clusterThisLayer->getYmm() - clusterLastLayer->getYmm());
-		return deflection;
-	}
+   if (idxLastLast < 0) {
+      deflection.push_back(clusterThisLayer->getXmm() - clusterLastLayer->getXmm());
+      deflection.push_back(clusterThisLayer->getYmm() - clusterLastLayer->getYmm());
+      return deflection;
+   }
 
-	clusterLastLastLayer = At(idxLastLast);
-	Cluster slope(clusterLastLayer->getX() - clusterLastLastLayer->getX(),
-					  clusterLastLayer->getY() - clusterLastLastLayer->getY());
+   clusterLastLastLayer = At(idxLastLast);
+   Cluster slope(clusterLastLayer->getX() - clusterLastLastLayer->getX(),
+                 clusterLastLayer->getY() - clusterLastLastLayer->getY());
 
-	extrapolatedClusterThisLayer = Cluster(clusterLastLayer->getX() + slope.getX(),
-															 clusterLastLayer->getY() + slope.getY());
+   extrapolatedClusterThisLayer = Cluster(clusterLastLayer->getX() + slope.getX(),
+                                              clusterLastLayer->getY() + slope.getY());
 
-	deflection.push_back(clusterThisLayer->getXmm() - extrapolatedClusterThisLayer.getXmm());
-	deflection.push_back(clusterThisLayer->getYmm() - extrapolatedClusterThisLayer.getYmm());
+   deflection.push_back(clusterThisLayer->getXmm() - extrapolatedClusterThisLayer.getXmm());
+   deflection.push_back(clusterThisLayer->getYmm() - extrapolatedClusterThisLayer.getYmm());
 
-	return deflection;
+   return deflection;
 }
 
 void Track::extrapolateToLayer0() {
@@ -138,10 +138,10 @@ void Track::extrapolateToLayer0() {
          cout << "No pointer for At(1) as well... Aborting this track extrapolation.\n";
          return;
       }
-		else {
-			eventID = At(1)->getEventID();
-			if (getLayer(1) == 0) return; // hotfix... Why is layer 0 sometimes placed in idx 1? Must fix this.
-		}
+      else {
+         eventID = At(1)->getEventID();
+         if (getLayer(1) == 0) return; // hotfix... Why is layer 0 sometimes placed in idx 1? Must fix this.
+      }
 
       if (At(2)) {
          slope->set(getX(2) - getX(1), getY(2) - getY(1), getLayer(2) - getLayer(1));
@@ -163,7 +163,7 @@ void Track::extrapolateToLayer0() {
                  getY(1) - slope->getLayer() * slope->getY(), // new y
                  0); // layer = 0
 
-		newStart->setEventID(eventID);
+      newStart->setEventID(eventID);
    }
 }
 

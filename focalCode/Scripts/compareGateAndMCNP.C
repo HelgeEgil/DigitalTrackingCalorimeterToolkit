@@ -41,12 +41,12 @@ void compareGateAndMCNP::Run()
    Int_t xfrom = 0;
    Int_t xto = 27;
 
-	TH1F *hGATE = new TH1F("hGATE", "All protons in GATE dataset", nbinsx, xfrom, xto);
-	TH1F *hGATEStop = new TH1F("hGATEStop", "Protons in GATE dataset with processName == ProtonInelastic", nbinsx, xfrom, xto);
+   TH1F *hGATE = new TH1F("hGATE", "All protons in GATE dataset", nbinsx, xfrom, xto);
+   TH1F *hGATEStop = new TH1F("hGATEStop", "Protons in GATE dataset with processName == ProtonInelastic", nbinsx, xfrom, xto);
 
    Int_t    lastEvent = -1;
-	Float_t  lastRange = 0;
-	Int_t    lastID = -1;
+   Float_t  lastRange = 0;
+   Int_t    lastID = -1;
 
    // GATE READOUT
 
@@ -54,35 +54,35 @@ void compareGateAndMCNP::Run()
 
    Long64_t nentries = fChain->GetEntriesFast();
    Long64_t nbytes = 0, nb = 0;
-	
+   
    Long64_t ientry = LoadTree(0);
-	fChain->GetEntry(0);
-	
+   fChain->GetEntry(0);
+   
    for (Long64_t jentry=0; jentry<nentries;jentry++) {
-	Long64_t ientry = LoadTree(jentry);
-	
-	if (ientry < 0) {
-		break;
-	}
+   Long64_t ientry = LoadTree(jentry);
+   
+   if (ientry < 0) {
+      break;
+   }
 
-	nb = fChain->GetEntry(jentry);   nbytes += nb;
+   nb = fChain->GetEntry(jentry);   nbytes += nb;
 
 
-	if (lastID < 0) lastID = eventID;
+   if (lastID < 0) lastID = eventID;
 
-	if (parentID == 0) {
+   if (parentID == 0) {
 
-		if (eventID != lastID) {
-			hGATE->Fill(lastRange/10.);
-   	}
+      if (eventID != lastID) {
+         hGATE->Fill(lastRange/10.);
+      }
 
       else {
          if (processName[0] == 'P') hGATEStop->Fill(lastRange/10.);
       }
 
-		lastRange = posZ;
+      lastRange = posZ;
       lastID = eventID;
-		}
+      }
    }
    
    TF1 *fitFunctionG = new TF1("fitFunctionG", "gaus", 20, 30);

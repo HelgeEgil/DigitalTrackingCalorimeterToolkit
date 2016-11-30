@@ -195,6 +195,18 @@ void  createSplines() {
       in.open("Data/Ranges/3mm_Al.csv");
    }
 
+   else if (kAbsorbatorThickness == 4) {
+      in.open("Data/Ranges/4mm_Al.csv");
+   }
+   
+   else if (kAbsorbatorThickness == 5) {
+      in.open("Data/Ranges/5mm_Al.csv");
+   }
+   
+   else if (kAbsorbatorThickness == 6) {
+      in.open("Data/Ranges/6mm_Al.csv");
+   }
+
    else {
       in.open("Data/Range/2mm_Al.csv");
    }
@@ -251,13 +263,28 @@ void  createSplines() {
    splineWInv = new TSpline3("splineWInv", rangesW, energiesW, idxW);
 
    if (kAbsorbatorThickness == 2) {
-      alpha_aluminum = 0.0154651;
-      p_aluminum = 1.73118;
+      alpha_aluminum = 0.0096;
+      p_aluminum = 1.784;
    }
 
    else if (kAbsorbatorThickness == 3) {
       alpha_aluminum = 0.0173389;
       p_aluminum = 1.7751;
+   }
+
+   else if (kAbsorbatorThickness == 4) {
+      alpha_aluminum = 0.0124;
+      p_aluminum = 1.7341;
+   }
+   
+   else if (kAbsorbatorThickness == 5) {
+      alpha_aluminum = 0.0125;
+      p_aluminum = 1.7327;
+   }
+
+   else if (kAbsorbatorThickness == 6) {
+      alpha_aluminum = 0.0098;
+      p_aluminum = 1.781;
    }
 
 //   alpha_aluminum = 0.0140203;
