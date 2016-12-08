@@ -146,7 +146,13 @@ findRange::findRange(Int_t energy, Int_t thickness, Bool_t useDegrader, TTree *t
       }
 
       tree = chain;
-      run_energy = energy;
+      if (!useDegrader) {
+         run_energy = energy;
+      }
+      else {
+         run_energy = pow((329.1 - energy*2.1) / 0.0239, 1/1.7548);
+         printf("With inital energy of 230 MeV and a degrader thickness of %d mm, the residual energy is approx. %d MeV.", energy, run_energy);
+      }
 #endif // SINGLE_TREE
 
    }

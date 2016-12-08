@@ -66,6 +66,7 @@ vector<Float_t> findRange::Run(Double_t energy, Double_t sigma_mev)
    // 2 mm: 0.0096, 1.784
    // 3 mm: 0.0097, 1.7825
    // 4 mm: 0.0098, 1.7806
+   // H20:  0.0239, 1.7548 
    Float_t expectedRange = 0.0096 * pow(run_energy, 1.784);
    Float_t xfrom = expectedRange * 0.5;
    Float_t xto = expectedRange * 2;
