@@ -18,7 +18,7 @@
 /gate/waterbox/geometry/setYLength 800. cm
 /gate/waterbox/geometry/setZLength 100. cm
 /gate/waterbox/placement/setTranslation 0. 0. 50. cm
-/gate/waterbox/setMaterial Aluminium
+/gate/waterbox/setMaterial Water
 /gate/waterbox/vis/forceWireframe
 
 /gate/waterbox/attachCrystalSD
@@ -27,8 +27,8 @@
 # Physics	#
 #===============#
 
-/gate/geometry/setIonisationPotential Water 70 eV
-/gate/geometry/setIonisationPotential Aluminium 163 eV
+/gate/geometry/setIonisationPotential Water 75 eV
+#/gate/geometry/setIonisationPotential Aluminium 163 eV
 /gate/physics/addPhysicsList QGSP_BIC_EMY
 
 /gate/run/initialize
@@ -45,12 +45,13 @@
 /gate/source/uniformBeam/gps/type Plane
 /gate/source/uniformBeam/gps/shape Square
 /gate/source/uniformBeam/gps/direction 0 0 1
-/gate/source/uniformBeam/gps/halfx 25. mm
-/gate/source/uniformBeam/gps/halfy 25. mm
+/gate/source/uniformBeam/gps/halfx 35. mm
+/gate/source/uniformBeam/gps/halfy 35. mm
 /gate/source/uniformBeam/gps/centre 0. 0. -0.1 mm # -20 cm for scintillator
 
 /gate/output/root/enable
-/gate/output/root/setFileName /scratch/focal/focalCode/Scripts/MCCodeComparison/Data/GATE/Aluminium/aluminium163eV_{energy}MeV
+#/gate/output/root/setFileName /scratch/focal/focalCode/Scripts/MCCodeComparison/Data/GATE/Aluminium/aluminium_{energy}MeV
+/gate/output/root/setFileName /scratch/focal/focalCode/Scripts/MCCodeComparison/Data/GATE/Water/water_{energy}MeV
 
 /gate/random/setEngineName MersenneTwister
 /gate/random/setEngineSeed auto

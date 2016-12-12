@@ -1,8 +1,8 @@
 #!/bin/bash
 # Usage: run.sh material energy_from energy_increment energy_to
 
-echo "Usage: ./run.sh <energy_from> <energy_step> <energy_to> <file_number>"
-echo Energy From: $1, Energy Step: $2, Energy To: $3, File Number: $4
+echo "Usage: ./run.sh <energy_from> <energy_step> <energy_to> <npart>"
+echo Energy From: $1, Energy Step: $2, Energy To: $3, npart: $4
 
 if [ $# -ne 4 ]; then
 	echo Invalid number of arguments: $#
