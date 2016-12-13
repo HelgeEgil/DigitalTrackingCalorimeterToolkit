@@ -47,12 +47,12 @@
 /gate/source/uniformBeam/gps/type Plane
 /gate/source/uniformBeam/gps/shape Square
 /gate/source/uniformBeam/gps/direction 0 0 1
-/gate/source/uniformBeam/gps/halfx 3.5 cm
-/gate/source/uniformBeam/gps/halfy 3.5 cm
+/gate/source/uniformBeam/gps/halfx 0. cm
+/gate/source/uniformBeam/gps/halfy 0. cm
 /gate/source/uniformBeam/gps/centre 0. 0. -0.1 cm
 
 /gate/output/root/enable
-/gate/output/root/setFileName ../Data/GATE/ComplexGeometry/complex_{energy}MeV
+/gate/output/root/setFileName ../Data/GATE/ComplexGeometry/complexPB_{energy}MeV
 /gate/output/root/setRootSinglesFlag 0
 /gate/output/root/setRootNtupleFlag 0
 

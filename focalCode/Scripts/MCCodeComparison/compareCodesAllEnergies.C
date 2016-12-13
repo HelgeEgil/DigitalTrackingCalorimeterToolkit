@@ -34,8 +34,8 @@ Float_t findFWHM(TH1F *h) {
    }
    avg /= n;
 
-   bin1 = h->FindFirstBinAbove(avg/2);
-   bin2 = h->FindLastBinAbove(avg/2);
+   bin1 = h->FindFirstBinAbove(avg/10.);
+   bin2 = h->FindLastBinAbove(avg/10.);
    fwhm = h->GetBinCenter(bin2) - h->GetBinCenter(bin1);
    printf("FWHM = %.2f\n", fwhm);
  
@@ -49,7 +49,7 @@ void Run()
    Bool_t   activateMCNP = true;
    Bool_t   activateFLUKA = true;
    Bool_t   activateTRIM = false;
-   Int_t    phantom = kComplex;
+   Int_t    phantom = kWater;
 
    Int_t    nbinsxy = 400;
    Int_t    xyfrom = -60;
@@ -93,16 +93,17 @@ void Run()
    Float_t  fractionNIJanni[12] = {}; // % 
    Float_t  fractionNIJanniError[12] = {}; // % of %
 
-   Float_t  rangesJanni[12] = {0.2255, 0.3126, 0.4129, 0.5244, 0.6470, 0.7804, // 
+   Float_t  rangesJanniAl[12] = {1.0733, 1.4848, 1.9527, 2.4744, 3.0475, 3.6698, 5.4282, 7.4545, 9.7252, 12.220, 14.920, 17.811};
    Float_t  stragglingJanniAl[12] = {1.302, 1.276, 1.254, 1.236, 1.220, 1.207, 1.176, 1.153, 1.133, 1.115, 1.100, 1.087};
    Float_t  stragglingJanniErrorAl[12] = {0.019, 0.017, 0.015, 0.014, 0.013, 0.012, 0.01, 0.0088, 0.0078, 0.0071, 0.0066, 0.0061};
    Float_t  fractionNIJanniAl[12] = {4.023, 5.375, 6.817, 8.324, 9.892, 11.51, 15.70, 20.00, 24.36, 28.75, 33.13, 37.46};
    Float_t  fractionNIJanniErrorAl[12] = {0.24, 0.24, 0.24, 0.24, 0.23, 0.23, 0.22, 0.22, 0.21, 0.20, 0.19, 0.18};
 
-   Float_t stragglingJanniWater[12] = {1.249, 1.227, 1.210, 1.195, 1.181, 1.169, 1.144, 1.123, 1.105, 1.090, 1.076, 1.063};
-   Float_t stragglingJanniErrorWater[12] = {0.017, 0.017, 0.016, 0.015, 0.015, 0.015, 0.014, 0.014, 0.013, 0.013, 0.013, 0.013};
-   Float_t fractionNIJanniWater[12] = {3.487, 4.636, 5.860, 7.136, 8.465, 9.833, 13.29, 16.63, 19.92, 23.30, 26.75, 30.22};
-   Float_t fractionNIJanniErrorWater[12] = {0.24, 0.24, 0.24, 0.24, 0.24, 0.23, 0.23, 0.22, 0.22, 0.21, 0.21, 0.20};
+   Float_t  rangesJanniWater[12] = {2.252, 3.1259, 4.1226, 5.2360, 6.4610, 7.7929, 11.564, 15.919, 20.807, 26.185, 32.013, 38.257};
+   Float_t  stragglingJanniWater[12] = {1.249, 1.227, 1.210, 1.195, 1.181, 1.169, 1.144, 1.123, 1.105, 1.090, 1.076, 1.063};
+   Float_t  stragglingJanniErrorWater[12] = {0.017, 0.017, 0.016, 0.015, 0.015, 0.015, 0.014, 0.014, 0.013, 0.013, 0.013, 0.013};
+   Float_t  fractionNIJanniWater[12] = {3.487, 4.636, 5.860, 7.136, 8.465, 9.833, 13.29, 16.63, 19.92, 23.30, 26.75, 30.22};
+   Float_t  fractionNIJanniErrorWater[12] = {0.24, 0.24, 0.24, 0.24, 0.24, 0.23, 0.23, 0.22, 0.22, 0.21, 0.21, 0.20};
 
    if (phantom == kAluminium) {
       for (Int_t i=0; i<19; i++) {
@@ -110,10 +111,11 @@ void Run()
       }
       
       for (Int_t i=0; i<12; i++) {
-         stragglingJanni[i] = stragglingJanniAl[i];
+         rangesJanni[i] = rangesJanniAl[i];
+         stragglingJanni[i] = stragglingJanniAl[i] * rangesJanni[i] / 100.;
          stragglingJanniError[i] = stragglingJanniErrorAl[i];
-         fractionNIJanni[i] = fractionNIJanniAl[i];
-         fractionNIJanniError[i] = fractionNIJanniErrorAl[i];
+         fractionNIJanni[i] = fractionNIJanniAl[i] / 100.;
+         fractionNIJanniError[i] = fractionNIJanniErrorAl[i] * fractionNIJanni[i];
       }
    }
    else if (phantom == kWater) {
@@ -121,10 +123,11 @@ void Run()
          rangesPSTAR[i] = rangesPSTARWater[i];
       }
       for (Int_t i=0; i<12; i++) {
-         stragglingJanni[i] = stragglingJanniWater[i];
+         rangesJanni[i] = rangesJanniWater[i];
+         stragglingJanni[i] = stragglingJanniWater[i] * rangesJanni[i] / 100.;
          stragglingJanniError[i] = stragglingJanniErrorWater[i];
-         fractionNIJanni[i] = fractionNIJanniWater[i];
-         fractionNIJanniError[i] = fractionNIJanniErrorWater[i];
+         fractionNIJanni[i] = fractionNIJanniWater[i] / 100.;
+         fractionNIJanniError[i] = fractionNIJanniErrorWater[i] * fractionNIJanni[i];
       }
    }
    else if (phantom == kComplex) {
@@ -157,6 +160,7 @@ void Run()
       }
    }
    
+   TCanvas *c5 = new TCanvas("c5", "Straggling distribution", 1200, 1000);
    TCanvas *c4 = new TCanvas("c4", "Lateral BP distribution", 1200, 1000);
    TCanvas *c3 = new TCanvas("c3", "Fraction of nuclear interactions", 1200, 1000);
    TCanvas *c2 = new TCanvas("c2", "test", 800, 800);
@@ -184,6 +188,7 @@ void Run()
       Int_t    parentID, eventID;
       Bool_t   isInelastic;
       TFile   *f1 = nullptr;
+      Float_t    nTotal = 0, nInelastic = 0;
      
       for (Int_t i=0; i<19; i++) {
          printf("i = %d\n", i);
@@ -226,10 +231,12 @@ void Run()
          for (Int_t j=0, N = treeBic->GetEntries(); j<N; ++j) {
             treeBic->GetEntry(j);
             hGATEAll->Fill(z/10.);
+            nTotal++;
             if (!isInelastic) {
                hGATE->Fill(z/10.);
                hGATELateral->Fill(y/10.);
             }
+            else nInelastic++;
          }
       
          mu = 0; sigma = 0;
@@ -266,10 +273,14 @@ void Run()
          cutoffIntegral = hGATEAll->Integral(0, distributionCutoffBin);
          fraction = cutoffIntegral / float(totalIntegral);
          fractionNIGATE[i] = fraction;
-         printf("-> Fraction of NI is %.2f.\n", fraction);
 
          // Calculate FWHM of lateral distribution
-         fwhmGATE[i] = findFWHM(hGATELateral);
+//         fwhmGATE[i] = findFWHM(hGATELateral);
+         
+         Int_t bin1 = hGATELateral->FindFirstBinAbove(hGATELateral->GetMaximum()/10.);
+         Int_t bin2 = hGATELateral->FindLastBinAbove(hGATELateral->GetMaximum()/10.);
+         Float_t fwhm = hGATELateral->GetBinCenter(bin2) - hGATELateral->GetBinCenter(bin1);
+         fwhmGATE[i] = fwhm;
 
          delete f1;
          delete hGATEAll;
@@ -285,7 +296,6 @@ void Run()
       }
 
    }
-
    
    if (activateMCNP) {
       //
@@ -303,6 +313,8 @@ void Run()
       Float_t  u, v, w; // vectors
       Float_t  energy, weight, time;
       Float_t  nFilling = 0;
+
+      Int_t    nTotal = 0, nInelastic = 0;
 
       cout << "READING MCNP FILES...\n";
       for (Int_t i=0; i<19; i++) {
@@ -330,7 +342,7 @@ void Run()
             in.open(Form("Data/MCNP/Water/%dMeV_vannp", nominalEnergy));
          }
          else if (phantom == kComplex) {
-            in.open(Form("Data/MCNP/ComplexGeometry/cem03.03/10k_protons/%dMeV_sdetp", nominalEnergy));
+            in.open(Form("Data/MCNP/ComplexGeometry/%dMeV_sdetp", nominalEnergy));
          }
 
          while (! in.eof() ) {
@@ -353,10 +365,12 @@ void Run()
                   in >> x >> y >> z >> u >> v >> w >> energy >> weight >> time;
 
                   hMCNPAll->Fill(z - startZ);
+                  nTotal++;
                   if (terminationType != 13 && terminationType != 16) { // not a nuclear interaction
                      hMCNP->Fill((z - startZ));
                      hMCNPLateral->Fill(x);
                   }
+                  else nInelastic++;
                }
             }
          }
@@ -424,6 +438,7 @@ void Run()
       Float_t  x, y, z;
       Float_t  mu;
       Float_t  sigma; 
+      Int_t    nTotal = 0, nInelastic = 0;
 
       for (Int_t i=0; i<19; i++) {
          nominalEnergy = (i+5)*10;
@@ -438,24 +453,18 @@ void Run()
             nominalRange = 0.0013 * pow(nominalEnergy, 1.7447) * 0.97;
          }
 
-         TH1F * hFLUKA= new TH1F("hFLUKA", "All protons in FLUKA dataset;Range [cm];Number of primaries", 100, fmax(0, nominalRange-2), nominalRange+2);
+         TH1F * hFLUKA = new TH1F("hFLUKA", "All protons in FLUKA dataset;Range [cm];Number of primaries", 100, fmax(0, nominalRange-2), nominalRange+2);
          TH1F * hFLUKAAll = new TH1F("hFLUKAAll", "Proton ranges in single FLUKA dataset including nuclear interactions;Range [cm];Number of primaries", 200, 0, nominalRange+2);
          TH1F * hFLUKALateral = new TH1F("hFLUKALateral", "Lateral BP distribution;X position [cm];Number of end points", 300, -6,6);
 
          if (phantom == kAluminium) { 
-            in.open(Form("Data/FLUKA/Aluminium/aluminium%dMeV.txt", nominalEnergy));
+            in.open(Form("Data/FLUKA/Aluminium/%dMevProtons.txt", nominalEnergy));
          }
          else if (phantom == kWater) {
-            in.open(Form("Data/FLUKA/Water/water%dMeV.txt", nominalEnergy));
+            in.open(Form("Data/FLUKA/Water/%dMeVProtons.txt", nominalEnergy));
          }
          else if (phantom == kComplex) {
-            if (nominalEnergy == 200) {
-               // Check Jarle's new geometry/setup
-               in.open("Data/FLUKA/ComplexGeometry/ProtonEnergy200.txt");
-            }
-            else {
-               in.open(Form("Data/FLUKA/ComplexGeometry/detector%dMeV.txt", nominalEnergy));
-            }
+            in.open(Form("Data/FLUKA/ComplexGeometry/%dMeVProtons.txt", nominalEnergy));
          }
 
          while (! in.eof() ) {
@@ -464,11 +473,12 @@ void Run()
             if (!in.good()) break;
 
             hFLUKAAll->Fill(z);
+            nTotal++;
             if (terminationType != 11) {
                hFLUKA->Fill(z);
                hFLUKALateral->Fill(x);
             }
-
+            else nInelastic++;
          }
 
          in.close();
@@ -571,7 +581,7 @@ void Run()
    Int_t numberOfPoints = 19;
    if (phantom == kComplex) numberOfPoints = 18;
 
-   TGraphErrors *gMCNP = new TGraphErrors(numberOfPoints, energiesMCNP, rangesMCNP, energyError, sigmaMCNP);
+   TGraphErrors *gMCNP = new TGraphErrors(numberOfPoints-1, energiesMCNP, rangesMCNP, energyError, sigmaMCNP);
    if (phantom == kWater) {
       gMCNP->SetTitle(Form("Water range comparison between different codes; Energy [MeV];Range [cm]", errorScalingFactor));
    }
@@ -623,7 +633,7 @@ void Run()
       pad2->cd();
       cout << "Drawing in pad2\n";
 
-      TGraph *gMCNPdiff = new TGraph(19, energiesMCNP, rangesMCNPdiff);
+      TGraph *gMCNPdiff = new TGraph(numberOfPoints-1, energiesMCNP, rangesMCNPdiff);
       gMCNPdiff->SetTitle("; Energy [MeV];Range error [mm]");
       gMCNPdiff->SetLineColor(kRed);
       gMCNPdiff->SetLineWidth(3);
@@ -638,12 +648,12 @@ void Run()
       gMCNPdiff->GetXaxis()->SetNdivisions(30);
       gMCNPdiff->Draw("AL");
       
-      TGraph *gGATEdiff = new TGraph(19, energiesGATE, rangesGATEdiff);
+      TGraph *gGATEdiff = new TGraph(numberOfPoints, energiesGATE, rangesGATEdiff);
       gGATEdiff->SetLineColor(kBlue);
       gGATEdiff->SetLineWidth(3);
       gGATEdiff->Draw("same, L");
 
-      TGraph *gFLUKAdiff = new TGraph(19, energiesFLUKA, rangesFLUKAdiff);
+      TGraph *gFLUKAdiff = new TGraph(numberOfPoints, energiesFLUKA, rangesFLUKAdiff);
       gFLUKAdiff->SetLineColor(kBlack);
       gFLUKAdiff->SetLineWidth(3);
       gFLUKAdiff->Draw("same,L");
@@ -656,40 +666,45 @@ void Run()
 
    // Draw fraction of nuclear interactions
    c3->cd();
-   TGraph *gGATEFractionNI = new TGraph(numberOfPoints, rangesGATE, fractionNIGATE);
-   TGraph *gMCNPFractionNI = new TGraph(numberOfPoints, rangesMCNP, fractionNIMCNP);
-   TGraph *gFLUKAFractionNI = new TGraph(numberOfPoints, rangesFLUKA, fractionNIFLUKA);
-    TGraphErrors *gJanniFractionNI = new TGraphErrors(12, 
+   Float_t dummyArray[12] = {};
+
+   TGraph         *gGATEFractionNI  = new TGraph(numberOfPoints, rangesGATE, fractionNIGATE);
+   TGraph         *gMCNPFractionNI  = new TGraph(numberOfPoints-1, rangesMCNP, fractionNIMCNP);
+   TGraph         *gFLUKAFractionNI = new TGraph(numberOfPoints, rangesFLUKA, fractionNIFLUKA);
+   TGraphErrors   *gJanniFractionNI = new TGraphErrors(12, rangesJanni, fractionNIJanni, dummyArray, fractionNIJanniError);
 
    gGATEFractionNI->SetTitle("Fraction of nuclear interactions;Range [cm];Fraction of Nuclear Interactions (endpoints below 3#sigma)");
    gGATEFractionNI->SetLineColor(kBlue);
    gGATEFractionNI->SetLineWidth(3);
-   gFLUKAFractionNI->SetLineColor(kBlack);
+   gFLUKAFractionNI->SetLineColor(kGreen);
    gFLUKAFractionNI->SetLineWidth(3);
    gMCNPFractionNI->SetLineColor(kRed);
    gMCNPFractionNI->SetLineWidth(3);
+   gJanniFractionNI->SetMarkerColor(kBlack);
+   gJanniFractionNI->SetMarkerStyle(7);
 
    gGATEFractionNI->Draw("AL");
    gFLUKAFractionNI->Draw("same, L");
    gMCNPFractionNI->Draw("same, L");
+   gJanniFractionNI->Draw("same, P");
 
    TLegend *legFraction = new TLegend(0.17, 0.72, 0.35, 0.88);
-   if (phantom != kComplex) legFraction->AddEntry(gJanniFractionNI, "PSTAR", "Ple");
    legFraction->AddEntry(gGATEFractionNI, "GATE", "l");
    legFraction->AddEntry(gMCNPFractionNI, "MCNP", "l");
    legFraction->AddEntry(gFLUKAFractionNI, "FLUKA", "l");
+   if (phantom != kComplex) legFraction->AddEntry(gJanniFractionNI, "PSTAR", "Ple");
    legFraction->Draw();
 
    // Draw lateral BP distribution FWHM
    c4->cd();
    TGraph *gGATELateralFWHM = new TGraph(numberOfPoints, rangesGATE, fwhmGATE);
    TGraph *gFLUKALateralFWHM = new TGraph(numberOfPoints, rangesFLUKA, fwhmFLUKA);
-   TGraph *gMCNPLateralFWHM = new TGraph(numberOfPoints, rangesMCNP, fwhmMCNP);
+   TGraph *gMCNPLateralFWHM = new TGraph(numberOfPoints-1, rangesMCNP, fwhmMCNP);
 
    gGATELateralFWHM->SetTitle("Lateral Bragg Peak distribution FWHM;Range [cm];Lateral Bragg Peak size [FWHM cm]");
    gGATELateralFWHM->SetLineColor(kBlue);
    gGATELateralFWHM->SetLineWidth(3);
-   gFLUKALateralFWHM->SetLineColor(kBlack);
+   gFLUKALateralFWHM->SetLineColor(kGreen);
    gFLUKALateralFWHM->SetLineWidth(3);
    gMCNPLateralFWHM->SetLineColor(kRed);
    gMCNPLateralFWHM->SetLineWidth(3);
@@ -707,5 +722,34 @@ void Run()
    for (int i=0; i<19; i++) {
       printf("Lateral FWHM @ %.0f MeV: %.2f cm (FLUKA) - %.2f cm (GATE) - %.2f cm (MCNP).\n", energies[i], fwhmFLUKA[i], fwhmGATE[i], fwhmMCNP[i]);
    }
+
+   // Draw straggling distribution
+   c5->cd();
+   TGraph *gGATEStraggling = new TGraph(numberOfPoints, rangesGATE, sigmaGATE);
+   TGraph *gMCNPStraggling = new TGraph(numberOfPoints-1, rangesMCNP, sigmaMCNP);
+   TGraph *gFLUKAStraggling = new TGraph(numberOfPoints, rangesFLUKA, sigmaFLUKA);
+   TGraphErrors *gJanniStraggling = new TGraphErrors(12, rangesJanni, stragglingJanni, dummyArray, stragglingJanniError);
+
+   gGATEStraggling->SetTitle("Range straggling for different ranges;Range [cm];Range straggling [cm]");
+   gGATEStraggling->SetLineColor(kBlue);
+   gGATEStraggling->SetLineWidth(3);
+   gFLUKAStraggling->SetLineColor(kGreen);
+   gFLUKAStraggling->SetLineWidth(3);
+   gMCNPStraggling->SetLineColor(kRed);
+   gMCNPStraggling->SetLineWidth(3);
+   gJanniStraggling->SetMarkerColor(kBlack);
+   gJanniStraggling->SetMarkerStyle(21);
+
+   gGATEStraggling->Draw("AL");
+   gFLUKAStraggling->Draw("same, L");
+   gMCNPStraggling->Draw("same, L");
+   gJanniStraggling->Draw("same, P");
+
+   TLegend *legStraggling = new TLegend(0.17, 0.72, 0.35, 0.88);
+   legStraggling->AddEntry(gGATEStraggling, "GATE", "l");
+   legStraggling->AddEntry(gMCNPStraggling, "MCNP", "l");
+   legStraggling->AddEntry(gFLUKAStraggling, "FLUKA", "l");
+   legStraggling->AddEntry(gJanniStraggling, "Janni", "PLE");
+   legStraggling->Draw();
 
 }
