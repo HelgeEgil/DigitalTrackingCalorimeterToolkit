@@ -4,14 +4,6 @@
 /gate/world/placement/setTranslation 0 0 0 mm
 /gate/world/vis/setVisible false
 
-/gate/world/daughters/name degrader
-/gate/world/daughters/insert box
-/gate/degrader/geometry/setXLength 1000. mm
-/gate/degrader/geometry/setZLength 1000. mm
-/gate/degrader/geometry/setZLength {degraderthickness} mm
-/gate/degrader/setMaterial Water
-/gate/degrader/placement/setTranslation 0 0 -130. mm
-
 /gate/world/daughters/name scanner_1
 /gate/world/daughters/systemType scanner
 /gate/world/daughters/insert box

@@ -454,7 +454,7 @@ void makePlots() {
 
    pstarD->SetLineWidth(3);
    pstarD->SetLineColor(kMagenta-10);
-   pstarshadeD->SetTitle(Form("Reconstructed ranges of proton beams with %d mm Al absorbator;Reconstructed WET range [mm];WET error [mm]", mmAbsorbator));
+   pstarshadeD->SetTitle(Form("Reconstructed ranges of proton beams with %d mm Al absorbator;Energy [MeV];WET error [mm]", mmAbsorbator));
    
    pstarshadeD->SetFillColor(kMagenta-10);
    pstarshadeD->Draw("FA");

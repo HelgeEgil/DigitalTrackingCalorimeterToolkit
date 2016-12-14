@@ -124,7 +124,7 @@ Float_t getWEPLStragglingFromWEPL(Float_t wepl, Float_t sigma_energy) {
    Float_t estimatedStraggling;
 
    if       (kAbsorbatorThickness == 5)   estimatedStraggling = 1.57e-2 * wepl + 7.54e-6 * pow(wepl,2);
-   else if  (kAbsorbatorThickness == 4)   estimatedStraggling = 1.73e-2 * wepl + 2.28e-6 * pow(wepl,2);
+   else if  (kAbsorbatorThickness == 4)   estimatedStraggling = 1.52e-2 * wepl + 4.12e-5 * pow(wepl,2);
    else if  (kAbsorbatorThickness == 3)   estimatedStraggling = 1.52e-2 * wepl + 1.02e-5 * pow(wepl,2);
    else if  (kAbsorbatorThickness == 2)   estimatedStraggling = 1.53e-2 * wepl + 9.59e-6 * pow(wepl,2);
    else                                   estimatedStraggling = 0.017 * wepl;

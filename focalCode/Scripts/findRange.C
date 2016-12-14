@@ -67,9 +67,9 @@ vector<Float_t> findRange::Run(Double_t energy, Double_t sigma_mev)
    // 3 mm: 0.0097, 1.7825
    // 4 mm: 0.0098, 1.7806
    // H20:  0.0239, 1.7548 
-   Float_t expectedRange = 0.0096 * pow(run_energy, 1.784);
-   Float_t xfrom = expectedRange * 0.5;
-   Float_t xto = expectedRange * 2;
+   Float_t expectedRange = 0.0098 * pow(run_energy, 1.7806);
+   Float_t xfrom = expectedRange * 0.75;
+   Float_t xto = expectedRange * 1.25;
 
    Float_t x_compensate = 0;
 
@@ -169,12 +169,14 @@ vector<Float_t> findRange::Run(Double_t energy, Double_t sigma_mev)
    }
    
    c2->cd();
-   
+  
+   // The fitting parameters below
    TF1 *fRange = new TF1("fit_range", "gaus", xfrom, xto);
-   fRange->SetParameters(100, expectedRange, 4);
+   fRange->SetParameters(hRange->GetMaximum(), expectedRange, 2);
    hRange->Fit("fit_range", "Q,M,W,B", "", xfrom, xto);
 
    Float_t cutoff = fRange->GetParameter(1) - 6*fabs(fRange->GetParameter(2));
+   if (cutoff < 0) cutoff = 0;
    Float_t cutoffHigh = fRange->GetParameter(1) + 6*fabs(fRange->GetParameter(2));
    Int_t binLow = hRange->GetXaxis()->FindBin(cutoff);
    Int_t binHigh = hRange->GetXaxis()->FindBin(cutoffHigh);
@@ -196,6 +198,8 @@ vector<Float_t> findRange::Run(Double_t energy, Double_t sigma_mev)
 
    sigmaRangeWeight /= totalUnderCurve-1;
    sigmaRangeWeight = sqrt(sigmaRangeWeight);
+
+   printf("Expecting mean range = %.2f mm. Searching from %.2f mm to %.2f mm.\n", expectedRange, cutoff, cutoffHigh);
 
    cout << "Mean = " << fRange->GetParameter(1) << endl;
    cout << "3 sigma = " << cutoff << " to " << cutoffHigh << endl;

@@ -273,8 +273,8 @@ void  createSplines() {
    }
 
    else if (kAbsorbatorThickness == 4) {
-      alpha_aluminum = 0.0124;
-      p_aluminum = 1.7341;
+      alpha_aluminum = 0.0392;
+      p_aluminum = 1.7450;
    }
    
    else if (kAbsorbatorThickness == 5) {
