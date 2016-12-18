@@ -20,8 +20,9 @@
 [Core-0] 
 [Core-0] You are using Geant4 version 10.2.2
 /control/alias npart 100000
-/control/alias energy 230
-[Core-0] Starting macro Main.mac[[Physic-0] The following Geant4's physic-list is enabled :QGSP_BIC_EMY
+/control/alias energy 90
+[Core-0] Starting macro Main.mac
+[Physic-0] The following Geant4's physic-list is enabled :QGSP_BIC_EMY
 [Core-0] Initialization of geometry
 [Core-0] Initialization of physics
 G4PhysListFactory::GetReferencePhysList <QGSP_BIC_EMY>  EMoption= 3
@@ -29,7 +30,8 @@ G4PhysListFactory::GetReferencePhysList <QGSP_BIC_EMY>  EMoption= 3
 
 <<< Reference Physics List QGSP_BIC_EMY is built
 
-G4VUserPhysicsList::SetDefaultCutValue: negative cut values  :-1[mm]#### Adding tracking cuts for neutron  TimeCut(ns)= 10000  KinEnergyCut(MeV)= 0
+G4VUserPhysicsList::SetDefaultCutValue: negative cut values  :-1[mm]
+#### Adding tracking cuts for neutron  TimeCut(ns)= 10000  KinEnergyCut(MeV)= 0
 [Core-0] Initialization of actors
 [Acquisition-0]   
 [Acquisition-0] ============= Source initialization =============
@@ -55,6 +57,7 @@ G4VUserPhysicsList::SetDefaultCutValue: negative cut values  :-1[mm]#### Adding 
           PassiveChip
           scanner
           DefaultRegionForTheWorld
+
 phot:   for  gamma, applyCuts: 1     SubType= 12  BuildTable= 0
       LambdaPrime table from 200 keV to 10 TeV in 154 bins 
       ===== EM models for the G4Region  DefaultRegionForTheWorld ======
@@ -276,7 +279,6 @@ msc:   for mu+    SubType= 10
       ===== EM models for the G4Region  DefaultRegionForTheWorld ======
             UrbanMsc :  Emin=        0 eV    Emax=       10 TeV  Table with 220 bins Emin=    100 eV    Emax=     10 TeV
 
-
 muIoni:   for  mu+    SubType= 2
       dE/dx and range tables from 10 eV  to 10 TeV in 240 bins
       Lambda tables from threshold to 10 TeV, 20 bins per decade, spline: 1
@@ -332,6 +334,7 @@ msc:   for pi+    SubType= 10
       RangeFactor= 0.2, stepLimitType: 0, latDisplacement: 0
       ===== EM models for the G4Region  DefaultRegionForTheWorld ======
             UrbanMsc :  Emin=        0 eV    Emax=       10 TeV  Table with 220 bins Emin=    100 eV    Emax=     10 TeV
+
 hIoni:   for  pi+    SubType= 2
       dE/dx and range tables from 10 eV  to 10 TeV in 240 bins
       Lambda tables from threshold to 10 TeV, 20 bins per decade, spline: 1
@@ -354,11 +357,11 @@ hPairProd:   for  pi+    SubType= 4
       ===== EM models for the G4Region  DefaultRegionForTheWorld ======
            hPairProd :  Emin=        0 eV    Emax=       10 TeV
 
-
 msc:   for pi-    SubType= 10
       RangeFactor= 0.2, stepLimitType: 0, latDisplacement: 0
       ===== EM models for the G4Region  DefaultRegionForTheWorld ======
             UrbanMsc :  Emin=        0 eV    Emax=       10 TeV  Table with 220 bins Emin=    100 eV    Emax=     10 TeV
+
 hIoni:   for  pi-    SubType= 2
       dE/dx and range tables from 10 eV  to 10 TeV in 240 bins
       Lambda tables from threshold to 10 TeV, 20 bins per decade, spline: 1
@@ -726,8 +729,7 @@ WARNING: Scene "none" not found.
           PCBGlue
           PassiveChip
           scanner
-          DefaultRegionForTheWorld
-WWARNING: command "/vis/viewer/update" could not be applied: no current viewer.
+          DefaultRegionForTheWorldWWARNING: command "/vis/viewer/update" could not be applied: no current viewer.
 [Core-0] End of macro Main.mac
 Graphics systems deleted.
 Visualization Manager deleting...

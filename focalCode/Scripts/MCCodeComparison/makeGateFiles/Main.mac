@@ -52,7 +52,7 @@
 /gate/source/uniformBeam/gps/centre 0. 0. -0.1 cm
 
 /gate/output/root/enable
-/gate/output/root/setFileName ../Data/GATE/ComplexGeometry/complexPB_{energy}MeV
+/gate/output/root/setFileName ../Data/GATE/ComplexGeometry/complex_{energy}MeV
 /gate/output/root/setRootSinglesFlag 0
 /gate/output/root/setRootNtupleFlag 0
 

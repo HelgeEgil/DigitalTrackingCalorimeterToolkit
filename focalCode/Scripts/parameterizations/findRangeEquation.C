@@ -18,7 +18,7 @@
 
 using namespace std;
 
-void Run();
+void Run(int COUNTER);
 Double_t fitfunc_DBP(Double_t *v, Double_t *par);
 Double_t fitfunc_Ulmer(Double_t *v, Double_t *par);
 
@@ -65,7 +65,7 @@ Double_t fitfunc_Ulmer(Double_t *v, Double_t *par) {
    return fitval;
 }
 
-void Run() {
+void Run(int COUNTER) {
    TCanvas          *c1 = new TCanvas("c1", "Bragg-Kleeman", 1200, 900);
    TCanvas          *c2 = new TCanvas("c2", "Ulmer 1", 1200, 900);
 //   TCanvas          *c3 = new TCanvas("c3", "Ulmer 2", 1200, 900);
@@ -155,12 +155,12 @@ void Run() {
    Double_t           deltaLinearInv[numberOfEnergies] = {};
 
    cout << "Reading file\n";
-//   in.open("ranges_water_pstar.csv");
+   in.open("ranges_water_pstar2.csv");
 //   in.open("Ranges_2mm_Al.csv");
-   in.open("Ranges_3mm_Al.csv");
+//   in.open("Ranges_3mm_Al.csv");
    idx = 0;
    Bool_t useCSDA = true;
-   Bool_t useCompleteDataset = true;
+   Bool_t useCompleteDataset = false;
    Int_t idxPara = 0;
    Int_t idxCtrl = 0;
    
@@ -168,7 +168,7 @@ void Run() {
    while (1) {
 
       in >> energy >> range_csda >> range;
-//      if (counter++%10 != 0) continue; // Reduce N of data points
+      if (counter++%COUNTER != 0 && idx%2 == 0) continue; // Reduce N of data points
       if (!in.good()) break;
       
       if (energy > 1200) {
@@ -484,6 +484,11 @@ void Run() {
    cout << "INVERSE LINEAR MODEL : " << endl;
    cout << "RMS = " << rms_LinearInv << endl;
    cout << endl;
+
+   printf("Mean RMS of all models:\n");
+   printf("Bragg-Kleeman (%.3f), Ulmer (%.3f), Linear (%.3f), Spline (%.3f)\n", 
+         (rms_BK+rms_BKInv)/2, (rms_Ulmer + rms_UlmerInv)/2,
+         (rms_Linear+rms_LinearInv)/2, (rms_Spline + rms_SplineInv)/2);
 
    TCanvas *cCompare = new TCanvas("cCompare", "Error comparison", 800, 800);
    cCompare->Divide(1,2,0.01,0.01);
