@@ -49,7 +49,7 @@ void Run()
    Bool_t   activateMCNP = true;
    Bool_t   activateFLUKA = true;
    Bool_t   activateTRIM = false;
-   Int_t    phantom = kWater;
+   Int_t    phantom = kAluminium;
 
    Int_t    nbinsxy = 400;
    Int_t    xyfrom = -60;

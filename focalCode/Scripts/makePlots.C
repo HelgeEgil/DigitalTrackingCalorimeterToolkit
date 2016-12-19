@@ -4,6 +4,7 @@
 #include <TGraph.h>
 #include <TNtuple.h>
 #include <TGraphErrors.h>
+#include <TGraphAsymmErrors.h>
 #include <TStyle.h>
 #include <TCanvas.h>
 #include <TLine.h>
@@ -35,6 +36,7 @@ void makePlots() {
    TCanvas *c5 = new TCanvas("c5", "Chip sensitivity calibration", 1200, 800);
    TCanvas *c6 = new TCanvas("c6", "Resolution", 1200, 800);
    c6->Divide(2,1,0.0001,0.0001);
+   TCanvas *c7 = new TCanvas("c7", "Parameterization accuracy", 1200, 800);
 
    Float_t  arrayE[200] = {0}; // energy MC
    Float_t  arrayEE[200] = {0}; // error on energy MC
@@ -87,6 +89,33 @@ void makePlots() {
    Float_t  chipCalibrationError170[27] = {0};
    Float_t  chipCalibrationError180[27] = {0};
    Float_t  chipCalibrationError188[27] = {0};
+
+   // Parameterization (l = 1st quartile, m = median, h = 3rd quartile)
+   Double_t paraNPoints[21] = {};
+   Double_t paraBKl[21] = {};
+   Double_t paraBKm[21] = {};
+   Double_t paraBKh[21] = {};
+   Double_t paraBKInvl[21] = {};
+   Double_t paraBKInvm[21] = {};
+   Double_t paraBKInvh[21] = {};
+   Double_t paraUlmerl[21] = {};
+   Double_t paraUlmerm[21] = {};
+   Double_t paraUlmerh[21] = {};
+   Double_t paraUlmerInvl[21] = {};
+   Double_t paraUlmerInvm[21] = {};
+   Double_t paraUlmerInvh[21] = {};
+   Double_t paraSplinel[21] = {};
+   Double_t paraSplinem[21] = {};
+   Double_t paraSplineh[21] = {};
+   Double_t paraSplineInvl[21] = {};
+   Double_t paraSplineInvm[21] = {};
+   Double_t paraSplineInvh[21] = {};
+   Double_t paraLinearl[21] = {};
+   Double_t paraLinearm[21] = {};
+   Double_t paraLinearh[21] = {};
+   Double_t paraLinearInvl[21] = {};
+   Double_t paraLinearInvm[21] = {};
+   Double_t paraLinearInvh[21] = {};
 
    Int_t nThisEnergy = 0, lastEnergy = 0, mmAbsorbator;
 
@@ -352,6 +381,51 @@ void makePlots() {
       chipCalibrationError180[chipNumber] = error180;
       chipCalibrationError188[chipNumber] = error188;
    }
+
+   ifstream in8;
+   Int_t    pN;
+   Int_t    pi = 0;
+   Double_t pBKl, pBKm, pBKh, pBKIl, pBKIm, pBKIh;
+   Double_t pUlmerl, pUlmerm, pUlmerh, pUlmerIl, pUlmerIm, pUlmerIh;
+   Double_t pLinearl, pLinearm, pLinearh, pLinearIl, pLinearIm, pLinearIh;
+   Double_t pSplinel, pSplinem, pSplineh, pSplineIl, pSplineIm, pSplineIh;
+   in8.open("OutputFiles/MedianValuesForParameterization.csv");
+   while (1) {
+      in8 >> pN >> pBKl >> pBKm >> pBKh >> pBKIl >> pBKIm >> pBKIh >> pUlmerl >> pUlmerm >> pUlmerh >> pUlmerIl >> pUlmerIm >> pUlmerIh >> pSplinel >> pSplinem >> pSplineh >> pSplineIl >> pSplineIm >> pSplineIh >> pLinearl >> pLinearm >> pLinearh >> pLinearIl >> pLinearIm >> pLinearIh;
+
+      if (!in8.good()) break;
+
+      paraNPoints[pi] = pN;
+      paraBKm[pi] = pBKm;
+      paraBKl[pi] = pBKm - pBKl;
+      paraBKh[pi] = pBKh - pBKm;
+      paraBKInvm[pi] = pBKIm;
+      paraBKInvl[pi] = pBKIm - pBKIl;
+      paraBKInvh[pi] = pBKIh - pBKIm;
+      paraUlmerm[pi] = pUlmerm;
+      paraUlmerl[pi] = pUlmerm - pUlmerl;
+      paraUlmerh[pi] = pUlmerh - pUlmerm;
+      paraUlmerInvm[pi] = pUlmerIm;
+      paraUlmerInvl[pi] = pUlmerIm - pUlmerIl;
+      paraUlmerInvh[pi] = pUlmerIh - pUlmerIm;
+      paraSplinem[pi] = pSplinem;
+      paraSplinel[pi] = pSplinem - pSplinel;
+      paraSplineh[pi] = pSplineh - pSplinem;
+      paraSplineInvm[pi] = pSplineIm;
+      paraSplineInvl[pi] = pSplineIm - pSplineIl;
+      paraSplineInvh[pi] = pSplineIh - pSplineIm;
+      paraLinearm[pi] = pLinearm;
+      paraLinearl[pi] = pLinearm - pLinearl;
+      paraLinearh[pi] = pLinearh - pLinearm;
+      paraLinearInvm[pi] = pLinearIm;
+      paraLinearInvl[pi] = pLinearIm - pLinearIl;
+      paraLinearInvh[pi] = pLinearIh - pLinearIm;
+
+      pi++;
+   }
+   
+   printf("pi = %d\n", pi);
+
 
    TGraphErrors *cal150 = new TGraphErrors(27, chipCalibrationChip150, chipCalibrationFactor150, calibrationErrorX, chipCalibrationError150);
    TGraphErrors *cal160 = new TGraphErrors(27, chipCalibrationChip160, chipCalibrationFactor160, calibrationErrorX, chipCalibrationError160);
@@ -756,7 +830,29 @@ void makePlots() {
 
    c5->Update();
 
+   c7->cd();
+   Double_t dummy[21] = {};
+   TGraphAsymmErrors *tgaBK     = new TGraphAsymmErrors(21, paraNPoints, paraBKm, dummy, dummy, paraBKl, paraBKh);
+   TGraphAsymmErrors *tgaUlmer  = new TGraphAsymmErrors(21, paraNPoints, paraUlmerm, dummy, dummy, paraUlmerl, paraUlmerh);
+   TGraphAsymmErrors *tgaSpline = new TGraphAsymmErrors(21, paraNPoints, paraSplinem, dummy, dummy, paraSplinel, paraSplineh);
+   TGraphAsymmErrors *tgaLinear = new TGraphAsymmErrors(21, paraNPoints, paraLinearm, dummy, dummy, paraLinearl, paraLinearh);
 
+   tgaBK->SetTitle("Median error (+- 1st & 4rd quartile) over all energies of Bragg Curve parameterizations;Number of data points for model fit; Median error [%]");
+
+   tgaBK->SetLineColor(kRed);
+   tgaBK->SetMarkerColor(kRed);
+   tgaUlmer->SetLineColor(kBlue);
+   tgaUlmer->SetMarkerColor(kBlue);
+   tgaSpline->SetLineColor(kBlack);
+   tgaSpline->SetMarkerColor(kBlack);
+   tgaLinear->SetLineColor(kGreen);
+   tgaLinear->SetMarkerColor(kGreen);
+
+   tgaBK->Draw("ALP");
+   tgaUlmer->Draw("same, LP");
+   tgaSpline->Draw("same, LP");
+   tgaLinear->Draw("same, LP");
+   
    c1->SaveAs("OutputFiles/figures/finalPlotsForArticle/estimated_ranges_all_energies.eps");
    c1->SaveAs("OutputFiles/figures/finalPlotsForArticle/estimated_ranges_all_energies.root");
    c2->SaveAs("OutputFiles/figures/finalPlotsForArticle/fraction_of_correct_tracks.eps");
