@@ -40,6 +40,8 @@ void Run()
 //      TFile *fOut = new TFile(Form("Data/GATE/ComplexGeometry/compressed_complex_%dMeV.root", nominalEnergy), "recreate");
       TFile *f = new TFile(Form("Data/GATE/Water/water_%dMeV.root", nominalEnergy));
       TFile *fOut = new TFile(Form("Data/GATE/Water/compressed_water_%dMeV.root", nominalEnergy), "recreate");
+//      TFile *f = new TFile(Form("Data/GATE/Aluminium/aluminium_%dMeV.root", nominalEnergy));
+//      TFile *fOut = new TFile(Form("Data/GATE/Aluminium/compressed_aluminium_%dMeV.root", nominalEnergy), "recreate");
 
       TTree   *tree = (TTree*) f->Get("Hits");
       TTree    treeOut("treeOut", "Compressed GATE tree");
@@ -72,7 +74,7 @@ void Run()
          if (parentID == 0) {
             if (lastEventID < 0) lastEventID = eventID;
 
-            if (processName[0] == 'P') { // ProtonInelastic
+            if (processName[0] == 'p') { // ProtonInelastic
                lastX = x;
                lastY = y;
                lastZ = z;
