@@ -114,8 +114,38 @@ void Run()
    gStyle->SetLabelSize(0.04, "Y");
    gStyle->SetTitleSize(0.04);
    gStyle->SetTitleSize(0.04, "Y");
-   gStyle->SetTitleOffset(1.35);
+   gStyle->SetTitleOffset(1.1);
    gStyle->SetTitleOffset(1.35, "Y");
+   
+   Float_t  X0, angle;
+   Float_t  gamma, proton_mass, beta, momentum, mcs, p, a, ap, pv, energy;
+   proton_mass = 938.27;
+
+   if       (phantom == kAluminium) {
+      X0 = 8.897; // cm
+      p = 1.7806;
+      a = 0.00098;
+      ap = 0.087 * 2.36; // From GAMMEX manual
+
+   }
+   else if  (phantom == kComplex) {
+      X0 = 7.241; // cm
+      p = 1.7806;
+      a = 0.00098;
+      ap = 0.087 * 2.27; // Calculated from GAMMEX manual parameterization applied on DTC materials, and then summed each material's contribution to the fractional ED relative to water... Maybe not correct, but as the Catphan manufacturer is named: D. Goodenough.
+   }
+   else if  (phantom == kWater) {
+      X0 = 36.08; // cm
+      p = 1.7548;
+      a = 0.00239;
+      ap = 0.087;
+   }
+   else {
+      printf("X0 undefined! Using water values.\n");
+      X0 = 36.08;
+      p = 1.7548;
+      a = 0.00239;
+   }
 
    Int_t    nbinsxy = 400;
    Int_t    xyfrom = -60;
@@ -168,10 +198,10 @@ void Run()
    Float_t  rangesPSTAR[19] = {};
    Float_t  energiesJanni[12] = {50, 60, 70, 80, 90, 100, 125, 150, 175, 200, 225, 250};
    Float_t  rangesJanni[12] = {};
-   Float_t  stragglingJanni[12] = {}; // %
-   Float_t  stragglingJanniError[12] = {}; // % of %
-   Float_t  fractionNIJanni[12] = {}; // % 
-   Float_t  fractionNIJanniError[12] = {}; // % of %
+   Float_t  stragglingJanni[25] = {}; // %
+   Float_t  stragglingJanniError[25] = {}; // % of %
+   Float_t  fractionNIJanni[25] = {}; // % 
+   Float_t  fractionNIJanniError[25] = {}; // % of %
 
    Float_t  rangesJanniAl[12] = {1.0733, 1.4848, 1.9527, 2.4744, 3.0475, 3.6698, 5.4282, 7.4545, 9.7252, 12.220, 14.920, 17.811};
    Float_t  stragglingJanniAl[12] = {1.302, 1.276, 1.254, 1.236, 1.220, 1.207, 1.176, 1.153, 1.133, 1.115, 1.100, 1.087};
@@ -184,6 +214,13 @@ void Run()
    Float_t  stragglingJanniErrorWater[12] = {0.017, 0.017, 0.016, 0.015, 0.015, 0.015, 0.014, 0.014, 0.013, 0.013, 0.013, 0.013};
    Float_t  fractionNIJanniWater[12] = {3.487, 4.636, 5.860, 7.136, 8.465, 9.833, 13.29, 16.63, 19.92, 23.30, 26.75, 30.22};
    Float_t  fractionNIJanniErrorWater[12] = {0.24, 0.24, 0.24, 0.24, 0.24, 0.23, 0.23, 0.22, 0.22, 0.21, 0.21, 0.20};
+   
+   Float_t  sigmaPSTAR[19] = {};
+
+   for (Int_t i=0; i<19; i++) {
+      energies[i] = (i+5)*10;
+      sigmaPSTAR[i] = rangesPSTAR[i] * pow(energies[i], -0.104) * 0.0188; // FIT TO YANNI
+   }
 
    if (phantom == kAluminium) {
       for (Int_t i=0; i<19; i++) {
@@ -211,19 +248,14 @@ void Run()
       }
    }
    else if (phantom == kComplex) {
-      for (Int_t i=0; i<19; i++) {
+      for (Int_t i=0; i<18; i++) {
          rangesPSTAR[i] = 0; // no experimental values for complex geometry
       }
    }
 
-   Float_t  sigmaPSTAR[19] = {};
 
    Float_t separation = 1.15;
 
-   for (Int_t i=0; i<19; i++) {
-      energies[i] = (i+5)*10;
-      sigmaPSTAR[i] = rangesPSTAR[i] * pow(energies[i], -0.104) * 0.0188; // FIT TO YANNI
-   }
 
    for (Int_t i=0; i<19; i++) {
       energiesFLUKA[i] = energies[i] + separation*3;
@@ -675,9 +707,14 @@ void Run()
 
    if (phantom == kComplex) {
       for (int i=0; i<19; i++) {
+         sigmaMCNP[i] *= errorScalingFactor;
+         sigmaGATE[i] *= errorScalingFactor;
+         sigmaPSTAR[i] *= errorScalingFactor;
+         sigmaFLUKA[i] *= errorScalingFactor;
+
          rangesMCNPdiff[i] = rangesMCNP[i] - (rangesMCNP[i] + rangesGATE[i] + rangesFLUKA[i]) / 3;
-         rangesGATEdiff[i] = rangesMCNP[i] - (rangesMCNP[i] + rangesGATE[i] + rangesFLUKA[i]) / 3;
-         rangesFLUKAdiff[i] = rangesMCNP[i] - (rangesMCNP[i] + rangesGATE[i] + rangesFLUKA[i]) / 3;
+         rangesGATEdiff[i] = rangesGATE[i] - (rangesMCNP[i] + rangesGATE[i] + rangesFLUKA[i]) / 3;
+         rangesFLUKAdiff[i] = rangesFLUKA[i] - (rangesMCNP[i] + rangesGATE[i] + rangesFLUKA[i]) / 3;
       }
    }
 
@@ -726,7 +763,7 @@ void Run()
    }
 
    Int_t numberOfPoints = 19;
-//   if (phantom == kComplex) numberOfPoints = 18;
+   if (phantom == kComplex) numberOfPoints = 17;
 
    TGraphErrors *gMCNP = new TGraphErrors(numberOfPoints, energiesMCNP, rangesMCNP, energyError, sigmaMCNP);
    if (phantom == kWater) {
@@ -868,7 +905,7 @@ void Run()
 
    // Draw fraction of nuclear interactions
    c3->cd();
-   Float_t dummyArray[12] = {};
+   Float_t dummyArray[50] = {};
    
    TGraph         *gGATEFractionNI  = new TGraph(numberOfPoints, rangesGATE, fractionNIGATE);
    TGraph         *gMCNPFractionNI  = new TGraph(numberOfPoints, rangesMCNP, fractionNIMCNP);
@@ -931,7 +968,24 @@ void Run()
    TGraph *gGATEStraggling = new TGraph(numberOfPoints, rangesGATE, sigmaGATE);
    TGraph *gMCNPStraggling = new TGraph(numberOfPoints, rangesMCNP, sigmaMCNP);
    TGraph *gFLUKAStraggling = new TGraph(numberOfPoints, rangesFLUKA, sigmaFLUKA);
-   TGraphErrors *gJanniStraggling = new TGraphErrors(12, rangesJanni, stragglingJanni, dummyArray, stragglingJanniError);
+   TGraphErrors *gJanniStraggling = nullptr;
+
+   cout << "a" << endl;
+   cout << "a = " << a << ", p = " << p << endl;
+   if (phantom == kComplex) {
+      for (Int_t i=0; i<numberOfPoints; i++) {
+         cout << i << endl;
+         Float_t first = pow(p, 2) * pow(a, 2/p);
+         Float_t second = 3-2/p;
+         Float_t third = pow(rangesFLUKA[i], 3-2/p);
+         stragglingJanni[i] = sqrt(ap * first / second * third);
+      }
+      cout << "Making TGE\n";
+      gJanniStraggling = new TGraphErrors(numberOfPoints, rangesFLUKA, stragglingJanni, dummyArray, dummyArray);
+   }
+   else {
+      gJanniStraggling = new TGraphErrors(12, rangesJanni, stragglingJanni, dummyArray, stragglingJanniError);
+   }
 
    gGATEStraggling->SetTitle("Range straggling for different ranges;Range [cm];Range straggling [cm]");
    gGATEStraggling->SetLineColor(gateColor);
