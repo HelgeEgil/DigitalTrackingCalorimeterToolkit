@@ -18,7 +18,7 @@
 /gate/waterbox/geometry/setYLength 800. cm
 /gate/waterbox/geometry/setZLength 100. cm
 /gate/waterbox/placement/setTranslation 0. 0. 50. cm
-/gate/waterbox/setMaterial Aluminium
+/gate/waterbox/setMaterial Water
 /gate/waterbox/vis/forceWireframe
 
 /gate/waterbox/attachCrystalSD
@@ -27,8 +27,7 @@
 # Physics	#
 #===============#
 
-/gate/geometry/setIonisationPotential Water 75 eV
-#/gate/geometry/setIonisationPotential Aluminium 163 eV
+/gate/geometry/setIonisationPotential Water 74 eV
 /gate/physics/addPhysicsList QGSP_BIC_EMY
 
 /gate/run/initialize
@@ -51,8 +50,8 @@
 
 /gate/output/root/enable
 #/gate/output/root/setFileName /scratch/focal/focalCode/Scripts/MCCodeComparison/Data/GATE/Aluminium/aluminium_{energy}MeV
-/gate/output/root/setFileName /home/local1/focal/focalCode/Scripts/MCCodeComparison/Data/GATE/Aluminium/aluminium_{energy}MeV
-#/gate/output/root/setFileName /scratch/focal/focalCode/Scripts/MCCodeComparison/Data/GATE/Water/water_{energy}MeV
+#/gate/output/root/setFileName /home/local1/focal/focalCode/Scripts/MCCodeComparison/Data/GATE/Aluminium/aluminium_{energy}MeV
+/gate/output/root/setFileName /scratch/focal/focalCode/Scripts/MCCodeComparison/Data/GATE/Water/water_74_{energy}MeV
 
 /gate/random/setEngineName MersenneTwister
 /gate/random/setEngineSeed auto

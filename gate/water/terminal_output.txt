@@ -19,8 +19,8 @@
 [Core-0] **********************************************************************
 [Core-0] 
 [Core-0] You are using Geant4 version 10.2.2
-/control/alias energy 50
-/control/alias npart 100000
+/control/alias energy 130
+/control/alias npart 10000
 /control/alias step_active 0
 /control/alias sigma 0
 [Core-0] Starting macro focal_script.mac
@@ -32,8 +32,7 @@ G4PhysListFactory::GetReferencePhysList <QGSP_BIC_EMY>  EMoption= 3
 
 <<< Reference Physics List QGSP_BIC_EMY is built
 
-G4VUserPhysicsList::SetDefaultCutValue: negative cut values  :-1[mm]
-### Adding tracking cuts for neutron  TimeCut(ns)= 10000  KinEnergyCut(MeV)= 0
+G4VUserPhysicsList::SetDefaultCutValue: negative cut values  :-1[mm]#### Adding tracking cuts for neutron  TimeCut(ns)= 10000  KinEnergyCut(MeV)= 0
 [Core-0] Initialization of actors
 [Acquisition-0]   
 [Acquisition-0] ============= Source initialization =============
@@ -215,7 +214,6 @@ msc:   for kaon+    SubType= 10
       RangeFactor= 0.2, stepLimitType: 0, latDisplacement: 0
       ===== EM models for the G4Region  DefaultRegionForTheWorld ======
             UrbanMsc :  Emin=        0 eV    Emax=       10 TeV  Table with 220 bins Emin=    100 eV    Emax=     10 TeV
-
 
 hIoni:   for  kaon+    SubType= 2
       dE/dx and range tables from 10 eV  to 10 TeV in 240 bins
