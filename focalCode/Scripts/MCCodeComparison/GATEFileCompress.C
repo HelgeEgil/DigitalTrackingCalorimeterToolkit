@@ -38,8 +38,8 @@ void Run()
       cout << "Compressing tree with " << nominalEnergy << " MeV -> ";
 //      TFile *f = new TFile(Form("Data/GATE/ComplexGeometry/complex_%dMeV.root", nominalEnergy));
 //      TFile *fOut = new TFile(Form("Data/GATE/ComplexGeometry/compressed_complex_%dMeV.root", nominalEnergy), "recreate");
-      TFile *f = new TFile(Form("Data/GATE/Water/water_74_%dMeV.root", nominalEnergy));
-      TFile *fOut = new TFile(Form("Data/GATE/Water/compressed_water_74_%dMeV.root", nominalEnergy), "recreate");
+      TFile *f = new TFile(Form("Data/GATE/Water/water_71_%dMeV.root", nominalEnergy));
+      TFile *fOut = new TFile(Form("Data/GATE/Water/compressed_water_71_%dMeV.root", nominalEnergy), "recreate");
 //      TFile *f = new TFile(Form("Data/GATE/Aluminium/aluminium_%dMeV.root", nominalEnergy));
 //      TFile *fOut = new TFile(Form("Data/GATE/Aluminium/compressed_aluminium_%dMeV.root", nominalEnergy), "recreate");
 

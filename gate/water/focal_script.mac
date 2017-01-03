@@ -27,8 +27,8 @@
 # Physics	#
 #===============#
 
-/gate/geometry/setIonisationPotential Water 74 eV
-/gate/physics/addPhysicsList QGSP_BIC_EMY
+/gate/geometry/setIonisationPotential Water 75 eV
+/gate/physics/addPhysicsList QGSP_BIC
 
 /gate/run/initialize
 
@@ -51,7 +51,7 @@
 /gate/output/root/enable
 #/gate/output/root/setFileName /scratch/focal/focalCode/Scripts/MCCodeComparison/Data/GATE/Aluminium/aluminium_{energy}MeV
 #/gate/output/root/setFileName /home/local1/focal/focalCode/Scripts/MCCodeComparison/Data/GATE/Aluminium/aluminium_{energy}MeV
-/gate/output/root/setFileName /scratch/focal/focalCode/Scripts/MCCodeComparison/Data/GATE/Water/water_74_{energy}MeV
+/gate/output/root/setFileName /scratch/focal/focalCode/Scripts/MCCodeComparison/Data/GATE/Water/water_qgspbic_{energy}MeV
 
 /gate/random/setEngineName MersenneTwister
 /gate/random/setEngineSeed auto
