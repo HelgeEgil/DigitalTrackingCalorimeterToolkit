@@ -685,9 +685,9 @@ class scanner:
         self.box.writeBox()
 
 class World:
-    def __init__(self, dx = 150*cm, dy = 150*cm, dz = 350*cm):
+    def __init__(self, dx = 350*cm, dy = 350*cm, dz = 350*cm):
         self.name = "world"
-        self.size = Size(dz, dy, dz)
+        self.size = Size(dx, dy, dz)
         self.pos = Pos()
         self.box = Box(self.name, kNoMother, self.pos, self.size)
 
@@ -697,9 +697,23 @@ class World:
     def writeGeometry(self):
         self.box.writeBox()
 
+class Degrader:
+   def __init__(self, dx = 150*cm, dy = 150*cm, dz = "{degraderthickness}"):
+      self.name = "degrader"
+      self.size = Size(dx, dy, dz)
+      self.mother = "world"
+      self.pos = Pos(0, 0, -20*cm) # maximum 2*20 = 40 cm WEPL
+      self.box = Box(self.name, self.mother, self.pos, self.size)
+
+   def printGeometry(self):
+      self.box.printBox()
+
+   def writeGeometry(self):
+      self.box.writeBox()
+
 
 class MainMenu(Frame):
-    def __init__(self, parent, firstModule, module, world, scanner1, scanner2):
+    def __init__(self, parent, firstModule, module, world, degrader, scanner1, scanner2):
         Frame.__init__(self, parent)
         self.parent = parent
         self.parent.protocol("WM_DELETE_WINDOW", self.myQuit)
@@ -709,12 +723,14 @@ class MainMenu(Frame):
         self.firstModule = firstModule
         self.module = module
         self.world = world
+        self.degrader = degrader
         self.scanner1 = scanner1
         self.scanner2 = scanner2
         self.state = None
 
         self.firstLayerPosition = 0
 
+        self.topContainer = Frame(self, borderwidth=10)
         self.leftContainer = Frame(self, borderwidth=10)
         self.leftLabelContainer = Frame(self.leftContainer, borderwidth=5)
         self.leftEntryContainer = Frame(self.leftContainer, borderwidth=5)
@@ -722,6 +738,7 @@ class MainMenu(Frame):
         self.bottomContainer = Frame(self, borderwidth=10)
 
         self.bottomContainer.pack(side=BOTTOM)
+        self.topContainer.pack()
         self.leftContainer.pack(side=LEFT)
         self.leftLabelContainer.pack(side=LEFT)
         self.leftEntryContainer.pack(side=LEFT)
@@ -737,6 +754,7 @@ class MainMenu(Frame):
         self.var_firstmaterial = StringVar()
         self.var_firstAbsorberThickness = DoubleVar()
         self.var_chipThickness = DoubleVar()
+        self.var_useDegrader = IntVar()
 
         self.labeltext_xsize = StringVar()
         self.labeltext_ysize = StringVar()
@@ -759,6 +777,7 @@ class MainMenu(Frame):
         self.var_firstmaterial.set("Aluminium")
         self.var_firstAbsorberThickness.set(2)
         self.var_chipThickness.set(14)
+        self.var_useDegrader.set(1)
         
         self.optionsTitle = Label(self.leftContainer, text="Geometry options")
 
@@ -796,6 +815,8 @@ class MainMenu(Frame):
         self.entry_firstmaterial = Entry(self.leftEntryContainer, textvariable=self.var_firstmaterial, width=15)
         self.entry_firstAbsorberThickness = Entry(self.leftEntryContainer, textvariable=self.var_firstAbsorberThickness, width=15)
         self.entry_chipThickness = Entry(self.leftEntryContainer, textvariable=self.var_chipThickness, width=15)
+        
+        self.check_useDegrader = Checkbutton(self.topContainer, text="Use water degrader phantom", variable=self.var_useDegrader)
 
         self.label_xsize.pack()
         self.entry_xsize.pack()
@@ -817,6 +838,7 @@ class MainMenu(Frame):
         self.entry_firstAbsorberThickness.pack()
         self.label_chipThickness.pack()
         self.entry_chipThickness.pack()
+        self.check_useDegrader.pack(side=LEFT)
 
         self.button_create = Button(self.bottomContainer, text="Show geometry", command=self.show_geometry, width=30)
         self.button_create.pack(side=LEFT)
@@ -844,12 +866,14 @@ class MainMenu(Frame):
         self.module.moveAllLayerDaughters(True, self.firstLayerPosition)
 
         self.world.writeGeometry()
+        if self.degrader and self.var_useDegrader.get():
+           self.degrader.writeGeometry()
+
         self.scanner1.writeGeometry()
         self.scanner2.writeGeometry()
 
         self.firstModule.writeGeometry()
         self.module.writeGeometry()
-
 
     def show_geometry(self):
         self.readyModule()
@@ -927,6 +951,7 @@ def main():
     # Cross check geometry and Module.mac (filename should be constant)
 
     world = World()
+    degrader = Degrader()
     scanner1 = scanner(1)
     scanner2 = scanner(2)
 
@@ -934,7 +959,7 @@ def main():
     module = Module("Module", scanner2.name, Pos(0,0,0), kAluminium, 20)
 
     root = Tk()
-    mainmenu = MainMenu(root, firstModule, module, world, scanner1, scanner2)
+    mainmenu = MainMenu(root, firstModule, module, world, degrader, scanner1, scanner2)
     root.mainloop()
 
 main()

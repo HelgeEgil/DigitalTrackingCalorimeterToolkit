@@ -1,8 +1,16 @@
 /gate/world/geometry/setXLength 3500.0 mm
-/gate/world/geometry/setYLength 1500.0 mm
+/gate/world/geometry/setYLength 3500.0 mm
 /gate/world/geometry/setZLength 3500.0 mm
 /gate/world/placement/setTranslation 0 0 0 mm
 /gate/world/vis/setVisible false
+
+/gate/world/daughters/name degrader
+/gate/world/daughters/insert box
+/gate/degrader/geometry/setXLength 1500.0 mm
+/gate/degrader/geometry/setYLength 1500.0 mm
+/gate/degrader/geometry/setZLength {degraderthickness} mm
+/gate/degrader/placement/setTranslation 0 0 -200.0 mm
+/gate/degrader/vis/setVisible false
 
 /gate/world/daughters/name scanner_1
 /gate/world/daughters/systemType scanner

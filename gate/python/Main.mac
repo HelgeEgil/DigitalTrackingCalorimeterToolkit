@@ -48,8 +48,8 @@
 
 /gate/output/root/enable
 /gate/output/root/setRootSinglesFlag 0
-#/gate/output/root/setFileName ../../focalCode/Data/MonteCarlo/DTC_Aluminium_{degraderthickness}mmDegrader_{energy}MeV_{absorberthickness}mm
-/gate/output/root/setFileName ../../focalCode/Data/MonteCarlo/DTC_Aluminium_{energy}MeV_{absorberthickness}mm
+/gate/output/root/setFileName ../../focalCode/Data/MonteCarlo/DTC_Aluminium_{degraderthickness}mmDegrader_{energy}MeV_{absorberthickness}mm
+#/gate/output/root/setFileName ../../focalCode/Data/MonteCarlo/DTC_Aluminium_{energy}MeV_{absorberthickness}mm
 #/gate/output/root/setFileName GATE
 
 #===============#
@@ -58,5 +58,5 @@
 
 /gate/random/setEngineName MersenneTwister
 /gate/random/setEngineSeed auto
-/gate/application/setTotalNumberOfPrimaries 5000
+/gate/application/setTotalNumberOfPrimaries 1000
 /gate/application/start
