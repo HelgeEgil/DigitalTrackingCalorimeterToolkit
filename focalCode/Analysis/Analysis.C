@@ -2256,7 +2256,7 @@ void drawIndividualGraphs(TCanvas *cGraph, TGraphErrors* outputGraph, Float_t fi
       text->Draw();
    }
    
-   outputGraph->GetXaxis()->SetRangeUser(0, 280);
+   outputGraph->GetXaxis()->SetRangeUser(0, 350);
 
    cGraph->Update();
 }
@@ -2400,7 +2400,7 @@ Float_t doNGaussianFit ( TH1F *h, Float_t *means, Float_t *sigmas) {
    printf("lastMean = %.2f. lastSigma = %.2f\n", lastMean, lastSigma);
    printf("sigmaFrom = %.2f\n", lastMean - 3* lastSigma);
 
-   Int_t binSigmaFrom = axis->FindBin(lastMean - 3*lastSigma);
+   Int_t binSigmaFrom = axis->FindBin(lastMean - 6*lastSigma);
 
    if (lastMean == 0) {
       binSigmaFrom = axis->FindBin(getWEPLFromEnergy(run_energy)*0.9);
@@ -2450,7 +2450,13 @@ Float_t doNGaussianFit ( TH1F *h, Float_t *means, Float_t *sigmas) {
 
    ofstream file2("OutputFiles/result_makebraggpeakfit.csv", ofstream::out | ofstream::app);
    // absorber thickness; energy; nominal range; estimated range; range sigma
-   file2 << kAbsorbatorThickness << " " << run_energy << " " << getWEPLFromEnergy(run_energy) << " " << empiricalMean << " " << empiricalSigma << " " << endl;
+   if (run_degraderThickness == 0) {
+      file2 << kAbsorbatorThickness << " " << run_energy << " " << getWEPLFromEnergy(run_energy) << " " << empiricalMean << " " << empiricalSigma << " " << endl;
+   }
+   else {
+      file2 << kAbsorbatorThickness << " " << run_degraderThickness << " " << getWEPLFromEnergy(run_energy) << " " << empiricalMean << " " << empiricalSigma << " " << endl;
+   }
+
    file2.close();
 
    means[9] = empiricalMean;

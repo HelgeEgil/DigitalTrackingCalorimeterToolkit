@@ -138,6 +138,12 @@ void makePlots() {
    Float_t meanError = 0;
    Float_t meanAbsError = 0;
    Float_t meanSigma = 0;
+   Float_t a_dtc = 0;
+   Float_t p_dtc = 0;
+   Float_t aprime_dtc = 0;
+   Float_t a_wtr = 0.02387;
+   Float_t p_wtr = 1.7547;
+   Float_t aprime_wtr = 0.0087; // MeV^2 / mm
 
    while (1) {
       in >> thickness_ >> energy_ >> nomrange_ >> estrange_ >> sigmaRange_;
@@ -156,6 +162,36 @@ void makePlots() {
       else if  (mmAbsorbator == 2) estimatedStraggling = 1.53e-2 * nomrange_ + 9.59e-6 * pow(nomrange_,2);
 
 //      estimatedStraggling = 0.012 * pow(nomrange_, 0.935); // using water values for minimized straggling limit
+
+      if (mmAbsorbator == 2) {
+         a_dtc = 0.0096;
+         p_dtc = 1.784;
+         aprime_dtc = 0.01938;
+      }
+      
+      else if (mmAbsorbator == 3) {
+         a_dtc = 0.0173389;
+         p_dtc = 1.7751;
+         aprime_dtc = 0.01971;
+      }
+
+      else if (mmAbsorbator == 4) {
+         a_dtc = 0.0117;
+         p_dtc = 1.7450;
+         aprime_dtc = 0.01988;
+      }
+
+      Float_t zprime = energy_;
+      Float_t wtr_range = a_wtr * pow(250, p_wtr);
+      Float_t dtc_term = aprime_dtc * (p_dtc * pow(a_dtc, 2/p_dtc)) / (3 - 2/p_dtc);
+      Float_t wtr_term = aprime_wtr * (p_wtr * pow(a_wtr, 2/p_wtr)) / (3 - 2/p_wtr);
+      Float_t wepl_ratio = pow(a_wtr / a_dtc * pow(nomrange_ / a_wtr, 1 - p_dtc / p_wtr), 2);
+      Float_t dtc_strag = wepl_ratio * dtc_term * pow(nomrange_/wepl_ratio, 3-2/p_dtc);
+      Float_t wtr_strag = wtr_term * (pow(wtr_range, 3-2/p_wtr) - pow(wtr_range - zprime, 3-2/p_wtr));
+
+      printf("Using a %.2f mm water phantom, the estimated straggling from water is %.2f mm and from DTC is %.2f mm. WEPL ratio is %.2f.\n", zprime, sqrt(wtr_strag), sqrt(dtc_strag), sqrt(wepl_ratio));
+
+      estimatedStraggling = sqrt(dtc_strag + wtr_strag);   
 
       if (nlines < MC2Data || MC2Data<0) {
          cout << "Line " << nlines << ", energy " << energy_ << ",  MC" << endl;

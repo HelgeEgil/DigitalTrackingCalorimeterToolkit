@@ -114,7 +114,7 @@ TGraphErrors * Track::doRangeFit(Bool_t isScaleVariable) {
    }
 
    // how much beyond the last measurement the fit is allowed to go
-   overFittingDistance = 1.00 * dz;
+   overFittingDistance = 1.50 * dz;
 
    maxEnergy = getEnergyFromTL(x[n-1] + overFittingDistance);
    maxRange = getWEPLFromTL(x[n-1] + overFittingDistance);
@@ -147,7 +147,7 @@ TGraphErrors * Track::doRangeFit(Bool_t isScaleVariable) {
    }
    func->SetNpx(750);
 
-   graph->Fit("fit_BP", "B, N, Q, W", "", 0, maxRange*1.1);
+   graph->Fit("fit_BP", "B, N, Q, W", "", 0, maxRange*1.2);
    
    fitRange_ = func->GetParameter(0);
    fitScale_ = func->GetParameter(1);

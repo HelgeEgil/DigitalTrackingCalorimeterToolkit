@@ -30,7 +30,8 @@ void findAPAndStraggling(Int_t absorberthickness) {
    gStyle->SetOptStat(0);
 
    Float_t  arrayE[200] = {0}; 
-   Float_t  arrayRange[200] = {0}; 
+   Float_t  arrayRange[200] = {0};
+   Float_t  arrayEMaterial[200] = {0};
    Float_t  arrayStraggling[200] = {0};
    Float_t  arrayWEPLStraggling[200] = {0};
    Float_t  arrayRangeWater[200] = {0};
@@ -59,6 +60,7 @@ void findAPAndStraggling(Int_t absorberthickness) {
       inMaterial >> energy >> thickness >> range >> straggling >> inelasticfraction;
 
       if (!inMaterial.good()) {
+         printf("!inMaterial.good() in line %d.\n", nlinesMaterial);
          break;
       }
 
@@ -66,6 +68,7 @@ void findAPAndStraggling(Int_t absorberthickness) {
          continue;
       }
 
+      arrayEMaterial[nlinesMaterial] = energy;
       arrayRange[nlinesMaterial] = range;
       arrayStraggling[nlinesMaterial] = straggling;
 
@@ -74,7 +77,7 @@ void findAPAndStraggling(Int_t absorberthickness) {
    }
    inMaterial.close();
 
-   TGraph *gRange = new TGraph(nlinesMaterial, arrayE, arrayRange);
+   TGraph *gRange = new TGraph(nlinesMaterial, arrayEMaterial, arrayRange);
    TGraph *gStraggling = new TGraph(nlinesMaterial, arrayRange, arrayStraggling);
    TGraph *gWEStraggling = new TGraph(nlinesMaterial, arrayRangeWater, arrayWEPLStraggling);
 
