@@ -120,8 +120,6 @@ Tracks * loadOrCreateTracks(Bool_t recreate, Int_t Runs, Int_t dataType, Float_t
 }
 
 Clusters * getClusters(Int_t Runs, Int_t dataType, Int_t frameType, Float_t energy) {
-   run_energy = energy;
-
    DataInterface   * di = new DataInterface();
    Int_t             nClusters = kEventsPerRun * 5 * nLayers;
    Int_t             nHits = kEventsPerRun * 50;
@@ -190,8 +188,6 @@ Clusters * getClusters(Int_t Runs, Int_t dataType, Int_t frameType, Float_t ener
 }
 
 Tracks * getTracksFromClusters(Int_t Runs, Int_t dataType, Int_t frameType, Float_t energy) {
-   run_energy = energy;
-
    DataInterface   * di = new DataInterface();
    Int_t             nClusters = kEventsPerRun * 5 * nLayers;
    Int_t             nTracks = kEventsPerRun * 2;
@@ -220,7 +216,7 @@ Tracks * getTracksFromClusters(Int_t Runs, Int_t dataType, Int_t frameType, Floa
       
       cout << "Of " << nTracksBefore << " tracks, " << nTracksBefore - nTracksAfter << " (" << 100* ( nTracksBefore - nTracksAfter) / ( (float) nTracksBefore ) << "%) were lost when leaving the detector.\n";
       
-      tracks->removeTrackCollisions();
+      // tracks->removeTrackCollisions();
       // tracks->retrogradeTrackImprovement(clusters);
 
       tracks->Compress();
@@ -248,8 +244,6 @@ Tracks * getTracksFromClusters(Int_t Runs, Int_t dataType, Int_t frameType, Floa
 }
 
 Tracks * getTracks(Int_t Runs, Int_t dataType, Int_t frameType, Float_t energy, Float_t *x, Float_t *y) {
-   run_energy = energy;
-
    DataInterface   * di = new DataInterface();
    Misalign        * m = new Misalign();
    Int_t             nClusters = kEventsPerRun * 5 * nLayers;

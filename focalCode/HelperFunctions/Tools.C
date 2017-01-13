@@ -395,8 +395,10 @@ Bool_t isPointOutOfBounds(Cluster *point, Float_t padding) {
       isOutside = kTRUE;
    else {
       if (x < 0 - padding || x > nx + padding ||
-          y < 0 - padding || y > ny + padding)
+          y < 0 - padding || y > ny + padding) {
          isOutside = kTRUE;
+         printf("Point is outside detector area: x = %.0f, y = %.0f.\n", x, y);
+      }
       else
          isOutside = kFALSE;
    }

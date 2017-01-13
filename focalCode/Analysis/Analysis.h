@@ -8,7 +8,7 @@ class TF1;
 #include "Classes/Track/Tracks.h"
 #include "Classes/Hit/Hits.h"
 
-Float_t 		drawBraggPeakGraphFit(Int_t Runs, Int_t dataType = kMC, Bool_t recreate = 0, Float_t energy = 188);
+Float_t 		drawBraggPeakGraphFit(Int_t Runs, Int_t dataType = kMC, Bool_t recreate = 0, Float_t energy = 188, Float_t degraderThickness = 0);
 void			drawTungstenSpectrum(Int_t Runs, Int_t dataType = kMC, Bool_t recreate = 0, Float_t energy = 188);
 Hits		 *	getEventIDs(Int_t Runs, Float_t energy);
 void			drawFrame2D(Int_t Runs, Int_t dataType = kMC, Int_t Layer = 2, Float_t energy = 170);

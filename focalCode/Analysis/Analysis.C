@@ -670,8 +670,14 @@ void drawTracksWithEnergyLoss(Int_t Runs, Int_t dataType, Bool_t recreate, Float
    hAccuracy->Draw("COLZ");
 }
 
-Float_t drawBraggPeakGraphFit(Int_t Runs, Int_t dataType, Bool_t recreate, Float_t energy) {
+Float_t drawBraggPeakGraphFit(Int_t Runs, Int_t dataType, Bool_t recreate, Float_t energy, Float_t degraderThickness) {
+   run_degraderThickness = degraderThickness;
    run_energy = energy;
+   if (useDegrader) {
+      run_energy = getEnergyAtWEPL(energy, degraderThickness);
+   }
+   printf("Using water degrader of thickness %.0f mm, the initial energy of %.0f MeV is reduced to %.1f MeV.\n", degraderThickness, energy, run_energy);
+
    kDataType = dataType;
    Bool_t         kDrawHorizontalLines = false;
    Bool_t         kDrawVerticalLayerLines = false;
@@ -687,17 +693,21 @@ Float_t drawBraggPeakGraphFit(Int_t Runs, Int_t dataType, Bool_t recreate, Float
    TGraphErrors * outputGraph;
    char         * sDataType = getDataTypeChar(dataType);
    char         * sMaterial = getMaterialChar();
-   char         * hTitle = Form("Fitted energy of a %.2f MeV beam in %s (%s)", energy, sMaterial, sDataType);
+   char         * hTitle = Form("Fitted energy of a %.2f MeV beam in %s (%s)", run_energy, sMaterial, sDataType);
+   if (useDegrader) {
+      hTitle = Form("Fitted energy of a %.0f MeV nominal beam on %s DTC w/%.1f mm water degrader", energy, sMaterial, degraderThickness);
+   }
    TCanvas      * cGraph = new TCanvas("cGraph", "Fitted data points", 1500, 500);
    TCanvas      * cFitResults = new TCanvas("cFitResults", hTitle, 1000, 1000);
-   TH1F         * hFitResults = new TH1F("fitResult", hTitle, 200, getUnitFromEnergy(0), getUnitFromEnergy(energy*1.2));
-   TH1F         * hFitResultsDroppedData = new TH1F("fitResultsDroppedData", hTitle, 200, getUnitFromEnergy(0), getUnitFromEnergy(energy*1.2));
+   TH1F         * hFitResults = new TH1F("fitResult", hTitle, 200, getUnitFromEnergy(0), getUnitFromEnergy(run_energy*1.2));
+   TH1F         * hFitResultsDroppedData = new TH1F("fitResultsDroppedData", hTitle, 200, getUnitFromEnergy(0), getUnitFromEnergy(run_energy*1.2));
    TH1F         * hMaxAngle = new TH1F("hMaxAngle", "Maximum angle for proton track", 200, 0, 25);
    
    printf("At energy %.0f, expecting range %.2f mm and WEPL %.2f mm.\n", run_energy, getTLFromEnergy(run_energy), getWEPLFromEnergy(run_energy));
    printf("This corresponds to a WEPL factor of %.2f.\n", getWEPLFactorFromEnergy(run_energy));
    cout << "Correcting for aluminum plate: " << kIsAluminumPlate << endl;
    cout << "Correcting for scintillators: " << kIsScintillator << endl;
+
 
    // Histogram options
    cGraph->Divide(nPlotX,nPlotY, 0.000001, 0.000001, 0);
@@ -712,7 +722,7 @@ Float_t drawBraggPeakGraphFit(Int_t Runs, Int_t dataType, Bool_t recreate, Float
    hMaxAngle->SetLineColor(kBlack); hMaxAngle->SetFillColor(kGreen-5);
 
    // Create or load all tracks
-   Tracks * tracks = loadOrCreateTracks(recreate, Runs, dataType, energy);
+   Tracks * tracks = loadOrCreateTracks(recreate, Runs, dataType, run_energy);
    
    for (Int_t j=0; j<tracks->GetEntriesFast(); j++) {
       Track *thisTrack = tracks->At(j);
@@ -825,11 +835,11 @@ Float_t drawBraggPeakGraphFit(Int_t Runs, Int_t dataType, Bool_t recreate, Float
    // Draw expected gaussian distribution of results from initial energy
    Float_t expectedStraggling = 0, expectedMean = 0, dlayer_down = 0, dlayer = 0;
    Float_t separationFactor = 0.9, nullStraggling = 0;
-   Float_t sigma_energy = getSigmaEnergy(energy);
+   Float_t sigma_energy = getSigmaEnergy(run_energy);
    
-   expectedMean = getUnitFromEnergy(energy);
-   expectedStraggling = getUnitStragglingFromEnergy(energy, sigma_energy);
-   nullStraggling = getUnitStragglingFromEnergy(energy, 0);
+   expectedMean = getUnitFromEnergy(run_energy);
+   expectedStraggling = getUnitStragglingFromEnergy(run_energy, sigma_energy);
+   nullStraggling = getUnitStragglingFromEnergy(run_energy, 0);
    
    cout << "OutputUnit is " << kOutputUnit << " and the expected mean value is " << expectedMean 
        << ". The straggling including / excluding energy variation is " << expectedStraggling << " / " << nullStraggling << ".\n";

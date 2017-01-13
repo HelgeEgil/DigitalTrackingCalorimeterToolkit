@@ -217,6 +217,7 @@ void  DataInterface::getMCClusters(Int_t runNo, Clusters *clusters) {
    Int_t    n = 0;
    Float_t  sumX = 0, sumY = 0;
    Float_t  x,y;
+   Int_t    maxEventID = 50;
 
    Long64_t nentries = fChain->GetEntriesFast();
    Long64_t nbytes = 0, nb = 0;
@@ -231,10 +232,10 @@ void  DataInterface::getMCClusters(Int_t runNo, Clusters *clusters) {
       if (parentID != 0) continue;
       
       if (lastID != eventID || lastLayer != layer) {
-         showDebug(Form("Adding point (x,y,z,ID,edep) = (%.2f, %.2f, %d, %d, %.2f)\n", sumX/n/dx+nx/2,sumY/n/dy+ny/2,lastLayer,lastID,sum_edep));
-
          x = sumX/n / dx + nx/2;
          y = sumY/n / dy + ny/2;
+         
+         showDebug(Form("Adding point (N,x,y,x_mm, y_mm, z,ID,edep) = (%.2f, %.2f, %.2f, %.2f, %d, %d, %.2f)\n", n, x, y, sumX/n, sumY/n, lastLayer, lastID, sum_edep));
       
          clusters->appendClusterEdep(x, y, lastLayer, sum_edep, lastID);
 

@@ -702,8 +702,9 @@ class Degrader:
       self.name = "degrader"
       self.size = Size(dx, dy, dz)
       self.mother = "world"
+      self.material = "Water"
       self.pos = Pos(0, 0, -20*cm) # maximum 2*20 = 40 cm WEPL
-      self.box = Box(self.name, self.mother, self.pos, self.size)
+      self.box = Box(self.name, self.mother, self.pos, self.size, self.material)
 
    def printGeometry(self):
       self.box.printBox()

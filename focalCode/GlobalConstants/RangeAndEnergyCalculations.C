@@ -38,6 +38,10 @@ Float_t getEnergyAtTL(Float_t E0, Float_t depth) {
    return getEnergyAtTL(E0, depth, splineMaterial, splineMaterialInv);
 }
 
+Float_t getEnergyAtWEPL(Float_t E0, Float_t depth) {
+   return getEnergyAtTL(E0, depth, splineWater, splineWaterInv);
+}
+
 Float_t getEnergyAtTLFromPureAluminium(Float_t E0, Float_t depth) {
    return getEnergyAtTL(E0, depth, splinePureAl, splinePureAlInv);
 }
