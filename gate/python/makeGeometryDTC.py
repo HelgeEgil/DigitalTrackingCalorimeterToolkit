@@ -188,7 +188,7 @@ class Box:
         if self.mother:
             string += "/gate/{}/daughters/name {}\n".format(self.mother, self.name)
 
-            if "scanner" in self.name:
+            if "scanner" in self.name or "phantom" in self.name:
                 string += "/gate/{}/daughters/systemType scanner\n".format(self.mother)
 
             string += "/gate/{}/daughters/insert box\n".format(self.mother)
@@ -701,15 +701,21 @@ class Degrader:
    def __init__(self, dx = 150*cm, dy = 150*cm, dz = "{degraderthickness}"):
       self.name = "degrader"
       self.size = Size(dx, dy, dz)
+      self.mothersize = Size(dx*1.1, dy*1.1, dz);
+      self.mothername = "phantom"
       self.mother = "world"
       self.material = "Water"
-      self.pos = Pos(0, 0, -20*cm) # maximum 2*20 = 40 cm WEPL
-      self.box = Box(self.name, self.mother, self.pos, self.size, self.material)
+      self.pos = Pos(0, 0, 0) # maximum 2*20 = 40 cm WEPL
+      self.motherpos = Pos(0, 0, -20.*cm)
+      self.motherbox = Box(self.mothername, self.mother, self.motherpos, self.mothersize)
+      self.box = Box(self.name, self.mothername, self.pos, self.size, self.material)
 
    def printGeometry(self):
+      self.motherbox.printBox()
       self.box.printBox()
 
    def writeGeometry(self):
+      self.motherbox.writeBox()
       self.box.writeBox()
 
 
