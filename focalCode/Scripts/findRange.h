@@ -59,7 +59,8 @@ public :
    Int_t           runID;
    Float_t         axialPos;
    Float_t         rotationAngle;
-   Int_t          run_energy;
+   Float_t          run_energy;
+   Float_t         run_degraderThickness;
    Int_t           volumeID[10];
    Char_t          processName[17];
    Char_t          comptVolName[5];
@@ -103,7 +104,7 @@ public :
    TBranch        *b_comptVolName;   //!
    TBranch        *b_RayleighVolName;   //!
 
-   findRange(Int_t energy, Int_t thickness, Bool_t useDegrader = false, TTree *tree=0);
+   findRange(Float_t energy, Int_t thickness, Float_t degraderThickness = 0, TTree *tree=0);
    virtual ~findRange();
    virtual Int_t     Cut(Long64_t entry);
    virtual Int_t     GetEntry(Long64_t entry);
@@ -118,7 +119,7 @@ public :
 #endif
 
 #ifdef findRange_cxx
-findRange::findRange(Int_t energy, Int_t thickness, Bool_t useDegrader, TTree *tree) : fChain(0)
+findRange::findRange(Float_t energy, Int_t thickness, Float_t degraderThickness, TTree *tree) : fChain(0)
 {
 // if parameter tree is not specified (or zero), connect the file
 // used to generate this class and read the Tree.
@@ -138,20 +139,24 @@ findRange::findRange(Int_t energy, Int_t thickness, Bool_t useDegrader, TTree *t
       // The following code should be used if you want this class to access a chain
       // of trees.
       TChain * chain = new TChain("Hits","");
-      if (!useDegrader) {
-         chain->Add(Form("../Data/MonteCarlo/DTC_full_Aluminium_%dMeV_%dmm.root/Hits", energy, thickness));
+      if (degraderThickness == 0) {
+         chain->Add(Form("../Data/MonteCarlo/DTC_Full_Aluminium_%dMeV_%dmm.root/Hits", energy, thickness));
       }
       else { // degrader is used, then energy -> degrader thickness and init energy = 230 MeV
-         chain->Add(Form("../Data/MonteCarlo/DTC_full_Aluminium_%dmmDegrader_230MeV_%dmm.root/Hits", energy, thickness));
+         chain->Add(Form("../Data/MonteCarlo/DTC_Full_Aluminium_Absorber%dmm_Degrader%.0fmm_250MeV.root/Hits", thickness, degraderThickness));
       }
 
       tree = chain;
-      if (!useDegrader) {
+      Float_t a = 0.0239;
+      Float_t p = 1.7548;
+      if (degraderThickness == 0) {
          run_energy = energy;
+         run_degraderThickness = degraderThickness;
       }
       else {
-         run_energy = pow((329.1 - energy*2.1) / 0.0239, 1/1.7548);
-         printf("With inital energy of 230 MeV and a degrader thickness of %d mm, the residual energy is approx. %d MeV.", energy, run_energy);
+         run_energy = pow( (a * pow(energy, p) - degraderThickness) / a, 1/p);
+         run_degraderThickness = degraderThickness;
+         printf("Degraderthickness %.1f. Initial energy is %.2f, initial range is %.2f. Energy from range %.2f is %.2f MeV.\n", degraderThickness, energy, a * pow(energy, p), a * pow(energy, p) - degraderThickness, run_energy);
       }
 #endif // SINGLE_TREE
 

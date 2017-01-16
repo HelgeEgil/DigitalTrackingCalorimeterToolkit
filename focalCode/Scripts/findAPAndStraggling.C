@@ -37,10 +37,14 @@ void findAPAndStraggling(Int_t absorberthickness) {
    Float_t  arrayRangeWater[200] = {0};
    Float_t  range, straggling, inelasticfraction;
    Float_t  weplfactor, energyWater;
+   Float_t  a, p, aw, pw;
    Int_t    energy, thickness;
    Int_t    nlinesWater = 0, nlinesMaterial = 0;
+   Bool_t   useDegrader = true;
    ifstream inWater, inMaterial;
 
+   a = 0.0098; aw = 0.0239;
+   p = 1.7806; pw = 1.7548;
 
    inWater.open("../Data/Ranges/Water.csv");
    while (1) {
@@ -53,9 +57,16 @@ void findAPAndStraggling(Int_t absorberthickness) {
       arrayE[nlinesWater] = energyWater;
       arrayRangeWater[nlinesWater++] = range * 10; // file in CM
    }
+
    inWater.close();
 
-   inMaterial.open("../OutputFiles/findManyRanges.csv");
+   if (useDegrader) {
+      inMaterial.open("../OutputFiles/findManyRangesDegrader.csv");
+   }
+   else {
+      inMaterial.open("../OutputFiles/findManyRanges.csv");
+   }
+
    while (1) {
       inMaterial >> energy >> thickness >> range >> straggling >> inelasticfraction;
 
@@ -68,11 +79,19 @@ void findAPAndStraggling(Int_t absorberthickness) {
          continue;
       }
 
-      arrayEMaterial[nlinesMaterial] = energy;
+      if (!useDegrader) { // energy = ENERGY [MeV]
+         arrayEMaterial[nlinesMaterial] = energy;
+      }
+      else { // energy = DEGRADER THICKNESS [mm], calculate residual energy
+         arrayEMaterial[nlinesMaterial] = pow((a * pow(250, p) - energy) / a, 1/p);
+      }
+
       arrayRange[nlinesMaterial] = range;
       arrayStraggling[nlinesMaterial] = straggling;
 
-      weplfactor = arrayRangeWater[nlinesMaterial] / range;
+//      weplfactor = arrayRangeWater[nlinesMaterial] / range;
+      weplfactor = aw / a * pow(range / aw, 1-p/pw);
+      printf("weplfactor = %.2f.\n", weplfactor);
       arrayWEPLStraggling[nlinesMaterial++] = straggling * weplfactor;
    }
    inMaterial.close();

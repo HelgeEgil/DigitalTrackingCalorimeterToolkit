@@ -182,14 +182,18 @@ void makePlots() {
       }
 
       Float_t zprime = energy_;
+      
       Float_t wtr_range = a_wtr * pow(250, p_wtr);
-      Float_t dtc_term = aprime_dtc * (p_dtc * pow(a_dtc, 2/p_dtc)) / (3 - 2/p_dtc);
-      Float_t wtr_term = aprime_wtr * (p_wtr * pow(a_wtr, 2/p_wtr)) / (3 - 2/p_wtr);
-      Float_t wepl_ratio = pow(a_wtr / a_dtc * pow(nomrange_ / a_wtr, 1 - p_dtc / p_wtr), 2);
-      Float_t dtc_strag = wepl_ratio * dtc_term * pow(nomrange_/wepl_ratio, 3-2/p_dtc);
+      Float_t wtr_term = aprime_wtr * (pow(p_wtr, 2) * pow(a_wtr, 2/p_wtr)) / (3 - 2/p_wtr);
       Float_t wtr_strag = wtr_term * (pow(wtr_range, 3-2/p_wtr) - pow(wtr_range - zprime, 3-2/p_wtr));
+     
+      Float_t wepl_ratio = a_wtr / a_dtc * pow(nomrange_ / a_wtr, 1 - p_dtc / p_wtr);
+      Float_t dtc_term = aprime_dtc * (pow(p_dtc, 2) * pow(a_dtc, 2/p_dtc)) / (3 - 2/p_dtc);
+      Float_t dtc_strag = pow(wepl_ratio, 2) * dtc_term * pow(nomrange_/wepl_ratio, 3-2/p_dtc);
 
-      printf("Using a %.2f mm water phantom, the estimated straggling from water is %.2f mm and from DTC is %.2f mm. WEPL ratio is %.2f.\n", zprime, sqrt(wtr_strag), sqrt(dtc_strag), sqrt(wepl_ratio));
+      printf("nomrange_ = %.2f. Calculated WEPL range = %.2f.\n", nomrange_, wtr_range - zprime);
+      printf("Bad method of calculating DTC straggling = %.2f mm.\n", sqrt(wtr_term * pow(nomrange_, 3-2/p_wtr)));
+      printf("Using a %.2f mm water phantom, the estimated straggling from water is %.2f mm and from DTC is %.2f mm. WEPL ratio is %.2f.\n", zprime, sqrt(wtr_strag), sqrt(dtc_strag), wepl_ratio);
 
       estimatedStraggling = sqrt(dtc_strag + wtr_strag);   
 
@@ -200,7 +204,7 @@ void makePlots() {
          arrayMC[nlines] = estrange_;
          arrayMCDelta[nlines] = estrange_ - nomrange_;
          arrayEMC[nlines] = sigmaRange_;
-         arrayEMCRatio[nlines] = sigmaRange_ / nomrange_ * 100;
+         arrayEMCRatio[nlines] = sigmaRange_ / wtr_range * 100;
          arrayEMCSub[nlines] = sqrt(abs(pow(estimatedStraggling, 2) - pow(sigmaRange_, 2)));
          arrayEMCSubRatio[nlines] = sqrt(abs(pow(estimatedStraggling, 2) - pow(sigmaRange_, 2))) / nomrange_ * 100;
          arrayPSTAR[nlines] = nomrange_;
@@ -209,7 +213,7 @@ void makePlots() {
          arrayPSTARDelta[nlines] = 0;
          arrayPSTARminDelta[nlines] = -estimatedStraggling;
          arrayPSTARmaxDelta[nlines] = estimatedStraggling;
-         arrayPSTARmaxDeltaRatio[nlines] = estimatedStraggling / nomrange_ * 100;
+         arrayPSTARmaxDeltaRatio[nlines] = estimatedStraggling / wtr_range * 100;
          arrayEPstar[nlines] = 0;
       }
 
@@ -601,6 +605,9 @@ void makePlots() {
 //   gResolutionSub->Draw("P");
    
    TGraph *gResolutionStraggling = new TGraph(MC2Data, arrayMC, arrayPSTARmaxDelta);
+   for (Int_t i=0; i<MC2Data; i++) {
+      printf("x[%d] = %.2f. y[%d] = %.2f.\n", i, arrayMC[i], i, arrayPSTARmaxDelta[i]);
+   }
    gResolutionStraggling->SetLineWidth(2);
    gResolutionStraggling->SetLineColor(kRed);
    gResolutionStraggling->Draw("L");

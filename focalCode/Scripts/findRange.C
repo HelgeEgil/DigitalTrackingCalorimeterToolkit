@@ -9,6 +9,8 @@
 #include <TLine.h>
 #include <vector>
 #include <iostream>
+#include <math.h>
+#include <cmath>
 #include <string.h>
 #include <TString.h>
 #include <TLegend.h>
@@ -53,14 +55,18 @@ vector<Float_t> findRange::Run(Double_t energy, Double_t sigma_mev)
    vector<Float_t> returnValues;
    if (fChain == 0) return returnValues;
 
+   Float_t degraderThickness = run_degraderThickness;
    Long64_t nentries = fChain->GetEntriesFast();
    Long64_t nbytes = 0, nb = 0;
+   Bool_t useDegrader = (degraderThickness > 0) ? true : false;
+
 
    TCanvas *c1 = new TCanvas("c1", "hZ", 800, 600);
    TCanvas *c2 = new TCanvas("c2", "hRange", 800, 600);
    TCanvas *c3 = new TCanvas("c3", "hTracklength", 800, 600);
    TCanvas *c4 = new TCanvas("c4", "hActualTracklength", 800, 600);
    TCanvas *c5 = new TCanvas("c5", "hSteplength", 800, 600);
+   TCanvas *c6 = new TCanvas("c6", "hEnergyAtInterface", 800, 600);
 
    Int_t nbinsx = 750;
    // 2 mm: 0.0096, 1.784
@@ -68,18 +74,20 @@ vector<Float_t> findRange::Run(Double_t energy, Double_t sigma_mev)
    // 4 mm: 0.0098, 1.7806
    // H20:  0.0239, 1.7548 
    Float_t expectedRange = 0.0098 * pow(run_energy, 1.7806);
-   Float_t xfrom = expectedRange * 0.75;
+   Float_t xfrom = expectedRange * 0.75;// - 15;
+   if (xfrom < 0) xfrom = 0;
    Float_t xto = expectedRange * 1.25;
 
    Float_t x_compensate = 0;
 
-   printf("RUNNING WITH ENERGY %d.\n", run_energy);
+   printf("RUNNING WITH ENERGY %.2f.\n", run_energy);
 
    TH1F *hZ = new TH1F("hZ", "Z profile", nbinsx/3, xfrom + x_compensate, xto + x_compensate);
    TH1F *hRange = new TH1F("hRange", "Primary ranges", nbinsx, xfrom + x_compensate, xto + x_compensate);
    TH1F *hTracklength = new TH1F("hTracklength", "Straight tracklengths", nbinsx, xfrom + x_compensate, xto + x_compensate);
    TH1F *hActualTracklength = new TH1F("hActualTracklength", "Actual tracklengths", nbinsx, xfrom + x_compensate, xto + x_compensate);
    TH1F *hStepLength = new TH1F("hStepLength", "Steplenghths", 1000, 0, 1);
+   TH1F *hEnergyAtInterface = new TH1F("hEnergyAtInterface", "Remaining energy after degrader;Energy [MeV];Entries", 500, run_energy * 0.8, run_energy * 1.25);
 
    gStyle->SetOptStat(0);
 
@@ -112,59 +120,71 @@ vector<Float_t> findRange::Run(Double_t energy, Double_t sigma_mev)
    Int_t lastP = 0;
    
    for (Long64_t jentry=0; jentry<nentries;jentry++) {
-   Long64_t ientry = LoadTree(jentry);
-   
-   if (ientry < 0) {
-      cout << "Aborting run at jentry = " << jentry << endl;
-      break;
-   }
-
-   nb = fChain->GetEntry(jentry);   nbytes += nb;
-
-
-   if (lastID < 0) lastID = eventID;
-
-   if (parentID == 0) {
-   
-      hStepLength->Fill(stepLength);
-
-      Float_t z = posZ;
-      Float_t y = posY;
-      Float_t x = posX;
-   
-      hZ->Fill(z + x_compensate);
-      n++;
-
-      if (processName[0] == 'P') {
-         hTracklength->Fill(z + firstZ);
-      }
-
-      if (eventID != lastID) {
-         n = 0;
-         
-         Float_t diff = sqrt( pow(firstX - lastX, 2) + pow(firstY - lastY, 2) + pow(0 - lastZ, 2));
-
-         hRange->Fill(lastRange);
-         hActualTracklength->Fill(tl + firstZ);
-         if (lastProcessName[0] == 'P') { lastP++; }
-
-         firstX = posX;
-         firstY = posY;
-         firstZ = posZ;
-         tl = 0;
-      }
-
-      else if (jentry>0) {
-         Float_t diff = sqrt( pow(x - lastX, 2) + pow(y - lastY, 2) + pow(z - lastZ, 2));
-         tl += diff;
-      }
+      Long64_t ientry = LoadTree(jentry);
       
-      lastRange = posZ;
-      lastX = posX;
-      lastID = eventID;
-      lastY = posY;
-      lastZ = posZ;
-      for (Int_t j=0; j<17; j++) lastProcessName[j] = processName[j];
+      if (ientry < 0) {
+         cout << "Aborting run at jentry = " << jentry << endl;
+         break;
+      }
+
+      nb = fChain->GetEntry(jentry);   nbytes += nb;
+
+      if (lastID < 0) lastID = eventID;
+
+      if (parentID == 0) {
+      
+         hStepLength->Fill(stepLength);
+
+         Float_t z = posZ;
+         Float_t y = posY;
+         Float_t x = posX;
+      
+         hZ->Fill(z + x_compensate);
+         n++;
+
+         if (processName[0] == 'P') {
+            hTracklength->Fill(z + firstZ);
+         }
+         
+         if (useDegrader) {
+            if (posZ < 0) {
+               dE += edep;
+            }
+            else if (dE > 0) {
+               hEnergyAtInterface->Fill(250 - dE);
+               dE = 0;
+            }
+         }
+
+         if (eventID != lastID) {
+            n = 0;
+            
+            Float_t diff = sqrt( pow(firstX - lastX, 2) + pow(firstY - lastY, 2) + pow(0 - lastZ, 2));
+
+            hRange->Fill(lastRange);
+            hActualTracklength->Fill(tl + firstZ);
+            if (lastProcessName[0] == 'P') { lastP++; }
+
+            firstX = posX;
+            firstY = posY;
+            firstZ = posZ;
+            tl = 0;
+         }
+
+         else if (jentry>0) {
+            Float_t diff = sqrt( pow(x - lastX, 2) + pow(y - lastY, 2) + pow(z - lastZ, 2));
+            tl += diff;
+         }
+
+         lastRange = posZ;
+         lastX = posX;
+         lastID = eventID;
+         lastY = posY;
+         lastZ = posZ;
+
+         for (Int_t j=0; j<17; j++) {
+            lastProcessName[j] = processName[j];
+         }
       }
    }
    
@@ -205,9 +225,12 @@ vector<Float_t> findRange::Run(Double_t energy, Double_t sigma_mev)
    cout << "3 sigma = " << cutoff << " to " << cutoffHigh << endl;
    cout << "Number of protons attenuated (more than 4 sigma below) = \033[1m" << 100 * attenuation / total << " %\033[0m.\n";
    printf("Estimated range from histogram weighing = %.3f +- %.3f\n",sumRangeWeight, sigmaRangeWeight);
+   printf("Estimated range from Gaussian fitting = %.3f +- %.3f\n", fRange->GetParameter(1), fabs(fRange->GetParameter(2)));
 
-   returnValues.push_back(sumRangeWeight);
-   returnValues.push_back(sigmaRangeWeight);
+//   returnValues.push_back(sumRangeWeight);
+//   returnValues.push_back(sigmaRangeWeight);
+   returnValues.push_back(fRange->GetParameter(1));
+   returnValues.push_back(fabs(fRange->GetParameter(2)));
    returnValues.push_back(100 * attenuation / total);
 
    c1->cd();
@@ -253,6 +276,11 @@ vector<Float_t> findRange::Run(Double_t energy, Double_t sigma_mev)
       hStepLength->SetFillColor(kBlue-7);
       hStepLength->SetLineColor(kBlack);
       hStepLength->Draw();
+
+   c6->cd();
+      hEnergyAtInterface->SetFillColor(kBlue-7);
+      hEnergyAtInterface->SetLineColor(kBlack);
+      hEnergyAtInterface->Draw();
    
    return returnValues;
 }
