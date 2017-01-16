@@ -72,8 +72,12 @@ vector<Float_t> findRange::Run(Double_t energy, Double_t sigma_mev)
    // 2 mm: 0.0096, 1.784
    // 3 mm: 0.0097, 1.7825
    // 4 mm: 0.0098, 1.7806
-   // H20:  0.0239, 1.7548 
-   Float_t expectedRange = 0.0098 * pow(run_energy, 1.7806);
+   // H20:  0.0239, 1.7548
+
+   Float_t a = 0.0098, p = 1.7806;
+   Float_t aw = 0.0239, pw = 1.7548;
+
+   Float_t expectedRange = a * pow(run_energy, p);
    Float_t xfrom = expectedRange * 0.75;// - 15;
    if (xfrom < 0) xfrom = 0;
    Float_t xto = expectedRange * 1.25;
@@ -87,7 +91,7 @@ vector<Float_t> findRange::Run(Double_t energy, Double_t sigma_mev)
    TH1F *hTracklength = new TH1F("hTracklength", "Straight tracklengths", nbinsx, xfrom + x_compensate, xto + x_compensate);
    TH1F *hActualTracklength = new TH1F("hActualTracklength", "Actual tracklengths", nbinsx, xfrom + x_compensate, xto + x_compensate);
    TH1F *hStepLength = new TH1F("hStepLength", "Steplenghths", 1000, 0, 1);
-   TH1F *hEnergyAtInterface = new TH1F("hEnergyAtInterface", "Remaining energy after degrader;Energy [MeV];Entries", 500, run_energy * 0.8, run_energy * 1.25);
+   TH1F *hEnergyAtInterface = new TH1F("hEnergyAtInterface", "Remaining energy after degrader;Energy [MeV];Entries", 500, run_energy -24, run_energy +20);
 
    gStyle->SetOptStat(0);
 
@@ -226,12 +230,21 @@ vector<Float_t> findRange::Run(Double_t energy, Double_t sigma_mev)
    cout << "Number of protons attenuated (more than 4 sigma below) = \033[1m" << 100 * attenuation / total << " %\033[0m.\n";
    printf("Estimated range from histogram weighing = %.3f +- %.3f\n",sumRangeWeight, sigmaRangeWeight);
    printf("Estimated range from Gaussian fitting = %.3f +- %.3f\n", fRange->GetParameter(1), fabs(fRange->GetParameter(2)));
+   
+   TF1 *fRemainingEnergy = new TF1("fRemainingEnergy", "gaus"); 
+   hEnergyAtInterface->Fit("fRemainingEnergy", "Q");
+   printf("Estimated remaining energy and straggling: %.2f +- %.2f MeV.\n", fRemainingEnergy->GetParameter(1), fRemainingEnergy->GetParameter(2));
+
+   printf("Total range and straggling: %.2f +- %.2f mm.\n", run_degraderThickness + aw * pow(fRemainingEnergy->GetParameter(1), pw), sqrt(pow(fRange->GetParameter(2), 2) + pow(fRemainingEnergy->GetParameter(2) * a * p * pow(fRemainingEnergy->GetParameter(1), p-1), 2)));
+   printf("Total WEPL straggling: %.2f mm.\n", sqrt(pow(fRemainingEnergy->GetParameter(2) * aw * pw * pow(fRemainingEnergy->GetParameter(1), p-1), 2) + pow(aw/a * pow(fRange->GetParameter(1) / aw, 1-pw/p) * fRange->GetParameter(2), 2)));
 
 //   returnValues.push_back(sumRangeWeight);
 //   returnValues.push_back(sigmaRangeWeight);
    returnValues.push_back(fRange->GetParameter(1));
    returnValues.push_back(fabs(fRange->GetParameter(2)));
    returnValues.push_back(100 * attenuation / total);
+   returnValues.push_back(fRemainingEnergy->GetParameter(1));
+   returnValues.push_back(fRemainingEnergy->GetParameter(2));
 
    c1->cd();
       hZ->SetXTitle("Z [mm]");
