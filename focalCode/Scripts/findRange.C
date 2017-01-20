@@ -67,6 +67,7 @@ vector<Float_t> findRange::Run(Double_t energy, Double_t sigma_mev)
    TCanvas *c4 = new TCanvas("c4", "hActualTracklength", 800, 600);
    TCanvas *c5 = new TCanvas("c5", "hSteplength", 800, 600);
    TCanvas *c6 = new TCanvas("c6", "hEnergyAtInterface", 800, 600);
+   TCanvas *c7 = new TCanvas("c7", "hRangeWEPL", 800, 600);
 
    Int_t nbinsx = 750;
    // 2 mm: 0.0096, 1.784
@@ -78,7 +79,7 @@ vector<Float_t> findRange::Run(Double_t energy, Double_t sigma_mev)
    Float_t aw = 0.0239, pw = 1.7548;
 
    Float_t expectedRange = a * pow(run_energy, p);
-   Float_t xfrom = expectedRange * 0.75;// - 15;
+   Float_t xfrom = expectedRange * 0.75 - 30;
    if (xfrom < 0) xfrom = 0;
    Float_t xto = expectedRange * 1.25;
 
@@ -88,10 +89,11 @@ vector<Float_t> findRange::Run(Double_t energy, Double_t sigma_mev)
 
    TH1F *hZ = new TH1F("hZ", "Z profile", nbinsx/3, xfrom + x_compensate, xto + x_compensate);
    TH1F *hRange = new TH1F("hRange", "Primary ranges", nbinsx, xfrom + x_compensate, xto + x_compensate);
-   TH1F *hTracklength = new TH1F("hTracklength", "Straight tracklengths", nbinsx, xfrom + x_compensate, xto + x_compensate);
-   TH1F *hActualTracklength = new TH1F("hActualTracklength", "Actual tracklengths", nbinsx, xfrom + x_compensate, xto + x_compensate);
+   TH1F *hRangeWEPL = new TH1F("hRangeWEPL", "Primary ranges in WEPL", nbinsx, xfrom*1.8 + x_compensate, xto*2.2 + x_compensate);
+   TH1F *hTracklength = new TH1F("hTracklength", "Beam range straggling", nbinsx, -20 , 20);
+   TH1F *hActualTracklength = new TH1F("hActualTracklength", "Ranges in DTC deconvoluted from beam energy straggling", nbinsx, xfrom + x_compensate, xto + x_compensate);
    TH1F *hStepLength = new TH1F("hStepLength", "Steplenghths", 1000, 0, 1);
-   TH1F *hEnergyAtInterface = new TH1F("hEnergyAtInterface", "Remaining energy after degrader;Energy [MeV];Entries", 500, run_energy -24, run_energy +20);
+   TH1F *hEnergyAtInterface = new TH1F("hEnergyAtInterface", "Remaining energy after degrader;Energy [MeV];Entries", 500, run_energy*0.8 - 24, run_energy*1.2 +20);
 
    gStyle->SetOptStat(0);
 
@@ -106,6 +108,8 @@ vector<Float_t> findRange::Run(Double_t energy, Double_t sigma_mev)
    Float_t dE = 0;
    Float_t dTL = 0;
    Float_t dE_random = 0;
+   Float_t thisEnergy = 0;
+   Float_t thisRange = 0;
    Int_t ignoreID = -5;
 
    Float_t tl = 0;
@@ -146,16 +150,14 @@ vector<Float_t> findRange::Run(Double_t energy, Double_t sigma_mev)
          hZ->Fill(z + x_compensate);
          n++;
 
-         if (processName[0] == 'P') {
-            hTracklength->Fill(z + firstZ);
-         }
-         
          if (useDegrader) {
             if (posZ < 0) {
                dE += edep;
             }
             else if (dE > 0) {
-               hEnergyAtInterface->Fill(250 - dE);
+               thisEnergy = 250 - dE;
+               thisRange = aw * pow(run_energy, pw) - aw * pow(thisEnergy, pw);
+               hEnergyAtInterface->Fill(thisEnergy);
                dE = 0;
             }
          }
@@ -166,7 +168,11 @@ vector<Float_t> findRange::Run(Double_t energy, Double_t sigma_mev)
             Float_t diff = sqrt( pow(firstX - lastX, 2) + pow(firstY - lastY, 2) + pow(0 - lastZ, 2));
 
             hRange->Fill(lastRange);
-            hActualTracklength->Fill(tl + firstZ);
+            Float_t weplRange = aw / a * pow(lastRange / aw, 1 - pw/p) * lastRange;
+            Float_t dtcRange = degraderThickness - thisRange + weplRange;
+            hActualTracklength->Fill(dtcRange);
+            hRangeWEPL->Fill(weplRange);
+            hTracklength->Fill(degraderThickness - thisRange);
             if (lastProcessName[0] == 'P') { lastP++; }
 
             firstX = posX;
@@ -267,7 +273,14 @@ vector<Float_t> findRange::Run(Double_t energy, Double_t sigma_mev)
       l2->SetLineWidth(2);
       l2->SetLineStyle(9);
       l2->Draw("same");
-      
+
+   c7->cd();
+      hRangeWEPL->SetXTitle("Range WEPL [mm]");
+      hRangeWEPL->SetYTitle("Number of primaries");
+      hRangeWEPL->SetFillColor(kBlue-7);
+      hRangeWEPL->SetLineColor(kBlack);
+      hRangeWEPL->Draw();
+
    c3->cd();
       hTracklength->SetXTitle("Range [mm]");
       hTracklength->SetYTitle("Number of primaries");

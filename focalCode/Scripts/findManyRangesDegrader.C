@@ -12,7 +12,7 @@ void findManyRanges(Int_t degraderFrom, Int_t degraderIncrement, Int_t degraderT
       for (Int_t mm=mmFrom; mm<=mmTo; mm += mmIncrement) {
       	findRange f(250, mm, degrader);
          resultVector = f.Run();
-         file << degrader << " " << mm << " " << resultVector.at(0) << " " << resultVector.at(1) << " " << resultVector.at(2) << endl;
+         file << degrader << " " << mm << " " << resultVector.at(0) << " " << resultVector.at(1) << " " << resultVector.at(2) << " " <<  resultVector.at(3) << " " << resultVector.at(4) << endl;
       }
    }
 

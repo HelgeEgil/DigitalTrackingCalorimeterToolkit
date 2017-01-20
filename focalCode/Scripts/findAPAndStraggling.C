@@ -26,6 +26,7 @@ void findAPAndStraggling(Int_t absorberthickness) {
    TCanvas *c1 = new TCanvas("c1", "Ranges", 1200, 800);
    TCanvas *c2 = new TCanvas("c2", "Straggling", 1200, 800);
    TCanvas *c3 = new TCanvas("c3", "WE straggling", 1200, 800);
+   TCanvas *c4 = new TCanvas("c4", "Energy straggling", 1200, 800);
 
    gStyle->SetOptStat(0);
 
@@ -35,12 +36,16 @@ void findAPAndStraggling(Int_t absorberthickness) {
    Float_t  arrayStraggling[200] = {0};
    Float_t  arrayWEPLStraggling[200] = {0};
    Float_t  arrayRangeWater[200] = {0};
+   Float_t  arrayEnergyStraggling[200] = {0};
    Float_t  range, straggling, inelasticfraction;
    Float_t  weplfactor, energyWater;
    Float_t  a, p, aw, pw;
    Int_t    energy, thickness;
+   Float_t  energyFloat;
    Int_t    nlinesWater = 0, nlinesMaterial = 0;
    Bool_t   useDegrader = true;
+   Float_t  energyStraggling;
+   Int_t    degraderThickness;
    ifstream inWater, inMaterial;
 
    a = 0.0098; aw = 0.0239;
@@ -68,10 +73,16 @@ void findAPAndStraggling(Int_t absorberthickness) {
    }
 
    while (1) {
-      inMaterial >> energy >> thickness >> range >> straggling >> inelasticfraction;
+      if (!useDegrader) {
+         inMaterial >> energy >> thickness >> range >> straggling >> inelasticfraction;
+      }
+      else {
+         inMaterial >> degraderThickness >> thickness >> range >> straggling >> inelasticfraction >> energyFloat >> energyStraggling;
+      }
 
       if (!inMaterial.good()) {
          printf("!inMaterial.good() in line %d.\n", nlinesMaterial);
+         printf("degraderThickness %d, thickness %d, range %.2f, straggling %.2f, inelasticfraction %.2f, energy %.2f, energyStraggling %.2f.\n", degraderThickness, thickness, range, straggling, inelasticfraction, energyFloat, energyStraggling);
          break;
       }
 
@@ -79,15 +90,10 @@ void findAPAndStraggling(Int_t absorberthickness) {
          continue;
       }
 
-      if (!useDegrader) { // energy = ENERGY [MeV]
-         arrayEMaterial[nlinesMaterial] = energy;
-      }
-      else { // energy = DEGRADER THICKNESS [mm], calculate residual energy
-         arrayEMaterial[nlinesMaterial] = pow((a * pow(250, p) - energy) / a, 1/p);
-      }
-
+      arrayEMaterial[nlinesMaterial] = energyFloat;
       arrayRange[nlinesMaterial] = range;
       arrayStraggling[nlinesMaterial] = straggling;
+      arrayEnergyStraggling[nlinesMaterial] = energyStraggling;
 
 //      weplfactor = arrayRangeWater[nlinesMaterial] / range;
       weplfactor = aw / a * pow(range / aw, 1-p/pw);
@@ -99,10 +105,12 @@ void findAPAndStraggling(Int_t absorberthickness) {
    TGraph *gRange = new TGraph(nlinesMaterial, arrayEMaterial, arrayRange);
    TGraph *gStraggling = new TGraph(nlinesMaterial, arrayRange, arrayStraggling);
    TGraph *gWEStraggling = new TGraph(nlinesMaterial, arrayRangeWater, arrayWEPLStraggling);
+   TGraph *gEnergyStraggling = new TGraph(nlinesMaterial, arrayEMaterial, arrayEnergyStraggling);
 
    gRange->SetTitle(Form("Ranges for material in %d mm Al;Energy [MeV];Range [mm]", absorberthickness));
    gStraggling->SetTitle(Form("Straggling in Al for %d mm absorber;Range [mm];Straggling [mm]", absorberthickness));
    gWEStraggling->SetTitle(Form("WE straggling in Al for %d mm absorber;Water Equivalent Range [mm];Water Equivalent Straggling [mm]", absorberthickness));
+   gEnergyStraggling->SetTitle(Form("Energy straggling in DTC for %d mm absorber;Energy [MeV];Energy straggling [MeV]", absorberthickness));
 
    c1->cd();
    gRange->SetMarkerStyle(7);
@@ -125,6 +133,12 @@ void findAPAndStraggling(Int_t absorberthickness) {
    gWEStraggling->Draw("AP");
    TF1 *WEStraggling = new TF1("WEStraggling", "[0]*x + [1]*pow(x,2)");
    gWEStraggling->Fit("WEStraggling", "Q,M");
+
+   c4->cd();
+   gEnergyStraggling->SetMarkerStyle(7);
+   gEnergyStraggling->SetMarkerColor(kBlue);
+   gEnergyStraggling->Draw("AP");
+
 
    printf("-----------------------------------\n");
    printf("Bragg-Kleeman parameters: R = %.4f E ^ %.4f\n", BK->GetParameter(0), BK->GetParameter(1));
