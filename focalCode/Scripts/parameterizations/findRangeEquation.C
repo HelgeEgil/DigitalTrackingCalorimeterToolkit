@@ -202,12 +202,14 @@ void Run(int COUNTER) {
          ranges[idxPara] = range;
          energies[idxPara] = energy;
          idxPara++;
+         printf("%.0f MeV added to training dataset.\n", energy);
       }
 
       if (idx%2 != 0 || useCompleteDataset) { // odd
          ranges_control[idxCtrl] = range;
          energies_control[idxCtrl] = energy;
          idxCtrl++;
+         printf("%.0f MeV added to control dataset.\n", energy);
       }
       idx++;
    }
@@ -609,7 +611,7 @@ void Run(int COUNTER) {
    firstQuartileLinearInv = aSize % 4 ? tempArray[aSize / 4] : (tempArray[aSize / 4 - 1] + tempArray[aSize/4]) / 2;
    thirdQuartileLinearInv = aSize % 4 ? tempArray[aSize * 3 / 4] : (tempArray[aSize * 3/ 4 - 1] + tempArray[aSize * 3 / 4]) / 2;
    
-   printf("\033[1mMEDIAN VALUES....\n");
+   printf("\033[1mMEDIAN VALUES....\033[0m\n");
    printf("Bragg-Kleeman: (%.3f%, %.3f%, %.3f%), Inverse Bragg-Kleeman: (%.3f%, %.3f%, %.3f%)\n", firstQuartileBK, medianBK, thirdQuartileBK, firstQuartileBKInv, medianBKInv, thirdQuartileBKInv);
    printf("Ulmer: (%.3f%, %.3f%, %.3f%), Inverse Ulmer: (%.3f%, %.3f%, %.3f%)\n", firstQuartileUlmer, medianUlmer, thirdQuartileUlmer, firstQuartileUlmerInv, medianUlmerInv, thirdQuartileUlmerInv);
    printf("Linear: (%.3f%, %.3f%, %.3f%), Inverse linear: (%.3f%, %.3f%, %.3f%)\n", firstQuartileLinear, medianLinear, thirdQuartileLinear, firstQuartileLinearInv, medianLinearInv, thirdQuartileLinearInv);
