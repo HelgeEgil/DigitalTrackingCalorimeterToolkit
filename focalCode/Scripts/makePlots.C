@@ -875,26 +875,59 @@ void makePlots() {
 
    c7->cd();
    Double_t dummy[21] = {};
+   
+   gPad->SetLogy();
+   gPad->SetLogx();
+
+   /*
    TGraphAsymmErrors *tgaBK     = new TGraphAsymmErrors(21, paraNPoints, paraBKm, dummy, dummy, paraBKl, paraBKh);
    TGraphAsymmErrors *tgaUlmer  = new TGraphAsymmErrors(21, paraNPoints, paraUlmerm, dummy, dummy, paraUlmerl, paraUlmerh);
    TGraphAsymmErrors *tgaSpline = new TGraphAsymmErrors(21, paraNPoints, paraSplinem, dummy, dummy, paraSplinel, paraSplineh);
    TGraphAsymmErrors *tgaLinear = new TGraphAsymmErrors(21, paraNPoints, paraLinearm, dummy, dummy, paraLinearl, paraLinearh);
+   */
 
-   tgaBK->SetTitle("Median error (+- 1st & 4rd quartile) over all energies of Bragg Curve parameterizations;Number of data points for model fit; Median error [%]");
+   TGraph *tgaBK     = new TGraph(14, paraNPoints, paraBKh);
+   TGraph *tgaUlmer  = new TGraph(14, paraNPoints, paraUlmerh);
+   TGraph *tgaSpline = new TGraph(14, paraNPoints, paraSplineh);
+   TGraph *tgaLinear = new TGraph(14, paraNPoints, paraLinearh);
+
+   tgaBK->SetTitle("Median error over all energies of Bragg Curve parameterizations;Number of data points in training group; Median error [%]");
 
    tgaBK->SetLineColor(kRed);
    tgaBK->SetMarkerColor(kRed);
+   tgaBK->SetLineWidth(2);
    tgaUlmer->SetLineColor(kBlue);
    tgaUlmer->SetMarkerColor(kBlue);
-   tgaSpline->SetLineColor(kBlack);
-   tgaSpline->SetMarkerColor(kBlack);
-   tgaLinear->SetLineColor(kGreen);
-   tgaLinear->SetMarkerColor(kGreen);
+   tgaUlmer->SetLineWidth(2);
+   tgaSpline->SetLineColor(kGreen);
+   tgaSpline->SetMarkerColor(kGreen);
+   tgaSpline->SetLineWidth(2);
+   tgaLinear->SetLineColor(kBlack);
+   tgaLinear->SetMarkerColor(kBlack);
+   tgaLinear->SetLineWidth(2);
 
    tgaBK->Draw("ALP");
    tgaUlmer->Draw("same, LP");
    tgaSpline->Draw("same, LP");
    tgaLinear->Draw("same, LP");
+   
+   gPad->Update();
+   TLine  *tgaLine = new TLine(pow(10, gPad->GetUxmin()), 1, pow(10, gPad->GetUxmax()), 1);
+   tgaLine->Draw("same");
+
+   tgaBK->GetYaxis()->SetRangeUser(0.05, 50);
+   tgaBK->GetYaxis()->SetNoExponent();
+   tgaBK->GetXaxis()->SetNoExponent();
+   tgaBK->GetYaxis()->SetTitleOffset(0.85);
+
+   TLegend *leg5 = new TLegend(0.72, 0.7, 0.94, 0.93);
+   leg5->SetTextSize(0.035);
+//   leg5->SetTextFont(22);
+   leg5->AddEntry(tgaBK, "Bragg-Kleeman", "L");
+   leg5->AddEntry(tgaUlmer, "Sum of exponentials", "L");
+   leg5->AddEntry(tgaLinear, "Linear interpolation", "L");
+   leg5->AddEntry(tgaSpline, "Spline interpolation", "L");
+   leg5->Draw();
    
    c1->SaveAs("OutputFiles/figures/finalPlotsForArticle/estimated_ranges_all_energies.eps");
    c1->SaveAs("OutputFiles/figures/finalPlotsForArticle/estimated_ranges_all_energies.root");

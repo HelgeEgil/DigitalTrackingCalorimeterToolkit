@@ -319,6 +319,11 @@ void Run(int COUNTER) {
    c2Inv->cd();
    gUlmerInv->Fit("fitInvFunction", "M, B, Q");
 
+   printf("Parameters for BRAGG KLEEMAN: alpha = %.5f, p = %.5f.\n", braggKleeman->GetParameter(0), braggKleeman->GetParameter(1));
+   printf("Parameters for ULMER: a1 = %.5f, b1 = %.5f, g1 = %.5f, b2 = %.5f, g2 = %.5f.\n", fitFunction->GetParameter(0), fitFunction->GetParameter(1), fitFunction->GetParameter(2), fitFunction->GetParameter(3), fitFunction->GetParameter(4));
+#define FIT(x) fitInvFunction->GetParameter(x)
+   printf("Parameters for ULMER INV: c1 = %.5f, l1 = %.5f, c2 = %.5f, l2 = %.5f, c3 = %.5f, l3 = %.5f, c4 = %.5f, l4 = %.5f, c5 = %.5f, l5 = %.5f.\n", FIT(0), 1/FIT(1), FIT(2), 1/FIT(3), FIT(4), 1/FIT(5), FIT(6), 1/FIT(7), FIT(8), 1/FIT(9));
+
 
    // calculate the % difference between the models and the CONTROL points
    Float_t controlValue;
@@ -714,7 +719,7 @@ void Run(int COUNTER) {
    cout << "ALPHA = " << alpha << ", p = " << p << endl;
 
    TCanvas *cDepth = new TCanvas("cDepth", "depth-dose curves", 800, 800);
-   cDepth->Divide(1,5,0.001,0.001);
+//   cDepth->Divide(1,5,0.001,0.001);
    
    // the depth of the semi-empirical models is easy to find, since we have formulas for it
    // make depth dose functions
@@ -790,7 +795,16 @@ void Run(int COUNTER) {
    }
    TGraph *DDSpline = new TGraph(idx+1, x_Spline, dEdx_Spline);
 
+   DDBK->SetLineColor(kRed);
+   DDBK->SetLineWidth(3);
+   DDUlmer->SetLineColor(kBlue);
+   DDUlmer->SetLineWidth(3);
+   DDLinear->SetLineColor(kGreen);
+   DDLinear->SetLineWidth(3);
+   DDSpline->SetLineColor(kBlack);
+   DDSpline->SetLineWidth(3);
 
+   /*
    cDepth->cd(1);
    DDBK->Draw();
    TLine *r1 = new TLine(range, 0, range, 60); r1->Draw();
@@ -817,19 +831,24 @@ void Run(int COUNTER) {
    DDSpline->SetTitle("Depth dose curve from Spline interpolation;Depth [cm];dE/dx [A.U.]");
    
    cDepth->Update();
+   */
 
-   cDepth->cd(5);
-   DDBK->Draw();
-   DDUlmer->Draw("same");
-   DDLinear->Draw("L");
+   DDLinear->GetHistogram()->GetYaxis()->SetRangeUser(0, 75);
+   DDLinear->GetHistogram()->GetYaxis()->SetTitleOffset(0.6);
+   DDLinear->GetHistogram()->SetTitle("Depth-dose curves from model parameterizations;Depth in water [cm];dE/dz [A.U.]");
+
+   cDepth->cd();
+   DDLinear->Draw("LA");
    DDSpline->Draw("L");
+   DDUlmer->Draw("same");
+   DDBK->Draw("same");
 
-
-   /*
    TLegend *leg3 = new TLegend(0.18, 0.75, 0.46, 0.87);
    leg3->AddEntry(DDBK, "Bragg-Kleeman", "L");
-   leg3->AddEntry(DDUlmer, "Ulmer", "L");
+   leg3->AddEntry(DDUlmer, "Sum of exponentials", "L");
+   leg3->AddEntry(DDSpline, "Linear interpolation", "L");
+   leg3->AddEntry(DDLinear, "Spline interpolation", "L");
    leg3->Draw();
-   */
+   
 }
 
