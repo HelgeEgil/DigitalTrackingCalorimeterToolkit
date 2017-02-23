@@ -17,7 +17,7 @@
 /gate/waterbox/geometry/setXLength 800. cm
 /gate/waterbox/geometry/setYLength 800. cm
 /gate/waterbox/geometry/setZLength 212. cm
-/gate/waterbox/placement/setTranslation 0. 0. 50. cm
+/gate/waterbox/placement/setTranslation 0. 0. 106. cm
 /gate/waterbox/setMaterial Air
 /gate/waterbox/vis/forceWireframe
 
@@ -39,8 +39,8 @@
 /gate/source/addSource uniformBeam gps
 /gate/source/uniformBeam/gps/particle proton
 /gate/source/uniformBeam/gps/ene/type Gauss
-/gate/source/uniformBeam/gps/ene/mono {energy} MeV
-/gate/source/uniformBeam/gps/ene/sigma {sigma} MeV
+/gate/source/uniformBeam/gps/ene/mono 34.9 MeV
+/gate/source/uniformBeam/gps/ene/sigma 0 MeV
 /gate/source/uniformBeam/gps/type Plane
 /gate/source/uniformBeam/gps/shape Square
 /gate/source/uniformBeam/gps/direction 0 0 1
@@ -49,12 +49,9 @@
 /gate/source/uniformBeam/gps/centre 0. 0. -0.1 mm # -20 cm for scintillator
 
 /gate/output/root/enable
-#/gate/output/root/setFileName /scratch/focal/focalCode/Scripts/MCCodeComparison/Data/GATE/Aluminium/aluminium_{energy}MeV
-#/gate/output/root/setFileName /home/local1/focal/focalCode/Scripts/MCCodeComparison/Data/GATE/Aluminium/aluminium_{energy}MeV
-#/gate/output/root/setFileName /scratch/focal/focalCode/Scripts/MCCodeComparison/Data/GATE/Water/water_qgspbic_{energy}MeV
 /gate/output/root/setFileName 212_cm_air
 
 /gate/random/setEngineName MersenneTwister
 /gate/random/setEngineSeed auto
-/gate/application/setTotalNumberOfPrimaries {npart}
+/gate/application/setTotalNumberOfPrimaries 5000
 /gate/application/start

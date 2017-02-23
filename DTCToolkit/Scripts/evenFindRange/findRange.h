@@ -4,12 +4,13 @@
 // from TChain Hits/
 //////////////////////////////////////////////////////////
 
-#ifndef compareGateAndMCNP_h
-#define compareGateAndMCNP_h
+#ifndef findRange_h
+#define findRange_h
 
 #include <TROOT.h>
 #include <TChain.h>
 #include <TFile.h>
+#include <vector>
 
 class TH2;
 
@@ -17,7 +18,7 @@ class TH2;
 
 // Fixed size dimensions of array or collections stored in the TTree if any.
 
-class compareGateAndMCNP {
+class findRange {
 public :
    TTree          *fChain;   //!pointer to the analyzed TTree or TChain
    Int_t           fCurrent; //!current Tree number in a TChain
@@ -55,6 +56,8 @@ public :
    Int_t           runID;
    Float_t         axialPos;
    Float_t         rotationAngle;
+   Float_t          run_energy;
+   Float_t         run_degraderThickness;
    Int_t           volumeID[10];
    Char_t          processName[17];
    Char_t          comptVolName[5];
@@ -98,22 +101,22 @@ public :
    TBranch        *b_comptVolName;   //!
    TBranch        *b_RayleighVolName;   //!
 
-   compareGateAndMCNP(TTree *tree=0);
-   virtual ~compareGateAndMCNP();
-   virtual Int_t    Cut(Long64_t entry);
-   virtual Int_t    GetEntry(Long64_t entry);
-   virtual Long64_t LoadTree(Long64_t entry);
-   virtual void     Init(TTree *tree);
-   virtual void     Run();
-   virtual Bool_t   Notify();
-   virtual void     Show(Long64_t entry = -1);
+   findRange(TTree *tree=0);
+   virtual ~findRange();
+   virtual Int_t     Cut(Long64_t entry);
+   virtual Int_t     GetEntry(Long64_t entry);
+   virtual Long64_t  LoadTree(Long64_t entry);
+   virtual void      Init(TTree *tree);
+   virtual void      Run();
+   virtual Bool_t    Notify();
+   virtual void      Show(Long64_t entry = -1);
    
 };
 
 #endif
 
-#ifdef compareGateAndMCNP_cxx
-compareGateAndMCNP::compareGateAndMCNP(TTree *tree) : fChain(0)
+#ifdef findRange_cxx
+findRange::findRange(TTree *tree) : fChain(0)
 {
 // if parameter tree is not specified (or zero), connect the file
 // used to generate this class and read the Tree.
@@ -133,7 +136,8 @@ compareGateAndMCNP::compareGateAndMCNP(TTree *tree) : fChain(0)
       // The following code should be used if you want this class to access a chain
       // of trees.
       TChain * chain = new TChain("Hits","");
-      chain->Add(Form("GATE.root/Hits"));
+      chain->Add("212_cm_air.root/Hits");
+
       tree = chain;
 #endif // SINGLE_TREE
 
@@ -141,20 +145,19 @@ compareGateAndMCNP::compareGateAndMCNP(TTree *tree) : fChain(0)
    Init(tree);
 }
 
-compareGateAndMCNP::~compareGateAndMCNP()
+findRange::~findRange()
 {
    if (!fChain) return;
    delete fChain->GetCurrentFile();
 }
 
-Int_t compareGateAndMCNP::GetEntry(Long64_t entry)
+Int_t findRange::GetEntry(Long64_t entry)
 {
 // Read contents of entry.
    if (!fChain) return 0;
    return fChain->GetEntry(entry);
 }
-
-Long64_t compareGateAndMCNP::LoadTree(Long64_t entry)
+Long64_t findRange::LoadTree(Long64_t entry)
 {
 // Set the environment to read one entry
    if (!fChain) return -5;
@@ -167,7 +170,7 @@ Long64_t compareGateAndMCNP::LoadTree(Long64_t entry)
    return centry;
 }
 
-void compareGateAndMCNP::Init(TTree *tree)
+void findRange::Init(TTree *tree)
 {
    // The Init() function is called when the selector needs to initialize
    // a new tree or chain. Typically here the branch addresses and branch
@@ -222,7 +225,7 @@ void compareGateAndMCNP::Init(TTree *tree)
    Notify();
 }
 
-Bool_t compareGateAndMCNP::Notify()
+Bool_t findRange::Notify()
 {
    // The Notify() function is called when a new file is opened. This
    // can be either for a new TTree in a TChain or when when a new TTree
@@ -233,18 +236,18 @@ Bool_t compareGateAndMCNP::Notify()
    return kTRUE;
 }
 
-void compareGateAndMCNP::Show(Long64_t entry)
+void findRange::Show(Long64_t entry)
 {
 // Print contents of entry.
 // If entry is not specified, print current entry
    if (!fChain) return;
    fChain->Show(entry);
 }
-Int_t compareGateAndMCNP::Cut(Long64_t entry)
+Int_t findRange::Cut(Long64_t entry)
 {
 // This function may be called from Loop.
 // returns  1 if entry is accepted.
 // returns -1 otherwise.
    return 1;
 }
-#endif // #ifdef compareGateAndMCNP_cxx
+#endif // #ifdef findRange_cxx

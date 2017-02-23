@@ -1174,17 +1174,16 @@ void drawClusterSizeDistribution(Int_t Runs, Int_t dataType, Bool_t recreate, Fl
    hClusterSizes->Draw("COLZ");
 }
       
-void drawTracks3D(Int_t Runs, Int_t dataType, Bool_t recreate, Float_t energy) {
+void drawTracks3D(Int_t Runs, Int_t dataType, Bool_t recreate, Int_t switchLayer, Float_t energy, Float_t degraderThickness) {
    run_energy = energy;
+   run_degraderThickness = degraderThickness;
 
    Tracks * tracks = loadOrCreateTracks(recreate, Runs, dataType, energy);
 
-   Int_t switchLayer =  100;
-
-   TCanvas *c1 = new TCanvas("c1", "c1", 1600, 1200);
+   TCanvas *c1 = new TCanvas("c1", "c1", 1600, 800);
    c1->SetTitle(Form("Tracks from %.2f MeV protons on %s", energy, getMaterialChar()));
    TView *view = TView::CreateView(1);
-   view->SetRange(0, 0, 0, nx, 100, ny);
+   view->SetRange(0, 0, 0, nx, 35, ny);
    Int_t iret;
    Float_t theta = 285;
    Float_t phi = 80;
@@ -1376,7 +1375,7 @@ void drawTracks3D(Int_t Runs, Int_t dataType, Bool_t recreate, Float_t energy) {
          
          conflictMarker->SetPoint(conflictIdx++, x,y,z);
       }
-
+      l->SetLineColor(kBlue);
       l->Draw();
       trackPoints->Draw();
 //    EIDMarker->Draw();

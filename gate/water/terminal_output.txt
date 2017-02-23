@@ -19,8 +19,8 @@
 [Core-0] **********************************************************************
 [Core-0] 
 [Core-0] You are using Geant4 version 10.2.2
-/control/alias energy 50
-/control/alias npart 50000
+/control/alias energy 34.9
+/control/alias npart 10000
 /control/alias step_active 0
 /control/alias sigma 0
 [Core-0] Starting macro focal_script.mac
@@ -33,7 +33,8 @@ G4PhysListFactory::GetReferencePhysList <QGSP_BIC>  EMoption= 0
 <<< Reference Physics List QGSP_BIC is built
 
 G4VUserPhysicsList::SetDefaultCutValue: negative cut values  :-1[mm]
-#### Adding tracking cuts for neutron  TimeCut(ns)= 10000  KinEnergyCut(MeV)= 0[[Core-0] Initialization of actors
+### Adding tracking cuts for neutron  TimeCut(ns)= 10000  KinEnergyCut(MeV)= 0
+[Core-0] Initialization of actors
 [Acquisition-0]   
 [Acquisition-0] ============= Source initialization =============
 [Acquisition-0]   
@@ -349,6 +350,7 @@ msc:   for pi+    SubType= 10
       RangeFactor= 0.2, step limit type: 0, lateralDisplacement: 0, polarAngleLimit(deg)= 180
       ===== EM models for the G4Region  DefaultRegionForTheWorld ======
         WentzelVIUni :  Emin=        0 eV    Emax=       10 TeV  Table with 77 bins Emin=    100 eV    Emax=     10 TeV
+
 hIoni:   for  pi+    SubType= 2
       dE/dx and range tables from 100 eV  to 10 TeV in 77 bins
       Lambda tables from threshold to 10 TeV, 7 bins per decade, spline: 1
@@ -409,7 +411,6 @@ CoulombScat:   for  pi-, integral: 1 , applyCuts: 1     SubType= 1  BuildTable= 
       180 < Theta(degree) < 180; pLimit(GeV^1)= 0.139531
       ===== EM models for the G4Region  DefaultRegionForTheWorld ======
   eCoulombScattering :  Emin=        0 eV    Emax=       10 TeV
-
 
 ====================================================================
                   HADRONIC PROCESSES SUMMARY (verbose level 1)
@@ -740,11 +741,4 @@ CoulombScat:   for  pi-, integral: 1 , applyCuts: 1     SubType= 1  BuildTable= 
 
 ================================================================
 WARNING: Scene "none" not found.
-  /vis/scene/list to see scenes.WWARNING: command "/vis/viewer/update" could not be applied: no current viewer.
-[Core-0] End of macro focal_script.mac
-Graphics systems deleted.
-Visualization Manager deleting...
-WARNING - Attempt to delete the physical volume store while geometry closed !
-WARNING - Attempt to delete the logical volume store while geometry closed !
-WARNING - Attempt to delete the solid store while geometry closed !
-WARNING - Attempt to delete the region store while geometry closed !
+  /vis/scene/list to see scenes.

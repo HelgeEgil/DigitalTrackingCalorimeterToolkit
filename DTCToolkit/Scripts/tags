@@ -1,0 +1,472 @@
+!_TAG_FILE_FORMAT	2	/extended format; --format=1 will not append ;" to lines/
+!_TAG_FILE_SORTED	1	/0=unsorted, 1=sorted, 2=foldcase/
+!_TAG_PROGRAM_AUTHOR	Darren Hiebert	/dhiebert@users.sourceforge.net/
+!_TAG_PROGRAM_NAME	Exuberant Ctags	//
+!_TAG_PROGRAM_URL	http://ctags.sourceforge.net	/official site/
+!_TAG_PROGRAM_VERSION	5.8	//
+BinLogX	findLET.C	/^void findLET::BinLogX(TH1 *h) {$/;"	f	class:findLET
+BinLogY	Check.C	/^void Check::BinLogY(TH2 *h) {$/;"	f	class:Check
+BinLogY	findFilterEnergyLoss.C	/^void findFilterEnergyLoss::BinLogY(TH2 *h) {$/;"	f	class:findFilterEnergyLoss
+Check_cxx	Check.C	1;"	d	file:
+Cut	compareGateAndMCNP.h	/^Int_t compareGateAndMCNP::Cut(Long64_t entry)$/;"	f	class:compareGateAndMCNP
+Cut	findLET.h	/^Int_t findLET::Cut(Long64_t entry)$/;"	f	class:findLET
+Cut	findRange.h	/^Int_t findRange::Cut(Long64_t entry)$/;"	f	class:findRange
+Cut	include/findFilterEnergyLoss.h	/^Int_t findFilterEnergyLoss::Cut(Long64_t entry)$/;"	f	class:findFilterEnergyLoss
+Cut	include/findRange.h	/^Int_t findRange::Cut(Long64_t entry)$/;"	f	class:findRange
+GetEntry	compareGateAndMCNP.h	/^Int_t compareGateAndMCNP::GetEntry(Long64_t entry)$/;"	f	class:compareGateAndMCNP
+GetEntry	findLET.h	/^Int_t findLET::GetEntry(Long64_t entry)$/;"	f	class:findLET
+GetEntry	findRange.h	/^Int_t findRange::GetEntry(Long64_t entry)$/;"	f	class:findRange
+GetEntry	include/findFilterEnergyLoss.h	/^Int_t findFilterEnergyLoss::GetEntry(Long64_t entry)$/;"	f	class:findFilterEnergyLoss
+GetEntry	include/findRange.h	/^Int_t findRange::GetEntry(Long64_t entry)$/;"	f	class:findRange
+Init	compareGateAndMCNP.h	/^void compareGateAndMCNP::Init(TTree *tree)$/;"	f	class:compareGateAndMCNP
+Init	findLET.h	/^void findLET::Init(TTree *tree)$/;"	f	class:findLET
+Init	findRange.h	/^void findRange::Init(TTree *tree)$/;"	f	class:findRange
+Init	include/findFilterEnergyLoss.h	/^void findFilterEnergyLoss::Init(TTree *tree)$/;"	f	class:findFilterEnergyLoss
+Init	include/findRange.h	/^void findRange::Init(TTree *tree)$/;"	f	class:findRange
+LoadTree	compareGateAndMCNP.h	/^Long64_t compareGateAndMCNP::LoadTree(Long64_t entry)$/;"	f	class:compareGateAndMCNP
+LoadTree	findLET.h	/^Long64_t findLET::LoadTree(Long64_t entry)$/;"	f	class:findLET
+LoadTree	findRange.h	/^Long64_t findRange::LoadTree(Long64_t entry)$/;"	f	class:findRange
+LoadTree	include/findFilterEnergyLoss.h	/^Long64_t findFilterEnergyLoss::LoadTree(Long64_t entry)$/;"	f	class:findFilterEnergyLoss
+LoadTree	include/findRange.h	/^Long64_t findRange::LoadTree(Long64_t entry)$/;"	f	class:findRange
+Loop	Check.C	/^void Check::Loop(Double_t energy, Double_t sigma_mev)$/;"	f	class:Check
+Loop	findFilterEnergyLoss.C	/^void findFilterEnergyLoss::Loop()$/;"	f	class:findFilterEnergyLoss
+Loop	findLET.C	/^void findLET::Loop(Double_t energy)$/;"	f	class:findLET
+Notify	compareGateAndMCNP.h	/^Bool_t compareGateAndMCNP::Notify()$/;"	f	class:compareGateAndMCNP
+Notify	findLET.h	/^Bool_t findLET::Notify()$/;"	f	class:findLET
+Notify	findRange.h	/^Bool_t findRange::Notify()$/;"	f	class:findRange
+Notify	include/findFilterEnergyLoss.h	/^Bool_t findFilterEnergyLoss::Notify()$/;"	f	class:findFilterEnergyLoss
+Notify	include/findRange.h	/^Bool_t findRange::Notify()$/;"	f	class:findRange
+PDGEncoding	compareGateAndMCNP.h	/^   Int_t           PDGEncoding;$/;"	m	class:compareGateAndMCNP
+PDGEncoding	findLET.h	/^   Int_t           PDGEncoding;$/;"	m	class:findLET
+PDGEncoding	findRange.h	/^   Int_t           PDGEncoding;$/;"	m	class:findRange
+PDGEncoding	include/findFilterEnergyLoss.h	/^   Int_t           PDGEncoding;$/;"	m	class:findFilterEnergyLoss
+PDGEncoding	include/findRange.h	/^   Int_t           PDGEncoding;$/;"	m	class:findRange
+RayleighVolName	compareGateAndMCNP.h	/^   Char_t          RayleighVolName[5];$/;"	m	class:compareGateAndMCNP
+RayleighVolName	findLET.h	/^   Char_t          RayleighVolName[5];$/;"	m	class:findLET
+RayleighVolName	findRange.h	/^   Char_t          RayleighVolName[5];$/;"	m	class:findRange
+RayleighVolName	include/findFilterEnergyLoss.h	/^   Char_t          RayleighVolName[5];$/;"	m	class:findFilterEnergyLoss
+RayleighVolName	include/findRange.h	/^   Char_t          RayleighVolName[5];$/;"	m	class:findRange
+Run	MCCodeComparison/GATEFileCompress.C	/^void Run()$/;"	f
+Run	MCCodeComparison/compareCodesAllEnergies.C	/^void Run()$/;"	f
+Run	MCCodeComparison/compareCodesOneEnergy.C	/^void Run()$/;"	f
+Run	compareGateAndMCNP.C	/^void compareGateAndMCNP::Run()$/;"	f	class:compareGateAndMCNP
+Run	findRange.C	/^vector<Float_t> findRange::Run(Double_t energy, Double_t sigma_mev, Float_t degraderThickness)$/;"	f	class:findRange
+Run	parameterizations/findRangeEquation.C	/^void Run(int COUNTER) {$/;"	f
+Show	compareGateAndMCNP.h	/^void compareGateAndMCNP::Show(Long64_t entry)$/;"	f	class:compareGateAndMCNP
+Show	findLET.h	/^void findLET::Show(Long64_t entry)$/;"	f	class:findLET
+Show	findRange.h	/^void findRange::Show(Long64_t entry)$/;"	f	class:findRange
+Show	include/findFilterEnergyLoss.h	/^void findFilterEnergyLoss::Show(Long64_t entry)$/;"	f	class:findFilterEnergyLoss
+Show	include/findRange.h	/^void findRange::Show(Long64_t entry)$/;"	f	class:findRange
+a0	findRange.C	/^Double_t a0 = -3.7279603175;$/;"	v
+a1	findRange.C	/^Double_t a1 =  0.1958689129;$/;"	v
+a2	findRange.C	/^Double_t a2 =  0.0066110840;$/;"	v
+a3	findRange.C	/^Double_t a3 = -0.0000051372;$/;"	v
+alpha	findRange.C	/^Float_t alpha = 0.02073;$/;"	v
+alphaprime	findRange.C	/^Float_t alphaprime = 0.0087;$/;"	v
+axialPos	compareGateAndMCNP.h	/^   Float_t         axialPos;$/;"	m	class:compareGateAndMCNP
+axialPos	findLET.h	/^   Float_t         axialPos;$/;"	m	class:findLET
+axialPos	findRange.h	/^   Float_t         axialPos;$/;"	m	class:findRange
+axialPos	include/findFilterEnergyLoss.h	/^   Float_t         axialPos;$/;"	m	class:findFilterEnergyLoss
+axialPos	include/findRange.h	/^   Float_t         axialPos;$/;"	m	class:findRange
+b_PDGEncoding	compareGateAndMCNP.h	/^   TBranch        *b_PDGEncoding;   \/\/!$/;"	m	class:compareGateAndMCNP
+b_PDGEncoding	findLET.h	/^   TBranch        *b_PDGEncoding;   \/\/!$/;"	m	class:findLET
+b_PDGEncoding	findRange.h	/^   TBranch        *b_PDGEncoding;   \/\/!$/;"	m	class:findRange
+b_PDGEncoding	include/findFilterEnergyLoss.h	/^   TBranch        *b_PDGEncoding;   \/\/!$/;"	m	class:findFilterEnergyLoss
+b_PDGEncoding	include/findRange.h	/^   TBranch        *b_PDGEncoding;   \/\/!$/;"	m	class:findRange
+b_RayleighVolName	compareGateAndMCNP.h	/^   TBranch        *b_RayleighVolName;   \/\/!$/;"	m	class:compareGateAndMCNP
+b_RayleighVolName	findLET.h	/^   TBranch        *b_RayleighVolName;   \/\/!$/;"	m	class:findLET
+b_RayleighVolName	findRange.h	/^   TBranch        *b_RayleighVolName;   \/\/!$/;"	m	class:findRange
+b_RayleighVolName	include/findFilterEnergyLoss.h	/^   TBranch        *b_RayleighVolName;   \/\/!$/;"	m	class:findFilterEnergyLoss
+b_RayleighVolName	include/findRange.h	/^   TBranch        *b_RayleighVolName;   \/\/!$/;"	m	class:findRange
+b_axialPos	compareGateAndMCNP.h	/^   TBranch        *b_axialPos;   \/\/!$/;"	m	class:compareGateAndMCNP
+b_axialPos	findLET.h	/^   TBranch        *b_axialPos;   \/\/!$/;"	m	class:findLET
+b_axialPos	findRange.h	/^   TBranch        *b_axialPos;   \/\/!$/;"	m	class:findRange
+b_axialPos	include/findFilterEnergyLoss.h	/^   TBranch        *b_axialPos;   \/\/!$/;"	m	class:findFilterEnergyLoss
+b_axialPos	include/findRange.h	/^   TBranch        *b_axialPos;   \/\/!$/;"	m	class:findRange
+b_baseID	compareGateAndMCNP.h	/^   TBranch        *b_baseID;   \/\/!$/;"	m	class:compareGateAndMCNP
+b_baseID	findLET.h	/^   TBranch        *b_baseID;   \/\/!$/;"	m	class:findLET
+b_baseID	findRange.h	/^   TBranch        *b_baseID;   \/\/!$/;"	m	class:findRange
+b_baseID	include/findFilterEnergyLoss.h	/^   TBranch        *b_baseID;   \/\/!$/;"	m	class:findFilterEnergyLoss
+b_baseID	include/findRange.h	/^   TBranch        *b_baseID;   \/\/!$/;"	m	class:findRange
+b_comptVolName	compareGateAndMCNP.h	/^   TBranch        *b_comptVolName;   \/\/!$/;"	m	class:compareGateAndMCNP
+b_comptVolName	findLET.h	/^   TBranch        *b_comptVolName;   \/\/!$/;"	m	class:findLET
+b_comptVolName	findRange.h	/^   TBranch        *b_comptVolName;   \/\/!$/;"	m	class:findRange
+b_comptVolName	include/findFilterEnergyLoss.h	/^   TBranch        *b_comptVolName;   \/\/!$/;"	m	class:findFilterEnergyLoss
+b_comptVolName	include/findRange.h	/^   TBranch        *b_comptVolName;   \/\/!$/;"	m	class:findRange
+b_edep	compareGateAndMCNP.h	/^   TBranch        *b_edep;   \/\/!$/;"	m	class:compareGateAndMCNP
+b_edep	findLET.h	/^   TBranch        *b_edep;   \/\/!$/;"	m	class:findLET
+b_edep	findRange.h	/^   TBranch        *b_edep;   \/\/!$/;"	m	class:findRange
+b_edep	include/findFilterEnergyLoss.h	/^   TBranch        *b_edep;   \/\/!$/;"	m	class:findFilterEnergyLoss
+b_edep	include/findRange.h	/^   TBranch        *b_edep;   \/\/!$/;"	m	class:findRange
+b_eventID	compareGateAndMCNP.h	/^   TBranch        *b_eventID;   \/\/!$/;"	m	class:compareGateAndMCNP
+b_eventID	findLET.h	/^   TBranch        *b_eventID;   \/\/!$/;"	m	class:findLET
+b_eventID	findRange.h	/^   TBranch        *b_eventID;   \/\/!$/;"	m	class:findRange
+b_eventID	include/findFilterEnergyLoss.h	/^   TBranch        *b_eventID;   \/\/!$/;"	m	class:findFilterEnergyLoss
+b_eventID	include/findRange.h	/^   TBranch        *b_eventID;   \/\/!$/;"	m	class:findRange
+b_layerID	compareGateAndMCNP.h	/^   TBranch        *b_layerID;   \/\/!$/;"	m	class:compareGateAndMCNP
+b_layerID	findLET.h	/^   TBranch        *b_layerID;   \/\/!$/;"	m	class:findLET
+b_layerID	findRange.h	/^   TBranch        *b_layerID;   \/\/!$/;"	m	class:findRange
+b_layerID	include/findFilterEnergyLoss.h	/^   TBranch        *b_layerID;   \/\/!$/;"	m	class:findFilterEnergyLoss
+b_layerID	include/findRange.h	/^   TBranch        *b_layerID;   \/\/!$/;"	m	class:findRange
+b_level1ID	compareGateAndMCNP.h	/^   TBranch        *b_level1ID;   \/\/!$/;"	m	class:compareGateAndMCNP
+b_level1ID	findLET.h	/^   TBranch        *b_level1ID;   \/\/!$/;"	m	class:findLET
+b_level1ID	findRange.h	/^   TBranch        *b_level1ID;   \/\/!$/;"	m	class:findRange
+b_level1ID	include/findFilterEnergyLoss.h	/^   TBranch        *b_level1ID;   \/\/!$/;"	m	class:findFilterEnergyLoss
+b_level1ID	include/findRange.h	/^   TBranch        *b_level1ID;   \/\/!$/;"	m	class:findRange
+b_level2ID	compareGateAndMCNP.h	/^   TBranch        *b_level2ID;   \/\/!$/;"	m	class:compareGateAndMCNP
+b_level2ID	findLET.h	/^   TBranch        *b_level2ID;   \/\/!$/;"	m	class:findLET
+b_level2ID	findRange.h	/^   TBranch        *b_level2ID;   \/\/!$/;"	m	class:findRange
+b_level2ID	include/findFilterEnergyLoss.h	/^   TBranch        *b_level2ID;   \/\/!$/;"	m	class:findFilterEnergyLoss
+b_level2ID	include/findRange.h	/^   TBranch        *b_level2ID;   \/\/!$/;"	m	class:findRange
+b_level3ID	compareGateAndMCNP.h	/^   TBranch        *b_level3ID;   \/\/!$/;"	m	class:compareGateAndMCNP
+b_level3ID	findLET.h	/^   TBranch        *b_level3ID;   \/\/!$/;"	m	class:findLET
+b_level3ID	findRange.h	/^   TBranch        *b_level3ID;   \/\/!$/;"	m	class:findRange
+b_level3ID	include/findFilterEnergyLoss.h	/^   TBranch        *b_level3ID;   \/\/!$/;"	m	class:findFilterEnergyLoss
+b_level3ID	include/findRange.h	/^   TBranch        *b_level3ID;   \/\/!$/;"	m	class:findRange
+b_level4ID	compareGateAndMCNP.h	/^   TBranch        *b_level4ID;   \/\/!$/;"	m	class:compareGateAndMCNP
+b_level4ID	findLET.h	/^   TBranch        *b_level4ID;   \/\/!$/;"	m	class:findLET
+b_level4ID	findRange.h	/^   TBranch        *b_level4ID;   \/\/!$/;"	m	class:findRange
+b_level4ID	include/findFilterEnergyLoss.h	/^   TBranch        *b_level4ID;   \/\/!$/;"	m	class:findFilterEnergyLoss
+b_level4ID	include/findRange.h	/^   TBranch        *b_level4ID;   \/\/!$/;"	m	class:findRange
+b_localPosX	compareGateAndMCNP.h	/^   TBranch        *b_localPosX;   \/\/!$/;"	m	class:compareGateAndMCNP
+b_localPosX	findLET.h	/^   TBranch        *b_localPosX;   \/\/!$/;"	m	class:findLET
+b_localPosX	findRange.h	/^   TBranch        *b_localPosX;   \/\/!$/;"	m	class:findRange
+b_localPosX	include/findFilterEnergyLoss.h	/^   TBranch        *b_localPosX;   \/\/!$/;"	m	class:findFilterEnergyLoss
+b_localPosX	include/findRange.h	/^   TBranch        *b_localPosX;   \/\/!$/;"	m	class:findRange
+b_localPosY	compareGateAndMCNP.h	/^   TBranch        *b_localPosY;   \/\/!$/;"	m	class:compareGateAndMCNP
+b_localPosY	findLET.h	/^   TBranch        *b_localPosY;   \/\/!$/;"	m	class:findLET
+b_localPosY	findRange.h	/^   TBranch        *b_localPosY;   \/\/!$/;"	m	class:findRange
+b_localPosY	include/findFilterEnergyLoss.h	/^   TBranch        *b_localPosY;   \/\/!$/;"	m	class:findFilterEnergyLoss
+b_localPosY	include/findRange.h	/^   TBranch        *b_localPosY;   \/\/!$/;"	m	class:findRange
+b_localPosZ	compareGateAndMCNP.h	/^   TBranch        *b_localPosZ;   \/\/!$/;"	m	class:compareGateAndMCNP
+b_localPosZ	findLET.h	/^   TBranch        *b_localPosZ;   \/\/!$/;"	m	class:findLET
+b_localPosZ	findRange.h	/^   TBranch        *b_localPosZ;   \/\/!$/;"	m	class:findRange
+b_localPosZ	include/findFilterEnergyLoss.h	/^   TBranch        *b_localPosZ;   \/\/!$/;"	m	class:findFilterEnergyLoss
+b_localPosZ	include/findRange.h	/^   TBranch        *b_localPosZ;   \/\/!$/;"	m	class:findRange
+b_nCrystalCompton	compareGateAndMCNP.h	/^   TBranch        *b_nCrystalCompton;   \/\/!$/;"	m	class:compareGateAndMCNP
+b_nCrystalCompton	findLET.h	/^   TBranch        *b_nCrystalCompton;   \/\/!$/;"	m	class:findLET
+b_nCrystalCompton	findRange.h	/^   TBranch        *b_nCrystalCompton;   \/\/!$/;"	m	class:findRange
+b_nCrystalCompton	include/findFilterEnergyLoss.h	/^   TBranch        *b_nCrystalCompton;   \/\/!$/;"	m	class:findFilterEnergyLoss
+b_nCrystalCompton	include/findRange.h	/^   TBranch        *b_nCrystalCompton;   \/\/!$/;"	m	class:findRange
+b_nCrystalRayleigh	compareGateAndMCNP.h	/^   TBranch        *b_nCrystalRayleigh;   \/\/!$/;"	m	class:compareGateAndMCNP
+b_nCrystalRayleigh	findLET.h	/^   TBranch        *b_nCrystalRayleigh;   \/\/!$/;"	m	class:findLET
+b_nCrystalRayleigh	findRange.h	/^   TBranch        *b_nCrystalRayleigh;   \/\/!$/;"	m	class:findRange
+b_nCrystalRayleigh	include/findFilterEnergyLoss.h	/^   TBranch        *b_nCrystalRayleigh;   \/\/!$/;"	m	class:findFilterEnergyLoss
+b_nCrystalRayleigh	include/findRange.h	/^   TBranch        *b_nCrystalRayleigh;   \/\/!$/;"	m	class:findRange
+b_nPhantomCompton	compareGateAndMCNP.h	/^   TBranch        *b_nPhantomCompton;   \/\/!$/;"	m	class:compareGateAndMCNP
+b_nPhantomCompton	findLET.h	/^   TBranch        *b_nPhantomCompton;   \/\/!$/;"	m	class:findLET
+b_nPhantomCompton	findRange.h	/^   TBranch        *b_nPhantomCompton;   \/\/!$/;"	m	class:findRange
+b_nPhantomCompton	include/findFilterEnergyLoss.h	/^   TBranch        *b_nPhantomCompton;   \/\/!$/;"	m	class:findFilterEnergyLoss
+b_nPhantomCompton	include/findRange.h	/^   TBranch        *b_nPhantomCompton;   \/\/!$/;"	m	class:findRange
+b_nPhantomRayleigh	compareGateAndMCNP.h	/^   TBranch        *b_nPhantomRayleigh;   \/\/!$/;"	m	class:compareGateAndMCNP
+b_nPhantomRayleigh	findLET.h	/^   TBranch        *b_nPhantomRayleigh;   \/\/!$/;"	m	class:findLET
+b_nPhantomRayleigh	findRange.h	/^   TBranch        *b_nPhantomRayleigh;   \/\/!$/;"	m	class:findRange
+b_nPhantomRayleigh	include/findFilterEnergyLoss.h	/^   TBranch        *b_nPhantomRayleigh;   \/\/!$/;"	m	class:findFilterEnergyLoss
+b_nPhantomRayleigh	include/findRange.h	/^   TBranch        *b_nPhantomRayleigh;   \/\/!$/;"	m	class:findRange
+b_parentID	compareGateAndMCNP.h	/^   TBranch        *b_parentID;   \/\/$/;"	m	class:compareGateAndMCNP
+b_parentID	findLET.h	/^   TBranch        *b_parentID;   \/\/$/;"	m	class:findLET
+b_parentID	findRange.h	/^   TBranch        *b_parentID;   \/\/$/;"	m	class:findRange
+b_parentID	include/findFilterEnergyLoss.h	/^   TBranch        *b_parentID;   \/\/$/;"	m	class:findFilterEnergyLoss
+b_parentID	include/findRange.h	/^   TBranch        *b_parentID;   \/\/$/;"	m	class:findRange
+b_photonID	compareGateAndMCNP.h	/^   TBranch        *b_photonID;   \/\/!$/;"	m	class:compareGateAndMCNP
+b_photonID	findLET.h	/^   TBranch        *b_photonID;   \/\/!$/;"	m	class:findLET
+b_photonID	findRange.h	/^   TBranch        *b_photonID;   \/\/!$/;"	m	class:findRange
+b_photonID	include/findFilterEnergyLoss.h	/^   TBranch        *b_photonID;   \/\/!$/;"	m	class:findFilterEnergyLoss
+b_photonID	include/findRange.h	/^   TBranch        *b_photonID;   \/\/!$/;"	m	class:findRange
+b_posX	compareGateAndMCNP.h	/^   TBranch        *b_posX;   \/\/!$/;"	m	class:compareGateAndMCNP
+b_posX	findLET.h	/^   TBranch        *b_posX;   \/\/!$/;"	m	class:findLET
+b_posX	findRange.h	/^   TBranch        *b_posX;   \/\/!$/;"	m	class:findRange
+b_posX	include/findFilterEnergyLoss.h	/^   TBranch        *b_posX;   \/\/!$/;"	m	class:findFilterEnergyLoss
+b_posX	include/findRange.h	/^   TBranch        *b_posX;   \/\/!$/;"	m	class:findRange
+b_posY	compareGateAndMCNP.h	/^   TBranch        *b_posY;   \/\/!$/;"	m	class:compareGateAndMCNP
+b_posY	findLET.h	/^   TBranch        *b_posY;   \/\/!$/;"	m	class:findLET
+b_posY	findRange.h	/^   TBranch        *b_posY;   \/\/!$/;"	m	class:findRange
+b_posY	include/findFilterEnergyLoss.h	/^   TBranch        *b_posY;   \/\/!$/;"	m	class:findFilterEnergyLoss
+b_posY	include/findRange.h	/^   TBranch        *b_posY;   \/\/!$/;"	m	class:findRange
+b_posZ	compareGateAndMCNP.h	/^   TBranch        *b_posZ;   \/\/!$/;"	m	class:compareGateAndMCNP
+b_posZ	findLET.h	/^   TBranch        *b_posZ;   \/\/!$/;"	m	class:findLET
+b_posZ	findRange.h	/^   TBranch        *b_posZ;   \/\/!$/;"	m	class:findRange
+b_posZ	include/findFilterEnergyLoss.h	/^   TBranch        *b_posZ;   \/\/!$/;"	m	class:findFilterEnergyLoss
+b_posZ	include/findRange.h	/^   TBranch        *b_posZ;   \/\/!$/;"	m	class:findRange
+b_primaryID	compareGateAndMCNP.h	/^   TBranch        *b_primaryID;   \/\/!$/;"	m	class:compareGateAndMCNP
+b_primaryID	findLET.h	/^   TBranch        *b_primaryID;   \/\/!$/;"	m	class:findLET
+b_primaryID	findRange.h	/^   TBranch        *b_primaryID;   \/\/!$/;"	m	class:findRange
+b_primaryID	include/findFilterEnergyLoss.h	/^   TBranch        *b_primaryID;   \/\/!$/;"	m	class:findFilterEnergyLoss
+b_primaryID	include/findRange.h	/^   TBranch        *b_primaryID;   \/\/!$/;"	m	class:findRange
+b_processName	compareGateAndMCNP.h	/^   TBranch        *b_processName;   \/\/!$/;"	m	class:compareGateAndMCNP
+b_processName	findLET.h	/^   TBranch        *b_processName;   \/\/!$/;"	m	class:findLET
+b_processName	findRange.h	/^   TBranch        *b_processName;   \/\/!$/;"	m	class:findRange
+b_processName	include/findFilterEnergyLoss.h	/^   TBranch        *b_processName;   \/\/!$/;"	m	class:findFilterEnergyLoss
+b_processName	include/findRange.h	/^   TBranch        *b_processName;   \/\/!$/;"	m	class:findRange
+b_rotationAngle	compareGateAndMCNP.h	/^   TBranch        *b_rotationAngle;   \/\/!$/;"	m	class:compareGateAndMCNP
+b_rotationAngle	findLET.h	/^   TBranch        *b_rotationAngle;   \/\/!$/;"	m	class:findLET
+b_rotationAngle	findRange.h	/^   TBranch        *b_rotationAngle;   \/\/!$/;"	m	class:findRange
+b_rotationAngle	include/findFilterEnergyLoss.h	/^   TBranch        *b_rotationAngle;   \/\/!$/;"	m	class:findFilterEnergyLoss
+b_rotationAngle	include/findRange.h	/^   TBranch        *b_rotationAngle;   \/\/!$/;"	m	class:findRange
+b_runID	compareGateAndMCNP.h	/^   TBranch        *b_runID;   \/\/!$/;"	m	class:compareGateAndMCNP
+b_runID	findLET.h	/^   TBranch        *b_runID;   \/\/!$/;"	m	class:findLET
+b_runID	findRange.h	/^   TBranch        *b_runID;   \/\/!$/;"	m	class:findRange
+b_runID	include/findFilterEnergyLoss.h	/^   TBranch        *b_runID;   \/\/!$/;"	m	class:findFilterEnergyLoss
+b_runID	include/findRange.h	/^   TBranch        *b_runID;   \/\/!$/;"	m	class:findRange
+b_sourceID	compareGateAndMCNP.h	/^   TBranch        *b_sourceID;   \/\/!$/;"	m	class:compareGateAndMCNP
+b_sourceID	findLET.h	/^   TBranch        *b_sourceID;   \/\/!$/;"	m	class:findLET
+b_sourceID	findRange.h	/^   TBranch        *b_sourceID;   \/\/!$/;"	m	class:findRange
+b_sourceID	include/findFilterEnergyLoss.h	/^   TBranch        *b_sourceID;   \/\/!$/;"	m	class:findFilterEnergyLoss
+b_sourceID	include/findRange.h	/^   TBranch        *b_sourceID;   \/\/!$/;"	m	class:findRange
+b_sourcePosX	compareGateAndMCNP.h	/^   TBranch        *b_sourcePosX;   \/\/!$/;"	m	class:compareGateAndMCNP
+b_sourcePosX	findLET.h	/^   TBranch        *b_sourcePosX;   \/\/!$/;"	m	class:findLET
+b_sourcePosX	findRange.h	/^   TBranch        *b_sourcePosX;   \/\/!$/;"	m	class:findRange
+b_sourcePosX	include/findFilterEnergyLoss.h	/^   TBranch        *b_sourcePosX;   \/\/!$/;"	m	class:findFilterEnergyLoss
+b_sourcePosX	include/findRange.h	/^   TBranch        *b_sourcePosX;   \/\/!$/;"	m	class:findRange
+b_sourcePosY	compareGateAndMCNP.h	/^   TBranch        *b_sourcePosY;   \/\/!$/;"	m	class:compareGateAndMCNP
+b_sourcePosY	findLET.h	/^   TBranch        *b_sourcePosY;   \/\/!$/;"	m	class:findLET
+b_sourcePosY	findRange.h	/^   TBranch        *b_sourcePosY;   \/\/!$/;"	m	class:findRange
+b_sourcePosY	include/findFilterEnergyLoss.h	/^   TBranch        *b_sourcePosY;   \/\/!$/;"	m	class:findFilterEnergyLoss
+b_sourcePosY	include/findRange.h	/^   TBranch        *b_sourcePosY;   \/\/!$/;"	m	class:findRange
+b_sourcePosZ	compareGateAndMCNP.h	/^   TBranch        *b_sourcePosZ;   \/\/!$/;"	m	class:compareGateAndMCNP
+b_sourcePosZ	findLET.h	/^   TBranch        *b_sourcePosZ;   \/\/!$/;"	m	class:findLET
+b_sourcePosZ	findRange.h	/^   TBranch        *b_sourcePosZ;   \/\/!$/;"	m	class:findRange
+b_sourcePosZ	include/findFilterEnergyLoss.h	/^   TBranch        *b_sourcePosZ;   \/\/!$/;"	m	class:findFilterEnergyLoss
+b_sourcePosZ	include/findRange.h	/^   TBranch        *b_sourcePosZ;   \/\/!$/;"	m	class:findRange
+b_stepLength	compareGateAndMCNP.h	/^   TBranch        *b_stepLength;   \/\/!$/;"	m	class:compareGateAndMCNP
+b_stepLength	findLET.h	/^   TBranch        *b_stepLength;   \/\/!$/;"	m	class:findLET
+b_stepLength	findRange.h	/^   TBranch        *b_stepLength;   \/\/!$/;"	m	class:findRange
+b_stepLength	include/findFilterEnergyLoss.h	/^   TBranch        *b_stepLength;   \/\/!$/;"	m	class:findFilterEnergyLoss
+b_stepLength	include/findRange.h	/^   TBranch        *b_stepLength;   \/\/!$/;"	m	class:findRange
+b_time	compareGateAndMCNP.h	/^   TBranch        *b_time;   \/\/!$/;"	m	class:compareGateAndMCNP
+b_time	findLET.h	/^   TBranch        *b_time;   \/\/!$/;"	m	class:findLET
+b_time	findRange.h	/^   TBranch        *b_time;   \/\/!$/;"	m	class:findRange
+b_time	include/findFilterEnergyLoss.h	/^   TBranch        *b_time;   \/\/!$/;"	m	class:findFilterEnergyLoss
+b_time	include/findRange.h	/^   TBranch        *b_time;   \/\/!$/;"	m	class:findRange
+b_trackID	compareGateAndMCNP.h	/^   TBranch        *b_trackID;   \/\/!$/;"	m	class:compareGateAndMCNP
+b_trackID	findLET.h	/^   TBranch        *b_trackID;   \/\/!$/;"	m	class:findLET
+b_trackID	findRange.h	/^   TBranch        *b_trackID;   \/\/!$/;"	m	class:findRange
+b_trackID	include/findFilterEnergyLoss.h	/^   TBranch        *b_trackID;   \/\/!$/;"	m	class:findFilterEnergyLoss
+b_trackID	include/findRange.h	/^   TBranch        *b_trackID;   \/\/!$/;"	m	class:findRange
+b_volumeID	compareGateAndMCNP.h	/^   TBranch        *b_volumeID;   \/\/!$/;"	m	class:compareGateAndMCNP
+b_volumeID	findLET.h	/^   TBranch        *b_volumeID;   \/\/!$/;"	m	class:findLET
+b_volumeID	findRange.h	/^   TBranch        *b_volumeID;   \/\/!$/;"	m	class:findRange
+b_volumeID	include/findFilterEnergyLoss.h	/^   TBranch        *b_volumeID;   \/\/!$/;"	m	class:findFilterEnergyLoss
+b_volumeID	include/findRange.h	/^   TBranch        *b_volumeID;   \/\/!$/;"	m	class:findRange
+baseID	compareGateAndMCNP.h	/^   Int_t           baseID;$/;"	m	class:compareGateAndMCNP
+baseID	findLET.h	/^   Int_t           baseID;$/;"	m	class:findLET
+baseID	findRange.h	/^   Int_t           baseID;$/;"	m	class:findRange
+baseID	include/findFilterEnergyLoss.h	/^   Int_t           baseID;$/;"	m	class:findFilterEnergyLoss
+baseID	include/findRange.h	/^   Int_t           baseID;$/;"	m	class:findRange
+compareGateAndMCNP	compareGateAndMCNP.h	/^class compareGateAndMCNP {$/;"	c
+compareGateAndMCNP	compareGateAndMCNP.h	/^compareGateAndMCNP::compareGateAndMCNP(TTree *tree) : fChain(0)$/;"	f	class:compareGateAndMCNP
+compareGateAndMCNP_cxx	compareGateAndMCNP.C	1;"	d	file:
+compareGateAndMCNP_h	compareGateAndMCNP.h	8;"	d
+comptVolName	compareGateAndMCNP.h	/^   Char_t          comptVolName[5];$/;"	m	class:compareGateAndMCNP
+comptVolName	findLET.h	/^   Char_t          comptVolName[5];$/;"	m	class:findLET
+comptVolName	findRange.h	/^   Char_t          comptVolName[5];$/;"	m	class:findRange
+comptVolName	include/findFilterEnergyLoss.h	/^   Char_t          comptVolName[5];$/;"	m	class:findFilterEnergyLoss
+comptVolName	include/findRange.h	/^   Char_t          comptVolName[5];$/;"	m	class:findRange
+drawUlmerAndBortfeld	drawUlmerAndBortfeld.C	/^void drawUlmerAndBortfeld() {$/;"	f
+edep	compareGateAndMCNP.h	/^   Float_t         edep;$/;"	m	class:compareGateAndMCNP
+edep	findLET.h	/^   Float_t         edep;$/;"	m	class:findLET
+edep	findRange.h	/^   Float_t         edep;$/;"	m	class:findRange
+edep	include/findFilterEnergyLoss.h	/^   Float_t         edep;$/;"	m	class:findFilterEnergyLoss
+edep	include/findRange.h	/^   Float_t         edep;$/;"	m	class:findRange
+eventID	compareGateAndMCNP.h	/^   Int_t           eventID;$/;"	m	class:compareGateAndMCNP
+eventID	findLET.h	/^   Int_t           eventID;$/;"	m	class:findLET
+eventID	findRange.h	/^   Int_t           eventID;$/;"	m	class:findRange
+eventID	include/findFilterEnergyLoss.h	/^   Int_t           eventID;$/;"	m	class:findFilterEnergyLoss
+eventID	include/findRange.h	/^   Int_t           eventID;$/;"	m	class:findRange
+fChain	compareGateAndMCNP.h	/^   TTree          *fChain;   \/\/!pointer to the analyzed TTree or TChain$/;"	m	class:compareGateAndMCNP
+fChain	findLET.h	/^   TTree          *fChain;   \/\/!pointer to the analyzed TTree or TChain$/;"	m	class:findLET
+fChain	findRange.h	/^   TTree          *fChain;   \/\/!pointer to the analyzed TTree or TChain$/;"	m	class:findRange
+fChain	include/findFilterEnergyLoss.h	/^   TTree          *fChain;   \/\/!pointer to the analyzed TTree or TChain$/;"	m	class:findFilterEnergyLoss
+fChain	include/findRange.h	/^   TTree          *fChain;   \/\/!pointer to the analyzed TTree or TChain$/;"	m	class:findRange
+fCurrent	compareGateAndMCNP.h	/^   Int_t           fCurrent; \/\/!current Tree number in a TChain$/;"	m	class:compareGateAndMCNP
+fCurrent	findLET.h	/^   Int_t           fCurrent; \/\/!current Tree number in a TChain$/;"	m	class:findLET
+fCurrent	findRange.h	/^   Int_t           fCurrent; \/\/!current Tree number in a TChain$/;"	m	class:findRange
+fCurrent	include/findFilterEnergyLoss.h	/^   Int_t           fCurrent; \/\/!current Tree number in a TChain$/;"	m	class:findFilterEnergyLoss
+fCurrent	include/findRange.h	/^   Int_t           fCurrent; \/\/!current Tree number in a TChain$/;"	m	class:findRange
+findAPAndStraggling	findAPAndStraggling.C	/^void findAPAndStraggling(Int_t absorberthickness) {$/;"	f
+findFWHM	MCCodeComparison/compareCodesAllEnergies.C	/^Float_t findFWHM(TH1F *h) {$/;"	f
+findFilterEnergyLoss	include/findFilterEnergyLoss.h	/^class findFilterEnergyLoss {$/;"	c
+findFilterEnergyLoss	include/findFilterEnergyLoss.h	/^findFilterEnergyLoss::findFilterEnergyLoss(Int_t energy, TTree *tree) : fChain(0)$/;"	f	class:findFilterEnergyLoss
+findFilterEnergyLoss_cxx	findFilterEnergyLoss.C	1;"	d	file:
+findFilterEnergyLoss_h	include/findFilterEnergyLoss.h	8;"	d
+findLET	findLET.h	/^class findLET {$/;"	c
+findLET	findLET.h	/^findLET::findLET(Int_t energy, TTree *tree) : fChain(0)$/;"	f	class:findLET
+findLET_cxx	findLET.C	1;"	d	file:
+findLET_h	findLET.h	8;"	d
+findManyRanges	findManyRanges.C	/^void findManyRanges(Int_t energyFrom, Int_t energyIncrement, Int_t energyTo, Int_t mmFrom, Int_t mmIncrement, Int_t mmTo) {$/;"	f
+findManyRanges	findManyRangesDegrader.C	/^void findManyRanges(Int_t degraderFrom, Int_t degraderIncrement, Int_t degraderTo, Int_t mmFrom, Int_t mmIncrement, Int_t mmTo) {$/;"	f
+findRange	findRange.h	/^class findRange {$/;"	c
+findRange	findRange.h	/^findRange::findRange(Float_t energy, Int_t thickness, Float_t degraderThickness, TTree *tree) : fChain(0)$/;"	f	class:findRange
+findRange	include/findRange.h	/^class findRange {$/;"	c
+findRange	include/findRange.h	/^findRange::findRange(Int_t energy, TTree *tree) : fChain(0)$/;"	f	class:findRange
+findRange_cxx	findRange.C	1;"	d	file:
+findRange_h	findRange.h	8;"	d
+findRange_h	include/findRange.h	8;"	d
+fitfunc_DBP	parameterizations/findRangeEquation.C	/^Double_t fitfunc_DBP(Double_t *v, Double_t *par) {$/;"	f
+fitfunc_Ulmer	parameterizations/findRangeEquation.C	/^Double_t fitfunc_Ulmer(Double_t *v, Double_t *par) {$/;"	f
+getBeamSpreading	MCCodeComparison/compareCodesAllEnergies.C	/^Float_t getBeamSpreading(Float_t initialEnergy, Int_t phantom) {   $/;"	f
+getEnergyFromTLQuadratic	findRange.C	/^Double_t getEnergyFromTLQuadratic(Float_t tl) {$/;"	f
+getMCSCAngle	MCCodeComparison/compareCodesAllEnergies.C	/^Float_t getMCSCAngle(Float_t initialEnergy, Float_t range, Int_t phantom) {$/;"	f
+getPValues	findRangeEquation.C	/^void getPValues() {$/;"	f
+getTLFromEnergyQuadratic	findRange.C	/^Float_t getTLFromEnergyQuadratic(Float_t energy) {$/;"	f
+kAluminium	MCCodeComparison/compareCodesAllEnergies.C	/^enum phantomType {kAluminium, kWater, kComplex};$/;"	e	enum:phantomType	file:
+kComplex	MCCodeComparison/compareCodesAllEnergies.C	/^enum phantomType {kAluminium, kWater, kComplex};$/;"	e	enum:phantomType	file:
+kWater	MCCodeComparison/compareCodesAllEnergies.C	/^enum phantomType {kAluminium, kWater, kComplex};$/;"	e	enum:phantomType	file:
+layerID	compareGateAndMCNP.h	/^   Int_t           layerID;$/;"	m	class:compareGateAndMCNP
+layerID	findLET.h	/^   Int_t           layerID;$/;"	m	class:findLET
+layerID	findRange.h	/^   Int_t           layerID;$/;"	m	class:findRange
+layerID	include/findFilterEnergyLoss.h	/^   Int_t           layerID;$/;"	m	class:findFilterEnergyLoss
+layerID	include/findRange.h	/^   Int_t           layerID;$/;"	m	class:findRange
+level1ID	compareGateAndMCNP.h	/^   Int_t           level1ID;$/;"	m	class:compareGateAndMCNP
+level1ID	findLET.h	/^   Int_t           level1ID;$/;"	m	class:findLET
+level1ID	findRange.h	/^   Int_t           level1ID;$/;"	m	class:findRange
+level1ID	include/findFilterEnergyLoss.h	/^   Int_t           level1ID;$/;"	m	class:findFilterEnergyLoss
+level1ID	include/findRange.h	/^   Int_t           level1ID;$/;"	m	class:findRange
+level2ID	compareGateAndMCNP.h	/^   Int_t           level2ID;$/;"	m	class:compareGateAndMCNP
+level2ID	findLET.h	/^   Int_t           level2ID;$/;"	m	class:findLET
+level2ID	findRange.h	/^   Int_t           level2ID;$/;"	m	class:findRange
+level2ID	include/findFilterEnergyLoss.h	/^   Int_t           level2ID;$/;"	m	class:findFilterEnergyLoss
+level2ID	include/findRange.h	/^   Int_t           level2ID;$/;"	m	class:findRange
+level3ID	compareGateAndMCNP.h	/^   Int_t           level3ID;$/;"	m	class:compareGateAndMCNP
+level3ID	findLET.h	/^   Int_t           level3ID;$/;"	m	class:findLET
+level3ID	findRange.h	/^   Int_t           level3ID;$/;"	m	class:findRange
+level3ID	include/findFilterEnergyLoss.h	/^   Int_t           level3ID;$/;"	m	class:findFilterEnergyLoss
+level3ID	include/findRange.h	/^   Int_t           level3ID;$/;"	m	class:findRange
+level4ID	compareGateAndMCNP.h	/^   Int_t           level4ID;$/;"	m	class:compareGateAndMCNP
+level4ID	findLET.h	/^   Int_t           level4ID;$/;"	m	class:findLET
+level4ID	findRange.h	/^   Int_t           level4ID;$/;"	m	class:findRange
+level4ID	include/findFilterEnergyLoss.h	/^   Int_t           level4ID;$/;"	m	class:findFilterEnergyLoss
+level4ID	include/findRange.h	/^   Int_t           level4ID;$/;"	m	class:findRange
+localPosX	compareGateAndMCNP.h	/^   Float_t         localPosX;$/;"	m	class:compareGateAndMCNP
+localPosX	findLET.h	/^   Float_t         localPosX;$/;"	m	class:findLET
+localPosX	findRange.h	/^   Float_t         localPosX;$/;"	m	class:findRange
+localPosX	include/findFilterEnergyLoss.h	/^   Float_t         localPosX;$/;"	m	class:findFilterEnergyLoss
+localPosX	include/findRange.h	/^   Float_t         localPosX;$/;"	m	class:findRange
+localPosY	compareGateAndMCNP.h	/^   Float_t         localPosY;$/;"	m	class:compareGateAndMCNP
+localPosY	findLET.h	/^   Float_t         localPosY;$/;"	m	class:findLET
+localPosY	findRange.h	/^   Float_t         localPosY;$/;"	m	class:findRange
+localPosY	include/findFilterEnergyLoss.h	/^   Float_t         localPosY;$/;"	m	class:findFilterEnergyLoss
+localPosY	include/findRange.h	/^   Float_t         localPosY;$/;"	m	class:findRange
+localPosZ	compareGateAndMCNP.h	/^   Float_t         localPosZ;$/;"	m	class:compareGateAndMCNP
+localPosZ	findLET.h	/^   Float_t         localPosZ;$/;"	m	class:findLET
+localPosZ	findRange.h	/^   Float_t         localPosZ;$/;"	m	class:findRange
+localPosZ	include/findFilterEnergyLoss.h	/^   Float_t         localPosZ;$/;"	m	class:findFilterEnergyLoss
+localPosZ	include/findRange.h	/^   Float_t         localPosZ;$/;"	m	class:findRange
+makeBraggPeakPDF	makeBraggPeakPDF.C	/^void makeBraggPeakPDF(Int_t energy) {$/;"	f
+makeBraggPeakPDFDegrader	makeBraggPeakPDFDegrader.C	/^void makeBraggPeakPDFDegrader(Int_t thickness) {$/;"	f
+makePlots	makePlots.C	/^void makePlots() {$/;"	f
+makeTracksFile	makeTracksFile.C	/^void makeTracksFile(Int_t Runs, Float_t energy) {$/;"	f
+nCrystalCompton	compareGateAndMCNP.h	/^   Int_t           nCrystalCompton;$/;"	m	class:compareGateAndMCNP
+nCrystalCompton	findLET.h	/^   Int_t           nCrystalCompton;$/;"	m	class:findLET
+nCrystalCompton	findRange.h	/^   Int_t           nCrystalCompton;$/;"	m	class:findRange
+nCrystalCompton	include/findFilterEnergyLoss.h	/^   Int_t           nCrystalCompton;$/;"	m	class:findFilterEnergyLoss
+nCrystalCompton	include/findRange.h	/^   Int_t           nCrystalCompton;$/;"	m	class:findRange
+nCrystalRayleigh	compareGateAndMCNP.h	/^   Int_t           nCrystalRayleigh;$/;"	m	class:compareGateAndMCNP
+nCrystalRayleigh	findLET.h	/^   Int_t           nCrystalRayleigh;$/;"	m	class:findLET
+nCrystalRayleigh	findRange.h	/^   Int_t           nCrystalRayleigh;$/;"	m	class:findRange
+nCrystalRayleigh	include/findFilterEnergyLoss.h	/^   Int_t           nCrystalRayleigh;$/;"	m	class:findFilterEnergyLoss
+nCrystalRayleigh	include/findRange.h	/^   Int_t           nCrystalRayleigh;$/;"	m	class:findRange
+nPhantomCompton	compareGateAndMCNP.h	/^   Int_t           nPhantomCompton;$/;"	m	class:compareGateAndMCNP
+nPhantomCompton	findLET.h	/^   Int_t           nPhantomCompton;$/;"	m	class:findLET
+nPhantomCompton	findRange.h	/^   Int_t           nPhantomCompton;$/;"	m	class:findRange
+nPhantomCompton	include/findFilterEnergyLoss.h	/^   Int_t           nPhantomCompton;$/;"	m	class:findFilterEnergyLoss
+nPhantomCompton	include/findRange.h	/^   Int_t           nPhantomCompton;$/;"	m	class:findRange
+nPhantomRayleigh	compareGateAndMCNP.h	/^   Int_t           nPhantomRayleigh;$/;"	m	class:compareGateAndMCNP
+nPhantomRayleigh	findLET.h	/^   Int_t           nPhantomRayleigh;$/;"	m	class:findLET
+nPhantomRayleigh	findRange.h	/^   Int_t           nPhantomRayleigh;$/;"	m	class:findRange
+nPhantomRayleigh	include/findFilterEnergyLoss.h	/^   Int_t           nPhantomRayleigh;$/;"	m	class:findFilterEnergyLoss
+nPhantomRayleigh	include/findRange.h	/^   Int_t           nPhantomRayleigh;$/;"	m	class:findRange
+parentID	compareGateAndMCNP.h	/^   Int_t           parentID;$/;"	m	class:compareGateAndMCNP
+parentID	findLET.h	/^   Int_t           parentID;$/;"	m	class:findLET
+parentID	findRange.h	/^   Int_t           parentID;$/;"	m	class:findRange
+parentID	include/findFilterEnergyLoss.h	/^   Int_t           parentID;$/;"	m	class:findFilterEnergyLoss
+parentID	include/findRange.h	/^   Int_t           parentID;$/;"	m	class:findRange
+phantomType	MCCodeComparison/compareCodesAllEnergies.C	/^enum phantomType {kAluminium, kWater, kComplex};$/;"	g	file:
+photonID	compareGateAndMCNP.h	/^   Int_t           photonID;$/;"	m	class:compareGateAndMCNP
+photonID	findLET.h	/^   Int_t           photonID;$/;"	m	class:findLET
+photonID	findRange.h	/^   Int_t           photonID;$/;"	m	class:findRange
+photonID	include/findFilterEnergyLoss.h	/^   Int_t           photonID;$/;"	m	class:findFilterEnergyLoss
+photonID	include/findRange.h	/^   Int_t           photonID;$/;"	m	class:findRange
+posX	compareGateAndMCNP.h	/^   Float_t         posX;$/;"	m	class:compareGateAndMCNP
+posX	findLET.h	/^   Float_t         posX;$/;"	m	class:findLET
+posX	findRange.h	/^   Float_t         posX;$/;"	m	class:findRange
+posX	include/findFilterEnergyLoss.h	/^   Float_t         posX;$/;"	m	class:findFilterEnergyLoss
+posX	include/findRange.h	/^   Float_t         posX;$/;"	m	class:findRange
+posY	compareGateAndMCNP.h	/^   Float_t         posY;$/;"	m	class:compareGateAndMCNP
+posY	findLET.h	/^   Float_t         posY;$/;"	m	class:findLET
+posY	findRange.h	/^   Float_t         posY;$/;"	m	class:findRange
+posY	include/findFilterEnergyLoss.h	/^   Float_t         posY;$/;"	m	class:findFilterEnergyLoss
+posY	include/findRange.h	/^   Float_t         posY;$/;"	m	class:findRange
+posZ	compareGateAndMCNP.h	/^   Float_t         posZ;$/;"	m	class:compareGateAndMCNP
+posZ	findLET.h	/^   Float_t         posZ;$/;"	m	class:findLET
+posZ	findRange.h	/^   Float_t         posZ;$/;"	m	class:findRange
+posZ	include/findFilterEnergyLoss.h	/^   Float_t         posZ;$/;"	m	class:findFilterEnergyLoss
+posZ	include/findRange.h	/^   Float_t         posZ;$/;"	m	class:findRange
+primaryID	compareGateAndMCNP.h	/^   Int_t           primaryID;$/;"	m	class:compareGateAndMCNP
+primaryID	findLET.h	/^   Int_t           primaryID;$/;"	m	class:findLET
+primaryID	findRange.h	/^   Int_t           primaryID;$/;"	m	class:findRange
+primaryID	include/findFilterEnergyLoss.h	/^   Int_t           primaryID;$/;"	m	class:findFilterEnergyLoss
+primaryID	include/findRange.h	/^   Int_t           primaryID;$/;"	m	class:findRange
+processName	compareGateAndMCNP.h	/^   Char_t          processName[17];$/;"	m	class:compareGateAndMCNP
+processName	findLET.h	/^   Char_t          processName[17];$/;"	m	class:findLET
+processName	findRange.h	/^   Char_t          processName[17];$/;"	m	class:findRange
+processName	include/findFilterEnergyLoss.h	/^   Char_t          processName[17];$/;"	m	class:findFilterEnergyLoss
+processName	include/findRange.h	/^   Char_t          processName[17];$/;"	m	class:findRange
+rotationAngle	compareGateAndMCNP.h	/^   Float_t         rotationAngle;$/;"	m	class:compareGateAndMCNP
+rotationAngle	findLET.h	/^   Float_t         rotationAngle;$/;"	m	class:findLET
+rotationAngle	findRange.h	/^   Float_t         rotationAngle;$/;"	m	class:findRange
+rotationAngle	include/findFilterEnergyLoss.h	/^   Float_t         rotationAngle;$/;"	m	class:findFilterEnergyLoss
+rotationAngle	include/findRange.h	/^   Float_t         rotationAngle;$/;"	m	class:findRange
+runID	compareGateAndMCNP.h	/^   Int_t           runID;$/;"	m	class:compareGateAndMCNP
+runID	findLET.h	/^   Int_t           runID;$/;"	m	class:findLET
+runID	findRange.h	/^   Int_t           runID;$/;"	m	class:findRange
+runID	include/findFilterEnergyLoss.h	/^   Int_t           runID;$/;"	m	class:findFilterEnergyLoss
+runID	include/findRange.h	/^   Int_t           runID;$/;"	m	class:findRange
+run_energy	findRange.h	/^   Float_t          run_energy;$/;"	m	class:findRange
+run_energy	include/findFilterEnergyLoss.h	/^Int_t run_energy;$/;"	v
+run_thickness	include/findFilterEnergyLoss.h	/^Float_t run_thickness;$/;"	v
+sourceID	compareGateAndMCNP.h	/^   Int_t           sourceID;$/;"	m	class:compareGateAndMCNP
+sourceID	findLET.h	/^   Int_t           sourceID;$/;"	m	class:findLET
+sourceID	findRange.h	/^   Int_t           sourceID;$/;"	m	class:findRange
+sourceID	include/findFilterEnergyLoss.h	/^   Int_t           sourceID;$/;"	m	class:findFilterEnergyLoss
+sourceID	include/findRange.h	/^   Int_t           sourceID;$/;"	m	class:findRange
+sourcePosX	compareGateAndMCNP.h	/^   Float_t         sourcePosX;$/;"	m	class:compareGateAndMCNP
+sourcePosX	findLET.h	/^   Float_t         sourcePosX;$/;"	m	class:findLET
+sourcePosX	findRange.h	/^   Float_t         sourcePosX;$/;"	m	class:findRange
+sourcePosX	include/findFilterEnergyLoss.h	/^   Float_t         sourcePosX;$/;"	m	class:findFilterEnergyLoss
+sourcePosX	include/findRange.h	/^   Float_t         sourcePosX;$/;"	m	class:findRange
+sourcePosY	compareGateAndMCNP.h	/^   Float_t         sourcePosY;$/;"	m	class:compareGateAndMCNP
+sourcePosY	findLET.h	/^   Float_t         sourcePosY;$/;"	m	class:findLET
+sourcePosY	findRange.h	/^   Float_t         sourcePosY;$/;"	m	class:findRange
+sourcePosY	include/findFilterEnergyLoss.h	/^   Float_t         sourcePosY;$/;"	m	class:findFilterEnergyLoss
+sourcePosY	include/findRange.h	/^   Float_t         sourcePosY;$/;"	m	class:findRange
+sourcePosZ	compareGateAndMCNP.h	/^   Float_t         sourcePosZ;$/;"	m	class:compareGateAndMCNP
+sourcePosZ	findLET.h	/^   Float_t         sourcePosZ;$/;"	m	class:findLET
+sourcePosZ	findRange.h	/^   Float_t         sourcePosZ;$/;"	m	class:findRange
+sourcePosZ	include/findFilterEnergyLoss.h	/^   Float_t         sourcePosZ;$/;"	m	class:findFilterEnergyLoss
+sourcePosZ	include/findRange.h	/^   Float_t         sourcePosZ;$/;"	m	class:findRange
+stepLength	compareGateAndMCNP.h	/^   Float_t         stepLength;$/;"	m	class:compareGateAndMCNP
+stepLength	findLET.h	/^   Float_t         stepLength;$/;"	m	class:findLET
+stepLength	findRange.h	/^   Float_t         stepLength;$/;"	m	class:findRange
+stepLength	include/findFilterEnergyLoss.h	/^   Float_t         stepLength;$/;"	m	class:findFilterEnergyLoss
+stepLength	include/findRange.h	/^   Float_t         stepLength;$/;"	m	class:findRange
+time	compareGateAndMCNP.h	/^   Double_t        time;$/;"	m	class:compareGateAndMCNP
+time	findLET.h	/^   Double_t        time;$/;"	m	class:findLET
+time	findRange.h	/^   Double_t        time;$/;"	m	class:findRange
+time	include/findFilterEnergyLoss.h	/^   Double_t        time;$/;"	m	class:findFilterEnergyLoss
+time	include/findRange.h	/^   Double_t        time;$/;"	m	class:findRange
+trackID	compareGateAndMCNP.h	/^   Int_t           trackID;$/;"	m	class:compareGateAndMCNP
+trackID	findLET.h	/^   Int_t           trackID;$/;"	m	class:findLET
+trackID	findRange.h	/^   Int_t           trackID;$/;"	m	class:findRange
+trackID	include/findFilterEnergyLoss.h	/^   Int_t           trackID;$/;"	m	class:findFilterEnergyLoss
+trackID	include/findRange.h	/^   Int_t           trackID;$/;"	m	class:findRange
+volumeID	compareGateAndMCNP.h	/^   Int_t           volumeID[10];$/;"	m	class:compareGateAndMCNP
+volumeID	findLET.h	/^   Int_t           volumeID[10];$/;"	m	class:findLET
+volumeID	findRange.h	/^   Int_t           volumeID[10];$/;"	m	class:findRange
+volumeID	include/findFilterEnergyLoss.h	/^   Int_t           volumeID[10];$/;"	m	class:findFilterEnergyLoss
+volumeID	include/findRange.h	/^   Int_t           volumeID[10];$/;"	m	class:findRange
+~compareGateAndMCNP	compareGateAndMCNP.h	/^compareGateAndMCNP::~compareGateAndMCNP()$/;"	f	class:compareGateAndMCNP
+~findFilterEnergyLoss	include/findFilterEnergyLoss.h	/^findFilterEnergyLoss::~findFilterEnergyLoss()$/;"	f	class:findFilterEnergyLoss
+~findLET	findLET.h	/^findLET::~findLET()$/;"	f	class:findLET
+~findRange	findRange.h	/^findRange::~findRange()$/;"	f	class:findRange
+~findRange	include/findRange.h	/^findRange::~findRange()$/;"	f	class:findRange
