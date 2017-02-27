@@ -16,7 +16,7 @@ Float_t getEnergyFromTL(Float_t tl);
 Float_t getEnergyFromWEPL(Float_t wepl);
 Float_t getEnergyAtTL(Float_t energy, Float_t depth);
 Float_t getEnergyAtWEPL(Float_t energy, Float_t depth);
-Float_t getEnergyAtTLFromPureAluminium(Float_t energy, Float_t depth);
+Float_t getEnergyAtTLFromPureAluminum(Float_t energy, Float_t depth);
 
 // Conversion to range
 Float_t getTLFromEnergy(Float_t energy);

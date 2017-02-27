@@ -97,8 +97,8 @@ void findAPAndStraggling(Int_t absorberthickness) {
 
 //      weplfactor = arrayRangeWater[nlinesMaterial] / range;
       weplfactor = aw / a * pow(range / aw, 1-p/pw);
-      printf("weplfactor = %.2f.\n", weplfactor);
       arrayWEPLStraggling[nlinesMaterial++] = straggling * weplfactor;
+      arrayRangeWater[nlinesMaterial] = range * weplfactor; 
    }
    inMaterial.close();
 
@@ -124,14 +124,16 @@ void findAPAndStraggling(Int_t absorberthickness) {
    gStraggling->SetMarkerStyle(7);
    gStraggling->SetMarkerColor(kBlue);
    gStraggling->Draw("AP");
-   TF1 *Straggling = new TF1("Straggling", "[0]*x + [1]*pow(x,2)");
+//   TF1 *Straggling = new TF1("Straggling", "[0]*x + [1]*pow(x,2)");
+   TF1 *Straggling = new TF1("Straggling", "[0] + [1]*x");
    gStraggling->Fit("Straggling", "Q,M");
 
    c3->cd();
    gWEStraggling->SetMarkerStyle(7);
    gWEStraggling->SetMarkerColor(kBlue);
    gWEStraggling->Draw("AP");
-   TF1 *WEStraggling = new TF1("WEStraggling", "[0]*x + [1]*pow(x,2)");
+//   TF1 *WEStraggling = new TF1("WEStraggling", "[0]*x + [1]*pow(x,2)");
+   TF1 *WEStraggling = new TF1("WEStraggling", "[0] + [1]*x");
    gWEStraggling->Fit("WEStraggling", "Q,M");
 
    c4->cd();
@@ -141,8 +143,8 @@ void findAPAndStraggling(Int_t absorberthickness) {
 
 
    printf("-----------------------------------\n");
-   printf("Bragg-Kleeman parameters: R = %.4f E ^ %.4f\n", BK->GetParameter(0), BK->GetParameter(1));
-   printf("Straggling = %.2e * R + %.2e * R^2\n", Straggling->GetParameter(0), Straggling->GetParameter(1));
-   printf("WE Straggling = %.2e * R + %.2e * R^2\n", WEStraggling->GetParameter(0), WEStraggling->GetParameter(1));
+   printf("Bragg-Kleeman parameters: R = %.6f E ^ %.6f\n", BK->GetParameter(0), BK->GetParameter(1));
+   printf("Straggling = %.5f + %.6fR \n", Straggling->GetParameter(0), Straggling->GetParameter(1));
+   printf("WE Straggling = %.5f + %.6fR \n", WEStraggling->GetParameter(0), WEStraggling->GetParameter(1));
 
 }

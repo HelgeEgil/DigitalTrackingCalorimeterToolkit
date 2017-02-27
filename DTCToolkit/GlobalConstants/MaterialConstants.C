@@ -9,75 +9,37 @@
 #include "GlobalConstants/Constants.h"
 #include "Classes/Hit/Hit.h"
 #include "Classes/Cluster/Cluster.h"
-// #include "Classes/Track/conversionFunctions.h"
 
 using namespace std;
-   
-// Full revision of range-energy and depth-dose relationship as of 2016-06
-// Using Ulmer Rad Phys and Chem 76 (2007) 1089-1107
-// In short:
-// R = a1 E0 * (1 + sum_(k=1)^2 (bk - bk * exp(-gk * E0)))
-// E = R * sum_(i=1)^5 (ck * exp(-lambdak * R))
-//     ( and  E(z) = (R-z) * sum_(i=1)^5 (ck * exp(-lambdak * (R-z))) )
-// -dE/dz = E(z) / (R-z) - sum_(k=1)^5 (lambdak * ck * (R-z) * exp(-lambdak * (R-z)))
-// The parameters a1, bk(1-2), gk(1-2), ck(1-5), lambdak(1-5) are found through range-energy fitting on different materials in GATE simulations, and defined below
-// All calculations are performed in Classes/Track/conversionFunctions.C
 
 void MaterialConstants() {
 
-   a1_water = 0.0727504;
-   b1_water = 44.7718;
-   g1_water = 0.00108048;
-   b2_water = 13.4883;
-   g2_water = 0.00457689;
-
-   c1_water = 10.7425;
-   l1_water = 0.500803;
-   c2_water = 1.7655;
-   l2_water = 0.0734755;
-   c3_water = 0.95865;
-   l3_water = 0.0236093;
-   c4_water = 0.723177;
-   l4_water = 0.00662777;
-   c5_water = 0.733621;
-   l5_water = 0.000523239;
-
-   cout << "LoadRangeValues 1\n";
-   loadRangeValuesForTungsten();
-   cout << "LoadRangeValues 2\n";
-   loadRangeValuesForAluminium();
-
-   cout << "create splines\n";
-   createSplines();
-
-   // USING VALUES FOR WATER FOR PMMA FIXME
+   X0_tungsten = 4.2;
+   p_tungsten = 1.6677;
+   alpha_tungsten = 0.004461;
+   alpha_prime_tungsten = 0.1086784;
    
-   a1_pmma = 0.0727504;
-   b1_pmma = 44.7718;
-   g1_pmma = 0.00108048;
-   b2_pmma = 13.4883;
-   g2_pmma = 0.00457689;
-   c1_pmma = 10.7425;
-   l1_pmma = 0.500803;
-   c2_pmma = 1.7655;
-   l2_pmma = 0.0734755;
-   c3_pmma = 0.95865;
-   l3_pmma = 0.0236093;
-   c4_pmma = 0.723177;
-   l4_pmma = 0.0662777;
-   c5_pmma = 0.733621;
-   l5_pmma = 0.000523239;
-
-   firstUpperLayerZ = 0.3;
-   firstLowerLayerZ = 0.6;
+   Float_t m = kAbsorbatorThickness;
+   X0_aluminum = 5.4775 + 1.3109*m - 0.2608 * pow(m,2) + 0.0248 * pow(m,3) - 0.0009 * pow(m,4);
+   alpha_aluminum = 0.0140203;
+   p_aluminum = 1.72903;
+   alpha_prime_aluminum = 0.017102; // HOW DID I FIND THIS!!!
 
    p_water = 1.7547;
    alpha_water = 0.02387;
    alpha_prime_water = 0.0087;
+   X0_pmma = 16.52;
+   X0_firstlayer = 33.36;
+   
+   straggling_a = 1.8568;
+   straggling_b = 0.000856;
+   
+   createSplines();
+
+   firstUpperLayerZ = 0.3;
+   firstLowerLayerZ = 0.6;
 
    proton_mass = 938.27;
-   X0_firstlayer = 33.36;
-   X0_pmma = 16.52;
 
    for (Int_t i=0; i<100; i++) {
       mcs_radius_per_layer[i] = 0;
@@ -90,48 +52,16 @@ void MaterialConstants() {
       alpha_prime = alpha_prime_tungsten;
       X0 = X0_tungsten;
       
-      a1_material = a1_tungsten;
-      b1_material = b1_tungsten;
-      g1_material = g1_tungsten;
-      b2_material = b2_tungsten;
-      g2_material = g2_tungsten;
-      c1_material = c1_tungsten;
-      l1_material = l1_tungsten;
-      c2_material = c2_tungsten;
-      l2_material = l2_tungsten;
-      c3_material = c3_tungsten;
-      l3_material = l3_tungsten;
-      c4_material = c4_tungsten;
-      l4_material = l4_tungsten;
-      c5_material = c5_tungsten;
-      l5_material = l5_tungsten;
-
       splineMaterial = splineW;
       splineMaterialInv = splineWInv;
    }
 
-   else if (kMaterial == kAluminium) {
+   else if (kMaterial == kAluminum) {
       nLayers = 100;
       p = p_aluminum;
       alpha = alpha_aluminum;
       alpha_prime = alpha_prime_aluminum;
       X0 = X0_aluminum;
-
-      a1_material = a1_aluminium;
-      b1_material = b1_aluminium;
-      g1_material = g1_aluminium;
-      b2_material = b2_aluminium;
-      g2_material = g2_aluminium;
-      c1_material = c1_aluminium;
-      l1_material = l1_aluminium;
-      c2_material = c2_aluminium;
-      l2_material = l2_aluminium;
-      c3_material = c3_aluminium;
-      l3_material = l3_aluminium;
-      c4_material = c4_aluminium;
-      l4_material = l4_aluminium;
-      c5_material = c5_aluminium;
-      l5_material = l5_aluminium;
 
       splineMaterial = spline2mmAl;
       splineMaterialInv = spline2mmAlInv;
@@ -144,22 +74,6 @@ void MaterialConstants() {
       alpha = alpha_water; // MUST VERIFY
       X0 = X0_pmma;
       
-      a1_material = a1_pmma;
-      b1_material = b1_pmma;
-      g1_material = g1_pmma;
-      b2_material = b2_pmma;
-      g2_material = g2_pmma;
-      c1_material = c1_pmma;
-      l1_material = l1_pmma;
-      c2_material = c2_pmma;
-      l2_material = l2_pmma;
-      c3_material = c3_pmma;
-      l3_material = l3_pmma;
-      c4_material = c4_pmma;
-      l4_material = l4_pmma;
-      c5_material = c5_pmma;
-      l5_material = l5_pmma;
-
       splineMaterial = splineWater; // FIX
       splineMaterialInv = splineWaterInv; // FIX
    }
@@ -265,92 +179,39 @@ void  createSplines() {
    if (kAbsorbatorThickness == 2) {
       alpha_aluminum = 0.0096;
       p_aluminum = 1.784;
+      straggling_a = 1.8568;
+      straggling_b = 0.000856;
    }
 
    else if (kAbsorbatorThickness == 3) {
-      alpha_aluminum = 0.0173389;
-      p_aluminum = 1.7751;
+      alpha_aluminum = 0.011626;
+      p_aluminum = 1.743151;
+      straggling_a = 1.8568;
+      straggling_b = 0.000856;
    }
 
    else if (kAbsorbatorThickness == 4) {
       alpha_aluminum = 0.0392;
       p_aluminum = 1.7450;
+      straggling_a = 1.8568;
+      straggling_b = 0.000856;
    }
    
    else if (kAbsorbatorThickness == 5) {
       alpha_aluminum = 0.0125;
       p_aluminum = 1.7327;
+      straggling_a = 1.8568;
+      straggling_b = 0.000856;
    }
 
    else if (kAbsorbatorThickness == 6) {
       alpha_aluminum = 0.0098;
       p_aluminum = 1.781;
+      straggling_a = 1.8568;
+      straggling_b = 0.000856;
    }
 
-//   alpha_aluminum = 0.0140203;
-//   p_aluminum = 1.72903;
 }
-
-void loadRangeValuesForTungsten() {
-   X0_tungsten = 4.2;
-   p_tungsten = 1.6677;
-   alpha_tungsten = 0.004461;
-   alpha_prime_tungsten = 0.1086784;
-
-   a1_tungsten = 0.0128998;
-   b1_tungsten = 39.5341;
-   g1_tungsten = 0.00080173;
-   b2_tungsten = 6.67826;
-   g2_tungsten = 0.00687635;
-
-   c1_tungsten = 1.01309;
-   l1_tungsten = 22.4927;
-   c2_tungsten = 12.6053;
-   l2_tungsten = 0.472777;
-   c3_tungsten = 4.31023;
-   l3_tungsten = 0.0361097;
-   c4_tungsten = 6.1832;
-   l4_tungsten = 0.122736;
-   c5_tungsten = 5.42993;
-   l5_tungsten = 0.00293302;
-}
-
-void loadRangeValuesForAluminium() {
-   // Parameterization of X0 calculation
-   Int_t    m = kAbsorbatorThickness;
-   Float_t  mm_thickness;
-   ifstream in;
-   
-   X0_aluminum = 5.4775 + 1.3109*m - 0.2608 * pow(m,2) + 0.0248 * pow(m,3) - 0.0009 * pow(m,4);
-   alpha_prime_aluminum = 0.017102; // HOW DID I FIND THIS!!!
-
-   /*
-   in.open("OutputFiles/RangeEnergyParameters.csv");
-   while (1) {
-      in >> mm_thickness;
-
-      if (!in.good()) continue;
-
-      if (mm_thickness == kAbsorbatorThickness) {
-         in >> alpha_aluminum >> p_aluminum;
-         in >> a1_aluminium >> b1_aluminium >> g1_aluminium >> b2_aluminium >> g2_aluminium;
-         in >> c1_aluminium >> c2_aluminium >> c3_aluminium >> c4_aluminium >> c5_aluminium;
-         in >> l1_aluminium >> l2_aluminium >> l3_aluminium >> l4_aluminium >> l5_aluminium;
-         continue; 
-      }
-
-      else if (mm_thickness == 10) {
-         in >> alpha_pure_aluminum >> p_pure_aluminum;
-         in >> a1_pure_aluminium >> b1_pure_aluminium >> g1_pure_aluminium >> b2_pure_aluminium >> g2_pure_aluminium;
-         in >> c1_pure_aluminium >> c2_pure_aluminium >> c3_pure_aluminium >> c4_pure_aluminium >> c5_pure_aluminium;
-         in >> l1_pure_aluminium >> l2_pure_aluminium >> l3_pure_aluminium >> l4_pure_aluminium >> l5_pure_aluminium; 
-         break;
-      }
-   }
-   in.close();
-   */
-}
-
 
 Double_t getLayerPositionmm(Int_t i) {
    Double_t z = 0;

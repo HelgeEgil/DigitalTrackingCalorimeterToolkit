@@ -52,7 +52,7 @@ Bool_t Track::doesTrackEndAbruptly() {
    Float_t  actualTL = getTLFromEnergy(getEnergy());
    Float_t  riseFactor = getRiseFactor();
    Float_t edepLimit = 2;
-   if (kMaterial == kAluminium) edepLimit = 3;
+   if (kMaterial == kAluminum) edepLimit = 3;
    Bool_t   endsAbruptly = (Last()->getDepositedEnergy() < edepLimit);
    
    if (endsAbruptly) return true;

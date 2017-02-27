@@ -49,21 +49,21 @@ const Float_t kRad = 3.14159265/180.;
 const    Int_t nx = NX;
 const    Int_t ny = NY;
 const    Int_t nTrackers = 4;
-const    Float_t kAbsorbatorThickness = 4; // mm 
+const    Float_t kAbsorbatorThickness = 3; // mm 
 // FOCAL IS 3 mm (2x absorbers = 3 mm)
 
 // nLayers are loaded in MaterialConstants.C according to the detector geometry
 const Float_t dx = DX; // mm
 const Float_t dy = DY; // mm
 const Float_t dz = DZ + kAbsorbatorThickness;
-Int_t kEventsPerRun = 500;
+Int_t kEventsPerRun = 10;
 
 // Used for treatment of available experimental data files
 const Int_t nEnergies = 8;
 Int_t energies[nEnergies] = {122, 140, 150, 160, 170, 180, 188, 190};
 
-enum eMaterial {kTungsten, kAluminium, kPMMA, kWater};
-const Int_t kMaterial = kAluminium;
+enum eMaterial {kTungsten, kAluminum, kPMMA, kWater};
+const Int_t kMaterial = kAluminum;
 
 Int_t kDataType = kMC;
 

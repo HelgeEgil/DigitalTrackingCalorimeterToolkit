@@ -61,13 +61,14 @@ vector<Float_t> findRange::Run(Double_t energy, Double_t sigma_mev)
    Bool_t useDegrader = (degraderThickness > 0) ? true : false;
 
 
-   TCanvas *c1 = new TCanvas("c1", "hZ", 800, 600);
-   TCanvas *c2 = new TCanvas("c2", "hRange", 800, 600);
-   TCanvas *c3 = new TCanvas("c3", "hTracklength", 800, 600);
-   TCanvas *c4 = new TCanvas("c4", "hActualTracklength", 800, 600);
-   TCanvas *c5 = new TCanvas("c5", "hSteplength", 800, 600);
-   TCanvas *c6 = new TCanvas("c6", "hEnergyAtInterface", 800, 600);
-   TCanvas *c7 = new TCanvas("c7", "hRangeWEPL", 800, 600);
+//   TCanvas *c1 = new TCanvas("c1", "hZ", 800, 600);
+   TCanvas *c2 = new TCanvas("c2", "Ranges and energies", 1200, 600);
+   c2->Divide(2, 1, 0.001, 0.001);
+//   TCanvas *c3 = new TCanvas("c3", "hTracklength", 800, 600);
+//   TCanvas *c4 = new TCanvas("c4", "hActualTracklength", 800, 600);
+//   TCanvas *c5 = new TCanvas("c5", "hSteplength", 800, 600);
+//   TCanvas *c6 = new TCanvas("c6", "hEnergyAtInterface", 800, 600);
+//   TCanvas *c7 = new TCanvas("c7", "hRangeWEPL", 800, 600);
 
    Int_t nbinsx = 750;
    // 2 mm: 0.0096, 1.784
@@ -79,21 +80,21 @@ vector<Float_t> findRange::Run(Double_t energy, Double_t sigma_mev)
    Float_t aw = 0.0239, pw = 1.7548;
 
    Float_t expectedRange = a * pow(run_energy, p);
-   Float_t xfrom = expectedRange * 0.75 - 30;
+   Float_t xfrom = expectedRange - 30;
    if (xfrom < 0) xfrom = 0;
-   Float_t xto = expectedRange * 1.25;
+   Float_t xto = expectedRange + 30;
 
    Float_t x_compensate = 0;
 
    printf("RUNNING WITH ENERGY %.2f.\n", run_energy);
 
    TH1F *hZ = new TH1F("hZ", "Z profile", nbinsx/3, xfrom + x_compensate, xto + x_compensate);
-   TH1F *hRange = new TH1F("hRange", "Primary ranges", nbinsx, xfrom + x_compensate, xto + x_compensate);
-   TH1F *hRangeWEPL = new TH1F("hRangeWEPL", "Primary ranges in WEPL", nbinsx, xfrom*1.8 + x_compensate, xto*2.2 + x_compensate);
+   TH1F *hRange = new TH1F("hRange", "Projected range in DTC", nbinsx, xfrom + x_compensate, xto + x_compensate);
+   TH1F *hRangeWEPL = new TH1F("hRangeWEPL", "Primary ranges in WEPL", nbinsx, xfrom*1.9 + x_compensate, xto*2.5 + x_compensate);
    TH1F *hTracklength = new TH1F("hTracklength", "Beam range straggling", nbinsx, -20 , 20);
    TH1F *hActualTracklength = new TH1F("hActualTracklength", "Ranges in DTC deconvoluted from beam energy straggling", nbinsx, xfrom + x_compensate, xto + x_compensate);
    TH1F *hStepLength = new TH1F("hStepLength", "Steplenghths", 1000, 0, 1);
-   TH1F *hEnergyAtInterface = new TH1F("hEnergyAtInterface", "Remaining energy after degrader;Energy [MeV];Entries", 500, run_energy*0.8 - 24, run_energy*1.2 +20);
+   TH1F *hEnergyAtInterface = new TH1F("hEnergyAtInterface", "Remaining energy after degrader;Energy [MeV];Entries", 500, run_energy - 15, run_energy + 15);
 
    gStyle->SetOptStat(0);
 
@@ -198,10 +199,11 @@ vector<Float_t> findRange::Run(Double_t energy, Double_t sigma_mev)
       }
    }
    
-   c2->cd();
+   c2->cd(1);
   
    // The fitting parameters below
    TF1 *fRange = new TF1("fit_range", "gaus", xfrom, xto);
+   fRange->SetLineWidth(3);
    fRange->SetParameters(hRange->GetMaximum(), expectedRange, 2);
    hRange->Fit("fit_range", "Q,M,W,B", "", xfrom, xto);
 
@@ -237,7 +239,8 @@ vector<Float_t> findRange::Run(Double_t energy, Double_t sigma_mev)
    printf("Estimated range from histogram weighing = %.3f +- %.3f\n",sumRangeWeight, sigmaRangeWeight);
    printf("Estimated range from Gaussian fitting = %.3f +- %.3f\n", fRange->GetParameter(1), fabs(fRange->GetParameter(2)));
    
-   TF1 *fRemainingEnergy = new TF1("fRemainingEnergy", "gaus"); 
+   TF1 *fRemainingEnergy = new TF1("fRemainingEnergy", "gaus");
+   fRemainingEnergy->SetLineWidth(3);
    hEnergyAtInterface->Fit("fRemainingEnergy", "Q");
    printf("Estimated remaining energy and straggling: %.2f +- %.2f MeV.\n", fRemainingEnergy->GetParameter(1), fRemainingEnergy->GetParameter(2));
 
@@ -252,21 +255,24 @@ vector<Float_t> findRange::Run(Double_t energy, Double_t sigma_mev)
    returnValues.push_back(fRemainingEnergy->GetParameter(1));
    returnValues.push_back(fRemainingEnergy->GetParameter(2));
 
+/*
    c1->cd();
       hZ->SetXTitle("Z [mm]");
       hZ->SetYTitle("Edep [MeV]");
       hZ->SetFillColor(kBlue-7);
       hZ->SetLineColor(kBlack);
       hZ->Draw();
+*/
 
-   c2->cd();
+   c2->cd(1);
       hRange->SetXTitle("Range [mm]");
       hRange->SetYTitle("Number of primaries");
       hRange->SetFillColor(kBlue-7);
       hRange->SetLineColor(kBlack);
       hRange->Draw();
-      TLine *l = new TLine(cutoff, 0, cutoff, hActualTracklength->GetMaximum()*1.95);
-      TLine *l2 = new TLine(cutoffHigh, 0, cutoffHigh, hActualTracklength->GetMaximum()*1.95);
+      gPad->Update();
+      TLine *l = new TLine(cutoff, 0, cutoff, gPad->GetUymax());
+      TLine *l2 = new TLine(cutoffHigh, 0, cutoffHigh, gPad->GetUymax());
       l->SetLineWidth(2);
       l->SetLineStyle(9);
       l->Draw("same");
@@ -274,6 +280,7 @@ vector<Float_t> findRange::Run(Double_t energy, Double_t sigma_mev)
       l2->SetLineStyle(9);
       l2->Draw("same");
 
+/*
    c7->cd();
       hRangeWEPL->SetXTitle("Range WEPL [mm]");
       hRangeWEPL->SetYTitle("Number of primaries");
@@ -302,8 +309,8 @@ vector<Float_t> findRange::Run(Double_t energy, Double_t sigma_mev)
       hStepLength->SetFillColor(kBlue-7);
       hStepLength->SetLineColor(kBlack);
       hStepLength->Draw();
-
-   c6->cd();
+*/
+   c2->cd(2);
       hEnergyAtInterface->SetFillColor(kBlue-7);
       hEnergyAtInterface->SetLineColor(kBlack);
       hEnergyAtInterface->Draw();

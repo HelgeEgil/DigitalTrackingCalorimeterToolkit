@@ -42,7 +42,7 @@ Float_t getEnergyAtWEPL(Float_t E0, Float_t depth) {
    return getEnergyAtTL(E0, depth, splineWater, splineWaterInv);
 }
 
-Float_t getEnergyAtTLFromPureAluminium(Float_t E0, Float_t depth) {
+Float_t getEnergyAtTLFromPureAluminum(Float_t E0, Float_t depth) {
    return getEnergyAtTL(E0, depth, splinePureAl, splinePureAlInv);
 }
 
@@ -91,7 +91,8 @@ Float_t getWEPLFromTL(Float_t tl) {
 Float_t getTLStragglingFromTL(Float_t tl, Float_t sigma_energy) {
    Float_t energy = getEnergyFromTL(tl);
    
-   Float_t sigma_a = alpha_prime * (pow(p, 2) * pow(alpha, 2/p) / (3-2/p) * pow(tl, 3-2/p));
+//   Float_t sigma_a = alpha_prime * (pow(p, 2) * pow(alpha, 2/p) / (3-2/p) * pow(tl, 3-2/p));
+   Float_t sigma_a = straggling_a + tl * straggling_b;
    Float_t sigma_b = pow(sigma_energy * alpha * p, 2) * pow(energy, 2*p-2);
    
    Float_t sigma = sqrt(sigma_a + sigma_b);

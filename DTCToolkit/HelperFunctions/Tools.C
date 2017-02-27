@@ -115,7 +115,7 @@ char * getMaterialChar() {
    char *sMaterial;
 
    if (kMaterial == kTungsten) sMaterial = (char*) "Tungsten";
-   if (kMaterial == kAluminium) sMaterial = (char*) "Aluminium";
+   if (kMaterial == kAluminum) sMaterial = (char*) "Aluminium";
    if (kMaterial == kPMMA) sMaterial = (char*) "PMMA";
 
    return sMaterial;
@@ -397,7 +397,6 @@ Bool_t isPointOutOfBounds(Cluster *point, Float_t padding) {
       if (x < 0 - padding || x > nx + padding ||
           y < 0 - padding || y > ny + padding) {
          isOutside = kTRUE;
-         printf("Point is outside detector area: x = %.0f, y = %.0f.\n", x, y);
       }
       else
          isOutside = kFALSE;

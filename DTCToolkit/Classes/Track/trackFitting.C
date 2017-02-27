@@ -57,12 +57,12 @@ TGraphErrors * Track::doFit() {
    
    if (kOutputUnit == kPhysical) {
       if (kMaterial == kTungsten) scaleParameter = 14;
-      if (kMaterial == kAluminium) scaleParameter = 65;
+      if (kMaterial == kAluminum) scaleParameter = 65;
    }
    
    else if (kOutputUnit == kWEPL || kOutputUnit == kEnergy) {
       if (kMaterial == kTungsten) scaleParameter = 100;
-      if (kMaterial == kAluminium) scaleParameter = 126;
+      if (kMaterial == kAluminum) scaleParameter = 126;
    }
    
    TF1 *func = new TF1("fit_BP", fitfunc_DBP, 0, 500, 2);
@@ -104,7 +104,7 @@ TGraphErrors * Track::doRangeFit(Bool_t isScaleVariable) {
    if (kDataType == kData) {
       checkResistivity = true;
    }
-   
+
    for (Int_t i=0; i<n; i++) {
       if (!At(i)) continue;
       x[i] = preTL + getLayermm(i);
@@ -112,6 +112,7 @@ TGraphErrors * Track::doRangeFit(Bool_t isScaleVariable) {
       ery[i] = getDepositedEnergyError(i, checkResistivity);
       erx[i] = dz / sqrt(12);
    }
+
 
    // how much beyond the last measurement the fit is allowed to go
    overFittingDistance = 1.50 * dz;
