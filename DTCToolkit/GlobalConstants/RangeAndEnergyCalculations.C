@@ -91,7 +91,7 @@ Float_t getWEPLFromTL(Float_t tl) {
 Float_t getTLStragglingFromTL(Float_t tl, Float_t sigma_energy) {
    Float_t energy = getEnergyFromTL(tl);
    
-//   Float_t sigma_a = alpha_prime * (pow(p, 2) * pow(alpha, 2/p) / (3-2/p) * pow(tl, 3-2/p));
+   // The straggling is calculated empirically from fit from full MC data
    Float_t sigma_a = straggling_a + tl * straggling_b;
    Float_t sigma_b = pow(sigma_energy * alpha * p, 2) * pow(energy, 2*p-2);
    
@@ -109,30 +109,18 @@ Float_t getTLStragglingFromEnergy(Float_t energy, Float_t sigma_energy) {
 // Conversion to WEPL straggling   //
 /////////////////////////////////////
 
-/*
-Float_t getWEPLStragglingFromWEPL(Float_t wepl, Float_t sigma_energy) {
-   Float_t energy = getEnergyFromWEPL(wepl);
-   
-   Float_t tlStraggling = getTLStragglingFromEnergy(energy, sigma_energy);
-   Float_t tl = getTLFromEnergy(energy);
-
-   Float_t upperTL = tl + tlStraggling / 2;
-   Float_t lowerTL = tl - tlStraggling / 2;
-
-   Float_t weplStraggling = getWEPLFromTL(upperTL) - getWEPLFromTL(lowerTL);
-
-   return weplStraggling;
-}
-*/
-
 Float_t getWEPLStragglingFromWEPL(Float_t wepl, Float_t sigma_energy) {
    Float_t estimatedStraggling;
 
-   if       (kAbsorbatorThickness == 5)   estimatedStraggling = 1.57e-2 * wepl + 7.54e-6 * pow(wepl,2);
-   else if  (kAbsorbatorThickness == 4)   estimatedStraggling = 1.52e-2 * wepl + 4.12e-5 * pow(wepl,2);
-   else if  (kAbsorbatorThickness == 3)   estimatedStraggling = 1.52e-2 * wepl + 1.02e-5 * pow(wepl,2);
-   else if  (kAbsorbatorThickness == 2)   estimatedStraggling = 1.53e-2 * wepl + 9.59e-6 * pow(wepl,2);
-   else                                   estimatedStraggling = 0.017 * wepl;
+   Float_t tl = getTLFromWEPL(wepl);
+   Float_t tl_straggling = getTLStragglingFromTL(tl, sigma_energy);
+   Float_t tl_high = tl + tl_straggling;
+   Float_t tl_low = tl - tl_straggling;
+
+   Float_t wepl_high = getWEPLFromTL(tl_high);
+   Float_t wepl_low = getWEPLFromEnergy(tl_low);
+   
+   estimatedStraggling = wepl_high - wepl_low;
 
    return estimatedStraggling;
 }
