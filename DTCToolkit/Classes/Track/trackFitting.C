@@ -115,7 +115,7 @@ TGraphErrors * Track::doRangeFit(Bool_t isScaleVariable) {
 
 
    // how much beyond the last measurement the fit is allowed to go
-   overFittingDistance = 1.50 * dz;
+   overFittingDistance = dz;
 
    maxEnergy = getEnergyFromTL(x[n-1] + overFittingDistance);
    maxRange = getWEPLFromTL(x[n-1] + overFittingDistance);

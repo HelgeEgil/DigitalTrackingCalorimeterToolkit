@@ -38,27 +38,27 @@ void makePlots() {
    c6->Divide(2,1,0.0001,0.0001);
    TCanvas *c7 = new TCanvas("c7", "Parameterization accuracy", 1200, 800);
 
-   Float_t  arrayE[200] = {0}; // energy MC
-   Float_t  arrayEE[200] = {0}; // error on energy MC
-   Float_t  arrayMC[200] = {0}; // range MC
-   Float_t  arrayEMC[200] = {0}; // error on range MC
-   Float_t  arrayEMCRatio[200] = {0}; // error on range MC
-   Float_t  arrayEMCSub[200] = {0}; // error on range MC
-   Float_t  arrayEMCSubRatio[200] = {0}; // error on range MC
-   Float_t  arrayMCDelta[200] = {0}; // range MC
-   Float_t  arrayPSTAR[200] = {0};
-   Float_t  arrayPSTARDelta[200] = {0};
+   Float_t  arrayE[500] = {0}; // energy MC
+   Float_t  arrayEE[500] = {0}; // error on energy MC
+   Float_t  arrayMC[500] = {0}; // range MC
+   Float_t  arrayEMC[500] = {0}; // error on range MC
+   Float_t  arrayEMCRatio[500] = {0}; // error on range MC
+   Float_t  arrayEMCSub[500] = {0}; // error on range MC
+   Float_t  arrayEMCSubRatio[500] = {0}; // error on range MC
+   Float_t  arrayMCDelta[500] = {0}; // range MC
+   Float_t  arrayPSTAR[500] = {0};
+   Float_t  arrayPSTARDelta[500] = {0};
    Float_t  arrayPSTARshade[400] = {0};
-   Float_t  arrayPSTARmin[200] = {0};
-   Float_t  arrayPSTARmax[200] = {0};
-   Float_t  arrayPSTARminDelta[200] = {0};
-   Float_t  arrayPSTARmaxDelta[200] = {0};
-   Float_t  arrayPSTARmaxDeltaRatio[200] = {0};
-   Float_t  arrayEPstar[200] = {0};
-   Float_t  arrayE2[200] = {0}; // energy data 
-   Float_t  arrayEE2[200] = {0}; // error on energy data
-   Float_t  arrayEData[200] = {0};  // range data
-   Float_t  arrayData[200] = {0}; // error on range data
+   Float_t  arrayPSTARmin[500] = {0};
+   Float_t  arrayPSTARmax[500] = {0};
+   Float_t  arrayPSTARminDelta[500] = {0};
+   Float_t  arrayPSTARmaxDelta[500] = {0};
+   Float_t  arrayPSTARmaxDeltaRatio[500] = {0};
+   Float_t  arrayEPstar[500] = {0};
+   Float_t  arrayE2[500] = {0}; // energy data 
+   Float_t  arrayEE2[500] = {0}; // error on energy data
+   Float_t  arrayEData[500] = {0};  // range data
+   Float_t  arrayData[500] = {0}; // error on range data
    Float_t  arrayEfficiencyEnergy[300];
    Float_t  arrayEfficiencyFinal[300];
    Float_t  arrayEfficiencyFinal2[300];
@@ -126,7 +126,7 @@ void makePlots() {
 
    cout << "Opened file.\n";
 
-   Float_t nomrange_, estrange_, sigmaRange_, lastRange_;
+   Float_t nomrange_, estrange_, sigmaRange_, lastRange_, nomsigma_;
    Int_t energy_, thickness_;
    Float_t estimatedStraggling;
 
@@ -146,7 +146,7 @@ void makePlots() {
    Float_t aprime_wtr = 0.0087; // MeV^2 / mm
 
    while (1) {
-      in >> thickness_ >> energy_ >> nomrange_ >> estrange_ >> sigmaRange_;
+      in >> thickness_ >> energy_ >> nomrange_ >> estrange_ >> nomsigma_ >> sigmaRange_;
 
       if (!in.good()) {
          break;
@@ -156,13 +156,8 @@ void makePlots() {
       meanError += ( estrange_ - nomrange_ ) / nomrange_;
       meanAbsError += fabs(( estrange_ - nomrange_ ) / nomrange_);
       meanSigma += sigmaRange_;
-      if       (mmAbsorbator == 5) estimatedStraggling = 1.57e-2 * nomrange_ + 7.54e-6 * pow(nomrange_,2);
-      else if  (mmAbsorbator == 4) estimatedStraggling = 1.73e-2 * nomrange_ + 2.28e-6 * pow(nomrange_,2);
-      else if  (mmAbsorbator == 3) estimatedStraggling = 1.52e-2 * nomrange_ + 1.02e-5 * pow(nomrange_,2);
-      else if  (mmAbsorbator == 2) estimatedStraggling = 1.53e-2 * nomrange_ + 9.59e-6 * pow(nomrange_,2);
 
-//      estimatedStraggling = 0.012 * pow(nomrange_, 0.935); // using water values for minimized straggling limit
-
+      
       if (mmAbsorbator == 2) {
          a_dtc = 0.0096;
          p_dtc = 1.784;
@@ -170,8 +165,8 @@ void makePlots() {
       }
       
       else if (mmAbsorbator == 3) {
-         a_dtc = 0.0173389;
-         p_dtc = 1.7751;
+         a_dtc = 0.010746;
+         p_dtc = 1.758228;
          aprime_dtc = 0.01971;
       }
 
@@ -196,6 +191,7 @@ void makePlots() {
       printf("Using a %.2f mm water phantom, the estimated straggling from water is %.2f mm and from DTC is %.2f mm. WEPL ratio is %.2f.\n", zprime, sqrt(wtr_strag), sqrt(dtc_strag), wepl_ratio);
 
       estimatedStraggling = sqrt(dtc_strag + wtr_strag);   
+      estimatedStraggling = nomsigma_; 
 
       if (nlines < MC2Data || MC2Data<0) {
          cout << "Line " << nlines << ", energy " << energy_ << ",  MC" << endl;
@@ -204,7 +200,7 @@ void makePlots() {
          arrayMC[nlines] = estrange_;
          arrayMCDelta[nlines] = estrange_ - nomrange_;
          arrayEMC[nlines] = sigmaRange_;
-         arrayEMCRatio[nlines] = sigmaRange_ / wtr_range * 100;
+         arrayEMCRatio[nlines] = sigmaRange_ / nomrange_ * 100; // used wtr_range
          arrayEMCSub[nlines] = sqrt(abs(pow(estimatedStraggling, 2) - pow(sigmaRange_, 2)));
          arrayEMCSubRatio[nlines] = sqrt(abs(pow(estimatedStraggling, 2) - pow(sigmaRange_, 2))) / nomrange_ * 100;
          arrayPSTAR[nlines] = nomrange_;
@@ -213,7 +209,7 @@ void makePlots() {
          arrayPSTARDelta[nlines] = 0;
          arrayPSTARminDelta[nlines] = -estimatedStraggling;
          arrayPSTARmaxDelta[nlines] = estimatedStraggling;
-         arrayPSTARmaxDeltaRatio[nlines] = estimatedStraggling / wtr_range * 100;
+         arrayPSTARmaxDeltaRatio[nlines] = estimatedStraggling / nomrange_ * 100; // used wtr_range
          arrayEPstar[nlines] = 0;
       }
 
@@ -591,7 +587,7 @@ void makePlots() {
 
    c6->cd(1);
    TGraph *gResolution = new TGraph(MC2Data, arrayMC, arrayEMC);
-   gResolution->SetTitle(Form("WEPL resolution using %d mm Al absorber;WEPL [mm];#Delta WEPL [mm]", mmAbsorbator));
+   gResolution->SetTitle(Form("WEPL resolution using %d mm Al absorber;Depth in detector [WEPL mm];#Delta WEPL [mm]", mmAbsorbator));
    gResolution->GetYaxis()->SetRangeUser(0,7);
    gResolution->SetMarkerColor(kBlue);
    gResolution->SetMarkerStyle(21);
@@ -615,14 +611,14 @@ void makePlots() {
    TLegend *legRes = new TLegend(0.17, 0.77, 0.69, 0.88);
    legRes->SetTextSize(0.03);
    legRes->SetTextFont(22);
-   legRes->AddEntry(gResolution, "#Delta WEPL", "P");
+   legRes->AddEntry(gResolution, "Measured range spread", "P");
 //   legRes->AddEntry(gResolutionSub, "#Delta WEPL - Range straggling", "P");
-   legRes->AddEntry(gResolutionStraggling, "Range straggling", "L");
+   legRes->AddEntry(gResolutionStraggling, "MC truth range straggling", "L");
    legRes->Draw();
 
    c6->cd(2);
    TGraph *gResolutionRatio = new TGraph(MC2Data, arrayMC, arrayEMCRatio);
-   gResolutionRatio->SetTitle(Form("WEPL resolution using %d mm Al absorber;WEPL [mm];#Delta WEPL / WEPL [%]", mmAbsorbator));
+   gResolutionRatio->SetTitle(Form("WEPL resolution using %d mm Al absorber;Depth in detector [WEPL mm];#Delta WEPL / WEPL [%]", mmAbsorbator));
    gResolutionRatio->GetYaxis()->SetTitleOffset(1.5);
    gResolutionRatio->SetMarkerColor(kBlue);
    gResolutionRatio->SetMarkerStyle(21);
@@ -643,9 +639,9 @@ void makePlots() {
    TLegend *legResRatio = new TLegend(0.36, 0.76, 0.88, 0.88);
    legResRatio->SetTextSize(0.03);
    legResRatio->SetTextFont(22);
-   legResRatio->AddEntry(gResolutionRatio, "#Delta WEPL", "P");
+   legResRatio->AddEntry(gResolutionRatio, "Measured range spread", "P");
 //   legResRatio->AddEntry(gResolutionSubRatio, "#Delta WEPL - Range straggling", "P");
-   legResRatio->AddEntry(gResolutionStragglingRatio, "Range straggling", "L");
+   legResRatio->AddEntry(gResolutionStragglingRatio, "MC truth range straggling", "L");
    legResRatio->Draw();
 
    c2->cd();

@@ -70,7 +70,7 @@ vector<Float_t> findRange::Run(Double_t energy, Double_t sigma_mev)
 //   TCanvas *c6 = new TCanvas("c6", "hEnergyAtInterface", 800, 600);
 //   TCanvas *c7 = new TCanvas("c7", "hRangeWEPL", 800, 600);
 
-   Int_t nbinsx = 750;
+   Int_t nbinsx = 250;
    // 2 mm: 0.0096, 1.784
    // 3 mm: 0.0097, 1.7825
    // 4 mm: 0.0098, 1.7806
@@ -86,6 +86,13 @@ vector<Float_t> findRange::Run(Double_t energy, Double_t sigma_mev)
 
    Float_t x_compensate = 0;
 
+   Int_t energyFrom = run_energy - 40;
+   Int_t energyTo = run_energy + 15;
+   if (run_energy > 70) {
+      energyFrom = run_energy - 15;
+      energyTo = run_energy + 5;
+   }
+
    printf("RUNNING WITH ENERGY %.2f.\n", run_energy);
 
    TH1F *hZ = new TH1F("hZ", "Z profile", nbinsx/3, xfrom + x_compensate, xto + x_compensate);
@@ -94,7 +101,7 @@ vector<Float_t> findRange::Run(Double_t energy, Double_t sigma_mev)
    TH1F *hTracklength = new TH1F("hTracklength", "Beam range straggling", nbinsx, -20 , 20);
    TH1F *hActualTracklength = new TH1F("hActualTracklength", "Ranges in DTC deconvoluted from beam energy straggling", nbinsx, xfrom + x_compensate, xto + x_compensate);
    TH1F *hStepLength = new TH1F("hStepLength", "Steplenghths", 1000, 0, 1);
-   TH1F *hEnergyAtInterface = new TH1F("hEnergyAtInterface", "Remaining energy after degrader;Energy [MeV];Entries", 500, run_energy - 15, run_energy + 15);
+   TH1F *hEnergyAtInterface = new TH1F("hEnergyAtInterface", "Remaining energy after degrader;Energy [MeV];Entries", 150, energyFrom, energyTo);
 
    gStyle->SetOptStat(0);
 

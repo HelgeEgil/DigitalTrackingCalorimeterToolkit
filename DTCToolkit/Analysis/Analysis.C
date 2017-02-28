@@ -847,7 +847,7 @@ Float_t drawBraggPeakGraphFit(Int_t Runs, Int_t dataType, Bool_t recreate, Float
    Float_t means[10] = {};
    Float_t sigmas[10] = {};
 
-   Float_t nGaussianFitRange = doNGaussianFit(hFitResults, means, sigmas);
+   TF1 *gauss = doSimpleGaussianFit(hFitResults, means, sigmas);
    Float_t empiricalMean = means[9];
    Float_t empiricalSigma = sigmas[9];
    
@@ -855,9 +855,6 @@ Float_t drawBraggPeakGraphFit(Int_t Runs, Int_t dataType, Bool_t recreate, Float
 
    cFitResults->Update();
   
-   TF1 *nominalStragglingFunction = new TF1("nominalStragglingFunction", "gaus", 0, 350);
-   nominalStragglingFunction->SetParameters(hFitResults->GetMaximum(), expectedMean, expectedStraggling);
-   nominalStragglingFunction->Draw("SAME");
    cFitResults->Update();
 
    TLine *l = nullptr;
@@ -872,8 +869,7 @@ Float_t drawBraggPeakGraphFit(Int_t Runs, Int_t dataType, Bool_t recreate, Float
    
 
    gPad->Update();
-   TF1 *fit1 = (TF1*) gPad->GetPrimitive("Gaus_6");
-   Float_t bip_value = means[0] - 3*sigmas[0];
+   Float_t bip_value = empiricalMean - 3*empiricalSigma;
    if (bip_value == 0) bip_value = getWEPLFromEnergy(run_energy)*0.9;
    TLine *bip = new TLine(bip_value, hFitResultsDroppedData->GetMaximum(), bip_value, 0);
    bip->Draw();
@@ -882,10 +878,9 @@ Float_t drawBraggPeakGraphFit(Int_t Runs, Int_t dataType, Bool_t recreate, Float
    legend->SetTextSize(0.028);
    legend->AddEntry(hFitResults, "Accepted tracks", "F");
    legend->AddEntry(hFitResultsDroppedData, "Tracks without BP rise", "F");
-   legend->AddEntry(fit1, "Fitted Gaussians", "L");
+   legend->AddEntry(gauss, "Fitted Gaussians", "L");
    legend->AddEntry(bip, "x_{i'} bin", "L");
    legend->SetTextFont(22);
-//    legend->AddEntry(landau, Form("Fit with E = %.1f MeV and #sigma = %.1f mm ", landau_energy, landau->GetParameter(2)*1.7), "F");
    if (kDrawVerticalLayerLines) legend->AddEntry(l, "Sensor layer positions", "L");
    legend->Draw();
 
@@ -895,12 +890,14 @@ Float_t drawBraggPeakGraphFit(Int_t Runs, Int_t dataType, Bool_t recreate, Float
    ps->SetTextFont(22);
    ps->AddText(Form("Nominal WEPL = %.2f", expectedMean));
    ps->AddText(Form("Nominal straggling = %.2f", expectedStraggling));
-   
+  
+   /*
    for (Int_t i=0; i<2; i++) {
       ps->AddText(Form("Fit %d WEPL = %.2f", i+1, means[i]));
       ps->AddText(Form("Fit %d #sigma_{WEPL} = %.2f", i+1, sigmas[i]));
       ps->AddText(Form("Fit %d energy = %.2f", i+1, getEnergyFromUnit(means[i])));
    }
+   */
 
    ps->AddText(Form("Resulting WEPL = %.2f #pm %.2f", empiricalMean, empiricalSigma));
    ps->AddText(Form("Resulting energy = %.2f #pm %.2f", getEnergyFromUnit(empiricalMean), energySigma));
@@ -918,7 +915,7 @@ Float_t drawBraggPeakGraphFit(Int_t Runs, Int_t dataType, Bool_t recreate, Float
 
    delete tracks;
    
-   return nGaussianFitRange;
+   return empiricalMean;
 }
 
 void writeClusterFile(Int_t Runs, Int_t dataType, Float_t energy) {
@@ -2260,6 +2257,68 @@ void drawIndividualGraphs(TCanvas *cGraph, TGraphErrors* outputGraph, Float_t fi
    cGraph->Update();
 }
 
+TF1 *  doSimpleGaussianFit (TH1F *h, Float_t *means, Float_t *sigmas) {
+   Float_t estimated_energy = 0, estimated_range = 0;
+   Float_t estimated_energy_error = 0;
+   Float_t sum_constant = 0, sumSigma = 0;
+
+   Float_t nominalMean = getWEPLFromEnergy(run_energy);
+   Float_t nominalSigma = getWEPLStragglingFromEnergy(run_energy, 0);
+
+   TAxis *axis = h->GetXaxis();
+   TF1 *gauss = new TF1("gauss", "gaus");
+   gauss->SetParameter(1, nominalMean);
+   gauss->SetParameter(2, nominalSigma);
+   h->Fit("gauss", "B,W,M");
+
+   Float_t mu, sigma;
+   mu = gauss->GetParameter(1);
+   sigma = fabs(gauss->GetParameter(2));
+
+   Int_t binSigmaFrom = axis->FindBin(mu - 3*sigma);
+
+   Float_t squareMeanDifference = 0;
+   Float_t empiricalMean = 0;
+   Int_t N = 0;
+
+   printf("Looping from %d to %d.\n", binSigmaFrom, h->GetNbinsX());
+
+   for (Int_t i=binSigmaFrom; i<=h->GetNbinsX(); i++) {
+      empiricalMean += h->GetBinContent(i) * axis->GetBinCenter(i);
+      N += h->GetBinContent(i);
+   } 
+  
+   empiricalMean /= N;
+
+   printf("empiricalMean = %.2f\n", empiricalMean);
+
+   for (Int_t i=binSigmaFrom; i<=h->GetNbinsX(); i++) {
+      squareMeanDifference += h->GetBinContent(i) * pow(axis->GetBinCenter(i) - empiricalMean, 2);
+   }
+   printf("squareMeanDifference = %.2f\n", squareMeanDifference);
+
+   Float_t empiricalSigma = sqrt(abs(squareMeanDifference / N));
+   cout << "The empirical estimated range is " << empiricalMean << " mm. (which is " << getEnergyFromWEPL(empiricalMean) << " MeV).\n";
+   cout << "The empirical standard deviation is " << empiricalSigma << " mm.\n";
+   
+   ofstream file2("OutputFiles/result_makebraggpeakfit.csv", ofstream::out | ofstream::app);
+   // absorber thickness; energy; nominal range; estimated range; range sigma
+   if (run_degraderThickness == 0) {
+      file2 << kAbsorbatorThickness << " " << run_energy << " " << getWEPLFromEnergy(run_energy) << " " << empiricalMean << " " << nominalSigma << " " << empiricalSigma << " " << endl;
+   }
+   else {
+      file2 << kAbsorbatorThickness << " " << run_degraderThickness << " " << getWEPLFromEnergy(run_energy) << " " << empiricalMean << " " << nominalSigma << " " << empiricalSigma << " " << endl;
+   }
+
+   file2.close();
+   
+   means[9] = empiricalMean;
+   sigmas[9] = empiricalSigma;
+
+   return gauss;
+
+}
+
 Float_t doNGaussianFit ( TH1F *h, Float_t *means, Float_t *sigmas) {
    TF1 *gauss;
    cout << "Energy " << run_energy << endl;
@@ -2397,9 +2456,9 @@ Float_t doNGaussianFit ( TH1F *h, Float_t *means, Float_t *sigmas) {
    }
 
    printf("lastMean = %.2f. lastSigma = %.2f\n", lastMean, lastSigma);
-   printf("sigmaFrom = %.2f\n", lastMean - 3* lastSigma);
+   printf("sigmaFrom = %.2f\n", lastMean - 9 * lastSigma);
 
-   Int_t binSigmaFrom = axis->FindBin(lastMean - 6*lastSigma);
+   Int_t binSigmaFrom = axis->FindBin(lastMean - 9*lastSigma);
 
    if (lastMean == 0) {
       binSigmaFrom = axis->FindBin(getWEPLFromEnergy(run_energy)*0.9);
@@ -2447,13 +2506,15 @@ Float_t doNGaussianFit ( TH1F *h, Float_t *means, Float_t *sigmas) {
    if (array_constant[1] > 0.1) last_range = array_mean[1];
    if (array_constant[2] > 0.1) last_range = array_mean[2];
 
+   Float_t nominalSigma = getWEPLStragglingFromEnergy(run_energy, 0);
+
    ofstream file2("OutputFiles/result_makebraggpeakfit.csv", ofstream::out | ofstream::app);
    // absorber thickness; energy; nominal range; estimated range; range sigma
    if (run_degraderThickness == 0) {
-      file2 << kAbsorbatorThickness << " " << run_energy << " " << getWEPLFromEnergy(run_energy) << " " << empiricalMean << " " << empiricalSigma << " " << endl;
+      file2 << kAbsorbatorThickness << " " << run_energy << " " << getWEPLFromEnergy(run_energy) << " " << empiricalMean << " " << nominalSigma << " " << empiricalSigma << " " << endl;
    }
    else {
-      file2 << kAbsorbatorThickness << " " << run_degraderThickness << " " << getWEPLFromEnergy(run_energy) << " " << empiricalMean << " " << empiricalSigma << " " << endl;
+      file2 << kAbsorbatorThickness << " " << run_degraderThickness << " " << getWEPLFromEnergy(run_energy) << " " << empiricalMean << " " << nominalSigma << " " << empiricalSigma << " " << endl;
    }
 
    file2.close();

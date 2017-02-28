@@ -92,7 +92,7 @@ Float_t getTLStragglingFromTL(Float_t tl, Float_t sigma_energy) {
    Float_t energy = getEnergyFromTL(tl);
    
    // The straggling is calculated empirically from fit from full MC data
-   Float_t sigma_a = straggling_a + tl * straggling_b;
+   Float_t sigma_a = pow(straggling_a + tl * straggling_b, 2);
    Float_t sigma_b = pow(sigma_energy * alpha * p, 2) * pow(energy, 2*p-2);
    
    Float_t sigma = sqrt(sigma_a + sigma_b);
@@ -114,14 +114,17 @@ Float_t getWEPLStragglingFromWEPL(Float_t wepl, Float_t sigma_energy) {
 
    Float_t tl = getTLFromWEPL(wepl);
    Float_t tl_straggling = getTLStragglingFromTL(tl, sigma_energy);
-   Float_t tl_high = tl + tl_straggling;
-   Float_t tl_low = tl - tl_straggling;
+
+   Float_t tl_high = tl + tl_straggling / 2;
+   Float_t tl_low = tl - tl_straggling / 2;
 
    Float_t wepl_high = getWEPLFromTL(tl_high);
-   Float_t wepl_low = getWEPLFromEnergy(tl_low);
-   
+   Float_t wepl_low = getWEPLFromTL(tl_low);
+
    estimatedStraggling = wepl_high - wepl_low;
 
+   printf("getWEPLStragglingFromWEPL: TL = %.2f, WEPL = %.2f. TL straggling = %.2f (%.2f %%), WEPL straggling = %.2f (%.2f %%)\n", tl, wepl, tl_straggling, 100*tl_straggling/tl, estimatedStraggling, 100*estimatedStraggling/wepl);
+   
    return estimatedStraggling;
 }
    

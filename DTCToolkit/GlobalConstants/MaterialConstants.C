@@ -92,14 +92,14 @@ void  createSplines() {
    Int_t    idxPureAl = 0;
    Int_t    idxW = 0;
    Double_t  range;
-   Double_t  ranges2mmAl[250];
-   Double_t  energies2mmAl[250];
-   Double_t  rangesW[250];
-   Double_t  energiesW[250];
-   Double_t  rangesWater[250];
-   Double_t  energiesWater[250];
-   Double_t  rangesPureAl[250];
-   Double_t  energiesPureAl[250];
+   Double_t  ranges2mmAl[500];
+   Double_t  energies2mmAl[500];
+   Double_t  rangesW[500];
+   Double_t  energiesW[500];
+   Double_t  rangesWater[500];
+   Double_t  energiesWater[500];
+   Double_t  rangesPureAl[500];
+   Double_t  energiesPureAl[500];
    
    if (kAbsorbatorThickness == 2) {
       in.open("Data/Ranges/2mm_Al.csv");
@@ -184,10 +184,10 @@ void  createSplines() {
    }
 
    else if (kAbsorbatorThickness == 3) {
-      alpha_aluminum = 0.011626;
-      p_aluminum = 1.743151;
-      straggling_a = 1.8568;
-      straggling_b = 0.000856;
+      alpha_aluminum = 0.010746;
+      p_aluminum = 1.758228;
+      straggling_a = 1.92792;
+      straggling_b = 0.000116;
    }
 
    else if (kAbsorbatorThickness == 4) {
