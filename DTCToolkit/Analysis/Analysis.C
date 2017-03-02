@@ -694,12 +694,15 @@ Float_t drawBraggPeakGraphFit(Int_t Runs, Int_t dataType, Bool_t recreate, Float
    char         * sDataType = getDataTypeChar(dataType);
    char         * sMaterial = getMaterialChar();
    char         * hTitle = Form("Fitted energy of a %.2f MeV beam in %s (%s)", run_energy, sMaterial, sDataType);
+
+   Int_t nEnergies = getUnitFromEnergy(run_energy);
+
    if (useDegrader) {
       hTitle = Form("Fitted energy of a %.0f MeV nominal beam on %s DTC w/%.1f mm water degrader", energy, sMaterial, degraderThickness);
    }
    TCanvas      * cGraph = new TCanvas("cGraph", "Fitted data points", 1500, 500);
    TCanvas      * cFitResults = new TCanvas("cFitResults", hTitle, 1000, 1000);
-   TH1F         * hFitResults = new TH1F("fitResult", hTitle, 200, getUnitFromEnergy(0), getUnitFromEnergy(run_energy*1.2));
+   TH1F         * hFitResults = new TH1F("fitResult", hTitle, nEnergies*4, getUnitFromEnergy(0), getUnitFromEnergy(run_energy*1.2));
    TH1F         * hFitResultsDroppedData = new TH1F("fitResultsDroppedData", hTitle, 200, getUnitFromEnergy(0), getUnitFromEnergy(run_energy*1.2));
    TH1F         * hMaxAngle = new TH1F("hMaxAngle", "Maximum angle for proton track", 200, 0, 25);
    
@@ -2275,15 +2278,17 @@ TF1 *  doSimpleGaussianFit (TH1F *h, Float_t *means, Float_t *sigmas) {
    mu = gauss->GetParameter(1);
    sigma = fabs(gauss->GetParameter(2));
 
-   Int_t binSigmaFrom = axis->FindBin(mu - 3*sigma);
+   Int_t binSigmaFrom = axis->FindBin(mu - 4*sigma);
+   Int_t binSigmaTo = axis->FindBin(mu + 4*sigma);
+   // Int_t binSigmaTo = h->GetNbinsX();
 
    Float_t squareMeanDifference = 0;
    Float_t empiricalMean = 0;
    Int_t N = 0;
 
-   printf("Looping from %d to %d.\n", binSigmaFrom, h->GetNbinsX());
+   printf("Looping from %d to %d.\n", binSigmaFrom, binSigmaTo);
 
-   for (Int_t i=binSigmaFrom; i<=h->GetNbinsX(); i++) {
+   for (Int_t i=binSigmaFrom; i<=binSigmaTo; i++) {
       empiricalMean += h->GetBinContent(i) * axis->GetBinCenter(i);
       N += h->GetBinContent(i);
    } 
@@ -2292,7 +2297,7 @@ TF1 *  doSimpleGaussianFit (TH1F *h, Float_t *means, Float_t *sigmas) {
 
    printf("empiricalMean = %.2f\n", empiricalMean);
 
-   for (Int_t i=binSigmaFrom; i<=h->GetNbinsX(); i++) {
+   for (Int_t i=binSigmaFrom; i<=binSigmaTo; i++) {
       squareMeanDifference += h->GetBinContent(i) * pow(axis->GetBinCenter(i) - empiricalMean, 2);
    }
    printf("squareMeanDifference = %.2f\n", squareMeanDifference);

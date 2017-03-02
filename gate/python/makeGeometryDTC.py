@@ -929,10 +929,6 @@ class MainMenu(Frame):
         
         print("Scanner 1 position: {} and size: {}. Scanner 2 position: {} and size: {}. First layer position: {} and size: {}".format(self.scanner1.pos, self.scanner1.size, self.scanner2.pos, self.scanner2.size, self.firstLayerPosition, self.firstModule.thickness))
 
-        # TODO
-        # - Check alignment for FM_Layer vs Layer(0)
-        # - Check output volumeIDs and layer1IDs 
-
     def getState(self):
         return self.state
 
@@ -956,6 +952,8 @@ def main():
     # See if we can get the rotation right
     # fix names of mother volumes
     # Cross check geometry and Module.mac (filename should be constant)
+
+    # FIXME Bug in propagation of first absorber material
 
     world = World()
     degrader = Degrader()
