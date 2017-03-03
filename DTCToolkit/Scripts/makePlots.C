@@ -23,6 +23,8 @@
 
 using namespace std;
 
+Int_t absorberThickness = 2;
+
 void makePlots() {
    TCanvas *c1 = new TCanvas("c1", "Fit results", 1200, 800);
    TPad *pad1 = new TPad("pad1", "70", 0.0, 0.3, 1.0, 1.0, 0);
@@ -131,22 +133,36 @@ void makePlots() {
    ifstream in0;
    in0.open("OutputFiles/findManyRangesDegrader.csv");
    Int_t nlines0 = 0;
+   Float_t a_dtc = 0, p_dtc = 0;
    Float_t a_wtr = 0.02387;
    Float_t p_wtr = 1.7547;
-   Float_t a_dtc = 0.010746;
-   Float_t p_dtc = 1.758228;
+
+   if       (absorberThickness == 2) {
+      a_dtc = 0.014306;
+      p_dtc = 1.705680;
+   }
+   else if  (absorberThickness == 3) {
+      a_dtc = 0.010746;
+      p_dtc = 1.758228;
+   }
+
    Float_t wepl_ratio0 = a_wtr / a_dtc * pow(250 / a_wtr, 1 - p_dtc / p_wtr);
-   Float_t wtr_range = a_wtr * pow(250, p_wtr);
-   printf("The calculated WEPL ratio is %.2f.\n", wepl_ratio0);
+//   Float_t wtr_range = a_wtr * pow(250, p_wtr);
+   Float_t wtr_range = 379.4; // PSTAR
 
    while (1) {
-      in0 >>  thickness_ >> waterphantomthickness_ >> nomrange_ >> nomsigma_ >> dummy0 >> dummy0 >> dummy0;
+      in0 >>  waterphantomthickness_ >> thickness_ >> nomrange_ >> nomsigma_ >> dummy0 >> dummy0 >> dummy0;
 
       if (!in0.good()) {
          break;
       }
 
-      arrayMCActualSigma[nlines0] = nomsigma_ * wepl_ratio0;
+      if (thickness_ != absorberThickness) {
+         printf("Thickness is %d mm, continuing to next line...\n", thickness_);
+         continue;
+      }
+
+      arrayMCActualSigma[nlines0] = nomsigma_;// * wepl_ratio0;
       arrayMCActualSigmaRatio[nlines0] = nomsigma_ * 100 * wepl_ratio0 / wtr_range;
       arrayMCActualResidualRange[nlines0++] = nomrange_ * wepl_ratio0;
    }
@@ -174,6 +190,8 @@ void makePlots() {
       if (!in.good()) {
          break;
       }
+
+      if (thickness_ != absorberThickness) continue;
 
       mmAbsorbator = thickness_;
       meanError += ( estrange_ - nomrange_ ) / nomrange_;

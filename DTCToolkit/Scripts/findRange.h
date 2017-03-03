@@ -12,9 +12,6 @@
 #include <TFile.h>
 #include <vector>
 
-Float_t getTLFromEnergyQuadratic(Float_t energy);
-Double_t getEnergyFromTLQuadratic(Float_t tl);
-
 class TH2;
 
 // Header file for the classes stored in the TTree if any.

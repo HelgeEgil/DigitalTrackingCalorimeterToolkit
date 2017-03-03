@@ -176,35 +176,35 @@ void  createSplines() {
    splinePureAlInv = new TSpline3("splineWaterInv", rangesPureAl, energiesPureAl, idxPureAl);
    splineWInv = new TSpline3("splineWInv", rangesW, energiesW, idxW);
 
-   if (kAbsorbatorThickness == 2) {
-      alpha_aluminum = 0.0096;
-      p_aluminum = 1.784;
-      straggling_a = 1.8568;
-      straggling_b = 0.000856;
+   if (kAbsorbatorThickness == 2) { // updated 2017-03-02
+      alpha_aluminum = 0.0014306;
+      p_aluminum = 1.70568;
+      straggling_a = 1.85941;
+      straggling_b = 0.000650;
    }
 
-   else if (kAbsorbatorThickness == 3) {
+   else if (kAbsorbatorThickness == 3) { // updated 2017-03-01
       alpha_aluminum = 0.010746;
       p_aluminum = 1.758228;
       straggling_a = 1.92792;
-      straggling_b = 0; // 0.000116;
+      straggling_b = 0.000116;
    }
 
-   else if (kAbsorbatorThickness == 4) {
-      alpha_aluminum = 0.0392;
-      p_aluminum = 1.7450;
-      straggling_a = 1.8568;
-      straggling_b = 0.000856;
+   else if (kAbsorbatorThickness == 4) { // updated 2017-03-03
+      alpha_aluminum = 0.018745; // not good for energies
+      p_aluminum = 1.660262;
+      straggling_a = 1.88728;
+      straggling_b = 0.001685;
    }
    
-   else if (kAbsorbatorThickness == 5) {
+   else if (kAbsorbatorThickness == 5) { // dummy values
       alpha_aluminum = 0.0125;
       p_aluminum = 1.7327;
       straggling_a = 1.8568;
       straggling_b = 0.000856;
    }
 
-   else if (kAbsorbatorThickness == 6) {
+   else if (kAbsorbatorThickness == 6) { // dummy values
       alpha_aluminum = 0.0098;
       p_aluminum = 1.781;
       straggling_a = 1.8568;

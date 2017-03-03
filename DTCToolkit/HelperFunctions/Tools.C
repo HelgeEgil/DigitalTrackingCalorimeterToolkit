@@ -91,7 +91,7 @@ Double_t fitfunc_DBP(Double_t *v, Double_t *par) {
     * and implement the depth-dose curve (Eq. 28) with maybe a nice Bragg Peak
     * I had some bumps... Back to Bragg-Kleeman.
    
-    * However, the depth at the bragg peak is correct, since the rance is calculated using Ulmer 2007
+    * However, the depth at the bragg peak is correct, since the rance is calculated using LUT curves
     */
 
    if (isnan(fitval)) fitval = 0;

@@ -136,7 +136,7 @@ TGraphErrors * Track::doRangeFit(Bool_t isScaleVariable) {
    scaleParameter = 3.1; // found through drawFitScale and finding distribution mean value
 
    if (kDataType == kData) scaleParameter = 2.7;
-   if (kUseAlpide) scaleParameter = 1.58;
+   if (kUseAlpide) scaleParameter = 1.38; // was 1.58
 
    TF1 *func = new TF1("fit_BP", fitfunc_DBP, 0, maxRange, 2);
    func->SetParameter(0, estimatedRange);

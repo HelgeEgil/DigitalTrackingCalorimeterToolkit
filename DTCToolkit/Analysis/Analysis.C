@@ -748,7 +748,8 @@ Float_t drawBraggPeakGraphFit(Int_t Runs, Int_t dataType, Bool_t recreate, Float
       hMaxAngle->Fill(maxAngle);
 
       // Do track fit, extract all parameters for this track
-      outputGraph = (TGraphErrors*) thisTrack->doRangeFit(true);
+     outputGraph = (TGraphErrors*) thisTrack->doRangeFit(false);
+
       if (!outputGraph) continue;
 
 
@@ -872,10 +873,14 @@ Float_t drawBraggPeakGraphFit(Int_t Runs, Int_t dataType, Bool_t recreate, Float
    
 
    gPad->Update();
-   Float_t bip_value = empiricalMean - 3*empiricalSigma;
+   Float_t bip_value = empiricalMean - 6 * empiricalSigma;
    if (bip_value == 0) bip_value = getWEPLFromEnergy(run_energy)*0.9;
-   TLine *bip = new TLine(bip_value, hFitResultsDroppedData->GetMaximum(), bip_value, 0);
+   TLine *bip = new TLine(bip_value, gPad->GetUymax(), bip_value, 0);
    bip->Draw();
+
+   Float_t bip_value2 = empiricalMean + 6 * empiricalSigma;
+   TLine *bip2 = new TLine(bip_value2, 0, bip_value2, gPad->GetUymax());
+   bip2->Draw();
 
    TLegend *legend = new TLegend(0.16, 0.78, 0.42, 0.88);
    legend->SetTextSize(0.028);
@@ -2278,15 +2283,13 @@ TF1 *  doSimpleGaussianFit (TH1F *h, Float_t *means, Float_t *sigmas) {
    mu = gauss->GetParameter(1);
    sigma = fabs(gauss->GetParameter(2));
 
-   Int_t binSigmaFrom = axis->FindBin(mu - 4*sigma);
-   Int_t binSigmaTo = axis->FindBin(mu + 4*sigma);
+   Int_t binSigmaFrom = axis->FindBin(mu - 5 * nominalSigma); // was sigma
+   Int_t binSigmaTo = axis->FindBin(mu + 5 * nominalSigma); // was sigma, needs nominal to avoid small sigma fits on >> absorbers
    // Int_t binSigmaTo = h->GetNbinsX();
 
    Float_t squareMeanDifference = 0;
    Float_t empiricalMean = 0;
    Int_t N = 0;
-
-   printf("Looping from %d to %d.\n", binSigmaFrom, binSigmaTo);
 
    for (Int_t i=binSigmaFrom; i<=binSigmaTo; i++) {
       empiricalMean += h->GetBinContent(i) * axis->GetBinCenter(i);
@@ -2295,12 +2298,9 @@ TF1 *  doSimpleGaussianFit (TH1F *h, Float_t *means, Float_t *sigmas) {
   
    empiricalMean /= N;
 
-   printf("empiricalMean = %.2f\n", empiricalMean);
-
    for (Int_t i=binSigmaFrom; i<=binSigmaTo; i++) {
       squareMeanDifference += h->GetBinContent(i) * pow(axis->GetBinCenter(i) - empiricalMean, 2);
    }
-   printf("squareMeanDifference = %.2f\n", squareMeanDifference);
 
    Float_t empiricalSigma = sqrt(abs(squareMeanDifference / N));
    cout << "The empirical estimated range is " << empiricalMean << " mm. (which is " << getEnergyFromWEPL(empiricalMean) << " MeV).\n";

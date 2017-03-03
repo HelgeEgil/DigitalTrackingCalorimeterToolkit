@@ -25,31 +25,6 @@ Float_t p = 1.7813;
 Float_t alpha = 0.02073;
 Float_t alphaprime = 0.0087;
 
-Double_t a0 = -3.7279603175;
-Double_t a1 =  0.1958689129;
-Double_t a2 =  0.0066110840;
-Double_t a3 = -0.0000051372;
-
-Float_t getTLFromEnergyQuadratic(Float_t energy) {
-   return a0 + a1 * energy + a2 * pow(energy,2) + a3 * pow(energy,3);
-}
-
-Double_t getEnergyFromTLQuadratic(Float_t tl) {
-   Double_t a = a3;
-   Double_t b = a2;
-   Double_t c = a1;
-   Double_t d = a0;
-
-   Double_t qq = (2*pow(b,3) - 9*a*b*c + 27*pow(a,2) * (d - tl)) / (27*pow(a,3));
-   Double_t pp = (3*a*c - pow(b,2)) / (3 * pow(a,2));
-
-   Int_t nRoot = 1;
-   Double_t t = 2 * sqrt(-pp/3.) * cos(1/3. * acos((3*qq)/(2*pp) * sqrt(-3/pp)) - nRoot * 2 * 3.14159265/3.);
-   Double_t E = t - b/(3*a);
-
-   return E;
-}
-
 vector<Float_t> findRange::Run(Double_t energy, Double_t sigma_mev)
 {
    vector<Float_t> returnValues;
@@ -80,13 +55,13 @@ vector<Float_t> findRange::Run(Double_t energy, Double_t sigma_mev)
    Float_t aw = 0.0239, pw = 1.7548;
 
    Float_t expectedRange = a * pow(run_energy, p);
-   Float_t xfrom = expectedRange - 30;
+   Float_t xfrom = expectedRange - 20;
    if (xfrom < 0) xfrom = 0;
-   Float_t xto = expectedRange + 30;
+   Float_t xto = expectedRange + 15;
 
    Float_t x_compensate = 0;
 
-   Int_t energyFrom = run_energy - 40;
+   Int_t energyFrom = run_energy - 35;
    Int_t energyTo = run_energy + 15;
    if (run_energy > 70) {
       energyFrom = run_energy - 15;
@@ -212,7 +187,7 @@ vector<Float_t> findRange::Run(Double_t energy, Double_t sigma_mev)
    TF1 *fRange = new TF1("fit_range", "gaus", xfrom, xto);
    fRange->SetLineWidth(3);
    fRange->SetParameters(hRange->GetMaximum(), expectedRange, 2);
-   hRange->Fit("fit_range", "Q,M,W,B", "", xfrom, xto);
+   hRange->Fit("fit_range");//, "M,W,B", "", xfrom, xto);
 
    Float_t cutoff = fRange->GetParameter(1) - 6*fabs(fRange->GetParameter(2));
    if (cutoff < 0) cutoff = 0;
@@ -287,6 +262,7 @@ vector<Float_t> findRange::Run(Double_t energy, Double_t sigma_mev)
       l2->SetLineStyle(9);
       l2->Draw("same");
 
+
 /*
    c7->cd();
       hRangeWEPL->SetXTitle("Range WEPL [mm]");
@@ -322,5 +298,6 @@ vector<Float_t> findRange::Run(Double_t energy, Double_t sigma_mev)
       hEnergyAtInterface->SetLineColor(kBlack);
       hEnergyAtInterface->Draw();
    
+      c2->SaveAs(Form("../OutputFiles/straggling/straggling_%.0f_mm_degrader.png", degraderThickness));
    return returnValues;
 }
