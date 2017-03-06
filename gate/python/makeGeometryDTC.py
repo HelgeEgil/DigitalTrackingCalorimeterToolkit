@@ -268,7 +268,8 @@ class Box:
         return "BOX {} ({} -> {}, {} -> {}, {} -> {})".format(self.name, x1, x2, y1, y2, z1, z2)
 
 class Module:
-    def __init__(self, name, mother, pos, absorberMaterial, nlayers = 40, firstAbsorberMaterial = kNoMaterial, absorberThickness = 1.5):
+#    def __init__(self, name, mother, pos, absorberMaterial, nlayers = 40, firstAbsorberMaterial = kNoMaterial, absorberThickness = 1.5):
+    def __init__(self, name, mother, pos, absorberMaterial, nlayers = 40, absorberThickness = 1.5):
         self.objects = []
         self.nlayers = 40
         self.pos = pos
@@ -278,7 +279,8 @@ class Module:
         self.chipPos = Pos(0, 0)
 
         self.absorberThickness = absorberThickness
-        self.firstAbsorberThickness = absorberThickness
+        self.absorberMaterial = absorberMaterial
+#        self.firstAbsorberThickness = absorberThickness
         self.absorberSize = Size(self.chipSize.dx + 1 * cm, self.chipSize.dy + 1*cm, self.absorberThickness)
         self.glueThickness = 40 * um
         self.pcbThickness = 160 * um
@@ -291,8 +293,7 @@ class Module:
 
         self.size = Size(10*cm, 4*cm, self.thickness)
         self.mother = mother
-        self.absorberMaterial = absorberMaterial
-        self.firstAbsorberMaterial = firstAbsorberMaterial
+#        self.firstAbsorberMaterial = firstAbsorberMaterial
 
     def getLeftSide(self):
         return self.pos - self.size / 2.
@@ -383,9 +384,9 @@ class Module:
         # pos.z += self.getLastObjectRightSide() - self.getLeftSideNoAbsorber()
 
         material = self.absorberMaterial
-        if self.firstAbsorberMaterial and isFirstAbsorber:
-            material = self.firstAbsorberMaterial
-            size.dz = self.firstAbsorberThickness
+#        if self.firstAbsorberMaterial and isFirstAbsorber:
+#            material = self.firstAbsorberMaterial
+#            size.dz = self.firstAbsorberThickness
         
         self.addAbsorber(name, pos, size, material, kVisible, kGrey)
 
@@ -556,7 +557,7 @@ class Module:
         self.makeChipGlue()
         self.makePCB()
         self.makePCBGlue()
-        self.makeAbsorber(1, kIsFirstAbsorber)
+        self.makeAbsorber(1) #, kIsFirstAbsorber)
         self.makeAbsorberAirGap()
         self.recalculateSize()
         if (self.nlayers>1):
@@ -574,6 +575,8 @@ class Module:
 
     def correctAllNames(self):
         for obj in self.objects:
+            if "FM_" in obj.name: continue
+
             if obj.name != "FirstModule":
                 obj.name = "FM_" + obj.name
             if obj.type == "Box":
@@ -781,7 +784,7 @@ class MainMenu(Frame):
         self.var_ygap.set(0)
         self.var_material.set("Aluminium")
         self.var_absorberThickness.set(2)
-        self.var_firstmaterial.set("Aluminium")
+        self.var_firstmaterial.set("Air")
         self.var_firstAbsorberThickness.set(2)
         self.var_chipThickness.set(14)
         self.var_useDegrader.set(1)
@@ -889,16 +892,16 @@ class MainMenu(Frame):
         self.drawPlot(figure)
 
     def readyModule(self):
-        self.returnDictionary = {"xsize" : self.var_xsize.get(), "ysize" : self.var_ysize.get(), "nlayers" : self.var_nlayers.get(), "xgap" : self.var_xgap.get(), "ygap" : self.var_ygap.get(), "chipthickness" : self.var_chipThickness.get(), "material" : self.var_material.get(), "absorberThickness" : self.var_absorberThickness.get(), "firstmaterial" : self.var_firstmaterial.get(), "firstabsorberthickness" : self.var_firstAbsorberThickness.get()}
+        self.returnDictionary = {"xsize" : self.var_xsize.get(), "ysize" : self.var_ysize.get(), "nlayers" : self.var_nlayers.get(), "xgap" : self.var_xgap.get(), "ygap" : self.var_ygap.get(), "chipthickness" : self.var_chipThickness.get(), "material" : self.var_material.get(), "absorberthickness" : self.var_absorberThickness.get(), "firstmaterial" : self.var_firstmaterial.get(), "firstabsorberthickness" : self.var_firstAbsorberThickness.get()}
         
         self.firstModule.nlayers = 1
         self.firstModule.chipSize = Size(self.returnDictionary["xsize"], self.returnDictionary["ysize"])
         self.firstModule.chipGap = Size(self.returnDictionary["xgap"], self.returnDictionary["ygap"])
-        self.firstModule.absorberMaterial = self.returnDictionary["material"]
-        self.firstModule.absorberThickness = self.returnDictionary["absorberThickness"]
+        self.firstModule.absorberMaterial = self.returnDictionary["firstmaterial"]
+        self.firstModule.absorberThickness = self.returnDictionary["firstabsorberthickness"]
         self.firstModule.activeChipThickness = self.returnDictionary["chipthickness"] / 1000.
-        self.firstModule.firstmaterial = self.returnDictionary["firstmaterial"]
-        self.firstModule.firstAbsorberThickness = self.returnDictionary["firstabsorberthickness"]
+#        self.firstModule.firstmaterial = self.returnDictionary["firstmaterial"]
+#        self.firstModule.firstAbsorberThickness = self.returnDictionary["firstabsorberthickness"]
         self.firstModule.recalculateSize()
         self.firstModule.buildModule()
         lastPos = self.firstModule.getLayerThickness()
@@ -911,9 +914,9 @@ class MainMenu(Frame):
         self.module.chipSize = Size(self.returnDictionary["xsize"], self.returnDictionary["ysize"])
         self.module.chipGap = Size(self.returnDictionary["xgap"], self.returnDictionary["ygap"])
         self.module.absorberMaterial = self.returnDictionary["material"]
-        self.module.absorberThickness = self.returnDictionary["absorberThickness"]
+        self.module.absorberThickness = self.returnDictionary["absorberthickness"]
         self.module.activeChipThickness = self.returnDictionary["chipthickness"] / 1000.
-        self.module.firstAbsorberThickness= self.returnDictionary["firstabsorberthickness"]
+#        self.module.firstAbsorberThickness= self.returnDictionary["firstabsorberthickness"]
         self.module.recalculateSize()
         self.module.buildModule()
         lastPos = self.module.getLayerThickness()
@@ -960,7 +963,7 @@ def main():
     scanner1 = scanner(1)
     scanner2 = scanner(2)
 
-    firstModule = Module("FirstModule", scanner1.name, Pos(0,0,0), kAluminium, 1, kAluminium)
+    firstModule = Module("FirstModule", scanner1.name, Pos(0,0,0), kAir, 1)
     module = Module("Module", scanner2.name, Pos(0,0,0), kAluminium, 20)
 
     root = Tk()
