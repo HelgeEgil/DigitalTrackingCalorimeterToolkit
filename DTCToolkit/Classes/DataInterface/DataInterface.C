@@ -204,6 +204,40 @@ void DataInterface::getDataFrame(Int_t runNo, CalorimeterFrame * cf, Int_t energ
    delete f;
 }
 
+void DataInterface::writeDataFrame(Int_t energy) {
+   if (!existsEnergyFile(energy)) {
+      cout << "There are no data files with energy " << energy << endl;
+   }
+   
+   TString fn = Form("Data/ExperimentalData/DataFrame_%i_MeV.root", energy);
+   TFile *f = new TFile(fn);
+   TTree *tree = (TTree*) f->Get("tree");
+
+   Int_t nentries = tree->GetEntries();
+   cout << "Found " << nentries << " frames in the DataFrame.\n";
+  
+   ofstream iofile(Form("OutputFiles/DataFrameCSV_%i_MeV.csv", energy), ofstream::out);
+
+   TLeaf *lX = tree->GetLeaf("fDataFrame.fX");
+   TLeaf *lY = tree->GetLeaf("fDataFrame.fY");
+   TLeaf *lLayer = tree->GetLeaf("fDataFrame.fLayer");
+
+   Int_t counter = 0;
+   for (Int_t i=0; i<nentries; i++) {
+      tree->GetEntry(i);
+
+      for (Int_t j=0; j<lX->GetLen(); j++) {
+         Int_t x = lX->GetValue(j) + nx/2;
+         Int_t y = lY->GetValue(j) + ny/2;
+         Int_t z = lLayer->GetValue(j);
+
+         iofile << i << " " << x << " " << y << " " << z << endl;
+      }
+   }
+   delete f;
+}
+
+
 void  DataInterface::getMCClusters(Int_t runNo, Clusters *clusters) {
    Int_t eventIdFrom = runNo * kEventsPerRun;
    Int_t eventIdTo = eventIdFrom + kEventsPerRun;

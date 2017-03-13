@@ -42,6 +42,10 @@
 
 using namespace std;
 
+void writeDataFrame(Int_t energy) {
+   DataInterface *di = new DataInterface();
+   di->writeDataFrame(energy);
+}
 
 void drawTrackAngleAtVaryingRunNumbers(Int_t dataType, Float_t energy) {
    Int_t nRuns = 0;

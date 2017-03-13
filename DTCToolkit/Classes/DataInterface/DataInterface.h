@@ -129,6 +129,7 @@ public :
    virtual Int_t     getMCFrame(Int_t runNo, CalorimeterFrame *cf, Float_t *x_energy = 0, Float_t *y_energy = 0);
    virtual void      getMCClusters(Int_t runNo, Clusters *clusters);
    virtual void      getDataFrame(Int_t runNo, CalorimeterFrame *cf, Int_t energy = 190);
+   virtual void      writeDataFrame(Int_t energy = 190);
    virtual void      getMCData(Int_t runNo, TH3F* Frame3D);
    virtual void      getDataProfile(TH2F *hProfile, TH2F *hProjection, Int_t energy);
    virtual void      getEventIDs(Int_t runNo, Hits* hits);
