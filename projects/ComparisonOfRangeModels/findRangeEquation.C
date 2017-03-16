@@ -8,6 +8,7 @@
 #include <fstream>
 #include <TCanvas.h>
 #include <TGraph.h>
+#include <TPaveText.h>
 #include <TLegend.h>
 #include <TGraphErrors.h>
 #include <TH1F.h>
@@ -21,6 +22,34 @@ using namespace std;
 void Run(int COUNTER);
 Double_t fitfunc_DBP(Double_t *v, Double_t *par);
 Double_t fitfunc_Ulmer(Double_t *v, Double_t *par);
+
+const Int_t numberOfEnergies = 132;
+
+void filterArray(Double_t *array, Int_t filterSize) {
+   Double_t tempArray[numberOfEnergies];
+   Double_t value;
+   Int_t n;
+
+   for (Int_t i=0; i<numberOfEnergies; i++) {
+      value = 0;
+      n = 0;
+
+      for (Int_t j=i-filterSize/2; j<=i+filterSize/2; j++) {
+         if (j<0 || j>=numberOfEnergies) {
+            continue;
+         }
+         value += array[j];
+         n++;
+      }
+
+      value /= n;
+      tempArray[i] = value;
+   }
+
+   for (Int_t i=0; i<numberOfEnergies; i++) {
+      array[i] = tempArray[i];
+   }
+}
 
 Double_t fitfunc_DBP(Double_t *v, Double_t *par) {
 
@@ -149,7 +178,6 @@ void Run(int COUNTER) {
    TF1             * hybridBraggKleemanInv = nullptr;
    TF1             * fitFunction = nullptr;
    TF1             * fitInvFunction = nullptr;
-   const Int_t       numberOfEnergies = 132;
    Double_t          ranges[numberOfEnergies] = {};
    Double_t          sigmas[numberOfEnergies] = {};
    Double_t          energies[numberOfEnergies] = {}; // {0, 10, 30, 50, 70, 90, 100, 110, 120, 130, 140, 150, 160, 170, 180, 190, 200};
@@ -171,13 +199,13 @@ void Run(int COUNTER) {
    Double_t          deltaHybridInv[numberOfEnergies] = {};
 
    cout << "Reading file\n";
-   in.open("ranges_water_pstar2.csv");
+   in.open("ranges_water_pstar3.csv");
 //   in.open("Ranges_2mm_Al.csv");
 //   in.open("Ranges_3mm_Al.csv");
    idx = 0;
    Bool_t useCSDA = true;
    Bool_t useCompleteDataset = false;
-   Double_t  lowerAccuracyLimit = 1e-4; // in %
+   Double_t  lowerAccuracyLimit = 1e-3; // in %
    Int_t idxPara = 0;
    Int_t idxCtrl = 0;
    
@@ -227,36 +255,36 @@ void Run(int COUNTER) {
 
    pad11->cd();
    gBK->SetTitle("Bragg-Kleeman fit;Energy [MeV];Range [cm]");
-   gPad->SetLogx(); gPad->SetLogy();
+   gPad->SetLogy();
    gBK->Draw("A*");
 
    pad11Inv->cd();
    gBKInv->SetTitle("Inverse Bragg-Kleeman fit;Range [cm];Energy [MeV]");
-   gPad->SetLogx(); gPad->SetLogy();
+   gPad->SetLogy();
    gBKInv->Draw("A*");
 
    pad21->cd(); 
    gUlmer->SetTitle("Ulmer fit;Energy [MeV];Range [cm]");
-   gPad->SetLogx(); gPad->SetLogy();
+   gPad->SetLogy();
    gUlmer->Draw("A*");
    
    pad21Inv->cd();
    gUlmerInv->SetTitle("Inverse Ulmer fit;Range [cm];Energy [cm]");
-   gPad->SetLogx(); gPad->SetLogy();
+   gPad->SetLogy();
    gUlmerInv->Draw("A*");
 
    pad41->cd();
    gLinear->SetTitle("Linear interpolation;Energy [MeV];Range [cm]");
    gLinear->SetLineColor(kRed);
    gLinear->SetLineWidth(2);
-   gPad->SetLogx(); gPad->SetLogy();
+   gPad->SetLogy();
    gLinear->Draw("LA*");
 
    pad41Inv->cd();
    gLinearInv->SetTitle("Inverse linear intepolation;Range [cm];Energy [MeV]");
    gLinearInv->SetLineColor(kRed);
    gLinearInv->SetLineWidth(2);
-   gPad->SetLogx(); gPad->SetLogy();
+   gPad->SetLogy();
    gLinearInv->Draw("LA*");
 
    pad51->cd();
@@ -264,7 +292,7 @@ void Run(int COUNTER) {
    gSpline->Draw("*A");
    spline->SetLineColor(kRed);
    spline->SetLineWidth(2);
-   gPad->SetLogx(); gPad->SetLogy();
+   gPad->SetLogy();
    spline->Draw("same");
    
    pad51Inv->cd();
@@ -272,7 +300,7 @@ void Run(int COUNTER) {
    gSplineInv->Draw("*A");
    splineInv->SetLineColor(kRed);
    splineInv->SetLineWidth(2);
-   gPad->SetLogx(); gPad->SetLogy();
+   gPad->SetLogy();
    splineInv->Draw("same");
 
    cout << "Fitting functions\n";
@@ -331,14 +359,16 @@ void Run(int COUNTER) {
       energy = energies_control[i];
       controlValue = ranges_control[i];
 
-      deltaBK[i] = max( 100*fabs(braggKleeman->Eval(energy) - controlValue) / controlValue, lowerAccuracyLimit );
-      deltaBKInv[i] = max( 100*fabs(braggKleemanInv->Eval(controlValue) - energy) / energy, lowerAccuracyLimit );
-      deltaUlmer[i] = max( 100*fabs(fitFunction->Eval(energy) - controlValue) / controlValue, lowerAccuracyLimit );
-      deltaUlmerInv[i] = max( 100*fabs(fitInvFunction->Eval(controlValue) - energy) / energy, lowerAccuracyLimit );
-      deltaSpline[i] = max( 100*fabs(spline->Eval(energy) - controlValue) / controlValue, lowerAccuracyLimit );
-      deltaSplineInv[i] = max( 100*fabs(splineInv->Eval(controlValue) - energy) / energy, lowerAccuracyLimit );
-      deltaLinear[i] = max( 100*fabs(gLinear->Eval(energy) - controlValue) / controlValue, lowerAccuracyLimit );
-      deltaLinearInv[i] = max( 100*fabs(gLinearInv->Eval(controlValue) - energy) / energy, lowerAccuracyLimit );
+      // The limit is given in terms of MM
+      // Limit in %: Divide by controlValue
+      deltaBK[i] = max( 100*fabs(braggKleeman->Eval(energy) - controlValue) / controlValue, 100*lowerAccuracyLimit / controlValue);
+      deltaBKInv[i] = max( 100*fabs(braggKleemanInv->Eval(controlValue) - energy) / energy, 100*lowerAccuracyLimit / energy);
+      deltaUlmer[i] = max( 100*fabs(fitFunction->Eval(energy) - controlValue) / controlValue, 100*lowerAccuracyLimit / controlValue);
+      deltaUlmerInv[i] = max( 100*fabs(fitInvFunction->Eval(controlValue) - energy) / energy, 100*lowerAccuracyLimit / energy);
+      deltaSpline[i] = max( 100*fabs(spline->Eval(energy) - controlValue) / controlValue, 100*lowerAccuracyLimit /controlValue);
+      deltaSplineInv[i] = max( 100*fabs(splineInv->Eval(controlValue) - energy) / energy, 100*lowerAccuracyLimit / energy);
+      deltaLinear[i] = max( 100*fabs(gLinear->Eval(energy) - controlValue) / controlValue, 100*lowerAccuracyLimit /controlValue);
+      deltaLinearInv[i] = max( 100*fabs(gLinearInv->Eval(controlValue) - energy) / energy, 100*lowerAccuracyLimit /energy);
    }
 
    cout << "THE NUMBER OF DATA POINTS TO OBTAIN THE MODEL IS THUS: " << idxPara << endl;
@@ -357,7 +387,8 @@ void Run(int COUNTER) {
    gBKControl->SetLineWidth(2);
    gBKControl->SetLineColor(kRed);
    gPad->SetLogy();
-   gBKControl->GetYaxis()->SetRangeUser(1e-5, 500);
+   gBKControl->GetYaxis()->SetRangeUser(0.001, 300);
+   gBKControl->GetXaxis()->SetRangeUser(0, 250);
    gBKControl->GetYaxis()->SetNdivisions(5);
    gBKControl->GetYaxis()->SetNoExponent();
    gBKControl->Draw("AL");
@@ -558,15 +589,15 @@ void Run(int COUNTER) {
          (rms_BK+rms_BKInv)/2, (rms_Ulmer + rms_UlmerInv)/2,
          (rms_Linear+rms_LinearInv)/2, (rms_Spline + rms_SplineInv)/2);
 
-   printf("Mean % of all models:\n");
-   printf("Bragg-Kleeman (%.3f%), Ulmer (%.3f%), Linear (%.3f%), Spline (%.3f%)\n", 
+   printf("Mean %% of all models:\n");
+   printf("Bragg-Kleeman (%.3f%%), Ulmer (%.3f%%), Linear (%.3f%%), Spline (%.3f%%)\n", 
          (avgErrorBK+avgErrorBKInv)/2, (avgErrorUlmer + avgErrorUlmerInv)/2,
          (avgErrorLinear+avgErrorLinearInv)/2, (avgErrorSpline + avgErrorSplineInv)/2);
 
-   printf("Bragg-Kleeman: %.3f%, Inverse Bragg-Kleeman: %.3f%\n", avgErrorBK, avgErrorBKInv);
-   printf("Ulmer: %.3f%, Inverse Ulmer: %.3f%\n", avgErrorUlmer, avgErrorUlmerInv);
-   printf("Linear: %.3f%, Inverse linear: %.3f%\n", avgErrorLinear, avgErrorLinearInv);
-   printf("Spline: %.3f%, Inverse spline: %.3f%\n", avgErrorSpline, avgErrorSplineInv);
+   printf("Bragg-Kleeman: %.3f%%, Inverse Bragg-Kleeman: %.3f%%\n", avgErrorBK, avgErrorBKInv);
+   printf("Ulmer: %.3f%%, Inverse Ulmer: %.3f%%\n", avgErrorUlmer, avgErrorUlmerInv);
+   printf("Linear: %.3f%%, Inverse linear: %.3f%%\n", avgErrorLinear, avgErrorLinearInv);
+   printf("Spline: %.3f%%, Inverse spline: %.3f%%\n", avgErrorSpline, avgErrorSplineInv);
 
    // Find median values
    Int_t aSize;
@@ -617,20 +648,28 @@ void Run(int COUNTER) {
    thirdQuartileLinearInv = aSize % 4 ? tempArray[aSize * 3 / 4] : (tempArray[aSize * 3/ 4 - 1] + tempArray[aSize * 3 / 4]) / 2;
    
    printf("\033[1mMEDIAN VALUES....\033[0m\n");
-   printf("Bragg-Kleeman: (%.3f%, %.3f%, %.3f%), Inverse Bragg-Kleeman: (%.3f%, %.3f%, %.3f%)\n", firstQuartileBK, medianBK, thirdQuartileBK, firstQuartileBKInv, medianBKInv, thirdQuartileBKInv);
-   printf("Ulmer: (%.3f%, %.3f%, %.3f%), Inverse Ulmer: (%.3f%, %.3f%, %.3f%)\n", firstQuartileUlmer, medianUlmer, thirdQuartileUlmer, firstQuartileUlmerInv, medianUlmerInv, thirdQuartileUlmerInv);
-   printf("Linear: (%.3f%, %.3f%, %.3f%), Inverse linear: (%.3f%, %.3f%, %.3f%)\n", firstQuartileLinear, medianLinear, thirdQuartileLinear, firstQuartileLinearInv, medianLinearInv, thirdQuartileLinearInv);
-   printf("Spline: (%.3f%, %.3f%, %.3f%), Inverse spline: (%.3f%, %.3f%, %.3f%)\n\033[0m", firstQuartileSpline, medianSpline, thirdQuartileSpline, firstQuartileSplineInv, medianSplineInv, thirdQuartileSplineInv);
+   printf("Bragg-Kleeman: (%.3f%%, %.3f%%, %.3f%%), Inverse Bragg-Kleeman: (%.3f%%, %.3f%%, %.3f%%)\n", firstQuartileBK, medianBK, thirdQuartileBK, firstQuartileBKInv, medianBKInv, thirdQuartileBKInv);
+   printf("Ulmer: (%.3f%%, %.3f%%, %.3f%%), Inverse Ulmer: (%.3f%%, %.3f%%, %.3f%%)\n", firstQuartileUlmer, medianUlmer, thirdQuartileUlmer, firstQuartileUlmerInv, medianUlmerInv, thirdQuartileUlmerInv);
+   printf("Linear: (%.3f%%, %.3f%%, %.3f%%), Inverse linear: (%.3f%%, %.3f%%, %.3f%%)\n", firstQuartileLinear, medianLinear, thirdQuartileLinear, firstQuartileLinearInv, medianLinearInv, thirdQuartileLinearInv);
+   printf("Spline: (%.3f%%, %.3f%%, %.3f%%), Inverse spline: (%.3f%%, %.3f%%, %.3f%%)\n\033[0m", firstQuartileSpline, medianSpline, thirdQuartileSpline, firstQuartileSplineInv, medianSplineInv, thirdQuartileSplineInv);
    
-   ofstream file("../../OutputFiles/MedianValuesForParameterization.csv", ofstream::out | ofstream::app);
+   ofstream file("../../DTCToolkit/OutputFiles/MedianValuesForParameterization.csv", ofstream::out | ofstream::app);
    file << idxPara+1 << " " <<  firstQuartileBK << " " << medianBK << " " << thirdQuartileBK << " " << firstQuartileBKInv << " " << medianBKInv << " " << thirdQuartileBKInv;
    file << " " <<  firstQuartileUlmer << " " << medianUlmer << " " << thirdQuartileUlmer << " " << firstQuartileUlmerInv << " " << medianUlmerInv << " " << thirdQuartileUlmerInv;
    file << " " <<  firstQuartileSpline << " " << medianSpline << " " << thirdQuartileSpline << " " << firstQuartileSplineInv << " " << medianSplineInv << " " << thirdQuartileSplineInv;
    file << " " <<  firstQuartileLinear << " " << medianLinear << " " << thirdQuartileLinear << " " << firstQuartileLinearInv << " " << medianLinearInv << " " << thirdQuartileLinearInv << endl;
    file.close();
 
-   TCanvas *cCompare = new TCanvas("cCompare", "Error comparison", 800, 800);
-   cCompare->Divide(1,2,0.01,0.01);
+   TCanvas *cCompare = new TCanvas("cCompare", "Error comparison", 1200, 700);
+//   cCompare->Divide(1,2,0.01,0.01);
+
+/*
+   Int_t filterSize = 5;
+   filterArray(deltaBK, filterSize);
+   filterArray(deltaUlmer, filterSize);
+   filterArray(deltaSpline, filterSize);
+   filterArray(deltaLinear, filterSize);
+*/
 
    TGraph *gBKCompare = new TGraph(idxCtrl, energies_control, deltaBK);
    TGraph *gBKInvCompare = new TGraph(idxCtrl, ranges_control, deltaBKInv);
@@ -644,10 +683,13 @@ void Run(int COUNTER) {
    gBKCompare->SetLineColor(kRed);
    gBKInvCompare->SetLineColor(kRed);
    gUlmerCompare->SetLineColor(kBlue);
+//   gUlmerCompare->SetLineStyle(9);
    gUlmerInvCompare->SetLineColor(kBlue);
    gSplineCompare->SetLineColor(kGreen);
+//   gSplineCompare->SetLineStyle(10);
    gSplineInvCompare->SetLineColor(kGreen);
    gLinearCompare->SetLineColor(kBlack);
+//   gLinearCompare->SetLineStyle(7);
    gLinearInvCompare->SetLineColor(kBlack);
    gBKCompare->SetLineWidth(3);
    gBKInvCompare->SetLineWidth(3);
@@ -658,25 +700,44 @@ void Run(int COUNTER) {
    gLinearCompare->SetLineWidth(3);
    gLinearInvCompare->SetLineWidth(3);
 
-   gBKCompare->SetTitle("Range-from-energy accuracy comparison;Energy [MeV];Range error [%]");
+   gBKCompare->GetXaxis()->SetTitleFont(22);
+   gBKCompare->GetXaxis()->SetLabelFont(22);
+   gBKCompare->GetYaxis()->SetTitleFont(22);
+   gBKCompare->GetYaxis()->SetLabelFont(22);
+
+   gBKCompare->SetTitle("Accuracy of proton range calculation;Initial energy [MeV];Range error [%]");
    gBKInvCompare->SetTitle("Energy-from-range accuracy comparison;Range [MeV];Energy error [%]");
 
    cCompare->cd(1);
-   gPad->SetLogy(); gPad->SetLogx();
+   gPad->SetLogy(); 
    gBKCompare->Draw("LA");
    gUlmerCompare->Draw("L");
    gSplineCompare->Draw("L");
-   gLinearCompare->Draw("L)");
+   gLinearCompare->Draw("L");
+
+   gPad->Update();
+   TPaveText *title = (TPaveText*) gPad->GetPrimitive("title");
+   title->SetTextFont(22);
+   gPad->Modified();   
+
    TLegend *leg1 = new TLegend(0.15, 0.6, 0.35, 0.88);
+   leg1->SetTextFont(22);
    leg1->AddEntry(gBKCompare, "Bragg-Kleeman", "L");
-   leg1->AddEntry(gUlmerCompare, "Ulmer", "L");
+   leg1->AddEntry(gUlmerCompare, "Sum of exponentials", "L");
    leg1->AddEntry(gLinearCompare, "Linear interpolation", "L");
    leg1->AddEntry(gSplineCompare, "Spline interpolation", "L");
    leg1->Draw();
-   gBKCompare->GetYaxis()->SetRangeUser(1e-5, 1000);
+   gBKCompare->GetYaxis()->SetRangeUser(0.001, 300);
+   gBKCompare->GetYaxis()->SetNoExponent();
+   gBKCompare->GetXaxis()->SetRangeUser(0, 250);
+   gPad->Update();
+   TLine *onepercentline = new TLine(0, 1, gPad->GetUxmax(), 1);
+   onepercentline->SetLineStyle(7);
+   onepercentline->Draw();
 
+   /*
    cCompare->cd(2);
-   gPad->SetLogy(); gPad->SetLogx();
+   gPad->SetLogy(); 
    gBKInvCompare->Draw("LA");
    gUlmerInvCompare->Draw("L");
    gSplineInvCompare->Draw("L");
@@ -688,7 +749,7 @@ void Run(int COUNTER) {
    leg2->AddEntry(gSplineInvCompare, "Spline interpolation", "L");
    leg2->Draw();
    gBKInvCompare->GetYaxis()->SetRangeUser(1e-5, 1000);
-
+*/
    cout << "Finding depth dose curves\n";
    // ASSIGN THE PARAMETERS
    Double_t alpha, p, a1, b1, g1, b2, g2;
@@ -800,7 +861,7 @@ void Run(int COUNTER) {
    DDUlmer->SetLineColor(kBlue);
    DDUlmer->SetLineWidth(3);
    DDLinear->SetLineColor(kGreen);
-   DDLinear->SetLineWidth(3);
+   DDLinear->SetLineWidth(4);
    DDSpline->SetLineColor(kBlack);
    DDSpline->SetLineWidth(3);
 
@@ -835,15 +896,28 @@ void Run(int COUNTER) {
 
    DDLinear->GetHistogram()->GetYaxis()->SetRangeUser(0, 75);
    DDLinear->GetHistogram()->GetYaxis()->SetTitleOffset(0.6);
-   DDLinear->GetHistogram()->SetTitle("Depth-dose curves from model parameterizations;Depth in water [cm];dE/dz [A.U.]");
+   DDLinear->GetXaxis()->SetTitleFont(22);
+   DDLinear->GetXaxis()->SetLabelFont(22);
+   DDLinear->GetYaxis()->SetTitleFont(22);
+   DDLinear->GetYaxis()->SetLabelFont(22);
+   DDLinear->GetHistogram()->SetTitle("Energy loss curves of 190 MeV protons from model parameterizations;Depth in water [cm];Energy loss dE / dz [A.U.]");
+
+   DDUlmer->SetNpx(1000);
+   DDBK->SetNpx(1000);
 
    cDepth->cd();
    DDLinear->Draw("LA");
    DDSpline->Draw("L");
    DDUlmer->Draw("same");
    DDBK->Draw("same");
+   
+   gPad->Update();
+   TPaveText *title2 = (TPaveText*) gPad->GetPrimitive("title");
+   title2->SetTextFont(22);
+   gPad->Modified();
 
    TLegend *leg3 = new TLegend(0.18, 0.75, 0.46, 0.87);
+   leg3->SetTextFont(22);
    leg3->AddEntry(DDBK, "Bragg-Kleeman", "L");
    leg3->AddEntry(DDUlmer, "Sum of exponentials", "L");
    leg3->AddEntry(DDSpline, "Linear interpolation", "L");

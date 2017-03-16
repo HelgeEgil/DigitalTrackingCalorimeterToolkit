@@ -51,14 +51,17 @@ Float_t getEnergyAtTLFromPureAluminum(Float_t E0, Float_t depth) {
 //////////////////////////
 
 Float_t getTLFromEnergy(Float_t energy) {
+   if (energy == 0) return 0;
    return getTLFromEnergy(energy, splineMaterial);
 }
 
 Float_t getWEPLFromEnergy(Float_t energy) {
+   if (energy == 0) return 0;
    return getTLFromEnergy(energy, splineWater);
 }
 
 Float_t getTLFromWEPL(Float_t wepl) {
+   if (wepl == 0) return 0;
    Float_t energy = getEnergyFromWEPL(wepl);
    Float_t tl = getTLFromEnergy(energy);
 
@@ -70,13 +73,16 @@ Float_t getTLFromWEPL(Float_t wepl) {
 //////////////////////////
 
 Float_t getWEPLFactorFromEnergy(Float_t energy) {
+   if (energy == 0) return 0;
    Float_t range = getTLFromEnergy(energy);
    Float_t wepl = getWEPLFromEnergy(energy);
 
+//   return 2.15; // TEST
    return wepl / range;
 }
 
 Float_t getWEPLFromTL(Float_t tl) {
+   if (tl == 0) return 0;
    Double_t energy = getEnergyFromTL(tl);
    Double_t wepl = getWEPLFromEnergy(energy);
 
@@ -89,6 +95,7 @@ Float_t getWEPLFromTL(Float_t tl) {
 /////////////////////////////////////
 
 Float_t getTLStragglingFromTL(Float_t tl, Float_t sigma_energy) {
+   if (tl == 0) return 0;
    Float_t energy = getEnergyFromTL(tl);
    
    // The straggling is calculated empirically from fit from full MC data
@@ -194,6 +201,15 @@ Float_t getUnitFromEnergy(Float_t energy) {
    return res;
 }
 
+Float_t getUnitFromTL(Float_t tl) {
+   Float_t res = 0;
+   if       (kOutputUnit == kEnergy)   res = getEnergyFromTL(tl);
+   else if  (kOutputUnit == kPhysical) res = tl;
+   else if  (kOutputUnit == kWEPL)     res = getWEPLFromTL(tl);
+
+   return res;
+}
+
 Float_t getUnitFromWEPL(Float_t wepl) {
    Float_t res = 0;
    if       (kOutputUnit == kEnergy)   res = getEnergyFromWEPL(wepl);
@@ -206,10 +222,20 @@ Float_t getUnitFromWEPL(Float_t wepl) {
 Float_t getEnergyFromUnit(Float_t unit) {
    Float_t res = 0;
 
-   if    (kOutputUnit == kEnergy)   res = unit;
+   if       (kOutputUnit == kEnergy)   res = unit;
    else if  (kOutputUnit == kPhysical) res = getEnergyFromTL(unit);
-   else if (kOutputUnit == kWEPL)      res = getEnergyFromWEPL(unit);
+   else if  (kOutputUnit == kWEPL)     res = getEnergyFromWEPL(unit);
    
+   return res;
+}
+
+Float_t getEnergyAtUnit(Float_t unit, Float_t degraderthickness) {
+   Float_t res = 0;
+
+   if       (kOutputUnit == kEnergy)      res = getEnergyAtWEPL(getWEPLFromEnergy(unit), degraderthickness); // Eh?
+   else if  (kOutputUnit == kWEPL)        res = getEnergyAtWEPL(unit, degraderthickness);
+   else if  (kOutputUnit == kPhysical)    res = getEnergyAtTL(unit, degraderthickness);
+
    return res;
 }
 

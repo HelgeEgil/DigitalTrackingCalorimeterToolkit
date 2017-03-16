@@ -5,7 +5,7 @@
 #include <vector>
 #include <TObject.h>
 
-// #define USEALPIDE
+#define USEALPIDE
 
 #ifdef USEDEBUG
 #define showDebug(x) std::cout << x
@@ -49,7 +49,7 @@ const Float_t kRad = 3.14159265/180.;
 const    Int_t nx = NX;
 const    Int_t ny = NY;
 const    Int_t nTrackers = 4;
-const    Float_t kAbsorbatorThickness = 4; // mm 
+const    Float_t kAbsorbatorThickness = 2; // mm 
 // FOCAL IS 3 mm (2x absorbers = 3 mm)
 
 // nLayers are loaded in MaterialConstants.C according to the detector geometry
@@ -68,7 +68,7 @@ const Int_t kMaterial = kAluminum;
 Int_t kDataType = kMC;
 
 enum eOutputUnit {kPhysical, kWEPL, kEnergy};
-Int_t kOutputUnit = kWEPL;
+Int_t kOutputUnit = kPhysical;
 
 /*
  * Track reconstruction algorithms

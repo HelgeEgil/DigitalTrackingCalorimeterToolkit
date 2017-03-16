@@ -1,0 +1,61 @@
+/gate/geometry/setMaterialDatabase GateMaterials.db
+
+/gate/world/geometry/setXLength 1000. cm
+/gate/world/geometry/setYLength 1000. cm
+/gate/world/geometry/setZLength 150. cm
+
+/gate/world/daughters/name scanner
+/gate/world/daughters/insert box
+/gate/scanner/geometry/setXLength 80. cm
+/gate/scanner/geometry/setYLength 80. cm
+/gate/scanner/geometry/setZLength 75. cm
+/gate/scanner/placement/setTranslation 0 0 37.5 cm
+
+/gate/scanner/daughters/name phantom
+/gate/scanner/daughters/insert box
+/gate/phantom/geometry/setXLength 50. cm
+/gate/phantom/geometry/setYLength 50. cm
+/gate/phantom/geometry/setZLength 75. cm
+/gate/phantom/setMaterial Water
+
+/gate/phantom/attachCrystalSD
+
+/gate/physics/addPhysicsList QGSP_BIC_EMY
+/gate/geometry/setIonisationPotential Water 75 eV
+
+/gate/run/initialize
+
+#/gate/source/addSource PBS PencilBeam
+#/gate/source/PBS/setParticleType proton
+#/gate/source/PBS/setEnergy 250. MeV
+#/gate/source/PBS/setSigmaEnergy 0. MeV
+#/gate/source/PBS/setPosition 0 0 -10. mm
+#/gate/source/PBS/setSigmaX 4 mm
+#/gate/source/PBS/setSigmaY 2 mm
+#/gate/source/PBS/setSigmaTheta 3.3 mrad
+#/gate/source/PBS/setSigmaPhi 3.8 mrad
+#/gate/source/PBS/setEllipseXThetaEmittance 15 mm*mrad
+#/gate/source/PBS/setEllipseXThetaRotationNorm negative
+#/gate/source/PBS/setEllipseYPhiEmittance 20 mm*mrad
+#/gate/source/PBS/setEllipseYPhiRotationNorm negative
+
+/gate/source/addSource uniformBeam gps
+/gate/source/uniformBeam/gps/particle proton
+/gate/source/uniformBeam/gps/ene/type Gauss
+/gate/source/uniformBeam/gps/ene/mono 250 MeV
+/gate/source/uniformBeam/gps/ene/sigma 0 MeV
+/gate/source/uniformBeam/gps/type Plane
+/gate/source/uniformBeam/gps/shape Square
+/gate/source/uniformBeam/gps/direction 0 0 1
+/gate/source/uniformBeam/gps/halfx 0 mm
+/gate/source/uniformBeam/gps/halfy 0 mm
+/gate/source/uniformBeam/gps/centre 0. 0. -1. cm
+/gate/application/setTotalNumberOfPrimaries 5000
+
+
+/gate/output/root/enable
+/gate/output/root/setFileName gate_simulation
+
+/gate/random/setEngineName MersenneTwister
+/gate/random/setEngineSeed auto
+/gate/application/start

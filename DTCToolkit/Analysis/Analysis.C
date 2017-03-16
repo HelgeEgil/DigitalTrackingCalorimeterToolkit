@@ -706,10 +706,12 @@ Float_t drawBraggPeakGraphFit(Int_t Runs, Int_t dataType, Bool_t recreate, Float
    }
    TCanvas      * cGraph = new TCanvas("cGraph", "Fitted data points", 1500, 500);
    TCanvas      * cFitResults = new TCanvas("cFitResults", hTitle, 1000, 1000);
-   TH1F         * hFitResults = new TH1F("fitResult", hTitle, nEnergies*4, getUnitFromEnergy(0), getUnitFromEnergy(run_energy*1.2));
-   TH1F         * hFitResultsDroppedData = new TH1F("fitResultsDroppedData", hTitle, 200, getUnitFromEnergy(0), getUnitFromEnergy(run_energy*1.2));
+   TH1F         * hFitResults = new TH1F("fitResult", hTitle, fmax(nEnergies*4,100), getUnitFromEnergy(0), getUnitFromEnergy(run_energy)*1.4+10);
+   TH1F         * hFitResultsDroppedData = new TH1F("fitResultsDroppedData", hTitle, 200, getUnitFromEnergy(0), getUnitFromEnergy(run_energy)*1.4+10);
    TH1F         * hMaxAngle = new TH1F("hMaxAngle", "Maximum angle for proton track", 200, 0, 25);
-   
+ 
+   printf("Histogram limits: %.2f to %.2f.\n", getUnitFromEnergy(0), getUnitFromEnergy(run_energy)*1.2);
+
    printf("At energy %.0f, expecting range %.2f mm and WEPL %.2f mm.\n", run_energy, getTLFromEnergy(run_energy), getWEPLFromEnergy(run_energy));
    printf("This corresponds to a WEPL factor of %.2f.\n", getWEPLFactorFromEnergy(run_energy));
    cout << "Correcting for aluminum plate: " << kIsAluminumPlate << endl;
@@ -735,7 +737,7 @@ Float_t drawBraggPeakGraphFit(Int_t Runs, Int_t dataType, Bool_t recreate, Float
       Track *thisTrack = tracks->At(j);
       if (!thisTrack) continue;
      
-      if (thisTrack->doesTrackEndAbruptly() && thisTrack->getEnergy() < 200) {
+      if (thisTrack->doesTrackEndAbruptly()) {
          hFitResultsDroppedData->Fill(getUnitFromEnergy(thisTrack->getEnergy()));
          nCutDueToTrackEndingAbruptly++;
          continue;
@@ -761,7 +763,7 @@ Float_t drawBraggPeakGraphFit(Int_t Runs, Int_t dataType, Bool_t recreate, Float
       fitScale = thisTrack->getFitParameterScale();
       fitError = quadratureAdd(thisTrack->getFitParameterError(), dz/sqrt(12)); // latter term from error on layer position
 
-      hFitResults->Fill(getUnitFromWEPL(fitRange));
+      hFitResults->Fill(fitRange); // fitRange is already correct unit
 
       if (fitIdx < plotSize && kDrawIndividualGraphs && j>=skipPlot) {
          drawIndividualGraphs(cGraph, outputGraph, fitRange, fitScale, fitError, fitIdx++);
@@ -1825,7 +1827,7 @@ void drawRegionOccupancy(Int_t Runs, Int_t Layer, Float_t energy) {
    hCount->SetFillColor(kBlue-7);
    hCount->Draw();
       
-   printf("The overall occupancy is %.2f %", 100*(float) counterOverall / nx / ny);
+   printf("The overall occupancy is %.2f %%", 100*(float) counterOverall / nx / ny);
 
    gPad->Update();
    TLine *l = new TLine(12.5, 0, 12.5, 500);
@@ -2196,7 +2198,7 @@ void drawIndividualGraphs(TCanvas *cGraph, TGraphErrors* outputGraph, Float_t fi
    }
    
    else if (kOutputUnit == kPhysical) {
-      outputGraph->GetXaxis()->SetTitle("Physical path length [mm]");
+      outputGraph->GetXaxis()->SetTitle("Projected range [mm]");
    }
 
    outputGraph->GetYaxis()->SetTitle("Energy deposition [keV/#mum]");
@@ -2258,7 +2260,7 @@ void drawIndividualGraphs(TCanvas *cGraph, TGraphErrors* outputGraph, Float_t fi
    }
 
    if (kDrawText) {
-      TLatex *text = new TLatex(15, 18, Form("Fitted energy: %.1f #pm %.1f MeV", getEnergyFromWEPL(fitRange), fitError));
+      TLatex *text = new TLatex(15, 18, Form("Fitted range: %.1f #pm %.1f mm", fitRange, fitError));
       text->SetTextSize(0.05);
       text->SetTextFont(22);
       text->Draw();
@@ -2274,8 +2276,8 @@ TF1 *  doSimpleGaussianFit (TH1F *h, Float_t *means, Float_t *sigmas) {
    Float_t estimated_energy_error = 0;
    Float_t sum_constant = 0, sumSigma = 0;
 
-   Float_t nominalMean = getWEPLFromEnergy(run_energy);
-   Float_t nominalSigma = getWEPLStragglingFromEnergy(run_energy, 0);
+   Float_t nominalMean = getUnitFromEnergy(run_energy);
+   Float_t nominalSigma = getUnitStragglingFromEnergy(run_energy, 0);
 
    TAxis *axis = h->GetXaxis();
    TF1 *gauss = new TF1("gauss", "gaus");
@@ -2307,16 +2309,16 @@ TF1 *  doSimpleGaussianFit (TH1F *h, Float_t *means, Float_t *sigmas) {
    }
 
    Float_t empiricalSigma = sqrt(abs(squareMeanDifference / N));
-   cout << "The empirical estimated range is " << empiricalMean << " mm. (which is " << getEnergyFromWEPL(empiricalMean) << " MeV).\n";
+   cout << "The empirical estimated range is " << empiricalMean << " mm. (which is " << getEnergyFromUnit(empiricalMean) << " MeV).\n";
    cout << "The empirical standard deviation is " << empiricalSigma << " mm.\n";
    
    ofstream file2("OutputFiles/result_makebraggpeakfit.csv", ofstream::out | ofstream::app);
    // absorber thickness; energy; nominal range; estimated range; range sigma
    if (run_degraderThickness == 0) {
-      file2 << kAbsorbatorThickness << " " << run_energy << " " << getWEPLFromEnergy(run_energy) << " " << empiricalMean << " " << nominalSigma << " " << empiricalSigma << " " << endl;
+      file2 << kAbsorbatorThickness << " " << run_energy << " " << getUnitFromEnergy(run_energy) << " " << empiricalMean << " " << nominalSigma << " " << empiricalSigma << " " << endl;
    }
    else {
-      file2 << kAbsorbatorThickness << " " << run_degraderThickness << " " << getWEPLFromEnergy(run_energy) << " " << empiricalMean << " " << nominalSigma << " " << empiricalSigma << " " << endl;
+      file2 << kAbsorbatorThickness << " " << run_degraderThickness << " " << getUnitFromEnergy(run_energy) << " " << empiricalMean << " " << nominalSigma << " " << empiricalSigma << " " << endl;
    }
 
    file2.close();

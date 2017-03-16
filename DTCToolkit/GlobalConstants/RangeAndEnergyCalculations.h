@@ -44,7 +44,9 @@ Float_t getEnergyStragglingFromWEPLStraggling(Float_t range, Float_t rangeStragg
 // Conversion to/from defined kOutputUnit
 Float_t getUnitFromEnergy(Float_t energy);
 Float_t getUnitFromWEPL(Float_t wepl);
+Float_t getUnitFromTL(Float_t tl);
 Float_t getEnergyFromUnit(Float_t unit);
+Float_t getEnergyAtUnit(Float_t unit, Float_t degraderthickness);
 Float_t getUnitStragglingFromEnergy(Float_t energy, Float_t sigma_energy);
 
 // Calculation of energy loss

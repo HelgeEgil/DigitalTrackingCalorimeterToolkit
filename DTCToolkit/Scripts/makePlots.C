@@ -96,31 +96,31 @@ void makePlots() {
    Float_t  chipCalibrationError188[27] = {0};
 
    // Parameterization (l = 1st quartile, m = median, h = 3rd quartile)
-   Double_t paraNPoints[21] = {};
-   Double_t paraBKl[21] = {};
-   Double_t paraBKm[21] = {};
-   Double_t paraBKh[21] = {};
-   Double_t paraBKInvl[21] = {};
-   Double_t paraBKInvm[21] = {};
-   Double_t paraBKInvh[21] = {};
-   Double_t paraUlmerl[21] = {};
-   Double_t paraUlmerm[21] = {};
-   Double_t paraUlmerh[21] = {};
-   Double_t paraUlmerInvl[21] = {};
-   Double_t paraUlmerInvm[21] = {};
-   Double_t paraUlmerInvh[21] = {};
-   Double_t paraSplinel[21] = {};
-   Double_t paraSplinem[21] = {};
-   Double_t paraSplineh[21] = {};
-   Double_t paraSplineInvl[21] = {};
-   Double_t paraSplineInvm[21] = {};
-   Double_t paraSplineInvh[21] = {};
-   Double_t paraLinearl[21] = {};
-   Double_t paraLinearm[21] = {};
-   Double_t paraLinearh[21] = {};
-   Double_t paraLinearInvl[21] = {};
-   Double_t paraLinearInvm[21] = {};
-   Double_t paraLinearInvh[21] = {};
+   Double_t paraNPoints[100] = {};
+   Double_t paraBKl[100] = {};
+   Double_t paraBKm[100] = {};
+   Double_t paraBKh[100] = {};
+   Double_t paraBKInvl[100] = {};
+   Double_t paraBKInvm[100] = {};
+   Double_t paraBKInvh[100] = {};
+   Double_t paraUlmerl[100] = {};
+   Double_t paraUlmerm[100] = {};
+   Double_t paraUlmerh[100] = {};
+   Double_t paraUlmerInvl[100] = {};
+   Double_t paraUlmerInvm[100] = {};
+   Double_t paraUlmerInvh[100] = {};
+   Double_t paraSplinel[100] = {};
+   Double_t paraSplinem[100] = {};
+   Double_t paraSplineh[100] = {};
+   Double_t paraSplineInvl[100] = {};
+   Double_t paraSplineInvm[100] = {};
+   Double_t paraSplineInvh[100] = {};
+   Double_t paraLinearl[100] = {};
+   Double_t paraLinearm[100] = {};
+   Double_t paraLinearh[100] = {};
+   Double_t paraLinearInvl[100] = {};
+   Double_t paraLinearInvm[100] = {};
+   Double_t paraLinearInvh[100] = {};
 
    Int_t nThisEnergy = 0, lastEnergy = 0, mmAbsorbator;
 
@@ -138,8 +138,8 @@ void makePlots() {
    Float_t p_wtr = 1.7547;
 
    if       (absorberThickness == 2) {
-      a_dtc = 0.014306;
-      p_dtc = 1.705680;
+      a_dtc = 0.012511;
+      p_dtc = 1.730529;
    }
    else if  (absorberThickness == 3) {
       a_dtc = 0.010746;
@@ -162,7 +162,7 @@ void makePlots() {
          continue;
       }
 
-      arrayMCActualSigma[nlines0] = nomsigma_;// * wepl_ratio0;
+      arrayMCActualSigma[nlines0] = nomsigma_ * wepl_ratio0;
       arrayMCActualSigmaRatio[nlines0] = nomsigma_ * 100 * wepl_ratio0 / wtr_range;
       arrayMCActualResidualRange[nlines0++] = nomrange_ * wepl_ratio0;
    }
@@ -461,7 +461,7 @@ void makePlots() {
    }
 
    ifstream in8;
-   Int_t    pN;
+   Double_t    pN;
    Int_t    pi = 0;
    Double_t pBKl, pBKm, pBKh, pBKIl, pBKIm, pBKIh;
    Double_t pUlmerl, pUlmerm, pUlmerh, pUlmerIl, pUlmerIm, pUlmerIh;
@@ -941,25 +941,30 @@ void makePlots() {
    TGraphAsymmErrors *tgaLinear = new TGraphAsymmErrors(21, paraNPoints, paraLinearm, dummy, dummy, paraLinearl, paraLinearh);
    */
 
-   TGraph *tgaBK     = new TGraph(14, paraNPoints, paraBKh);
-   TGraph *tgaUlmer  = new TGraph(14, paraNPoints, paraUlmerh);
-   TGraph *tgaSpline = new TGraph(14, paraNPoints, paraSplineh);
-   TGraph *tgaLinear = new TGraph(14, paraNPoints, paraLinearh);
+   TGraph *tgaBK     = new TGraph(pi, paraNPoints, paraBKh);
+   TGraph *tgaUlmer  = new TGraph(pi, paraNPoints, paraUlmerh);
+   TGraph *tgaSpline = new TGraph(pi, paraNPoints, paraSplineh);
+   TGraph *tgaLinear = new TGraph(pi, paraNPoints, paraLinearh);
 
-   tgaBK->SetTitle("Median error over all energies of Bragg Curve parameterizations;Number of data points in training group; Median error [%]");
+   tgaBK->SetTitle("Comparison of model stability;Number of data points in training group; 75% percentile of errors in range calculation [%]");
 
    tgaBK->SetLineColor(kRed);
    tgaBK->SetMarkerColor(kRed);
-   tgaBK->SetLineWidth(2);
+   tgaBK->SetLineWidth(3);
    tgaUlmer->SetLineColor(kBlue);
    tgaUlmer->SetMarkerColor(kBlue);
-   tgaUlmer->SetLineWidth(2);
+   tgaUlmer->SetLineWidth(3);
    tgaSpline->SetLineColor(kGreen);
    tgaSpline->SetMarkerColor(kGreen);
-   tgaSpline->SetLineWidth(2);
+   tgaSpline->SetLineWidth(3);
    tgaLinear->SetLineColor(kBlack);
    tgaLinear->SetMarkerColor(kBlack);
-   tgaLinear->SetLineWidth(2);
+   tgaLinear->SetLineWidth(3);
+
+   tgaBK->GetXaxis()->SetTitleFont(22);
+   tgaBK->GetXaxis()->SetLabelFont(22);
+   tgaBK->GetYaxis()->SetTitleFont(22);
+   tgaBK->GetYaxis()->SetLabelFont(22);
 
    tgaBK->Draw("ALP");
    tgaUlmer->Draw("same, LP");
@@ -967,17 +972,23 @@ void makePlots() {
    tgaLinear->Draw("same, LP");
    
    gPad->Update();
+   TPaveText *title = (TPaveText*) gPad->GetPrimitive("title");
+   title->SetTextFont(22);
+   gPad->Modified();
+   
+   gPad->Update();
    TLine  *tgaLine = new TLine(pow(10, gPad->GetUxmin()), 1, pow(10, gPad->GetUxmax()), 1);
+   tgaLine->SetLineStyle(7);
    tgaLine->Draw("same");
 
-   tgaBK->GetYaxis()->SetRangeUser(0.05, 50);
+   tgaBK->GetYaxis()->SetRangeUser(0.005, 200);
    tgaBK->GetYaxis()->SetNoExponent();
    tgaBK->GetXaxis()->SetNoExponent();
-   tgaBK->GetYaxis()->SetTitleOffset(0.85);
+   tgaBK->GetYaxis()->SetTitleOffset(0.95);
 
    TLegend *leg5 = new TLegend(0.72, 0.7, 0.94, 0.93);
    leg5->SetTextSize(0.035);
-//   leg5->SetTextFont(22);
+   leg5->SetTextFont(22);
    leg5->AddEntry(tgaBK, "Bragg-Kleeman", "L");
    leg5->AddEntry(tgaUlmer, "Sum of exponentials", "L");
    leg5->AddEntry(tgaLinear, "Linear interpolation", "L");

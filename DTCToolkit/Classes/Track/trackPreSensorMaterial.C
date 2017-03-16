@@ -99,8 +99,11 @@ Float_t Track::getPreTL() {
    if (kIsAluminumPlate) {
       energyLoss += getEnergyLossFromAluminumAbsorber(run_energy);
    }
-   
-   tl = getTLFromEnergy(run_energy) - getTLFromEnergy(run_energy - energyLoss);
+
+   if (energyLoss > 0) {   
+      tl = getTLFromEnergy(run_energy) - getTLFromEnergy(run_energy - energyLoss);
+   }
+
    return tl;
 }
 

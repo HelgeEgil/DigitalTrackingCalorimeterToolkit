@@ -36,8 +36,8 @@
 /gate/world/daughters/insert box
 /gate/scanner_2/geometry/setXLength 150.0 mm
 /gate/scanner_2/geometry/setYLength 150.0 mm
-/gate/scanner_2/geometry/setZLength 487.0 mm
-/gate/scanner_2/placement/setTranslation 0 0 245.935 mm
+/gate/scanner_2/geometry/setZLength 1826.25 mm
+/gate/scanner_2/placement/setTranslation 0 0 915.56 mm
 /gate/scanner_2/vis/setVisible false
 
 /gate/scanner_1/daughters/name FM_Layer
@@ -58,8 +58,8 @@
 
 /gate/FirstModule/daughters/name FM_ActiveChip
 /gate/FirstModule/daughters/insert box
-/gate/FM_ActiveChip/geometry/setXLength 90.0 mm
-/gate/FM_ActiveChip/geometry/setYLength 30.0 mm
+/gate/FM_ActiveChip/geometry/setXLength 500.0 mm
+/gate/FM_ActiveChip/geometry/setYLength 500.0 mm
 /gate/FM_ActiveChip/geometry/setZLength 0.0139 mm
 /gate/FM_ActiveChip/placement/setTranslation 0 0 -0.173 mm
 /gate/FM_ActiveChip/setMaterial Silicon
@@ -67,8 +67,8 @@
 
 /gate/FirstModule/daughters/name FM_PassiveChip
 /gate/FirstModule/daughters/insert box
-/gate/FM_PassiveChip/geometry/setXLength 90.0 mm
-/gate/FM_PassiveChip/geometry/setYLength 30.0 mm
+/gate/FM_PassiveChip/geometry/setXLength 500.0 mm
+/gate/FM_PassiveChip/geometry/setYLength 500.0 mm
 /gate/FM_PassiveChip/geometry/setZLength 0.1059 mm
 /gate/FM_PassiveChip/placement/setTranslation 0 0 -0.113 mm
 /gate/FM_PassiveChip/setMaterial Silicon
@@ -76,8 +76,8 @@
 
 /gate/FirstModule/daughters/name FM_ChipGlue
 /gate/FirstModule/daughters/insert box
-/gate/FM_ChipGlue/geometry/setXLength 90.0 mm
-/gate/FM_ChipGlue/geometry/setYLength 30.0 mm
+/gate/FM_ChipGlue/geometry/setXLength 500.0 mm
+/gate/FM_ChipGlue/geometry/setYLength 500.0 mm
 /gate/FM_ChipGlue/geometry/setZLength 0.0399 mm
 /gate/FM_ChipGlue/placement/setTranslation 0 0 -0.04 mm
 /gate/FM_ChipGlue/setMaterial Glue
@@ -85,8 +85,8 @@
 
 /gate/FirstModule/daughters/name FM_PCB
 /gate/FirstModule/daughters/insert box
-/gate/FM_PCB/geometry/setXLength 90.0 mm
-/gate/FM_PCB/geometry/setYLength 30.0 mm
+/gate/FM_PCB/geometry/setXLength 500.0 mm
+/gate/FM_PCB/geometry/setYLength 500.0 mm
 /gate/FM_PCB/geometry/setZLength 0.1599 mm
 /gate/FM_PCB/placement/setTranslation 0 0 0.06 mm
 /gate/FM_PCB/setMaterial PCB
@@ -94,8 +94,8 @@
 
 /gate/FirstModule/daughters/name FM_PCBGlue
 /gate/FirstModule/daughters/insert box
-/gate/FM_PCBGlue/geometry/setXLength 90.0 mm
-/gate/FM_PCBGlue/geometry/setYLength 30.0 mm
+/gate/FM_PCBGlue/geometry/setXLength 500.0 mm
+/gate/FM_PCBGlue/geometry/setYLength 500.0 mm
 /gate/FM_PCBGlue/geometry/setZLength 0.0399 mm
 /gate/FM_PCBGlue/placement/setTranslation 0 0 0.16 mm
 /gate/FM_PCBGlue/setMaterial Glue
@@ -124,7 +124,7 @@
 /gate/Layer/geometry/setXLength 100.0 mm
 /gate/Layer/geometry/setYLength 40.0 mm
 /gate/Layer/geometry/setZLength 2.435 mm
-/gate/Layer/placement/setTranslation 0 0 -242.2825 mm
+/gate/Layer/placement/setTranslation 0 0 -911.9075 mm
 /gate/Layer/vis/setVisible false
 
 /gate/Layer/daughters/name Module
@@ -137,8 +137,8 @@
 
 /gate/Module/daughters/name ActiveChip
 /gate/Module/daughters/insert box
-/gate/ActiveChip/geometry/setXLength 90.0 mm
-/gate/ActiveChip/geometry/setYLength 30.0 mm
+/gate/ActiveChip/geometry/setXLength 500.0 mm
+/gate/ActiveChip/geometry/setYLength 500.0 mm
 /gate/ActiveChip/geometry/setZLength 0.0139 mm
 /gate/ActiveChip/placement/setTranslation 0 0 -0.173 mm
 /gate/ActiveChip/setMaterial Silicon
@@ -146,8 +146,8 @@
 
 /gate/Module/daughters/name PassiveChip
 /gate/Module/daughters/insert box
-/gate/PassiveChip/geometry/setXLength 90.0 mm
-/gate/PassiveChip/geometry/setYLength 30.0 mm
+/gate/PassiveChip/geometry/setXLength 500.0 mm
+/gate/PassiveChip/geometry/setYLength 500.0 mm
 /gate/PassiveChip/geometry/setZLength 0.1059 mm
 /gate/PassiveChip/placement/setTranslation 0 0 -0.113 mm
 /gate/PassiveChip/setMaterial Silicon
@@ -155,8 +155,8 @@
 
 /gate/Module/daughters/name ChipGlue
 /gate/Module/daughters/insert box
-/gate/ChipGlue/geometry/setXLength 90.0 mm
-/gate/ChipGlue/geometry/setYLength 30.0 mm
+/gate/ChipGlue/geometry/setXLength 500.0 mm
+/gate/ChipGlue/geometry/setYLength 500.0 mm
 /gate/ChipGlue/geometry/setZLength 0.0399 mm
 /gate/ChipGlue/placement/setTranslation 0 0 -0.04 mm
 /gate/ChipGlue/setMaterial Glue
@@ -164,8 +164,8 @@
 
 /gate/Module/daughters/name PCB
 /gate/Module/daughters/insert box
-/gate/PCB/geometry/setXLength 90.0 mm
-/gate/PCB/geometry/setYLength 30.0 mm
+/gate/PCB/geometry/setXLength 500.0 mm
+/gate/PCB/geometry/setYLength 500.0 mm
 /gate/PCB/geometry/setZLength 0.1599 mm
 /gate/PCB/placement/setTranslation 0 0 0.06 mm
 /gate/PCB/setMaterial PCB
@@ -173,8 +173,8 @@
 
 /gate/Module/daughters/name PCBGlue
 /gate/Module/daughters/insert box
-/gate/PCBGlue/geometry/setXLength 90.0 mm
-/gate/PCBGlue/geometry/setYLength 30.0 mm
+/gate/PCBGlue/geometry/setXLength 500.0 mm
+/gate/PCBGlue/geometry/setYLength 500.0 mm
 /gate/PCBGlue/geometry/setZLength 0.0399 mm
 /gate/PCBGlue/placement/setTranslation 0 0 0.16 mm
 /gate/PCBGlue/setMaterial Glue
@@ -200,6 +200,6 @@
 
 /gate/Layer/repeaters/insert linear
 /gate/Layer/linear/autoCenter false
-/gate/Layer/linear/setRepeatNumber 40
+/gate/Layer/linear/setRepeatNumber 150
 /gate/Layer/linear/setRepeatVector 0 0 2.435 mm
 

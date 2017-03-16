@@ -82,7 +82,17 @@ Double_t fitfunc_DBP(Double_t *v, Double_t *par) {
 
    Double_t fitval = 0;
 
-   fitval = scale / ( p_water * pow(alpha_water, 1/p_water) * pow((range - depth), 1-1/p_water) ); // power calculation, less accurate but with the depth dose function
+   Float_t aa=0, pp=0;
+   if (kOutputUnit == kWEPL) {
+      aa = alpha_water;
+      pp = p_water;
+   }
+   else {
+      aa = alpha;
+      pp = p;
+   }
+
+   fitval = scale / ( pp * pow(aa, 1/pp) * pow((range - depth), 1-1/pp) ); // power calculation, less accurate but with the depth dose function
 
    /*
     * I tried to use an improved depth-dose curve in order to improve accuracy

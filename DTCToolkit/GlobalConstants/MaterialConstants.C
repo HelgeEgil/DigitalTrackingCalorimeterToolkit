@@ -176,11 +176,11 @@ void  createSplines() {
    splinePureAlInv = new TSpline3("splineWaterInv", rangesPureAl, energiesPureAl, idxPureAl);
    splineWInv = new TSpline3("splineWInv", rangesW, energiesW, idxW);
 
-   if (kAbsorbatorThickness == 2) { // updated 2017-03-02
-      alpha_aluminum = 0.0014306;
-      p_aluminum = 1.70568;
-      straggling_a = 1.85941;
-      straggling_b = 0.000650;
+   if (kAbsorbatorThickness == 2) { // updated 2017-03-15
+      alpha_aluminum = 0.012626;
+      p_aluminum = 1.728743;
+      straggling_a = 1.72323;
+      straggling_b = 0.00100124;
    }
 
    else if (kAbsorbatorThickness == 3) { // updated 2017-03-01

@@ -100,8 +100,11 @@ void findAPAndStraggling(Int_t absorberthickness) {
    }
    inMaterial.close();
 
+
+   Int_t nLinesChange = 381;
    TGraph *gRange = new TGraph(nlinesMaterial, arrayEMaterial, arrayRange);
-   TGraph *gStraggling = new TGraph(nlinesMaterial, arrayRange, arrayStraggling);
+   TGraph *gStraggling = new TGraph(nLinesChange, arrayRange, arrayStraggling);
+   TGraph *gStraggling2 = new TGraph(nlinesMaterial-nLinesChange, arrayRange+nLinesChange, arrayStraggling+nLinesChange);
    TGraph *gWEStraggling = new TGraph(nlinesMaterial, arrayRangeWater, arrayWEPLStraggling);
    TGraph *gEnergyStraggling = new TGraph(nlinesMaterial, arrayEMaterial, arrayEnergyStraggling);
 
@@ -118,6 +121,7 @@ void findAPAndStraggling(Int_t absorberthickness) {
    BK->SetParameters(0.01, 1.78);
    gRange->Fit("BK", "B,Q,M");
 
+
    c1->cd(3);
    gStraggling->SetMarkerStyle(7);
    gStraggling->SetMarkerColor(kBlue);
@@ -126,6 +130,10 @@ void findAPAndStraggling(Int_t absorberthickness) {
    TF1 *Straggling = new TF1("Straggling", "[0] + [1]*x");
    gStraggling->GetYaxis()->SetRangeUser(0,6);
    gStraggling->Fit("Straggling", "Q,M");
+   
+   gStraggling2->SetMarkerStyle(7);
+   gStraggling2->SetMarkerColor(kRed);
+   gStraggling2->Draw("P");
 
    c1->cd(4);
    gWEStraggling->SetMarkerStyle(7);

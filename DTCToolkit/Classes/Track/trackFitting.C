@@ -98,7 +98,7 @@ TGraphErrors * Track::doRangeFit(Bool_t isScaleVariable) {
    Float_t        maxEnergy, maxRange, estimatedEnergy, estimatedRange;
    Float_t        scaleParameter = 0;
    Float_t        WEPLFactor;
-   Float_t        overFittingDistance;
+   Float_t        overFittingDistance, startFittingDistance;
    Bool_t         checkResistivity = false;
 
    if (kDataType == kData) {
@@ -113,14 +113,14 @@ TGraphErrors * Track::doRangeFit(Bool_t isScaleVariable) {
       erx[i] = dz / sqrt(12);
    }
 
-
    // how much beyond the last measurement the fit is allowed to go
    overFittingDistance = dz;
+   startFittingDistance = dz * 0.5;
 
    maxEnergy = getEnergyFromTL(x[n-1] + overFittingDistance);
-   maxRange = getWEPLFromTL(x[n-1] + overFittingDistance);
-   estimatedEnergy = getEnergyFromTL(x[n-1] + 0.5*dz);
-   estimatedRange = getWEPLFromTL(x[n-1] + 0.5*dz);
+   maxRange = getUnitFromTL(x[n-1] + overFittingDistance);
+   estimatedEnergy = getEnergyFromTL(x[n-1] + startFittingDistance);
+   estimatedRange = getUnitFromTL(x[n-1] + startFittingDistance);
 
    // WE CONVERT FROM PROJECTED RANGE TO WATER EQUIVALENT RANGE HERE
    if (kOutputUnit == kWEPL || kOutputUnit == kEnergy) {
@@ -137,6 +137,7 @@ TGraphErrors * Track::doRangeFit(Bool_t isScaleVariable) {
 
    if (kDataType == kData) scaleParameter = 2.7;
    if (kUseAlpide) scaleParameter = 1.38; // was 1.58
+   if (kOutputUnit == kPhysical) scaleParameter = 0.73;
 
    TF1 *func = new TF1("fit_BP", fitfunc_DBP, 0, maxRange, 2);
    func->SetParameter(0, estimatedRange);

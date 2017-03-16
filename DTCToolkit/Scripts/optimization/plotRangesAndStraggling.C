@@ -23,7 +23,7 @@
 
 using namespace std;
 
-Int_t absorberThickness = 3;
+Int_t absorberThickness = 2;
 Bool_t kFilterData = true;
 Int_t filterSize = 15;
 const Int_t arraySize = 500;
@@ -106,8 +106,8 @@ void plotRangesAndStraggling() {
    Float_t p_wtr = 1.7547;
 
    if       (absorberThickness == 2) {
-      a_dtc = 0.014306;
-      p_dtc = 1.705680;
+      a_dtc = 0.012511;
+      p_dtc = 1.730529;
    }
    else if  (absorberThickness == 3) {
       a_dtc = 0.010746;
@@ -120,7 +120,7 @@ void plotRangesAndStraggling() {
 
    Float_t wepl_ratio0 = a_wtr / a_dtc * pow(250 / a_wtr, 1 - p_dtc / p_wtr);
 //   Float_t wtr_range = a_wtr * pow(250, p_wtr);
-   Float_t wtr_range = 379.4; // PSTAR
+   Float_t wtr_range = 378.225; // GATE
 
    while (1) {
       in0 >>  waterphantomthickness_ >> thickness_ >> nomrange_ >> nomsigma_ >> dummy0 >> dummy0 >> dummy0;
@@ -133,9 +133,9 @@ void plotRangesAndStraggling() {
          continue;
       }
 
-      arrayMCActualSigma[nlines0] = nomsigma_ * wepl_ratio0;
+      arrayMCActualSigma[nlines0] = nomsigma_; //  * wepl_ratio0;
       arrayMCActualSigmaRatio[nlines0] = nomsigma_ * 100 * wepl_ratio0 / wtr_range;
-      arrayMCActualResidualRange[nlines0++] = nomrange_ * wepl_ratio0;
+      arrayMCActualResidualRange[nlines0++] = nomrange_; //  * wepl_ratio0;
    }
    in0.close();
 
@@ -149,7 +149,6 @@ void plotRangesAndStraggling() {
    Float_t meanError = 0;
    Float_t meanAbsError = 0;
    Float_t meanSigma = 0;
-   Float_t aprime_dtc = 0;
 
    while (1) {
       in >> thickness_ >> energy_ >> nomrange_ >> estrange_ >> nomsigma_ >> sigmaRange_;
@@ -165,24 +164,6 @@ void plotRangesAndStraggling() {
       meanAbsError += fabs(( estrange_ - nomrange_ ) / nomrange_);
       meanSigma += sigmaRange_;
       
-      if (mmAbsorbator == 2) {
-         a_dtc = 0.0096;
-         p_dtc = 1.784;
-         aprime_dtc = 0.01938;
-      }
-      
-      else if (mmAbsorbator == 3) {
-         a_dtc = 0.010746;
-         p_dtc = 1.758228;
-         aprime_dtc = 0.01971;
-      }
-
-      else if (mmAbsorbator == 4) {
-         a_dtc = 0.0117;
-         p_dtc = 1.7450;
-         aprime_dtc = 0.01988;
-      }
-
       estimatedStraggling = nomsigma_; 
 
       arrayE[nlines] = energy_;
@@ -250,14 +231,14 @@ void plotRangesAndStraggling() {
    
    pstar->SetLineWidth(3);
    pstar->SetLineColor(kMagenta-10);
-   pstarshade->SetTitle(Form("Reconstructed ranges of proton beams with %d mm Al absorbator;Energy [MeV];Reconstructed WET range [mm]", mmAbsorbator));
+   pstarshade->SetTitle(Form("Reconstructed ranges of proton beams with %d mm Al absorbator;Degrader thickness [mm];Reconstructed WET range [mm]", mmAbsorbator));
    
    pstarshade->SetFillColor(kMagenta-10);
    pstarshade->Draw("FA");
    pstarmin->Draw("L");
    pstarmax->Draw("L");
 
-   hMC->SetTitle("Reconstructed ranges #LT#hat{R_{0}}#GT of proton tracks;Energy [MeV];Projected range [mm]");
+   hMC->SetTitle("Reconstructed ranges #LT#hat{R_{0}}#GT of proton tracks;Degrader thickness [mm];Projected range [mm]");
    hMC->Draw("P");
    hData->Draw("P");
 
@@ -365,7 +346,8 @@ void plotRangesAndStraggling() {
    gPad->Update();
    // Janni: Straggling in water is 1.063 percent
    // Range in water is 379.4 mm (PSTAR) or 382.57 (Janni)
-   Float_t waterStraggling = 379.4 * 0.01063;
+   // Straggling in water is 3.791 mm as measured in GATE
+   Float_t waterStraggling = 3.791; // GATE
    TLine *lWaterStraggling = new TLine(0, waterStraggling, gPad->GetUxmax(), waterStraggling);
    lWaterStraggling->SetLineWidth(2);
    lWaterStraggling->SetLineColor(kGreen);
@@ -408,7 +390,8 @@ void plotRangesAndStraggling() {
    gPad->Update();
    // Janni: Straggling in water is 1.063 percent
    // Range in water is 379.4 mm (PSTAR) or 382.57 (Janni)
-   waterStraggling = 0.01063 * 100;
+   // Straggling in water is 3.791 mm as measured in GATE
+   waterStraggling = 3.791 * 100 / 378.225; // GATE
    TLine *lWaterStraggling = new TLine(0, waterStraggling, gPad->GetUxmax(), waterStraggling);
    lWaterStraggling->SetLineWidth(2);
    lWaterStraggling->SetLineColor(kGreen);
