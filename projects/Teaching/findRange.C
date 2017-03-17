@@ -6,12 +6,14 @@
 
 using namespace std;
 
-void Run() {
-   TFile  * f = new TFile("gate_simulation.root");
+void Run(int energy) {
+   TFile  * f = new TFile(Form("output/gate_simulation_%dMeV.root", energy));
    TTree  * tree = (TTree*) f->Get("Hits");
    Float_t  z,lastZ = -1;
    Int_t    eventID, parentID, lastEventID = -1;
-   TH1F   * rangeHistogram = new TH1F("rangeHistogram", "Stopping position for protons;Range [mm];Entries", 800, 0, 400);
+   Float_t expectedRange = 0.0262 * pow(energy, 1.736);
+
+   TH1F   * rangeHistogram = new TH1F("rangeHistogram", "Stopping position for protons;Range [mm];Entries", 800, fmax(expectedRange - 20, 0), expectedRange + 20);
 
    tree->SetBranchAddress("posZ", &z);
    tree->SetBranchAddress("eventID", &eventID);
@@ -32,8 +34,9 @@ void Run() {
    rangeHistogram->Draw();
 
    TF1 *fit = new TF1("fit", "gaus");
-   rangeHistogram->Fit(fit, "", "", 350, 400);
+   rangeHistogram->Fit(fit, "Q", "", fmax(expectedRange - 20, 0), expectedRange + 20);
 
-   printf("The range of the proton beam is %.3f mm +- %.3f mm.\n", fit->GetParameter(1), fit->GetParameter(2));
+   //printf("The range of the %d MeV proton beam is %.3f mm +- %.3f mm.\n", energy, fit->GetParameter(1), fit->GetParameter(2));
+   printf("%.1f %.3f\n", float(energy), fit->GetParameter(1));
 
 }

@@ -133,9 +133,9 @@ void plotRangesAndStraggling() {
          continue;
       }
 
-      arrayMCActualSigma[nlines0] = nomsigma_; //  * wepl_ratio0;
+      arrayMCActualSigma[nlines0] = nomsigma_ * wepl_ratio0;
       arrayMCActualSigmaRatio[nlines0] = nomsigma_ * 100 * wepl_ratio0 / wtr_range;
-      arrayMCActualResidualRange[nlines0++] = nomrange_; //  * wepl_ratio0;
+      arrayMCActualResidualRange[nlines0++] = nomrange_ * wepl_ratio0;
    }
    in0.close();
 

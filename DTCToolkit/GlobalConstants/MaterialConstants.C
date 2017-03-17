@@ -140,7 +140,7 @@ void  createSplines() {
       in >> energy >> range;
       if (!in.good()) break;
 
-      rangesWater[idxWater] = range*10; // cm to mm
+      rangesWater[idxWater] = range;
       energiesWater[idxWater++] = energy;
    }
    in.close();
