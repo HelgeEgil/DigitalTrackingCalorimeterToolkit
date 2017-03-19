@@ -251,9 +251,9 @@ Tracks * getTracks(Int_t Runs, Int_t dataType, Int_t frameType, Float_t energy, 
    Int_t             nTracks = kEventsPerRun * 2;
    Bool_t            breakSignal = false;
    CalorimeterFrame *cf = new CalorimeterFrame();
-   Clusters        * clusters = new Clusters(nClusters);
+   Clusters        * clusters = nullptr; // new Clusters(nClusters);
    Clusters        * trackerClusters = new Clusters(nClusters);
-   Hits            * hits = new Hits(nHits);
+   Hits            * hits = nullptr; // new Hits(nHits);
    Hits            * eventIDs = new Hits(kEventsPerRun * sizeOfEventID);
    Int_t             eventID = -1;
    Hits            * trackerHits = new Hits(nHits);
