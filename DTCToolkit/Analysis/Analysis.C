@@ -876,7 +876,6 @@ Float_t drawBraggPeakGraphFit(Int_t Runs, Int_t dataType, Bool_t recreate, Float
          l->SetLineColor(kBlack); l->SetLineWidth(2); l->Draw();
       }
    }
-   
 
    gPad->Update();
    Float_t bip_value = empiricalMean - 6 * empiricalSigma;
