@@ -1,3 +1,13 @@
+/vis/open/OGLX
+/vis/viewer/reset
+/vis/viewer/set/viewpointThetaPhi 60 60
+/vis/viewer/zoom 1
+/vis/viewer/set/style surface
+/vis/drawVolume
+/tracking/storeTrajectory 1
+/vis/scene/endOfEventAction accumulate
+/vis/viewer/update
+
 /gate/geometry/setMaterialDatabase GateMaterials.db
 
 /gate/world/geometry/setXLength 1000. cm
@@ -42,7 +52,7 @@
 /gate/source/addSource uniformBeam gps
 /gate/source/uniformBeam/gps/particle proton
 /gate/source/uniformBeam/gps/ene/type Gauss
-/gate/source/uniformBeam/gps/ene/mono {energy} MeV
+/gate/source/uniformBeam/gps/ene/mono 200 MeV
 /gate/source/uniformBeam/gps/ene/sigma 0 MeV
 /gate/source/uniformBeam/gps/type Plane
 /gate/source/uniformBeam/gps/shape Square
@@ -50,10 +60,10 @@
 /gate/source/uniformBeam/gps/halfx 0 mm
 /gate/source/uniformBeam/gps/halfy 0 mm
 /gate/source/uniformBeam/gps/centre 0. 0. -1. cm
-/gate/application/setTotalNumberOfPrimaries 2500
+/gate/application/setTotalNumberOfPrimaries 250
 
 /gate/output/root/enable
-/gate/output/root/setFileName output/gate_simulation_{energy}MeV
+/gate/output/root/setFileName gate_simulation_200MeV
 
 /gate/random/setEngineName MersenneTwister
 /gate/random/setEngineSeed auto

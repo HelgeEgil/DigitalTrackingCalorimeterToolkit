@@ -104,7 +104,7 @@ Double_t fitfunc_DBP(Double_t *v, Double_t *par) {
     * However, the depth at the bragg peak is correct, since the rance is calculated using LUT curves
     */
 
-   if (isnan(fitval)) fitval = 0;
+   if (::isnan(fitval)) fitval = 0;
 
    return fitval;
 }
@@ -293,7 +293,7 @@ void fillMCSRadiusList(Float_t angleFactor) {
 
    for (Int_t i=0; i<nLayers; i++) {
       pixelRadius = findMCSPixelRadiusForLayer(i, run_energy);
-      if (!isnan(pixelRadius)) {
+      if (!::isnan(pixelRadius)) {
          mcs_radius_per_layer[i] = pixelRadius * angleFactor;
       }
    }
