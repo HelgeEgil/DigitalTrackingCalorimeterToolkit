@@ -10,7 +10,7 @@ Cluster::Cluster() {
    x_ = -1;
    y_ = -1;
    layerNo_ = -1;
-   clusterSize_ -1;
+   clusterSize_ = -1;
    eventID_ = -1;
    isUsed_ = false;
 }
