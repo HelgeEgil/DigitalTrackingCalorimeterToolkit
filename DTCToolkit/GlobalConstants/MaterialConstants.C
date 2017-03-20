@@ -7,7 +7,6 @@
 
 #include "GlobalConstants/MaterialConstants.h"
 #include "GlobalConstants/Constants.h"
-#include "Classes/Hit/Hit.h"
 #include "Classes/Cluster/Cluster.h"
 
 using namespace std;

@@ -3,7 +3,11 @@
 
 using namespace std;
 
+void findManyRanges(Int_t degraderFrom, Int_t degraderIncrement, Int-t degraderTo, Int_t mmFrom, Int_t mmIncrement = 1, Int_t mmTo = -1);
+
 void findManyRanges(Int_t degraderFrom, Int_t degraderIncrement, Int_t degraderTo, Int_t mmFrom, Int_t mmIncrement, Int_t mmTo) {
+   if (mmTo < 0) mmTo = mmFrom;
+
    vector<Float_t> resultVector;
    ofstream file("../OutputFiles/findManyRangesDegrader.csv", ofstream::out || ofstream:app);
 

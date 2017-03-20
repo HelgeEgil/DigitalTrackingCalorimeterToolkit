@@ -1,7 +1,7 @@
-/vis/open/OGLX
+/vis/open OGLSX
 /vis/viewer/reset
 /vis/viewer/set/viewpointThetaPhi 60 60
-/vis/viewer/zoom 1
+/vis/viewer/zoom 10
 /vis/viewer/set/style surface
 /vis/drawVolume
 /tracking/storeTrajectory 1
@@ -12,21 +12,24 @@
 
 /gate/world/geometry/setXLength 1000. cm
 /gate/world/geometry/setYLength 1000. cm
-/gate/world/geometry/setZLength 150. cm
+/gate/world/geometry/setZLength 1000. cm
 
 /gate/world/daughters/name scanner
 /gate/world/daughters/insert box
-/gate/scanner/geometry/setXLength 80. cm
-/gate/scanner/geometry/setYLength 80. cm
-/gate/scanner/geometry/setZLength 75. cm
-/gate/scanner/placement/setTranslation 0 0 37.5 cm
+/gate/scanner/geometry/setXLength 100. cm
+/gate/scanner/geometry/setYLength 100. cm
+/gate/scanner/geometry/setZLength 100. cm
+/gate/scanner/placement/setTranslation 0 0 50. cm
+/gate/scanner/vis/forceWireframe
 
 /gate/scanner/daughters/name phantom
 /gate/scanner/daughters/insert box
-/gate/phantom/geometry/setXLength 50. cm
-/gate/phantom/geometry/setYLength 50. cm
-/gate/phantom/geometry/setZLength 75. cm
+/gate/phantom/geometry/setXLength 30. cm
+/gate/phantom/geometry/setYLength 30. cm
+/gate/phantom/geometry/setZLength 30. cm
+/gate/phantom/placement/setTranslation 0 0 -15. cm
 /gate/phantom/setMaterial Water
+/gate/phantom/vis/forceWireframe
 
 /gate/phantom/attachCrystalSD
 
