@@ -139,8 +139,9 @@ class Track : public TObject {
       Float_t           getFitParameterError();
       Float_t           getTrackScore();
 
-      friend ostream& operator<<(ostream &os, Track& t);
-
       ClassDef(Track,5)
 };
+
+ostream& operator<<(ostream &os, Track& t);
+
 #endif

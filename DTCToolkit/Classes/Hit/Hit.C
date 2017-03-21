@@ -63,7 +63,7 @@ void Hit::set(Hit* hit) {
 }
 
 ostream &operator<< (ostream &os, Hit &h) {
-   os << "(" << h.x_ << "," << h.y_ << "," << h.layerNo_ << ")";
+   os << "(" << h.getX() << "," << h.getY() << "," << h.getLayer() << ")";
    return os;
 }
 

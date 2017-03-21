@@ -32,8 +32,9 @@ class Hit : public TObject {
       void     set(Int_t x, Int_t y, Int_t layerNo = -1, Int_t eventNo = -1, Float_t edep = 0);
       void     set(Hit* hit);
 
-      friend ostream &operator<< (ostream &os, Hit &h);
-
       ClassDef(Hit,2)
 };
+
+ostream &operator<< (ostream &os, Hit &h);
+
 #endif

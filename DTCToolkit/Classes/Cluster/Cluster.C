@@ -137,7 +137,7 @@ void Cluster::set(Float_t x, Float_t y, Int_t layer, Int_t size, Int_t eventID) 
 }
 
 ostream& operator<< (ostream &os, Cluster& c) {
-   os << "(" << c.getXmm() << ", " << c.getYmm() << ", " << c.layerNo_ << ", EID " << c.eventID_ << ", CS " << c.clusterSize_ << ")";
+   os << "(" << c.getXmm() << ", " << c.getYmm() << ", " << c.getLayer() << ", EID " << c.getEventID() << ", CS " << c.getSize() << ")";
    return os;
 }
 
