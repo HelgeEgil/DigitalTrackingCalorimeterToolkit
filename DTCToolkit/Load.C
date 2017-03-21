@@ -1,6 +1,7 @@
 void Load() {
    
    // gDebug =3 ;
+   gSystem->AddIncludePath(" -I\"./\"");
 
    cout << "LOADING MATERIALCONSTANTS\n";
    gROOT->LoadMacro("GlobalConstants/MaterialConstants.C+");
