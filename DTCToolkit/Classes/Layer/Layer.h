@@ -9,6 +9,7 @@
 
 class TRandom3;
 
+namespace DTC {
 class Layer : public TObject {
    private:
       TH2F frame2D_;
@@ -30,5 +31,6 @@ class Layer : public TObject {
       
       ClassDef(Layer,2)
 };
+}
 
 #endif /* Layer_h */

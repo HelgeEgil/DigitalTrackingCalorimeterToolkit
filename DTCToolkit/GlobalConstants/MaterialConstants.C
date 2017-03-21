@@ -10,6 +10,7 @@
 #include "Classes/Cluster/Cluster.h"
 
 using namespace std;
+using namespace DTC;
 
 void MaterialConstants() {
 

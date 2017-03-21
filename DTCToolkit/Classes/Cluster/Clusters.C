@@ -12,6 +12,7 @@
 #include "HelperFunctions/Tools.h"
 
 using namespace std;
+using namespace DTC;
 
 Clusters::Clusters(Bool_t frameType) : clusters_("Cluster", kEventsPerRun*2),
                                        clustersWithoutTrack_("Cluster", kEventsPerRun*2) {

@@ -11,6 +11,7 @@ class TGraph;
 class TH1F;
 
 using namespace std;
+using namespace DTC;
 
 Bool_t      isItemInVector(Int_t i, vector<Int_t> *v);
 Float_t     diffXY(Cluster *p, Hit *h);

@@ -12,6 +12,7 @@
 
 
 using namespace std;
+using namespace DTC;
 
 Tracks * Clusters::findCalorimeterTracksWithMCTruth() {
    // Now clusters is sorted by event ID

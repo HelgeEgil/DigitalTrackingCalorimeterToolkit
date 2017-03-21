@@ -5,6 +5,7 @@
 
 #include "GlobalConstants/Constants.h"
 
+namespace DTC {
 class Hit : public TObject {
   private:
       Int_t x_, y_;
@@ -34,7 +35,8 @@ class Hit : public TObject {
 
       ClassDef(Hit,2)
 };
+}
 
-ostream &operator<< (ostream &os, Hit &h);
+ostream &operator<< (ostream &os, DTC::Hit &h);
 
 #endif

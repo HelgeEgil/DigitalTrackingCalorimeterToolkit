@@ -23,6 +23,7 @@
 #include "HelperFunctions/Tools.h"
 
 using namespace std;
+using namespace DTC;
 
 Tracks::~Tracks() {
    tracks_.Delete();
@@ -211,6 +212,7 @@ Int_t Tracks::getTrackIdxFromCluster(Cluster * cluster) {
          return i;
       }
    }
+   return -1;
 }
 
 void Tracks::matchWithEventIDs(Hits * eventIDs) {

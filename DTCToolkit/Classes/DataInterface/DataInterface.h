@@ -27,9 +27,11 @@
 class TH3F;
 class TH2F;
 class TRandom3;
-class Hits;
 
 using namespace std;
+
+namespace DTC {
+class Hits;
 
 class DataInterface {
 public :
@@ -134,6 +136,6 @@ public :
    virtual void      getDataProfile(TH2F *hProfile, TH2F *hProjection, Int_t energy);
    virtual void      getEventIDs(Int_t runNo, Hits* hits);
 };
-
+}
 #endif
 

@@ -7,10 +7,11 @@
 #include "GlobalConstants/MaterialConstants.h"
 
 using namespace std;
+using namespace DTC;
 
-CalorimeterFrame::CalorimeterFrame() : calorimeterFrame_("Layer", nLayers) {
+CalorimeterFrame::CalorimeterFrame() : calorimeterFrame_("DTC::Layer", nLayers) {
    for (Int_t i=0; i<nLayers; i++) {
-      new(calorimeterFrame_[i]) Layer(i, kCalorimeter, kMC);
+      new(calorimeterFrame_[i]) DTC::Layer(i, kCalorimeter, kMC);
    }
 }
 

@@ -41,6 +41,7 @@
 #include "HelperFunctions/getTracks.h"
 
 using namespace std;
+using namespace DTC;
 
 void writeDataFrame(Int_t energy) {
    DataInterface *di = new DataInterface();
@@ -467,9 +468,13 @@ void drawClusterShapes(Int_t Runs, Bool_t dataType, Bool_t recreate, Float_t ene
    }
 }
 
+// a function of the same signature is also defined in HelperFunctions/getTracks.C
+// in the end it looks like it is not used anyway
+/*
 void makeTracks(Int_t Runs, Int_t dataType, Bool_t recreate, Float_t energy) {
    Tracks * tracks = loadOrCreateTracks(recreate, Runs, dataType, energy);
 }
+*/
 
 void drawTrackRanges(Int_t Runs, Int_t dataType, Bool_t recreate, Float_t energy) {
    run_energy = energy;

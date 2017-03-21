@@ -7,10 +7,13 @@
 #include "Classes/Cluster/Cluster.h"
 // #include "Classes/Track/conversionFunctions.h"
 
-const Int_t MaxTrackLength = 40;
 class TGraph;
 class TGraphErrors;
+
+namespace DTC {
 class Clusters;
+
+const Int_t MaxTrackLength = 40;
 
 class Track : public TObject {
 
@@ -141,7 +144,8 @@ class Track : public TObject {
 
       ClassDef(Track,5)
 };
+}
 
-ostream& operator<<(ostream &os, Track& t);
+ostream& operator<<(ostream &os, DTC::Track& t);
 
 #endif

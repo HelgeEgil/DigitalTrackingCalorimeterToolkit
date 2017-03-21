@@ -2,6 +2,8 @@
 
 #include "Classes/Hit/Hit.h"
 
+using namespace DTC;
+
 Hit::Hit() {
    x_ = -1;
    y_ = -1;

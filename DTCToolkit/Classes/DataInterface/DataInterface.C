@@ -31,6 +31,8 @@
 #include "Classes/CalorimeterFrame/CalorimeterFrame.h"
 #include "RootFiles/LinkDef.h"
 
+using namespace DTC;
+
 DataInterface::DataInterface(TTree *tree) : fChain(0)
 {
 // if parameter tree is not specified (or zero), connect the file

@@ -6,6 +6,8 @@
 #include "GlobalConstants/Constants.h"
 #include "GlobalConstants/MaterialConstants.h"
 
+using namespace DTC;
+
 Cluster::Cluster() {
    x_ = -1;
    y_ = -1;

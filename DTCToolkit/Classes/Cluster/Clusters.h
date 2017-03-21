@@ -11,6 +11,7 @@
 
 using namespace std;
 
+namespace DTC {
 class Track;
 class Hits;
 
@@ -87,4 +88,5 @@ public:
 
    ClassDef(Clusters,5)
 };
+}
 #endif

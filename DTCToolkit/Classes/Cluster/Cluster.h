@@ -8,6 +8,7 @@
 
 #include "GlobalConstants/Constants.h"
 
+namespace DTC {
 class Cluster : public TObject {
 private:
    Float_t  x_, y_;
@@ -54,7 +55,8 @@ public:
 
    ClassDef(Cluster,4)
 };
+}
 
-ostream& operator<<(ostream &os, Cluster &c);
+ostream& operator<<(ostream &os, DTC::Cluster &c);
 
 #endif
