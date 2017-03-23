@@ -16,6 +16,7 @@
 #include <string.h>
 #include <TString.h>
 #include <TLegend.h>
+#include <TStyle.h>
 #include <THStack.h>
 #include <TRandom3.h>
 #include <TPad.h>
@@ -23,10 +24,12 @@
 
 using namespace std;
 
-Int_t absorberThickness = 2;
+Int_t absorberThickness = 3;
 Bool_t kFilterData = true;
-Int_t filterSize = 15;
+Int_t filterSize = 1;
 const Int_t arraySize = 500;
+const Int_t xFrom = 40;
+const Int_t xTo = 350;
 
 void filterArray(Float_t *array, Int_t filterSize) {
    Float_t tempArray[arraySize];
@@ -60,7 +63,9 @@ void plotRangesAndStraggling() {
    TPad *pad2 = new TPad("pad2", "30", 0.0, 0.0, 1.0, 0.3, 0);
    pad1->Draw();
    pad2->Draw();
-   
+  
+   gStyle->SetTitleH(0.1);
+
    TCanvas *c6 = new TCanvas("c6", "Resolution", 1800, 600);
    c6->Divide(4,1,0.0001,0.0001);
 
@@ -105,21 +110,37 @@ void plotRangesAndStraggling() {
    Float_t a_wtr = 0.02387;
    Float_t p_wtr = 1.7547;
 
-   if       (absorberThickness == 2) {
+   if       (absorberThickness == 2) { // Updated 2017-03-??
       a_dtc = 0.012511;
       p_dtc = 1.730529;
    }
-   else if  (absorberThickness == 3) {
-      a_dtc = 0.010746;
-      p_dtc = 1.758228;
+   else if  (absorberThickness == 3) { // Updated 2017-03-22
+      a_dtc = 0.014440;
+      p_dtc = 1.706428;
    }
-   else if (absorberThickness == 4) {
-      a_dtc = 0.018745;
-      p_dtc = 1.660262;
+   else if (absorberThickness == 4) { // Updated 2017-03-22
+      a_dtc = 0.016493;
+      p_dtc = 1.683775;
+   }
+   
+   else if (absorberThickness == 5) { // updated 2017-03-23
+      a_dtc = 0.018807;
+      p_dtc = 1.661016;
+   }
+
+   else if (absorberThickness == 6) { // updated 2017-03-23
+      a_dtc = 0.021480;
+      p_dtc = 1.637919;
+   }
+   
+   else if (absorberThickness == 7) { // updated 2017-03-23
+      a_dtc = 0.024070;
+      p_dtc = 1.618193;
    }
 
    Float_t wepl_ratio0 = a_wtr / a_dtc * pow(250 / a_wtr, 1 - p_dtc / p_wtr);
-//   Float_t wtr_range = a_wtr * pow(250, p_wtr);
+   cout << wepl_ratio0 << endl;
+   //   Float_t wtr_range = a_wtr * pow(250, p_wtr);
    Float_t wtr_range = 378.225; // GATE
 
    while (1) {
@@ -259,26 +280,26 @@ void plotRangesAndStraggling() {
    
    pad2->cd();
 
-   TGraphErrors *hMCD = new TGraphErrors(nlines, arrayE, arrayMCDelta, arrayEE, arrayEMC);
-   TGraph *pstarD = new TGraph(nlines, arrayE, arrayPSTARDelta);
-   TGraph *pstarminD = new TGraph(nlines, arrayE, arrayPSTARminDelta);
-   TGraph *pstarmaxD = new TGraph(nlines, arrayE, arrayPSTARmaxDelta);
+   TGraphErrors *hMCD = new TGraphErrors(nlines, arrayMC, arrayMCDelta, arrayEE, arrayEMC);
+   TGraph *pstarD = new TGraph(nlines, arrayMC, arrayPSTARDelta);
+   TGraph *pstarminD = new TGraph(nlines, arrayMC, arrayPSTARminDelta);
+   TGraph *pstarmaxD = new TGraph(nlines, arrayMC, arrayPSTARmaxDelta);
    TGraph *pstarshadeD = new TGraph(nlines*2);
 
    for (Int_t i=0; i<nlines; i++) {
-      pstarshadeD->SetPoint(i, arrayE[i], arrayPSTARmaxDelta[i]);
-      pstarshadeD->SetPoint(nlines+i, arrayE[nlines-i-1], arrayPSTARminDelta[nlines-i-1]);
+      pstarshadeD->SetPoint(i, arrayMC[i], arrayPSTARmaxDelta[i]);
+      pstarshadeD->SetPoint(nlines+i, arrayMC[nlines-i-1], arrayPSTARminDelta[nlines-i-1]);
    }
 
    pstarshadeD->GetXaxis()->SetTitleFont(22);
    pstarshadeD->GetYaxis()->SetTitleFont(22);
    pstarshadeD->GetXaxis()->SetTitleOffset(0.9);
-   pstarshadeD->GetYaxis()->SetTitleOffset(0.9);
+   pstarshadeD->GetYaxis()->SetTitleOffset(0.2);
    pstarshadeD->GetXaxis()->SetLabelFont(22);
    pstarshadeD->GetXaxis()->SetTitleSize(0.05);
    pstarshadeD->GetXaxis()->SetLabelSize(0.05);
    pstarshadeD->GetYaxis()->SetLabelFont(22);
-   pstarshadeD->GetYaxis()->SetTitleSize(0.05);
+   pstarshadeD->GetYaxis()->SetTitleSize(0.08);
    pstarshadeD->GetYaxis()->SetLabelSize(0.05);
 
    pstarshadeD->GetYaxis()->SetRangeUser(-10, 10); // 145 - 270
@@ -289,7 +310,7 @@ void plotRangesAndStraggling() {
 
    pstarD->SetLineWidth(3);
    pstarD->SetLineColor(kMagenta-10);
-   pstarshadeD->SetTitle(Form("Reconstructed ranges of proton beams with %d mm Al absorbator;Energy [MeV];WET error [mm]", mmAbsorbator));
+   pstarshadeD->SetTitle(Form("Reconstructed ranges of proton beams with %d mm Al absorbator;Detector depth [WEPL mm];WET error [mm]", mmAbsorbator));
    
    pstarshadeD->SetFillColor(kMagenta-10);
    pstarshadeD->Draw("FA");
@@ -323,17 +344,23 @@ void plotRangesAndStraggling() {
    TGraph *gResolution = new TGraph(nlines, arrayMC, arrayEMC);
    gResolution->SetTitle(Form("WEPL resolution using %d mm Al absorber;Depth in detector [WEPL mm];#Delta WEPL [mm]", mmAbsorbator));
    gResolution->GetYaxis()->SetRangeUser(2,5.5);
+   gResolution->GetYaxis()->SetTitleOffset(1.2);
+   gResolution->GetXaxis()->SetRangeUser(xFrom,xTo);
    gResolution->SetMarkerColor(kBlue);
    gResolution->SetMarkerStyle(21);
    gResolution->SetMarkerSize(1);
    gResolution->SetLineWidth(3);
    gResolution->SetLineColor(kBlue);
    gResolution->Draw("LA");
-   
+  
+   TF1 * fRes = new TF1("fRes", "pol0");
+   fRes->SetLineColor(kBlack);
+   gResolution->Fit(fRes, "B", "", xFrom, xTo);
+
    if (kFilterData) {
       gPad->Update();
       TPaveText * title = (TPaveText *)gPad->FindObject("title");
-      title->InsertText(Form("Data filtered, size %d.", filterSize));
+      title->InsertText(Form("Data filtered, size %d. Mean value = %.2f mm.", filterSize, fRes->GetParameter(0)));
       title->SetTextSize(0.04);
       gPad->Modified();
    }
@@ -348,7 +375,7 @@ void plotRangesAndStraggling() {
    // Range in water is 379.4 mm (PSTAR) or 382.57 (Janni)
    // Straggling in water is 3.791 mm as measured in GATE
    Float_t waterStraggling = 3.791; // GATE
-   TLine *lWaterStraggling = new TLine(0, waterStraggling, gPad->GetUxmax(), waterStraggling);
+   TLine *lWaterStraggling = new TLine(gPad->GetUxmin(), waterStraggling, gPad->GetUxmax(), waterStraggling);
    lWaterStraggling->SetLineWidth(2);
    lWaterStraggling->SetLineColor(kGreen);
    lWaterStraggling->Draw();
@@ -357,6 +384,7 @@ void plotRangesAndStraggling() {
    legRes->SetTextSize(0.03);
    legRes->SetTextFont(22);
    legRes->AddEntry(gResolution, "Measured range spread", "L");
+   legRes->AddEntry(fRes, "   + Mean value", "L");
    legRes->AddEntry(gResolutionStraggling, "MC truth range straggling", "L");
    legRes->AddEntry(lWaterStraggling, "Straggling in water", "L");
    legRes->Draw();
@@ -364,20 +392,25 @@ void plotRangesAndStraggling() {
    c6->cd(2);
    TGraph *gResolutionRatio = new TGraph(nlines, arrayMC, arrayEMCRatio);
    gResolutionRatio->SetTitle(Form("WEPL resolution using %d mm Al absorber;Depth in detector [WEPL mm];#Delta WEPL / WEPL [%]", mmAbsorbator));
-   gResolutionRatio->GetYaxis()->SetTitleOffset(1.5);
+   gResolutionRatio->GetYaxis()->SetTitleOffset(1.35);
    gResolutionRatio->GetYaxis()->SetRangeUser(0.5, 1.5);
+   gResolutionRatio->GetXaxis()->SetRangeUser(xFrom, xTo);
    gResolutionRatio->SetMarkerColor(kBlue);
    gResolutionRatio->SetLineColor(kBlue);
    gResolutionRatio->SetLineWidth(3);
    gResolutionRatio->SetMarkerStyle(21);
    gResolutionRatio->SetMarkerSize(1);
    gResolutionRatio->Draw("LA");
+   
+   TF1 * fResRatio = new TF1("fResRatio", "pol0");
+   fResRatio->SetLineColor(kBlack);
+   gResolutionRatio->Fit(fResRatio, "B", "", xFrom, xTo);
 
    if (kFilterData) {
       gPad->Update();
       TPaveText * title = (TPaveText *)gPad->FindObject("title");
       title->SetTextSize(0.04);
-      title->InsertText(Form("Data filtered, size %d.", filterSize));
+      title->InsertText(Form("Data filtered, size %d. Mean value = %.2f.", filterSize, fResRatio->GetParameter(0)));
       gPad->Modified();
    }
    
@@ -392,7 +425,7 @@ void plotRangesAndStraggling() {
    // Range in water is 379.4 mm (PSTAR) or 382.57 (Janni)
    // Straggling in water is 3.791 mm as measured in GATE
    waterStraggling = 3.791 * 100 / 378.225; // GATE
-   TLine *lWaterStraggling = new TLine(0, waterStraggling, gPad->GetUxmax(), waterStraggling);
+   TLine *lWaterStraggling = new TLine(gPad->GetUxmin(), waterStraggling, gPad->GetUxmax(), waterStraggling);
    lWaterStraggling->SetLineWidth(2);
    lWaterStraggling->SetLineColor(kGreen);
    lWaterStraggling->Draw();
@@ -402,11 +435,11 @@ void plotRangesAndStraggling() {
    gResolutionStragglingRatio->SetLineColor(kRed);
    gResolutionStragglingRatio->Draw("L");
    
-   
    TLegend *legResRatio = new TLegend(0.36, 0.76, 0.88, 0.88);
    legResRatio->SetTextSize(0.03);
    legResRatio->SetTextFont(22);
    legResRatio->AddEntry(gResolutionRatio, "Measured range spread", "L");
+   legResRatio->AddEntry(fResRatio, "   + Mean value", "L");
    legResRatio->AddEntry(gResolutionStragglingRatio, "MC truth range straggling", "L");
    legResRatio->AddEntry(lWaterStraggling, "Straggling in water", "L");
    legResRatio->Draw();
@@ -419,21 +452,28 @@ void plotRangesAndStraggling() {
    TGraph *gStragglingsRatio = new TGraph(nlines0, arrayMCActualResidualRange, arrayStragglingsRatio);
    gStragglingsRatio->SetTitle(Form("Resolution/straggling, %d mm Al absorber;Depth in detector [WEPL mm]; Resolution / straggling", mmAbsorbator));
    gStragglingsRatio->GetYaxis()->SetRangeUser(0.3, 1.4);
-   gStragglingsRatio->SetLineWidth(2);
-   gStragglingsRatio->SetLineColor(kRed);
+   gStragglingsRatio->GetYaxis()->SetTitleOffset(1.2);
+   gStragglingsRatio->GetXaxis()->SetRangeUser(xFrom, xTo);
+   gStragglingsRatio->SetLineWidth(3);
+   gStragglingsRatio->SetLineColor(kBlue);
    gStragglingsRatio->Draw("AL");
+   
+   TF1 * fStragRatio = new TF1("fStragRatio", "pol0");
+   fStragRatio->SetLineColor(kBlack);
+   gStragglingsRatio->Fit(fStragRatio, "B", "", xFrom, xTo);
    
    if (kFilterData) {
       gPad->Update();
       TPaveText * title = (TPaveText *)gPad->FindObject("title");
       title->SetTextSize(0.04);
-      title->InsertText(Form("Data filtered, size %d.", filterSize));
+      title->InsertText(Form("Data filtered, size %d. Mean excess = %.2f %%", filterSize, 100*(fStragRatio->GetParameter(0)-1)));
       gPad->Modified();
    }
 
 
    gPad->Update();
-   TLine *stragglingline = new TLine(0, 1, gPad->GetUxmax(), 1);
+   TLine *stragglingline = new TLine(gPad->GetUxmin(), 1, gPad->GetUxmax(), 1);
+   stragglingline->SetLineStyle(7);
    stragglingline->Draw("same");
 
    Float_t subtractMCStraggling[arraySize];
@@ -464,22 +504,30 @@ void plotRangesAndStraggling() {
    gSubtractFullResolution->SetTitle(Form("Resolution deconstruction %d mm Al absorber; Depth in detector [WEPL mm]; Deconstructed resolution [WEPL mm]", mmAbsorbator));
 
    gSubtractFullResolution->GetYaxis()->SetRangeUser(0, 6);
-   gSubtractFullResolution->SetLineColor(kRed);
+   gSubtractFullResolution->GetYaxis()->SetTitleOffset(1.2);
+   gSubtractFullResolution->GetXaxis()->SetRangeUser(xFrom, xTo);
+   gSubtractFullResolution->SetLineColor(kBlue);
    gSubtractFullResolution->SetLineWidth(3);
-   gSubtractMCResolution->SetLineColor(kBlue);
+   gSubtractMCResolution->SetLineColor(kRed);
    gSubtractMCResolution->SetLineWidth(3);
    gSubtractWaterResolution->SetLineColor(kGreen);
    gSubtractWaterResolution->SetLineWidth(3);
+
+   
+   TF1 * fResMC = new TF1("fResMC", "pol0");
+   fResMC->SetLineColor(kBlack);
+   gSubtractMCResolution->Fit(fResMC, "B", "", xFrom, xTo);
 
    gSubtractFullResolution->Draw("LA");
    gSubtractMCResolution->Draw("same");
    gSubtractWaterResolution->Draw("same");
 
-   TLegend *legSubtractResolution = new TLegend(0.50, 0.78, 0.96, 0.93);
+   TLegend *legSubtractResolution = new TLegend(0.41, 0.73, 0.86, 0.88);
    legSubtractResolution->SetTextSize(0.03);
    legSubtractResolution->SetTextFont(22);
    legSubtractResolution->AddEntry(gSubtractFullResolution, "Range resolution", "L");
    legSubtractResolution->AddEntry(gSubtractMCResolution, "#sqrt{- MC straggling^{2}}", "L");
+   legSubtractResolution->AddEntry(fResMC, "   + Mean value", "L");
    legSubtractResolution->AddEntry(gSubtractWaterResolution, "#sqrt{- water straggling^{2}}", "L");
    legSubtractResolution->Draw();
    
@@ -487,7 +535,7 @@ void plotRangesAndStraggling() {
       gPad->Update();
       TPaveText * title = (TPaveText *)gPad->FindObject("title");
       title->SetTextSize(0.04);
-      title->InsertText(Form("Data filtered, size %d.", filterSize));
+      title->InsertText(Form("Data filtered, size %d. Mean value = %.2f mm.", filterSize, fResMC->GetParameter(0)));
       gPad->Modified();
    }
 

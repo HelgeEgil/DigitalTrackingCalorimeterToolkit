@@ -104,7 +104,7 @@ void  createSplines() {
       in.open("Data/Ranges/2mm_Al.csv");
    }
 
-   else if ( kAbsorbatorThickness == 3) {
+   else if (kAbsorbatorThickness == 3) {
       in.open("Data/Ranges/3mm_Al.csv");
    }
 
@@ -118,6 +118,10 @@ void  createSplines() {
    
    else if (kAbsorbatorThickness == 6) {
       in.open("Data/Ranges/6mm_Al.csv");
+   }
+   
+   else if (kAbsorbatorThickness == 7) {
+      in.open("Data/Ranges/7mm_Al.csv");
    }
 
    else {
@@ -182,34 +186,40 @@ void  createSplines() {
       straggling_b = 0.00100124;
    }
 
-   else if (kAbsorbatorThickness == 3) { // updated 2017-03-01
-      alpha_aluminum = 0.010746;
-      p_aluminum = 1.758228;
-      straggling_a = 1.92792;
-      straggling_b = 0.000116;
+   else if (kAbsorbatorThickness == 3) { // updated 2017-03-22
+      alpha_aluminum = 0.014440;
+      p_aluminum = 1.706428;
+      straggling_a = 1.7364;
+      straggling_b = 0.0010367;
    }
 
-   else if (kAbsorbatorThickness == 4) { // updated 2017-03-03
-      alpha_aluminum = 0.018745; // not good for energies
-      p_aluminum = 1.660262;
-      straggling_a = 1.88728;
-      straggling_b = 0.001685;
+   else if (kAbsorbatorThickness == 4) { // updated 2017-03-22
+      alpha_aluminum = 0.016493;
+      p_aluminum = 1.683775;
+      straggling_a = 1.73913;
+      straggling_b = 0.00109215;
    }
    
-   else if (kAbsorbatorThickness == 5) { // dummy values
-      alpha_aluminum = 0.0125;
-      p_aluminum = 1.7327;
-      straggling_a = 1.8568;
-      straggling_b = 0.000856;
+   else if (kAbsorbatorThickness == 5) { // updated 2017-03-23
+      alpha_aluminum = 0.018807;
+      p_aluminum = 1.661016;
+      straggling_a = 1.71864;
+      straggling_b = 0.001381;
    }
 
    else if (kAbsorbatorThickness == 6) { // dummy values
-      alpha_aluminum = 0.0098;
-      p_aluminum = 1.781;
-      straggling_a = 1.8568;
-      straggling_b = 0.000856;
+      alpha_aluminum = 0.021480;
+      p_aluminum = 1.637919;
+      straggling_a = 1.71891;
+      straggling_b = 0.001397;
    }
-
+   
+   else if (kAbsorbatorThickness == 7) { // dummy values
+      alpha_aluminum = 0.024070;
+      p_aluminum = 1.618193;
+      straggling_a = 1.73329;
+      straggling_b = 0.001268;
+   }
 }
 
 Double_t getLayerPositionmm(Int_t i) {

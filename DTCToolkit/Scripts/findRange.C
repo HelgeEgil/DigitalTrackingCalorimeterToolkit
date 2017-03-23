@@ -29,6 +29,7 @@ vector<Float_t> findRange::Run(Double_t energy, Double_t sigma_mev)
 {
    vector<Float_t> returnValues;
    if (fChain == 0) return returnValues;
+   if (fChain->GetEntries() == 0) return returnValues;
 
    Float_t degraderThickness = run_degraderThickness;
    Long64_t nentries = fChain->GetEntriesFast();
@@ -110,6 +111,8 @@ vector<Float_t> findRange::Run(Double_t energy, Double_t sigma_mev)
 
    Int_t lastP = 0;
    
+   if (nentries == 0) return returnValues;
+
    for (Long64_t jentry=0; jentry<nentries;jentry++) {
       Long64_t ientry = LoadTree(jentry);
       

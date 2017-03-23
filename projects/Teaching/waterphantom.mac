@@ -55,7 +55,7 @@
 /gate/source/addSource uniformBeam gps
 /gate/source/uniformBeam/gps/particle proton
 /gate/source/uniformBeam/gps/ene/type Gauss
-/gate/source/uniformBeam/gps/ene/mono 200 MeV
+/gate/source/uniformBeam/gps/ene/mono 230 MeV
 /gate/source/uniformBeam/gps/ene/sigma 0 MeV
 /gate/source/uniformBeam/gps/type Plane
 /gate/source/uniformBeam/gps/shape Square
@@ -66,7 +66,7 @@
 /gate/application/setTotalNumberOfPrimaries 250
 
 /gate/output/root/enable
-/gate/output/root/setFileName gate_simulation_200MeV
+/gate/output/root/setFileName gate_simulation_230MeV
 
 /gate/random/setEngineName MersenneTwister
 /gate/random/setEngineSeed auto

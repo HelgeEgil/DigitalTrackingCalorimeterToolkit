@@ -2288,9 +2288,8 @@ TF1 *  doSimpleGaussianFit (TH1F *h, Float_t *means, Float_t *sigmas) {
    mu = gauss->GetParameter(1);
    sigma = fabs(gauss->GetParameter(2));
 
-   Int_t binSigmaFrom = axis->FindBin(mu - 5 * nominalSigma); // was sigma
-   Int_t binSigmaTo = axis->FindBin(mu + 5 * nominalSigma); // was sigma, needs nominal to avoid small sigma fits on >> absorbers
-   // Int_t binSigmaTo = h->GetNbinsX();
+   Int_t binSigmaFrom = axis->FindBin(fmax(mu - 4 * nominalSigma, 0)); // was sigma
+   Int_t binSigmaTo = axis->FindBin(mu + 4 * nominalSigma); // was sigma, needs nominal to avoid small sigma fits on >> absorbers
 
    Float_t squareMeanDifference = 0;
    Float_t empiricalMean = 0;

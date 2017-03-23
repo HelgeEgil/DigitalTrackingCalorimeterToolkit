@@ -119,7 +119,7 @@ void findAPAndStraggling(Int_t absorberthickness) {
    gRange->Draw("AP");
    TF1 *BK = new TF1("BK", "[0] * pow(x, [1])");
    BK->SetParameters(0.01, 1.78);
-   gRange->Fit("BK", "B,Q,M");
+   gRange->Fit("BK", "B,Q,M", "", 15, 240);
 
 
    c1->cd(3);
@@ -129,7 +129,7 @@ void findAPAndStraggling(Int_t absorberthickness) {
 //   TF1 *Straggling = new TF1("Straggling", "[0]*x + [1]*pow(x,2)");
    TF1 *Straggling = new TF1("Straggling", "[0] + [1]*x");
    gStraggling->GetYaxis()->SetRangeUser(0,6);
-   gStraggling->Fit("Straggling", "Q,M");
+   gStraggling->Fit("Straggling", "Q,M", "", 20, 180);
    
    gStraggling2->SetMarkerStyle(7);
    gStraggling2->SetMarkerColor(kRed);
