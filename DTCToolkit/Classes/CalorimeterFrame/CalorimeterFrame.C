@@ -9,18 +9,26 @@
 using namespace std;
 using namespace DTC;
 
-CalorimeterFrame::CalorimeterFrame() : calorimeterFrame_("DTC::Layer", nLayers) {
+CalorimeterFrame::CalorimeterFrame() : layers_("DTC::Layer", nLayers) {
+  layers_.ExpandCreate(nLayers);
    for (Int_t i=0; i<nLayers; i++) {
-      new(calorimeterFrame_[i]) DTC::Layer(i, kCalorimeter, kMC);
+      At(i)->SetProperties(i, kCalorimeter, kMC);
+      // the memory should be contiguous, the object pointers should be
+      // in an ascending order with a gap of the size of the Layer class
+      // but it is not in the first elements and if placement new is used
+      // to create the objects one by one, there is a double delete error
+      // when deleting the CalorimeterFrame
+      // Needs more investigation
+      //std::cout << "CalorimeterFrame::CalorimeterFrame(): Layer " << At(i)->GetLayerNo() << ": " << At(i) << std::endl;
    }
 }
 
 CalorimeterFrame::~CalorimeterFrame() {
-   calorimeterFrame_.Delete();
+   layers_.Delete();
 }
 
 void CalorimeterFrame::Clear(Option_t *) {
-   calorimeterFrame_.Clear("C");
+   layers_.Clear("C");
 }
 
 void CalorimeterFrame::Reset() {

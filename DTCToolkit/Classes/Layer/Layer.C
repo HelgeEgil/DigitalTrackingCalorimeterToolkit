@@ -81,4 +81,3 @@ Float_t DTC::Layer::getOccupancy() {
 
    return occupancy;
 }
-
