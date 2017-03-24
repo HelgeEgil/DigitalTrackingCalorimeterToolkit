@@ -867,11 +867,14 @@ Float_t drawBraggPeakGraphFit(Int_t Runs, Int_t dataType, Bool_t recreate, Float
   
    cFitResults->Update();
 
+   gPad->Update();
+
    TLine *l = nullptr;
    if (kDrawVerticalLayerLines) {
       Float_t line_z = 0;
-      for (Int_t i=0; i<10; i++) {
+      for (Int_t i=0; i<65; i++) {
          line_z = getWEPLFromTL(getLayerPositionmm(i));
+         if (line_z > gPad->GetUxmax()) break;
          l = new TLine(line_z, 0, line_z, hFitResults->GetMaximum()*1.05);
          l->SetLineColor(kBlack); l->SetLineWidth(2); l->Draw();
       }

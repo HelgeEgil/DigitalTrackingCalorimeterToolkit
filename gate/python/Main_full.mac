@@ -50,8 +50,6 @@
 /gate/output/root/enable
 /gate/output/root/setRootSinglesFlag 0
 /gate/output/root/setFileName ../../DTCToolkit/Data/MonteCarlo/DTC_Full_Aluminium_Absorber{absorberthickness}mm_Degrader{degraderthickness}mm_{energy}MeV
-#/gate/output/root/setFileName ../../DTCToolkit/Data/MonteCarlo/DTC_Aluminium_Absorber{absorberthickness}mm_Degrader{degraderthickness}mm_{energy}MeV
-#/gate/output/root/setFileName GATE
 
 #===============#
 # START BEAMS	#

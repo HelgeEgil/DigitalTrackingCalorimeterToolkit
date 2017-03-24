@@ -24,7 +24,7 @@
 
 using namespace std;
 
-Int_t absorberThickness = 3;
+Int_t absorberThickness = 4;
 Bool_t kFilterData = true;
 Int_t filterSize = 1;
 const Int_t arraySize = 500;

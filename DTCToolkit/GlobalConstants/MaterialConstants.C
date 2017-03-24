@@ -225,8 +225,13 @@ void  createSplines() {
 Double_t getLayerPositionmm(Int_t i) {
    Double_t z = 0;
 
-   if (i>0) {
-      z = ( firstUpperLayerZ + firstLowerLayerZ ) / 2 + dz * i;
+   if (!kUseAlpide) {
+      if (i>0) {
+         z = ( firstUpperLayerZ + firstLowerLayerZ ) / 2 + dz * i;
+      }
+   }
+   else {
+      z = dz * i;
    }
 
    return z;
