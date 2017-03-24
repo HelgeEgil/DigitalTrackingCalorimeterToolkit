@@ -2,6 +2,8 @@
 
 #include "Classes/Hit/Hit.h"
 
+using namespace DTC;
+
 Hit::Hit() {
    x_ = -1;
    y_ = -1;
@@ -63,7 +65,7 @@ void Hit::set(Hit* hit) {
 }
 
 ostream &operator<< (ostream &os, Hit &h) {
-   os << "(" << h.x_ << "," << h.y_ << "," << h.layerNo_ << ")";
+   os << "(" << h.getX() << "," << h.getY() << "," << h.getLayer() << ")";
    return os;
 }
 

@@ -9,6 +9,8 @@
 #include "Classes/Cluster/Clusters.h"
 #include "GlobalConstants/Constants.h"
 
+namespace DTC {
+
 class Hits : public TObject {
 
 private:
@@ -66,4 +68,5 @@ public:
 
    ClassDef(Hits,2)
 };
+}
 #endif

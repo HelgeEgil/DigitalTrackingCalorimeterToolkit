@@ -8,6 +8,7 @@
 
 #include "GlobalConstants/Constants.h"
 
+namespace DTC {
 class Cluster : public TObject {
 private:
    Float_t  x_, y_;
@@ -52,9 +53,10 @@ public:
    void     set(Float_t x, Float_t y, Int_t layer = -1, Int_t size = -1, Int_t eventID = -1);
    void     set(Cluster *copyCluster); // copy properties, not pointer
 
-   friend ostream& operator<<(ostream &os, Cluster &c);
-
    ClassDef(Cluster,4)
 };
+}
+
+ostream& operator<<(ostream &os, DTC::Cluster &c);
 
 #endif

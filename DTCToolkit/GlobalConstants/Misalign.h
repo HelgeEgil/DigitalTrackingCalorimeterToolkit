@@ -8,6 +8,10 @@
 #include "Classes/Cluster/Cluster.h"
 #include "Classes/Cluster/Clusters.h"
 
+namespace DTC {
+class Cluster;
+class Clusters;
+
 struct chipAlignment {
    Float_t deltaX, deltaY, deltaTheta;
    Int_t idx;
@@ -28,4 +32,5 @@ class Misalign : public TObject {
 
 //      ClassDef(Misalign,1)
 };
+}
 #endif

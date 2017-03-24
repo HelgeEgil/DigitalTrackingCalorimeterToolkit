@@ -8,6 +8,8 @@
 #include "Classes/Cluster/Cluster.h"
 #include "Classes/Cluster/Clusters.h"
 
+using namespace DTC;
+
 Misalign::Misalign() {
    // Data retrieved from dropbox.com/sh/zv5cu0j1pjgb2ph/AAD2Yg72S9uek7mJN-P7TsE6a/backupgeometry.txt
    // I.e. the Utrecht experiment. Their unit is cm, I've multiplied every number with 10

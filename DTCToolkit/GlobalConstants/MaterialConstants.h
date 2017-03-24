@@ -4,8 +4,9 @@
 #include <TObject.h>
 #include <TSpline.h>
 
-class Hit;
+namespace DTC {
 class Cluster;
+}
 
 Int_t nLayers;
 
@@ -41,6 +42,6 @@ Double_t getLayerPositionmm(Int_t i);
 Float_t  getSigmaEnergy(Int_t energy);
 Bool_t   isChipLowResistivity(Int_t chipIdx);
 Float_t  getChipCalibrationFactor(Int_t chipIdx);
-Bool_t   isBadData(Cluster * estimatedPosition);
+Bool_t   isBadData(DTC::Cluster * estimatedPosition);
 
 #endif

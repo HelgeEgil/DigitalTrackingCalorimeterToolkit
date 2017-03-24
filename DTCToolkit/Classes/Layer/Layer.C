@@ -7,16 +7,16 @@
 #include "Classes/Layer/Layer.h"
 #include "Classes/Hit/Hits.h"
 
-Layer::Layer(Int_t layerNo, Bool_t frameType, Bool_t dataType) : frame2D_(Form("%d_frame2D_%i",frameType, layerNo), Form("frame2D_layer_%i", layerNo), nx, 0, nx, ny, 0, ny) {
+DTC::Layer::Layer(Int_t layerNo, Bool_t frameType, Bool_t dataType) : frame2D_(Form("%d_frame2D_%i",frameType, layerNo), Form("frame2D_layer_%i", layerNo), nx, 0, nx, ny, 0, ny) {
    dataType_ = dataType;
    frameType_ = frameType;
    layerNo_ = layerNo;
 }
 
-Layer::~Layer() {
+DTC::Layer::~Layer() {
 }
 
-Int_t Layer::diffuseLayer(TRandom3 *gRandom) {
+Int_t DTC::Layer::diffuseLayer(TRandom3 *gRandom) {
    Int_t repeatFactor, x, y, z, randX, randY;
    Float_t EnergyFactor = 2.67;
    Float_t newSigma, eDep;
@@ -47,7 +47,7 @@ Int_t Layer::diffuseLayer(TRandom3 *gRandom) {
    return nHits;
 }
 
-Bool_t Layer::findHits(Hits* hits) {
+Bool_t DTC::Layer::findHits(Hits* hits) {
    Int_t    x, y, z, nBins;
    Bool_t   isHits = false;
    Float_t  edep;
@@ -68,7 +68,7 @@ Bool_t Layer::findHits(Hits* hits) {
    return isHits;
 }
 
-Float_t Layer::getOccupancy() {
+Float_t DTC::Layer::getOccupancy() {
    Int_t    numberOfActivatedPixels = 0;
    Int_t    nBins = frame2D_.GetBin(frame2D_.GetNbinsX(), frame2D_.GetNbinsY());
    Float_t  occupancy;

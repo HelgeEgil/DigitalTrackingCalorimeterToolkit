@@ -7,9 +7,10 @@
 
 #include "Classes/Track/Track.h"
 
-class Hits;
-
 using namespace std;
+
+namespace DTC {
+class Hits;
 
 struct trackCluster { 
   int track; 
@@ -86,4 +87,5 @@ class Tracks : public TObject {
 
    ClassDef(Tracks,2)
 };
+}
 #endif

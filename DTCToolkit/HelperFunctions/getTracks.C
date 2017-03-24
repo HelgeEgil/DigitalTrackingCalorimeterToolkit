@@ -24,6 +24,7 @@
 #include "HelperFunctions/getTracks.h"
 
 using namespace std;
+using namespace DTC;
 
 void makeTracks(Int_t Runs, Int_t dataType, Bool_t recreate, Float_t energy) {
    Tracks * tracks = loadOrCreateTracks(recreate, Runs, dataType, energy);

@@ -9,6 +9,8 @@
 #include "GlobalConstants/MaterialConstants.h"
 #include "HelperFunctions/Tools.h"
 
+using namespace DTC;
+
 Hits::~Hits() {
    hits_.Delete();
 }

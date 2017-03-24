@@ -15,6 +15,7 @@
 #include "GlobalConstants/MaterialConstants.h"
 
 using namespace std;
+using namespace DTC;
 
 Track::Track() : track_("Cluster", MaxTrackLength) {
    fitEnergy_ = 0;

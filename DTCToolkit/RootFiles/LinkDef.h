@@ -1,11 +1,11 @@
 #ifdef __CINT__
-#pragma link C++ class Hit+;
-#pragma link C++ class Hits+;
-#pragma link C++ class Cluster+;
-#pragma link C++ class Clusters+;
-#pragma link C++ class Track+;
-#pragma link C++ class Tracks+;
-#pragma link C++ class Layer+;
-#pragma link C++ class CalorimeterFrame+;
-//#pragma link C++ class Misalign+;
+#pragma link C++ class DTC::Hit+;
+#pragma link C++ class DTC::Hits+;
+#pragma link C++ class DTC::Cluster+;
+#pragma link C++ class DTC::Clusters+;
+#pragma link C++ class DTC::Track+;
+#pragma link C++ class DTC::Tracks+;
+#pragma link C++ class DTC::Layer+;
+#pragma link C++ class DTC::CalorimeterFrame+;
+//#pragma link C++ class DTC::Misalign+;
 #endif

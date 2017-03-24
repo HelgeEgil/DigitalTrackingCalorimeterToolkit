@@ -10,6 +10,7 @@
 
 using namespace std;
 
+namespace DTC {
 class Hits;
 
 // A Frame contains many layers
@@ -17,7 +18,7 @@ class Hits;
 class CalorimeterFrame : public TObject {
 
    private:
-      TClonesArray calorimeterFrame_;
+      TClonesArray layers_;
 
    public:
       CalorimeterFrame();
@@ -26,7 +27,7 @@ class CalorimeterFrame : public TObject {
       // ROOT functions
       virtual void   Clear(Option_t * = "");
       virtual void   Reset();
-      virtual Layer *At(Int_t i) { return (Layer*) calorimeterFrame_.At(i); }
+      virtual Layer *At(Int_t i) { return (DTC::Layer*) layers_.At(i); }
 
       // inline functions
       TH2F         * getTH2F(Int_t i) { return (TH2F*) At(i)->getTH2F(); }
@@ -39,4 +40,5 @@ class CalorimeterFrame : public TObject {
 
    ClassDef(CalorimeterFrame,2)
 };
+}
 #endif
