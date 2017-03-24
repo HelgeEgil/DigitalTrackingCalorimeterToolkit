@@ -33,7 +33,7 @@
 
 /gate/phantom/attachCrystalSD
 
-/gate/physics/addPhysicsList QGSP_BIC_EMY
+/gate/physics/addPhysicsList QGSP_BIC
 /gate/geometry/setIonisationPotential Water 75 eV
 
 /gate/run/initialize
@@ -55,7 +55,7 @@
 /gate/source/addSource uniformBeam gps
 /gate/source/uniformBeam/gps/particle proton
 /gate/source/uniformBeam/gps/ene/type Gauss
-/gate/source/uniformBeam/gps/ene/mono 230 MeV
+/gate/source/uniformBeam/gps/ene/mono 190 MeV
 /gate/source/uniformBeam/gps/ene/sigma 0 MeV
 /gate/source/uniformBeam/gps/type Plane
 /gate/source/uniformBeam/gps/shape Square
@@ -63,7 +63,7 @@
 /gate/source/uniformBeam/gps/halfx 0 mm
 /gate/source/uniformBeam/gps/halfy 0 mm
 /gate/source/uniformBeam/gps/centre 0. 0. -1. cm
-/gate/application/setTotalNumberOfPrimaries 250
+/gate/application/setTotalNumberOfPrimaries 100000
 
 /gate/output/root/enable
 /gate/output/root/setFileName gate_simulation_230MeV

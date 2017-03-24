@@ -199,20 +199,20 @@ void Run(int COUNTER) {
    Double_t          deltaHybridInv[numberOfEnergies] = {};
 
    cout << "Reading file\n";
-   in.open("ranges_water_pstar3.csv");
+   in.open("ranges_water_pstar4_1e-4.csv");
 //   in.open("Ranges_2mm_Al.csv");
 //   in.open("Ranges_3mm_Al.csv");
    idx = 0;
    Bool_t useCSDA = true;
    Bool_t useCompleteDataset = false;
-   Double_t  lowerAccuracyLimit = 1e-3; // in %
+   Double_t  lowerAccuracyLimit = 1e-4; // in cm
    Int_t idxPara = 0;
    Int_t idxCtrl = 0;
    
    Int_t counter = 0;
    while (1) {
 
-      in >> energy >> range_csda >> range;
+      in >> energy >> range_csda; //>> range;
 
       if (!in.good()) break;
       
@@ -359,8 +359,7 @@ void Run(int COUNTER) {
       energy = energies_control[i];
       controlValue = ranges_control[i];
 
-      // The limit is given in terms of MM
-      // Limit in %: Divide by controlValue
+      // The lowerAccuracyLimit is given in terms of [cm]
       deltaBK[i] = max( 100*fabs(braggKleeman->Eval(energy) - controlValue) / controlValue, 100*lowerAccuracyLimit / controlValue);
       deltaBKInv[i] = max( 100*fabs(braggKleemanInv->Eval(controlValue) - energy) / energy, 100*lowerAccuracyLimit / energy);
       deltaUlmer[i] = max( 100*fabs(fitFunction->Eval(energy) - controlValue) / controlValue, 100*lowerAccuracyLimit / controlValue);
@@ -660,7 +659,7 @@ void Run(int COUNTER) {
    file << " " <<  firstQuartileLinear << " " << medianLinear << " " << thirdQuartileLinear << " " << firstQuartileLinearInv << " " << medianLinearInv << " " << thirdQuartileLinearInv << endl;
    file.close();
 
-   TCanvas *cCompare = new TCanvas("cCompare", "Error comparison", 1200, 700);
+   TCanvas *cCompare = new TCanvas("cCompare", "Error comparison", 1200, 900);
 //   cCompare->Divide(1,2,0.01,0.01);
 
 /*
@@ -705,8 +704,9 @@ void Run(int COUNTER) {
    gBKCompare->GetYaxis()->SetTitleFont(22);
    gBKCompare->GetYaxis()->SetLabelFont(22);
 
-   gBKCompare->SetTitle("Accuracy of proton range calculation;Initial energy [MeV];Range error [%]");
+   gBKCompare->SetTitle(";Initial energy [MeV];Range error [%]");
    gBKInvCompare->SetTitle("Energy-from-range accuracy comparison;Range [MeV];Energy error [%]");
+
 
    cCompare->cd(1);
    gPad->SetLogy(); 
@@ -715,10 +715,12 @@ void Run(int COUNTER) {
    gSplineCompare->Draw("L");
    gLinearCompare->Draw("L");
 
+   /*
    gPad->Update();
    TPaveText *title = (TPaveText*) gPad->GetPrimitive("title");
    title->SetTextFont(22);
    gPad->Modified();   
+   */
 
    TLegend *leg1 = new TLegend(0.15, 0.6, 0.35, 0.88);
    leg1->SetTextFont(22);
@@ -727,7 +729,7 @@ void Run(int COUNTER) {
    leg1->AddEntry(gLinearCompare, "Linear interpolation", "L");
    leg1->AddEntry(gSplineCompare, "Spline interpolation", "L");
    leg1->Draw();
-   gBKCompare->GetYaxis()->SetRangeUser(0.001, 300);
+   gBKCompare->GetYaxis()->SetRangeUser(0.00001, 300);
    gBKCompare->GetYaxis()->SetNoExponent();
    gBKCompare->GetXaxis()->SetRangeUser(0, 250);
    gPad->Update();
@@ -779,7 +781,7 @@ void Run(int COUNTER) {
 
    cout << "ALPHA = " << alpha << ", p = " << p << endl;
 
-   TCanvas *cDepth = new TCanvas("cDepth", "depth-dose curves", 800, 800);
+   TCanvas *cDepth = new TCanvas("cDepth", "depth-dose curves", 1200, 900);
 //   cDepth->Divide(1,5,0.001,0.001);
    
    // the depth of the semi-empirical models is easy to find, since we have formulas for it
@@ -860,9 +862,12 @@ void Run(int COUNTER) {
    DDBK->SetLineWidth(3);
    DDUlmer->SetLineColor(kBlue);
    DDUlmer->SetLineWidth(3);
+//   DDUlmer->SetLineStyle(9);
    DDLinear->SetLineColor(kGreen);
+//   DDLinear->SetLineStyle(2);
    DDLinear->SetLineWidth(4);
    DDSpline->SetLineColor(kBlack);
+//   DDSpline->SetLineStyle(6);
    DDSpline->SetLineWidth(3);
 
    /*
@@ -894,13 +899,17 @@ void Run(int COUNTER) {
    cDepth->Update();
    */
 
-   DDLinear->GetHistogram()->GetYaxis()->SetRangeUser(0, 75);
-   DDLinear->GetHistogram()->GetYaxis()->SetTitleOffset(0.6);
+   gPad->SetLogy();
+   DDLinear->GetHistogram()->GetYaxis()->SetRangeUser(7.2, 380);
+   DDLinear->GetHistogram()->GetYaxis()->SetNoExponent();
+   DDLinear->GetHistogram()->GetYaxis()->SetMoreLogLabels();
+   DDLinear->GetHistogram()->GetXaxis()->SetRangeUser(19.7, 24);
+   DDLinear->GetHistogram()->GetYaxis()->SetTitleOffset(1.1);
    DDLinear->GetXaxis()->SetTitleFont(22);
    DDLinear->GetXaxis()->SetLabelFont(22);
    DDLinear->GetYaxis()->SetTitleFont(22);
    DDLinear->GetYaxis()->SetLabelFont(22);
-   DDLinear->GetHistogram()->SetTitle("Energy loss curves of 190 MeV protons from model parameterizations;Depth in water [cm];Energy loss dE / dz [A.U.]");
+   DDLinear->GetHistogram()->SetTitle(";Depth in water [cm];Energy loss [A.U.]");
 
    DDUlmer->SetNpx(1000);
    DDBK->SetNpx(1000);
@@ -911,12 +920,14 @@ void Run(int COUNTER) {
    DDUlmer->Draw("same");
    DDBK->Draw("same");
    
+   /*
    gPad->Update();
    TPaveText *title2 = (TPaveText*) gPad->GetPrimitive("title");
    title2->SetTextFont(22);
    gPad->Modified();
+   */
 
-   TLegend *leg3 = new TLegend(0.18, 0.75, 0.46, 0.87);
+   TLegend *leg3 = new TLegend(0.16, 0.66, 0.46, 0.86);
    leg3->SetTextFont(22);
    leg3->AddEntry(DDBK, "Bragg-Kleeman", "L");
    leg3->AddEntry(DDUlmer, "Sum of exponentials", "L");

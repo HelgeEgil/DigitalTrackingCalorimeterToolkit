@@ -38,7 +38,7 @@ void makePlots() {
    TCanvas *c5 = new TCanvas("c5", "Chip sensitivity calibration", 1200, 800);
    TCanvas *c6 = new TCanvas("c6", "Resolution", 1200, 800);
    c6->Divide(3,1,0.0001,0.0001);
-   TCanvas *c7 = new TCanvas("c7", "Parameterization accuracy", 1200, 800);
+   TCanvas *c7 = new TCanvas("c7", "Parameterization accuracy", 1200, 900);
 
    Float_t  arrayE[500] = {0}; // energy MC
    Float_t  arrayMCActualSigma[500] = {0}; // Measured range straeggling from full MC
@@ -467,7 +467,7 @@ void makePlots() {
    Double_t pUlmerl, pUlmerm, pUlmerh, pUlmerIl, pUlmerIm, pUlmerIh;
    Double_t pLinearl, pLinearm, pLinearh, pLinearIl, pLinearIm, pLinearIh;
    Double_t pSplinel, pSplinem, pSplineh, pSplineIl, pSplineIm, pSplineIh;
-   in8.open("OutputFiles/MedianValuesForParameterization.csv");
+   in8.open("OutputFiles/MedianValuesForParameterization_merged.csv");
    while (1) {
       in8 >> pN >> pBKl >> pBKm >> pBKh >> pBKIl >> pBKIm >> pBKIh >> pUlmerl >> pUlmerm >> pUlmerh >> pUlmerIl >> pUlmerIm >> pUlmerIh >> pSplinel >> pSplinem >> pSplineh >> pSplineIl >> pSplineIm >> pSplineIh >> pLinearl >> pLinearm >> pLinearh >> pLinearIl >> pLinearIm >> pLinearIh;
 
