@@ -19,8 +19,8 @@ private:
    vector<Int_t> verticalIndexOfLayer_;
 
 public:
-   Hits(Int_t nHits) : hits_("Hit", nHits) {}
-   Hits() : hits_("Hit", kEventsPerRun*200) {}
+   Hits(Int_t nHits) : hits_("DTC::Hit", nHits) {}
+   Hits() : hits_("DTC::Hit", kEventsPerRun*200) {}
    virtual ~Hits(); 
 
    // ROOT & I/O

@@ -14,8 +14,8 @@
 using namespace std;
 using namespace DTC;
 
-Clusters::Clusters(Bool_t frameType) : clusters_("Cluster", kEventsPerRun*2),
-                                       clustersWithoutTrack_("Cluster", kEventsPerRun*2) {
+Clusters::Clusters(Bool_t frameType) : clusters_("DTC::Cluster", kEventsPerRun*2),
+                                       clustersWithoutTrack_("DTC::Cluster", kEventsPerRun*2) {
    frameType_ = frameType;
 }
 

@@ -17,14 +17,14 @@
 using namespace std;
 using namespace DTC;
 
-Track::Track() : track_("Cluster", MaxTrackLength) {
+Track::Track() : track_("DTC::Cluster", MaxTrackLength) {
    fitEnergy_ = 0;
    fitRange_ = 0;
    fitScale_ = 0;
    fitError_ = 0;
 }
 
-Track::Track(Cluster *cluster) : track_("Cluster", MaxTrackLength) {
+Track::Track(Cluster *cluster) : track_("DTC::Cluster", MaxTrackLength) {
    appendCluster(cluster);
    fitEnergy_ = 0;
    fitRange_ = 0;

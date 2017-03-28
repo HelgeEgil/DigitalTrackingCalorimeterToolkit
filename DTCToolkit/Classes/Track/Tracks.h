@@ -24,8 +24,8 @@ class Tracks : public TObject {
       TClonesArray clustersWithoutTrack_;
 
    public:
-      Tracks() : tracks_("Track", 1000), clustersWithoutTrack_("Cluster", 5000) {}
-      Tracks(Int_t nTracks) : tracks_("Track", nTracks), clustersWithoutTrack_("Cluster", nTracks*5) {}
+      Tracks() : tracks_("DTC::Track", 1000), clustersWithoutTrack_("DTC::Cluster", 5000) {}
+      Tracks(Int_t nTracks) : tracks_("DTC::Track", nTracks), clustersWithoutTrack_("DTC::Cluster", nTracks*5) {}
       virtual ~Tracks(); 
 
       // ROOT & I/O     
