@@ -2296,8 +2296,17 @@ TF1 *  doSimpleGaussianFit (TH1F *h, Float_t *means, Float_t *sigmas) {
    mu = gauss->GetParameter(1);
    sigma = fabs(gauss->GetParameter(2));
 
-   Int_t binSigmaFrom = axis->FindBin(fmax(mu - 4 * nominalSigma, 0)); // was sigma
-   Int_t binSigmaTo = axis->FindBin(mu + 4 * nominalSigma); // was sigma, needs nominal to avoid small sigma fits on >> absorbers
+   // nominalSigma is too low at very low energies
+   // fitted sigma may be too low at high energies, where fit can be ~= 1 layer
+   Float_t sigmaToUse = fmax(sigma, nominalSigma);
+
+   Float_t sigmaFrom = fmax(mu - 4 * sigmaToUse, 0);
+   Float_t sigmaTo = fmin(mu + 4 * sigmaToUse, nominalMean * 1.4 + 10);
+
+   Int_t binSigmaFrom = axis->FindBin(sigmaFrom);
+   Int_t binSigmaTo = axis->FindBin(sigmaTo);
+
+   printf("doSimpleGaussianFit: Searching from %.2f (bin %d)  to %.2f (bin %d).\n", sigmaFrom, binSigmaFrom, sigmaTo, binSigmaTo);
 
    Float_t squareMeanDifference = 0;
    Float_t empiricalMean = 0;

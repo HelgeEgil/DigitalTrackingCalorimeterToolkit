@@ -100,6 +100,10 @@ Float_t Track::getPreTL() {
       energyLoss += getEnergyLossFromAluminumAbsorber(run_energy);
    }
 
+   if (kIsFirstLayerAir) {
+      energyLoss += getEnergyLossFromTracker(run_energy);
+   }
+
    if (energyLoss > 0) {   
       tl = getTLFromEnergy(run_energy) - getTLFromEnergy(run_energy - energyLoss);
    }

@@ -8,7 +8,6 @@ if [ $# -ne 4 ]; then
 	exit
 fi
 
-
 for i in `seq $2 $3 $4`;
 do
    hdt=`echo "scale=3; -$i/2-2" | bc`

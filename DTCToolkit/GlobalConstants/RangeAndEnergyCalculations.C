@@ -57,7 +57,17 @@ Float_t getTLFromEnergy(Float_t energy) {
 
 Float_t getWEPLFromEnergy(Float_t energy) {
    if (energy == 0) return 0;
-   return getTLFromEnergy(energy, splineWater);
+   Float_t wepl = getTLFromEnergy(energy, splineWater);
+
+   if (kIsFirstLayerAir) {
+      Float_t tl = getTLFromEnergy(energy, splineMaterial);   
+      Float_t fromTracker = wepl/tl * DZ;
+      Float_t fromRest    = wepl/tl * (tl - dz);
+
+      wepl = fromTracker + fromRest;
+   }
+
+   return wepl;
 }
 
 Float_t getTLFromWEPL(Float_t wepl) {
@@ -77,7 +87,6 @@ Float_t getWEPLFactorFromEnergy(Float_t energy) {
    Float_t range = getTLFromEnergy(energy);
    Float_t wepl = getWEPLFromEnergy(energy);
 
-//   return 2.15; // TEST
    return wepl / range;
 }
 
@@ -130,8 +139,6 @@ Float_t getWEPLStragglingFromWEPL(Float_t wepl, Float_t sigma_energy) {
 
    estimatedStraggling = wepl_high - wepl_low;
 
-   printf("getWEPLStragglingFromWEPL: TL = %.2f, WEPL = %.2f. TL straggling = %.2f (%.2f %%), WEPL straggling = %.2f (%.2f %%)\n", tl, wepl, tl_straggling, 100*tl_straggling/tl, estimatedStraggling, 100*estimatedStraggling/wepl);
-   
    return estimatedStraggling;
 }
    
@@ -268,9 +275,9 @@ Float_t getEnergyLossErrorFromScintillators(Int_t nScintillators) {
    Float_t energyLossError = 0;
 
    if       (nScintillators == 0) energyLossError = 0;
-   else if (nScintillators == 1) energyLossError = 0.30;
-   else if (nScintillators == 2) energyLossError = 0.38;
-   else if (nScintillators == 3) energyLossError = 0.44;
+   else if  (nScintillators == 1) energyLossError = 0.30;
+   else if  (nScintillators == 2) energyLossError = 0.38;
+   else if  (nScintillators == 3) energyLossError = 0.44;
    
    return energyLossError;
 }
@@ -282,6 +289,10 @@ Float_t getEnergyLossFromAluminumAbsorber(Float_t energy) {
    // measured MC energy loss in a 1.5 mm Al absorber
 
    return  62.00441 * pow(energy, -0.7158403) * (kAbsorbatorThickness/1.5);
+}
+
+Float_t getEnergyLossFromTracker(Float_t energy) {
+   return 34.46854 * pow(energy, -0.82696);
 }
 
 Float_t getEnergyLossErrorFromAluminumAbsorber() {

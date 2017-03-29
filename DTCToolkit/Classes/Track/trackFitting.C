@@ -107,6 +107,7 @@ TGraphErrors * Track::doRangeFit(Bool_t isScaleVariable) {
 
    for (Int_t i=0; i<n; i++) {
       if (!At(i)) continue;
+
       x[i] = preTL + getLayermm(i);
       y[i] = getDepositedEnergy(i, checkResistivity);
       ery[i] = getDepositedEnergyError(i, checkResistivity);

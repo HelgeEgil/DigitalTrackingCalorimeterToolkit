@@ -53,6 +53,7 @@ Float_t getUnitStragglingFromEnergy(Float_t energy, Float_t sigma_energy);
 Float_t  getEnergyLossFromScintillators(Float_t energy, Int_t nScintillators);
 Float_t  getEnergyLossErrorFromScintillators(Int_t nScintillators);
 Float_t  getEnergyLossFromAluminumAbsorber(Float_t energy);
+Float_t  getEnergyLossFromTracker(Float_t energy);
 Float_t  getEnergyLossErrorFromAluminumAbsorber();
 
 #endif

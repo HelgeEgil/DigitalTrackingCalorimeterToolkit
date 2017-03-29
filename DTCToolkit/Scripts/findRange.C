@@ -63,10 +63,10 @@ vector<Float_t> findRange::Run(Double_t energy, Double_t sigma_mev)
    Float_t x_compensate = 0;
 
    Int_t energyFrom = run_energy - 35;
-   Int_t energyTo = run_energy + 15;
+   Int_t energyTo = run_energy + 25;
    if (run_energy > 70) {
       energyFrom = run_energy - 15;
-      energyTo = run_energy + 5;
+      energyTo = run_energy + 25;
    }
 
    printf("RUNNING WITH ENERGY %.2f.\n", run_energy);
@@ -137,9 +137,10 @@ vector<Float_t> findRange::Run(Double_t energy, Double_t sigma_mev)
          n++;
 
          if (useDegrader) {
-            if (posZ < 0) {
+            if (baseID == 0) { // inside degrader
                dE += edep;
             }
+
             else if (dE > 0) {
                thisEnergy = 250 - dE;
                thisRange = aw * pow(run_energy, pw) - aw * pow(thisEnergy, pw);

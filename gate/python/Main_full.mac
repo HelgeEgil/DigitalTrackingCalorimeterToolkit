@@ -45,7 +45,7 @@
 /gate/source/uniformBeam/gps/direction 0 0 1
 /gate/source/uniformBeam/gps/halfx 0. mm
 /gate/source/uniformBeam/gps/halfy 0. mm
-/gate/source/uniformBeam/gps/centre 0. 0. {beampos} cm
+/gate/source/uniformBeam/gps/centre 0. 0. {beampos} mm
 
 /gate/output/root/enable
 /gate/output/root/setRootSinglesFlag 0
@@ -57,5 +57,5 @@
 
 /gate/random/setEngineName MersenneTwister
 /gate/random/setEngineSeed auto
-/gate/application/setTotalNumberOfPrimaries 5000
+/gate/application/setTotalNumberOfPrimaries 500
 /gate/application/start

@@ -34,6 +34,7 @@ Float_t  run_energy = 0;
 Float_t  run_degraderThickness = 0;
 Bool_t   kIsAluminumPlate = false;
 Bool_t   kIsScintillator = false;
+Bool_t   kIsFirstLayerAir = false;
 Bool_t   kUseAlpide = true;
 Bool_t   kFilterNuclearInteractions = true;
 Bool_t   useDegrader = true;
