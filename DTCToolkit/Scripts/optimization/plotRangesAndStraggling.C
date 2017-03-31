@@ -114,9 +114,9 @@ void plotRangesAndStraggling() {
       a_dtc = 0.012511;
       p_dtc = 1.730529;
    }
-   else if  (absorberThickness == 3) { // Updated 2017-03-28 NOAIR
-      a_dtc = 0.011154;
-      p_dtc = 1.751128;
+   else if  (absorberThickness == 3) { // Updated 2017-03-31 PHASE SPACE
+      a_dtc = 0.015553;
+      p_dtc = 1.690590;
    }
    else if (absorberThickness == 4) { // Updated 2017-03-22
       a_dtc = 0.016493;

@@ -187,9 +187,9 @@ void  createSplines() {
       straggling_b = 0.00100124;
    }
 
-   else if (kAbsorbatorThickness == 3) { // updated 2017-03-29
-      alpha_aluminum = 0.011154;
-      p_aluminum = 1.751128;
+   else if (kAbsorbatorThickness == 3) { // updated 2017-03-31
+      alpha_aluminum = 0.015553;
+      p_aluminum = 1.690590;
       straggling_a = 1.80564;
       straggling_b = 0.001971;
    }
