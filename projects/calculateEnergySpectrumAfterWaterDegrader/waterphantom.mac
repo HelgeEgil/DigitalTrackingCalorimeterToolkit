@@ -1,0 +1,66 @@
+/gate/geometry/setMaterialDatabase GateMaterials.db
+
+/gate/world/geometry/setXLength 3500.0 mm
+/gate/world/geometry/setYLength 3500.0 mm
+/gate/world/geometry/setZLength 3500.0 mm
+/gate/world/placement/setTranslation 0 0 0 mm
+/gate/world/vis/setVisible false
+
+/gate/world/daughters/name phantom
+/gate/world/daughters/systemType scanner
+/gate/world/daughters/insert box
+/gate/phantom/geometry/setXLength 1650.0 mm
+/gate/phantom/geometry/setYLength 1650.0 mm
+/gate/phantom/geometry/setZLength {degraderthickness} mm
+/gate/phantom/placement/setTranslation 0 0 {halfdegraderthickness} mm
+/gate/phantom/vis/setVisible false
+
+/gate/phantom/daughters/name degrader
+/gate/phantom/daughters/insert box
+/gate/degrader/geometry/setXLength 1500.0 mm
+/gate/degrader/geometry/setYLength 1500.0 mm
+/gate/degrader/geometry/setZLength {degraderthickness} mm
+/gate/degrader/placement/setTranslation 0 0 0 mm
+/gate/degrader/setMaterial Water
+/gate/degrader/vis/setVisible false
+
+/gate/world/daughters/name scoringplane
+/gate/world/daughters/insert box
+/gate/scoringplane/geometry/setXLength 3000.0 mm
+/gate/scoringplane/geometry/setYLength 3000.0 mm
+/gate/scoringplane/geometry/setZLength 0.1 mm
+/gate/scoringplane/placement/setTranslation 0 0 0 mm
+
+/gate/physics/addPhysicsList QGSP_BIC
+/gate/geometry/setIonisationPotential Water 75 eV
+
+/gate/degrader/attachCrystalSD
+
+/gate/actor/addActor EnergySpectrumActor MyActor
+/gate/actor/MyActor/save energyspec_{degraderthickness}mm.root
+/gate/actor/MyActor/attachTo scoringplane
+/gate/actor/MyActor/energySpectrum/setEmin 0 MeV
+/gate/actor/MyActor/energySpectrum/setEmax 275 MeV
+/gate/actor/MyActor/energySpectrum/setNumberOfBins 1000
+
+/gate/run/initialize
+
+/gate/source/addSource uniformBeam gps
+/gate/source/uniformBeam/gps/particle proton
+/gate/source/uniformBeam/gps/ene/type Gauss
+/gate/source/uniformBeam/gps/ene/mono 250 MeV
+/gate/source/uniformBeam/gps/ene/sigma 0 MeV
+/gate/source/uniformBeam/gps/type Plane
+/gate/source/uniformBeam/gps/shape Square
+/gate/source/uniformBeam/gps/direction 0 0 1
+/gate/source/uniformBeam/gps/halfx 0 mm
+/gate/source/uniformBeam/gps/halfy 0 mm
+/gate/source/uniformBeam/gps/centre 0. 0. {beampos} cm
+/gate/application/setTotalNumberOfPrimaries 2500
+
+/gate/output/root/enable
+/gate/output/root/setFileName rootoutput
+
+/gate/random/setEngineName MersenneTwister
+/gate/random/setEngineSeed auto
+/gate/application/start

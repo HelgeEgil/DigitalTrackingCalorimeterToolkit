@@ -711,7 +711,7 @@ Float_t drawBraggPeakGraphFit(Int_t Runs, Int_t dataType, Bool_t recreate, Float
    }
    TCanvas      * cGraph = new TCanvas("cGraph", "Fitted data points", 1500, 500);
    TCanvas      * cFitResults = new TCanvas("cFitResults", hTitle, 1000, 1000);
-   TH1F         * hFitResults = new TH1F("fitResult", hTitle, fmax(nEnergies*4,100), getUnitFromEnergy(0), getUnitFromEnergy(run_energy)*1.4+10);
+   TH1F         * hFitResults = new TH1F("fitResult", hTitle, fmax(nEnergies*8,200), getUnitFromEnergy(0), getUnitFromEnergy(run_energy)*1.4+10);
    TH1F         * hFitResultsDroppedData = new TH1F("fitResultsDroppedData", hTitle, 200, getUnitFromEnergy(0), getUnitFromEnergy(run_energy)*1.4+10);
    TH1F         * hMaxAngle = new TH1F("hMaxAngle", "Maximum angle for proton track", 200, 0, 25);
  
@@ -921,6 +921,7 @@ Float_t drawBraggPeakGraphFit(Int_t Runs, Int_t dataType, Bool_t recreate, Float
    */
 
    ps->AddText(Form("Resulting WEPL = %.2f #pm %.2f", empiricalMean, empiricalSigma));
+   ps->AddText(Form("WEPL deviation = %.2f #pm %.2f", empiricalMean - expectedMean, empiricalSigma - expectedStraggling));
    ps->AddText(Form("Resulting energy = %.2f #pm %.2f", getEnergyFromUnit(empiricalMean), energySigma));
       
    if (kOutputUnit == kPhysical) {
