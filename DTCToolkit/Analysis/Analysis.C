@@ -2402,7 +2402,7 @@ Float_t doNGaussianFit ( TH1F *h, Float_t *means, Float_t *sigmas) {
       
       gauss = new TF1(Form("Gaus_%d", i), "gaus(0)", searchFrom, searchTo);
    
-      gauss->SetLineWidth(2.5);
+      gauss->SetLineWidth(2);
 
       sigma = 3;
       if (isLastLayer && ratio < 0.05) sigma = 0.2;
