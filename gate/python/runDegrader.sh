@@ -19,9 +19,9 @@ do
 	echo "Running: $i"
    if (( $IDX % $NCORES == 0 ))
    then
-      echo "Waiting for run $i (PID $1)"
+      echo "Waiting for run $i (PID $!)"
       IDX=1
-      time wait $1
+      time wait $!
    else
       IDX=$((IDX+1))
    fi

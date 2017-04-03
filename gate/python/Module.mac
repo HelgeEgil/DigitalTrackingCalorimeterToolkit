@@ -10,7 +10,7 @@
 /gate/phantom/geometry/setXLength 1650.0 mm
 /gate/phantom/geometry/setYLength 1650.0 mm
 /gate/phantom/geometry/setZLength {degraderthickness} mm
-/gate/phantom/placement/setTranslation 0 0 {halfdegraderthickness} mm
+/gate/phantom/placement/setTranslation 0 0 -200.0 mm
 /gate/phantom/vis/setVisible false
 
 /gate/phantom/daughters/name degrader
@@ -36,8 +36,8 @@
 /gate/world/daughters/insert box
 /gate/scanner_2/geometry/setXLength 150.0 mm
 /gate/scanner_2/geometry/setYLength 150.0 mm
-/gate/scanner_2/geometry/setZLength 2576.25 mm
-/gate/scanner_2/placement/setTranslation 0 0 1291.56 mm
+/gate/scanner_2/geometry/setZLength 687.0 mm
+/gate/scanner_2/placement/setTranslation 0 0 346.935 mm
 /gate/scanner_2/vis/setVisible false
 
 /gate/scanner_1/daughters/name FM_Layer
@@ -124,7 +124,7 @@
 /gate/Layer/geometry/setXLength 100.0 mm
 /gate/Layer/geometry/setYLength 40.0 mm
 /gate/Layer/geometry/setZLength 3.435 mm
-/gate/Layer/placement/setTranslation 0 0 -1286.4075 mm
+/gate/Layer/placement/setTranslation 0 0 -341.7825 mm
 /gate/Layer/vis/setVisible false
 
 /gate/Layer/daughters/name Module
@@ -200,6 +200,6 @@
 
 /gate/Layer/repeaters/insert linear
 /gate/Layer/linear/autoCenter false
-/gate/Layer/linear/setRepeatNumber 150
+/gate/Layer/linear/setRepeatNumber 40
 /gate/Layer/linear/setRepeatVector 0 0 3.435 mm
 

@@ -20,10 +20,21 @@
 #include <TRandom3.h>
 #include <TPad.h>
 #include <TMath.h>
+#include <TColor.h>
 
 using namespace std;
 
 Int_t absorberThickness = 2;
+
+Color_t kColorBK = kRed-4;
+Color_t kColorUlmer = kCyan+1;
+Color_t kColorSpline = kGreen+1;
+Color_t kColorLinear = kBlack;
+
+Int_t kLineBK = 1;
+Int_t kLineUlmer = 9;
+Int_t kLineLinear = 7;
+Int_t kLineSpline = 10;
 
 void makePlots() {
    TCanvas *c1 = new TCanvas("c1", "Fit results", 1200, 800);
@@ -467,7 +478,7 @@ void makePlots() {
    Double_t pUlmerl, pUlmerm, pUlmerh, pUlmerIl, pUlmerIm, pUlmerIh;
    Double_t pLinearl, pLinearm, pLinearh, pLinearIl, pLinearIm, pLinearIh;
    Double_t pSplinel, pSplinem, pSplineh, pSplineIl, pSplineIm, pSplineIh;
-   in8.open("OutputFiles/MedianValuesForParameterization_merged.csv");
+   in8.open("OutputFiles/MedianValuesForParameterization.csv");
    while (1) {
       in8 >> pN >> pBKl >> pBKm >> pBKh >> pBKIl >> pBKIm >> pBKIh >> pUlmerl >> pUlmerm >> pUlmerh >> pUlmerIl >> pUlmerIm >> pUlmerIh >> pSplinel >> pSplinem >> pSplineh >> pSplineIl >> pSplineIm >> pSplineIh >> pLinearl >> pLinearm >> pLinearh >> pLinearIl >> pLinearIm >> pLinearIh;
 
@@ -946,19 +957,19 @@ void makePlots() {
    TGraph *tgaSpline = new TGraph(pi, paraNPoints, paraSplineh);
    TGraph *tgaLinear = new TGraph(pi, paraNPoints, paraLinearh);
 
-   tgaBK->SetTitle("Comparison of model stability;Number of data points in training group; 75% percentile of errors in range calculation [%]");
+   tgaBK->SetTitle(";Number of data points in training group; 75% percentile of errors in range calculation [%]");
 
-   tgaBK->SetLineColor(kRed);
-   tgaBK->SetMarkerColor(kRed);
+   tgaBK->SetLineColor(kColorBK);
    tgaBK->SetLineWidth(3);
-   tgaUlmer->SetLineColor(kBlue);
-   tgaUlmer->SetMarkerColor(kBlue);
+   tgaBK->SetLineStyle(kLineBK);
+   tgaUlmer->SetLineColor(kColorUlmer);
+   tgaUlmer->SetLineStyle(kLineUlmer);
    tgaUlmer->SetLineWidth(3);
-   tgaSpline->SetLineColor(kGreen);
-   tgaSpline->SetMarkerColor(kGreen);
+   tgaSpline->SetLineColor(kColorSpline);
+   tgaSpline->SetLineStyle(kLineSpline);
    tgaSpline->SetLineWidth(3);
-   tgaLinear->SetLineColor(kBlack);
-   tgaLinear->SetMarkerColor(kBlack);
+   tgaLinear->SetLineColor(kColorLinear);
+   tgaLinear->SetLineStyle(kLineLinear);
    tgaLinear->SetLineWidth(3);
 
    tgaBK->GetXaxis()->SetTitleFont(22);
@@ -966,25 +977,16 @@ void makePlots() {
    tgaBK->GetYaxis()->SetTitleFont(22);
    tgaBK->GetYaxis()->SetLabelFont(22);
 
-   tgaBK->Draw("ALP");
-   tgaUlmer->Draw("same, LP");
-   tgaSpline->Draw("same, LP");
-   tgaLinear->Draw("same, LP");
+   tgaBK->Draw("AL");
+   tgaUlmer->Draw("same, L");
+   tgaSpline->Draw("same, L");
+   tgaLinear->Draw("same, L");
    
-   gPad->Update();
-   TPaveText *title = (TPaveText*) gPad->GetPrimitive("title");
-   title->SetTextFont(22);
-   gPad->Modified();
    
-   gPad->Update();
-   TLine  *tgaLine = new TLine(pow(10, gPad->GetUxmin()), 1, pow(10, gPad->GetUxmax()), 1);
-   tgaLine->SetLineStyle(7);
-   tgaLine->Draw("same");
-
-   tgaBK->GetYaxis()->SetRangeUser(0.005, 200);
+   tgaBK->GetYaxis()->SetRangeUser(0.0005, 200);
    tgaBK->GetYaxis()->SetNoExponent();
    tgaBK->GetXaxis()->SetNoExponent();
-   tgaBK->GetYaxis()->SetTitleOffset(0.95);
+   tgaBK->GetYaxis()->SetTitleOffset(1.2);
 
    TLegend *leg5 = new TLegend(0.72, 0.7, 0.94, 0.93);
    leg5->SetTextSize(0.035);

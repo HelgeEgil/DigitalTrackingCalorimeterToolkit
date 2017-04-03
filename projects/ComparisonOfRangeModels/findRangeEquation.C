@@ -10,6 +10,7 @@
 #include <TGraph.h>
 #include <TPaveText.h>
 #include <TLegend.h>
+#include <TColor.h>
 #include <TGraphErrors.h>
 #include <TH1F.h>
 #include <TF1.h>
@@ -24,6 +25,15 @@ Double_t fitfunc_DBP(Double_t *v, Double_t *par);
 Double_t fitfunc_Ulmer(Double_t *v, Double_t *par);
 
 const Int_t numberOfEnergies = 132;
+Color_t kColorBK = kRed-4;
+Color_t kColorUlmer = kCyan+1;
+Color_t kColorSpline = kGreen+1;
+Color_t kColorLinear = kBlack;
+
+Int_t kLineBK = 1;
+Int_t kLineUlmer = 9;
+Int_t kLineLinear = 7;
+Int_t kLineSpline = 10;
 
 void filterArray(Double_t *array, Int_t filterSize) {
    Double_t tempArray[numberOfEnergies];
@@ -679,17 +689,17 @@ void Run(int COUNTER) {
    TGraph *gLinearCompare = new TGraph(idxCtrl, energies_control, deltaLinear);
    TGraph *gLinearInvCompare = new TGraph(idxCtrl, ranges_control, deltaLinearInv);
 
-   gBKCompare->SetLineColor(kRed);
-   gBKInvCompare->SetLineColor(kRed);
-   gUlmerCompare->SetLineColor(kBlue);
-//   gUlmerCompare->SetLineStyle(9);
-   gUlmerInvCompare->SetLineColor(kBlue);
-   gSplineCompare->SetLineColor(kGreen);
-//   gSplineCompare->SetLineStyle(10);
-   gSplineInvCompare->SetLineColor(kGreen);
-   gLinearCompare->SetLineColor(kBlack);
-//   gLinearCompare->SetLineStyle(7);
-   gLinearInvCompare->SetLineColor(kBlack);
+   gBKCompare->SetLineColor(kColorBK);
+   gBKInvCompare->SetLineColor(kColorBK);
+   gUlmerCompare->SetLineColor(kColorUlmer); // was blue
+   gUlmerCompare->SetLineStyle(kLineUlmer); //9
+   gUlmerInvCompare->SetLineColor(kColorUlmer);
+   gSplineCompare->SetLineColor(kColorSpline); // was green
+   gSplineCompare->SetLineStyle(kLineSpline); // 10
+   gSplineInvCompare->SetLineColor(kColorSpline);
+   gLinearCompare->SetLineColor(kColorLinear);
+   gLinearCompare->SetLineStyle(kLineLinear); //7
+   gLinearInvCompare->SetLineColor(kColorLinear);
    gBKCompare->SetLineWidth(3);
    gBKInvCompare->SetLineWidth(3);
    gUlmerCompare->SetLineWidth(3);
@@ -858,16 +868,17 @@ void Run(int COUNTER) {
    }
    TGraph *DDSpline = new TGraph(idx+1, x_Spline, dEdx_Spline);
 
-   DDBK->SetLineColor(kRed);
+   DDBK->SetLineColor(kColorBK);
    DDBK->SetLineWidth(3);
-   DDUlmer->SetLineColor(kBlue);
+   DDBK->SetLineStyle(kLineBK);
+   DDUlmer->SetLineColor(kColorUlmer);
    DDUlmer->SetLineWidth(3);
-//   DDUlmer->SetLineStyle(9);
-   DDLinear->SetLineColor(kGreen);
-//   DDLinear->SetLineStyle(2);
+   DDUlmer->SetLineStyle(kLineUlmer);
+   DDLinear->SetLineColor(kColorSpline); // draw order important here, so switch linear/spline. they are identical.
+   DDLinear->SetLineStyle(kLineSpline);
    DDLinear->SetLineWidth(4);
-   DDSpline->SetLineColor(kBlack);
-//   DDSpline->SetLineStyle(6);
+   DDSpline->SetLineColor(kColorLinear);
+   DDSpline->SetLineStyle(kLineLinear);
    DDSpline->SetLineWidth(3);
 
    /*
@@ -909,7 +920,7 @@ void Run(int COUNTER) {
    DDLinear->GetXaxis()->SetLabelFont(22);
    DDLinear->GetYaxis()->SetTitleFont(22);
    DDLinear->GetYaxis()->SetLabelFont(22);
-   DDLinear->GetHistogram()->SetTitle(";Depth in water [cm];Energy loss [A.U.]");
+   DDLinear->GetHistogram()->SetTitle(";Depth in water [cm];Energy loss [MeV/cm]");
 
    DDUlmer->SetNpx(1000);
    DDBK->SetNpx(1000);
