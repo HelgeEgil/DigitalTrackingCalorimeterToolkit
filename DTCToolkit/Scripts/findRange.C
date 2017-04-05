@@ -16,14 +16,13 @@
 #include <TLegend.h>
 #include <THStack.h>
 #include <TRandom3.h>
+#include <TSpline.h>
+#include <iostream>
+#include <fstream>
 #include <TPad.h>
 #include <TMath.h>
 
 using namespace std;
-
-Float_t p = 1.7813;
-Float_t alpha = 0.02073;
-Float_t alphaprime = 0.0087;
 
 vector<Float_t> findRange::Run(Double_t energy, Double_t sigma_mev)
 {
@@ -36,15 +35,31 @@ vector<Float_t> findRange::Run(Double_t energy, Double_t sigma_mev)
    Long64_t nbytes = 0, nb = 0;
    Bool_t useDegrader = (degraderThickness > 0) ? true : false;
 
+   // Load phase space spline
+   Double_t phaseSpaceDegraderthickness[300];
+   Double_t phaseSpaceEnergy[300];
+   Double_t phaseSpaceEnergySpread[300];
+   Double_t dt, e, es;
+   Int_t idx = 0;
+   ifstream in;
+   in.open("../Data/Ranges/EnergyAfterDegrader.csv");
 
-//   TCanvas *c1 = new TCanvas("c1", "hZ", 800, 600);
-   TCanvas *c2 = new TCanvas("c2", "Ranges and energies", 1200, 600);
-   c2->Divide(2, 1, 0.001, 0.001);
-//   TCanvas *c3 = new TCanvas("c3", "hTracklength", 800, 600);
-//   TCanvas *c4 = new TCanvas("c4", "hActualTracklength", 800, 600);
-//   TCanvas *c5 = new TCanvas("c5", "hSteplength", 800, 600);
-//   TCanvas *c6 = new TCanvas("c6", "hEnergyAtInterface", 800, 600);
-//   TCanvas *c7 = new TCanvas("c7", "hRangeWEPL", 800, 600);
+   while (1) {
+      in >> dt >> e >> es;
+      if (!in.good()) break;
+      phaseSpaceDegraderthickness[idx] = dt;
+      phaseSpaceEnergy[idx] = e;
+      phaseSpaceEnergySpread[idx++] = es;
+   }
+   in.close();
+
+   TSpline3 *phaseSpaceSpline = new TSpline3("phaseSpaceSpline", phaseSpaceDegraderthickness, phaseSpaceEnergy, idx);
+   TSpline3 *phaseSpaceSpreadSpline = new TSpline3("phaseSpaceSpreadSpline", phaseSpaceDegraderthickness, phaseSpaceEnergySpread, idx);
+
+   run_energy = phaseSpaceSpline->Eval(run_degraderThickness);
+
+   TCanvas *c2 = new TCanvas("c2", "Ranges and energies", 1200, 900);
+//   c2->Divide(2, 1, 0.001, 0.001);i
 
    Int_t nbinsx = 250;
    // 2 mm: 0.0096, 1.784
@@ -62,8 +77,8 @@ vector<Float_t> findRange::Run(Double_t energy, Double_t sigma_mev)
 
    Float_t x_compensate = 0;
 
-   Int_t energyFrom = run_energy - 35;
-   Int_t energyTo = run_energy + 25;
+   Int_t energyFrom = run_energy - 25;
+   Int_t energyTo = run_energy + 15;
    if (run_energy > 70) {
       energyFrom = run_energy - 15;
       energyTo = run_energy + 25;
@@ -127,13 +142,13 @@ vector<Float_t> findRange::Run(Double_t energy, Double_t sigma_mev)
 
       if (parentID == 0) {
       
-         hStepLength->Fill(stepLength);
+//         hStepLength->Fill(stepLength);
 
          Float_t z = posZ;
          Float_t y = posY;
          Float_t x = posX;
       
-         hZ->Fill(z + x_compensate);
+//         hZ->Fill(z + x_compensate);
          n++;
 
          if (useDegrader) {
@@ -228,7 +243,7 @@ vector<Float_t> findRange::Run(Double_t energy, Double_t sigma_mev)
    TF1 *fRemainingEnergy = new TF1("fRemainingEnergy", "gaus");
    fRemainingEnergy->SetLineWidth(3);
    hEnergyAtInterface->Fit("fRemainingEnergy", "Q");
-   printf("Estimated remaining energy and straggling: %.2f +- %.2f MeV.\n", fRemainingEnergy->GetParameter(1), fRemainingEnergy->GetParameter(2));
+   printf("Estimated remaining energy and straggling: %.2f +- %.2f MeV.\n", phaseSpaceSpline->Eval(run_degraderThickness), phaseSpaceSpreadSpline->Eval(run_degraderThickness));
 
    printf("Total range and straggling: %.2f +- %.2f mm.\n", run_degraderThickness + aw * pow(fRemainingEnergy->GetParameter(1), pw), sqrt(pow(fRange->GetParameter(2), 2) + pow(fRemainingEnergy->GetParameter(2) * a * p * pow(fRemainingEnergy->GetParameter(1), p-1), 2)));
    printf("Total WEPL straggling: %.2f mm.\n", sqrt(pow(fRemainingEnergy->GetParameter(2) * aw * pw * pow(fRemainingEnergy->GetParameter(1), p-1), 2) + pow(aw/a * pow(fRange->GetParameter(1) / aw, 1-pw/p) * fRange->GetParameter(2), 2)));
@@ -296,12 +311,13 @@ vector<Float_t> findRange::Run(Double_t energy, Double_t sigma_mev)
       hStepLength->SetFillColor(kBlue-7);
       hStepLength->SetLineColor(kBlack);
       hStepLength->Draw();
-*/
+
    c2->cd(2);
       hEnergyAtInterface->SetFillColor(kBlue-7);
       hEnergyAtInterface->SetLineColor(kBlack);
       hEnergyAtInterface->Draw();
-   
+*/
+
       c2->SaveAs(Form("../OutputFiles/straggling/straggling_%.0f_mm_degrader.png", degraderThickness));
    return returnValues;
 }

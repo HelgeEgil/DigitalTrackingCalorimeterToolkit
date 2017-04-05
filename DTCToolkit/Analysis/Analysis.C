@@ -598,10 +598,11 @@ void drawFitScale(Int_t Runs, Int_t dataType, Bool_t recreate, Float_t energy) {
    for (Int_t j=0; j<tracks->GetEntriesFast(); j++) {
       Track *thisTrack = tracks->At(j);
       if (!thisTrack) continue;
-      
+      if (thisTrack->doesTrackEndAbruptly()) continue;
+
       outputGraph = (TGraphErrors*) thisTrack->doRangeFit(true);
       if (!outputGraph) continue;
-         
+      
       Float_t fitScale = thisTrack->getFitParameterScale();
       
       hScale->Fill(fitScale);
@@ -679,12 +680,49 @@ void drawTracksWithEnergyLoss(Int_t Runs, Int_t dataType, Bool_t recreate, Float
    hAccuracy->Draw("COLZ");
 }
 
+Float_t drawTH2FRangeAccuracy() {
+   TCanvas      * c = new TCanvas("c", "Range determination accuracy", 1200, 1200);
+   TH2F         * hRangeAccuracy = new TH2F("hRangeAccuracy", "Range Determination Accuracy;Nominal range [WEPL mm];Calculated range [WEPL mm]", 400, 0, 400, 800, 0, 400);
+   Float_t        nominalRange, calculatedRange;
+   TGraphErrors * outputGraph = nullptr;
+   Track        * thisTrack = nullptr;
+
+   for (Int_t degraderThickness = 20; degraderThickness < 350; degraderThickness += 2) {
+      run_degraderThickness = degraderThickness;
+      run_energy = getEnergyAtWEPL(250, degraderThickness);
+      nominalRange = getUnitFromEnergy(run_energy);
+
+      Tracks * tracks = loadOrCreateTracks(1, 1, 0, run_energy);
+
+      for (Int_t i=0; i<tracks->GetEntriesFast(); i++) {
+         thisTrack = tracks->At(i);
+
+         if (!thisTrack) continue;
+         if (thisTrack->doesTrackEndAbruptly()) continue;
+
+         outputGraph = (TGraphErrors*) thisTrack->doRangeFit(false);
+         hRangeAccuracy->Fill(nominalRange, thisTrack->getFitParameterRange());
+     }
+
+      delete tracks;
+   }
+   
+   gStyle->SetOptStat(0);
+   gPad->SetLogz();
+   hRangeAccuracy->Draw("COLZ");
+
+   TLine *line = new TLine(0, 0, 400, 400);
+   line->Draw();
+}
+
 Float_t drawBraggPeakGraphFit(Int_t Runs, Int_t dataType, Bool_t recreate, Float_t energy, Float_t degraderThickness) {
    run_degraderThickness = degraderThickness;
    run_energy = energy;
+
    if (useDegrader) {
       run_energy = getEnergyAtWEPL(energy, degraderThickness);
    }
+
    printf("Using water degrader of thickness %.0f mm, the initial energy of %.0f MeV is reduced to %.1f MeV.\n", degraderThickness, energy, run_energy);
 
    kDataType = dataType;
@@ -721,7 +759,6 @@ Float_t drawBraggPeakGraphFit(Int_t Runs, Int_t dataType, Bool_t recreate, Float
    printf("This corresponds to a WEPL factor of %.2f.\n", getWEPLFactorFromEnergy(run_energy));
    cout << "Correcting for aluminum plate: " << kIsAluminumPlate << endl;
    cout << "Correcting for scintillators: " << kIsScintillator << endl;
-
 
    // Histogram options
    cGraph->Divide(nPlotX,nPlotY, 0.000001, 0.000001, 0);
@@ -768,7 +805,7 @@ Float_t drawBraggPeakGraphFit(Int_t Runs, Int_t dataType, Bool_t recreate, Float
       fitScale = thisTrack->getFitParameterScale();
       fitError = quadratureAdd(thisTrack->getFitParameterError(), dz/sqrt(12)); // latter term from error on layer position
 
-      hFitResults->Fill(fitRange); // fitRange is already correct unit
+      hFitResults->Fill(fitRange);
 
       if (fitIdx < plotSize && kDrawIndividualGraphs && j>=skipPlot) {
          drawIndividualGraphs(cGraph, outputGraph, fitRange, fitScale, fitError, fitIdx++);

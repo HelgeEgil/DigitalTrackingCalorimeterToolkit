@@ -393,10 +393,12 @@ void  DataInterface::getMCClusters(Int_t runNo, Clusters *clusters) {
    Float_t  sum_edep = 0;
    Int_t    lastID = 0;
    Int_t    lastLayer = 0;
+   Float_t  lastZ = 0;
    Int_t    layer;
    Int_t    n = 0;
    Float_t  sumX = 0, sumY = 0;
    Float_t  x,y;
+   Bool_t   isInElastic;
    Int_t    maxEventID = 50;
 
    Long64_t nentries = fChain->GetEntriesFast();
@@ -415,7 +417,7 @@ void  DataInterface::getMCClusters(Int_t runNo, Clusters *clusters) {
          x = sumX/n / dx + nx/2;
          y = sumY/n / dy + ny/2;
          
-         showDebug(Form("Adding point (N,x,y,x_mm, y_mm, z,ID,edep) = (%.2f, %.2f, %.2f, %.2f, %d, %d, %.2f)\n", n, x, y, sumX/n, sumY/n, lastLayer, lastID, sum_edep));
+         showDebug(Form("Adding point (N,x,y,x_mm, y_mm, layer,z,ID,edep) = (%d, %.2f, %.2f, %.2f, %.2f, %d, %.2f, %d, %.2f)\n", n, x, y, sumX/n, sumY/n, lastLayer,lastZ, lastID, sum_edep));
       
          clusters->appendClusterEdep(x, y, lastLayer, sum_edep, lastID);
 
@@ -438,6 +440,7 @@ void  DataInterface::getMCClusters(Int_t runNo, Clusters *clusters) {
       sum_edep += edep*1000;
       sumX += posX;
       sumY += posY;
+      lastZ = posZ;
       lastID = eventID;
       lastLayer = layer;
       n++;

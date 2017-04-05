@@ -95,7 +95,7 @@ TGraphErrors * Track::doRangeFit(Bool_t isScaleVariable) {
    Float_t        x[n], y[n];
    Float_t        erx[n], ery[n];
    Float_t        preTL = getPreTL();
-   Float_t        maxEnergy, maxRange, estimatedEnergy, estimatedRange;
+   Float_t        maxEnergy, maxRange, minRange, estimatedEnergy, estimatedRange;
    Float_t        scaleParameter = 0;
    Float_t        WEPLFactor;
    Float_t        overFittingDistance, startFittingDistance;
@@ -120,12 +120,13 @@ TGraphErrors * Track::doRangeFit(Bool_t isScaleVariable) {
 
    maxEnergy = getEnergyFromTL(x[n-1] + overFittingDistance);
    maxRange = getUnitFromTL(x[n-1] + overFittingDistance);
+   minRange = getUnitFromTL(x[n-1]);
    estimatedEnergy = getEnergyFromTL(x[n-1] + startFittingDistance);
    estimatedRange = getUnitFromTL(x[n-1] + startFittingDistance);
 
    // WE CONVERT FROM PROJECTED RANGE TO WATER EQUIVALENT RANGE HERE
    if (kOutputUnit == kWEPL || kOutputUnit == kEnergy) {
-      WEPLFactor = getWEPLFactorFromEnergy(estimatedEnergy);
+      WEPLFactor = getWEPLFactorFromEnergy(estimatedEnergy); 
       for (Int_t i=0; i<n; i++) {
          x[i] = x[i] * WEPLFactor;
          erx[i] = erx[i] * WEPLFactor;
@@ -137,13 +138,13 @@ TGraphErrors * Track::doRangeFit(Bool_t isScaleVariable) {
    scaleParameter = 3.1; // found through drawFitScale and finding distribution mean value
 
    if (kDataType == kData) scaleParameter = 2.7;
-   if (kUseAlpide) scaleParameter = 1.38; // was 1.58
+   if (kUseAlpide) scaleParameter = 1.5; // was 1.38
    if (kOutputUnit == kPhysical) scaleParameter = 0.73;
 
    TF1 *func = new TF1("fit_BP", fitfunc_DBP, 0, maxRange, 2);
    func->SetParameter(0, estimatedRange);
    func->SetParameter(1, scaleParameter);
-   func->SetParLimits(0, 0, maxRange);
+   func->SetParLimits(0, minRange, maxRange);
    func->SetParLimits(1, scaleParameter, scaleParameter);
    if (isScaleVariable) {
       func->SetParLimits(1, 0.01 * scaleParameter, 100 * scaleParameter);

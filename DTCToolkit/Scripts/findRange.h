@@ -147,13 +147,10 @@ findRange::findRange(Float_t energy, Int_t thickness, Float_t degraderThickness,
       Float_t a = 0.0239;
       Float_t p = 1.7548;
       if (degraderThickness == 0) {
-         run_energy = energy;
          run_degraderThickness = degraderThickness;
       }
       else {
-         run_energy = pow( (a * pow(energy, p) - degraderThickness) / a, 1/p);
          run_degraderThickness = degraderThickness;
-         printf("Degraderthickness %.1f. Initial energy is %.2f, initial range is %.2f. Energy from range %.2f is %.2f MeV.\n", degraderThickness, energy, a * pow(energy, p), a * pow(energy, p) - degraderThickness, run_energy);
       }
 #endif // SINGLE_TREE
 

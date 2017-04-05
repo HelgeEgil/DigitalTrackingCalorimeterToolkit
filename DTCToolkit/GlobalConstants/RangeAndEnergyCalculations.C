@@ -84,6 +84,7 @@ Float_t getTLFromWEPL(Float_t wepl) {
 
 Float_t getWEPLFactorFromEnergy(Float_t energy) {
    if (energy == 0) return 0;
+
    Float_t range = getTLFromEnergy(energy);
    Float_t wepl = getWEPLFromEnergy(energy);
 

@@ -75,34 +75,21 @@ Float_t diffmmXYZ(Cluster *p1, Cluster *p2) {
 }
 
 Double_t fitfunc_DBP(Double_t *v, Double_t *par) {
+   // See PRC publication (H. Pettersen, 2017) for details about the accuracy of this approach
 
    Float_t depth = v[0];
    Float_t range = par[0];
    Float_t scale = par[1];
 
    Double_t fitval = 0;
+   Float_t aa=alpha, pp=p;
 
-   Float_t aa=0, pp=0;
    if (kOutputUnit == kWEPL) {
       aa = alpha_water;
       pp = p_water;
    }
-   else {
-      aa = alpha;
-      pp = p;
-   }
 
-   fitval = scale / ( pp * pow(aa, 1/pp) * pow((range - depth), 1-1/pp) ); // power calculation, less accurate but with the depth dose function
-
-   /*
-    * I tried to use an improved depth-dose curve in order to improve accuracy
-    * Alas it didn't work. Maybe you could give it a go?
-    * Start with: W. Ulmer, Rad. Phys. and Chem. 76 (2007)
-    * and implement the depth-dose curve (Eq. 28) with maybe a nice Bragg Peak
-    * I had some bumps... Back to Bragg-Kleeman.
-   
-    * However, the depth at the bragg peak is correct, since the rance is calculated using LUT curves
-    */
+   fitval = scale / ( pp * pow(aa, 1/pp) * pow((range - depth), 1-1/pp) );
 
    if (std::isnan(fitval)) fitval = 0;
 

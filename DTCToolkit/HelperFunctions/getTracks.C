@@ -90,15 +90,17 @@ Tracks * loadOrCreateTracks(Bool_t recreate, Int_t Runs, Int_t dataType, Float_t
       printf("kUseAlpide = %d\n", kUseAlpide);
       if (!kUseAlpide) {
          tracks = getTracks(Runs, dataType, kCalorimeter, energy, x, y);
+      
+         if (tracks->GetEntries()) {
+            cout << "Saving " << tracks->GetEntries() << " tracks.\n";
+            saveTracks(tracks, dataType, energy);
+         }
       }
+
       else {
          tracks = getTracksFromClusters(Runs, dataType, kCalorimeter, energy);
       }
 
-      if (tracks->GetEntries()) {
-         cout << "Saving " << tracks->GetEntries() << " tracks.\n";
-         saveTracks(tracks, dataType, energy);
-      }
    }
 
    else {

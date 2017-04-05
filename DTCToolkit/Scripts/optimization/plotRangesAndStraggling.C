@@ -24,7 +24,7 @@
 
 using namespace std;
 
-Int_t absorberThickness = 3;
+Int_t absorberThickness = 2;
 Bool_t kFilterData = true;
 Int_t filterSize = 5;
 const Int_t arraySize = 500;
@@ -110,9 +110,9 @@ void plotRangesAndStraggling() {
    Float_t a_wtr = 0.02387;
    Float_t p_wtr = 1.7547;
 
-   if       (absorberThickness == 2) { // Updated 2017-03-??
-      a_dtc = 0.012511;
-      p_dtc = 1.730529;
+   if       (absorberThickness == 2) { // Updated 2017-04-04 PHASE SPACE
+      a_dtc = 0.015847;
+      p_dtc = 1.687795;
    }
    else if  (absorberThickness == 3) { // Updated 2017-03-31 PHASE SPACE
       a_dtc = 0.015553;

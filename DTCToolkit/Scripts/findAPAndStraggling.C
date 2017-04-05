@@ -30,6 +30,7 @@ void findAPAndStraggling(Int_t absorberthickness) {
 
    Float_t  arrayE[500] = {0}; 
    Float_t  arrayRange[500] = {0};
+   Float_t  arrayDegrader[500] = {0};
    Float_t  arrayEMaterial[500] = {0};
    Float_t  arrayStraggling[500] = {0};
    Float_t  arrayWEPLStraggling[500] = {0};
@@ -90,6 +91,7 @@ void findAPAndStraggling(Int_t absorberthickness) {
 
       arrayEMaterial[nlinesMaterial] = energyFloat;
       arrayRange[nlinesMaterial] = range;
+      arrayDegrader[nlinesMaterial] = degraderThickness;
       arrayStraggling[nlinesMaterial] = straggling;
       arrayEnergyStraggling[nlinesMaterial] = energyStraggling;
 
@@ -103,6 +105,7 @@ void findAPAndStraggling(Int_t absorberthickness) {
 
    Int_t nLinesChange = 381;
    TGraph *gRange = new TGraph(nlinesMaterial, arrayEMaterial, arrayRange);
+   TGraph *gEnergy = new TGraph(nlinesMaterial, arrayDegrader, arrayEMaterial);
    TGraph *gStraggling = new TGraph(nLinesChange, arrayRange, arrayStraggling);
    TGraph *gStraggling2 = new TGraph(nlinesMaterial-nLinesChange, arrayRange+nLinesChange, arrayStraggling+nLinesChange);
    TGraph *gWEStraggling = new TGraph(nlinesMaterial, arrayRangeWater, arrayWEPLStraggling);
@@ -145,17 +148,22 @@ void findAPAndStraggling(Int_t absorberthickness) {
    gWEStraggling->Fit("WEStraggling", "Q,M,B", "", 0, 290);
 
    c1->cd(2);
+   /*
    gEnergyStraggling->SetMarkerStyle(7);
    gEnergyStraggling->SetMarkerColor(kBlue);
    gEnergyStraggling->Draw("AP");
    TF1 *fLandau = new TF1("fLandau", "landau");
    gEnergyStraggling->Fit("fLandau", "Q,M");
+   */
+   gEnergy->SetMarkerStyle(7);
+   gEnergy->SetMarkerColor(kBlue);
+   gEnergy->Draw("AP");
 
 
    printf("-----------------------------------\n");
    printf("Bragg-Kleeman parameters: R = %.6f E ^ %.6f\n", BK->GetParameter(0), BK->GetParameter(1));
    printf("Straggling = %.5f + %.6fR \n", Straggling->GetParameter(0), Straggling->GetParameter(1));
    printf("WE Straggling = %.5f + %.6fR \n", WEStraggling->GetParameter(0));
-   printf("Energy straggling  = Landau w/ constants %.1f,  MPV %.6f and sigma %.6f.\n", fLandau->GetParameter(0), fLandau->GetParameter(1), fLandau->GetParameter(2)); 
+//   printf("Energy straggling  = Landau w/ constants %.1f,  MPV %.6f and sigma %.6f.\n", fLandau->GetParameter(0), fLandau->GetParameter(1), fLandau->GetParameter(2)); 
 
 }
