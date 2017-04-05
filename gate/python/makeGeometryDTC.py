@@ -709,7 +709,7 @@ class Degrader:
       self.mother = "world"
       self.material = "Water"
       self.pos = Pos(0, 0, 0) # maximum 2*20 = 40 cm WEPL
-      self.motherpos = Pos(0, 0, -20.*cm)
+      self.motherpos = Pos(0, 0, "{halfdegraderthickness}")
       self.motherbox = Box(self.mothername, self.mother, self.motherpos, self.mothersize)
       self.box = Box(self.name, self.mothername, self.pos, self.size, self.material)
 
@@ -926,7 +926,7 @@ class MainMenu(Frame):
         
         self.scanner1.size.dz = self.firstModule.thickness
         self.scanner1.pos.z = self.scanner1.size.dz/2
-        self.scanner2.size.dz = self.module.thickness * self.module.nlayers*5
+        self.scanner2.size.dz = self.module.thickness * self.module.nlayers*2
         self.scanner2.pos.z = self.scanner2.size.dz/2. + self.scanner1.pos.z + self.scanner1.size.dz/2.
         self.firstLayerPosition = -self.scanner2.size.dz/2 + self.module.thickness/2
         
@@ -955,8 +955,6 @@ def main():
     # See if we can get the rotation right
     # fix names of mother volumes
     # Cross check geometry and Module.mac (filename should be constant)
-
-    # FIXME Bug in propagation of first absorber material
 
     world = World()
     degrader = Degrader()
