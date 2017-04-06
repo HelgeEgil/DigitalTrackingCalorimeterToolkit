@@ -71,13 +71,13 @@ vector<Float_t> findRange::Run(Double_t energy, Double_t sigma_mev)
    Float_t aw = 0.0239, pw = 1.7548;
 
    Float_t expectedRange = a * pow(run_energy, p);
-   Float_t xfrom = expectedRange - 20;
+   Float_t xfrom = expectedRange - 15;
    if (xfrom < 0) xfrom = 0;
    Float_t xto = expectedRange + 15;
 
    Float_t x_compensate = 0;
 
-   Int_t energyFrom = run_energy - 25;
+   Int_t energyFrom = run_energy - 15;
    Int_t energyTo = run_energy + 15;
    if (run_energy > 70) {
       energyFrom = run_energy - 15;

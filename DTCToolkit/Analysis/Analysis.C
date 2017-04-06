@@ -729,8 +729,9 @@ Float_t drawBraggPeakGraphFit(Int_t Runs, Int_t dataType, Bool_t recreate, Float
    Bool_t         kDrawHorizontalLines = false;
    Bool_t         kDrawVerticalLayerLines = false;
    Bool_t         kDrawIndividualGraphs = true;
-   Bool_t         acceptAngle = false;
+   Bool_t         acceptAngle = true;
    Float_t        maxAngle, thisAngle;
+   Float_t        cutAngle = (run_degraderThickness * 0.0219 + 0.556) * 0.8;
    Float_t        finalEnergy = 0;
    Float_t        fitRange, fitScale, fitError;
    Int_t          nCutDueToTrackEndingAbruptly = 0;
@@ -749,6 +750,7 @@ Float_t drawBraggPeakGraphFit(Int_t Runs, Int_t dataType, Bool_t recreate, Float
    }
    TCanvas      * cGraph = new TCanvas("cGraph", "Fitted data points", 1500, 500);
    TCanvas      * cFitResults = new TCanvas("cFitResults", hTitle, 1000, 1000);
+//   TCanvas      * cAngle = new TCanvas("cAngle", "Incoming angles", 800, 800);
    TH1F         * hFitResults = new TH1F("fitResult", hTitle, fmax(nEnergies*8,200), getUnitFromEnergy(0), getUnitFromEnergy(run_energy)*1.4+10);
    TH1F         * hFitResultsDroppedData = new TH1F("fitResultsDroppedData", hTitle, 200, getUnitFromEnergy(0), getUnitFromEnergy(run_energy)*1.4+10);
    TH1F         * hMaxAngle = new TH1F("hMaxAngle", "Maximum angle for proton track", 200, 0, 25);
@@ -785,19 +787,12 @@ Float_t drawBraggPeakGraphFit(Int_t Runs, Int_t dataType, Bool_t recreate, Float
          continue;
       }
    
-      maxAngle = 0;
-      thisAngle = 0;
-      
-      for (Int_t i=0; i<thisTrack->GetEntriesFast(); i++) {
-         thisAngle = thisTrack->getSlopeAngleAtLayer(i);
-         maxAngle = max(thisAngle, maxAngle);
-      }
-      
+      maxAngle = thisTrack->getSlopeAngleAtLayer(1);
+      if (maxAngle > cutAngle && acceptAngle) continue;
       hMaxAngle->Fill(maxAngle);
 
       // Do track fit, extract all parameters for this track
-     outputGraph = (TGraphErrors*) thisTrack->doRangeFit(false);
-
+      outputGraph = (TGraphErrors*) thisTrack->doRangeFit(false);
       if (!outputGraph) continue;
 
 
@@ -961,6 +956,12 @@ Float_t drawBraggPeakGraphFit(Int_t Runs, Int_t dataType, Bool_t recreate, Float
    ps->AddText(Form("WEPL deviation = %.2f #pm %.2f", empiricalMean - expectedMean, empiricalSigma - expectedStraggling));
    ps->AddText(Form("Resulting energy = %.2f #pm %.2f", getEnergyFromUnit(empiricalMean), energySigma));
       
+/*
+   cAngle->cd();
+   hMaxAngle->SetTitle("Proton angles;Incoming angle [AU];Entries");
+   hMaxAngle->Draw();
+*/
+   
    if (kOutputUnit == kPhysical) {
       cFitResults->SaveAs(Form("OutputFiles/figures/Fitted_energies_%.2f_MeV_%s_%s_physical.pdf", energy, getMaterialChar(), getDataTypeChar(dataType)));
    }
