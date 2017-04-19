@@ -34,6 +34,7 @@ Double_t X0, X0_tungsten, X0_aluminum, X0_pmma, X0_firstlayer;
 Double_t proton_mass;
 
 Float_t mcs_radius_per_layer[100]; // change if max(nLayers) > 100
+Float_t mcs_radius_per_layer_empirical[100];
 
 Double_t firstUpperLayerZ, firstLowerLayerZ;
 

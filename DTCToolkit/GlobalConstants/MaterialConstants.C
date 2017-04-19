@@ -86,20 +86,22 @@ void  createSplines() {
 
    cout << "Creating SPLINE files\n";
    ifstream in;
-   Float_t    energy;
+   Float_t  energy;
    Int_t    idx2mmAl = 0;
    Int_t    idxWater = 0;
    Int_t    idxPureAl = 0;
    Int_t    idxW = 0;
-   Double_t  range;
-   Double_t  ranges2mmAl[500];
-   Double_t  energies2mmAl[500];
-   Double_t  rangesW[500];
-   Double_t  energiesW[500];
-   Double_t  rangesWater[500];
-   Double_t  energiesWater[500];
-   Double_t  rangesPureAl[500];
-   Double_t  energiesPureAl[500];
+   Int_t    layer = 0;
+   Double_t range;
+   Double_t mu, sigma;
+   Double_t ranges2mmAl[500];
+   Double_t energies2mmAl[500];
+   Double_t rangesW[500];
+   Double_t energiesW[500];
+   Double_t rangesWater[500];
+   Double_t energiesWater[500];
+   Double_t rangesPureAl[500];
+   Double_t energiesPureAl[500];
    
    if (kAbsorbatorThickness == 2) {
       in.open("Data/Ranges/2mm_Al.csv");
@@ -170,6 +172,13 @@ void  createSplines() {
    }
 
    in.close();
+
+   in.open("Data/Scattering/50mm.csv");
+   while (1) {
+      in >> layer >> mu >> sigma;
+      if (!in.good()) break;
+      mcs_radius_per_layer_empirical[layer] = mu + 3 * sigma;
+   }
 
    spline2mmAl = new TSpline3("spline2mmAl", energies2mmAl, ranges2mmAl, idx2mmAl);
    splineWater = new TSpline3("splineWater", energiesWater, rangesWater, idxWater);

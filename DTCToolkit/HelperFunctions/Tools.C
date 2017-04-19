@@ -306,6 +306,26 @@ Float_t getMCSAngleForLayer(Int_t layer) {
    return angle * 180 / 3.14159265;
 }
 
+Float_t getEmpiricalMCSAngle(Int_t layer) {
+   // defined as the dot product rule angle between the ingoing and outgoing vector in mm
+   // This value is found through Analysis.C::findMCSAngles.
+
+   return mcs_radius_per_layer_empirical[layer];
+}
+
+Float_t getDotProductAngle(Cluster *a, Cluster *b, Cluster *c) {
+   // If a == b, b is usually the first layer, but we want to parallel propagate the vector to calculate the change from ||
+   // If not, the distance between the layers might be > dz, so calculate it.
+
+   Float_t in[3]  = {b->getXmm() - a->getXmm(), b->getYmm() - a->getYmm(), (a==b) ? dz : b->getLayermm() - a->getLayermm()};
+   Float_t out[3] = {c->getXmm() - b->getXmm(), c->getYmm() - b->getYmm(), c->getLayermm() - b->getLayermm()};
+
+   Float_t dot    = in[0] * out[0] + in[1] * out[1] + in[2] * out[2];
+   Float_t scalar = sqrt(pow(out[0] - in[0], 2) + pow(out[1] - in[1], 2) + pow(out[2] - in[2], 2));
+
+   return acos(dot / scalar);
+}
+
 Float_t getAverageEnergyLoss(Float_t energy) {
    Float_t dE_1 = getEnergyLossFromScintillators(energy, 1);
    Float_t dE_2 = getEnergyLossFromScintillators(energy, 2);

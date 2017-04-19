@@ -220,8 +220,10 @@ Clusters * Clusters::findClustersFromSeedInLayer(Cluster *seed, Int_t nextLayer)
    Int_t layerIdxTo = getLastIndexOfLayer(nextLayer);
    Clusters *clustersFromThisLayer = new Clusters(50);
 
-   Float_t maxDelta = getSearchRadiusForLayer(nextLayer) * 0.75 * MCSMultiplicationFactor;
-//   showDebug("Search radius is " << maxDelta << " mm.\n");
+   Float_t maxAngle, thisAngle;
+
+   if (kUseEmpiricalMCS) maxAngle = getEmpiricalMCSAngle(nextLayer - 1);
+   else                  maxAngle = getSearchRadiusForLayer(nextLayer) * 0.75 * MCSMultiplicationFactor;
 
    if (layerIdxFrom < 0)
       return clustersFromThisLayer; // empty
@@ -229,64 +231,47 @@ Clusters * Clusters::findClustersFromSeedInLayer(Cluster *seed, Int_t nextLayer)
    for (Int_t i=layerIdxFrom; i<layerIdxTo; i++) {
       if (!At(i)) { continue; }
 
-      if (diffmmXY(seed, At(i)) < maxDelta) {
+      if (kUseEmpiricalMCS)   thisAngle = getDotProductAngle(seed, seed, At(i));
+      else                    thisAngle = diffmmXY(seed, At(i));
+
+      if (thisAngle < maxAngle) {
          clustersFromThisLayer->appendCluster(At(i));
       }
    }
+
    return clustersFromThisLayer;
 }
 
 void Clusters::growTrackFromLayer(Track *track, Int_t fromLayer) {
-   Cluster   * projectedPoint = 0;
-   Cluster   * nearestNeighbour = 0;
-   Cluster   * skipNearestNeighbour = 0;
-   Float_t     delta, skipDistance;
+   // Rewrite, we don't have to check if the neighbor is valid both here and in findNearestNeighbour... 
+   // So removing a lot of testing.
+
+   Cluster   * projectedPoint = nullptr;
+   Cluster   * nearestNeighbour = nullptr;
    Int_t       nSearchLayers = getLastActiveLayer();
    Int_t       lastHitLayer = fromLayer;
-   Bool_t      skipCurrentLayer = false;
 
    for (Int_t layer = lastHitLayer + 1; layer <= nSearchLayers+1; layer++) {
-      searchRadius = getSearchRadiusForLayer(layer) * MCSMultiplicationFactor;
-
       projectedPoint = getTrackExtrapolationToLayer(track, layer);
-      if (isPointOutOfBounds(projectedPoint, searchRadius / dx))
-         break;
+      if (isPointOutOfBounds(projectedPoint, 10)) break;
 
-      nearestNeighbour = findNearestNeighbour(projectedPoint);
+      nearestNeighbour = findNearestNeighbour(track, projectedPoint);
 
-      delta = diffmmXY(projectedPoint, nearestNeighbour);
-      skipCurrentLayer = (delta > searchRadius);
-
-      if (skipCurrentLayer) {
-         projectedPoint = getTrackExtrapolationToLayer(track, layer+1);
-
-         if (!isPointOutOfBounds(projectedPoint, searchRadius / dx)) { // repeat process in layer+1
-            skipNearestNeighbour = findNearestNeighbour(projectedPoint);
-            skipDistance = diffmmXY(projectedPoint, skipNearestNeighbour);
-
-            if (skipDistance * 1.2 < delta  && skipDistance > 0) {
-               track->appendCluster(skipNearestNeighbour);
-               lastHitLayer = ++layer+1; // don't search next layer...
-            }
-            
-            else if (delta > 0) { // append cluster in layer+1 to track
-               // This is a test.. Remove if it doesn't give warnings
-               for (Int_t j=0; j<track->GetEntriesFast(); j++) {
-                  if (!track->At(j)) continue;
-                  if (track->getLayer(j) == nearestNeighbour->getLayer()) {
-                     cout << "SOMETHING IS WRONG IN Clusters::growTrackFromLayer()! Track so far = " << *track << " and it wants to add nearestNeighbour " << *nearestNeighbour << ".\n";
-                  }
-               }
-
-               track->appendCluster(nearestNeighbour);
-               lastHitLayer = layer+1;
-            }
-         }
-      }
-
-      else if (delta > 0) { // append cluster to track
+      if (nearestNeighbour) {
          track->appendCluster(nearestNeighbour);
          lastHitLayer = layer;
+      }
+
+      else { // No matching points, trying next layer
+         projectedPoint = getTrackExtrapolationToLayer(track, layer+1);
+         if (isPointOutOfBounds(projectedPoint, 10)) break;
+
+         nearestNeighbour = findNearestNeighbour(track, projectedPoint);
+
+         if (nearestNeighbour) { // Found one there! Don't search next layer
+            track->appendCluster(nearestNeighbour);
+            lastHitLayer = ++layer+1;
+         }
       }
 
       if (layer>lastHitLayer+2) {
@@ -295,19 +280,26 @@ void Clusters::growTrackFromLayer(Track *track, Int_t fromLayer) {
    }
 
    delete projectedPoint;
+   delete nextProjectedPoint;
    delete nearestNeighbour;
-   delete skipNearestNeighbour;
+   delete nextNearestNeighbour;
 }
 
-Cluster * Clusters::findNearestNeighbour(Cluster *projectedPoint, Bool_t rejectUsed) {
+Cluster * Clusters::findNearestNeighbour(Track *track, Cluster *projectedPoint, Bool_t rejectUsed) {
    Cluster *nearestNeighbour = new Cluster();
-   Float_t  delta;
+   Float_t  thisAngle, maxAngle;
    Bool_t   kFoundNeighbour = false;
    Bool_t   reject = false;
    Int_t    searchLayer = projectedPoint->getLayer();
    Int_t    layerIdxFrom = getFirstIndexOfLayer(searchLayer);
    Int_t    layerIdxTo = getLastIndexOfLayer(searchLayer);
-   Float_t  maxDelta = getSearchRadiusForLayer(searchLayer) * MCSMultiplicationFactor;
+
+   showDebug("Clusters::findNearestNeighbour using track " << *track << " and with projected point " << *projectedPoint << endl);
+
+   if (kUseEmpiricalMCS)   maxAngle = getEmpiricalMCSAngle(searchLayer-1);
+   else                    maxAngle = getSearchRadiusForLayer(searchLayer) * MCSMultiplicationFactor;
+
+   showDebug("Clusters::findNearestNeighbour The max angle is " << maxAngle);
 
    if (layerIdxFrom < 0) return 0;
 
@@ -315,20 +307,25 @@ Cluster * Clusters::findNearestNeighbour(Cluster *projectedPoint, Bool_t rejectU
       if (!At(i))
          continue;
 
-      delta = diffmmXY(projectedPoint, At(i));
+      if (kUseEmpiricalMCS)   thisAngle = getDotProductAngle(track->At(track->GetEntriesFast()-2), track->Last(), At(i));
+      else                    thisAngle = diffmmXY(projectedPoint, At(i));
+
       reject = (At(i)->isUsed() && rejectUsed);
 
-      if (delta < maxDelta && !reject) {
+      showDebug(" and found thisAngle " << thisAngle << " from point " << *At(i));
+
+      if (thisAngle < maxAngle && !reject) {
+         showDebug(", which is a current best match ... ");
          nearestNeighbour->set(At(i));
-         maxDelta = delta;
-         kFoundNeighbour = kTRUE;
+         maxAngle = thisAngle;
+         kFoundNeighbour = true;
       }
    }
+   
+   showDebug("OK! Keeping last point.\n");
 
-   if (!kFoundNeighbour)
-      return 0;
-
-   return nearestNeighbour;
+   if (kFoundNeighbour)   return nearestNeighbour;
+   else                   return nullptr;
 }
 
 Track * Clusters::findLongestTrack(Tracks *seedTracks) {

@@ -88,7 +88,7 @@ Tracks * loadOrCreateTracks(Bool_t recreate, Int_t Runs, Int_t dataType, Float_t
    
    if (recreate) {
       printf("kUseAlpide = %d\n", kUseAlpide);
-      if (!kUseAlpide) {
+      if (kDoTracking || !kUseAlpide) {
          tracks = getTracks(Runs, dataType, kCalorimeter, energy, x, y);
       
          if (tracks->GetEntries()) {
@@ -109,7 +109,7 @@ Tracks * loadOrCreateTracks(Bool_t recreate, Int_t Runs, Int_t dataType, Float_t
       if (!tracks) {
          cout << "!tracks, creating new file\n";
 
-         if (!kUseAlpide) {
+         if (kDoTracking || !kUseAlpide) {
             tracks = getTracks(Runs, dataType, kCalorimeter, energy, x, y);
          }
          else {

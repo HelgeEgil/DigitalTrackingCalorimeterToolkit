@@ -118,10 +118,10 @@ void Run(int COUNTER) {
 
 
    c1->cd();
-   TPad *pad11 = new TPad("pad11", "The pad 80% of the height", 0.0, 0.3, 1.0, 1.0, 0);
-   TPad *pad12 = new TPad("pad12", "The pad 20% of the height", 0.0, 0.00, 1.0, 0.3, 0);
-   pad11->Draw();
-   pad12->Draw();
+//   TPad *pad11 = new TPad("pad11", "The pad 80% of the height", 0.0, 0.3, 1.0, 1.0, 0);
+//   TPad *pad12 = new TPad("pad12", "The pad 20% of the height", 0.0, 0.00, 1.0, 0.3, 0);
+//   pad11->Draw();
+//   pad12->Draw();
 
    c1Inv->cd();
    TPad *pad11Inv = new TPad("pad11Inv", "The pad 80% of the height", 0.0, 0.3, 1.0, 1.0, 0);
@@ -253,6 +253,7 @@ void Run(int COUNTER) {
    }
 
    TGraph *gBK = new TGraph(idxPara, energies, ranges);
+   TGraph *gBKc = new TGraph(idxCtrl, energies_control, ranges_control);
    TGraph *gBKInv = new TGraph(idxPara, ranges, energies);
    TGraph *gUlmer = new TGraph(idxPara, energies, ranges);
    TGraph *gUlmerInv = new TGraph(idxPara, ranges, energies);
@@ -263,10 +264,6 @@ void Run(int COUNTER) {
    TSpline3 *spline = new TSpline3("spline", energies, ranges, idxPara);
    TSpline3 *splineInv = new TSpline3("splineInv", ranges, energies, idxPara);
 
-   pad11->cd();
-   gBK->SetTitle("Bragg-Kleeman fit;Energy [MeV];Range [cm]");
-   gPad->SetLogy();
-   gBK->Draw("A*");
 
    pad11Inv->cd();
    gBKInv->SetTitle("Inverse Bragg-Kleeman fit;Range [cm];Energy [MeV]");
@@ -349,7 +346,23 @@ void Run(int COUNTER) {
 
 
    c1->cd();
+   gBK->Draw("PA");
    gBK->Fit("braggKleeman", "M, B, Q");
+   braggKleeman->SetLineColor(kBlack);
+   gBK->SetTitle(";Energy [MeV];Range [cm]");
+   gBK->SetMarkerColor(kColorBK);
+   gBK->SetMarkerStyle(7);
+   gBKc->SetMarkerColor(kColorUlmer);
+   gBKc->SetMarkerStyle(7);
+   gBKc->Draw("P");
+   braggKleemanInv->SetLineColor(kColorBK);
+   TLegend *legBKind = new TLegend(0.15, 0.6, 0.35, 0.88);
+   legBKind->SetTextFont(22);
+   legBKind->AddEntry(gBK, "Training points", "P");
+   legBKind->AddEntry(gBKc, "Control points", "P");
+   legBKind->AddEntry(braggKleeman, "Bragg-Kleeman model", "L");
+   legBKind->Draw();
+
    c1Inv->cd();
    gBKInv->Fit("braggKleemanInv", "M, B, Q");
    c2->cd(); 
@@ -391,8 +404,9 @@ void Run(int COUNTER) {
    TGraph *gLinearControl = new TGraph(idxCtrl, energies_control, deltaLinear);
    TGraph *gLinearInvControl = new TGraph(idxCtrl, ranges_control, deltaLinearInv);
 
+   /*
    pad12->cd();
-   gBKControl->SetTitle("Deviation from PSTAR;Energy [MeV];Range deviation [%]"); 
+   gBKControl->SetTitle(";Energy [MeV];Range deviation [%]"); 
    gBKControl->SetLineWidth(2);
    gBKControl->SetLineColor(kRed);
    gPad->SetLogy();
@@ -403,7 +417,7 @@ void Run(int COUNTER) {
    gBKControl->Draw("AL");
    gPad->Update();
    TLine *line1 = new TLine(0, 1, gPad->GetUxmax(), 1); line1->Draw();
-
+*/
    pad12Inv->cd(); 
    gBKInvControl->SetTitle("Deviation from PSTAR;Energy [MeV];Range deviation [%]"); 
    gBKInvControl->SetLineWidth(2);
@@ -415,8 +429,8 @@ void Run(int COUNTER) {
    gBKInvControl->Draw("AL");
    gPad->Update();
    TLine *line2 = new TLine(0, 1, gPad->GetUxmax(), 1); line2->Draw();
-//   line = new TLine(0, 0, 333, 0); line->Draw();
 
+//   line = new TLine(0, 0, 333, 0); line->Draw();
    pad22->cd(); 
    gUlmerControl->SetTitle("Deviation from PSTAR;Energy [MeV];Range deviation [%]"); 
    gUlmerControl->SetLineWidth(2);

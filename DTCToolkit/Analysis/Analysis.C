@@ -48,6 +48,95 @@ void writeDataFrame(Int_t energy) {
    di->writeDataFrame(energy);
 }
 
+void findMCSAngles(Int_t Runs, Int_t dataType, Bool_t recreate, Float_t energy, Float_t degraderThickness) {
+   // Make one histogram for each layer (starting at layer 1)
+   // For each track (found using event ID information), find the change in angle
+   // at layer 1, 2, 3, 4, 5, ..., nLayers.
+   // The angle at layer 1 is defined as 
+   // THETA1 = atan2(sqrt((x2-x1)^2 + (y2-y1)^2), dz)/sqrt(2) - atan2(sqrt(x1-x0)^2 + (y1-y0)^2, dz)/sqrt(2).
+   // Use MM units for all distances.
+
+   Int_t layers = 150;
+   Int_t lastActivatedLayer = 0;
+
+   run_degraderThickness = degraderThickness;
+   run_energy = energy;
+   if (useDegrader) run_energy = getEnergyAtWEPL(energy, degraderThickness);
+
+   Tracks * tracks = loadOrCreateTracks(recreate, Runs, dataType, run_energy);
+
+   vector<TH1F*> *hAngleDifference = new vector<TH1F*>;
+   vector<TCanvas*> *cCanvases = new vector<TCanvas*>;
+   hAngleDifference->reserve(layers);
+   cCanvases->reserve(layers);
+
+   for (Int_t layer=0; layer<layers; layer++) {
+      hAngleDifference->push_back(new TH1F(Form("hAngleDifference_layer_%i",layer), Form("Angular spread in layer %d for %.0f mm absorbator;Angular spread [rad];Entries",layer, degraderThickness), 100, 0, 0.1));
+   }
+
+   Track *thisTrack = nullptr;
+   Float_t angle, y2, y1, y0, x2, x1, x0;
+   Float_t entering[3] = {};
+   Float_t leaving[3] = {};
+   Float_t dotproduct, scalarproduct;
+
+   for (Int_t i=0; i<tracks->GetEntriesFast(); i++) {
+      thisTrack = tracks->At(i);
+      if (!thisTrack) continue;
+
+      for (Int_t layer=0; layer<layers; layer++) {
+         if (thisTrack->GetEntriesFast() - 2 <= layer) {
+            lastActivatedLayer = fmax(layer, lastActivatedLayer);
+            break;
+         }
+
+         x2 = thisTrack->getXmm(layer+1);
+         x1 = thisTrack->getXmm(layer);
+         x0 = (layer > 0) ? thisTrack->getXmm(layer-1) : thisTrack->getXmm(layer); // parallel projection if layer=0
+
+         y2 = thisTrack->getYmm(layer+1);
+         y1 = thisTrack->getYmm(layer);
+         y0 = (layer > 0) ? thisTrack->getYmm(layer-1) : thisTrack->getYmm(layer); // parallel projection if layer=0
+         
+         entering[0] = x1-x0;
+         entering[1] = y1-y0;
+         entering[2] = dz;
+
+         leaving[0] = x2-x1;
+         leaving[1] = y2-y1;
+         leaving[2] = dz;
+
+         // DOT PRODUCT RULE
+         // dot(a,b) = |a| |b| cos theta
+         
+         scalarproduct = sqrt(pow(entering[0], 2) + pow(entering[1], 2) + pow(entering[2], 2)) * sqrt(pow(leaving[0], 2) + pow(leaving[1], 2) + pow(leaving[2], 2));
+         dotproduct = entering[0] * leaving[0] + entering[1] * leaving[1] + entering[2] * leaving[2];
+         angle = acos(dotproduct / scalarproduct);
+
+         hAngleDifference->at(layer)->Fill(angle);
+      }
+   }
+   
+   for (Int_t layer=0; layer<lastActivatedLayer; layer++) {
+      cCanvases->push_back(new TCanvas(Form("canvas_%d", layer), Form("LAYER %d", layer), 1200, 900));
+   }
+
+   TH1F *h = nullptr;
+   printf("Layer mean_angle sigma_angle\n");
+   for (Int_t layer=0; layer<lastActivatedLayer; layer++) {
+      cCanvases->at(layer)->cd();
+      h = hAngleDifference->at(layer);
+      h->SetFillColor(kBlue-4);
+      h->Draw();
+      TF1 *fit = new TF1("fit", "gaus");
+      h->Fit(fit, "Q");
+
+      printf("%d %.3f %.3f\n", layer, fit->GetParameter(1), fit->GetParameter(2));
+
+      delete fit;
+   }
+}
+
 void drawTrackAngleAtVaryingRunNumbers(Int_t dataType, Float_t energy) {
    Int_t nRuns = 0;
    Hits * eventIDs = nullptr;

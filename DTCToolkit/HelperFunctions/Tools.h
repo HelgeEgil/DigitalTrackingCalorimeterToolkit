@@ -39,6 +39,8 @@ void        multiplyRadiusFirstLayers(Float_t factor);
 Float_t     getMCSAngleForLayer(Int_t layer);
 Float_t     findMCSAtLayerRad(Int_t layer, Float_t E0);
 Float_t     getSearchRadiusForLayer(Int_t layer);
+Float_t     getEmpiricalMCSAngle(Int_t layer);
+Float_t     getDotProductAngle(Cluster *a, Cluster *b, Cluster *c);
 Hit       * sumHits(Hit * a, Hit * b);
 Cluster   * getTrackExtrapolationToLayer(Track * track, Int_t layer);
 Cluster   * getTrackExtrapolationFromTo(Track * track, Int_t fromLayer, Int_t toLayer);
