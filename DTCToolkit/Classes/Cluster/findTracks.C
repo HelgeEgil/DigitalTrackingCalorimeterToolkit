@@ -230,6 +230,8 @@ Clusters * Clusters::findClustersFromSeedInLayer(Cluster *seed, Int_t nextLayer)
    if (kUseEmpiricalMCS) maxAngle = getEmpiricalMCSAngle(nextLayer - 1);
    else                  maxAngle = getSearchRadiusForLayer(nextLayer) * 0.75 * MCSMultiplicationFactor;
 
+   showDebug("Clusters::findClustersFromSeedInLayer is looking at seed. maxAngle = " << 1000*maxAngle << " mrad\n");
+
    if (layerIdxFrom < 0)
       return clustersFromThisLayer; // empty
 
@@ -238,6 +240,8 @@ Clusters * Clusters::findClustersFromSeedInLayer(Cluster *seed, Int_t nextLayer)
 
       if (kUseEmpiricalMCS)   thisAngle = getDotProductAngle(seed, seed, At(i));
       else                    thisAngle = diffmmXY(seed, At(i));
+
+      showDebug(" -- Found potential cluster with angle " << 1000*thisAngle << " mrad.\n");
 
       if (thisAngle < maxAngle) {
          clustersFromThisLayer->appendCluster(At(i));

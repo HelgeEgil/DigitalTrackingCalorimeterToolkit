@@ -331,7 +331,7 @@ Float_t getDotProductAngle(Cluster *a, Cluster *b, Cluster *c) {
    Double_t out[3] = {c->getXmm() - b->getXmm(), c->getYmm() - b->getYmm(), c->getLayermm() - b->getLayermm()};
 
    Double_t dot    = in[0] * out[0] + in[1] * out[1] + in[2] * out[2];
-   Double_t scalar = sqrt(pow(out[0] - in[0], 2) + pow(out[1] - in[1], 2) + pow(out[2] - in[2], 2));
+   Double_t scalar = sqrt(pow(out[0],2) + pow(out[1],2) + pow(out[2],2)) * sqrt(pow(in[0],2) + pow(in[1],2) + pow(in[2],2));
 
    return acos(dot / scalar);
 }

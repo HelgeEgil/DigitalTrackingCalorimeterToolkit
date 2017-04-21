@@ -40,7 +40,7 @@ Bool_t   kIsAluminumPlate = false;
 Bool_t   kIsScintillator = false;
 Bool_t   kIsFirstLayerAir = false;
 Bool_t   kUseAlpide = true;
-Bool_t   kDoTracking = false;
+Bool_t   kDoTracking = true;
 Bool_t   kUseEmpiricalMCS = true;
 Bool_t   kFilterNuclearInteractions = true;
 Bool_t   useDegrader = true;
@@ -63,7 +63,7 @@ const    Float_t kAbsorbatorThickness = 2; // mm
 const Float_t dx = DX; // mm
 const Float_t dy = DY; // mm
 const Float_t dz = DZ + kAbsorbatorThickness;
-Int_t kEventsPerRun = 500;
+Int_t kEventsPerRun = 25;
 
 // Used for treatment of available experimental data files
 const Int_t nEnergies = 8;
