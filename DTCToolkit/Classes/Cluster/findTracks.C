@@ -109,7 +109,10 @@ void Clusters::findTracksFromLayer(Tracks * tracks, Int_t layer, Bool_t kUsedClu
       if (!seeds->At(i))
          continue;
 
+      showDebug("Seed(At(i)) = " << *seeds->At(i) << endl);
+
       bestTrack = trackPropagation(seeds->At(i));
+      showDebug("Best track has " << bestTrack->GetEntriesFast() << " entries.\n");
 
       if (bestTrack->GetEntriesFast() < minimumLengthOfTrackToPass)
          continue;
@@ -169,7 +172,9 @@ Track * Clusters::trackPropagation(Cluster *seed) {
       currentTrack->appendCluster(seed);
       currentTrack->appendCluster(nextCluster);
 
+      showDebug("Growing the track: " << *currentTrack << endl);
       growTrackFromLayer(currentTrack, fromLayer);
+      showDebug("Result: " << *currentTrack << endl);
 
       if (currentTrack->GetEntriesFast()){
          seedTracks->appendTrack(currentTrack);
@@ -280,12 +285,15 @@ void Clusters::growTrackFromLayer(Track *track, Int_t fromLayer) {
    }
 
    delete projectedPoint;
-   delete nextProjectedPoint;
    delete nearestNeighbour;
-   delete nextNearestNeighbour;
 }
 
 Cluster * Clusters::findNearestNeighbour(Track *track, Cluster *projectedPoint, Bool_t rejectUsed) {
+   // Finds the cluster in layer projectedPoint->getLayer() closest to the projectedPoint,
+   // based on the distance from a projected vector from *track. (angle minimization)
+   //
+   // In some cases we don't know which track to connect the point to - in that case
+   // Track * track = nullptr, and the legacy method (diffmmXY) is used
    Cluster *nearestNeighbour = new Cluster();
    Float_t  thisAngle, maxAngle;
    Bool_t   kFoundNeighbour = false;
@@ -296,8 +304,8 @@ Cluster * Clusters::findNearestNeighbour(Track *track, Cluster *projectedPoint, 
 
    showDebug("Clusters::findNearestNeighbour using track " << *track << " and with projected point " << *projectedPoint << endl);
 
-   if (kUseEmpiricalMCS)   maxAngle = getEmpiricalMCSAngle(searchLayer-1);
-   else                    maxAngle = getSearchRadiusForLayer(searchLayer) * MCSMultiplicationFactor;
+   if (kUseEmpiricalMCS && track)   maxAngle = getEmpiricalMCSAngle(searchLayer-1);
+   else                             maxAngle = getSearchRadiusForLayer(searchLayer) * MCSMultiplicationFactor;
 
    showDebug("Clusters::findNearestNeighbour The max angle is " << maxAngle);
 
@@ -307,8 +315,8 @@ Cluster * Clusters::findNearestNeighbour(Track *track, Cluster *projectedPoint, 
       if (!At(i))
          continue;
 
-      if (kUseEmpiricalMCS)   thisAngle = getDotProductAngle(track->At(track->GetEntriesFast()-2), track->Last(), At(i));
-      else                    thisAngle = diffmmXY(projectedPoint, At(i));
+      if (kUseEmpiricalMCS && track)   thisAngle = getDotProductAngle(track->At(track->GetEntriesFast()-2), track->Last(), At(i));
+      else                             thisAngle = diffmmXY(projectedPoint, At(i));
 
       reject = (At(i)->isUsed() && rejectUsed);
 

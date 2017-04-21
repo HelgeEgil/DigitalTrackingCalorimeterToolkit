@@ -102,34 +102,18 @@ void  createSplines() {
    Double_t energiesWater[500];
    Double_t rangesPureAl[500];
    Double_t energiesPureAl[500];
-   
-   if (kAbsorbatorThickness == 2) {
-      in.open("Data/Ranges/2mm_Al.csv");
+
+
+   if       (kMaterial == kTungsten) {
+      in.open(Form("Data/Ranges/%.0fmm_W.csv", kAbsorbatorThickness));
+   }
+   else if  (kMaterial == kAluminum) {
+      in.open(Form("Data/Ranges/%.0fmm_Al.csv", kAbsorbatorThickness));
+   }
+   else if  (kMaterial == kCarbon) {
+      in.open(Form("Data/Ranges/%.0fmm_C.csv", kAbsorbatorThickness));
    }
 
-   else if (kAbsorbatorThickness == 3) {
-      in.open("Data/Ranges/3mm_Al.csv");
-   }
-
-   else if (kAbsorbatorThickness == 4) {
-      in.open("Data/Ranges/4mm_Al.csv");
-   }
-   
-   else if (kAbsorbatorThickness == 5) {
-      in.open("Data/Ranges/5mm_Al.csv");
-   }
-   
-   else if (kAbsorbatorThickness == 6) {
-      in.open("Data/Ranges/6mm_Al.csv");
-   }
-   
-   else if (kAbsorbatorThickness == 7) {
-      in.open("Data/Ranges/7mm_Al.csv");
-   }
-
-   else {
-      in.open("Data/Range/2mm_Al.csv");
-   }
 
    while (1) {
       in >> energy >> range;

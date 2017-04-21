@@ -183,6 +183,7 @@ void Run(int COUNTER) {
    Int_t             idx;
    ifstream          in;
    TF1             * braggKleeman = nullptr;
+   TF1             * braggKleeman_zoom = nullptr;
    TF1             * braggKleemanInv = nullptr;
    TF1             * hybridBraggKleeman = nullptr;
    TF1             * hybridBraggKleemanInv = nullptr;
@@ -254,6 +255,8 @@ void Run(int COUNTER) {
 
    TGraph *gBK = new TGraph(idxPara, energies, ranges);
    TGraph *gBKc = new TGraph(idxCtrl, energies_control, ranges_control);
+   TGraph *gBK_zoom = new TGraph(idxPara, energies, ranges);
+   TGraph *gBKc_zoom = new TGraph(idxCtrl, energies_control, ranges_control);
    TGraph *gBKInv = new TGraph(idxPara, ranges, energies);
    TGraph *gUlmer = new TGraph(idxPara, energies, ranges);
    TGraph *gUlmerInv = new TGraph(idxPara, ranges, energies);
@@ -312,6 +315,7 @@ void Run(int COUNTER) {
 
    cout << "Fitting functions\n";
    braggKleeman = new TF1("braggKleeman", "[0] * pow(x, [1])", 0, 500);
+   braggKleeman_zoom = new TF1("braggKleeman_zoom", "[0] * pow(x, [1])", 0, 500);
    braggKleemanInv = new TF1("braggKleemanInv", "pow(x/[0], 1/[1])", 0, 500);
    fitFunction = new TF1("fitFunction", "[0] * x * (1 + ([1] - [1]* exp(-[2] * x)) + ([3] - [3] * exp(-[4]*x)))", 0, 500);
    fitInvFunction = new TF1("fitInvFunction", "x * ([0] * exp ( - [1] * x) + [2] * exp( - [3] * x) + [4] * exp( - [5] * x) + [6] * exp(-[7] * x) + [8] * exp(-[9] * x))", 0, 500);
@@ -347,14 +351,16 @@ void Run(int COUNTER) {
 
    c1->cd();
    gBK->Draw("PA");
-   gBK->Fit("braggKleeman", "M, B, Q");
    braggKleeman->SetLineColor(kBlack);
+   braggKleeman->SetLineWidth(1);
+   gBK->Fit("braggKleeman", "M, B, Q");
    gBK->SetTitle(";Energy [MeV];Range [cm]");
    gBK->SetMarkerColor(kColorBK);
    gBK->SetMarkerStyle(7);
    gBKc->SetMarkerColor(kColorUlmer);
    gBKc->SetMarkerStyle(7);
    gBKc->Draw("P");
+
    braggKleemanInv->SetLineColor(kColorBK);
    TLegend *legBKind = new TLegend(0.15, 0.6, 0.35, 0.88);
    legBKind->SetTextFont(22);
@@ -362,6 +368,29 @@ void Run(int COUNTER) {
    legBKind->AddEntry(gBKc, "Control points", "P");
    legBKind->AddEntry(braggKleeman, "Bragg-Kleeman model", "L");
    legBKind->Draw();
+   
+   // MAKE ZOOM INSERT
+   TPad *inset_pad = new TPad("bk_zoom", "bk_zoom", 0.625, 0.15, 0.85, 0.475);
+   inset_pad->SetBorderMode(1);
+   inset_pad->Draw();
+   inset_pad->cd();
+   gBK_zoom->GetXaxis()->SetRangeUser(25, 50);
+   gBK_zoom->GetYaxis()->SetRangeUser(0.25, 3);
+   gBK_zoom->GetXaxis()->SetLabelSize(0.08);
+   gBK_zoom->GetYaxis()->SetLabelSize(0.08);
+   gBK_zoom->GetXaxis()->SetLabelOffset(0.015);
+   gBK_zoom->GetYaxis()->SetLabelOffset(0.015);
+   gBK_zoom->SetTitle("");
+   gBK_zoom->SetMarkerColor(kColorBK);
+   gBK_zoom->SetMarkerStyle(7);
+   gBKc_zoom->SetMarkerColor(kColorUlmer);
+   gBKc_zoom->SetMarkerStyle(7);
+   gBK_zoom->Draw("PA");
+   gBKc_zoom->Draw("P");
+   braggKleeman_zoom->SetLineColor(kBlack);
+   braggKleeman_zoom->SetLineWidth(1);
+   braggKleeman_zoom->SetParameters(braggKleeman->GetParameter(0), braggKleeman->GetParameter(1));
+   braggKleeman_zoom->Draw("same");
 
    c1Inv->cd();
    gBKInv->Fit("braggKleemanInv", "M, B, Q");

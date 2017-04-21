@@ -388,6 +388,8 @@ void  DataInterface::getMCClusters(Int_t runNo, Clusters *clusters) {
    Int_t eventIdFrom = runNo * kEventsPerRun;
    Int_t eventIdTo = eventIdFrom + kEventsPerRun;
 
+   printf("eventIdFrom = %d, eventIdTo = %d.\n", eventIdFrom, eventIdTo);
+
    if (runNo == 0) lastJentry_ = 0;
    
    Float_t  sum_edep = 0;
@@ -410,17 +412,13 @@ void  DataInterface::getMCClusters(Int_t runNo, Clusters *clusters) {
       nb = fChain->GetEntry(jentry);
       nbytes += nb;
 
-      layer = level1ID + baseID-1;
+      layer = level1ID + baseID - 1;
       if (parentID != 0) continue;
       
       if (lastID != eventID || lastLayer != layer) {
          x = sumX/n / dx + nx/2;
          y = sumY/n / dy + ny/2;
          
-         showDebug(Form("Adding point (N,x,y,x_mm, y_mm, layer,z,ID,edep) = (%d, %.2f, %.2f, %.2f, %.2f, %d, %.2f, %d, %.2f)\n", n, x, y, sumX/n, sumY/n, lastLayer,lastZ, lastID, sum_edep));
-
-         showDebug(Form("volumeIDs: [0] = %d, [1] = %d, [2] = %d, [3] = %d, [4] = %d, [5] = %d, [6] = %d, [7] = %d, [8] = %d, [9] = %d\n\n", volumeID[0], volumeID[1], volumeID[2], volumeID[3], volumeID[4], volumeID[5], volumeID[6], volumeID[7], volumeID[8], volumeID[9]));
-      
          clusters->appendClusterEdep(x, y, lastLayer, sum_edep, lastID);
 
          sum_edep = 0;
@@ -431,10 +429,12 @@ void  DataInterface::getMCClusters(Int_t runNo, Clusters *clusters) {
       
          
       if (eventID < eventIdFrom) {
+         printf("eventID (%d) < eventIdFrom (%d), continuing.\n", eventID, eventIdFrom);
          continue;
       }
       
       else if (eventID >= eventIdTo) {
+         printf("eventID (%d) >= eventIdTo (%d), breaking.\n", eventID, eventIdTo);
          lastJentry_ = jentry;
          break;
       }

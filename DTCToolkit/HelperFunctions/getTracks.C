@@ -88,7 +88,7 @@ Tracks * loadOrCreateTracks(Bool_t recreate, Int_t Runs, Int_t dataType, Float_t
    
    if (recreate) {
       printf("kUseAlpide = %d\n", kUseAlpide);
-      if (kDoTracking || !kUseAlpide) {
+      if (!kUseAlpide) {
          tracks = getTracks(Runs, dataType, kCalorimeter, energy, x, y);
       
          if (tracks->GetEntries()) {
@@ -109,7 +109,7 @@ Tracks * loadOrCreateTracks(Bool_t recreate, Int_t Runs, Int_t dataType, Float_t
       if (!tracks) {
          cout << "!tracks, creating new file\n";
 
-         if (kDoTracking || !kUseAlpide) {
+         if (!kUseAlpide) {
             tracks = getTracks(Runs, dataType, kCalorimeter, energy, x, y);
          }
          else {
@@ -204,9 +204,17 @@ Tracks * getTracksFromClusters(Int_t Runs, Int_t dataType, Int_t frameType, Floa
       di->getMCClusters(i, clusters);
 
       showDebug("Finding calorimeter tracks\n");
-      tracks = clusters->findCalorimeterTracksWithMCTruth();
+      if (kDoTracking) {
+         printf("There are %d clusters\n", clusters->GetEntriesFast());
+         clusters->sortTCAByLayer();
+         tracks = clusters->findCalorimeterTracks(); // We ignore diffusion effects here
+      }
 
-      if (tracks->GetEntriesFast() == 0) breakSignal = kTRUE; // to stop running
+      else {
+         tracks = clusters->findCalorimeterTracksWithMCTruth();
+      }
+
+      if (tracks->GetEntriesFast() == 0) breakSignal = true; // to stop running
 
       // Track improvements
       Int_t nTracksBefore = 0, nTracksAfter = 0;

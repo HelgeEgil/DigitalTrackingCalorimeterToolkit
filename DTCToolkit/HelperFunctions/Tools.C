@@ -111,17 +111,27 @@ Double_t double_landau(Double_t *v, Double_t *par) {
 char * getMaterialChar() {
    char *sMaterial;
 
-   if (kMaterial == kTungsten) sMaterial = (char*) "Tungsten";
-   if (kMaterial == kAluminum) sMaterial = (char*) "Aluminium";
-   if (kMaterial == kPMMA) sMaterial = (char*) "PMMA";
+   if (kMaterial == kTungsten)   sMaterial = (char*) "Tungsten";
+   if (kMaterial == kAluminum)   sMaterial = (char*) "Aluminium";
+   if (kMaterial == kPMMA)       sMaterial = (char*) "PMMA";
+
+   return sMaterial;
+}
+
+char * getMaterialAbbr() {
+   char *sMaterial;
+
+   if (kMaterial == kTungsten)   sMaterial = (char*) "W";
+   if (kMaterial == kAluminum)   sMaterial = (char*) "Al";
+   if (kMaterial == kCarbon)     sMaterial = (char*) "C";
 
    return sMaterial;
 }
 
 char * getDataTypeChar(Int_t dataType) {
    char * sDataType = (char*) "";
-   if (dataType == kMC) sDataType = (char*) "MC";
-   else if (dataType == kData) sDataType = (char*) "Exp. data";
+   if       (dataType == kMC)    sDataType = (char*) "MC";
+   else if  (dataType == kData)  sDataType = (char*) "Exp. data";
 
    return sDataType;
 }
@@ -317,11 +327,11 @@ Float_t getDotProductAngle(Cluster *a, Cluster *b, Cluster *c) {
    // If a == b, b is usually the first layer, but we want to parallel propagate the vector to calculate the change from ||
    // If not, the distance between the layers might be > dz, so calculate it.
 
-   Float_t in[3]  = {b->getXmm() - a->getXmm(), b->getYmm() - a->getYmm(), (a==b) ? dz : b->getLayermm() - a->getLayermm()};
-   Float_t out[3] = {c->getXmm() - b->getXmm(), c->getYmm() - b->getYmm(), c->getLayermm() - b->getLayermm()};
+   Double_t in[3]  = {b->getXmm() - a->getXmm(), b->getYmm() - a->getYmm(), (a==b) ? dz : b->getLayermm() - a->getLayermm()};
+   Double_t out[3] = {c->getXmm() - b->getXmm(), c->getYmm() - b->getYmm(), c->getLayermm() - b->getLayermm()};
 
-   Float_t dot    = in[0] * out[0] + in[1] * out[1] + in[2] * out[2];
-   Float_t scalar = sqrt(pow(out[0] - in[0], 2) + pow(out[1] - in[1], 2) + pow(out[2] - in[2], 2));
+   Double_t dot    = in[0] * out[0] + in[1] * out[1] + in[2] * out[2];
+   Double_t scalar = sqrt(pow(out[0] - in[0], 2) + pow(out[1] - in[1], 2) + pow(out[2] - in[2], 2));
 
    return acos(dot / scalar);
 }

@@ -248,7 +248,7 @@ void Tracks::retrogradeTrackImprovement(Clusters * clusters) {
          if (!estimatedRetrogradeCluster) continue;
          
          actualCluster = thisTrack->At(thisTrack->getClusterFromLayer(layer));
-         nearestNeighborAllTracks = clusters->findNearestNeighbour(estimatedRetrogradeCluster, false);   
+         nearestNeighborAllTracks = clusters->findNearestNeighbour(nullptr, estimatedRetrogradeCluster, false); // BROKEN!!!
 
          if (!nearestNeighborAllTracks) {
             delete estimatedRetrogradeCluster;

@@ -40,6 +40,7 @@ public:
    virtual Int_t     GetEntriesInLayer(Int_t i);
    virtual void      clearClusters();
    virtual void      Clear(Option_t * = "");
+   void              sortTCAByLayer();
    
    // Add and remove clusters
    virtual void      removeCluster(Cluster *c)              { clusters_.Remove((TObject*) c); }
@@ -83,7 +84,7 @@ public:
    Clusters  * findNearestClustersInNextLayer(Cluster *seed);
    Clusters  * findClustersFromSeedInLayer(Cluster *seed, Int_t nextLayer);
    void        growTrackFromLayer(Track *track, Int_t fromLayer);
-   Cluster   * findNearestNeighbour(Cluster *projectedPoint, Bool_t rejectUsed = true);
+   Cluster   * findNearestNeighbour(Track* track, Cluster *projectedPoint, Bool_t rejectUsed = true);
    Track     * findLongestTrack(Tracks *seedTracks);
 
    ClassDef(Clusters,5)

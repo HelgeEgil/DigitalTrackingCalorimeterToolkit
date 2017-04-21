@@ -6,6 +6,7 @@
 #include <TObject.h>
 
 #define USEALPIDE
+#define USEDEBUG
 
 #ifdef USEDEBUG
 #define showDebug(x) std::cout << x
@@ -13,11 +14,14 @@
 #define showDebug(x)
 #endif
 
+
+// Was 3072x1024 w/29.3 um px
+// With 270x135 and 30 um px this should be 9000x4500
 #ifdef USEALPIDE
-#define NX 3072
-#define DX 0.0293
-#define DY 0.0293
-#define NY 1024
+#define NX 9000
+#define DX 0.030
+#define DY 0.030
+#define NY 4500
 #define DZ 0.435
 #else
 #define NX 1280
@@ -36,7 +40,7 @@ Bool_t   kIsAluminumPlate = false;
 Bool_t   kIsScintillator = false;
 Bool_t   kIsFirstLayerAir = false;
 Bool_t   kUseAlpide = true;
-Bool_t   kDoTracking = true;
+Bool_t   kDoTracking = false;
 Bool_t   kUseEmpiricalMCS = true;
 Bool_t   kFilterNuclearInteractions = true;
 Bool_t   useDegrader = true;
@@ -59,13 +63,13 @@ const    Float_t kAbsorbatorThickness = 2; // mm
 const Float_t dx = DX; // mm
 const Float_t dy = DY; // mm
 const Float_t dz = DZ + kAbsorbatorThickness;
-Int_t kEventsPerRun = 5;
+Int_t kEventsPerRun = 500;
 
 // Used for treatment of available experimental data files
 const Int_t nEnergies = 8;
 Int_t energies[nEnergies] = {122, 140, 150, 160, 170, 180, 188, 190};
 
-enum eMaterial {kTungsten, kAluminum, kPMMA, kWater};
+enum eMaterial {kTungsten, kAluminum, kPMMA, kWater, kCarbon};
 const Int_t kMaterial = kAluminum;
 
 Int_t kDataType = kMC;

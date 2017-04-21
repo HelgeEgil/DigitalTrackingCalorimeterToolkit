@@ -23,6 +23,7 @@ Bool_t      existsEnergyFile(Int_t energy);
 Double_t    fitfunc_DBP(Double_t *v, Double_t *par);
 Double_t    double_landau(Double_t *v, Double_t *par);
 char      * getMaterialChar();
+char      * getMaterialAbbr();
 char      * getDataTypeChar(Int_t dataType);
 Int_t       getMinimumTrackLength(Float_t energy);
 Int_t       getFWxMInRange(TH1F* h, Float_t first, Float_t last, Int_t div);
@@ -31,7 +32,6 @@ Float_t     getEnergyFromXY(Float_t *x_energy, Float_t *y_energy, Int_t eventID)
 void        convertXYToWEPL(Float_t *x_energy, Float_t *y_energy, Int_t eventID);
 Double_t    correctForEnergyParameterisation(Float_t energy);
 Float_t     getAverageEnergyLoss(Float_t energy);
-
 Float_t     calculateMCS(Float_t energy, Float_t depth);
 Float_t     findMCSPixelRadiusForLayer(Float_t layer, Float_t E0);
 void        fillMCSRadiusList(Float_t angleFactor = 1);
