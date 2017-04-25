@@ -824,9 +824,9 @@ Float_t drawBraggPeakGraphFit(Int_t Runs, Int_t dataType, Bool_t recreate, Float
    Float_t        finalEnergy = 0;
    Float_t        fitRange, fitScale, fitError;
    Int_t          nCutDueToTrackEndingAbruptly = 0;
-   Int_t          nPlotX = 3, nPlotY = 1;
+   Int_t          nPlotX = 1, nPlotY = 1;
    Int_t          fitIdx = 0, plotSize = nPlotX*nPlotY;
-   Int_t          skipPlot = 20; 
+   Int_t          skipPlot = 12; 
    TGraphErrors * outputGraph;
    char         * sDataType = getDataTypeChar(dataType);
    char         * sMaterial = getMaterialChar();
@@ -837,7 +837,7 @@ Float_t drawBraggPeakGraphFit(Int_t Runs, Int_t dataType, Bool_t recreate, Float
    if (useDegrader) {
       hTitle = Form("Fitted energy of a %.0f MeV nominal beam on %s DTC w/%.1f mm water degrader", energy, sMaterial, degraderThickness);
    }
-   TCanvas      * cGraph = new TCanvas("cGraph", "Fitted data points", 1500, 500);
+   TCanvas      * cGraph = new TCanvas("cGraph", "Fitted data points", nPlotX*500, 600);
    TCanvas      * cFitResults = new TCanvas("cFitResults", hTitle, 1000, 1000);
 //   TCanvas      * cAngle = new TCanvas("cAngle", "Incoming angles", 800, 800);
    TH1F         * hFitResults = new TH1F("fitResult", hTitle, fmax(nEnergies*8,200), getUnitFromEnergy(0), getUnitFromEnergy(run_energy)*1.4+10);
@@ -898,7 +898,7 @@ Float_t drawBraggPeakGraphFit(Int_t Runs, Int_t dataType, Bool_t recreate, Float
          if (fitIdx == 1) {
             gPad->SetRightMargin(0.01);
             gPad->SetLeftMargin(0.15);
-            outputGraph->GetXaxis()->SetTitle("");
+//            outputGraph->GetXaxis()->SetTitle("");
          }
 
          else if (fitIdx == 2) {
@@ -951,23 +951,38 @@ Float_t drawBraggPeakGraphFit(Int_t Runs, Int_t dataType, Bool_t recreate, Float
    else if  (kOutputUnit == kEnergy)   hFitResultsDroppedData->SetXTitle("Energy [MeV]");
 
    hFitResultsDroppedData->SetYTitle("Number of protons");
-
    hFitResultsDroppedData->GetXaxis()->SetTitleFont(22);
    hFitResultsDroppedData->GetXaxis()->SetLabelFont(22);
    hFitResultsDroppedData->GetYaxis()->SetTitleFont(22);
    hFitResultsDroppedData->GetYaxis()->SetLabelFont(22);
    hFitResultsDroppedData->GetYaxis()->SetTitleOffset(1.5);
    
-   hFitResultsDroppedData->Draw();
-   hFitResults->Draw("same");
-   hFitResultsDroppedData->GetYaxis()->SetRangeUser(0, max(hFitResultsDroppedData->GetMaximum()*1.05, hFitResults->GetMaximum()*1.05));
+   if       (kOutputUnit == kPhysical) hFitResults->SetXTitle("Physical range [mm]");
+   else if  (kOutputUnit == kWEPL)     hFitResults->SetXTitle("Range in Water Equivalent Path Length [mm]");
+   else if  (kOutputUnit == kEnergy)   hFitResults->SetXTitle("Energy [MeV]");
 
-   // Change title font to 22 (Times New Roman)
+   hFitResults->SetYTitle("Number of protons");
+   hFitResults->GetXaxis()->SetTitleFont(22);
+   hFitResults->GetXaxis()->SetLabelFont(22);
+   hFitResults->GetYaxis()->SetTitleFont(22);
+   hFitResults->GetYaxis()->SetLabelFont(22);
+   hFitResults->GetYaxis()->SetTitleOffset(1.5);
+
+   hFitResults->SetTitle("");
+   
+//   hFitResultsDroppedData->Draw();
+   hFitResults->Draw(); // was same
+//   hFitResultsDroppedData->GetYaxis()->SetRangeUser(0, max(hFitResultsDroppedData->GetMaximum()*1.05, hFitResults->GetMaximum()*1.05));
+
+   /* 
+    * Uncomment when finished making plots for optimization poster
+    *
    gPad->Update();
    TPaveText *title = (TPaveText*) gPad->GetPrimitive("title");
    title->SetTextFont(22);
    gPad->Modified();
-   
+   */
+
    // Draw expected gaussian distribution of results from initial energy
    Float_t expectedStraggling = 0, expectedMean = 0, dlayer_down = 0, dlayer = 0;
    Float_t separationFactor = 0.9, nullStraggling = 0;
@@ -989,8 +1004,6 @@ Float_t drawBraggPeakGraphFit(Int_t Runs, Int_t dataType, Bool_t recreate, Float
    
    Float_t energySigma = getEnergyFromUnit(empiricalMean +  empiricalSigma/ 2) - getEnergyFromUnit(empiricalMean - empiricalSigma / 2);
 
-   cFitResults->Update();
-  
    cFitResults->Update();
 
    gPad->Update();
@@ -1024,10 +1037,12 @@ Float_t drawBraggPeakGraphFit(Int_t Runs, Int_t dataType, Bool_t recreate, Float
    legend->AddEntry(bip, "x_{i'} bin", "L");
    legend->SetTextFont(22);
    if (kDrawVerticalLayerLines) legend->AddEntry(l, "Sensor layer positions", "L");
-   legend->Draw();
+//   legend->Draw();
 
+   gStyle->SetOptStat(11);
    TPaveStats *ps = (TPaveStats*) cFitResults->GetPrimitive("stats");
    hFitResultsDroppedData->SetBit(TH1::kNoStats);
+   hFitResults->SetBit(TH1::kNoStats);
    ps->SetY1NDC(0.53); ps->SetX1NDC(0.72);
    ps->SetTextFont(22);
    ps->AddText(Form("Nominal WEPL = %.2f", expectedMean));
@@ -1329,7 +1344,12 @@ void drawTracks3D(Int_t Runs, Int_t dataType, Bool_t recreate, Int_t switchLayer
    TCanvas *c1 = new TCanvas("c1", "c1", 1600, 800);
    c1->SetTitle(Form("Tracks from %.2f MeV protons on %s", energy, getMaterialChar()));
    TView *view = TView::CreateView(1);
-   view->SetRange(0, 0, 0, nx, 35, ny);
+   float fromx = 0.25 * nx;
+   float tox = 0.75 * nx;
+   float fromy = 0.25 * ny;
+   float toy = 0.75 * ny;
+
+   view->SetRange(fromx, 0, fromy, tox, 70, toy);
    Int_t iret;
    Float_t theta = 285;
    Float_t phi = 80;
@@ -1521,7 +1541,8 @@ void drawTracks3D(Int_t Runs, Int_t dataType, Bool_t recreate, Int_t switchLayer
          
          conflictMarker->SetPoint(conflictIdx++, x,y,z);
       }
-      l->SetLineColor(kBlue);
+      l->SetLineColor(kBlack);
+      l->SetLineWidth(3);
       l->Draw();
       trackPoints->Draw();
 //    EIDMarker->Draw();

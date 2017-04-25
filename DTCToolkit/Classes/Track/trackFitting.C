@@ -203,24 +203,48 @@ Float_t Track::getTrackScore() {
    // If angularChange is 3, give 0 points
    // If its 0, give 10 points
    // If bragg peak is found, give 10 points
-   
-   Float_t  upperTrackLength = getTLFromEnergy(run_energy);
-   Float_t  upperAngularChange = 3;
-   Float_t  points = 0;
-   Int_t    angularChangePoints = 10;
-   Int_t    trackLengthPoints = 25;
-   Int_t    braggPeakPoints = 10;
-   Float_t  trackLength = getTrackLengthmm();
-   Float_t  angularChange = getSlopeAngleDifferenceSumInTheta0();
-   
-   if (trackLength == 0) return 0;
+  
+   if (!kUseAlpide) {
+      Float_t  upperTrackLength = getTLFromEnergy(run_energy);
+      Float_t  upperAngularChange = 3;
+      Float_t  points = 0;
+      Int_t    angularChangePoints = 10;
+      Int_t    trackLengthPoints = 25;
+      Int_t    braggPeakPoints = 10;
+      Float_t  trackLength = getTrackLengthmm();
+      Float_t  angularChange = getSlopeAngleDifferenceSumInTheta0();
+      
+      if (trackLength == 0) return 0;
 
-   points = trackLength * (trackLengthPoints / upperTrackLength);
-   points += (upperAngularChange - angularChange) * (angularChangePoints / upperAngularChange);
+      points = trackLength * (trackLengthPoints / upperTrackLength);
+      points += (upperAngularChange - angularChange) * (angularChangePoints / upperAngularChange);
 
-   if (getAverageCSLastN(2) > getAverageCS() * kBPFactorAboveAverage) {
-      points += braggPeakPoints;
+      if (getAverageCSLastN(2) > getAverageCS() * kBPFactorAboveAverage) {
+         points += braggPeakPoints;
+      }
+
+      return points;
    }
 
-   return points;
+   else {
+      Float_t angularChange = 0;
+      Cluster * cluster1 = nullptr;
+      Cluster * cluster2 = nullptr;
+      Cluster * cluster3 = nullptr;
+
+      for (Int_t layer=0; layer<nLayers; layer++) {
+         cluster1 = At(getClusterFromLayer((layer>0) ? layer-1 : layer));
+         cluster2 = At(getClusterFromLayer(layer));
+         cluster3 = At(getClusterFromLayer(layer+1));
+
+         if (!cluster1 || !cluster2 || !cluster3) continue;
+
+         angularChange += pow(getDotProductAngle(cluster1, cluster2, cluster3) / getEmpiricalMCSAngle(layer), 2);
+      }
+      angularChange = sqrt(angularChange);
+
+      showDebug("Track::getTrackScore: Angular change chi2 = " << angularChange << " and tracklength = " << getTrackLengthmm() << endl);
+      return getTrackLengthmm();
+   }
+   return 0;
 }

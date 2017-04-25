@@ -320,7 +320,7 @@ Float_t getEmpiricalMCSAngle(Int_t layer) {
    // defined as the dot product rule angle between the ingoing and outgoing vector in mm
    // This value is found through Analysis.C::findMCSAngles.
 
-   return mcs_radius_per_layer_empirical[layer];
+   return 3 * mcs_radius_per_layer_empirical[layer];
 }
 
 Float_t getDotProductAngle(Cluster *a, Cluster *b, Cluster *c) {

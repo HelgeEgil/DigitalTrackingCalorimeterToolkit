@@ -350,10 +350,12 @@ Track * Clusters::findLongestTrack(Tracks *seedTracks) {
    Track  * track = nullptr;
    Int_t    startOffset;
 
+   showDebug("There are " << seedTracks->GetEntriesFast() << " potential tracks in Clusters::findLongestTrack: " << *((Track*) seedTracks->At(0)) << endl);
    for (Int_t i=0; i<seedTracks->GetEntriesFast(); i++) {
       if (!seedTracks->At(i)) continue;
 
       score = seedTracks->getTrackScore(i);
+      showDebug("Track score is " << score << endl);
       if (score > bestScore) {
          bestScore = score;
          track = seedTracks->At(i);

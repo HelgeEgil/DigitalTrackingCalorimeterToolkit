@@ -356,9 +356,11 @@ void Run(int COUNTER) {
    gBK->Fit("braggKleeman", "M, B, Q");
    gBK->SetTitle(";Energy [MeV];Range [cm]");
    gBK->SetMarkerColor(kColorBK);
-   gBK->SetMarkerStyle(7);
+   gBK->SetMarkerStyle(20);
+   gBK->SetMarkerSize(0.8);
    gBKc->SetMarkerColor(kColorUlmer);
-   gBKc->SetMarkerStyle(7);
+   gBKc->SetMarkerStyle(20);
+   gBKc->SetMarkerSize(0.6);
    gBKc->Draw("P");
 
    braggKleemanInv->SetLineColor(kColorBK);
@@ -382,9 +384,11 @@ void Run(int COUNTER) {
    gBK_zoom->GetYaxis()->SetLabelOffset(0.015);
    gBK_zoom->SetTitle("");
    gBK_zoom->SetMarkerColor(kColorBK);
-   gBK_zoom->SetMarkerStyle(7);
+   gBK_zoom->SetMarkerStyle(20);
+   gBK_zoom->SetMarkerSize(0.8);
    gBKc_zoom->SetMarkerColor(kColorUlmer);
-   gBKc_zoom->SetMarkerStyle(7);
+   gBKc_zoom->SetMarkerStyle(20);
+   gBKc_zoom->SetMarkerSize(0.6);
    gBK_zoom->Draw("PA");
    gBKc_zoom->Draw("P");
    braggKleeman_zoom->SetLineColor(kBlack);
