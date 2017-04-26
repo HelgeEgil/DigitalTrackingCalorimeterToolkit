@@ -378,7 +378,7 @@ class Module:
 
     def makeAbsorber(self, n, isFirstAbsorber=False):
         name = "Absorber" + str(n)
-        size = self.absorberSize
+        size = self.chipSize
         size.dz = self.absorberThickness
         pos = self.getPosDepth(0, 0, size, name)
         # pos.z += self.getLastObjectRightSide() - self.getLeftSideNoAbsorber()
@@ -392,7 +392,7 @@ class Module:
 
     def makeAbsorberAirGap(self):
         name = "AbsorberAirGap"
-        size = Size(self.absorberSize.dx, self.absorberSize.dy, self.absorberAirGapThickness)
+        size = Size(self.chipSize.dx, self.chipSize.dy, self.absorberAirGapThickness)
         pos = Pos(0, 0, self.objects[-1].pos.z + self.objects[-1].size.dz/2 + size.dz/2)
 
         self.objects.append(Box(name, "Layer", pos, size, "Air", kNotVisible, kNoColor))
@@ -432,7 +432,7 @@ class Module:
         self.thickness = 2*self.glueThickness + self.pcbThickness + self.passiveChipThickness + self.activeChipThickness + self.absorberThickness + self.absorberAirGapThickness
         self.moduleThickness = 2 * self.glueThickness + self.pcbThickness + self.passiveChipThickness + self.activeChipThickness
 
-        self.size = Size(10*cm, 4*cm, self.thickness)
+        self.size = Size(self.chipSize.dx, self.chipSize.dy, self.thickness)
 
     def addRotation(self):
         filename = "{}.placements".format(self.name)
@@ -674,7 +674,7 @@ class Module:
         return fig
 
 class scanner:
-    def __init__(self, i=1, dx = 15*cm, dy = 15*cm, dz = 150*cm):
+    def __init__(self, i=1, dx = 300*cm, dy = 300*cm, dz = 150*cm):
         self.size = Size(dx, dy, dz)
         self.name = "scanner_{}".format(i)
         self.mother = "world"
@@ -924,6 +924,11 @@ class MainMenu(Frame):
         self.module.moveAllBoxes(self.module.fromZ)
         self.module.reduceAllSizes(0.1)
         
+        self.scanner1.size.dx = self.firstModule.size.dx
+        self.scanner1.size.dy = self.firstModule.size.dy
+        self.scanner2.size.dx = self.firstModule.size.dx
+        self.scanner2.size.dy = self.firstModule.size.dy
+
         self.scanner1.size.dz = self.firstModule.thickness
         self.scanner1.pos.z = self.scanner1.size.dz/2
         self.scanner2.size.dz = self.module.thickness * self.module.nlayers*2
