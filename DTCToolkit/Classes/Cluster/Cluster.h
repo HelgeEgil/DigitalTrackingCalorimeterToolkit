@@ -32,7 +32,7 @@ public:
    Int_t    getError()        { return sqrt(clusterSize_); }
    Double_t getXmm()          { return (x_ - nx/2) * dx; } // from -nx*dx/2 to nx*dx/2
    Double_t getYmm()          { return (y_ - ny/2) * dy; } // from -ny*dy to ny*dy
-   Bool_t       isUsed()      { return isUsed_; }
+   Bool_t   isUsed()          { return isUsed_; }
 
    void     setX(Float_t x)      { x_ = x; }
    void     setY(Float_t y)      { y_ = y; }

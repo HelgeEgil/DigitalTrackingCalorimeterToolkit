@@ -35,6 +35,7 @@ public:
    virtual Int_t     GetEntriesFast()           { return clusters_.GetEntriesFast(); }
    virtual Int_t     GetEntries()               { return clusters_.GetEntries(); }
    virtual Int_t     GetEntriesFastCWT()        { return clustersWithoutTrack_.GetEntriesFast(); }
+   virtual Int_t     GetEntriesCWT()            { return clustersWithoutTrack_.GetEntries(); }
    virtual void      Compress()                 { clusters_.Compress(); }
    virtual Int_t     GetEntriesFastLastLayer();
    virtual Int_t     GetEntriesInLayer(Int_t i);
@@ -77,8 +78,10 @@ public:
 
    // in file findTracks.C
    Tracks    * findCalorimeterTracks();
+   Tracks    * findCalorimeterTracksAlpide();
    Tracks    * findCalorimeterTracksWithMCTruth();
    void        findTracksFromLayer(Tracks *tracks, Int_t layer, Bool_t kUsedClustersInSeeds = true);
+   void        findRemainingTracks(Tracks *tracks);
    Clusters  * findSeeds(Int_t layer, Bool_t kUsedClustersInSeeds = true);
    Track     * trackPropagation(Cluster *seed);
    Clusters  * findNearestClustersInNextLayer(Cluster *seed);

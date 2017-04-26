@@ -43,8 +43,8 @@
 /gate/source/uniformBeam/gps/type Plane
 /gate/source/uniformBeam/gps/shape Square
 /gate/source/uniformBeam/gps/direction 0 0 1
-/gate/source/uniformBeam/gps/halfx 100 mm
-/gate/source/uniformBeam/gps/halfy 50 mm
+/gate/source/uniformBeam/gps/halfx 70.71 mm
+/gate/source/uniformBeam/gps/halfy 35.355 mm
 /gate/source/uniformBeam/gps/centre 0. 0. {beampos} mm
 
 /gate/output/root/enable

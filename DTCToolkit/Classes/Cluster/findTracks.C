@@ -53,6 +53,37 @@ Tracks * Clusters::findCalorimeterTracksWithMCTruth() {
    return tracks;
 }
 
+Tracks * Clusters::findCalorimeterTracksAlpide() {
+   Tracks * tracks = new Tracks(kEventsPerRun * 5);
+   Int_t    startOffset = 0;
+   Bool_t   usedClustersInSeeds = true;
+   Int_t    clustersLeft;
+   Float_t  factor;
+
+   for (Int_t i=0; i<GetEntriesFast(); i++) {
+      if (!At(i)) continue;
+      appendClusterWithoutTrack(At(i));
+   }
+   
+   makeLayerIndex();
+
+   // first pass, small search cone (3 sigma MCS)
+   kMCSFactor = 1;
+   findTracksFromLayer(tracks, 0, usedClustersInSeeds);
+   
+   kMCSFactor = 3;
+   findTracksFromLayer(tracks, 0, usedClustersInSeeds);
+
+   findRemainingTracks(tracks);
+
+   clustersLeft = clustersWithoutTrack_.GetEntries();
+   factor = 100 * (1 - (Float_t) clustersLeft / GetEntriesFast());
+   cout << "Found " << tracks->GetEntriesFast() << " tracks. " << clustersLeft << " of total " << GetEntriesFast() << " clusters were not assigned to track! (" << factor << " %)\n";
+
+   return tracks;
+}
+
+
 Tracks * Clusters::findCalorimeterTracks() {
    Tracks * tracks = new Tracks(kEventsPerRun * 5);
    Int_t    startOffset = 0;
@@ -172,9 +203,7 @@ Track * Clusters::trackPropagation(Cluster *seed) {
       currentTrack->appendCluster(seed);
       currentTrack->appendCluster(nextCluster);
 
-      showDebug("Growing the track: " << *currentTrack << endl);
       growTrackFromLayer(currentTrack, fromLayer);
-      showDebug("Result: " << *currentTrack << endl);
 
       if (currentTrack->GetEntriesFast()){
          seedTracks->appendTrack(currentTrack);
@@ -230,8 +259,6 @@ Clusters * Clusters::findClustersFromSeedInLayer(Cluster *seed, Int_t nextLayer)
    if (kUseEmpiricalMCS) maxAngle = getEmpiricalMCSAngle(nextLayer - 1);
    else                  maxAngle = getSearchRadiusForLayer(nextLayer) * 0.75 * MCSMultiplicationFactor;
 
-   showDebug("Clusters::findClustersFromSeedInLayer is looking at seed. maxAngle = " << 1000*maxAngle << " mrad\n");
-
    if (layerIdxFrom < 0)
       return clustersFromThisLayer; // empty
 
@@ -240,8 +267,6 @@ Clusters * Clusters::findClustersFromSeedInLayer(Cluster *seed, Int_t nextLayer)
 
       if (kUseEmpiricalMCS)   thisAngle = getDotProductAngle(seed, seed, At(i));
       else                    thisAngle = diffmmXY(seed, At(i));
-
-      showDebug(" -- Found potential cluster with angle " << 1000*thisAngle << " mrad.\n");
 
       if (thisAngle < maxAngle) {
          clustersFromThisLayer->appendCluster(At(i));
@@ -252,9 +277,6 @@ Clusters * Clusters::findClustersFromSeedInLayer(Cluster *seed, Int_t nextLayer)
 }
 
 void Clusters::growTrackFromLayer(Track *track, Int_t fromLayer) {
-   // Rewrite, we don't have to check if the neighbor is valid both here and in findNearestNeighbour... 
-   // So removing a lot of testing.
-
    Cluster   * projectedPoint = nullptr;
    Cluster   * nearestNeighbour = nullptr;
    Int_t       nSearchLayers = getLastActiveLayer();
@@ -306,12 +328,9 @@ Cluster * Clusters::findNearestNeighbour(Track *track, Cluster *projectedPoint, 
    Int_t    layerIdxFrom = getFirstIndexOfLayer(searchLayer);
    Int_t    layerIdxTo = getLastIndexOfLayer(searchLayer);
 
-   showDebug("Clusters::findNearestNeighbour using track " << *track << " and with projected point " << *projectedPoint << endl);
-
    if (kUseEmpiricalMCS && track)   maxAngle = getEmpiricalMCSAngle(searchLayer-1);
    else                             maxAngle = getSearchRadiusForLayer(searchLayer) * MCSMultiplicationFactor;
 
-   showDebug("Clusters::findNearestNeighbour The max angle is " << maxAngle);
 
    if (layerIdxFrom < 0) return 0;
 
@@ -324,18 +343,13 @@ Cluster * Clusters::findNearestNeighbour(Track *track, Cluster *projectedPoint, 
 
       reject = (At(i)->isUsed() && rejectUsed);
 
-      showDebug(" and found thisAngle " << thisAngle << " from point " << *At(i));
-
       if (thisAngle < maxAngle && !reject) {
-         showDebug(", which is a current best match ... ");
          nearestNeighbour->set(At(i));
          maxAngle = thisAngle;
          kFoundNeighbour = true;
       }
    }
    
-   showDebug("OK! Keeping last point.\n");
-
    if (kFoundNeighbour)   return nearestNeighbour;
    else                   return nullptr;
 }
@@ -350,7 +364,6 @@ Track * Clusters::findLongestTrack(Tracks *seedTracks) {
    Track  * track = nullptr;
    Int_t    startOffset;
 
-   showDebug("There are " << seedTracks->GetEntriesFast() << " potential tracks in Clusters::findLongestTrack: " << *((Track*) seedTracks->At(0)) << endl);
    for (Int_t i=0; i<seedTracks->GetEntriesFast(); i++) {
       if (!seedTracks->At(i)) continue;
 
@@ -375,4 +388,22 @@ Track * Clusters::findLongestTrack(Tracks *seedTracks) {
    longestTrack->setTrack(track, startOffset);
    
    return longestTrack;
+}
+
+void Clusters::findRemainingTracks(Tracks * tracks) {
+   Track *thisTrack = nullptr;
+
+   showDebug("Clusters::findRemainingTracks: There are " << clustersWithoutTrack_.GetEntries() << " unused clusters left.\n");
+
+   for (Int_t i=0; i<tracks->GetEntriesFast(); i++) {
+      if (!tracks->At(i)) continue;
+      thisTrack = tracks->At(i);
+
+      kMCSFactor = 3;
+      growTrackFromLayer(thisTrack, thisTrack->Last()->getLayer());
+      removeTrackFromClustersWithoutTrack(thisTrack);
+      markUsedClusters(thisTrack);
+   }
+   
+   showDebug("Clusters::findRemainingTracks: After cleanup, there are " << clustersWithoutTrack_.GetEntries() << " unused clusters left.\n");
 }

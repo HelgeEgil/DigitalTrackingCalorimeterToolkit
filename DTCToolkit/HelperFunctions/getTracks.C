@@ -16,7 +16,7 @@
 #include "GlobalConstants/MaterialConstants.h"
 #include "GlobalConstants/RangeAndEnergyCalculations.h"
 #include "GlobalConstants/Misalign.h"
-// #include "Classes/Track/conversionFunctions.h"
+#include "Classes/Cluster/Clusters.h"
 #include "Classes/Track/Tracks.h"
 #include "Classes/Hit/Hits.h"
 #include "Classes/DataInterface/DataInterface.h"
@@ -195,11 +195,12 @@ Tracks * getTracksFromClusters(Int_t Runs, Int_t dataType, Int_t frameType, Floa
    Int_t             nClusters = kEventsPerRun * 5 * nLayers;
    Int_t             nTracks = kEventsPerRun * 2;
    Bool_t            breakSignal = false;
-   Clusters        * clusters = new Clusters(nClusters);
-   Tracks          * tracks = new Tracks(nTracks);
+   Clusters        * clusters = nullptr;
+   Tracks          * tracks = nullptr;
    Tracks          * allTracks = new Tracks(nTracks * Runs);
 
    for (Int_t i=0; i<Runs; i++) {
+      clusters = new Clusters(nClusters);
       showDebug("Start getMCClusters\n");
       di->getMCClusters(i, clusters);
 
@@ -207,7 +208,7 @@ Tracks * getTracksFromClusters(Int_t Runs, Int_t dataType, Int_t frameType, Floa
       if (kDoTracking) {
          printf("There are %d clusters\n", clusters->GetEntriesFast());
          clusters->sortTCAByLayer();
-         tracks = clusters->findCalorimeterTracks(); // We ignore diffusion effects here
+         tracks = clusters->findCalorimeterTracksAlpide(); // We ignore diffusion effects here
       }
 
       else {
@@ -220,7 +221,6 @@ Tracks * getTracksFromClusters(Int_t Runs, Int_t dataType, Int_t frameType, Floa
       Int_t nTracksBefore = 0, nTracksAfter = 0;
       Int_t nIsInelastic = 0, nIsNotInelastic = 0;
       
-      tracks->extrapolateToLayer0();
       nTracksBefore = tracks->GetEntries();
       tracks->removeTracksLeavingDetector();
       nTracksAfter = tracks->GetEntries();
@@ -241,14 +241,12 @@ Tracks * getTracksFromClusters(Int_t Runs, Int_t dataType, Int_t frameType, Floa
 
       allTracks->appendClustersWithoutTrack(clusters->getClustersWithoutTrack());
 
-      clusters->clearClusters();
-      tracks->Clear();
+      delete clusters;
+      delete tracks;
 
       if (breakSignal) break;
    }
 
-   delete clusters;
-   delete tracks;
    delete di;
 
    return allTracks;

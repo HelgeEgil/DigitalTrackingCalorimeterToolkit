@@ -415,9 +415,6 @@ Bool_t Tracks::isLastEventIDCloseToFirst(Int_t trackIdx) {
       deltaPHI = fabs(phi1 - phi2);
 
       if (deltaXY < 0.5 && deltaPHI < 0.5) {
-         cout << "OK! deltaXY = " << deltaXY << "and angles (" << phi1 << ", " << phi2 << "(\n";
-         cout << "A = " << *track << endl;
-         cout << "B = " << *At(comparisonIdx) << endl;
          return true;
       }
 

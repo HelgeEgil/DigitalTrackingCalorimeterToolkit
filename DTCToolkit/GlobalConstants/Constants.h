@@ -6,7 +6,6 @@
 #include <TObject.h>
 
 #define USEALPIDE
-#define USEDEBUG
 
 #ifdef USEDEBUG
 #define showDebug(x) std::cout << x
@@ -56,14 +55,14 @@ const Float_t kRad = 3.14159265/180.;
 const    Int_t nx = NX;
 const    Int_t ny = NY;
 const    Int_t nTrackers = 4;
-const    Float_t kAbsorbatorThickness = 2; // mm 
+const    Float_t kAbsorbatorThickness = 3;
 // FOCAL IS 3 mm (2x absorbers = 3 mm)
 
 // nLayers are loaded in MaterialConstants.C according to the detector geometry
 const Float_t dx = DX; // mm
 const Float_t dy = DY; // mm
 const Float_t dz = DZ + kAbsorbatorThickness;
-Int_t kEventsPerRun = 5;
+Int_t kEventsPerRun = 500;
 
 // Used for treatment of available experimental data files
 const Int_t nEnergies = 8;
@@ -101,6 +100,7 @@ const Bool_t kUseTrackSplitting = kTRUE;
 // Tracking parameters
 Float_t initialSearchRadius = 50 * dx; // 20 if dimensionless
 Float_t searchRadius = 40 * dx; // 20 if dimensionless
+Float_t kMCSFactor = 3;
 const Double_t SpreadNumber = 0.1; // number of iterations in gaussian spread
 const Double_t SpreadSigma  = 0.7; // sigma (in pixels) to spread
 

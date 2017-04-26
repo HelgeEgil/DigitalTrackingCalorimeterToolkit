@@ -22,8 +22,8 @@ Cluster::Cluster(Cluster* cluster) {
    y_ = cluster->getY();
    layerNo_ = cluster->getLayer();
    clusterSize_ = cluster->getSize();
-   eventID_ = -1;
-   isUsed_ = false;
+   eventID_ = cluster->getEventID();
+   isUsed_ = cluster->isUsed();
 }
 
 Cluster::Cluster(Float_t x, Float_t y, Int_t layer, Int_t size, Int_t eventID) {

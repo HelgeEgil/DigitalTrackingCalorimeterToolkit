@@ -401,7 +401,6 @@ void  DataInterface::getMCClusters(Int_t runNo, Clusters *clusters) {
    Float_t  sumX = 0, sumY = 0;
    Float_t  x,y;
    Bool_t   isInElastic;
-   Int_t    maxEventID = 50;
 
    Long64_t nentries = fChain->GetEntriesFast();
    Long64_t nbytes = 0, nb = 0;

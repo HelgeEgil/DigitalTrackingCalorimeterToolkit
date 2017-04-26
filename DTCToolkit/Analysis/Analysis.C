@@ -137,11 +137,18 @@ void findMCSAngles(Int_t Runs, Int_t dataType, Bool_t recreate, Float_t energy, 
    }
 }
 
-void drawTrackAngleAtVaryingRunNumbers(Int_t dataType, Float_t energy) {
+void drawTrackAngleAtVaryingRunNumbers(Int_t dataType, Float_t energy, Float_t degraderThickness) {
    Int_t nRuns = 0;
    Hits * eventIDs = nullptr;
 
-   for (Int_t i=13; i<25; i++) {
+   run_energy = energy;
+   run_degraderThickness = degraderThickness;
+   
+   if (useDegrader) {
+      run_energy = getEnergyAtWEPL(energy, degraderThickness);
+   }
+
+   for (Int_t i=29; i<30; i++) {
       nRuns = pow(2, 4 + 0.25 * i) + 0.5;
 
       kEventsPerRun = nRuns;
@@ -209,7 +216,7 @@ void drawTrackAngleAtVaryingRunNumbers(Int_t dataType, Float_t energy) {
       hCorrectTracks->Divide(normCorrectTracks);
 
       ofstream file2("OutputFiles/lastLayerCorrect_different_nRuns.csv", ofstream::out | ofstream::app);
-      file2 << factor << " " << nRuns << " " << ratioCorrect << " " << ratioFirstAndLast << " " << ratioLastCloseToFirst << endl;
+      file2 << kAbsorbatorThickness << " " << nRuns << " " << ratioCorrect << " " << ratioFirstAndLast << " " << ratioLastCloseToFirst << endl;
       file2.close();
 
       c1->cd();
@@ -1541,7 +1548,7 @@ void drawTracks3D(Int_t Runs, Int_t dataType, Bool_t recreate, Int_t switchLayer
          
          conflictMarker->SetPoint(conflictIdx++, x,y,z);
       }
-      l->SetLineColor(kBlack);
+//      l->SetLineColor(kBlack);
       l->SetLineWidth(3);
       l->Draw();
       trackPoints->Draw();

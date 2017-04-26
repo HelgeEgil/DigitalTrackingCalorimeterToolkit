@@ -227,20 +227,19 @@ Float_t Track::getTrackScore() {
    }
 
    else {
-      Float_t angularChange = 0;
-      Cluster * cluster1 = nullptr;
-      Cluster * cluster2 = nullptr;
-      Cluster * cluster3 = nullptr;
+      Float_t  angularChange = 0;
+      Int_t    idx1, idx2, idx3;
 
       for (Int_t layer=0; layer<nLayers; layer++) {
-         cluster1 = At(getClusterFromLayer((layer>0) ? layer-1 : layer));
-         cluster2 = At(getClusterFromLayer(layer));
-         cluster3 = At(getClusterFromLayer(layer+1));
+         idx1 = getClusterFromLayer((layer>0) ? layer-1 : layer);
+         idx2 = getClusterFromLayer(layer);
+         idx3 = getClusterFromLayer(layer+1);
 
-         if (!cluster1 || !cluster2 || !cluster3) continue;
-
-         angularChange += pow(getDotProductAngle(cluster1, cluster2, cluster3) / getEmpiricalMCSAngle(layer), 2);
+         if (idx1<0 || idx2<0 || idx3<0) continue;
+         
+         angularChange += pow(getDotProductAngle(At(idx1), At(idx2), At(idx3)) / getEmpiricalMCSAngle(layer), 2);
       }
+
       angularChange = sqrt(angularChange);
 
       showDebug("Track::getTrackScore: Angular change chi2 = " << angularChange << " and tracklength = " << getTrackLengthmm() << endl);
