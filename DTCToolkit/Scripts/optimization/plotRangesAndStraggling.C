@@ -25,7 +25,7 @@
 using namespace std;
 
 Int_t absorberThickness = 2;
-Bool_t kFilterData = true;
+Bool_t kFilterData = false;
 Int_t filterSize = 5;
 const Int_t arraySize = 500;
 const Int_t xFrom = 40;
@@ -103,64 +103,40 @@ void plotRangesAndStraggling() {
    Int_t energy_, thickness_;
    Float_t estimatedStraggling;
    
-   ifstream in0;
-   in0.open("../../OutputFiles/findManyRangesDegrader.csv");
-   Int_t nlines0 = 0;
-   Float_t a_dtc = 0, p_dtc = 0;
-   Float_t a_wtr = 0.02387;
-   Float_t p_wtr = 1.7547;
 
+   Float_t a_dtc = 0, p_dtc = 0;
    ifstream inRanges;
-   inRanges.open(Form("../../Data/Ranges/%.0fmm_Al.csv", absorberThickness));
+   inRanges.open(Form("../../Data/Ranges/%dmm_Al.csv", absorberThickness));
    Double_t dtcRanges[500];
    Double_t dtcEnergies[500];
-   Double_t dtcRange, dtcEnergy;
+   Double_t dtcRange = 0;
+   Double_t dtcEnergy = 0;
    Int_t    dtcIdx = 0;
+
    while (1) {
-      in >> dtcEnergy >> dtcRange;
-      if (!in.good()) break;
+      inRanges >> dtcEnergy >> dtcRange;
+      if (!inRanges.good()) break;
+
       dtcEnergies[dtcIdx] = dtcEnergy;
-      dtcRanges[dtcIdx] = dtcRange;
+      dtcRanges[dtcIdx++] = dtcRange;
    }
+   inRanges.close();
 
    TGraph * range_energy = new TGraph(dtcIdx, dtcEnergies, dtcRanges);
    TF1    * range_energy_fit = new TF1("range_energy_fit", "[0] * pow(x, [1])");
-   range_energy->Fit("range_energy_fit", "Q,M");
+   range_energy_fit->SetParameters(0.02, 1.7);
+   range_energy->Fit("range_energy_fit", "M,Q");
    a_dtc = range_energy_fit->GetParameter(0);
    p_dtc = range_energy_fit->GetParameter(1);
-   
-/*
-   if       (absorberThickness == 2) { // Updated 2017-04-04 PHASE SPACE
-      a_dtc = 0.015847;
-      p_dtc = 1.687795;
-   }
-   else if  (absorberThickness == 3) { // Updated 2017-04-06 PHASE SPACE
-      a_dtc = 0.022575;
-      p_dtc = 1.625061;
-   }
-   else if (absorberThickness == 4) { // Updated 2017-03-22
-      a_dtc = 0.016493;
-      p_dtc = 1.683775;
-   }
-   
-   else if (absorberThickness == 5) { // updated 2017-03-23
-      a_dtc = 0.018807;
-      p_dtc = 1.661016;
-   }
 
-   else if (absorberThickness == 6) { // updated 2017-03-23
-      a_dtc = 0.021480;
-      p_dtc = 1.637919;
-   }
+   ifstream in0;
+   in0.open("../../OutputFiles/findManyRangesDegrader.csv");
+   Int_t nlines0 = 0;
+   Float_t a_wtr = 0.02387;
+   Float_t p_wtr = 1.7547;
    
-   else if (absorberThickness == 7) { // updated 2017-03-23
-      a_dtc = 0.024070;
-      p_dtc = 1.618193;
-   }
-   */
-
    Float_t wepl_ratio0 = a_wtr / a_dtc * pow(250 / a_wtr, 1 - p_dtc / p_wtr);
-   cout << wepl_ratio0 << endl;
+   cout << "WEPL ratio = " << wepl_ratio0 << endl;
    //   Float_t wtr_range = a_wtr * pow(250, p_wtr);
    Float_t wtr_range = 378.225; // GATE
 
@@ -376,7 +352,7 @@ void plotRangesAndStraggling() {
   
    TF1 * fRes = new TF1("fRes", "pol0");
    fRes->SetLineColor(kBlack);
-   gResolution->Fit(fRes, "B", "", xFrom, xTo);
+   gResolution->Fit(fRes, "B,Q", "", xFrom, xTo);
 
    if (kFilterData) {
       gPad->Update();
@@ -425,7 +401,7 @@ void plotRangesAndStraggling() {
    
    TF1 * fResRatio = new TF1("fResRatio", "pol0");
    fResRatio->SetLineColor(kBlack);
-   gResolutionRatio->Fit(fResRatio, "B", "", xFrom, xTo);
+   gResolutionRatio->Fit(fResRatio, "B,Q", "", xFrom, xTo);
 
    if (kFilterData) {
       gPad->Update();
@@ -481,7 +457,7 @@ void plotRangesAndStraggling() {
    
    TF1 * fStragRatio = new TF1("fStragRatio", "pol0");
    fStragRatio->SetLineColor(kBlack);
-   gStragglingsRatio->Fit(fStragRatio, "B", "", xFrom, xTo);
+   gStragglingsRatio->Fit(fStragRatio, "B,Q", "", xFrom, xTo);
    
    if (kFilterData) {
       gPad->Update();
@@ -537,7 +513,7 @@ void plotRangesAndStraggling() {
    
    TF1 * fResMC = new TF1("fResMC", "pol0");
    fResMC->SetLineColor(kBlack);
-   gSubtractMCResolution->Fit(fResMC, "B", "", xFrom, xTo);
+   gSubtractMCResolution->Fit(fResMC, "B,Q", "", xFrom, xTo);
 
    gSubtractFullResolution->Draw("LA");
    gSubtractMCResolution->Draw("same");
