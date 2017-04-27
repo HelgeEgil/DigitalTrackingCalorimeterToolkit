@@ -2,6 +2,8 @@
 #include <vector>
 #include <iostream>
 #include <fstream>
+#include <TGraph.h>
+#include <TF1.h>
 
 #include <TObject.h>
 
@@ -63,8 +65,8 @@ void MaterialConstants() {
       alpha_prime = alpha_prime_aluminum;
       X0 = X0_aluminum;
 
-      splineMaterial = spline2mmAl;
-      splineMaterialInv = spline2mmAlInv;
+      splineMaterial = splineDTC;
+      splineMaterialInv = splineDTCInv;
    }
 
    else if (kMaterial == kPMMA) {
@@ -87,15 +89,15 @@ void  createSplines() {
    cout << "Creating SPLINE files\n";
    ifstream in;
    Float_t  energy;
-   Int_t    idx2mmAl = 0;
+   Int_t    idxDTC = 0;
    Int_t    idxWater = 0;
    Int_t    idxPureAl = 0;
    Int_t    idxW = 0;
    Int_t    layer = 0;
    Double_t range;
    Double_t mu, sigma;
-   Double_t ranges2mmAl[500];
-   Double_t energies2mmAl[500];
+   Double_t rangesDTC[500];
+   Double_t energiesDTC[500];
    Double_t rangesW[500];
    Double_t energiesW[500];
    Double_t rangesWater[500];
@@ -119,8 +121,8 @@ void  createSplines() {
       in >> energy >> range;
       if (!in.good()) break;
 
-      ranges2mmAl[idx2mmAl] = range;
-      energies2mmAl[idx2mmAl++] = energy;
+      rangesDTC[idxDTC] = range;
+      energiesDTC[idxDTC++] = energy;
    }
 
    in.close();
@@ -164,15 +166,28 @@ void  createSplines() {
       mcs_radius_per_layer_empirical[layer] = mu + 3 * sigma;
    }
 
-   spline2mmAl = new TSpline3("spline2mmAl", energies2mmAl, ranges2mmAl, idx2mmAl);
+   splineDTC = new TSpline3("splineDTC", energiesDTC, rangesDTC, idxDTC);
    splineWater = new TSpline3("splineWater", energiesWater, rangesWater, idxWater);
    splinePureAl = new TSpline3("splinePureAl", energiesPureAl, rangesPureAl, idxPureAl);
    splineW = new TSpline3("splineW", energiesW, rangesW, idxW);
-   spline2mmAlInv = new TSpline3("spline2mmAlInv", ranges2mmAl, energies2mmAl, idx2mmAl);
+   splineDTCInv = new TSpline3("splineDTCInv", rangesDTC, energiesDTC, idxDTC);
    splineWaterInv = new TSpline3("splineWaterInv", rangesWater, energiesWater, idxWater);
    splinePureAlInv = new TSpline3("splineWaterInv", rangesPureAl, energiesPureAl, idxPureAl);
    splineWInv = new TSpline3("splineWInv", rangesW, energiesW, idxW);
+  
+   // FIND BRAGG-KLEEMAN PARAMETERS
+   TGraph * range_energy = new TGraph(idxDTC, energiesDTC, rangesDTC);
+   TF1    * range_energy_fit = new TF1("range_energy_fit", "[0] * pow(x, [1])");
+   range_energy->Fit("range_energy_fit", "Q,M");
+   alpha_aluminum = range_energy_fit->GetParameter(0);
+   p_aluminum = range_energy_fit->GetParameter(1);
+   printf("Through fitting, found alpha = %.5f, p = %.5f.\n", alpha_aluminum, p_aluminum);
 
+   // About the same in all geometries
+   straggling_a = 1.76;
+   straggling_b = 0.0012; 
+
+   /*
    if (kAbsorbatorThickness == 2) { // updated 2017-04-26 JARS
       alpha_aluminum = 0.019672;
       p_aluminum = 1.647959;
@@ -221,6 +236,7 @@ void  createSplines() {
       straggling_a = 1.73329;
       straggling_b = 0.001268;
    }
+   */
 
 }
 

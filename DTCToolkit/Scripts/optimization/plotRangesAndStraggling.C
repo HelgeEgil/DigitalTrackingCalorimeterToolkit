@@ -102,7 +102,7 @@ void plotRangesAndStraggling() {
    Float_t nomrange_, estrange_, sigmaRange_, lastRange_, nomsigma_, waterphantomthickness_, dummy0;
    Int_t energy_, thickness_;
    Float_t estimatedStraggling;
-
+   
    ifstream in0;
    in0.open("../../OutputFiles/findManyRangesDegrader.csv");
    Int_t nlines0 = 0;
@@ -110,6 +110,26 @@ void plotRangesAndStraggling() {
    Float_t a_wtr = 0.02387;
    Float_t p_wtr = 1.7547;
 
+   ifstream inRanges;
+   inRanges.open(Form("../../Data/Ranges/%.0fmm_Al.csv", absorberThickness));
+   Double_t dtcRanges[500];
+   Double_t dtcEnergies[500];
+   Double_t dtcRange, dtcEnergy;
+   Int_t    dtcIdx = 0;
+   while (1) {
+      in >> dtcEnergy >> dtcRange;
+      if (!in.good()) break;
+      dtcEnergies[dtcIdx] = dtcEnergy;
+      dtcRanges[dtcIdx] = dtcRange;
+   }
+
+   TGraph * range_energy = new TGraph(dtcIdx, dtcEnergies, dtcRanges);
+   TF1    * range_energy_fit = new TF1("range_energy_fit", "[0] * pow(x, [1])");
+   range_energy->Fit("range_energy_fit", "Q,M");
+   a_dtc = range_energy_fit->GetParameter(0);
+   p_dtc = range_energy_fit->GetParameter(1);
+   
+/*
    if       (absorberThickness == 2) { // Updated 2017-04-04 PHASE SPACE
       a_dtc = 0.015847;
       p_dtc = 1.687795;
@@ -137,6 +157,7 @@ void plotRangesAndStraggling() {
       a_dtc = 0.024070;
       p_dtc = 1.618193;
    }
+   */
 
    Float_t wepl_ratio0 = a_wtr / a_dtc * pow(250 / a_wtr, 1 - p_dtc / p_wtr);
    cout << wepl_ratio0 << endl;
