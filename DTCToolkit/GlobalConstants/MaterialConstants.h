@@ -19,8 +19,8 @@ Double_t p_pure_aluminum, alpha_pure_aluminum, alpha_prime_pure_aluminum;
 Double_t p_tungsten, alpha_tungsten, alpha_prime_tungsten;
 Double_t straggling_a, straggling_b; // straggling = straggling_a + straggling_b * range
 
-TSpline3 *spline2mmAl;
-TSpline3 *spline2mmAlInv;
+TSpline3 *splineDTC;
+TSpline3 *splineDTCInv;
 TSpline3 *splineWater;
 TSpline3 *splineWaterInv;
 TSpline3 *splineW;
