@@ -24,11 +24,11 @@ private:
    vector<Int_t>  clustersPerEventID_;
    Bool_t         frameType_; // Not used yet... kCalorimeter or kTracker (for the 4 trackers)
    Float_t        MCSMultiplicationFactor;
-   Float_t        kMCSFactorFirstPass = 1;
-   Float_t        kMCSFactorSecondPass = 4;
-   Float_t        kMCSFactorLastPass1 = 5;
-   Float_t        kMCSFactorLastPass2 = 6;
-   Float_t        kMCSFactorLastPass3 = 7;
+   Float_t        kMCSFactorFirstPass;
+   Float_t        kMCSFactorSecondPass;
+   Float_t        kMCSFactorLastPass1;
+   Float_t        kMCSFactorLastPass2;
+   Float_t        kMCSFactorLastPass3;
 
 public:
    

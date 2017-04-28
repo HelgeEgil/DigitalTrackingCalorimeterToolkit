@@ -1510,15 +1510,16 @@ void drawTracks3D(Int_t Runs, Int_t dataType, Bool_t recreate, Int_t switchLayer
          Float_t phi0 = thisTrack->getSlopeAngleBetweenLayers(1);
          Float_t phi1 = tracks->At(trackID)->getSlopeAngleBetweenLayers(1);
          Float_t deltaphi = fabs(phi0 - phi1);
-
+/*
          if (delta < 0.5 && deltaphi < 1) {
          }
 
          else if (thisTrack->getWEPL() < 0.6 * getWEPLFromEnergy(run_energy)) {
             // Bad track ends early. OK...
          }
-
-         else {
+*/
+         nMissingEID = tracks->getNMissingClustersWithEventID(thisTrack->getEventID(0));
+         if (!thisTrack->isFirstAndLastEventIDEqual() || nMissingEID > 0) {
             l->SetLineColor(kRed);
          }
       }
