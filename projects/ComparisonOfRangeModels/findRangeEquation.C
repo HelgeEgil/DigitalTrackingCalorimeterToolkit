@@ -895,8 +895,8 @@ void Run(int COUNTER) {
    idx = 0;
    while (1) {
       thisZ = range - z;
-      E1 = gSplineInv->Eval(thisZ + dx/2);
-      E2 = gSplineInv->Eval(thisZ - dx/2);
+      E1 = splineInv->Eval(thisZ + dx/2);
+      E2 = splineInv->Eval(thisZ - dx/2);
       dE = E1 - E2;
       dEdx = dE / dx;
 
@@ -921,12 +921,12 @@ void Run(int COUNTER) {
    DDUlmer->SetLineColor(kColorUlmer);
    DDUlmer->SetLineWidth(3);
    DDUlmer->SetLineStyle(kLineUlmer);
-   DDLinear->SetLineColor(kColorSpline); // draw order important here, so switch linear/spline. they are identical.
-   DDLinear->SetLineStyle(kLineSpline);
-   DDLinear->SetLineWidth(4);
-   DDSpline->SetLineColor(kColorLinear);
-   DDSpline->SetLineStyle(kLineLinear);
-   DDSpline->SetLineWidth(3);
+   DDSpline->SetLineColor(kColorSpline); // draw order important here, so switch linear/spline. they are identical.
+   DDSpline->SetLineStyle(kLineSpline);
+   DDSpline->SetLineWidth(4);
+   DDLinear->SetLineColor(kColorLinear);
+   DDLinear->SetLineStyle(kLineLinear);
+   DDLinear->SetLineWidth(3);
 
    /*
    cDepth->cd(1);
@@ -989,8 +989,8 @@ void Run(int COUNTER) {
    leg3->SetTextFont(22);
    leg3->AddEntry(DDBK, "Bragg-Kleeman", "L");
    leg3->AddEntry(DDUlmer, "Sum of exponentials", "L");
-   leg3->AddEntry(DDSpline, "Linear interpolation", "L");
-   leg3->AddEntry(DDLinear, "Spline interpolation", "L");
+   leg3->AddEntry(DDLinear, "Linear interpolation", "L");
+   leg3->AddEntry(DDSpline, "Spline interpolation", "L");
    leg3->Draw();
    
 }

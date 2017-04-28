@@ -392,7 +392,9 @@ void Clusters::sortTCAByLayer() {
 
 Int_t Clusters::getClustersForEventID(Int_t eventID) {
    if (clustersPerEventID_.size() == 0) {
-      throw logic_error("Cannot use getClustersForEventID before running findNumberOfClustersForEachEventID");
+//      throw logic_error("Cannot use getClustersForEventID before running findNumberOfClustersForEachEventID");
+      cout << "ERROR\n";
+      return -1;
    }
    return clustersPerEventID_.at(eventID);
 }
