@@ -114,6 +114,7 @@ char * getMaterialChar() {
    if (kMaterial == kTungsten)   sMaterial = (char*) "Tungsten";
    if (kMaterial == kAluminum)   sMaterial = (char*) "Aluminium";
    if (kMaterial == kPMMA)       sMaterial = (char*) "PMMA";
+   if (kMaterial == kCarbon)     sMaterial = (char*) "Carbon";
 
    return sMaterial;
 }
@@ -123,6 +124,7 @@ char * getMaterialAbbr() {
 
    if (kMaterial == kTungsten)   sMaterial = (char*) "W";
    if (kMaterial == kAluminum)   sMaterial = (char*) "Al";
+   if (kMaterial == kPMMA)       sMaterial = (char*) "PMMA";
    if (kMaterial == kCarbon)     sMaterial = (char*) "C";
 
    return sMaterial;
