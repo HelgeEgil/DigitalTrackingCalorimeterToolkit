@@ -79,6 +79,18 @@ void MaterialConstants() {
       splineMaterial = splineWater; // FIX
       splineMaterialInv = splineWaterInv; // FIX
    }
+
+   else if (kMaterial == kCarbon) {
+      nLayers = 100;
+      p = p_aluminum;
+      alpha = alpha_aluminum;
+      alpha_prime = alpha_prime_aluminum;
+      X0 = X0_aluminum;
+
+      splineMaterial = splineDTC;
+      splineMaterialInv = splineDTCInv;
+   }
+
 }
 
 void  createSplines() {
@@ -115,7 +127,6 @@ void  createSplines() {
    else if  (kMaterial == kCarbon) {
       in.open(Form("Data/Ranges/%.0fmm_C.csv", kAbsorbatorThickness));
    }
-
 
    while (1) {
       in >> energy >> range;
