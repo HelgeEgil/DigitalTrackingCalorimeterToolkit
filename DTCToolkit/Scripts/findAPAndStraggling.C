@@ -28,14 +28,14 @@ void findAPAndStraggling(Int_t absorberthickness) {
 
    gStyle->SetOptStat(0);
 
-   Float_t  arrayE[500] = {0}; 
-   Float_t  arrayRange[500] = {0};
-   Float_t  arrayDegrader[500] = {0};
-   Float_t  arrayEMaterial[500] = {0};
-   Float_t  arrayStraggling[500] = {0};
-   Float_t  arrayWEPLStraggling[500] = {0};
-   Float_t  arrayRangeWater[500] = {0};
-   Float_t  arrayEnergyStraggling[500] = {0};
+   Float_t  arrayE[1500] = {0}; 
+   Float_t  arrayRange[1500] = {0};
+   Float_t  arrayDegrader[1500] = {0};
+   Float_t  arrayEMaterial[1500] = {0};
+   Float_t  arrayStraggling[1500] = {0};
+   Float_t  arrayWEPLStraggling[1500] = {0};
+   Float_t  arrayRangeWater[1500] = {0};
+   Float_t  arrayEnergyStraggling[1500] = {0};
    Float_t  range, straggling, inelasticfraction;
    Float_t  weplfactor, energyWater;
    Float_t  a, p, aw, pw;

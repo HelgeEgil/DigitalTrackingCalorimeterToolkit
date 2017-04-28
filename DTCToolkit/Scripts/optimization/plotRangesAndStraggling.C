@@ -25,9 +25,9 @@
 using namespace std;
 
 Int_t absorberThickness = 2;
-Bool_t kFilterData = false;
-Int_t filterSize = 5;
-const Int_t arraySize = 500;
+Bool_t kFilterData = true;
+Int_t filterSize = 2;
+const Int_t arraySize = 1500;
 const Int_t xFrom = 40;
 const Int_t xTo = 350;
 
@@ -68,6 +68,8 @@ void plotRangesAndStraggling() {
 
    TCanvas *c6 = new TCanvas("c6", "Resolution", 1800, 600);
    c6->Divide(4,1,0.0001,0.0001);
+
+   TCanvas *c6red = new TCanvas("c6red", "Resolution", 500, 600);
 
    Float_t  arrayE[arraySize] = {0}; // energy MC
    Float_t  arrayMCActualSigma[arraySize] = {0}; // Measured range straeggling from full MC
@@ -349,6 +351,9 @@ void plotRangesAndStraggling() {
    gResolution->SetLineWidth(3);
    gResolution->SetLineColor(kBlue);
    gResolution->Draw("LA");
+
+
+   c6->cd(1);
   
    TF1 * fRes = new TF1("fRes", "pol0");
    fRes->SetLineColor(kBlack);
@@ -384,6 +389,12 @@ void plotRangesAndStraggling() {
    legRes->AddEntry(fRes, "   + Mean value", "L");
    legRes->AddEntry(gResolutionStraggling, "MC truth range straggling", "L");
    legRes->AddEntry(lWaterStraggling, "Straggling in water", "L");
+   legRes->Draw();
+   
+   c6red->cd();
+   gResolution->Draw("LA");
+   gResolutionStraggling->Draw("L");
+   lWaterStraggling->Draw();
    legRes->Draw();
 
    c6->cd(2);
@@ -475,7 +486,7 @@ void plotRangesAndStraggling() {
 
    Float_t subtractMCStraggling[arraySize];
    Float_t subtractWaterStraggling[arraySize];
-   Float_t waterStraggling = 379.4 * 0.01063;
+   Float_t waterStraggling = 3.971;
 
    for (Int_t i=0; i<arraySize; i++) {
       if (arrayEMC[i] > arrayMCActualSigma[i]) {

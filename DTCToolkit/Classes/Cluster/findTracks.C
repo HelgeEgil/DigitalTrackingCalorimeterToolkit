@@ -68,12 +68,19 @@ Tracks * Clusters::findCalorimeterTracksAlpide() {
    makeLayerIndex();
 
    // first pass, small search cone (3 sigma MCS)
-   kMCSFactor = 1;
+   kMCSFactor = kMCSFactorFirstPass;
    findTracksFromLayer(tracks, 0, usedClustersInSeeds);
    
-   kMCSFactor = 3;
+   kMCSFactor = kMCSFactorSecondPass;
    findTracksFromLayer(tracks, 0, usedClustersInSeeds);
 
+   kMCSFactor = kMCSFactorLastPass1;
+   findRemainingTracks(tracks);
+   
+   kMCSFactor = kMCSFactorLastPass2;
+   findRemainingTracks(tracks);
+   
+   kMCSFactor = kMCSFactorLastPass3;
    findRemainingTracks(tracks);
 
    clustersLeft = clustersWithoutTrack_.GetEntries();
@@ -259,6 +266,8 @@ Clusters * Clusters::findClustersFromSeedInLayer(Cluster *seed, Int_t nextLayer)
    if (kUseEmpiricalMCS) maxAngle = getEmpiricalMCSAngle(nextLayer - 1);
    else                  maxAngle = getSearchRadiusForLayer(nextLayer) * 0.75 * MCSMultiplicationFactor;
 
+   maxAngle *= 3;
+
    if (layerIdxFrom < 0)
       return clustersFromThisLayer; // empty
 
@@ -399,7 +408,6 @@ void Clusters::findRemainingTracks(Tracks * tracks) {
       if (!tracks->At(i)) continue;
       thisTrack = tracks->At(i);
 
-      kMCSFactor = 3;
       growTrackFromLayer(thisTrack, thisTrack->Last()->getLayer());
       removeTrackFromClustersWithoutTrack(thisTrack);
       markUsedClusters(thisTrack);

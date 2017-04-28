@@ -70,6 +70,7 @@ class Tracks : public TObject {
       Int_t             getTrackIdxFromFirstLayerEID(Int_t eventID);
       Int_t             getTrackIdxFromLastLayerEID(Int_t eventID);
       Int_t             getTrackIdxFromCluster(Cluster * cluster);
+      Int_t             getNMissingClustersWithEventID(Int_t eventID);
 
       // Calculations on involving all tracks
       void              matchWithEventIDs(Hits *eventIDs);

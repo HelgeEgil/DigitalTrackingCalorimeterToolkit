@@ -437,3 +437,14 @@ Bool_t Tracks::isLastEventIDCloseToFirst(Int_t trackIdx) {
 
    return false;
 }
+
+Int_t Tracks::getNMissingClustersWithEventID(Int_t eventID) {
+   Int_t n = 0;
+ 
+   for (Int_t i=0; i<GetEntriesFastCWT(); i++) {
+      if (!AtCWT(i)) continue;
+      if (AtCWT(i)->getEventID() == eventID) n++;
+   }
+
+   return n;
+}

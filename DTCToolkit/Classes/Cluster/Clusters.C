@@ -17,6 +17,12 @@ using namespace DTC;
 Clusters::Clusters(Bool_t frameType) : clusters_("DTC::Cluster", kEventsPerRun*2),
                                        clustersWithoutTrack_("DTC::Cluster", kEventsPerRun*2) {
    frameType_ = frameType;
+
+   kMCSFactorFirstPass = 1.2; // 1
+   kMCSFactorSecondPass = 3; // 4
+   kMCSFactorLastPass1 = 5; // 6
+   kMCSFactorLastPass2 = 6; // 6
+   kMCSFactorLastPass3 = 7; // 6
 }
 
 Clusters::~Clusters() {
@@ -382,4 +388,33 @@ void Clusters::sortTCAByLayer() {
       if (nl != l) break;
    }
 
+}
+
+Int_t Clusters::getClustersForEventID(Int_t eventID) {
+   if (clustersPerEventID_.size() == 0) {
+      throw logic_error("Cannot use getClustersForEventID before running findNumberOfClustersForEachEventID");
+   }
+   return clustersPerEventID_.at(eventID);
+}
+
+void Clusters::findNumberOfClustersForEachEventID() {
+   // Should be 0 for eventIDs not in vector
+   // DO THIS BEFORE SORTING BY LAYER!!!!
+
+   Int_t highestEventID = Last()->getEventID();
+   Int_t cIdx = 0;
+   Int_t n;
+   
+   for (Int_t i=0; i <= highestEventID; i++) {
+      n = 0;
+      while (cIdx < GetEntriesFast() && i == getEventID(cIdx++)) n++;
+      clustersPerEventID_.push_back(n);
+   }
+
+   Int_t sumEID = 0;
+   for (Int_t i=0; i <= highestEventID; i++) {
+      sumEID += clustersPerEventID_.at(i);
+      printf("For history with EID %d, there are %d clusters.\n", i, clustersPerEventID_.at(i));
+   }
+   printf("...In total %d clusters.\n", sumEID);
 }

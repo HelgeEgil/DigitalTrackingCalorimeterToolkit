@@ -21,8 +21,14 @@ private:
    TClonesArray   clusters_;
    TClonesArray   clustersWithoutTrack_;
    vector<Int_t>  layerIndex_;
+   vector<Int_t>  clustersPerEventID_;
    Bool_t         frameType_; // Not used yet... kCalorimeter or kTracker (for the 4 trackers)
    Float_t        MCSMultiplicationFactor;
+   Float_t        kMCSFactorFirstPass = 1;
+   Float_t        kMCSFactorSecondPass = 4;
+   Float_t        kMCSFactorLastPass1 = 5;
+   Float_t        kMCSFactorLastPass2 = 6;
+   Float_t        kMCSFactorLastPass3 = 7;
 
 public:
    
@@ -31,6 +37,7 @@ public:
 
    // ROOT & I/O
    virtual Cluster * At(Int_t i)                { return ((Cluster*) clusters_.At(i)); }
+   virtual Cluster * Last()                     { return ((Cluster*) clusters_.Last()); }
    TClonesArray    * getClustersWithoutTrack()  { return (TClonesArray*) &clustersWithoutTrack_; }
    virtual Int_t     GetEntriesFast()           { return clusters_.GetEntriesFast(); }
    virtual Int_t     GetEntries()               { return clusters_.GetEntries(); }
@@ -55,6 +62,10 @@ public:
    virtual void      appendClusterEdep(Float_t x, Float_t y, Int_t layer = -1, Float_t edep = -1, Int_t eventID = -1);
    virtual void      appendCluster(Cluster *cluster);
    virtual void      appendClusterWithoutTrack(Cluster *cluster);
+
+   // Event ID operations
+   Int_t             getClustersForEventID(Int_t eventID);
+   void              findNumberOfClustersForEachEventID();
 
    // Getters and setters
    virtual Float_t   getX(Int_t i)        { return At(i)->getX(); }

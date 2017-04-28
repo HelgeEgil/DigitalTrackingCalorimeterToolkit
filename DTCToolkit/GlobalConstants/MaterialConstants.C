@@ -159,7 +159,7 @@ void  createSplines() {
 
    in.close();
 
-   in.open("Data/Scattering/50mm.csv");
+   in.open(Form("Data/Scattering/%.0fmmAl_50mm.csv", kAbsorbatorThickness));
    while (1) {
       in >> layer >> mu >> sigma;
       if (!in.good()) break;
@@ -178,6 +178,7 @@ void  createSplines() {
    // FIND BRAGG-KLEEMAN PARAMETERS
    TGraph * range_energy = new TGraph(idxDTC, energiesDTC, rangesDTC);
    TF1    * range_energy_fit = new TF1("range_energy_fit", "[0] * pow(x, [1])");
+   range_energy_fit->SetParameters(0.02, 1.6);
    range_energy->Fit("range_energy_fit", "Q,M");
    alpha_aluminum = range_energy_fit->GetParameter(0);
    p_aluminum = range_energy_fit->GetParameter(1);
@@ -186,58 +187,6 @@ void  createSplines() {
    // About the same in all geometries
    straggling_a = 1.76;
    straggling_b = 0.0012; 
-
-   /*
-   if (kAbsorbatorThickness == 2) { // updated 2017-04-26 JARS
-      alpha_aluminum = 0.019672;
-      p_aluminum = 1.647959;
-      straggling_a = 1.74930;
-      straggling_b = 0.000930;
-   }
-
-   else if (kAbsorbatorThickness == 3) { // updated 2017-04-26 JARS
-      alpha_aluminum = 0.022212;
-      p_aluminum = 1.628010;
-      straggling_a = 1.76207;
-      straggling_b = 0.000993;
-   }
-
-   else if (kAbsorbatorThickness == 4) { // updated 2017-04-26 JARS
-      alpha_aluminum = 0.025099;
-      p_aluminum = 1.607298;
-      straggling_a = 1.76585;
-      straggling_b = 0.001091;
-   }
-   
-   else if (kAbsorbatorThickness == 5) { // updated 2017-04-26 JARS
-      alpha_aluminum = 0.02818;
-      p_aluminum = 1.587483;
-      straggling_a = 1.75713;
-      straggling_b = 0.001218;
-   }
-
-   else if (kAbsorbatorThickness == 6) { // updated 2017-04-26 JARS
-      alpha_aluminum = 0.031582;
-      p_aluminum = 1.567851;
-      straggling_a = 1.75673;
-      straggling_b = 0.001295;
-   }
-   
-   else if (kAbsorbatorThickness == 7) { // dummy values
-      alpha_aluminum = 0.024070;
-      p_aluminum = 1.618193;
-      straggling_a = 1.73329;
-      straggling_b = 0.001268;
-   }
-
-   else if (kAbsorbatorThickness == 8) { // dummy values
-      alpha_aluminum = 0.024070;
-      p_aluminum = 1.618193;
-      straggling_a = 1.73329;
-      straggling_b = 0.001268;
-   }
-   */
-
 }
 
 Double_t getLayerPositionmm(Int_t i) {

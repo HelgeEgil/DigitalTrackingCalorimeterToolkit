@@ -310,8 +310,10 @@ void makePlots() {
 
    Int_t nlinesF = 0, nlinesF2 = 0, nlinesF3 = 0, nlinesF4 = 0, nlinesF5 = 0, nlinesF6 = 0;
    
+   Float_t lastIsFirstAllTracks;
+
    while (1) {
-      in2 >> mmAbsorber_ >> np >> correctWhole >> lastIsFirst >> lastIsAlmostFirst;
+      in2 >> mmAbsorber_ >> np >> correctWhole >> lastIsFirst >> lastIsAlmostFirst >> lastIsFirstAllTracks;
 
       if (!in2.good()) break;
      
@@ -322,27 +324,27 @@ void makePlots() {
          arrayFractionY3[nlinesF++] = lastIsAlmostFirst * 100;
          
          arrayFraction2mmX[nlinesF2] = np;
-         arrayFraction2mmY[nlinesF2++] = lastIsFirst * 100;
+         arrayFraction2mmY[nlinesF2++] = lastIsFirstAllTracks * 100;
       }
 
       if (mmAbsorber_ == 3) {
          arrayFraction3mmX[nlinesF3] = np;
-         arrayFraction3mmY[nlinesF3++] = lastIsFirst * 100;
+         arrayFraction3mmY[nlinesF3++] = lastIsFirstAllTracks * 100;
       }
 
       if (mmAbsorber_ == 4) {
          arrayFraction4mmX[nlinesF4] = np;
-         arrayFraction4mmY[nlinesF4++] = lastIsFirst * 100;
+         arrayFraction4mmY[nlinesF4++] = lastIsFirstAllTracks * 100;
       }
 
       if (mmAbsorber_ == 5) {
          arrayFraction5mmX[nlinesF5] = np;
-         arrayFraction5mmY[nlinesF5++] = lastIsFirst * 100;
+         arrayFraction5mmY[nlinesF5++] = lastIsFirstAllTracks * 100;
       }
 
       if (mmAbsorber_ == 6) {
          arrayFraction6mmX[nlinesF6] = np;
-         arrayFraction6mmY[nlinesF6++] = lastIsFirst * 100;
+         arrayFraction6mmY[nlinesF6++] = lastIsFirstAllTracks * 100;
       }
    }
 
@@ -825,7 +827,7 @@ void makePlots() {
    gFraction2mm->GetXaxis()->SetTitleFont(22);
    gFraction2mm->GetYaxis()->SetTitleFont(22);
    gFraction2mm->GetXaxis()->SetTitleOffset(0.9);
-   gFraction2mm->GetYaxis()->SetTitleOffset(1.1);
+   gFraction2mm->GetYaxis()->SetTitleOffset(1.2);
    gFraction2mm->GetXaxis()->SetLabelFont(22);
    gFraction2mm->GetYaxis()->SetLabelFont(22);
    gFraction2mm->SetLineWidth(3);
@@ -844,6 +846,16 @@ void makePlots() {
    gFraction4mm->Draw("L");
    gFraction5mm->Draw("L");
    gFraction6mm->Draw("L");
+   
+   TText *tt = new TText();
+   gFraction2mm->GetYaxis()->SetLabelOffset(5);
+   tt->SetTextAlign(32);
+   tt->SetTextSize(0.04);
+   tt->SetTextFont(22);
+   for (Int_t i=0; i<12;i++) {
+      cout << "Drawing text at " << -0.42 << ", " << i*10 << endl;
+      tt->DrawText(-0.42, i*10, Form("%d%%", i*10));
+   }
 
    TLegend *leg22 = new TLegend(0.67, 0.76, 0.97, 0.93);
    leg22->SetTextSize(0.04);

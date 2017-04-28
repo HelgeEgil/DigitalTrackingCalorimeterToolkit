@@ -139,7 +139,6 @@ void findMCSAngles(Int_t Runs, Int_t dataType, Bool_t recreate, Float_t energy, 
 
 void drawTrackAngleAtVaryingRunNumbers(Int_t dataType, Float_t energy, Float_t degraderThickness) {
    Int_t nRuns = 0;
-   Hits * eventIDs = nullptr;
 
    run_energy = energy;
    run_degraderThickness = degraderThickness;
@@ -148,13 +147,13 @@ void drawTrackAngleAtVaryingRunNumbers(Int_t dataType, Float_t energy, Float_t d
       run_energy = getEnergyAtWEPL(energy, degraderThickness);
    }
 
-   for (Int_t i=29; i<30; i++) {
+   for (Int_t i=1; i<30; i++) { // 1 -> 30
       nRuns = pow(2, 4 + 0.25 * i) + 0.5;
 
       kEventsPerRun = nRuns;
       Float_t factor = 2;
 
-      Int_t totalNumberOfRuns = 5000 / kEventsPerRun;
+      Int_t totalNumberOfRuns = 1000 / kEventsPerRun;
       if (totalNumberOfRuns < 1) totalNumberOfRuns = 1;
       if (totalNumberOfRuns > 75) totalNumberOfRuns = 75;
 
@@ -184,6 +183,7 @@ void drawTrackAngleAtVaryingRunNumbers(Int_t dataType, Float_t energy, Float_t d
       Int_t nTotal = tracks->GetEntries();
       Int_t nTotal2 = 0;
       Int_t nFirstAndLast = 0;
+      Int_t nFirstAndLastAllTracks = 0;
       Int_t nLastCloseToFirst = 0;
       Int_t nCorrect = 0;
 
@@ -198,7 +198,8 @@ void drawTrackAngleAtVaryingRunNumbers(Int_t dataType, Float_t energy, Float_t d
          nCorrect += (int) thisTrack->isOneEventID();
          nFirstAndLast += (int) thisTrack->isFirstAndLastEventIDEqual();
          nLastCloseToFirst += (Int_t) tracks->isLastEventIDCloseToFirst(j);
-
+         nFirstAndLastAllTracks += (int) (thisTrack->isFirstAndLastEventIDEqual() && tracks->getNMissingClustersWithEventID(thisTrack->getEventID(0)) == 0);
+      
          for (Int_t k=1; k<thisTrack->GetEntriesFast(); k++) {
             if (!thisTrack->At(k)) continue;
             normCorrectTracks->Fill(thisTrack->getLayer(k));
@@ -211,12 +212,13 @@ void drawTrackAngleAtVaryingRunNumbers(Int_t dataType, Float_t energy, Float_t d
 
       Float_t ratioCorrect = (float) nCorrect / nTotal;
       Float_t ratioFirstAndLast = (float) nFirstAndLast / nTotal;
+      Float_t ratioFirstAndLastAllTracks = (float) nFirstAndLastAllTracks / nTotal;
       Float_t ratioLastCloseToFirst = (float) nLastCloseToFirst / nTotal;
 
       hCorrectTracks->Divide(normCorrectTracks);
 
       ofstream file2("OutputFiles/lastLayerCorrect_different_nRuns.csv", ofstream::out | ofstream::app);
-      file2 << kAbsorbatorThickness << " " << nRuns << " " << ratioCorrect << " " << ratioFirstAndLast << " " << ratioLastCloseToFirst << endl;
+      file2 << kAbsorbatorThickness << " " << nRuns << " " << ratioCorrect << " " << ratioFirstAndLast << " " << ratioLastCloseToFirst << " " << ratioFirstAndLastAllTracks << endl;
       file2.close();
 
       c1->cd();
@@ -1351,10 +1353,10 @@ void drawTracks3D(Int_t Runs, Int_t dataType, Bool_t recreate, Int_t switchLayer
    TCanvas *c1 = new TCanvas("c1", "c1", 1600, 800);
    c1->SetTitle(Form("Tracks from %.2f MeV protons on %s", energy, getMaterialChar()));
    TView *view = TView::CreateView(1);
-   float fromx = 0.25 * nx;
-   float tox = 0.75 * nx;
-   float fromy = 0.25 * ny;
-   float toy = 0.75 * ny;
+   float fromx = 0.1 * nx;
+   float tox = 0.9 * nx;
+   float fromy = 0.1 * ny;
+   float toy = 0.9 * ny;
 
    view->SetRange(fromx, 0, fromy, tox, 70, toy);
    Int_t iret;
@@ -1402,9 +1404,11 @@ void drawTracks3D(Int_t Runs, Int_t dataType, Bool_t recreate, Int_t switchLayer
 
    Int_t nTrueTracks = 0;
    Int_t nOKTracks = 0;
+   Int_t nOKTracksAllClusters = 0;
    Int_t nOKMinusTracks = 0;
    Int_t nOKLastLayers = 0;
    Int_t nOneWrong = 0;
+   Int_t nMissingEID;
 
    Track * thisTrack = nullptr;
 
@@ -1418,7 +1422,9 @@ void drawTracks3D(Int_t Runs, Int_t dataType, Bool_t recreate, Int_t switchLayer
          medianEventID = thisTrack->getModeEventID();
       }
 
+      nMissingEID = tracks->getNMissingClustersWithEventID(thisTrack->getEventID(0));
       if (thisTrack->isFirstAndLastEventIDEqual()) nOKTracks++;
+      if (thisTrack->isFirstAndLastEventIDEqual() && nMissingEID == 0) nOKTracksAllClusters++;
 
       else {
          if (!thisTrack->Last()) continue;
@@ -1456,11 +1462,13 @@ void drawTracks3D(Int_t Runs, Int_t dataType, Bool_t recreate, Int_t switchLayer
 
    Float_t factorEID = 100 * ((float) nTrueTracks / numberOfTracks);
    Float_t factorEIDOK = 100 * ((float) nOKTracks / numberOfTracks);
+   Float_t factorEIDOKAllClusters = 100 * ((float) nOKTracksAllClusters / numberOfTracks);
    Float_t factorEIDOKMinus = 100 * ((float) nOKMinusTracks / numberOfTracks);
    Float_t factorLastLayers = 100 * ((float) nOKLastLayers / numberOfTracks);
 
    cout << nTrueTracks << " of total " << numberOfTracks << " tracks has the same event ID (" << factorEID << "%)\n";
    cout << nOKTracks << " of total " << numberOfTracks << " tracks has the same first/last event ID (" << factorEIDOK << "%)\n";
+   cout << nOKTracksAllClusters << " of total " << numberOfTracks << " tracks has the same first/last event ID and NO missing clusters in track (" << factorEIDOKAllClusters << "%)\n";
    cout << nOKMinusTracks << " of total " << numberOfTracks << " tracks has a close match (0.5 mm, 1 degree) on first / last cluster (" << factorEIDOKMinus << "%)\n";
    cout << nOKLastLayers << " of total " << numberOfTracks << " tracks has a close match (0.5 mm, 1 degree) or is a very short tracr (" << factorLastLayers << "%)\n";
 

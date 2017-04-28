@@ -777,9 +777,9 @@ class MainMenu(Frame):
         self.labeltext_firstAbsorberThickness = StringVar()
         self.labeltext_chipThickness = StringVar()
 
-        self.var_nlayers.set(40)
-        self.var_xsize.set(90) # was 19.145
-        self.var_ysize.set(30) # was 19.145
+        self.var_nlayers.set(150)
+        self.var_xsize.set(270) # was 19.145
+        self.var_ysize.set(135) # was 19.145
         self.var_xgap.set(0)
         self.var_ygap.set(0)
         self.var_material.set("Aluminium")
