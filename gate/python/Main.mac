@@ -26,9 +26,8 @@
 /gate/geometry/setIonisationPotential Water 75 eV
 /gate/physics/addPhysicsList QGSP_BIC_EMY
 
-#/gate/physics/removeProcess HadronInelastic
-
 /gate/run/initialize
+#/process/inactivate hadElastic
 
 #/geometry/test/recursive_test
 /geometry/test/run
@@ -59,5 +58,5 @@
 
 /gate/random/setEngineName MersenneTwister
 /gate/random/setEngineSeed auto
-/gate/application/setTotalNumberOfPrimaries 5000
+/gate/application/setTotalNumberOfPrimaries 3000
 /gate/application/start

@@ -153,7 +153,7 @@ void drawTrackAngleAtVaryingRunNumbers(Int_t dataType, Float_t energy, Float_t d
       kEventsPerRun = nRuns;
       Float_t factor = 2;
 
-      Int_t totalNumberOfRuns = 1000 / kEventsPerRun;
+      Int_t totalNumberOfRuns = 2600 / kEventsPerRun;
       if (totalNumberOfRuns < 1) totalNumberOfRuns = 1;
       if (totalNumberOfRuns > 75) totalNumberOfRuns = 75;
 
@@ -198,7 +198,7 @@ void drawTrackAngleAtVaryingRunNumbers(Int_t dataType, Float_t energy, Float_t d
          nCorrect += (int) thisTrack->isOneEventID();
          nFirstAndLast += (int) thisTrack->isFirstAndLastEventIDEqual();
          nLastCloseToFirst += (Int_t) tracks->isLastEventIDCloseToFirst(j);
-         nFirstAndLastAllTracks += (int) (thisTrack->isFirstAndLastEventIDEqual() && tracks->getNMissingClustersWithEventID(thisTrack->getEventID(0)) == 0);
+         nFirstAndLastAllTracks += (int) (thisTrack->isFirstAndLastEventIDEqual() && tracks->getNMissingClustersWithEventID(thisTrack->getEventID(0), thisTrack->Last()->getLayer()) == 0);
       
          for (Int_t k=1; k<thisTrack->GetEntriesFast(); k++) {
             if (!thisTrack->At(k)) continue;
@@ -1378,6 +1378,7 @@ void drawTracks3D(Int_t Runs, Int_t dataType, Bool_t recreate, Int_t switchLayer
    TPolyMarker3D *EIDMarker = new TPolyMarker3D(nClusters, 7);
    TPolyMarker3D *conflictMarker = new TPolyMarker3D(nClusters, 7);
    pMarker->SetMarkerColor(kBlue); // Missing cluster
+   pMarker->SetMarkerStyle(15);
    EIDMarker->SetMarkerColor(kRed);
    conflictMarker->SetMarkerColor(kRed); // Conflicting cluster
    
@@ -1389,6 +1390,8 @@ void drawTracks3D(Int_t Runs, Int_t dataType, Bool_t recreate, Int_t switchLayer
       Float_t x = thisCluster->getX();
       Float_t z = thisCluster->getY();
       Float_t y = thisCluster->getLayer();
+
+      cout << "Drawing cluster pMarker: " << *thisCluster << endl;
 
       pMarker->SetPoint(i, x, y, z);
    }
@@ -1421,10 +1424,11 @@ void drawTracks3D(Int_t Runs, Int_t dataType, Bool_t recreate, Int_t switchLayer
       if (!thisTrack->isOneEventID()) {
          medianEventID = thisTrack->getModeEventID();
       }
-
-      nMissingEID = tracks->getNMissingClustersWithEventID(thisTrack->getEventID(0));
-      if (thisTrack->isFirstAndLastEventIDEqual()) nOKTracks++;
+      
+      nMissingEID = tracks->getNMissingClustersWithEventID(thisTrack->getEventID(0), thisTrack->Last()->getLayer()); // only count missing tracks after layer
       if (thisTrack->isFirstAndLastEventIDEqual() && nMissingEID == 0) nOKTracksAllClusters++;
+
+      if (thisTrack->isFirstAndLastEventIDEqual()) nOKTracks++;
 
       else {
          if (!thisTrack->Last()) continue;
@@ -1486,14 +1490,14 @@ void drawTracks3D(Int_t Runs, Int_t dataType, Bool_t recreate, Int_t switchLayer
    for (Int_t i=0; i<ntracks; i++) {
       Track *thisTrack = tracks->At(i);
       if (!thisTrack) continue;
-      if (thisTrack->getTrackLengthmm() < 2) continue;
+//      if (thisTrack->getTrackLengthmm() < 2) continue;
 
       Int_t n = thisTrack->GetEntriesFast();
 
       TPolyLine3D *l = new TPolyLine3D(n);
       l->SetLineWidth(2);
       TPolyMarker3D *trackPoints = new TPolyMarker3D(nClusters, 7);
-
+      
       if (!thisTrack->isFirstAndLastEventIDEqual()) {
          if (!thisTrack->Last()) continue;
          if (!thisTrack->At(thisTrack->GetEntriesFast() - 2)) continue;
@@ -1517,9 +1521,16 @@ void drawTracks3D(Int_t Runs, Int_t dataType, Bool_t recreate, Int_t switchLayer
          else if (thisTrack->getWEPL() < 0.6 * getWEPLFromEnergy(run_energy)) {
             // Bad track ends early. OK...
          }
-*/
+         
          nMissingEID = tracks->getNMissingClustersWithEventID(thisTrack->getEventID(0));
          if (!thisTrack->isFirstAndLastEventIDEqual() || nMissingEID > 0) {
+            l->SetLineColor(kRed);
+         }
+         */
+      
+         nMissingEID = tracks->getNMissingClustersWithEventID(thisTrack->getEventID(0), thisTrack->Last()->getLayer());
+         if (thisTrack->isFirstAndLastEventIDEqual() && nMissingEID == 0) {}
+         else {
             l->SetLineColor(kRed);
          }
       }

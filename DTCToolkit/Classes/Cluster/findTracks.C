@@ -70,18 +70,26 @@ Tracks * Clusters::findCalorimeterTracksAlpide() {
    // first pass, small search cone (3 sigma MCS)
    kMCSFactor = kMCSFactorFirstPass;
    findTracksFromLayer(tracks, 0, usedClustersInSeeds);
-   
-   kMCSFactor = kMCSFactorSecondPass;
-   findTracksFromLayer(tracks, 0, usedClustersInSeeds);
+  
+   if (GetEntriesCWT()) { 
+      kMCSFactor = kMCSFactorSecondPass;
+      findTracksFromLayer(tracks, 0, usedClustersInSeeds);
+   }
 
-   kMCSFactor = kMCSFactorLastPass1;
-   findRemainingTracks(tracks);
+   if (GetEntriesCWT()) {
+      kMCSFactor = kMCSFactorLastPass1;
+      findRemainingTracks(tracks);
+   }
+
+   if (GetEntriesCWT()) {
+      kMCSFactor = kMCSFactorLastPass2;
+    findRemainingTracks(tracks);
+   }
    
-   kMCSFactor = kMCSFactorLastPass2;
-   findRemainingTracks(tracks);
-   
-   kMCSFactor = kMCSFactorLastPass3;
-   findRemainingTracks(tracks);
+   if (GetEntriesCWT()) {
+      kMCSFactor = kMCSFactorLastPass3;
+      findRemainingTracks(tracks);
+   }
 
    clustersLeft = clustersWithoutTrack_.GetEntries();
    factor = 100 * (1 - (Float_t) clustersLeft / GetEntriesFast());
@@ -409,6 +417,7 @@ void Clusters::findRemainingTracks(Tracks * tracks) {
       thisTrack = tracks->At(i);
 
       growTrackFromLayer(thisTrack, thisTrack->Last()->getLayer());
+
       removeTrackFromClustersWithoutTrack(thisTrack);
       markUsedClusters(thisTrack);
    }

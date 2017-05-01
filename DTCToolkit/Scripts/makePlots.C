@@ -852,7 +852,7 @@ void makePlots() {
    tt->SetTextAlign(32);
    tt->SetTextSize(0.04);
    tt->SetTextFont(22);
-   for (Int_t i=0; i<12;i++) {
+   for (Int_t i=0; i<11;i++) {
       cout << "Drawing text at " << -0.42 << ", " << i*10 << endl;
       tt->DrawText(-0.42, i*10, Form("%d%%", i*10));
    }

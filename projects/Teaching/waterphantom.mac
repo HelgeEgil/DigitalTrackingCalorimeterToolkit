@@ -37,6 +37,7 @@
 /gate/geometry/setIonisationPotential Water 75 eV
 
 /gate/run/initialize
+/process/inactivate hadElastic
 
 #/gate/source/addSource PBS PencilBeam
 #/gate/source/PBS/setParticleType proton
@@ -63,10 +64,10 @@
 /gate/source/uniformBeam/gps/halfx 0 mm
 /gate/source/uniformBeam/gps/halfy 0 mm
 /gate/source/uniformBeam/gps/centre 0. 0. -1. cm
-/gate/application/setTotalNumberOfPrimaries 100000
+/gate/application/setTotalNumberOfPrimaries 10000
 
 /gate/output/root/enable
-/gate/output/root/setFileName gate_simulation_230MeV
+/gate/output/root/setFileName gate_simulation_230MeV_noelastic
 
 /gate/random/setEngineName MersenneTwister
 /gate/random/setEngineSeed auto

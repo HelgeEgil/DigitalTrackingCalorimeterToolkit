@@ -18,10 +18,10 @@ Clusters::Clusters(Bool_t frameType) : clusters_("DTC::Cluster", kEventsPerRun*2
                                        clustersWithoutTrack_("DTC::Cluster", kEventsPerRun*2) {
    frameType_ = frameType;
 
-   kMCSFactorFirstPass = 1.2; // 1
+   kMCSFactorFirstPass = 2; // 1
    kMCSFactorSecondPass = 3; // 4
-   kMCSFactorLastPass1 = 5; // 6
-   kMCSFactorLastPass2 = 6; // 6
+   kMCSFactorLastPass1 = 3; // 6
+   kMCSFactorLastPass2 = 5; // 6
    kMCSFactorLastPass3 = 7; // 6
 }
 
