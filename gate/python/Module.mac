@@ -186,7 +186,7 @@
 /gate/Absorber1/geometry/setYLength 135.0 mm
 /gate/Absorber1/geometry/setZLength 5.9999 mm
 /gate/Absorber1/placement/setTranslation 0 0 0.1425 mm
-/gate/Absorber1/setMaterial Aluminium
+/gate/Absorber1/setMaterial Carbon
 /gate/Absorber1/vis/setColor grey
 
 /gate/Layer/daughters/name AbsorberAirGap

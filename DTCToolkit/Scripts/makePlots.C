@@ -44,7 +44,7 @@ void makePlots() {
    pad2->Draw();
    
    TCanvas *c2 = new TCanvas("c2", "Correct Tracks fraction", 1200, 800);
-   TCanvas *c22 = new TCanvas("c22", "Correct Tracks fraction", 1200, 800);
+   TCanvas *c22 = new TCanvas("c22", "Correct Tracks fraction", 1200, 900);
    TCanvas *c3 = new TCanvas("c3", "Reconstruction efficiency", 1200, 800);
    TCanvas *c4 = new TCanvas("c4", "Chip alignment", 1200, 800);
    TCanvas *c5 = new TCanvas("c5", "Chip sensitivity calibration", 1200, 800);
@@ -289,6 +289,7 @@ void makePlots() {
    in.close();
    
    ifstream in2;
+//   in2.open("OutputFiles/lastLayerCorrect_different_nRuns_elastic_noinelastic.csv");
    in2.open("OutputFiles/lastLayerCorrect_different_nRuns.csv");
    Float_t np, correctLast, correctWhole, lastIsFirst, lastIsAlmostFirst;
    Int_t   mmAbsorber_;
@@ -323,27 +324,27 @@ void makePlots() {
          arrayFractionY2[nlinesF] = lastIsFirst * 100;
          arrayFractionY3[nlinesF++] = lastIsAlmostFirst * 100;
          
-         arrayFraction2mmX[nlinesF2] = np;
+         arrayFraction2mmX[nlinesF2] = np/100;
          arrayFraction2mmY[nlinesF2++] = lastIsFirstAllTracks * 100;
       }
 
       if (mmAbsorber_ == 3) {
-         arrayFraction3mmX[nlinesF3] = np;
+         arrayFraction3mmX[nlinesF3] = np/100;
          arrayFraction3mmY[nlinesF3++] = lastIsFirstAllTracks * 100;
       }
 
       if (mmAbsorber_ == 4) {
-         arrayFraction4mmX[nlinesF4] = np;
+         arrayFraction4mmX[nlinesF4] = np/100;
          arrayFraction4mmY[nlinesF4++] = lastIsFirstAllTracks * 100;
       }
 
       if (mmAbsorber_ == 5) {
-         arrayFraction5mmX[nlinesF5] = np;
+         arrayFraction5mmX[nlinesF5] = np/100;
          arrayFraction5mmY[nlinesF5++] = lastIsFirstAllTracks * 100;
       }
 
       if (mmAbsorber_ == 6) {
-         arrayFraction6mmX[nlinesF6] = np;
+         arrayFraction6mmX[nlinesF6] = np/100;
          arrayFraction6mmY[nlinesF6++] = lastIsFirstAllTracks * 100;
       }
    }
@@ -816,30 +817,38 @@ void makePlots() {
    TGraph *gFraction5mm = new TGraph(nlinesF5, arrayFraction5mmX, arrayFraction5mmY);
    TGraph *gFraction6mm = new TGraph(nlinesF6, arrayFraction6mmX, arrayFraction6mmY);
 
-   gFraction2mm->SetTitle(";Number of protons in frame;Fraction of correctly reconstructed tracks");
-   gFraction2mm->GetXaxis()->SetRangeUser(10, 6000);
+//   c22->SetLogx();
+   c22->SetGridy();
+   c22->SetGridx();
+   gFraction2mm->SetTitle(";Protons/cm^{2}/frame;Fraction of correctly reconstructed tracks");
+   gFraction2mm->GetXaxis()->SetRangeUser(0, 25);
    gFraction2mm->SetMaximum(100);
    gFraction2mm->SetMinimum(0);
    gFraction2mm->GetXaxis()->SetTitleSize(0.045);
    gFraction2mm->GetYaxis()->SetTitleSize(0.045);
    gFraction2mm->GetXaxis()->SetLabelSize(0.045);
+   gFraction2mm->GetXaxis()->SetNdivisions(16);
    gFraction2mm->GetYaxis()->SetLabelSize(0.045);
    gFraction2mm->GetXaxis()->SetTitleFont(22);
    gFraction2mm->GetYaxis()->SetTitleFont(22);
    gFraction2mm->GetXaxis()->SetTitleOffset(0.9);
-   gFraction2mm->GetYaxis()->SetTitleOffset(1.2);
+   gFraction2mm->GetYaxis()->SetTitleOffset(1.1);
+   gFraction2mm->GetYaxis()->SetLabelOffset(5);
    gFraction2mm->GetXaxis()->SetLabelFont(22);
+   gFraction2mm->GetXaxis()->SetNoExponent();
+   gFraction2mm->GetXaxis()->SetMoreLogLabels();
    gFraction2mm->GetYaxis()->SetLabelFont(22);
    gFraction2mm->SetLineWidth(3);
    gFraction3mm->SetLineWidth(3);
    gFraction4mm->SetLineWidth(3);
    gFraction5mm->SetLineWidth(3);
    gFraction6mm->SetLineWidth(3);
-   gFraction2mm->SetLineColor(kRed+4);
-   gFraction3mm->SetLineColor(kRed+2);
-   gFraction4mm->SetLineColor(kRed);
-   gFraction5mm->SetLineColor(kRed-7);
-   gFraction6mm->SetLineColor(kRed-10);
+
+   gFraction2mm->SetLineColor(kGreen+4);
+   gFraction3mm->SetLineColor(kGreen+3);
+   gFraction4mm->SetLineColor(kGreen+2);
+   gFraction5mm->SetLineColor(kGreen+1);
+   gFraction6mm->SetLineColor(kGreen);
 
    gFraction2mm->Draw("LA");
    gFraction3mm->Draw("L");
@@ -848,24 +857,35 @@ void makePlots() {
    gFraction6mm->Draw("L");
    
    TText *tt = new TText();
-   gFraction2mm->GetYaxis()->SetLabelOffset(5);
    tt->SetTextAlign(32);
    tt->SetTextSize(0.04);
    tt->SetTextFont(22);
    for (Int_t i=0; i<11;i++) {
       cout << "Drawing text at " << -0.42 << ", " << i*10 << endl;
-      tt->DrawText(-0.42, i*10, Form("%d%%", i*10));
+      tt->DrawText(-0.0042, i*10, Form("%d%%", i*10));
    }
+   
+   TText *curveLabel = new TText();
+   curveLabel->SetTextFont(22);
+   curveLabel->SetTextSize(0.038);
+   curveLabel->DrawText(25.50, gFraction2mm->Eval(25.00)*0.98, "2 mm C");
+   curveLabel->DrawText(25.50, gFraction3mm->Eval(25.00)*0.98, "3 mm C");
+   curveLabel->DrawText(25.50, gFraction4mm->Eval(25.00)*0.98, "4 mm C");
+   curveLabel->DrawText(25.50, gFraction5mm->Eval(25.00)*0.98, "5 mm C");
+   curveLabel->DrawText(25.50, gFraction6mm->Eval(25.00)*0.98, "6 mm C");
 
-   TLegend *leg22 = new TLegend(0.67, 0.76, 0.97, 0.93);
+
+   /*
+   TLegend *leg22 = new TLegend(0.21, 0.20, 0.50, 0.51);
    leg22->SetTextSize(0.04);
    leg22->SetTextFont(22);
-   leg22->AddEntry(gFraction2mm, "2 mm absorber", "L");
-   leg22->AddEntry(gFraction3mm, "3 mm absorber", "L");
-   leg22->AddEntry(gFraction4mm, "4 mm absorber", "L");
-   leg22->AddEntry(gFraction5mm, "5 mm absorber", "L");
-   leg22->AddEntry(gFraction6mm, "6 mm absorber", "L");
+   leg22->AddEntry(gFraction2mm, "2 mm Al absorber", "L");
+   leg22->AddEntry(gFraction3mm, "3 mm Al absorber", "L");
+   leg22->AddEntry(gFraction4mm, "4 mm Al absorber", "L");
+   leg22->AddEntry(gFraction5mm, "5 mm Al absorber", "L");
+   leg22->AddEntry(gFraction6mm, "6 mm Al absorber", "L");
    leg22->Draw();
+   */
 
    printf("AFTER\n");
 

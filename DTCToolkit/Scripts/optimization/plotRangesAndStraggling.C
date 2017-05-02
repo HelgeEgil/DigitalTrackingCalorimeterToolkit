@@ -24,9 +24,10 @@
 
 using namespace std;
 
-Int_t absorberThickness = 2;
+Int_t absorberThickness = 6;
 Bool_t kFilterData = true;
-Int_t filterSize = 2;
+Bool_t kUseCarbon = true;
+Int_t filterSize = 1;
 const Int_t arraySize = 1500;
 const Int_t xFrom = 40;
 const Int_t xTo = 350;
@@ -108,7 +109,13 @@ void plotRangesAndStraggling() {
 
    Float_t a_dtc = 0, p_dtc = 0;
    ifstream inRanges;
-   inRanges.open(Form("../../Data/Ranges/%dmm_Al.csv", absorberThickness));
+   if (!kUseCarbon) {
+      inRanges.open(Form("../../Data/Ranges/%dmm_Al.csv", absorberThickness));
+   }
+   else {
+      inRanges.open(Form("../../Data/Ranges/%dmm_C.csv", absorberThickness));
+   }
+
    Double_t dtcRanges[500];
    Double_t dtcEnergies[500];
    Double_t dtcRange = 0;
@@ -132,7 +139,13 @@ void plotRangesAndStraggling() {
    p_dtc = range_energy_fit->GetParameter(1);
 
    ifstream in0;
-   in0.open("../../OutputFiles/findManyRangesDegrader.csv");
+   if (!kUseCarbon) {
+      in0.open("../../OutputFiles/findManyRangesDegrader.csv");
+   }
+   else {
+      in0.open("../../OutputFiles/findManyRangesDegraderCarbon.csv");
+   }
+
    Int_t nlines0 = 0;
    Float_t a_wtr = 0.02387;
    Float_t p_wtr = 1.7547;
@@ -160,7 +173,13 @@ void plotRangesAndStraggling() {
    in0.close();
 
    ifstream in;
-   in.open("../../OutputFiles/result_makebraggpeakfit.csv");
+   if (!kUseCarbon) {
+      in.open("../../OutputFiles/result_makebraggpeakfit.csv");
+   }
+   else {
+      in.open("../../OutputFiles/result_makebraggpeakfitCarbon.csv");
+   }
+
 
    cout << "Opened file.\n";
 

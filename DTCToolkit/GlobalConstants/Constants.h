@@ -62,14 +62,14 @@ const    Float_t kAbsorbatorThickness = 6;
 const Float_t dx = DX; // mm
 const Float_t dy = DY; // mm
 const Float_t dz = DZ + kAbsorbatorThickness;
-Int_t kEventsPerRun = 512;
+Int_t kEventsPerRun = 800;
 
 // Used for treatment of available experimental data files
 const Int_t nEnergies = 8;
 Int_t energies[nEnergies] = {122, 140, 150, 160, 170, 180, 188, 190};
 
 enum eMaterial {kTungsten, kAluminum, kPMMA, kWater, kCarbon};
-const Int_t kMaterial = kAluminum;
+const Int_t kMaterial = kCarbon;
 
 Int_t kDataType = kMC;
 

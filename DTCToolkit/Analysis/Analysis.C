@@ -1391,8 +1391,6 @@ void drawTracks3D(Int_t Runs, Int_t dataType, Bool_t recreate, Int_t switchLayer
       Float_t z = thisCluster->getY();
       Float_t y = thisCluster->getLayer();
 
-      cout << "Drawing cluster pMarker: " << *thisCluster << endl;
-
       pMarker->SetPoint(i, x, y, z);
    }
 
