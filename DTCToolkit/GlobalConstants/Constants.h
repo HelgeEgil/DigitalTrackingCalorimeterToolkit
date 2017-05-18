@@ -39,7 +39,7 @@ Bool_t   kIsAluminumPlate = false;
 Bool_t   kIsScintillator = false;
 Bool_t   kIsFirstLayerAir = false;
 Bool_t   kUseAlpide = true;
-Bool_t   kDoTracking = true;
+Bool_t   kDoTracking = false;
 Bool_t   kUseEmpiricalMCS = true;
 Bool_t   kFilterNuclearInteractions = true;
 Bool_t   useDegrader = true;
@@ -55,21 +55,21 @@ const Float_t kRad = 3.14159265/180.;
 const    Int_t nx = NX;
 const    Int_t ny = NY;
 const    Int_t nTrackers = 4;
-const    Float_t kAbsorbatorThickness = 6;
+const    Float_t kAbsorbatorThickness = 3;
 // FOCAL IS 3 mm (2x absorbers = 3 mm)
 
 // nLayers are loaded in MaterialConstants.C according to the detector geometry
 const Float_t dx = DX; // mm
 const Float_t dy = DY; // mm
 const Float_t dz = DZ + kAbsorbatorThickness;
-Int_t kEventsPerRun = 800;
+Int_t kEventsPerRun = 800000;
 
 // Used for treatment of available experimental data files
 const Int_t nEnergies = 8;
 Int_t energies[nEnergies] = {122, 140, 150, 160, 170, 180, 188, 190};
 
 enum eMaterial {kTungsten, kAluminum, kPMMA, kWater, kCarbon};
-const Int_t kMaterial = kCarbon;
+const Int_t kMaterial = kAluminum;
 
 Int_t kDataType = kMC;
 

@@ -25,7 +25,7 @@
 
 using namespace std;
 
-Bool_t kUseCarbon = true;
+Bool_t kUseCarbon = false;
 const Int_t arraySize = 1500;
 const Int_t xFrom = 40;
 
@@ -86,7 +86,7 @@ void plotEnergyVsRange() {
    Float_t estimatedStraggling;
 
    ifstream in1;
-   in1.open("../../Data/Ranges/EnergyAfterDegrader.csv");
+   in1.open("../../Data/Ranges/EnergyAfterDegraderPSTAR.csv");
    Int_t thick, n=0;
    Double_t energy;
    while (1) {

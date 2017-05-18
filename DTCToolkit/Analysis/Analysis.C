@@ -878,7 +878,7 @@ Float_t drawBraggPeakGraphFit(Int_t Runs, Int_t dataType, Bool_t recreate, Float
    for (Int_t j=0; j<tracks->GetEntriesFast(); j++) {
       Track *thisTrack = tracks->At(j);
       if (!thisTrack) continue;
-     
+    
       if (thisTrack->doesTrackEndAbruptly()) {
          hFitResultsDroppedData->Fill(getUnitFromEnergy(thisTrack->getEnergy()));
          nCutDueToTrackEndingAbruptly++;
@@ -1021,7 +1021,7 @@ Float_t drawBraggPeakGraphFit(Int_t Runs, Int_t dataType, Bool_t recreate, Float
    if (kDrawVerticalLayerLines) {
       Float_t line_z = 0;
       for (Int_t i=0; i<65; i++) {
-         line_z = getWEPLFromTL(getLayerPositionmm(i));
+         line_z = getUnitFromTL(getLayerPositionmm(i));
          if (line_z > gPad->GetUxmax()) break;
          l = new TLine(line_z, 0, line_z, hFitResults->GetMaximum()*1.05);
          l->SetLineColor(kBlack); l->SetLineWidth(2); l->Draw();

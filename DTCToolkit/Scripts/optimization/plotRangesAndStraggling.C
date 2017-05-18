@@ -24,9 +24,9 @@
 
 using namespace std;
 
-Int_t absorberThickness = 6;
+Int_t absorberThickness = 3;
 Bool_t kFilterData = true;
-Bool_t kUseCarbon = true;
+Bool_t kUseCarbon = false;
 Int_t filterSize = 1;
 const Int_t arraySize = 1500;
 const Int_t xFrom = 40;
@@ -140,7 +140,7 @@ void plotRangesAndStraggling() {
 
    ifstream in0;
    if (!kUseCarbon) {
-      in0.open("../../OutputFiles/findManyRangesDegrader.csv");
+      in0.open("../../OutputFiles/findManyRangesDegraderPSTAR.csv");
    }
    else {
       in0.open("../../OutputFiles/findManyRangesDegraderCarbon.csv");

@@ -17,19 +17,17 @@ void findManyRanges(Int_t degraderFrom, Int_t degraderIncrement, Int_t degraderT
    Double_t dt, e, es;
    Int_t idx = 0;
    ifstream in;
-   in.open("../Data/Ranges/EnergyAfterDegrader.csv");
+   in.open("../Data/Ranges/EnergyAfterDegraderPSTAR.csv");
 
    while (1) {
-      in >> dt >> e >> es;
+      in >> dt >> e;
       if (!in.good()) break;
       phaseSpaceDegraderthickness[idx] = dt;
       phaseSpaceEnergy[idx] = e;
-      phaseSpaceEnergySpread[idx++] = es;
    }
    in.close();
 
    TSpline3 *phaseSpaceSpline = new TSpline3("phaseSpaceSpline", phaseSpaceDegraderthickness, phaseSpaceEnergy, idx);
-   TSpline3 *phaseSpaceSpreadSpline = new TSpline3("phaseSpaceSpreadSpline", phaseSpaceDegraderthickness, phaseSpaceEnergySpread, idx);
 
    vector<Float_t> resultVector;
    ofstream file("../OutputFiles/findManyRangesDegrader.csv", ofstream::out || ofstream:app);
@@ -44,12 +42,7 @@ void findManyRanges(Int_t degraderFrom, Int_t degraderIncrement, Int_t degraderT
             Float_t expectedSigma = resultVector.at(1);
             Float_t attenuation   = resultVector.at(2);
             Float_t expectedEnergy = phaseSpaceSpline->Eval(degrader);
-            Float_t expectedEnergySpread = phaseSpaceSpreadSpline->Eval(degrader);
-
-            // Previously, the expected energy was from resultVector.at(3) and 4 (spread)
-            // However, this calculation was from an edep sum, which gave some weird results
-            // Now the results are precalculated using a scoring plane after a water phantom
-            // of thickness 'degrader', and interpolated to this value using splines.
+            Float_t expectedEnergySpread = 6.11e-14*pow(mm,6) - 5.59e-11*pow(mm,5) + 1.90e-8*pow(mm,4) - 2.84e-6*pow(mm,3) + 1.57e-4*pow(mm,2) + 6.88e-3*mm + 2.23e-1; // parameterized from energy spectrum EnergyAfterDegrader.csv, might be a bit wrong but not much
 
             file << degrader << " " << mm << " " << expectedRange << " " << expectedSigma << " " << attenuation << " " <<  expectedEnergy << " " << expectedEnergySpread  << endl;
          }

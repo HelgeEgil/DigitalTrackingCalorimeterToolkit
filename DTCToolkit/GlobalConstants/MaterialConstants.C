@@ -138,12 +138,12 @@ void  createSplines() {
 
    in.close();
 
-   in.open("Data/Ranges/Water.csv");
+   in.open("Data/Ranges/WaterPSTAR.csv");
    while (1) {
       in >> energy >> range;
       if (!in.good()) break;
 
-      rangesWater[idxWater] = range;
+      rangesWater[idxWater] = range*10;
       energiesWater[idxWater++] = energy;
    }
    in.close();

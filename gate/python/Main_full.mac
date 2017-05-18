@@ -16,7 +16,6 @@
 /gate/systems/scanner_2/level2/attach Module
 /gate/systems/phantom/level1/attach degrader
 
-#/control/execute readout.mac
 /control/execute readout_full.mac
 
 #=================#
@@ -27,6 +26,9 @@
 /gate/physics/addPhysicsList QGSP_BIC_EMY
 
 /gate/run/initialize
+
+/process/inactivate hadElastic
+/process/inactivate protonInelastic
 
 #/geometry/test/recursive_test
 /geometry/test/run

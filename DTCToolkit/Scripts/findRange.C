@@ -38,30 +38,27 @@ vector<Float_t> findRange::Run(Double_t energy, Double_t sigma_mev)
    // Load phase space spline
    Double_t phaseSpaceDegraderthickness[300];
    Double_t phaseSpaceEnergy[300];
-   Double_t phaseSpaceEnergySpread[300];
    Double_t dt, e, es;
    Int_t idx = 0;
    ifstream in;
-   in.open("../Data/Ranges/EnergyAfterDegrader.csv");
+   in.open("../Data/Ranges/EnergyAfterDegraderPSTAR.csv");
 
    while (1) {
-      in >> dt >> e >> es;
+      in >> dt >> e;
       if (!in.good()) break;
       phaseSpaceDegraderthickness[idx] = dt;
       phaseSpaceEnergy[idx] = e;
-      phaseSpaceEnergySpread[idx++] = es;
    }
    in.close();
 
    TSpline3 *phaseSpaceSpline = new TSpline3("phaseSpaceSpline", phaseSpaceDegraderthickness, phaseSpaceEnergy, idx);
-   TSpline3 *phaseSpaceSpreadSpline = new TSpline3("phaseSpaceSpreadSpline", phaseSpaceDegraderthickness, phaseSpaceEnergySpread, idx);
 
    run_energy = phaseSpaceSpline->Eval(run_degraderThickness);
 
    TCanvas *c2 = new TCanvas("c2", "Ranges and energies", 1200, 900);
 //   c2->Divide(2, 1, 0.001, 0.001);i
 
-   Int_t nbinsx = 250;
+   Int_t nbinsx = 500;
    // 2 mm: 0.0096, 1.784
    // 3 mm: 0.0097, 1.7825
    // 4 mm: 0.0098, 1.7806
@@ -243,7 +240,7 @@ vector<Float_t> findRange::Run(Double_t energy, Double_t sigma_mev)
    TF1 *fRemainingEnergy = new TF1("fRemainingEnergy", "gaus");
    fRemainingEnergy->SetLineWidth(3);
    hEnergyAtInterface->Fit("fRemainingEnergy", "Q");
-   printf("Estimated remaining energy and straggling: %.2f +- %.2f MeV.\n", phaseSpaceSpline->Eval(run_degraderThickness), phaseSpaceSpreadSpline->Eval(run_degraderThickness));
+   printf("Estimated remaining energy: %.2f MeV.\n", phaseSpaceSpline->Eval(run_degraderThickness),);
 
    printf("Total range and straggling: %.2f +- %.2f mm.\n", run_degraderThickness + aw * pow(fRemainingEnergy->GetParameter(1), pw), sqrt(pow(fRange->GetParameter(2), 2) + pow(fRemainingEnergy->GetParameter(2) * a * p * pow(fRemainingEnergy->GetParameter(1), p-1), 2)));
    printf("Total WEPL straggling: %.2f mm.\n", sqrt(pow(fRemainingEnergy->GetParameter(2) * aw * pw * pow(fRemainingEnergy->GetParameter(1), p-1), 2) + pow(aw/a * pow(fRange->GetParameter(1) / aw, 1-pw/p) * fRange->GetParameter(2), 2)));
