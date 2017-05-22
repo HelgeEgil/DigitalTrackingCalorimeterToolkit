@@ -91,6 +91,12 @@ Float_t getWEPLFactorFromEnergy(Float_t energy) {
    return wepl / range;
 }
 
+Float_t getWELPFactorFromWEPL(Float_t wepl) {
+   Float_t range = getTLFromWEPL(wepl);
+
+   return wepl / range;
+}
+
 Float_t getWEPLFromTL(Float_t tl) {
    if (tl == 0) return 0;
    Double_t energy = getEnergyFromTL(tl);

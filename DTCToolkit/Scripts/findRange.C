@@ -41,7 +41,7 @@ vector<Float_t> findRange::Run(Double_t energy, Double_t sigma_mev)
    Double_t dt, e, es;
    Int_t idx = 0;
    ifstream in;
-   in.open("../Data/Ranges/EnergyAfterDegraderPSTAR.csv");
+   in.open("../Data/Ranges/EnergyAfterDegraderG4.csv");
 
    while (1) {
       in >> dt >> e;

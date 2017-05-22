@@ -84,10 +84,12 @@ Double_t fitfunc_DBP(Double_t *v, Double_t *par) {
    Double_t fitval = 0;
    Float_t aa=alpha, pp=p;
 
+   /*
    if (kOutputUnit == kWEPL) {
       aa = alpha_water;
       pp = p_water;
    }
+   */
 
    fitval = scale / ( pp * pow(aa, 1/pp) * pow((range - depth), 1-1/pp) );
 

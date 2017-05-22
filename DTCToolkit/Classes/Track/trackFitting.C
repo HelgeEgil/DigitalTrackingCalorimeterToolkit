@@ -42,10 +42,11 @@ TGraphErrors * Track::doFit() {
       erx[i] = getAbsorberLength(i);
    }
 
-   maxEnergy = getEnergyFromTL(trackLength + 0.75*dz);
-   estimatedEnergy = getEnergyFromTL(trackLength + 0.5*dz);
-   estimatedRange = getWEPLFromTL(x[n-1] + 0.5*dz);
+   maxEnergy = getEnergyFromTL(trackLength + 0.8 * dz);
+   estimatedEnergy = getEnergyFromTL(trackLength + 0.25*dz); // ~ triangular function, so mean value is 33% from peak
+   estimatedRange = getWEPLFromTL(x[n-1] + 0.25*dz);
 
+   
    if (kOutputUnit == kWEPL || kOutputUnit == kEnergy) {
       WEPLFactor = getWEPLFactorFromEnergy(estimatedEnergy);
       for (Int_t i=0; i<n; i++) {
@@ -53,17 +54,19 @@ TGraphErrors * Track::doFit() {
       }
    }
    
+
    graph = new TGraphErrors(n, x, y, erx, ery);
    
    if (kOutputUnit == kPhysical) {
       if (kMaterial == kTungsten) scaleParameter = 14;
       if (kMaterial == kAluminum) scaleParameter = 65;
    }
-   
+    
    else if (kOutputUnit == kWEPL || kOutputUnit == kEnergy) {
       if (kMaterial == kTungsten) scaleParameter = 100;
       if (kMaterial == kAluminum) scaleParameter = 126;
    }
+
    
    TF1 *func = new TF1("fit_BP", fitfunc_DBP, 0, 500, 2);
    func->SetParameter(0, estimatedRange);
@@ -89,13 +92,12 @@ TGraphErrors * Track::doRangeFit(Bool_t isScaleVariable) {
    // The difference should be minimal! However this is how the conversion functions
    // are defined.
 
-
    TGraphErrors * graph = nullptr;
    Int_t          n = GetEntriesFast();
    Float_t        x[n], y[n];
    Float_t        erx[n], ery[n];
    Float_t        preTL = getPreTL();
-   Float_t        maxEnergy, maxRange, minRange, estimatedEnergy, estimatedRange;
+   Float_t        maxRange, minRange, estimatedEnergy, estimatedRange;
    Float_t        scaleParameter = 0;
    Float_t        WEPLFactor;
    Float_t        overFittingDistance, startFittingDistance;
@@ -118,20 +120,24 @@ TGraphErrors * Track::doRangeFit(Bool_t isScaleVariable) {
    overFittingDistance = dz;
    startFittingDistance = dz * 0.5;
 
-   maxEnergy = getEnergyFromTL(x[n-1] + overFittingDistance);
-   maxRange = getUnitFromTL(x[n-1] + overFittingDistance);
-   minRange = getUnitFromTL(x[n-1]);
-   estimatedEnergy = getEnergyFromTL(x[n-1] + startFittingDistance);
-   estimatedRange = getUnitFromTL(x[n-1] + startFittingDistance);
+//   maxRange = getUnitFromTL(x[n-1] + overFittingDistance);
+//   minRange = getUnitFromTL(x[n-1]);
+//   estimatedRange = getUnitFromTL(x[n-1] + startFittingDistance);
+
+   minRange = x[n-1];
+   maxRange = x[n-1] + overFittingDistance;
+   estimatedRange = x[n-1] + startFittingDistance;
 
    // WE CONVERT FROM PROJECTED RANGE TO WATER EQUIVALENT RANGE HERE
+   /*
    if (kOutputUnit == kWEPL || kOutputUnit == kEnergy) {
-      WEPLFactor = getWEPLFactorFromEnergy(estimatedEnergy); 
+      WEPLFactor = getWEPLFactorFromWEPL(estimatedRange); 
       for (Int_t i=0; i<n; i++) {
          x[i] = x[i] * WEPLFactor;
          erx[i] = erx[i] * WEPLFactor;
       }
    }
+   */
 
    graph = new TGraphErrors(n, x, y, erx, ery);
    
@@ -140,6 +146,7 @@ TGraphErrors * Track::doRangeFit(Bool_t isScaleVariable) {
    if (kDataType == kData) scaleParameter = 2.7;
    if (kUseAlpide) scaleParameter = 1.6; // was 1.38
    if (kOutputUnit == kPhysical) scaleParameter = 0.73;
+   scaleParameter = 0.73;
 
    TF1 *func = new TF1("fit_BP", fitfunc_DBP, 0, maxRange, 2);
    func->SetParameter(0, estimatedRange);
@@ -156,6 +163,17 @@ TGraphErrors * Track::doRangeFit(Bool_t isScaleVariable) {
    fitRange_ = func->GetParameter(0);
    fitScale_ = func->GetParameter(1);
    fitError_ = func->GetParError(0);
+
+   /*
+   if (kOutputUnit == kWEPL) {
+      Float_t weplfactor = getWEPLFactorFromEnergy(getEnergyFromTL(fitRange_));
+
+      fitError_ = weplfactor * fitError_;
+      fitRange_ = weplfactor * fitRange_;
+      for (int i=0; i<n; i++) x[i] = x[i] * weplfactor;
+
+   }
+   */
 
    return graph;
 }

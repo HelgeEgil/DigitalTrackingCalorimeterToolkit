@@ -37,6 +37,7 @@ void filterArray(Float_t *array, Int_t filterSize) {
    Float_t value;
    Int_t n;
 
+
    for (Int_t i=0; i<arraySize; i++) {
       value = 0;
       n = 0;
@@ -140,7 +141,7 @@ void plotRangesAndStraggling() {
 
    ifstream in0;
    if (!kUseCarbon) {
-      in0.open("../../OutputFiles/findManyRangesDegraderPSTAR.csv");
+      in0.open("../../OutputFiles/findManyRangesDegraderG4.csv");
    }
    else {
       in0.open("../../OutputFiles/findManyRangesDegraderCarbon.csv");
