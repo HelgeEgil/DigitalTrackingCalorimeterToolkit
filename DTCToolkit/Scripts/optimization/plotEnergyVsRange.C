@@ -86,11 +86,11 @@ void plotEnergyVsRange() {
    Float_t estimatedStraggling;
 
    ifstream in1;
-   in1.open("../../Data/Ranges/EnergyAfterDegraderPSTAR.csv");
+   in1.open("../../Data/Ranges/EnergyAfterDegraderG4.csv");
    Int_t thick, n=0;
    Double_t energy;
    while (1) {
-      in1 >> thick >> energy >> dummy0;
+      in1 >> thick >> energy;
       if (!in1.good()) break;   
       thicknesses[n] = thick;
       energies[n++] = energy;
@@ -118,11 +118,11 @@ void plotEnergyVsRange() {
 
       energy = energySpline->Eval(energy_);
 
-      if (thickness_ == 2) arrayE2[nlines2] = energy;
-      if (thickness_ == 3) arrayE3[nlines3] = energy;
-      if (thickness_ == 4) arrayE4[nlines4] = energy;
-      if (thickness_ == 5) arrayE5[nlines5] = energy;
-      if (thickness_ == 6) arrayE6[nlines6] = energy;
+      if (thickness_ == 2) arrayE2[nlines2] = nomrange_;
+      if (thickness_ == 3) arrayE3[nlines3] = nomrange_;
+      if (thickness_ == 4) arrayE4[nlines4] = nomrange_;
+      if (thickness_ == 5) arrayE5[nlines5] = nomrange_;
+      if (thickness_ == 6) arrayE6[nlines6] = nomrange_;
 
       if (thickness_ == 2) arrayMC2[nlines2++] = -nomrange_ + estrange_;
       if (thickness_ == 3) arrayMC3[nlines3++] = estrange_ - nomrange_;
@@ -139,11 +139,11 @@ void plotEnergyVsRange() {
    TGraph *hMC5 = new TGraph(nlines5, arrayE5, arrayMC5);
    TGraph *hMC6 = new TGraph(nlines6, arrayE6, arrayMC6);
 
-   hMC2->SetTitle(";Energy [MeV];");
-   hMC3->SetTitle(";Energy [MeV];");
-   hMC4->SetTitle(";Energy [MeV];");
-   hMC5->SetTitle(";Energy [MeV];");
-   hMC6->SetTitle(";Energy [MeV];");
+   hMC2->SetTitle(";Range [mm WEPL];");
+   hMC3->SetTitle(";Range [mm WEPL];");
+   hMC4->SetTitle(";Range [mm WEPL];");
+   hMC5->SetTitle(";Range [mm WEPL];");
+   hMC6->SetTitle(";Range [mm WEPL];");
 
    Float_t ysize = 0.11;
 
@@ -173,14 +173,17 @@ void plotEnergyVsRange() {
    hMC5->SetLineWidth(3);
    hMC6->SetLineWidth(3);
 
-   Float_t yfrom = -3.5;
-   Float_t yto = 0.5;
+   Float_t yfrom = -1.25;
+   Float_t yto = 1.25;
 
-   hMC2->GetXaxis()->SetRangeUser(60, 240);
-   hMC3->GetXaxis()->SetRangeUser(60, 240);
-   hMC4->GetXaxis()->SetRangeUser(60, 240);
-   hMC5->GetXaxis()->SetRangeUser(60, 240);
-   hMC6->GetXaxis()->SetRangeUser(60, 240);
+   Float_t xfrom = 10;
+   Float_t xto = 380;
+
+   hMC2->GetXaxis()->SetRangeUser(xfrom, xto);
+   hMC3->GetXaxis()->SetRangeUser(xfrom, xto);
+   hMC4->GetXaxis()->SetRangeUser(xfrom, xto);
+   hMC5->GetXaxis()->SetRangeUser(xfrom, xto);
+   hMC6->GetXaxis()->SetRangeUser(xfrom, xto);
    hMC2->GetYaxis()->SetRangeUser(yfrom, yto);
    hMC3->GetYaxis()->SetRangeUser(yfrom, yto);
    hMC4->GetYaxis()->SetRangeUser(yfrom, yto);
@@ -193,7 +196,7 @@ void plotEnergyVsRange() {
    hMC6->GetYaxis()->SetNdivisions(404);
 
    graphPad->cd(1);
-   graphPad->SetGridy();
+   gPad->SetGridy();
    hMC2->Draw("LA");
    TText *t2 = new TText();
    t2->SetTextSize(0.14);
@@ -201,18 +204,22 @@ void plotEnergyVsRange() {
    t2->DrawText(100, -0.5, "2 mm Al absorber"); 
 
    graphPad->cd(2);
+   gPad->SetGridy();
    hMC3->Draw("LA");
    t2->DrawText(100, -0.5, "3 mm Al absorber");
 
    graphPad->cd(3);
+   gPad->SetGridy();
    hMC4->Draw("LA");
    t2->DrawText(100, -0.5, "4 mm Al absorber");
    
    graphPad->cd(4);
+   gPad->SetGridy();
    hMC5->Draw("LA");
    t2->DrawText(100, -0.5, "5 mm Al absorber");
    
    graphPad->cd(5);
+   gPad->SetGridy();
    hMC6->Draw("LA");
    t2->DrawText(100, -0.5, "6 mm Al absorber");
 

@@ -50,7 +50,7 @@ void findAPAndStraggling(Int_t absorberthickness) {
    a = 0.0098; aw = 0.0239;
    p = 1.7806; pw = 1.7548;
 
-   inWater.open("../Data/Ranges/WaterPSTAR.csv");
+   inWater.open("../Data/Ranges/Water.csv");
    while (1) {
       inWater >> energyWater >> range;
       
@@ -59,7 +59,7 @@ void findAPAndStraggling(Int_t absorberthickness) {
       }
 
       arrayE[nlinesWater] = energyWater;
-      arrayRangeWater[nlinesWater++] = range * 10; // file in CM
+      arrayRangeWater[nlinesWater++] = range; // file in CM
    }
 
    inWater.close();

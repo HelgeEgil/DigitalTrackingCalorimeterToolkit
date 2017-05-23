@@ -4,8 +4,8 @@
 import numpy as np
 import pandas as pd
 
-mrd = pd.read_csv("findManyRangesDegraderCarbon.csv", sep=" ", names=["waterdegrader", "absorber", "nomrange", "nomstrag", "inelastic", "remainingenergy", "energystrag"])
-ead = pd.read_csv("EnergyAfterDegraderPSTAR.csv", sep=" ", names=["waterdegrader", "remainingenergy", "energystrag"])
+mrd = pd.read_csv("findManyRangesDegrader.csv", sep=" ", names=["waterdegrader", "absorber", "nomrange", "nomstrag", "inelastic", "remainingenergy", "energystrag"])
+ead = pd.read_csv("EnergyAfterDegraderG4.csv", sep=" ", names=["waterdegrader", "remainingenergy"]) #, "energystrag"])
 
 for index, row in mrd.iterrows():
    absorber = row["absorber"]
@@ -19,4 +19,4 @@ for index, row in mrd.iterrows():
 
    mrd.loc[selection1 & selection2, "remainingenergy"] = energy_new
 
-mrd.to_csv("findManyRangesDegraderCarbonModified.csv", sep=" ", header=False, index=False)
+mrd.to_csv("findManyRangesDegraderModified.csv", sep=" ", header=False, index=False)

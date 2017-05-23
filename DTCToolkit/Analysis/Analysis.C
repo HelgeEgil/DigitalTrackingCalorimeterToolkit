@@ -833,9 +833,9 @@ Float_t drawBraggPeakGraphFit(Int_t Runs, Int_t dataType, Bool_t recreate, Float
    Float_t        finalEnergy = 0;
    Float_t        fitRange, fitScale, fitError;
    Int_t          nCutDueToTrackEndingAbruptly = 0;
-   Int_t          nPlotX = 1, nPlotY = 1;
+   Int_t          nPlotX = 3, nPlotY = 3;
    Int_t          fitIdx = 0, plotSize = nPlotX*nPlotY;
-   Int_t          skipPlot = 12; 
+   Int_t          skipPlot = 30;
    TGraphErrors * outputGraph;
    char         * sDataType = getDataTypeChar(dataType);
    char         * sMaterial = getMaterialChar();
@@ -894,12 +894,13 @@ Float_t drawBraggPeakGraphFit(Int_t Runs, Int_t dataType, Bool_t recreate, Float
       outputGraph = (TGraphErrors*) thisTrack->doRangeFit(false);
       if (!outputGraph) continue;
 
-
       fitRange = thisTrack->getFitParameterRange();
       fitScale = thisTrack->getFitParameterScale();
       fitError = quadratureAdd(thisTrack->getFitParameterError(), dz/sqrt(12)); // latter term from error on layer position
 
-      hFitResults->Fill(fitRange);
+      cGraph->Update();
+
+      hFitResults->Fill(getUnitFromTL(fitRange));
 
       if (fitIdx < plotSize && kDrawIndividualGraphs && j>=skipPlot) {
          drawIndividualGraphs(cGraph, outputGraph, fitRange, fitScale, fitError, fitIdx++);
@@ -2481,6 +2482,9 @@ TF1 *  doSimpleGaussianFit (TH1F *h, Float_t *means, Float_t *sigmas) {
 
    Int_t binSigmaFrom = axis->FindBin(sigmaFrom);
    Int_t binSigmaTo = axis->FindBin(sigmaTo);
+   
+   if (binSigmaTo > h->GetNbinsX()) binSigmaTo = h->GetNbinsX();
+   if (binSigmaTo < binSigmaFrom) binSigmaTo = h->GetNbinsX();
 
    printf("doSimpleGaussianFit: Searching from %.2f (bin %d)  to %.2f (bin %d).\n", sigmaFrom, binSigmaFrom, sigmaTo, binSigmaTo);
 
@@ -2725,4 +2729,17 @@ Float_t doNGaussianFit ( TH1F *h, Float_t *means, Float_t *sigmas) {
    sigmas[9] = empiricalSigma;
 
    return empiricalMean;
+}
+
+void generateWaterDegraderValues() {
+   // Use the Water.csv file to generate residual energies after a varying water phantom thickness
+   // Store the values in Data/Ranges/EnergyAfterDegrader.csv
+
+   // getEnergyAtWEPL(E0, depth)
+
+   ofstream file("Data/Ranges/EnergyAfterDegraderG4.csv", ofstream::out);
+   for (Int_t depth = 0; depth < 380; depth++) {
+      file << depth << " " << getEnergyAtWEPL(250, (float) depth) << endl;
+      printf("Writing to file: %d %.4f\n", depth, getEnergyAtWEPL(250, (float) depth));
+   }
 }
