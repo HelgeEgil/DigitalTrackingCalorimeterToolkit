@@ -842,11 +842,12 @@ Float_t drawBraggPeakGraphFit(Int_t Runs, Int_t dataType, Bool_t recreate, Float
    char         * hTitle = Form("Fitted energy of a %.2f MeV beam in %s (%s)", run_energy, sMaterial, sDataType);
 
    Int_t nEnergies = getUnitFromEnergy(run_energy);
+   gStyle->SetOptTitle(0);
 
    if (useDegrader) {
       hTitle = Form("Fitted energy of a %.0f MeV nominal beam on %s DTC w/%.1f mm water degrader", energy, sMaterial, degraderThickness);
    }
-   TCanvas      * cGraph = new TCanvas("cGraph", "Fitted data points", nPlotX*500, 600);
+   TCanvas      * cGraph = new TCanvas("cGraph", "Fitted data points", nPlotX*500, 500);
    TCanvas      * cFitResults = new TCanvas("cFitResults", hTitle, 1000, 1000);
 //   TCanvas      * cAngle = new TCanvas("cAngle", "Incoming angles", 800, 800);
    TH1F         * hFitResults = new TH1F("fitResult", hTitle, fmax(nEnergies*8,200), getUnitFromEnergy(0), getUnitFromEnergy(run_energy)*1.4+10);
@@ -1052,10 +1053,11 @@ Float_t drawBraggPeakGraphFit(Int_t Runs, Int_t dataType, Bool_t recreate, Float
    TPaveStats *ps = (TPaveStats*) cFitResults->GetPrimitive("stats");
    hFitResultsDroppedData->SetBit(TH1::kNoStats);
    hFitResults->SetBit(TH1::kNoStats);
-   ps->SetY1NDC(0.53); ps->SetX1NDC(0.72);
+   ps->SetX1NDC(0.50); ps->SetX2NDC(0.90);
+   ps->SetY1NDC(0.76); ps->SetY2NDC(0.90);
    ps->SetTextFont(22);
-   ps->AddText(Form("Nominal WEPL = %.2f", expectedMean));
-   ps->AddText(Form("Nominal straggling = %.2f", expectedStraggling));
+   ps->AddText(Form("Nominal WEPL = %.2f #pm %.2f", expectedMean, expectedStraggling));
+//   ps->AddText(Form("Nominal straggling = %.2f", expectedStraggling));
   
    /*
    for (Int_t i=0; i<2; i++) {
@@ -1065,9 +1067,9 @@ Float_t drawBraggPeakGraphFit(Int_t Runs, Int_t dataType, Bool_t recreate, Float
    }
    */
 
-   ps->AddText(Form("Resulting WEPL = %.2f #pm %.2f", empiricalMean, empiricalSigma));
+   ps->AddText(Form("Calculated WEPL = %.2f #pm %.2f", empiricalMean, empiricalSigma));
    ps->AddText(Form("WEPL deviation = %.2f #pm %.2f", empiricalMean - expectedMean, empiricalSigma - expectedStraggling));
-   ps->AddText(Form("Resulting energy = %.2f #pm %.2f", getEnergyFromUnit(empiricalMean), energySigma));
+//   ps->AddText(Form("Resulting energy = %.2f #pm %.2f", getEnergyFromUnit(empiricalMean), energySigma));
       
 /*
    cAngle->cd();
