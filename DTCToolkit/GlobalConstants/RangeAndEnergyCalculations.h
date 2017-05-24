@@ -56,4 +56,12 @@ Float_t  getEnergyLossFromAluminumAbsorber(Float_t energy);
 Float_t  getEnergyLossFromTracker(Float_t energy);
 Float_t  getEnergyLossErrorFromAluminumAbsorber();
 
+// Fallback Bragg-Kleeman functions
+Float_t  getBKTL(Float_t energy, Float_t aa, Float_t pp);
+Float_t  getBKEnergy(Float_t tl, Float_t aa, Float_t pp);
+Float_t  getBKEnergyHigh(Float_t tl);
+Float_t  getBKTLHigh(Float_t energy);
+Float_t  getBKEnergyLow(Float_t tl);
+Float_t  getBKTLLow(Float_t energy);
+
 #endif

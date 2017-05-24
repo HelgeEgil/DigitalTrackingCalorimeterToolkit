@@ -835,7 +835,7 @@ Float_t drawBraggPeakGraphFit(Int_t Runs, Int_t dataType, Bool_t recreate, Float
    Int_t          nCutDueToTrackEndingAbruptly = 0;
    Int_t          nPlotX = 3, nPlotY = 3;
    Int_t          fitIdx = 0, plotSize = nPlotX*nPlotY;
-   Int_t          skipPlot = 30;
+   Int_t          skipPlot = 10;
    TGraphErrors * outputGraph;
    char         * sDataType = getDataTypeChar(dataType);
    char         * sMaterial = getMaterialChar();
@@ -847,7 +847,7 @@ Float_t drawBraggPeakGraphFit(Int_t Runs, Int_t dataType, Bool_t recreate, Float
    if (useDegrader) {
       hTitle = Form("Fitted energy of a %.0f MeV nominal beam on %s DTC w/%.1f mm water degrader", energy, sMaterial, degraderThickness);
    }
-   TCanvas      * cGraph = new TCanvas("cGraph", "Fitted data points", nPlotX*500, 500);
+   TCanvas      * cGraph = new TCanvas("cGraph", "Fitted data points", nPlotX*500, nPlotY*500);
    TCanvas      * cFitResults = new TCanvas("cFitResults", hTitle, 1000, 1000);
 //   TCanvas      * cAngle = new TCanvas("cAngle", "Incoming angles", 800, 800);
    TH1F         * hFitResults = new TH1F("fitResult", hTitle, fmax(nEnergies*8,200), getUnitFromEnergy(0), getUnitFromEnergy(run_energy)*1.4+10);
@@ -917,12 +917,13 @@ Float_t drawBraggPeakGraphFit(Int_t Runs, Int_t dataType, Bool_t recreate, Float
             gPad->SetRightMargin(0.01);
             outputGraph->GetYaxis()->SetLabelOffset(2);
             outputGraph->SetTitle(Form("Bragg-Kleeman fit to exp. data at %.0f MeV", run_energy));
-            
+           /* 
             gPad->Update();
             TPaveText *title = (TPaveText*) gPad->GetPrimitive("title");
             title->SetTextFont(22);
             title->SetTextSize(0.06);
             gPad->Modified();
+            */
             
          }
 
@@ -1054,8 +1055,8 @@ Float_t drawBraggPeakGraphFit(Int_t Runs, Int_t dataType, Bool_t recreate, Float
    TPaveStats *ps = (TPaveStats*) cFitResults->GetPrimitive("stats");
    hFitResultsDroppedData->SetBit(TH1::kNoStats);
    hFitResults->SetBit(TH1::kNoStats);
-   ps->SetX1NDC(0.50); ps->SetX2NDC(0.90);
-   ps->SetY1NDC(0.76); ps->SetY2NDC(0.90);
+   ps->SetX1NDC(0.4176); ps->SetX2NDC(0.9257);
+   ps->SetY1NDC(0.7415); ps->SetY2NDC(0.9712);
    ps->SetTextFont(22);
    ps->AddText(Form("Nominal WEPL = %.2f #pm %.2f", expectedMean, expectedStraggling));
 //   ps->AddText(Form("Nominal straggling = %.2f", expectedStraggling));

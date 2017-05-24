@@ -27,6 +27,16 @@ Float_t getEnergyAtTL(Float_t E0, Float_t depth, TSpline3 *spline, TSpline3 *inv
 }
 
 Float_t  getEnergyFromTL(Float_t range) {
+   if (range == 0) return 0;
+
+   else if (range < splineMaterialInv->GetXmin()) {
+      return getBKEnergyLow(range);
+   }
+   
+   else if (range > splineMaterialInv->GetXmax()) {
+      return getBKEnergyHigh(range);
+   }
+
    return getEnergyFromTL(range, splineMaterialInv);
 }
 
@@ -52,6 +62,15 @@ Float_t getEnergyAtTLFromPureAluminum(Float_t E0, Float_t depth) {
 
 Float_t getTLFromEnergy(Float_t energy) {
    if (energy == 0) return 0;
+
+   else if (energy < splineMaterial->GetXmin()) {
+      return getBKTLLow(energy);
+   }
+
+   else if (energy > splineMaterial->GetXmax()) {
+      return getBKTLHigh(energy);
+   }
+
    return getTLFromEnergy(energy, splineMaterial);
 }
 
@@ -304,4 +323,34 @@ Float_t getEnergyLossFromTracker(Float_t energy) {
 
 Float_t getEnergyLossErrorFromAluminumAbsorber() {
    return 0.135;
+}
+
+// BRAGG-KLEEMAN DERIVED FALLBACK FUNCTIONS
+// FOR LOWER-QUALITY CALCULATIONS OUTSIDE SPLINE REGIONS
+
+
+// General functions
+Float_t getBKEnergy(Float_t tl, Float_t aa, Float_t pp) {
+   return pow(tl / aa, 1/pp);
+}
+
+Float_t getBKTL(Float_t energy, Float_t aa, Float_t pp) {
+   return aa * pow(energy, pp);
+}
+
+// Specific functions
+Float_t getBKEnergyHigh(Float_t tl) {
+   return getBKEnergy(tl, alpha_material_high, p_material_high);
+}
+
+Float_t getBKEnergyLow(Float_t tl) {
+   return getBKEnergy(tl, alpha_material_low, p_material_low);
+}
+
+Float_t getBKTLHigh(Float_t energy) {
+   return getBKTL(energy, alpha_material_high, p_material_high);
+}
+
+Float_t getBKTLLow(Float_t energy) {
+   return getBKTL(energy, alpha_material_low, p_material_low);
 }

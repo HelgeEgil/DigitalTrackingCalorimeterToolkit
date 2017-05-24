@@ -30,40 +30,27 @@ const Int_t arraySize = 1500;
 const Int_t xFrom = 40;
 
 void plotEnergyVsRange() {
-   TCanvas *c1 = new TCanvas("c1", "Range accuracy", 1200, 800);
+   TCanvas *c1 = new TCanvas("c1", "Range accuracy", 1100, 800);
    
-   TPaveLabel *Xtitle = new TPaveLabel(0.01, 0.1, 0.03, 0.9, "Range deviation [mm WEPL]");
+   TPaveLabel *Ytitle = new TPaveLabel(0.01, 0.05, 0.03, 0.9, "Range deviation [mm WEPL]");
+   Ytitle->SetBorderSize(0);
+   Ytitle->SetFillColor(kWhite);
+   Ytitle->SetTextAngle(90);
+   Ytitle->SetTextFont(22);
+   Ytitle->SetTextSize(0.04);
+   Ytitle->Draw();
+   
+   TPaveLabel *Xtitle = new TPaveLabel(0.5, 0.05, 0.95, 0.1, "Proton range [mm WET]");
    Xtitle->SetBorderSize(0);
    Xtitle->SetFillColor(kWhite);
-   Xtitle->SetTextAngle(90);
    Xtitle->SetTextFont(22);
-   Xtitle->SetTextSize(0.05);
+   Xtitle->SetTextSize(0.6);
    Xtitle->Draw();
 
-   TPad *graphPad = new TPad("Graphs", "Graphs", 0.05, 0.05, 0.95, 0.95);
+   TPad *graphPad = new TPad("Graphs", "Graphs", 0.05, 0.1, 0.95, 0.95);
    graphPad->Draw();
    graphPad->cd();
-   graphPad->Divide(1,5,0,0);
-
-   /*
-   Double_t W = 0.3;
-   Int_t Ny = 3;
-   Double_t Ym = (1-(Ny*W))/2;
-   Double_t dw = (W*0.1)/4;
-
-   TPad *p1 = new TPad("p1", "p1", 0.2, Ym, 0.8, Ym+W+dw, 0, 0, 0);
-   p1->SetBottomMargin(0);
-   p1->Draw();
-
-   TPad *p2 = new TPad("p1", "p1", 0.2, Ym+W+dw, 0.8, Ym+2*W-dw, 0, 0, 0);
-   p2->SetTopMargin(0);
-   p2->SetBottomMargin(0);
-   p2->Draw();
-   
-   TPad *p3 = new TPad("p1", "p1", 0.2, Ym+2*W-dw, 0.8, Ym+3*W, 0, 0, 0);
-   p3->SetTopMargin(0);
-   p3->Draw();
-*/
+   graphPad->Divide(1,5,0.00001,0.00001);
 
    Float_t  arrayE2[arraySize] = {0}; // energy MC
    Float_t  arrayE3[arraySize] = {0}; // energy MC
@@ -96,12 +83,13 @@ void plotEnergyVsRange() {
       energies[n++] = energy;
    }
    in1.close();
+   printf("Found %d lines in EnergyAfterDegrader[G4].csv\n", n);
 
    TSpline3 *energySpline = new TSpline3("energySpline", thicknesses, energies, n);
 
    ifstream in;
    if (!kUseCarbon) {
-      in.open("../../OutputFiles/result_makebraggpeakfit.csv");
+      in.open("../../OutputFiles/result_makebraggpeakfitAluminiumNew.csv");
    }
    else {
       in.open("../../OutputFiles/result_makebraggpeakfitCarbon.csv");
@@ -145,12 +133,10 @@ void plotEnergyVsRange() {
    hMC5->SetTitle(";Range [mm WEPL];");
    hMC6->SetTitle(";Range [mm WEPL];");
 
-   Float_t ysize = 0.11;
+   Float_t ysize = 0.18;
 
-   hMC6->GetXaxis()->SetTitleFont(22);
-   hMC6->GetXaxis()->SetTitleSize(0.11);
+   hMC6->GetXaxis()->SetLabelSize(ysize);
    hMC6->GetXaxis()->SetLabelFont(22);
-   hMC6->GetXaxis()->SetLabelSize(0.11);
    hMC4->GetYaxis()->SetLabelSize(ysize);
    hMC4->GetYaxis()->SetLabelFont(22);
    hMC2->GetYaxis()->SetLabelSize(ysize);
@@ -161,6 +147,19 @@ void plotEnergyVsRange() {
    hMC3->GetYaxis()->SetLabelFont(22);
    hMC5->GetYaxis()->SetLabelSize(ysize);
    hMC5->GetYaxis()->SetLabelFont(22);
+   hMC4->GetXaxis()->SetLabelSize(ysize);
+   hMC4->GetXaxis()->SetLabelFont(22);
+   hMC2->GetXaxis()->SetLabelSize(ysize);
+   hMC2->GetXaxis()->SetLabelFont(22);
+   hMC3->GetXaxis()->SetLabelSize(ysize);
+   hMC3->GetXaxis()->SetLabelFont(22);
+   hMC5->GetXaxis()->SetLabelSize(ysize);
+   hMC5->GetXaxis()->SetLabelFont(22);
+   hMC2->GetXaxis()->SetTitleOffset(3);
+   hMC3->GetXaxis()->SetTitleOffset(3);
+   hMC4->GetXaxis()->SetTitleOffset(3);
+   hMC5->GetXaxis()->SetTitleOffset(3);
+   hMC6->GetXaxis()->SetTitleOffset(3);
 
    hMC2->SetLineColor(kRed+4);
    hMC3->SetLineColor(kRed+3);
@@ -199,7 +198,7 @@ void plotEnergyVsRange() {
    gPad->SetGridy();
    hMC2->Draw("LA");
    TText *t2 = new TText();
-   t2->SetTextSize(0.14);
+   t2->SetTextSize(0.2);
    t2->SetTextFont(22);
    t2->DrawText(100, -0.5, "2 mm Al absorber"); 
 

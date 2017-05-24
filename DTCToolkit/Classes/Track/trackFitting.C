@@ -124,7 +124,7 @@ TGraphErrors * Track::doRangeFit(Bool_t isScaleVariable) {
 //   minRange = getUnitFromTL(x[n-1]);
 //   estimatedRange = getUnitFromTL(x[n-1] + startFittingDistance);
 
-   minRange = x[n-1];
+   minRange = x[n-2];
    maxRange = x[n-1] + overFittingDistance;
    estimatedRange = x[n-1] + startFittingDistance;
 
@@ -163,17 +163,6 @@ TGraphErrors * Track::doRangeFit(Bool_t isScaleVariable) {
    fitRange_ = func->GetParameter(0);
    fitScale_ = func->GetParameter(1);
    fitError_ = func->GetParError(0);
-
-   /*
-   if (kOutputUnit == kWEPL) {
-      Float_t weplfactor = getWEPLFactorFromEnergy(getEnergyFromTL(fitRange_));
-
-      fitError_ = weplfactor * fitError_;
-      fitRange_ = weplfactor * fitRange_;
-      for (int i=0; i<n; i++) x[i] = x[i] * weplfactor;
-
-   }
-   */
 
    return graph;
 }

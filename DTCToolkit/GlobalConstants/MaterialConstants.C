@@ -195,6 +195,17 @@ void  createSplines() {
    p_aluminum = range_energy_fit->GetParameter(1);
    printf("Through fitting, found alpha = %.5f, p = %.5f.\n", alpha_aluminum, p_aluminum);
 
+   // FIND BRAGG-KLEEMAN PARAMETERS HIGH / LOW
+   range_energy->Fit("range_energy_fit", "Q,M", "", 0, 40); // fit 0 - 40 MeV
+   alpha_material_low = range_energy_fit->GetParameter(0);
+   p_material_low = range_energy_fit->GetParameter(1);
+
+   range_energy->Fit("range_energy_fit", "Q,M", "", 220, 250); // fir 220 - 250 MeV
+   alpha_material_high = range_energy_fit->GetParameter(0);
+   p_material_high = range_energy_fit->GetParameter(1);
+
+   printf("LOW parameters: alpha = %.4f, p = %.4f. HIGH parameters: alpha = %.4f, p = %.4f.\n", alpha_material_low, p_material_low, alpha_material_high, p_material_high);
+
    // About the same in all geometries
    straggling_a = 1.76;
    straggling_b = 0.0012; 

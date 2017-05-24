@@ -12,11 +12,13 @@
 #include <TText.h>
 #include <iostream>
 #include <fstream>
+#include <TVirtualFFT.h>
 #include <TLatex.h>
 #include <string.h>
 #include <TString.h>
 #include <TLegend.h>
 #include <TStyle.h>
+#include <TSpline.h>
 #include <THStack.h>
 #include <TRandom3.h>
 #include <TPad.h>
@@ -24,13 +26,13 @@
 
 using namespace std;
 
-Int_t absorberThickness = 3;
+Int_t absorberThickness = 4;
 Bool_t kFilterData = true;
 Bool_t kUseCarbon = false;
 Int_t filterSize = 1;
 const Int_t arraySize = 1500;
-const Int_t xFrom = 40;
-const Int_t xTo = 350;
+const Int_t xFrom = 20;
+const Int_t xTo = 370;
 
 void filterArray(Float_t *array, Int_t filterSize) {
    Float_t tempArray[arraySize];
@@ -43,14 +45,14 @@ void filterArray(Float_t *array, Int_t filterSize) {
       n = 0;
 
       for (Int_t j=i-filterSize/2; j<=i+filterSize/2; j++) {
-         if (j<0 || j>=arraySize) {
+         if (j<0 || j>=arraySize || array[j] == 0) {
             continue;
          }
          value += array[j];
          n++;
       }
 
-      value /= n;
+      if (n>0) value /= n;
       tempArray[i] = value;
    }
 
@@ -71,7 +73,9 @@ void plotRangesAndStraggling() {
    TCanvas *c6 = new TCanvas("c6", "Resolution", 1800, 600);
    c6->Divide(4,1,0.0001,0.0001);
 
-   TCanvas *c6red = new TCanvas("c6red", "Resolution", 500, 600);
+   TCanvas *c6red = new TCanvas("c6red", "Resolution", 500, 500);
+
+   TCanvas *cFourier = new TCanvas("cFourier", "1D fourier of accuracy", 1000, 500);
 
    Float_t  arrayE[arraySize] = {0}; // energy MC
    Float_t  arrayMCActualSigma[arraySize] = {0}; // Measured range straeggling from full MC
@@ -109,28 +113,30 @@ void plotRangesAndStraggling() {
    
 
    Float_t a_dtc = 0, p_dtc = 0;
-   ifstream inRanges;
+   ifstream in;
    if (!kUseCarbon) {
-      inRanges.open(Form("../../Data/Ranges/%dmm_Al.csv", absorberThickness));
+      in.open(Form("../../Data/Ranges/%dmm_Al.csv", absorberThickness));
    }
    else {
-      inRanges.open(Form("../../Data/Ranges/%dmm_C.csv", absorberThickness));
+      in.open(Form("../../Data/Ranges/%dmm_C.csv", absorberThickness));
    }
 
    Double_t dtcRanges[500];
    Double_t dtcEnergies[500];
+   Double_t rangesWater[500];
+   Double_t energiesWater[500];
    Double_t dtcRange = 0;
    Double_t dtcEnergy = 0;
    Int_t    dtcIdx = 0;
 
    while (1) {
-      inRanges >> dtcEnergy >> dtcRange;
-      if (!inRanges.good()) break;
+      in >> dtcEnergy >> dtcRange;
+      if (!in.good()) break;
 
       dtcEnergies[dtcIdx] = dtcEnergy;
       dtcRanges[dtcIdx++] = dtcRange;
    }
-   inRanges.close();
+   in.close();
 
    TGraph * range_energy = new TGraph(dtcIdx, dtcEnergies, dtcRanges);
    TF1    * range_energy_fit = new TF1("range_energy_fit", "[0] * pow(x, [1])");
@@ -139,27 +145,47 @@ void plotRangesAndStraggling() {
    a_dtc = range_energy_fit->GetParameter(0);
    p_dtc = range_energy_fit->GetParameter(1);
 
-   ifstream in0;
+
+   Int_t idxWater = 0;
+   Float_t energy, range;
+   in.open("../../Data/Ranges/Water.csv");
+   while (1) {
+      in >> energy >> range;
+      if (!in.good()) break;
+
+      rangesWater[idxWater] = range;
+      energiesWater[idxWater++] = energy;
+   }
+   in.close();
+
+   splineWater = new TSpline3("splineWater", energiesWater, rangesWater, idxWater);
+   splineWaterInv = new TSpline3("splineWaterInv", rangesWater, energiesWater, idxWater);
+   splineDTC = new TSpline3("splineDTC", dtcEnergies, dtcRanges, dtcIdx);
+   splineDTCInv = new TSpline3("splineDTCInv", dtcRanges, dtcEnergies, dtcIdx);
+
    if (!kUseCarbon) {
-      in0.open("../../OutputFiles/findManyRangesDegraderG4.csv");
+      in.open("../../OutputFiles/findManyRangesDegrader.csv");
    }
    else {
-      in0.open("../../OutputFiles/findManyRangesDegraderCarbon.csv");
+      in.open("../../OutputFiles/findManyRangesDegraderCarbon.csv");
    }
 
    Int_t nlines0 = 0;
    Float_t a_wtr = 0.02387;
    Float_t p_wtr = 1.7547;
+
+   Float_t wepl_ratio = splineWater->Eval(242) / splineDTC->Eval(242);
+   Float_t wepl_ratio0 = a_wtr / a_dtc * pow(242 / a_wtr, 1 - p_dtc / p_wtr);
+
+   cout << "WEPL ratio (spline) = " << wepl_ratio << endl;
+   cout << "WEPL ratio (BK) = " << wepl_ratio0 << endl;
    
-   Float_t wepl_ratio0 = a_wtr / a_dtc * pow(250 / a_wtr, 1 - p_dtc / p_wtr);
-   cout << "WEPL ratio = " << wepl_ratio0 << endl;
-   //   Float_t wtr_range = a_wtr * pow(250, p_wtr);
-   Float_t wtr_range = 378.225; // GATE
+   Float_t wtr_range = splineWater->Eval(250); // GATE
 
    while (1) {
-      in0 >>  waterphantomthickness_ >> thickness_ >> nomrange_ >> nomsigma_ >> dummy0 >> dummy0 >> dummy0;
+      in >>  waterphantomthickness_ >> thickness_ >> nomrange_ >> nomsigma_ >> dummy0 >> energy >> dummy0;
 
-      if (!in0.good()) {
+      if (!in.good()) {
          break;
       }
 
@@ -167,15 +193,20 @@ void plotRangesAndStraggling() {
          continue;
       }
 
-      arrayMCActualSigma[nlines0] = nomsigma_ * wepl_ratio0;
-      arrayMCActualSigmaRatio[nlines0] = nomsigma_ * 100 * wepl_ratio0 / wtr_range;
-      arrayMCActualResidualRange[nlines0++] = nomrange_ * wepl_ratio0;
-   }
-   in0.close();
+//      wepl_ratio = splineWater->Eval(energy) / splineDTC->Eval(energy);
 
-   ifstream in;
+//      arrayMCActualSigma[nlines0] = nomsigma_ * wepl_ratio0;
+//      arrayMCActualSigmaRatio[nlines0] = nomsigma_ * 100 * wepl_ratio0 / wtr_range;
+//      arrayMCActualResidualRange[nlines0++] = nomrange_ * wepl_ratio0;
+      arrayMCActualSigma[nlines0] = nomsigma_ * wepl_ratio;
+      arrayMCActualSigmaRatio[nlines0] = nomsigma_ * 100 * wepl_ratio / wtr_range;
+      arrayMCActualResidualRange[nlines0++] = nomrange_ * wepl_ratio;
+      
+   }
+   in.close();
+
    if (!kUseCarbon) {
-      in.open("../../OutputFiles/result_makebraggpeakfit.csv");
+      in.open("../../OutputFiles/result_makebraggpeakfitAluminiumNew.csv");
    }
    else {
       in.open("../../OutputFiles/result_makebraggpeakfitCarbon.csv");
@@ -296,7 +327,8 @@ void plotRangesAndStraggling() {
    leg->Draw();
 
    pad1->Update();
-   
+
+
    pad2->cd();
 
    TGraphErrors *hMCD = new TGraphErrors(nlines, arrayMC, arrayMCDelta, arrayEE, arrayEMC);
@@ -361,10 +393,20 @@ void plotRangesAndStraggling() {
 
    c6->cd(1);
    TGraph *gResolution = new TGraph(nlines, arrayMC, arrayEMC);
-   gResolution->SetTitle(Form("WEPL resolution using %d mm Al absorber;Depth in detector [WEPL mm];#Delta WEPL [mm]", mmAbsorbator));
-   gResolution->GetYaxis()->SetRangeUser(2,5.5);
+//   gResolution->SetTitle(Form("WEPL resolution using %d mm Al absorber;Depth in detector [WEPL mm];#Delta WEPL [mm]", mmAbsorbator));
+   gResolution->SetTitle(";Proton range [mm WET];Range straggling [mm WET]");
+   gResolution->GetYaxis()->SetRangeUser(3.5,6);
    gResolution->GetYaxis()->SetTitleOffset(1.2);
+   gResolution->GetYaxis()->SetDecimals();
    gResolution->GetXaxis()->SetRangeUser(xFrom,xTo);
+   gResolution->GetXaxis()->SetTitleFont(22);
+   gResolution->GetYaxis()->SetTitleFont(22);
+   gResolution->GetXaxis()->SetLabelFont(22);
+   gResolution->GetYaxis()->SetLabelFont(22);
+   gResolution->GetXaxis()->SetTitleSize(0.05);
+   gResolution->GetYaxis()->SetTitleSize(0.05);
+   gResolution->GetXaxis()->SetLabelSize(0.05);
+   gResolution->GetYaxis()->SetLabelSize(0.05);
    gResolution->SetMarkerColor(kBlue);
    gResolution->SetMarkerStyle(21);
    gResolution->SetMarkerSize(1);
@@ -377,8 +419,8 @@ void plotRangesAndStraggling() {
   
    TF1 * fRes = new TF1("fRes", "pol0");
    fRes->SetLineColor(kBlack);
-   gResolution->Fit(fRes, "B,Q", "", xFrom, xTo);
-
+   gResolution->Fit(fRes, "B,Q,N", "", xFrom, xTo);
+/*
    if (kFilterData) {
       gPad->Update();
       TPaveText * title = (TPaveText *)gPad->FindObject("title");
@@ -386,6 +428,7 @@ void plotRangesAndStraggling() {
       title->SetTextSize(0.04);
       gPad->Modified();
    }
+   */
    
    TGraph *gResolutionStraggling = new TGraph(nlines0, arrayMCActualResidualRange, arrayMCActualSigma);
    gResolutionStraggling->SetLineWidth(3);
@@ -405,9 +448,9 @@ void plotRangesAndStraggling() {
    TLegend *legRes = new TLegend(0.17, 0.77, 0.69, 0.88);
    legRes->SetTextSize(0.03);
    legRes->SetTextFont(22);
-   legRes->AddEntry(gResolution, "Measured range spread", "L");
-   legRes->AddEntry(fRes, "   + Mean value", "L");
-   legRes->AddEntry(gResolutionStraggling, "MC truth range straggling", "L");
+   legRes->AddEntry(gResolution, "Measured straggling", "L");
+//   legRes->AddEntry(fRes, "   + Mean value", "L");
+   legRes->AddEntry(gResolutionStraggling, "MC truth straggling", "L");
    legRes->AddEntry(lWaterStraggling, "Straggling in water", "L");
    legRes->Draw();
    
@@ -415,7 +458,18 @@ void plotRangesAndStraggling() {
    gResolution->Draw("LA");
    gResolutionStraggling->Draw("L");
    lWaterStraggling->Draw();
-   legRes->Draw();
+
+   TLatex *t = new TLatex();
+   t->SetTextSize(0.045);
+   t->SetTextFont(22);
+   t->SetTextAngle(16.35);
+   t->DrawLatex(82.5, 5.36, "Measured straggling #LT#sigma#GT");
+   t->SetTextAngle(13);
+   t->DrawLatex(200.8, 4, "MC truth straggling");
+   t->SetTextAngle(0);
+   t->DrawLatex(232, 3.679, "Straggling in water");
+
+//   legRes->Draw();
 
    c6->cd(2);
    TGraph *gResolutionRatio = new TGraph(nlines, arrayMC, arrayEMCRatio);
@@ -473,11 +527,12 @@ void plotRangesAndStraggling() {
    legResRatio->Draw();
 
    c6->cd(3);
+   Int_t idx=0;
    for (Int_t i=0; i<nlines0; i++) {
-      arrayStragglingsRatio[i] = arrayEMCRatio[i] / arrayMCActualSigmaRatio[i];
+      if (arrayEMCRatio[i]>0) arrayStragglingsRatio[idx++] = arrayEMCRatio[i] / arrayMCActualSigmaRatio[i];
    }
 
-   TGraph *gStragglingsRatio = new TGraph(nlines0, arrayMCActualResidualRange, arrayStragglingsRatio);
+   TGraph *gStragglingsRatio = new TGraph(idx, arrayMCActualResidualRange, arrayStragglingsRatio);
    gStragglingsRatio->SetTitle(Form("Resolution/straggling, %d mm Al absorber;Depth in detector [WEPL mm]; Resolution / straggling", mmAbsorbator));
    gStragglingsRatio->GetYaxis()->SetRangeUser(0.3, 1.4);
    gStragglingsRatio->GetYaxis()->SetTitleOffset(1.2);
@@ -506,7 +561,7 @@ void plotRangesAndStraggling() {
 
    Float_t subtractMCStraggling[arraySize];
    Float_t subtractWaterStraggling[arraySize];
-   Float_t waterStraggling = 3.971;
+   Float_t waterStraggling = 3.791;
 
    for (Int_t i=0; i<arraySize; i++) {
       if (arrayEMC[i] > arrayMCActualSigma[i]) {
@@ -566,5 +621,39 @@ void plotRangesAndStraggling() {
       title->InsertText(Form("Data filtered, size %d. Mean value = %.2f mm.", filterSize, fResMC->GetParameter(0)));
       gPad->Modified();
    }
+   
+   cFourier->Divide(2,1,0.0000001,0.000001);
+   cFourier->cd(1);
+   Float_t from = arrayMC[0];
+   Float_t to = arrayMC[nlines-1];
+   // Want 4pi/sqrt(nlines)
+   // from = 0
+   // to = 4pi/sqrt(nlines)
+
+   Float_t  RANGE = 50;
+   Int_t    PAD = 500;
+   TH1D *hRangeError = new TH1D("hRangeError", Form("Range Error Histogram (%d mm Al)",absorberThickness), 250+2*PAD, 50-PAD, 300+PAD);
+   printf("Making 251 bins from %.2f to %.2f\n", arrayMC[308], arrayMC[58]);
+   for (int i=308; i>57; i--) {
+      hRangeError->Fill(RANGE, arrayMCDelta[i]);// - ( 0.333 - 0.00454799 + 0.0567 - (0.003867 +0.000814089)*RANGE + (4.012e-6 + 2.32894e-06) * pow(RANGE,2) ));
+      RANGE++;
+   }
+   hRangeError->GetXaxis()->SetRangeUser(50,300);
+   hRangeError->SetLineColor(kBlack);
+//   hRangeError->SetFillColor(kOrange-3);
+   hRangeError->Draw();
+
+   cFourier->cd(2);
+   TH1 *hm = 0;
+   TVirtualFFT::SetTransform(0);
+   hm = hRangeError->FFT(hm, "MAG");
+   hm->Scale(1/sqrt(250));
+   hm->GetXaxis()->SetRangeUser(50,250);
+   hm->SetTitle("Magnitude of Fourier transform");
+   hm->SetFillColor(kOrange);
+   hm->SetLineColor(kBlack);
+   hm->GetYaxis()->SetRangeUser(0, 5);
+   hm->Draw();
+   gPad->Update();
 
 }
