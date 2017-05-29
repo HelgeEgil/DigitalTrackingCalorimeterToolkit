@@ -13,7 +13,7 @@ void Run(int energy) {
    Int_t    eventID, parentID, lastEventID = -1;
    Float_t expectedRange = 0.0262 * pow(energy, 1.736);
 
-   TH1F   * rangeHistogram = new TH1F("rangeHistogram", "Stopping position for protons;Range [mm];Entries", 800, fmax(expectedRange - 20, 0), expectedRange + 20);
+   TH1F   * rangeHistogram = new TH1F("rangeHistogram", "Stopping position for protons;Range [mm];Entries", 800, fmax(expectedRange * 0.85*0, 0), expectedRange*1.07);
 
    tree->SetBranchAddress("posZ", &z);
    tree->SetBranchAddress("eventID", &eventID);
@@ -27,7 +27,7 @@ void Run(int energy) {
 
       if (eventID != lastEventID && lastEventID >= 0) {
          rangeHistogram->Fill(lastZ);
-         printf("The final energy loss is %.2f MeV.\n", dE);
+//         printf("The final energy loss is %.2f MeV.\n", dE);
          dE = 0;
 
       }

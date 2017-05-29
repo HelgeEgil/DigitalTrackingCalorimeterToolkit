@@ -13,17 +13,16 @@ void findManyRanges(Int_t degraderFrom, Int_t degraderIncrement, Int_t degraderT
    // Load phase space spline
    Double_t phaseSpaceDegraderthickness[300];
    Double_t phaseSpaceEnergy[300];
-   Double_t phaseSpaceEnergySpread[300];
    Double_t dt, e, es;
    Int_t idx = 0;
    ifstream in;
-   in.open("../Data/Ranges/EnergyAfterDegraderG4.csv");
+   in.open("../Data/Ranges/EnergyAfterDegraderPSTAR.csv");
 
    while (1) {
-      in >> dt >> e;
+      in >> dt >> e >> es;
       if (!in.good()) break;
       phaseSpaceDegraderthickness[idx] = dt;
-      phaseSpaceEnergy[idx] = e;
+      phaseSpaceEnergy[idx++] = e;
    }
    in.close();
 

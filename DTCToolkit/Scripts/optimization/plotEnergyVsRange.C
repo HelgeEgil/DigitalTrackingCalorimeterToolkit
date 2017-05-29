@@ -50,15 +50,17 @@ void plotEnergyVsRange() {
    TPad *graphPad = new TPad("Graphs", "Graphs", 0.05, 0.1, 0.95, 0.95);
    graphPad->Draw();
    graphPad->cd();
-   graphPad->Divide(1,5,0.00001,0.00001);
+   graphPad->Divide(1,6,0.00001,0.00001);
 
    Float_t  arrayE2[arraySize] = {0}; // energy MC
    Float_t  arrayE3[arraySize] = {0}; // energy MC
+   Float_t  arrayE35[arraySize] = {0}; // energy MC
    Float_t  arrayE4[arraySize] = {0}; // energy MC
    Float_t  arrayE5[arraySize] = {0}; // energy MC
    Float_t  arrayE6[arraySize] = {0}; // energy MC
    Float_t  arrayMC2[arraySize] = {0}; // range MC
    Float_t  arrayMC3[arraySize] = {0}; // range MC
+   Float_t  arrayMC35[arraySize] = {0}; // range MC
    Float_t  arrayMC4[arraySize] = {0}; // range MC
    Float_t  arrayMC5[arraySize] = {0}; // range MC
    Float_t  arrayMC6[arraySize] = {0}; // range MC
@@ -95,7 +97,7 @@ void plotEnergyVsRange() {
       in.open("../../OutputFiles/result_makebraggpeakfitCarbon.csv");
    }
 
-   Int_t nlines6 = 0, nlines2 = 0, nlines3 = 0, nlines4 = 0, nlines5 = 0;
+   Int_t nlines6 = 0, nlines2 = 0, nlines3 = 0, nlines35 = 0, nlines4 = 0, nlines5 = 0;
    
    while (1) {
       in >> thickness_ >> energy_ >> nomrange_ >> estrange_ >> nomsigma_ >> sigmaRange_;
@@ -108,12 +110,14 @@ void plotEnergyVsRange() {
 
       if (thickness_ == 2) arrayE2[nlines2] = nomrange_;
       if (thickness_ == 3) arrayE3[nlines3] = nomrange_;
+      if (thickness_ == 35) arrayE35[nlines35] = nomrange_;
       if (thickness_ == 4) arrayE4[nlines4] = nomrange_;
       if (thickness_ == 5) arrayE5[nlines5] = nomrange_;
       if (thickness_ == 6) arrayE6[nlines6] = nomrange_;
 
       if (thickness_ == 2) arrayMC2[nlines2++] = -nomrange_ + estrange_;
       if (thickness_ == 3) arrayMC3[nlines3++] = estrange_ - nomrange_;
+      if (thickness_ == 35) arrayMC35[nlines35++] = estrange_ - nomrange_;
       if (thickness_ == 4) arrayMC4[nlines4++] = -nomrange_ + estrange_;
       if (thickness_ == 5) arrayMC5[nlines5++] = estrange_ - nomrange_;
       if (thickness_ == 6) arrayMC6[nlines6++] = -nomrange_ + estrange_;
@@ -123,12 +127,14 @@ void plotEnergyVsRange() {
 
    TGraph *hMC2 = new TGraph(nlines2, arrayE2, arrayMC2);
    TGraph *hMC3 = new TGraph(nlines3, arrayE3, arrayMC3);
+   TGraph *hMC35 = new TGraph(nlines35, arrayE35, arrayMC35);
    TGraph *hMC4 = new TGraph(nlines4, arrayE4, arrayMC4);
    TGraph *hMC5 = new TGraph(nlines5, arrayE5, arrayMC5);
    TGraph *hMC6 = new TGraph(nlines6, arrayE6, arrayMC6);
 
    hMC2->SetTitle(";Range [mm WEPL];");
    hMC3->SetTitle(";Range [mm WEPL];");
+   hMC35->SetTitle(";Range [mm WEPL];");
    hMC4->SetTitle(";Range [mm WEPL];");
    hMC5->SetTitle(";Range [mm WEPL];");
    hMC6->SetTitle(";Range [mm WEPL];");
@@ -145,6 +151,8 @@ void plotEnergyVsRange() {
    hMC6->GetYaxis()->SetLabelFont(22);
    hMC3->GetYaxis()->SetLabelSize(ysize);
    hMC3->GetYaxis()->SetLabelFont(22);
+   hMC35->GetYaxis()->SetLabelSize(ysize);
+   hMC35->GetYaxis()->SetLabelFont(22);
    hMC5->GetYaxis()->SetLabelSize(ysize);
    hMC5->GetYaxis()->SetLabelFont(22);
    hMC4->GetXaxis()->SetLabelSize(ysize);
@@ -153,6 +161,8 @@ void plotEnergyVsRange() {
    hMC2->GetXaxis()->SetLabelFont(22);
    hMC3->GetXaxis()->SetLabelSize(ysize);
    hMC3->GetXaxis()->SetLabelFont(22);
+   hMC35->GetXaxis()->SetLabelSize(ysize);
+   hMC35->GetXaxis()->SetLabelFont(22);
    hMC5->GetXaxis()->SetLabelSize(ysize);
    hMC5->GetXaxis()->SetLabelFont(22);
    hMC2->GetXaxis()->SetTitleOffset(3);
@@ -163,11 +173,13 @@ void plotEnergyVsRange() {
 
    hMC2->SetLineColor(kRed+4);
    hMC3->SetLineColor(kRed+3);
-   hMC4->SetLineColor(kRed+2);
-   hMC5->SetLineColor(kRed+1);
-   hMC6->SetLineColor(kRed);
+   hMC35->SetLineColor(kRed+2);
+   hMC4->SetLineColor(kRed+1);
+   hMC5->SetLineColor(kRed);
+   hMC6->SetLineColor(kRed-1);
    hMC2->SetLineWidth(3);
    hMC3->SetLineWidth(3);
+   hMC35->SetLineWidth(3);
    hMC4->SetLineWidth(3);
    hMC5->SetLineWidth(3);
    hMC6->SetLineWidth(3);
@@ -180,16 +192,19 @@ void plotEnergyVsRange() {
 
    hMC2->GetXaxis()->SetRangeUser(xfrom, xto);
    hMC3->GetXaxis()->SetRangeUser(xfrom, xto);
+   hMC35->GetXaxis()->SetRangeUser(xfrom, xto);
    hMC4->GetXaxis()->SetRangeUser(xfrom, xto);
    hMC5->GetXaxis()->SetRangeUser(xfrom, xto);
    hMC6->GetXaxis()->SetRangeUser(xfrom, xto);
    hMC2->GetYaxis()->SetRangeUser(yfrom, yto);
    hMC3->GetYaxis()->SetRangeUser(yfrom, yto);
+   hMC35->GetYaxis()->SetRangeUser(yfrom, yto);
    hMC4->GetYaxis()->SetRangeUser(yfrom, yto);
    hMC5->GetYaxis()->SetRangeUser(yfrom, yto);
    hMC6->GetYaxis()->SetRangeUser(yfrom, yto);
    hMC2->GetYaxis()->SetNdivisions(404);
    hMC3->GetYaxis()->SetNdivisions(404);
+   hMC35->GetYaxis()->SetNdivisions(404);
    hMC4->GetYaxis()->SetNdivisions(404);
    hMC5->GetYaxis()->SetNdivisions(404);
    hMC6->GetYaxis()->SetNdivisions(404);
@@ -206,18 +221,23 @@ void plotEnergyVsRange() {
    gPad->SetGridy();
    hMC3->Draw("LA");
    t2->DrawText(100, -0.5, "3 mm Al absorber");
-
+   
    graphPad->cd(3);
+   gPad->SetGridy();
+   hMC35->Draw("LA");
+   t2->DrawText(100, -0.5, "3.5 mm Al absorber");
+
+   graphPad->cd(4);
    gPad->SetGridy();
    hMC4->Draw("LA");
    t2->DrawText(100, -0.5, "4 mm Al absorber");
    
-   graphPad->cd(4);
+   graphPad->cd(5);
    gPad->SetGridy();
    hMC5->Draw("LA");
    t2->DrawText(100, -0.5, "5 mm Al absorber");
    
-   graphPad->cd(5);
+   graphPad->cd(6);
    gPad->SetGridy();
    hMC6->Draw("LA");
    t2->DrawText(100, -0.5, "6 mm Al absorber");

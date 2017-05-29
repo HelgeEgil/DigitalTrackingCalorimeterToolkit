@@ -21,7 +21,7 @@ void MaterialConstants() {
    alpha_tungsten = 0.004461;
    alpha_prime_tungsten = 0.1086784;
    
-   Float_t m = kAbsorbatorThickness;
+   Float_t m = kAbsorberThickness;
    X0_aluminum = 5.4775 + 1.3109*m - 0.2608 * pow(m,2) + 0.0248 * pow(m,3) - 0.0009 * pow(m,4);
    alpha_aluminum = 0.0140203;
    p_aluminum = 1.72903;
@@ -117,15 +117,16 @@ void  createSplines() {
    Double_t rangesPureAl[500];
    Double_t energiesPureAl[500];
 
+   Float_t readoutAbsorber = (roundf(kAbsorberThickness) == kAbsorberThickness) ? kAbsorberThickness : kAbsorberThickness*10;
 
    if       (kMaterial == kTungsten) {
-      in.open(Form("Data/Ranges/%.0fmm_W.csv", kAbsorbatorThickness));
+      in.open(Form("Data/Ranges/%.0fmm_W.csv", readoutAbsorber));
    }
    else if  (kMaterial == kAluminum) {
-      in.open(Form("Data/Ranges/%.0fmm_Al.csv", kAbsorbatorThickness));
+      in.open(Form("Data/Ranges/%.0fmm_Al.csv", readoutAbsorber));
    }
    else if  (kMaterial == kCarbon) {
-      in.open(Form("Data/Ranges/%.0fmm_C.csv", kAbsorbatorThickness));
+      in.open(Form("Data/Ranges/%.0fmm_C.csv", readoutAbsorber));
    }
 
    while (1) {
@@ -170,7 +171,7 @@ void  createSplines() {
 
    in.close();
 
-   in.open(Form("Data/Scattering/%.0fmmAl_50mm.csv", kAbsorbatorThickness));
+   in.open(Form("Data/Scattering/%.0fmmAl_50mm.csv", kAbsorberThickness));
    while (1) {
       in >> layer >> mu >> sigma;
       if (!in.good()) break;

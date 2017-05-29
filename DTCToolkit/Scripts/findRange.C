@@ -27,6 +27,7 @@ using namespace std;
 vector<Float_t> findRange::Run(Double_t energy, Double_t sigma_mev)
 {
    vector<Float_t> returnValues;
+   returnValues.reserve(100);
    if (fChain == 0) return returnValues;
    if (fChain->GetEntries() == 0) return returnValues;
 
@@ -41,19 +42,20 @@ vector<Float_t> findRange::Run(Double_t energy, Double_t sigma_mev)
    Double_t dt, e, es;
    Int_t idx = 0;
    ifstream in;
-   in.open("../Data/Ranges/EnergyAfterDegraderG4.csv");
+   in.open("../Data/Ranges/EnergyAfterDegraderPSTAR.csv");
 
    while (1) {
-      in >> dt >> e;
+      in >> dt >> e >> es;
       if (!in.good()) break;
       phaseSpaceDegraderthickness[idx] = dt;
-      phaseSpaceEnergy[idx] = e;
+      phaseSpaceEnergy[idx++] = e;
    }
    in.close();
-
+   
    TSpline3 *phaseSpaceSpline = new TSpline3("phaseSpaceSpline", phaseSpaceDegraderthickness, phaseSpaceEnergy, idx);
 
    run_energy = phaseSpaceSpline->Eval(run_degraderThickness);
+   cout << "Run energy = " << run_energy << endl;
 
    TCanvas *c2 = new TCanvas("c2", "Ranges and energies", 1200, 900);
 //   c2->Divide(2, 1, 0.001, 0.001);i
@@ -240,15 +242,16 @@ vector<Float_t> findRange::Run(Double_t energy, Double_t sigma_mev)
    TF1 *fRemainingEnergy = new TF1("fRemainingEnergy", "gaus");
    fRemainingEnergy->SetLineWidth(3);
    hEnergyAtInterface->Fit("fRemainingEnergy", "Q");
-   printf("Estimated remaining energy: %.2f MeV.\n", phaseSpaceSpline->Eval(run_degraderThickness),);
+//   printf("Estimated remaining energy: %.2f MeV.\n", phaseSpaceSpline->Eval(run_degraderThickness),);
 
    printf("Total range and straggling: %.2f +- %.2f mm.\n", run_degraderThickness + aw * pow(fRemainingEnergy->GetParameter(1), pw), sqrt(pow(fRange->GetParameter(2), 2) + pow(fRemainingEnergy->GetParameter(2) * a * p * pow(fRemainingEnergy->GetParameter(1), p-1), 2)));
    printf("Total WEPL straggling: %.2f mm.\n", sqrt(pow(fRemainingEnergy->GetParameter(2) * aw * pw * pow(fRemainingEnergy->GetParameter(1), p-1), 2) + pow(aw/a * pow(fRange->GetParameter(1) / aw, 1-pw/p) * fRange->GetParameter(2), 2)));
 
-//   returnValues.push_back(sumRangeWeight);
-//   returnValues.push_back(sigmaRangeWeight);
-   returnValues.push_back(fRange->GetParameter(1));
-   returnValues.push_back(fabs(fRange->GetParameter(2)));
+   Float_t fR = fRange->GetParameter(1);
+   Float_t fRS = fRange->GetParameter(2);
+
+   returnValues.push_back(fR);
+   returnValues.push_back(fRS);
    returnValues.push_back(100 * attenuation / total);
    returnValues.push_back(fRemainingEnergy->GetParameter(1));
    returnValues.push_back(fRemainingEnergy->GetParameter(2));

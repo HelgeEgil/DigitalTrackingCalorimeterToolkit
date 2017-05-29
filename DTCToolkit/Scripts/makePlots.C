@@ -134,7 +134,8 @@ void makePlots() {
    Double_t paraLinearInvm[100] = {};
    Double_t paraLinearInvh[100] = {};
 
-   Int_t nThisEnergy = 0, lastEnergy = 0, mmAbsorbator;
+   Int_t nThisEnergy = 0, lastEnergy = 0;
+   Float_t  mmAbsorber;
 
    gStyle->SetOptStat(0);
 

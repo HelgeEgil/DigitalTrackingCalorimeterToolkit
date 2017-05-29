@@ -216,9 +216,11 @@ void drawTrackAngleAtVaryingRunNumbers(Int_t dataType, Float_t energy, Float_t d
       Float_t ratioLastCloseToFirst = (float) nLastCloseToFirst / nTotal;
 
       hCorrectTracks->Divide(normCorrectTracks);
+      
+      Float_t readoutAbsorber = (roundf(kAbsorberThickness) == kAbsorberThickness) ? kAbsorberThickness : kAbsorberThickness*10;
 
       ofstream file2("OutputFiles/lastLayerCorrect_different_nRuns.csv", ofstream::out | ofstream::app);
-      file2 << kAbsorbatorThickness << " " << nRuns << " " << ratioCorrect << " " << ratioFirstAndLast << " " << ratioLastCloseToFirst << " " << ratioFirstAndLastAllTracks << endl;
+      file2 << readoutAbsorber << " " << nRuns << " " << ratioCorrect << " " << ratioFirstAndLast << " " << ratioLastCloseToFirst << " " << ratioFirstAndLastAllTracks << endl;
       file2.close();
 
       c1->cd();
@@ -818,7 +820,8 @@ Float_t drawBraggPeakGraphFit(Int_t Runs, Int_t dataType, Bool_t recreate, Float
    run_energy = energy;
 
    if (useDegrader) {
-      run_energy = getEnergyAtWEPL(energy, degraderThickness);
+//      run_energy = getEnergyAtWEPL(energy, degraderThickness);
+      run_energy = getEnergyFromDegraderThickness(degraderThickness);
    }
 
    printf("Using water degrader of thickness %.0f mm, the initial energy of %.0f MeV is reduced to %.1f MeV.\n", degraderThickness, energy, run_energy);
@@ -2508,13 +2511,15 @@ TF1 *  doSimpleGaussianFit (TH1F *h, Float_t *means, Float_t *sigmas) {
    cout << "The empirical estimated range is " << empiricalMean << " mm. (which is " << getEnergyFromUnit(empiricalMean) << " MeV).\n";
    cout << "The empirical standard deviation is " << empiricalSigma << " mm.\n";
    
+   Float_t readoutAbsorber = (roundf(kAbsorberThickness) == kAbsorberThickness) ? kAbsorberThickness : kAbsorberThickness*10;
+   
    ofstream file2("OutputFiles/result_makebraggpeakfit.csv", ofstream::out | ofstream::app);
    // absorber thickness; energy; nominal range; estimated range; range sigma
    if (run_degraderThickness == 0) {
-      file2 << kAbsorbatorThickness << " " << run_energy << " " << getUnitFromEnergy(run_energy) << " " << empiricalMean << " " << nominalSigma << " " << empiricalSigma << " " << endl;
+      file2 << readoutAbsorber << " " << run_energy << " " << getUnitFromEnergy(run_energy) << " " << empiricalMean << " " << nominalSigma << " " << empiricalSigma << " " << endl;
    }
    else {
-      file2 << kAbsorbatorThickness << " " << run_degraderThickness << " " << getUnitFromEnergy(run_energy) << " " << empiricalMean << " " << nominalSigma << " " << empiricalSigma << " " << endl;
+      file2 << readoutAbsorber << " " << run_degraderThickness << " " << getUnitFromEnergy(run_energy) << " " << empiricalMean << " " << nominalSigma << " " << empiricalSigma << " " << endl;
    }
 
    file2.close();
@@ -2715,13 +2720,15 @@ Float_t doNGaussianFit ( TH1F *h, Float_t *means, Float_t *sigmas) {
 
    Float_t nominalSigma = getWEPLStragglingFromEnergy(run_energy, 0);
 
+   Float_t readoutAbsorber = (roundf(kAbsorberThickness) == kAbsorberThickness) ? kAbsorberThickness : kAbsorberThickness*10;
+
    ofstream file2("OutputFiles/result_makebraggpeakfit.csv", ofstream::out | ofstream::app);
    // absorber thickness; energy; nominal range; estimated range; range sigma
    if (run_degraderThickness == 0) {
-      file2 << kAbsorbatorThickness << " " << run_energy << " " << getWEPLFromEnergy(run_energy) << " " << empiricalMean << " " << nominalSigma << " " << empiricalSigma << " " << endl;
+      file2 << readoutAbsorber << " " << run_energy << " " << getWEPLFromEnergy(run_energy) << " " << empiricalMean << " " << nominalSigma << " " << empiricalSigma << " " << endl;
    }
    else {
-      file2 << kAbsorbatorThickness << " " << run_degraderThickness << " " << getWEPLFromEnergy(run_energy) << " " << empiricalMean << " " << nominalSigma << " " << empiricalSigma << " " << endl;
+      file2 << readoutAbsorber << " " << run_degraderThickness << " " << getWEPLFromEnergy(run_energy) << " " << empiricalMean << " " << nominalSigma << " " << empiricalSigma << " " << endl;
    }
 
    file2.close();

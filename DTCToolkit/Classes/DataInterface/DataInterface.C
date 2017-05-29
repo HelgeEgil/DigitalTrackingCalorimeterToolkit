@@ -54,14 +54,17 @@ DataInterface::DataInterface(TTree *tree) : fChain(0)
       // of trees.
      char *materialChar = getMaterialChar();
 
+     Float_t readoutAbsorber = kAbsorberThickness;
+     if (roundf(readoutAbsorber) != readoutAbsorber) readoutAbsorber *= 10; // To avoid having int / float mismatches in filenames
+
      //
       TChain * chain = new TChain("Hits","");
       if (!useDegrader) {
-         chain->Add(Form("Data/MonteCarlo/DTC_%s_%.0fMeV_%.0fmm.root/Hits", materialChar, run_energy, kAbsorbatorThickness));
+         chain->Add(Form("Data/MonteCarlo/DTC_%s_%.0fMeV_%.0fmm.root/Hits", materialChar, run_energy, kAbsorberThickness));
       }
       else {
-         printf("Opening file with degrader thickness %.0f mm, material is %s and abs. thicknesss %.0f mm.\n", run_degraderThickness, materialChar, kAbsorbatorThickness);
-         chain->Add(Form("Data/MonteCarlo/DTC_%s_Absorber%.0fmm_Degrader%.0fmm_250MeV.root/Hits", materialChar, kAbsorbatorThickness, run_degraderThickness)); // Fix if original run_energy is != 250
+         printf("Opening file with degrader thickness %.0f mm, material is %s and abs. thicknesss %.0f mm.\n", run_degraderThickness, materialChar, readoutAbsorber);
+         chain->Add(Form("Data/MonteCarlo/DTC_%s_Absorber%.0fmm_Degrader%.0fmm_250MeV.root/Hits", materialChar, readoutAbsorber, run_degraderThickness)); // Fix if original run_energy is != 250
       }
       tree = chain;
 #endif // SINGLE_TREE

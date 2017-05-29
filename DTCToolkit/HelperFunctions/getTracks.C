@@ -36,9 +36,11 @@ void saveTracks(Tracks *tracks, Int_t dataType, Float_t energy) {
 
    tracks->CompressCWT();
 
+   Float_t readoutAbsorber = (kAbsorberThickness == roundf(kAbsorberThickness)) ? kAbsorberThickness : kAbsorberThickness*10;
+
    TString sEnergy = Form("_%.2fMeV", energy);
    TString fileName = "Data/Tracks/tracks";
-   TString sAbsThick = Form("_%.0fmm", kAbsorbatorThickness);
+   TString sAbsThick = Form("_%.0fmm", readoutAbsorber);
    TString sMaterial = getMaterialChar();
    fileName.Append(sDataType);
    fileName.Append(sMaterial);
@@ -56,8 +58,10 @@ void saveTracks(Tracks *tracks, Int_t dataType, Float_t energy) {
 }
 
 Tracks * loadTracks(Int_t Runs, Int_t dataType, Float_t energy) {
+   Float_t readoutAbsorber = (kAbsorberThickness == roundf(kAbsorberThickness)) ? kAbsorberThickness : kAbsorberThickness*10;
+
    TString sDataType = (dataType == 0) ? "_MC_" : "_data_";
-   TString sAbsThick = Form("_%.0fmm", kAbsorbatorThickness);
+   TString sAbsThick = Form("_%.0fmm", readoutAbsorber);
    TString sEnergy = Form("_%.2fMeV", energy);
    TString fileName = "Data/Tracks/tracks";
    TString sMaterial = getMaterialChar();

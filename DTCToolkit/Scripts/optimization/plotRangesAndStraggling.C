@@ -26,11 +26,12 @@
 
 using namespace std;
 
-Int_t absorberThickness = 4;
+// IF FLOAT VALUES OF ABSORBER THICKNESS: USE *10 VALUES (3.5 -> 35)
+Int_t absorberThickness = 35;
 Bool_t kFilterData = true;
 Bool_t kUseCarbon = false;
 Int_t filterSize = 1;
-const Int_t arraySize = 1500;
+const Int_t arraySize = 3500;
 const Int_t xFrom = 20;
 const Int_t xTo = 370;
 
@@ -206,7 +207,7 @@ void plotRangesAndStraggling() {
    in.close();
 
    if (!kUseCarbon) {
-      in.open("../../OutputFiles/result_makebraggpeakfitAluminiumNew.csv");
+      in.open("../../OutputFiles/result_makebraggpeakfit.csv");
    }
    else {
       in.open("../../OutputFiles/result_makebraggpeakfitCarbon.csv");
@@ -227,6 +228,8 @@ void plotRangesAndStraggling() {
       if (!in.good()) {
          break;
       }
+
+      cout << "OK line, wrong absorberthickness: thickness = " << thickness_ << "\n";
 
       if (thickness_ != absorberThickness) continue;
 
@@ -633,6 +636,8 @@ void plotRangesAndStraggling() {
    Float_t  RANGE = 50;
    Int_t    PAD = 500;
    TH1D *hRangeError = new TH1D("hRangeError", Form("Range Error Histogram (%d mm Al)",absorberThickness), 250+2*PAD, 50-PAD, 300+PAD);
+   if (absorberThickness>10) hRangeError->SetTitle(Form("Range Error Histogram (%.1f mm Al)", float(absorberThickness)/10));
+
    printf("Making 251 bins from %.2f to %.2f\n", arrayMC[308], arrayMC[58]);
    for (int i=308; i>57; i--) {
       hRangeError->Fill(RANGE, arrayMCDelta[i]);// - ( 0.333 - 0.00454799 + 0.0567 - (0.003867 +0.000814089)*RANGE + (4.012e-6 + 2.32894e-06) * pow(RANGE,2) ));

@@ -1,12 +1,12 @@
-/vis/open OGLSX
-/vis/viewer/reset
-/vis/viewer/set/viewpointThetaPhi 60 60
-/vis/viewer/zoom 10
-/vis/viewer/set/style surface
-/vis/drawVolume
-/tracking/storeTrajectory 1
-/vis/scene/endOfEventAction accumulate
-/vis/viewer/update
+#/vis/open OGLSX
+#/vis/viewer/reset
+#/vis/viewer/set/viewpointThetaPhi 60 60
+#/vis/viewer/zoom 10
+#/vis/viewer/set/style surface
+#/vis/drawVolume
+#/tracking/storeTrajectory 1
+#/vis/scene/endOfEventAction accumulate
+#/vis/viewer/update
 
 /gate/geometry/setMaterialDatabase GateMaterials.db
 
@@ -16,27 +16,28 @@
 
 /gate/world/daughters/name scanner
 /gate/world/daughters/insert box
-/gate/scanner/geometry/setXLength 100. cm
-/gate/scanner/geometry/setYLength 100. cm
-/gate/scanner/geometry/setZLength 100. cm
-/gate/scanner/placement/setTranslation 0 0 50. cm
+/gate/scanner/geometry/setXLength 500. cm
+/gate/scanner/geometry/setYLength 500. cm
+/gate/scanner/geometry/setZLength 500. cm
+/gate/scanner/placement/setTranslation 0 0 0. cm
 /gate/scanner/vis/forceWireframe
 
 /gate/scanner/daughters/name phantom
 /gate/scanner/daughters/insert box
-/gate/phantom/geometry/setXLength 30. cm
-/gate/phantom/geometry/setYLength 30. cm
-/gate/phantom/geometry/setZLength 30. cm
-/gate/phantom/placement/setTranslation 0 0 -15. cm
+/gate/phantom/geometry/setXLength 100. cm
+/gate/phantom/geometry/setYLength 100. cm
+/gate/phantom/geometry/setZLength 100. cm
+/gate/phantom/placement/setTranslation 0 0 50. cm
 /gate/phantom/setMaterial Water
 /gate/phantom/vis/forceWireframe
 
 /gate/phantom/attachCrystalSD
 
-/gate/physics/addPhysicsList QGSP_BIC
+/gate/physics/addPhysicsList QGSP_BIC_EMY
 /gate/geometry/setIonisationPotential Water 75 eV
 
 /gate/run/initialize
+/process/inactivate protonInelastic
 /process/inactivate hadElastic
 
 #/gate/source/addSource PBS PencilBeam
@@ -56,7 +57,7 @@
 /gate/source/addSource uniformBeam gps
 /gate/source/uniformBeam/gps/particle proton
 /gate/source/uniformBeam/gps/ene/type Gauss
-/gate/source/uniformBeam/gps/ene/mono 190 MeV
+/gate/source/uniformBeam/gps/ene/mono {energy} MeV
 /gate/source/uniformBeam/gps/ene/sigma 0 MeV
 /gate/source/uniformBeam/gps/type Plane
 /gate/source/uniformBeam/gps/shape Square
@@ -67,7 +68,7 @@
 /gate/application/setTotalNumberOfPrimaries 10000
 
 /gate/output/root/enable
-/gate/output/root/setFileName gate_simulation_230MeV_noelastic
+/gate/output/root/setFileName output/gate_simulation_{energy}MeV
 
 /gate/random/setEngineName MersenneTwister
 /gate/random/setEngineSeed auto

@@ -311,19 +311,54 @@ Float_t getEnergyLossErrorFromScintillators(Int_t nScintillators) {
 Float_t getEnergyLossFromAluminumAbsorber(Float_t energy) {
    // We assume that the energy loss function is constant in the high energy range
    // (somewhat true)
-   // and calculate the energy loss of kAbsorbatorThickness mm Aluminum by scaling the
+   // and calculate the energy loss of kAbsorberThickness mm Aluminum by scaling the
    // measured MC energy loss in a 1.5 mm Al absorber
 
-   return  62.00441 * pow(energy, -0.7158403) * (kAbsorbatorThickness/1.5);
+   return  62.00441 * pow(energy, -0.7158403) * (kAbsorberThickness/1.5);
 }
 
 Float_t getEnergyLossFromTracker(Float_t energy) {
-   return 34.46854 * pow(energy, -0.82696);
+   // FROM MONTE CARLO, THIS MIGHT BE WRONG DUE TO HOW ENERGY LOSS IS REPORTED
+   // return 34.46854 * pow(energy, -0.82696);
+   //
+   // NEW CALCULATION, BASED ON STOPPING POWER TABLES
+   return 23.775 * pow(energy, -0.737);
 }
 
 Float_t getEnergyLossErrorFromAluminumAbsorber() {
    return 0.135;
 }
+
+Float_t getEnergyFromDegraderThickness(Double_t degraderThickness) {
+   // THIS IS A ONE-TIME OPERATION, SO NO NEED TO WORRY ABOUT SPEED
+
+   Double_t phaseSpaceDegraderthickness[300];
+   Double_t phaseSpaceEnergy[300];
+   Double_t dt, e, es;
+   Int_t idx = 0;
+   ifstream in;
+   in.open("Data/Ranges/EnergyAfterDegraderPSTAR.csv");
+
+   while (1) {
+      in >> dt >> e >> es;
+      if (!in.good()) break;
+      phaseSpaceDegraderthickness[idx] = dt;
+      phaseSpaceEnergy[idx++] = e;
+   }
+
+   in.close();
+
+   TSpline3 *phaseSpaceSpline = new TSpline3("phaseSpaceSpline", phaseSpaceDegraderthickness, phaseSpaceEnergy, idx);
+
+   cout << "SPLINE result = " << phaseSpaceSpline->Eval(30) << endl;
+   cout << "SPLINE result = " << phaseSpaceSpline->Eval(degraderThickness) << endl;
+
+   Double_t result = phaseSpaceSpline->Eval(degraderThickness);
+
+   delete phaseSpaceSpline;
+   return (float) result;
+}
+
 
 // BRAGG-KLEEMAN DERIVED FALLBACK FUNCTIONS
 // FOR LOWER-QUALITY CALCULATIONS OUTSIDE SPLINE REGIONS
