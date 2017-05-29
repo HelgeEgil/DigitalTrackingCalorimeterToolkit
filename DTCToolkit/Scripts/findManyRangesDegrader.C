@@ -16,7 +16,7 @@ void findManyRanges(Int_t degraderFrom, Int_t degraderIncrement, Int_t degraderT
    Double_t dt, e, es;
    Int_t idx = 0;
    ifstream in;
-   in.open("../Data/Ranges/EnergyAfterDegraderPSTAR.csv");
+   in.open("../Data/Ranges/EnergyAfterDegraderG4.csv");
 
    while (1) {
       in >> dt >> e >> es;

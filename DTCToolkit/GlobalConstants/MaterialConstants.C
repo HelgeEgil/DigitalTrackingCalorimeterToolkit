@@ -27,6 +27,8 @@ void MaterialConstants() {
    p_aluminum = 1.72903;
    alpha_prime_aluminum = 0.017102; // HOW DID I FIND THIS!!!
 
+   printf("Using absorber thickness %.1f mm\n", kAbsorberThickness);
+
    p_water = 1.7547;
    alpha_water = 0.02387;
    alpha_prime_water = 0.0087;

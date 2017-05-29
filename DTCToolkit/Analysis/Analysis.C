@@ -819,6 +819,11 @@ Float_t drawBraggPeakGraphFit(Int_t Runs, Int_t dataType, Bool_t recreate, Float
    run_degraderThickness = degraderThickness;
    run_energy = energy;
 
+   printf("WEPL factors for different energies... \n");
+   for (int i=50; i<260; i += 50) {
+      printf("%d MeV -> factor = %.3f\n", i, getWEPLFactorFromEnergy(i));
+   }
+
    if (useDegrader) {
 //      run_energy = getEnergyAtWEPL(energy, degraderThickness);
       run_energy = getEnergyFromDegraderThickness(degraderThickness);
