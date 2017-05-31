@@ -61,7 +61,7 @@ void MaterialConstants() {
    }
 
    else if (kMaterial == kAluminum) {
-      nLayers = 100;
+      nLayers = 150;
       p = p_aluminum;
       alpha = alpha_aluminum;
       alpha_prime = alpha_prime_aluminum;
@@ -199,11 +199,11 @@ void  createSplines() {
    printf("Through fitting, found alpha = %.5f, p = %.5f.\n", alpha_aluminum, p_aluminum);
 
    // FIND BRAGG-KLEEMAN PARAMETERS HIGH / LOW
-   range_energy->Fit("range_energy_fit", "Q,M", "", 0, 40); // fit 0 - 40 MeV
+   range_energy->Fit("range_energy_fit", "Q,M", "", 30, 40); // fit 0 - 40 MeV
    alpha_material_low = range_energy_fit->GetParameter(0);
    p_material_low = range_energy_fit->GetParameter(1);
 
-   range_energy->Fit("range_energy_fit", "Q,M", "", 220, 250); // fir 220 - 250 MeV
+   range_energy->Fit("range_energy_fit", "Q,M", "", 230, 240); // fit 220 - 250 MeV
    alpha_material_high = range_energy_fit->GetParameter(0);
    p_material_high = range_energy_fit->GetParameter(1);
 

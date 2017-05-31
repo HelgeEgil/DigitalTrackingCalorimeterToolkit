@@ -27,8 +27,8 @@
 using namespace std;
 
 // IF FLOAT VALUES OF ABSORBER THICKNESS: USE *10 VALUES (3.5 -> 35)
-Int_t absorberThickness = 35;
-Bool_t kFilterData = true;
+Int_t absorberThickness = 3;
+Bool_t kFilterData = false;
 Bool_t kUseCarbon = false;
 Int_t filterSize = 1;
 const Int_t arraySize = 3500;
@@ -165,7 +165,7 @@ void plotRangesAndStraggling() {
    splineDTCInv = new TSpline3("splineDTCInv", dtcRanges, dtcEnergies, dtcIdx);
 
    if (!kUseCarbon) {
-      in.open("../../OutputFiles/findManyRangesDegrader.csv");
+      in.open("../../OutputFiles/findManyRangesDegraderG4.csv");
    }
    else {
       in.open("../../OutputFiles/findManyRangesDegraderCarbon.csv");
@@ -616,7 +616,6 @@ void plotRangesAndStraggling() {
    legSubtractResolution->AddEntry(fResMC, "   + Mean value", "L");
    legSubtractResolution->AddEntry(gSubtractWaterResolution, "#sqrt{- water straggling^{2}}", "L");
    legSubtractResolution->Draw();
-   
    if (kFilterData) {
       gPad->Update();
       TPaveText * title = (TPaveText *)gPad->FindObject("title");
@@ -633,10 +632,16 @@ void plotRangesAndStraggling() {
    // from = 0
    // to = 4pi/sqrt(nlines)
 
+   printf("arrayMC: ");
+   for (int i=0; i<nlines; i++) {
+      cout << i << ", " << arrayMC[i] << endl;
+   }
+
    Float_t  RANGE = 50;
    Int_t    PAD = 500;
    TH1D *hRangeError = new TH1D("hRangeError", Form("Range Error Histogram (%d mm Al)",absorberThickness), 250+2*PAD, 50-PAD, 300+PAD);
    if (absorberThickness>10) hRangeError->SetTitle(Form("Range Error Histogram (%.1f mm Al)", float(absorberThickness)/10));
+
 
    printf("Making 251 bins from %.2f to %.2f\n", arrayMC[308], arrayMC[58]);
    for (int i=308; i>57; i--) {

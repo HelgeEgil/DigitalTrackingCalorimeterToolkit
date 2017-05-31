@@ -78,6 +78,7 @@ Float_t getWEPLFromEnergy(Float_t energy) {
    if (energy == 0) return 0;
    Float_t wepl = getTLFromEnergy(energy, splineWater);
 
+   /*
    if (kIsFirstLayerAir) {
       Float_t tl = getTLFromEnergy(energy, splineMaterial);   
       Float_t fromTracker = wepl/tl * DZ;
@@ -85,6 +86,8 @@ Float_t getWEPLFromEnergy(Float_t energy) {
 
       wepl = fromTracker + fromRest;
    }
+   */
+   
 
    return wepl;
 }
@@ -332,15 +335,15 @@ Float_t getEnergyLossErrorFromAluminumAbsorber() {
 Float_t getEnergyFromDegraderThickness(Double_t degraderThickness) {
    // THIS IS A ONE-TIME OPERATION, SO NO NEED TO WORRY ABOUT SPEED
 
-   Double_t phaseSpaceDegraderthickness[300];
-   Double_t phaseSpaceEnergy[300];
+   Double_t phaseSpaceDegraderthickness[500];
+   Double_t phaseSpaceEnergy[500];
    Double_t dt, e, es;
    Int_t idx = 0;
    ifstream in;
-   in.open("Data/Ranges/EnergyAfterDegraderPSTAR.csv");
+   in.open("Data/Ranges/EnergyAfterDegraderG4.csv");
 
    while (1) {
-      in >> dt >> e >> es;
+      in >> dt >> e;
       if (!in.good()) break;
       phaseSpaceDegraderthickness[idx] = dt;
       phaseSpaceEnergy[idx++] = e;
@@ -350,8 +353,7 @@ Float_t getEnergyFromDegraderThickness(Double_t degraderThickness) {
 
    TSpline3 *phaseSpaceSpline = new TSpline3("phaseSpaceSpline", phaseSpaceDegraderthickness, phaseSpaceEnergy, idx);
 
-   cout << "SPLINE result = " << phaseSpaceSpline->Eval(30) << endl;
-   cout << "SPLINE result = " << phaseSpaceSpline->Eval(degraderThickness) << endl;
+   cout << "Degraderthickness is " << degraderThickness << ". From EnergyAfterDegrader: dt = " << phaseSpaceDegraderthickness[int(degraderThickness)] << ", e = " << phaseSpaceEnergy[int(degraderThickness)] << " and spline = " << phaseSpaceSpline->Eval(degraderThickness) << endl;
 
    Double_t result = phaseSpaceSpline->Eval(degraderThickness);
 

@@ -1095,7 +1095,7 @@ Float_t drawBraggPeakGraphFit(Int_t Runs, Int_t dataType, Bool_t recreate, Float
    }
    
    else if (kOutputUnit == kWEPL) {
-      cFitResults->SaveAs(Form("OutputFiles/figures/Fitted_energies_%.2f_MeV_%s_%s_WEPL.png", energy, getMaterialChar(), getDataTypeChar(dataType)));
+      cFitResults->SaveAs(Form("OutputFiles/figures/Fitted_energies_%.2f_mmDegrader_%s_%s_WEPL.png", run_degraderThickness, getMaterialChar(), getDataTypeChar(dataType)));
    }
 
    delete tracks;

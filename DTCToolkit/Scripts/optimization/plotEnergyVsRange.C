@@ -91,7 +91,7 @@ void plotEnergyVsRange() {
 
    ifstream in;
    if (!kUseCarbon) {
-      in.open("../../OutputFiles/result_makebraggpeakfitAluminiumNew.csv");
+      in.open("../../OutputFiles/result_makebraggpeakfit.csv");
    }
    else {
       in.open("../../OutputFiles/result_makebraggpeakfitCarbon.csv");
@@ -187,7 +187,7 @@ void plotEnergyVsRange() {
    Float_t yfrom = -1.25;
    Float_t yto = 1.25;
 
-   Float_t xfrom = 10;
+   Float_t xfrom = 5;
    Float_t xto = 380;
 
    hMC2->GetXaxis()->SetRangeUser(xfrom, xto);
