@@ -18,6 +18,6 @@ do
    do
    	echo "Making plots at $i mm degrader with $j mm absorber."
    	# makeTracksFile.C(int Runs, int dataType, int energy)
-	   #root -l -q 'Scripts/makeBraggPeakPDFDegrader.C('$i')'
+	   root -l -q 'Scripts/makeBraggPeakPDFDegrader.C('$i')'
    done
 done
