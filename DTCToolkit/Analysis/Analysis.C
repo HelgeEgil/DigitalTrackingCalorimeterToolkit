@@ -922,7 +922,7 @@ Float_t drawBraggPeakGraphFit(Int_t Runs, Int_t dataType, Bool_t recreate, Float
 
       fitRange = thisTrack->getFitParameterRange();
       fitScale = thisTrack->getFitParameterScale();
-      if (kDrawIndividualGraphs) fitError = quadratureAdd(thisTrack->getFitParameterError(), dz/sqrt(12)); // latter term from error on layer position
+      if (kDrawIndividualGraphs) fitError = quadratureAdd(thisTrack->getFitParameterError(), dz*0.28867); // latter term from error on layer position
 
       hFitResults->Fill(getUnitFromTL(fitRange));
       t4.Stop();
@@ -972,13 +972,13 @@ Float_t drawBraggPeakGraphFit(Int_t Runs, Int_t dataType, Bool_t recreate, Float
 
    cout << 100 * float(nCutDueToTrackEndingAbruptly) / tracks->GetEntriesFast() << " % of the tracks were cut due to seemingly inelastic nuclear interactions.\n";
 
-   TF1 *fMaxAngle = new TF1("fMaxAngle", "gaus(0)", 0, 25);
-   fMaxAngle->SetParameters(100, 4, 6);
+//   TF1 *fMaxAngle = new TF1("fMaxAngle", "gaus(0)", 0, 25);
+//   fMaxAngle->SetParameters(100, 4, 6);
 //   hMaxAngle->Fit(fMaxAngle, "M, W, Q, N", "", 0, 25);
 
-   Float_t angleTo = fMaxAngle->GetParameter(1) + 3 * fMaxAngle->GetParameter(2);
+//   Float_t angleTo = fMaxAngle->GetParameter(1) + 3 * fMaxAngle->GetParameter(2);
 
-   cout << "3 sigma Confidence Limit for angular spread  = " << angleTo << endl;
+//   cout << "3 sigma Confidence Limit for angular spread  = " << angleTo << endl;
 
 //   Int_t nAccepted = hMaxAngle->Integral(0,hMaxAngle->GetXaxis()->FindBin(angleTo));
 //   Float_t percentAccepted = 100 * nAccepted / hMaxAngle->Integral(0);
@@ -1050,42 +1050,42 @@ Float_t drawBraggPeakGraphFit(Int_t Runs, Int_t dataType, Bool_t recreate, Float
    
    Float_t energySigma = getEnergyFromUnit(empiricalMean +  empiricalSigma/ 2) - getEnergyFromUnit(empiricalMean - empiricalSigma / 2);
 
-   if (kDrawFitResults) cFitResults->Update();
-
-   gPad->Update();
-
-   TLine *l = nullptr;
-   if (kDrawVerticalLayerLines) {
-      Float_t line_z = 0;
-      for (Int_t i=0; i<65; i++) {
-         line_z = getUnitFromTL(getLayerPositionmm(i));
-         if (line_z > gPad->GetUxmax()) break;
-         l = new TLine(line_z, 0, line_z, hFitResults->GetMaximum()*1.05);
-         l->SetLineColor(kBlack); l->SetLineWidth(2); l->Draw();
-      }
-   }
-
-   gPad->Update();
-   Float_t bip_value = empiricalMean - 6 * empiricalSigma;
-   if (bip_value == 0) bip_value = getWEPLFromEnergy(run_energy)*0.9;
-   TLine *bip = new TLine(bip_value, gPad->GetUymax(), bip_value, 0);
-   bip->Draw();
-
-   Float_t bip_value2 = empiricalMean + 6 * empiricalSigma;
-   TLine *bip2 = new TLine(bip_value2, 0, bip_value2, gPad->GetUymax());
-   bip2->Draw();
-
-   TLegend *legend = new TLegend(0.16, 0.78, 0.42, 0.88);
-   legend->SetTextSize(0.028);
-   legend->AddEntry(hFitResults, "Accepted tracks", "F");
-//   legend->AddEntry(hFitResultsDroppedData, "Tracks without BP rise", "F");
-   legend->AddEntry(gauss, "Fitted Gaussians", "L");
-   legend->AddEntry(bip, "x_{i'} bin", "L");
-   legend->SetTextFont(22);
-   if (kDrawVerticalLayerLines) legend->AddEntry(l, "Sensor layer positions", "L");
-//   legend->Draw();
-
    if (kDrawFitResults) {
+      cFitResults->Update();
+
+      gPad->Update();
+
+      TLine *l = nullptr;
+      if (kDrawVerticalLayerLines) {
+         Float_t line_z = 0;
+         for (Int_t i=0; i<65; i++) {
+            line_z = getUnitFromTL(getLayerPositionmm(i));
+            if (line_z > gPad->GetUxmax()) break;
+            l = new TLine(line_z, 0, line_z, hFitResults->GetMaximum()*1.05);
+            l->SetLineColor(kBlack); l->SetLineWidth(2); l->Draw();
+         }
+      }
+
+      gPad->Update();
+      Float_t bip_value = empiricalMean - 6 * empiricalSigma;
+      if (bip_value == 0) bip_value = getWEPLFromEnergy(run_energy)*0.9;
+      TLine *bip = new TLine(bip_value, gPad->GetUymax(), bip_value, 0);
+      bip->Draw();
+
+      Float_t bip_value2 = empiricalMean + 6 * empiricalSigma;
+      TLine *bip2 = new TLine(bip_value2, 0, bip_value2, gPad->GetUymax());
+      bip2->Draw();
+
+      TLegend *legend = new TLegend(0.16, 0.78, 0.42, 0.88);
+      legend->SetTextSize(0.028);
+      legend->AddEntry(hFitResults, "Accepted tracks", "F");
+   //   legend->AddEntry(hFitResultsDroppedData, "Tracks without BP rise", "F");
+      legend->AddEntry(gauss, "Fitted Gaussians", "L");
+      legend->AddEntry(bip, "x_{i'} bin", "L");
+      legend->SetTextFont(22);
+      if (kDrawVerticalLayerLines) legend->AddEntry(l, "Sensor layer positions", "L");
+   //   legend->Draw();
+
       gStyle->SetOptStat(11);
       TPaveStats *ps = (TPaveStats*) cFitResults->GetPrimitive("stats");
 //      hFitResultsDroppedData->SetBit(TH1::kNoStats);

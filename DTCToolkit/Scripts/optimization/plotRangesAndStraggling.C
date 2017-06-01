@@ -165,7 +165,7 @@ void plotRangesAndStraggling() {
    splineDTCInv = new TSpline3("splineDTCInv", dtcRanges, dtcEnergies, dtcIdx);
 
    if (!kUseCarbon) {
-      in.open("../../OutputFiles/findManyRangesDegraderG4.csv");
+      in.open("../../OutputFiles/findManyRangesDegrader.csv");
    }
    else {
       in.open("../../OutputFiles/findManyRangesDegraderCarbon.csv");
