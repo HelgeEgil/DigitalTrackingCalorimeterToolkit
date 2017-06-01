@@ -6,6 +6,9 @@
 #include <TGraph.h>
 #include <TH1F.h>
 #include <TMath.h>
+#include <TLatex.h>
+#include <TLine.h>
+#include <TCanvas.h>
 
 #include "GlobalConstants/Constants.h"
 #include "GlobalConstants/MaterialConstants.h"
@@ -648,4 +651,372 @@ Float_t max(Float_t a, Float_t b) {
 Float_t min(Float_t a, Float_t b) {
    if (a < b) return a;
    else return b;
+}
+
+
+void drawIndividualGraphs(TCanvas *cGraph, TGraphErrors* outputGraph, Float_t fitRange, Float_t fitScale, Float_t fitError, Int_t fitIdx, Int_t eventID, Float_t *x_energy, Float_t *y_energy) {
+   cGraph->cd(fitIdx+1);
+   Bool_t kDrawFit = true;
+   Bool_t kDrawText = true;
+
+   outputGraph->SetMinimum(0);
+   outputGraph->SetMaximum(20);
+   outputGraph->SetTitle("");
+   
+   if (kOutputUnit == kWEPL || kOutputUnit == kEnergy) {
+      outputGraph->GetXaxis()->SetTitle("Water Equivalent Thickness [mm]");
+   }
+   
+   else if (kOutputUnit == kPhysical) {
+      outputGraph->GetXaxis()->SetTitle("Projected range [mm]");
+   }
+
+   outputGraph->GetYaxis()->SetTitle("Energy deposition [keV/#mum]");
+   outputGraph->GetYaxis()->SetTitleOffset(1);
+   outputGraph->GetXaxis()->SetTitleSize(0.05);
+   outputGraph->GetYaxis()->SetTitleSize(0.05);
+   outputGraph->GetXaxis()->SetLabelSize(0.04);
+   outputGraph->GetYaxis()->SetLabelSize(0.04);
+   outputGraph->GetXaxis()->SetTitleFont(22);
+   outputGraph->GetXaxis()->SetLabelFont(22);
+   outputGraph->GetYaxis()->SetTitleFont(22);
+   outputGraph->GetYaxis()->SetLabelFont(22);
+
+   Float_t low = getUnitFromEnergy(0);
+   Float_t high = getUnitFromEnergy(run_energy) * 1.7;
+
+   outputGraph->GetXaxis()->SetLimits(low, high);
+
+   outputGraph->SetMarkerColor(4);
+   outputGraph->SetMarkerStyle(21);
+   outputGraph->Draw("PA");
+   
+   TF1 *func = new TF1("fit_BP", fitfunc_DBP, 0, 500, 2);
+   func->SetParameters(fitRange, fitScale);
+   func->SetNpx(500);
+
+   func->Draw("same");
+
+   if (x_energy) {
+      Float_t WEPLFactor = getWEPLFactorFromEnergy(run_energy);
+      Long64_t n=0;
+      Long64_t j=0;
+      
+      for (Long64_t i=eventID*sizeOfEventID; i<(eventID+1)*sizeOfEventID; i++) {
+         if (y_energy[i] == 0) {
+            n = j;
+            break;
+         }
+         y_energy[i] *=  2;
+         
+         j++;
+      }
+      
+      if (n>1) {
+         TGraph *energyLoss = new TGraph(n, (x_energy + eventID*sizeOfEventID), (y_energy + eventID*sizeOfEventID));
+         energyLoss->SetLineColor(kBlack); energyLoss->SetLineWidth(2);
+         energyLoss->Draw("same");
+      }
+      
+      Float_t lastX = x_energy[eventID*sizeOfEventID + n-1];
+      TLine *l = new TLine(lastX, 0, lastX, 600);
+      l->Draw();
+      
+      Float_t realEnergy = getEnergyFromWEPL(x_energy[eventID*sizeOfEventID + n-1]);
+      TLatex *text2 = new TLatex(15, 28, Form("'Real' energy: %.1f #pm MeV", realEnergy));
+      text2->SetTextSize(0.045);
+      text2->SetTextFont(22);
+      text2->Draw();
+   }
+
+   if (kDrawText) {
+      TLatex *text = new TLatex(15, 18, Form("Fitted range: %.1f #pm %.1f mm", fitRange, fitError));
+      text->SetTextSize(0.05);
+      text->SetTextFont(22);
+      text->Draw();
+   }
+   
+   outputGraph->GetXaxis()->SetRangeUser(0, 350);
+
+   cGraph->Update();
+}
+
+TF1 *  doSimpleGaussianFit (TH1F *h, Float_t *means, Float_t *sigmas) {
+   Float_t estimated_energy = 0, estimated_range = 0;
+   Float_t estimated_energy_error = 0;
+   Float_t sum_constant = 0, sumSigma = 0;
+
+   Float_t nominalMean = getUnitFromEnergy(run_energy);
+   Float_t nominalSigma = getUnitStragglingFromEnergy(run_energy, 0);
+
+   TAxis *axis = h->GetXaxis();
+   TF1 *gauss = new TF1("gauss", "gaus");
+   gauss->SetParameter(1, nominalMean);
+   gauss->SetParameter(2, nominalSigma);
+   h->Fit("gauss", "B,W,M");
+
+   Float_t mu, sigma;
+   mu = gauss->GetParameter(1);
+   sigma = fabs(gauss->GetParameter(2));
+
+   // nominalSigma is too low at very low energies
+   // fitted sigma may be too low at high energies, where fit can be ~= 1 layer
+   Float_t sigmaToUse = fmax(sigma, nominalSigma);
+
+   Float_t sigmaFrom = fmax(mu - 4 * sigmaToUse, 0);
+   Float_t sigmaTo = fmin(mu + 4 * sigmaToUse, nominalMean * 1.4 + 10);
+
+   Int_t binSigmaFrom = axis->FindBin(sigmaFrom);
+   Int_t binSigmaTo = axis->FindBin(sigmaTo);
+   
+   if (binSigmaTo > h->GetNbinsX()) binSigmaTo = h->GetNbinsX();
+   if (binSigmaTo < binSigmaFrom) binSigmaTo = h->GetNbinsX();
+
+   printf("doSimpleGaussianFit: Searching from %.2f (bin %d)  to %.2f (bin %d).\n", sigmaFrom, binSigmaFrom, sigmaTo, binSigmaTo);
+
+   Float_t squareMeanDifference = 0;
+   Float_t empiricalMean = 0;
+   Int_t N = 0;
+
+   for (Int_t i=binSigmaFrom; i<=binSigmaTo; i++) {
+      empiricalMean += h->GetBinContent(i) * axis->GetBinCenter(i);
+      N += h->GetBinContent(i);
+   } 
+  
+   empiricalMean /= N;
+
+   for (Int_t i=binSigmaFrom; i<=binSigmaTo; i++) {
+      squareMeanDifference += h->GetBinContent(i) * pow(axis->GetBinCenter(i) - empiricalMean, 2);
+   }
+
+   Float_t empiricalSigma = sqrt(abs(squareMeanDifference / N));
+   cout << "The empirical estimated range is " << empiricalMean << " mm. (which is " << getEnergyFromUnit(empiricalMean) << " MeV).\n";
+   cout << "The empirical standard deviation is " << empiricalSigma << " mm.\n";
+   
+   Float_t readoutAbsorber = (roundf(kAbsorberThickness) == kAbsorberThickness) ? kAbsorberThickness : kAbsorberThickness*10;
+   
+   ofstream file2("OutputFiles/result_makebraggpeakfit.csv", ofstream::out | ofstream::app);
+   // absorber thickness; energy; nominal range; estimated range; range sigma
+   if (run_degraderThickness == 0) {
+      file2 << readoutAbsorber << " " << run_energy << " " << getUnitFromEnergy(run_energy) << " " << empiricalMean << " " << nominalSigma << " " << empiricalSigma << " " << endl;
+   }
+   else {
+      file2 << readoutAbsorber << " " << run_degraderThickness << " " << getUnitFromEnergy(run_energy) << " " << empiricalMean << " " << nominalSigma << " " << empiricalSigma << " " << endl;
+   }
+
+   file2.close();
+   
+   means[9] = empiricalMean;
+   sigmas[9] = empiricalSigma;
+
+   return gauss;
+
+}
+
+Float_t doNGaussianFit ( TH1F *h, Float_t *means, Float_t *sigmas) {
+   TF1 *gauss;
+   cout << "Energy " << run_energy << endl;
+   cout << "Layer;\t Constant;\t Mean;\t\t Energy;\t Sigma;\t\t Fits in layer;\t Chi2/n\n";
+   
+   Float_t constant, mean, lEnergy, sigma;
+   Float_t meanValueFromSumming = 0;
+   
+   Float_t array_mean[3] = {};
+   Int_t array_layer[3] = {};
+   Float_t array_constant[3] = {};
+   Float_t array_sigma[3] = {};
+   Float_t array_sum[3] = {};
+   Float_t array_energy[3] = {};
+   Float_t array_f[3] = {};
+   Float_t array_chi2n[3] = {};
+   
+   TAxis *axis = h->GetXaxis();
+   Float_t fullIntegral = h->Integral();
+   Int_t binSearchFrom = axis->FindBin(getWEPLFromEnergy(run_energy * 0.9));
+   Int_t binSearchTo   = axis->FindBin(getWEPLFromEnergy(run_energy * 1.1));
+   Float_t partialIntegral = h->Integral(binSearchFrom, binSearchTo);
+
+   for (Int_t i=binSearchFrom; i<binSearchTo; i++) {
+      meanValueFromSumming += axis->GetBinCenter(i) * h->GetBinContent(i) / partialIntegral;
+   }
+
+   Float_t error = abs(100 * (meanValueFromSumming - getWEPLFromEnergy(run_energy)) / getWEPLFromEnergy(run_energy));
+   cout << "\033[1mUsing the sum method, the weighted mean value of the distribution is " << meanValueFromSumming << " mm. (" << error << ")\033[0m\n";
+   
+   Float_t maxBinHeight = h->GetMaximum();
+
+   Bool_t isLastLayer, wasLastLayer = false;;
+   
+
+   Int_t j=0;
+   for (Int_t i=0; i<nLayers; i++) {
+      if (getWEPLFromTL(getLayerPositionmm(i)) > getUnitFromEnergy(run_energy*1.2)) continue;
+      if (getWEPLFromTL(getLayerPositionmm(i)) < getWEPLFromEnergy(run_energy * 0.8)) continue;
+
+      Float_t searchFrom = getWEPLFromTL(getLayerPositionmm(i))+10;
+      Float_t searchTo = getWEPLFromTL(getLayerPositionmm(i+1))+10;
+      
+      Int_t bmin = axis->FindBin(searchFrom);
+      Int_t bmax = axis->FindBin(searchTo);
+      
+      Float_t integral = h->Integral(bmin,bmax);
+      Float_t ratio = integral / fullIntegral;
+      
+      isLastLayer = ((getWEPLFromTL(getLayerPositionmm(i)) > getUnitFromEnergy(run_energy-10)) && !wasLastLayer && ratio > 0.01) ;
+   
+      if (i<=3) continue;
+      if (ratio < 0.1 && !isLastLayer) continue;
+      
+      gauss = new TF1(Form("Gaus_%d", i), "gaus(0)", searchFrom, searchTo);
+   
+      gauss->SetLineWidth(2);
+
+      sigma = 3;
+      if (isLastLayer && ratio < 0.05) sigma = 0.2;
+      
+      gauss->SetParameters(10, (searchFrom+searchTo)/2, sigma);
+      gauss->SetParLimits(0, 0, maxBinHeight);
+      gauss->SetParLimits(1, searchFrom+5, searchTo);
+      gauss->SetParLimits(2, 2, 9);
+      
+      h->Fit(gauss, "M, B, WW, Q, 0", "", searchFrom, searchTo);
+      
+      sigma = gauss->GetParameter(2);
+      constant = gauss->GetParameter(0);
+      mean = gauss->GetParameter(1);
+      lEnergy = getEnergyFromUnit(mean);
+      
+      Float_t integralSigma = h->Integral(axis->FindBin(mean - sigma), axis->FindBin(mean + sigma));
+      Float_t chi2 = gauss->GetChisquare();
+      Float_t chi2n = chi2 / integral;
+      Float_t chi2nSigma = chi2 / integralSigma;
+      
+      cout << Form("Searching from %.1f to %.1f, with midpoint at %.1f. Found best fit @ %.1f with chi2 = %.2f and chi2/n = %.2f and chi2/nSIGMA = %.2f, ratio = %.2f.\n", searchFrom, searchTo,(searchTo+searchFrom)/2 , mean, chi2, chi2n, chi2nSigma, ratio);
+
+   /*
+      if (run_energy > 182 && run_energy < 193) {
+         if (chi2n > 200 || sigma < 2.5 || constant < 3) {
+            delete gauss;
+            continue;
+         }
+      }
+   */
+
+      if (ratio > 0.1) {
+         gauss->SetLineColor(kRed);
+         gauss->SetLineWidth(3);
+//         gauss->Draw("same");
+         cout << Form("%d;\t %8.5f;\t %8.5f;\t %8.5f;\t %8.5f;\t %8.5f;\t %.2f\n", i, constant, mean, lEnergy, sigma, ratio, chi2n);
+         
+         if (j<3) {
+            array_mean[j] = mean;
+            array_layer[j] = i;
+            array_constant[j] = constant;
+            array_energy[j] = lEnergy;
+            array_sigma[j] = sigma;
+            array_f[j] = ratio;
+            array_sum[j] = integralSigma;
+         }
+         
+         sigmas[j] = sigma;
+         means[j++] = mean;
+      }
+      wasLastLayer = isLastLayer;
+   }
+
+   Float_t estimated_energy = 0, estimated_range = 0;
+   Float_t estimated_energy_error = 0;
+   Float_t sum_constant = 0, sumSigma = 0;
+   for (Int_t i=0 ; i<3; i++) {
+      estimated_range += array_sum[i] * array_mean[i];
+      sum_constant += array_sum[i];
+      sumSigma += pow(array_sigma[i], 2);
+   }
+
+   sumSigma = sqrt(sumSigma);
+
+   estimated_range /= sum_constant;
+
+   estimated_energy = getEnergyFromUnit(estimated_range);
+   estimated_energy_error = getEnergyFromWEPL(estimated_range + sumSigma/2) - getEnergyFromWEPL(estimated_range - sumSigma/2);
+   cout << "ESTIMATED ENERGY FROM RUN IS " << estimated_energy << " +- " << estimated_energy_error << endl;
+   cout << "Estimated range = " << estimated_range << " +- " << sumSigma << endl;
+  
+   Float_t lastMean = array_mean[1];
+   Float_t lastSigma = array_sigma[1];
+   if (lastMean == 0 || axis->FindBin(lastMean) > h->GetNbinsX()) {
+      lastMean = array_mean[0];
+      lastSigma = array_sigma[0];
+   }
+
+   printf("lastMean = %.2f. lastSigma = %.2f\n", lastMean, lastSigma);
+   printf("sigmaFrom = %.2f\n", lastMean - 9 * lastSigma);
+
+   Int_t binSigmaFrom = axis->FindBin(lastMean - 9*lastSigma);
+
+   if (lastMean == 0) {
+      binSigmaFrom = axis->FindBin(getWEPLFromEnergy(run_energy)*0.9);
+      cout << "Setting binSigmaFrom to " << binSigmaFrom;
+   }
+
+   Float_t squareMeanDifference = 0;
+   Float_t empiricalMean = 0;
+   Int_t N = 0;
+
+   printf("Looping from %d to %d.\n", binSigmaFrom, h->GetNbinsX());
+
+   for (Int_t i=binSigmaFrom; i<=h->GetNbinsX(); i++) {
+      empiricalMean += h->GetBinContent(i) * axis->GetBinCenter(i);
+      N += h->GetBinContent(i);
+   } 
+  
+   empiricalMean /= N;
+
+   printf("empiricalMean = %.2f\n", empiricalMean);
+
+   for (Int_t i=binSigmaFrom; i<=h->GetNbinsX(); i++) {
+      squareMeanDifference += h->GetBinContent(i) * pow(axis->GetBinCenter(i) - empiricalMean, 2);
+   }
+   printf("squareMeanDifference = %.2f\n", squareMeanDifference);
+
+   Float_t empiricalSigma = sqrt(abs(squareMeanDifference / N));
+   cout << "The empirical estimated range is " << empiricalMean << " mm. (which is " << getEnergyFromWEPL(empiricalMean) << " MeV).\n";
+   cout << "The empirical standard deviation is " << empiricalSigma << " mm.\n";
+   
+   ofstream file("OutputFiles/output_gauss.csv", ofstream::out | ofstream::app);
+   // run_energy; layer[i], constant[i], mpv[i], energy[i], sigma[i], ratio[i];  i 1->3
+   
+   file << run_energy << "; ";
+   for (Int_t j=0; j<3; j++) {
+      file << Form("%d; %.5f; %.5f; %.5f; %.5f; %.5f; %.5f",
+                array_layer[j], array_constant[j], array_mean[j],
+                array_energy[j], array_sigma[j], array_f[j], array_chi2n[j]);
+   }
+
+   file << endl;
+   file.close();
+   
+   Float_t last_range = array_mean[0];
+   if (array_constant[1] > 0.1) last_range = array_mean[1];
+   if (array_constant[2] > 0.1) last_range = array_mean[2];
+
+   Float_t nominalSigma = getWEPLStragglingFromEnergy(run_energy, 0);
+
+   Float_t readoutAbsorber = (roundf(kAbsorberThickness) == kAbsorberThickness) ? kAbsorberThickness : kAbsorberThickness*10;
+
+   ofstream file2("OutputFiles/result_makebraggpeakfit.csv", ofstream::out | ofstream::app);
+   // absorber thickness; energy; nominal range; estimated range; range sigma
+   if (run_degraderThickness == 0) {
+      file2 << readoutAbsorber << " " << run_energy << " " << getWEPLFromEnergy(run_energy) << " " << empiricalMean << " " << nominalSigma << " " << empiricalSigma << " " << endl;
+   }
+   else {
+      file2 << readoutAbsorber << " " << run_degraderThickness << " " << getWEPLFromEnergy(run_energy) << " " << empiricalMean << " " << nominalSigma << " " << empiricalSigma << " " << endl;
+   }
+
+   file2.close();
+
+   means[9] = empiricalMean;
+   sigmas[9] = empiricalSigma;
+
+   return empiricalMean;
 }

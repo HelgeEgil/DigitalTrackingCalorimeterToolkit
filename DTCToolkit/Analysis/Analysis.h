@@ -33,8 +33,5 @@ Bool_t		getCutTrackLength(Float_t energy, Track *track);
 Bool_t		getCutWEPL(Track *track);
 Bool_t		getCutChipNumber(Track *track);
 Bool_t		getCutBraggPeakInTrack(Track *track);
-void			drawIndividualGraphs(TCanvas *cGraph, TGraphErrors* outputGraph, Float_t fitEnergy, Float_t fitScale, Float_t fitError, Int_t fitIdx, Int_t skipIdx = 0, Float_t *x = 0, Float_t *y = 0);
-Float_t		doNGaussianFit( TH1F *h, Float_t *means, Float_t *sigmas);
-TF1 *       doSimpleGaussianFit(TH1F *h, Float_t *means, Float_t *sigmas);
-
+void        generateWaterDegraderValues();
 #endif
