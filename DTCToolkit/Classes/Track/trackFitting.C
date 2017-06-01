@@ -5,6 +5,7 @@
 #include <TGraphErrors.h>
 #include <TClonesArray.h>
 #include <TF1.h>
+#include <TStopwatch.h>
 
 #include "Classes/Track/Track.h"
 #include "Classes/Cluster/Cluster.h"
@@ -99,7 +100,6 @@ TGraphErrors * Track::doRangeFit(Bool_t isScaleVariable) {
    Float_t        preTL = getPreTL();
    Float_t        maxRange, minRange, estimatedEnergy, estimatedRange;
    Float_t        scaleParameter = 0;
-   Float_t        WEPLFactor;
    Float_t        overFittingDistance, startFittingDistance;
    Bool_t         checkResistivity = false;
 
@@ -113,39 +113,20 @@ TGraphErrors * Track::doRangeFit(Bool_t isScaleVariable) {
       x[i] = preTL + getLayermm(i);
       y[i] = getDepositedEnergy(i, checkResistivity);
       ery[i] = getDepositedEnergyError(i, checkResistivity);
-      erx[i] = dz / sqrt(12);
+      erx[i] = dz * 0.289; // 1/sqrt(12)
    }
 
    // how much beyond the last measurement the fit is allowed to go
    overFittingDistance = dz;
    startFittingDistance = dz * 0.5;
 
-//   maxRange = getUnitFromTL(x[n-1] + overFittingDistance);
-//   minRange = getUnitFromTL(x[n-1]);
-//   estimatedRange = getUnitFromTL(x[n-1] + startFittingDistance);
-
    minRange = x[n-2];
    maxRange = x[n-1] + overFittingDistance;
    estimatedRange = x[n-1] + startFittingDistance;
 
-   // WE CONVERT FROM PROJECTED RANGE TO WATER EQUIVALENT RANGE HERE
-   /*
-   if (kOutputUnit == kWEPL || kOutputUnit == kEnergy) {
-      WEPLFactor = getWEPLFactorFromWEPL(estimatedRange); 
-      for (Int_t i=0; i<n; i++) {
-         x[i] = x[i] * WEPLFactor;
-         erx[i] = erx[i] * WEPLFactor;
-      }
-   }
-   */
-
-   graph = new TGraphErrors(n, x, y, erx, ery);
+   graph = new TGraphErrors(n, x, y, erx, ery); // maybe a speedup here is possible
    
-   scaleParameter = 3.1; // found through drawFitScale and finding distribution mean value
-
    if (kDataType == kData) scaleParameter = 2.7;
-   if (kUseAlpide) scaleParameter = 1.6; // was 1.38
-   if (kOutputUnit == kPhysical) scaleParameter = 0.73;
    scaleParameter = 0.73;
 
    TF1 *func = new TF1("fit_BP", fitfunc_DBP, 0, maxRange, 2);

@@ -1,7 +1,7 @@
 #!/bin/bash
 # Usage: run.sh material energy_from energy_increment energy_to
 
-NCORES=10
+NCORES=3
 IDX=1
 
 echo "Usage: ./makeBPFitResults.sh <degraderthickness_from> <degraderthickness_increment> <degrader_thickness_to> <absorberthickness_from> <absorberthickness_increment> <absorberthickness_to>"

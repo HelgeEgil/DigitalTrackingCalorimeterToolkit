@@ -818,6 +818,11 @@ Float_t drawTH2FRangeAccuracy() {
 Float_t drawBraggPeakGraphFit(Int_t Runs, Int_t dataType, Bool_t recreate, Float_t energy, Float_t degraderThickness, Int_t idx_txt) {
    run_degraderThickness = degraderThickness;
    run_energy = energy;
+   TStopwatch t1, t2, t3, t4, t5, t6, t7, t8;
+   // t.Start(), t.Stop(), t.RealTime()
+   
+
+   t1.Start();
 
    printf("WEPL factors for different energies... \n");
    for (int i=50; i<260; i += 50) {
@@ -828,6 +833,7 @@ Float_t drawBraggPeakGraphFit(Int_t Runs, Int_t dataType, Bool_t recreate, Float
 //      run_energy = getEnergyAtWEPL(energy, degraderThickness);
       run_energy = getEnergyFromDegraderThickness(degraderThickness);
    }
+
 
    printf("Using water degrader of thickness %.0f mm, the initial energy of %.0f MeV is reduced to %.1f MeV.\n", degraderThickness, energy, run_energy);
 
@@ -864,8 +870,8 @@ Float_t drawBraggPeakGraphFit(Int_t Runs, Int_t dataType, Bool_t recreate, Float
    TCanvas      * cGraph = new TCanvas("cGraph", "Fitted data points", nPlotX*500, nPlotY*500);
 //   TCanvas      * cAngle = new TCanvas("cAngle", "Incoming angles", 800, 800);
    TH1F         * hFitResults = new TH1F("fitResult", hTitle, fmax(nEnergies*8,200), getUnitFromEnergy(0), getUnitFromEnergy(run_energy)*1.4+10);
-   TH1F         * hFitResultsDroppedData = new TH1F("fitResultsDroppedData", hTitle, 200, getUnitFromEnergy(0), getUnitFromEnergy(run_energy)*1.4+10);
-   TH1F         * hMaxAngle = new TH1F("hMaxAngle", "Maximum angle for proton track", 200, 0, 25);
+//   TH1F         * hFitResultsDroppedData = new TH1F("fitResultsDroppedData", hTitle, 200, getUnitFromEnergy(0), getUnitFromEnergy(run_energy)*1.4+10);
+//   TH1F         * hMaxAngle = new TH1F("hMaxAngle", "Maximum angle for proton track", 200, 0, 25);
  
    printf("Histogram limits: %.2f to %.2f.\n", getUnitFromEnergy(0), getUnitFromEnergy(run_energy)*1.2);
 
@@ -883,38 +889,45 @@ Float_t drawBraggPeakGraphFit(Int_t Runs, Int_t dataType, Bool_t recreate, Float
    gStyle->SetPadBottomMargin(0.05);
    gStyle->SetPadLeftMargin(0.15);
    hFitResults->SetLineColor(kBlack); hFitResults->SetFillColor(kGreen-5);
-   hFitResultsDroppedData->SetLineColor(kBlack); hFitResultsDroppedData->SetFillColor(kYellow-2);
-   hMaxAngle->SetLineColor(kBlack); hMaxAngle->SetFillColor(kGreen-5);
+//   hFitResultsDroppedData->SetLineColor(kBlack); hFitResultsDroppedData->SetFillColor(kYellow-2);
+//   hMaxAngle->SetLineColor(kBlack); hMaxAngle->SetFillColor(kGreen-5);
+
+   t1.Stop();
 
    // Create or load all tracks
+   t2.Start();
    Tracks * tracks = loadOrCreateTracks(recreate, Runs, dataType, run_energy);
+   t2.Stop();
    
    for (Int_t j=0; j<tracks->GetEntriesFast(); j++) {
       Track *thisTrack = tracks->At(j);
       if (!thisTrack) continue;
     
+      t3.Start(false);
       if (thisTrack->doesTrackEndAbruptly()) {
-         hFitResultsDroppedData->Fill(getUnitFromEnergy(thisTrack->getEnergy()));
+//         hFitResultsDroppedData->Fill(getUnitFromEnergy(thisTrack->getEnergy()));
          nCutDueToTrackEndingAbruptly++;
          continue;
       }
    
       maxAngle = thisTrack->getSlopeAngleAtLayer(1);
       if (maxAngle > cutAngle && acceptAngle) continue;
-      hMaxAngle->Fill(maxAngle);
+//      hMaxAngle->Fill(maxAngle);
+      t3.Stop();
 
       // Do track fit, extract all parameters for this track
+      t4.Start(false);
       outputGraph = (TGraphErrors*) thisTrack->doRangeFit(false);
       if (!outputGraph) continue;
 
       fitRange = thisTrack->getFitParameterRange();
       fitScale = thisTrack->getFitParameterScale();
-      fitError = quadratureAdd(thisTrack->getFitParameterError(), dz/sqrt(12)); // latter term from error on layer position
-
-      cGraph->Update();
+      if (kDrawIndividualGraphs) fitError = quadratureAdd(thisTrack->getFitParameterError(), dz/sqrt(12)); // latter term from error on layer position
 
       hFitResults->Fill(getUnitFromTL(fitRange));
+      t4.Stop();
 
+      t5.Start(false);
       if (fitIdx < plotSize && kDrawIndividualGraphs && j>=skipPlot) {
          drawIndividualGraphs(cGraph, outputGraph, fitRange, fitScale, fitError, fitIdx++);
 
@@ -949,29 +962,32 @@ Float_t drawBraggPeakGraphFit(Int_t Runs, Int_t dataType, Bool_t recreate, Float
       }
       
       else delete outputGraph;
+      t5.Stop();
 
    }
    
    if (!kDrawIndividualGraphs) delete cGraph;
    
+   t6.Start();
+
    cout << 100 * float(nCutDueToTrackEndingAbruptly) / tracks->GetEntriesFast() << " % of the tracks were cut due to seemingly inelastic nuclear interactions.\n";
 
    TF1 *fMaxAngle = new TF1("fMaxAngle", "gaus(0)", 0, 25);
    fMaxAngle->SetParameters(100, 4, 6);
-   hMaxAngle->Fit(fMaxAngle, "M, W, Q, N", "", 0, 25);
+//   hMaxAngle->Fit(fMaxAngle, "M, W, Q, N", "", 0, 25);
 
    Float_t angleTo = fMaxAngle->GetParameter(1) + 3 * fMaxAngle->GetParameter(2);
 
    cout << "3 sigma Confidence Limit for angular spread  = " << angleTo << endl;
 
-   Int_t nAccepted = hMaxAngle->Integral(0,hMaxAngle->GetXaxis()->FindBin(angleTo));
-   Float_t percentAccepted = 100 * nAccepted / hMaxAngle->Integral(0);
+//   Int_t nAccepted = hMaxAngle->Integral(0,hMaxAngle->GetXaxis()->FindBin(angleTo));
+//   Float_t percentAccepted = 100 * nAccepted / hMaxAngle->Integral(0);
 
-   cout << "Number of accepted events = " << nAccepted << " of total " << hMaxAngle->Integral()  << "(" <<  percentAccepted << " %) " << endl;
+//   cout << "Number of accepted events = " << nAccepted << " of total " << hMaxAngle->Integral()  << "(" <<  percentAccepted << " %) " << endl;
 
    TCanvas * cFitResults = new TCanvas("cFitResults", hTitle, 1000, 1000);
    cFitResults->cd();
-
+/*
    if       (kOutputUnit == kPhysical) hFitResultsDroppedData->SetXTitle("Physical range [mm]");
    else if  (kOutputUnit == kWEPL)     hFitResultsDroppedData->SetXTitle("Range in Water Equivalent Path Length [mm]");
    else if  (kOutputUnit == kEnergy)   hFitResultsDroppedData->SetXTitle("Energy [MeV]");
@@ -982,7 +998,8 @@ Float_t drawBraggPeakGraphFit(Int_t Runs, Int_t dataType, Bool_t recreate, Float
    hFitResultsDroppedData->GetYaxis()->SetTitleFont(22);
    hFitResultsDroppedData->GetYaxis()->SetLabelFont(22);
    hFitResultsDroppedData->GetYaxis()->SetTitleOffset(1.5);
-   
+*/
+
    if       (kOutputUnit == kPhysical) hFitResults->SetXTitle("Physical range [mm]");
    else if  (kOutputUnit == kWEPL)     hFitResults->SetXTitle("Range in Water Equivalent Path Length [mm]");
    else if  (kOutputUnit == kEnergy)   hFitResults->SetXTitle("Energy [MeV]");
@@ -1061,7 +1078,7 @@ Float_t drawBraggPeakGraphFit(Int_t Runs, Int_t dataType, Bool_t recreate, Float
    TLegend *legend = new TLegend(0.16, 0.78, 0.42, 0.88);
    legend->SetTextSize(0.028);
    legend->AddEntry(hFitResults, "Accepted tracks", "F");
-   legend->AddEntry(hFitResultsDroppedData, "Tracks without BP rise", "F");
+//   legend->AddEntry(hFitResultsDroppedData, "Tracks without BP rise", "F");
    legend->AddEntry(gauss, "Fitted Gaussians", "L");
    legend->AddEntry(bip, "x_{i'} bin", "L");
    legend->SetTextFont(22);
@@ -1071,7 +1088,7 @@ Float_t drawBraggPeakGraphFit(Int_t Runs, Int_t dataType, Bool_t recreate, Float
    if (kDrawFitResults) {
       gStyle->SetOptStat(11);
       TPaveStats *ps = (TPaveStats*) cFitResults->GetPrimitive("stats");
-      hFitResultsDroppedData->SetBit(TH1::kNoStats);
+//      hFitResultsDroppedData->SetBit(TH1::kNoStats);
       hFitResults->SetBit(TH1::kNoStats);
       ps->SetX1NDC(0.4176); ps->SetX2NDC(0.9257);
       ps->SetY1NDC(0.7415); ps->SetY2NDC(0.9712);
@@ -1091,10 +1108,21 @@ Float_t drawBraggPeakGraphFit(Int_t Runs, Int_t dataType, Bool_t recreate, Float
          cFitResults->SaveAs(Form("OutputFiles/figures/Fitted_energies_%.2f_mmDegrader_%s_%s_WEPL.png", run_degraderThickness, getMaterialChar(), getDataTypeChar(dataType)));
       }
    }
-   delete cFitResults;
+   else delete cFitResults;
 
    delete tracks;
+   t6.Stop();
    
+   cout << "TIMING INFORMATION-------------\n";
+   cout << "INIT: " << t1.RealTime() << " s.\n";
+   cout << "LOAD TRACKS: " << t2.RealTime() << " s.\n";
+   cout << "TRACK INIT: " << t3.RealTime() << " s.\n";
+   cout << "STRICT TRACK INIT: " << t7.RealTime() << " s.\n";
+   cout << "TRACK FIT: " << t4.RealTime() << " s.\n";
+   cout << "DRAW PLOTS: " << t5.RealTime() << " s.\n";
+   cout << "ANALYSIS AND CLOSE DOWN: " << t6.RealTime() << " s.\n";
+
+
    return empiricalMean;
 }
 
