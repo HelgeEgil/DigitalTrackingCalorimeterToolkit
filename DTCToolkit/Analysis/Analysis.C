@@ -815,7 +815,7 @@ Float_t drawTH2FRangeAccuracy() {
    line->Draw();
 }
 
-Float_t drawBraggPeakGraphFit(Int_t Runs, Int_t dataType, Bool_t recreate, Float_t energy, Float_t degraderThickness) {
+Float_t drawBraggPeakGraphFit(Int_t Runs, Int_t dataType, Bool_t recreate, Float_t energy, Float_t degraderThickness, Int_t idx_txt) {
    run_degraderThickness = degraderThickness;
    run_energy = energy;
 
@@ -835,19 +835,25 @@ Float_t drawBraggPeakGraphFit(Int_t Runs, Int_t dataType, Bool_t recreate, Float
    Bool_t         kDrawHorizontalLines = false;
    Bool_t         kDrawVerticalLayerLines = false;
    Bool_t         kDrawIndividualGraphs = true;
+   Bool_t         kDrawFitResults = true;
    Bool_t         acceptAngle = true;
    Float_t        maxAngle, thisAngle;
    Float_t        cutAngle = (run_degraderThickness * 0.0219 + 0.556) * 0.8;
    Float_t        finalEnergy = 0;
    Float_t        fitRange, fitScale, fitError;
    Int_t          nCutDueToTrackEndingAbruptly = 0;
-   Int_t          nPlotX = 3, nPlotY = 3;
+   Int_t          nPlotX = 3, nPlotY = 1;
    Int_t          fitIdx = 0, plotSize = nPlotX*nPlotY;
    Int_t          skipPlot = 10;
    TGraphErrors * outputGraph;
    char         * sDataType = getDataTypeChar(dataType);
    char         * sMaterial = getMaterialChar();
    char         * hTitle = Form("Fitted energy of a %.2f MeV beam in %s (%s)", run_energy, sMaterial, sDataType);
+
+   if (idx_txt > 0) {
+      kDrawIndividualGraphs = false;
+      kDrawFitResults = false;
+   }
 
    Int_t nEnergies = getUnitFromEnergy(run_energy);
    gStyle->SetOptTitle(0);
@@ -856,7 +862,6 @@ Float_t drawBraggPeakGraphFit(Int_t Runs, Int_t dataType, Bool_t recreate, Float
       hTitle = Form("Fitted energy of a %.0f MeV nominal beam on %s DTC w/%.1f mm water degrader", energy, sMaterial, degraderThickness);
    }
    TCanvas      * cGraph = new TCanvas("cGraph", "Fitted data points", nPlotX*500, nPlotY*500);
-   TCanvas      * cFitResults = new TCanvas("cFitResults", hTitle, 1000, 1000);
 //   TCanvas      * cAngle = new TCanvas("cAngle", "Incoming angles", 800, 800);
    TH1F         * hFitResults = new TH1F("fitResult", hTitle, fmax(nEnergies*8,200), getUnitFromEnergy(0), getUnitFromEnergy(run_energy)*1.4+10);
    TH1F         * hFitResultsDroppedData = new TH1F("fitResultsDroppedData", hTitle, 200, getUnitFromEnergy(0), getUnitFromEnergy(run_energy)*1.4+10);
@@ -964,6 +969,7 @@ Float_t drawBraggPeakGraphFit(Int_t Runs, Int_t dataType, Bool_t recreate, Float
 
    cout << "Number of accepted events = " << nAccepted << " of total " << hMaxAngle->Integral()  << "(" <<  percentAccepted << " %) " << endl;
 
+   TCanvas * cFitResults = new TCanvas("cFitResults", hTitle, 1000, 1000);
    cFitResults->cd();
 
    if       (kOutputUnit == kPhysical) hFitResultsDroppedData->SetXTitle("Physical range [mm]");
@@ -988,10 +994,13 @@ Float_t drawBraggPeakGraphFit(Int_t Runs, Int_t dataType, Bool_t recreate, Float
    hFitResults->GetYaxis()->SetLabelFont(22);
    hFitResults->GetYaxis()->SetTitleOffset(1.5);
 
-   hFitResults->SetTitle("");
-   
+   hFitResults->SetTitle("");   
+
+   if (kDrawFitResults) {
+      hFitResults->Draw();
+   }
+
 //   hFitResultsDroppedData->Draw();
-   hFitResults->Draw(); // was same
 //   hFitResultsDroppedData->GetYaxis()->SetRangeUser(0, max(hFitResultsDroppedData->GetMaximum()*1.05, hFitResults->GetMaximum()*1.05));
 
    /* 
@@ -1018,13 +1027,13 @@ Float_t drawBraggPeakGraphFit(Int_t Runs, Int_t dataType, Bool_t recreate, Float
    Float_t means[10] = {};
    Float_t sigmas[10] = {};
 
-   TF1 *gauss = doSimpleGaussianFit(hFitResults, means, sigmas);
+   TF1 *gauss = doSimpleGaussianFit(hFitResults, means, sigmas, idx_txt);
    Float_t empiricalMean = means[9];
    Float_t empiricalSigma = sigmas[9];
    
    Float_t energySigma = getEnergyFromUnit(empiricalMean +  empiricalSigma/ 2) - getEnergyFromUnit(empiricalMean - empiricalSigma / 2);
 
-   cFitResults->Update();
+   if (kDrawFitResults) cFitResults->Update();
 
    gPad->Update();
 
@@ -1059,44 +1068,30 @@ Float_t drawBraggPeakGraphFit(Int_t Runs, Int_t dataType, Bool_t recreate, Float
    if (kDrawVerticalLayerLines) legend->AddEntry(l, "Sensor layer positions", "L");
 //   legend->Draw();
 
-   gStyle->SetOptStat(11);
-   TPaveStats *ps = (TPaveStats*) cFitResults->GetPrimitive("stats");
-   hFitResultsDroppedData->SetBit(TH1::kNoStats);
-   hFitResults->SetBit(TH1::kNoStats);
-   ps->SetX1NDC(0.4176); ps->SetX2NDC(0.9257);
-   ps->SetY1NDC(0.7415); ps->SetY2NDC(0.9712);
-   ps->SetTextFont(22);
-   ps->AddText(Form("Nominal WEPL = %.2f #pm %.2f", expectedMean, expectedStraggling));
-//   ps->AddText(Form("Nominal straggling = %.2f", expectedStraggling));
-  
-   /*
-   for (Int_t i=0; i<2; i++) {
-      ps->AddText(Form("Fit %d WEPL = %.2f", i+1, means[i]));
-      ps->AddText(Form("Fit %d #sigma_{WEPL} = %.2f", i+1, sigmas[i]));
-      ps->AddText(Form("Fit %d energy = %.2f", i+1, getEnergyFromUnit(means[i])));
-   }
-   */
-
-   ps->AddText(Form("Calculated WEPL = %.2f #pm %.2f", empiricalMean, empiricalSigma));
-   ps->AddText(Form("WEPL deviation = %.2f #pm %.2f", empiricalMean - expectedMean, empiricalSigma - expectedStraggling));
-//   ps->AddText(Form("Resulting energy = %.2f #pm %.2f", getEnergyFromUnit(empiricalMean), energySigma));
+   if (kDrawFitResults) {
+      gStyle->SetOptStat(11);
+      TPaveStats *ps = (TPaveStats*) cFitResults->GetPrimitive("stats");
+      hFitResultsDroppedData->SetBit(TH1::kNoStats);
+      hFitResults->SetBit(TH1::kNoStats);
+      ps->SetX1NDC(0.4176); ps->SetX2NDC(0.9257);
+      ps->SetY1NDC(0.7415); ps->SetY2NDC(0.9712);
+      ps->SetTextFont(22);
+      ps->AddText(Form("Nominal WEPL = %.2f #pm %.2f", expectedMean, expectedStraggling));
+      ps->AddText(Form("Calculated WEPL = %.2f #pm %.2f", empiricalMean, empiricalSigma));
+      ps->AddText(Form("WEPL deviation = %.2f #pm %.2f", empiricalMean - expectedMean, empiricalSigma - expectedStraggling));
+   
+      if (kOutputUnit == kPhysical) {
+         cFitResults->SaveAs(Form("OutputFiles/figures/Fitted_energies_%.2f_MeV_%s_%s_physical.pdf", energy, getMaterialChar(), getDataTypeChar(dataType)));
+      }
+      else if (kOutputUnit == kEnergy) {
+         cFitResults->SaveAs(Form("OutputFiles/figures/Fitted_energies_%.2f_MeV_%s_%s_energy.pdf", energy, getMaterialChar(), getDataTypeChar(dataType)));
+      }
       
-/*
-   cAngle->cd();
-   hMaxAngle->SetTitle("Proton angles;Incoming angle [AU];Entries");
-   hMaxAngle->Draw();
-*/
-   
-   if (kOutputUnit == kPhysical) {
-      cFitResults->SaveAs(Form("OutputFiles/figures/Fitted_energies_%.2f_MeV_%s_%s_physical.pdf", energy, getMaterialChar(), getDataTypeChar(dataType)));
+      else if (kOutputUnit == kWEPL) {
+         cFitResults->SaveAs(Form("OutputFiles/figures/Fitted_energies_%.2f_mmDegrader_%s_%s_WEPL.png", run_degraderThickness, getMaterialChar(), getDataTypeChar(dataType)));
+      }
    }
-   else if (kOutputUnit == kEnergy) {
-      cFitResults->SaveAs(Form("OutputFiles/figures/Fitted_energies_%.2f_MeV_%s_%s_energy.pdf", energy, getMaterialChar(), getDataTypeChar(dataType)));
-   }
-   
-   else if (kOutputUnit == kWEPL) {
-      cFitResults->SaveAs(Form("OutputFiles/figures/Fitted_energies_%.2f_mmDegrader_%s_%s_WEPL.png", run_degraderThickness, getMaterialChar(), getDataTypeChar(dataType)));
-   }
+   delete cFitResults;
 
    delete tracks;
    

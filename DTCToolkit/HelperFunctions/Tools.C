@@ -741,7 +741,7 @@ void drawIndividualGraphs(TCanvas *cGraph, TGraphErrors* outputGraph, Float_t fi
    cGraph->Update();
 }
 
-TF1 *  doSimpleGaussianFit (TH1F *h, Float_t *means, Float_t *sigmas) {
+TF1 *  doSimpleGaussianFit (TH1F *h, Float_t *means, Float_t *sigmas, Int_t idx_txt) {
    Float_t estimated_energy = 0, estimated_range = 0;
    Float_t estimated_energy_error = 0;
    Float_t sum_constant = 0, sumSigma = 0;
@@ -753,7 +753,12 @@ TF1 *  doSimpleGaussianFit (TH1F *h, Float_t *means, Float_t *sigmas) {
    TF1 *gauss = new TF1("gauss", "gaus");
    gauss->SetParameter(1, nominalMean);
    gauss->SetParameter(2, nominalSigma);
-   h->Fit("gauss", "B,W,M");
+   if (idx_txt < 0) {
+      h->Fit("gauss", "B,W,M");
+   }
+   else {
+      h->Fit("gauss", "B,W,M,N");
+   }
 
    Float_t mu, sigma;
    mu = gauss->GetParameter(1);
@@ -794,8 +799,18 @@ TF1 *  doSimpleGaussianFit (TH1F *h, Float_t *means, Float_t *sigmas) {
    cout << "The empirical standard deviation is " << empiricalSigma << " mm.\n";
    
    Float_t readoutAbsorber = (roundf(kAbsorberThickness) == kAbsorberThickness) ? kAbsorberThickness : kAbsorberThickness*10;
+ 
+   TString filename = "OutputFiles/result_makebraggpeakfit";
+   if (idx_txt > 0) {
+      filename.Append(Form("_idx%d.csv", idx_txt));
+   }
    
-   ofstream file2("OutputFiles/result_makebraggpeakfit.csv", ofstream::out | ofstream::app);
+   else {
+      filename.Append(".csv");
+   }
+
+   ofstream file2(filename, ofstream::out | ofstream::app);
+
    // absorber thickness; energy; nominal range; estimated range; range sigma
    if (run_degraderThickness == 0) {
       file2 << readoutAbsorber << " " << run_energy << " " << getUnitFromEnergy(run_energy) << " " << empiricalMean << " " << nominalSigma << " " << empiricalSigma << " " << endl;
