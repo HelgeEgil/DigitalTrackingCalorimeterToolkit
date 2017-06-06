@@ -23,6 +23,7 @@ class Track : public TObject {
       Float_t  fitRange_;
       Float_t  fitScale_;
       Float_t  fitError_;
+      Float_t  precomputeFactor;
 
    public:
       Track();

@@ -85,7 +85,7 @@ void plotEnergyVsRange() {
       energies[n++] = energy;
    }
    in1.close();
-   printf("Found %d lines in EnergyAfterDegrader[G4].csv\n", n);
+   printf("Found %d lines in EnergyAfterDegraderG4.csv\n", n);
 
    TSpline3 *energySpline = new TSpline3("energySpline", thicknesses, energies, n);
 
@@ -124,6 +124,8 @@ void plotEnergyVsRange() {
    }
    
    in.close();
+
+   printf("Found the following number of lines for the different geometries:\n2 mm: %d lines\n3 mm: %d lines\n3.5 mm: %d lines\n4 mm: %d lines\n5 mm: %d lines\n6 mm: %d lines\n", nlines2, nlines3, nlines35, nlines4, nlines5, nlines6);
 
    TGraph *hMC2 = new TGraph(nlines2, arrayE2, arrayMC2);
    TGraph *hMC3 = new TGraph(nlines3, arrayE3, arrayMC3);

@@ -78,18 +78,17 @@ Float_t getWEPLFromEnergy(Float_t energy) {
    if (energy == 0) return 0;
    Float_t wepl = getTLFromEnergy(energy, splineWater);
 
-   /*
-   if (kIsFirstLayerAir) {
-      Float_t tl = getTLFromEnergy(energy, splineMaterial);   
-      Float_t fromTracker = wepl/tl * DZ;
-      Float_t fromRest    = wepl/tl * (tl - dz);
-
-      wepl = fromTracker + fromRest;
-   }
-   */
    
+   if (kIsFirstLayerAir) {
+      // This is an approximation to increase the accuracy of the range determination
+      // Due to the lack of absorber in the first layer, and thus dz * tl does not represent the 'average' energy loss path length (but DZ does)
+      // dz = DZ + absorberLength
 
-   return wepl;
+      Float_t tl = getTLFromEnergy(energy, splineMaterial);
+      wepl -= wepl/tl * (dz-DZ);
+   }
+   
+   return fmax(wepl, 0);
 }
 
 Float_t getTLFromWEPL(Float_t wepl) {
@@ -321,9 +320,6 @@ Float_t getEnergyLossFromAluminumAbsorber(Float_t energy) {
 }
 
 Float_t getEnergyLossFromTracker(Float_t energy) {
-   // FROM MONTE CARLO, THIS MIGHT BE WRONG DUE TO HOW ENERGY LOSS IS REPORTED
-   // return 34.46854 * pow(energy, -0.82696);
-   //
    // NEW CALCULATION, BASED ON STOPPING POWER TABLES
    return 23.775 * pow(energy, -0.737);
 }

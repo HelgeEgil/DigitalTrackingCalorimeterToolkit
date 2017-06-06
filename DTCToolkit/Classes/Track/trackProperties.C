@@ -48,12 +48,9 @@ Int_t Track::getIdxFromLayer(Int_t layer) {
 }
 
 Bool_t Track::doesTrackEndAbruptly() {
-//   Float_t  expectedTL = getTLFromEnergy(run_energy);
-//   Float_t  actualTL = getTLFromEnergy(getEnergy());
-//   Float_t  riseFactor = getRiseFactor();
-//   Float_t edepLimit = 3;
-//   if (kMaterial == kAluminum) edepLimit = 2.5;
-   Bool_t   endsAbruptly = (Last()->getDepositedEnergy() < 3);
+//   This is limit has been found through MC truths
+//   See full information in PhD thesis (to come...)
+   Bool_t   endsAbruptly = (Last()->getDepositedEnergy() < 2.5);
 
    return endsAbruptly;   
 }

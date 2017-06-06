@@ -26,6 +26,7 @@ Float_t getTLFromWELP(Float_t wepl);
 Float_t getWEPLFromEnergy(Float_t energy);
 Float_t getWEPLFromTL(Float_t tl);
 Float_t getWEPLFactorFromEnergy ( Float_t energy);
+Float_t getWEPLFactorFromWEPL(Float_t wepl);
 
 // Calculation of Range straggling
 Float_t getTLStragglingFromTL( Float_t range, Float_t sigma_energy);

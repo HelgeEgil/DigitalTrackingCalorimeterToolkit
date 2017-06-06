@@ -68,7 +68,8 @@ TGraphErrors * Track::doFit() {
       if (kMaterial == kAluminum) scaleParameter = 126;
    }
 
-   
+  
+   precomputeFactor = scaleParameter / (p * pow(alpha, 1/p));
    TF1 *func = new TF1("fit_BP", fitfunc_DBP, 0, 500, 2);
    func->SetParameter(0, estimatedRange);
    func->SetParameter(1, scaleParameter);
@@ -113,7 +114,7 @@ TGraphErrors * Track::doRangeFit(Bool_t isScaleVariable) {
       x[i] = preTL + getLayermm(i);
       y[i] = getDepositedEnergy(i, checkResistivity);
       ery[i] = getDepositedEnergyError(i, checkResistivity);
-      erx[i] = dz * 0.289; // 1/sqrt(12)
+      erx[i] = dz * 0.28867; // 1/sqrt(12)
    }
 
    // how much beyond the last measurement the fit is allowed to go
@@ -127,16 +128,18 @@ TGraphErrors * Track::doRangeFit(Bool_t isScaleVariable) {
    graph = new TGraphErrors(n, x, y, erx, ery); // maybe a speedup here is possible
    
    if (kDataType == kData) scaleParameter = 2.7;
-   scaleParameter = 0.73;
+   scaleParameter = 0.73 / (p * pow(alpha, 1/p));
 
    TF1 *func = new TF1("fit_BP", fitfunc_DBP, 0, maxRange, 2);
    func->SetParameter(0, estimatedRange);
    func->SetParameter(1, scaleParameter);
    func->SetParLimits(0, minRange, maxRange);
    func->SetParLimits(1, scaleParameter, scaleParameter);
+
    if (isScaleVariable) {
       func->SetParLimits(1, 0.01 * scaleParameter, 100 * scaleParameter);
    }
+
    func->SetNpx(750);
 
    graph->Fit("fit_BP", "B, N, Q, W", "", 0, maxRange*1.2);

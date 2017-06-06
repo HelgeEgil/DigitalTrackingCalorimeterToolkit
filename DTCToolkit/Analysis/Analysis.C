@@ -867,13 +867,14 @@ Float_t drawBraggPeakGraphFit(Int_t Runs, Int_t dataType, Bool_t recreate, Float
    if (useDegrader) {
       hTitle = Form("Fitted energy of a %.0f MeV nominal beam on %s DTC w/%.1f mm water degrader", energy, sMaterial, degraderThickness);
    }
+
+   Float_t lowHistogramLimit = getUnitFromEnergy(0);
+   Float_t highHistogramLimit = getUnitFromEnergy(run_energy)*1.4 + 10;
+
    TCanvas      * cGraph = new TCanvas("cGraph", "Fitted data points", nPlotX*500, nPlotY*500);
-//   TCanvas      * cAngle = new TCanvas("cAngle", "Incoming angles", 800, 800);
-   TH1F         * hFitResults = new TH1F("fitResult", hTitle, fmax(nEnergies*8,200), getUnitFromEnergy(0), getUnitFromEnergy(run_energy)*1.4+10);
-//   TH1F         * hFitResultsDroppedData = new TH1F("fitResultsDroppedData", hTitle, 200, getUnitFromEnergy(0), getUnitFromEnergy(run_energy)*1.4+10);
-//   TH1F         * hMaxAngle = new TH1F("hMaxAngle", "Maximum angle for proton track", 200, 0, 25);
+   TH1F         * hFitResults = new TH1F("fitResult", hTitle, fmax(nEnergies*8,200), lowHistogramLimit, highHistogramLimit);
  
-   printf("Histogram limits: %.2f to %.2f.\n", getUnitFromEnergy(0), getUnitFromEnergy(run_energy)*1.2);
+   printf("Histogram limits: %.2f to %.2f.\n", lowHistogramLimit, highHistogramLimit);
 
    printf("At energy %.0f, expecting range %.2f mm and WEPL %.2f mm.\n", run_energy, getTLFromEnergy(run_energy), getWEPLFromEnergy(run_energy));
    printf("This corresponds to a WEPL factor of %.2f.\n", getWEPLFactorFromEnergy(run_energy));
@@ -882,15 +883,16 @@ Float_t drawBraggPeakGraphFit(Int_t Runs, Int_t dataType, Bool_t recreate, Float
 
    // Histogram options
    cGraph->Divide(nPlotX,nPlotY, 0.000001, 0.000001, 0);
-   gStyle->SetPadBorderMode(0); gStyle->SetFrameBorderMode(0);
-   gStyle->SetTitleH(0.06); gStyle->SetTitleYOffset(1);
-   gStyle->SetPadTickX(1); gStyle->SetPadTickY(1);
-   gStyle->SetPadTopMargin(0.05); gStyle->SetPadRightMargin(0.05);
-   gStyle->SetPadBottomMargin(0.05);
-   gStyle->SetPadLeftMargin(0.15);
+   cGraph->cd();
+
+   // All gPad were gStyle, but try to limit to cGraph and not cFitResults
+   gPad->SetBorderMode(0); gStyle->SetFrameBorderMode(0);
+//   gPad->SetTitleH(0.06); gPad->SetTitleYOffset(1);
+   gPad->SetTickx(1); gPad->SetTicky(1);
+   gPad->SetTopMargin(0.05); gPad->SetRightMargin(0.05);
+   gPad->SetBottomMargin(0.05);
+   gPad->SetLeftMargin(0.15);
    hFitResults->SetLineColor(kBlack); hFitResults->SetFillColor(kGreen-5);
-//   hFitResultsDroppedData->SetLineColor(kBlack); hFitResultsDroppedData->SetFillColor(kYellow-2);
-//   hMaxAngle->SetLineColor(kBlack); hMaxAngle->SetFillColor(kGreen-5);
 
    t1.Stop();
 
@@ -905,14 +907,12 @@ Float_t drawBraggPeakGraphFit(Int_t Runs, Int_t dataType, Bool_t recreate, Float
     
       t3.Start(false);
       if (thisTrack->doesTrackEndAbruptly()) {
-//         hFitResultsDroppedData->Fill(getUnitFromEnergy(thisTrack->getEnergy()));
          nCutDueToTrackEndingAbruptly++;
          continue;
       }
    
       maxAngle = thisTrack->getSlopeAngleAtLayer(1);
       if (maxAngle > cutAngle && acceptAngle) continue;
-//      hMaxAngle->Fill(maxAngle);
       t3.Stop();
 
       // Do track fit, extract all parameters for this track
@@ -943,7 +943,8 @@ Float_t drawBraggPeakGraphFit(Int_t Runs, Int_t dataType, Bool_t recreate, Float
             gPad->SetRightMargin(0.01);
             outputGraph->GetYaxis()->SetLabelOffset(2);
             outputGraph->SetTitle(Form("Bragg-Kleeman fit to exp. data at %.0f MeV", run_energy));
-           /* 
+         
+            /* 
             gPad->Update();
             TPaveText *title = (TPaveText*) gPad->GetPrimitive("title");
             title->SetTextFont(22);
@@ -987,18 +988,6 @@ Float_t drawBraggPeakGraphFit(Int_t Runs, Int_t dataType, Bool_t recreate, Float
 
    TCanvas * cFitResults = new TCanvas("cFitResults", hTitle, 1000, 1000);
    cFitResults->cd();
-/*
-   if       (kOutputUnit == kPhysical) hFitResultsDroppedData->SetXTitle("Physical range [mm]");
-   else if  (kOutputUnit == kWEPL)     hFitResultsDroppedData->SetXTitle("Range in Water Equivalent Path Length [mm]");
-   else if  (kOutputUnit == kEnergy)   hFitResultsDroppedData->SetXTitle("Energy [MeV]");
-
-   hFitResultsDroppedData->SetYTitle("Number of protons");
-   hFitResultsDroppedData->GetXaxis()->SetTitleFont(22);
-   hFitResultsDroppedData->GetXaxis()->SetLabelFont(22);
-   hFitResultsDroppedData->GetYaxis()->SetTitleFont(22);
-   hFitResultsDroppedData->GetYaxis()->SetLabelFont(22);
-   hFitResultsDroppedData->GetYaxis()->SetTitleOffset(1.5);
-*/
 
    if       (kOutputUnit == kPhysical) hFitResults->SetXTitle("Physical range [mm]");
    else if  (kOutputUnit == kWEPL)     hFitResults->SetXTitle("Range in Water Equivalent Path Length [mm]");
@@ -1016,9 +1005,6 @@ Float_t drawBraggPeakGraphFit(Int_t Runs, Int_t dataType, Bool_t recreate, Float
    if (kDrawFitResults) {
       hFitResults->Draw();
    }
-
-//   hFitResultsDroppedData->Draw();
-//   hFitResultsDroppedData->GetYaxis()->SetRangeUser(0, max(hFitResultsDroppedData->GetMaximum()*1.05, hFitResults->GetMaximum()*1.05));
 
    /* 
     * Uncomment when finished making plots for optimization poster
@@ -1051,12 +1037,10 @@ Float_t drawBraggPeakGraphFit(Int_t Runs, Int_t dataType, Bool_t recreate, Float
    Float_t energySigma = getEnergyFromUnit(empiricalMean +  empiricalSigma/ 2) - getEnergyFromUnit(empiricalMean - empiricalSigma / 2);
 
    if (kDrawFitResults) {
-      cFitResults->Update();
-
       gPad->Update();
 
-      TLine *l = nullptr;
       if (kDrawVerticalLayerLines) {
+         TLine *l = nullptr;
          Float_t line_z = 0;
          for (Int_t i=0; i<65; i++) {
             line_z = getUnitFromTL(getLayerPositionmm(i));
@@ -1070,25 +1054,15 @@ Float_t drawBraggPeakGraphFit(Int_t Runs, Int_t dataType, Bool_t recreate, Float
       Float_t bip_value = empiricalMean - 6 * empiricalSigma;
       if (bip_value == 0) bip_value = getWEPLFromEnergy(run_energy)*0.9;
       TLine *bip = new TLine(bip_value, gPad->GetUymax(), bip_value, 0);
-      bip->Draw();
+      if (bip_value > lowHistogramLimit) bip->Draw();
 
       Float_t bip_value2 = empiricalMean + 6 * empiricalSigma;
       TLine *bip2 = new TLine(bip_value2, 0, bip_value2, gPad->GetUymax());
-      bip2->Draw();
-
-      TLegend *legend = new TLegend(0.16, 0.78, 0.42, 0.88);
-      legend->SetTextSize(0.028);
-      legend->AddEntry(hFitResults, "Accepted tracks", "F");
-   //   legend->AddEntry(hFitResultsDroppedData, "Tracks without BP rise", "F");
-      legend->AddEntry(gauss, "Fitted Gaussians", "L");
-      legend->AddEntry(bip, "x_{i'} bin", "L");
-      legend->SetTextFont(22);
-      if (kDrawVerticalLayerLines) legend->AddEntry(l, "Sensor layer positions", "L");
-   //   legend->Draw();
+      if (bip_value < highHistogramLimit) bip2->Draw();
+      
 
       gStyle->SetOptStat(11);
       TPaveStats *ps = (TPaveStats*) cFitResults->GetPrimitive("stats");
-//      hFitResultsDroppedData->SetBit(TH1::kNoStats);
       hFitResults->SetBit(TH1::kNoStats);
       ps->SetX1NDC(0.4176); ps->SetX2NDC(0.9257);
       ps->SetY1NDC(0.7415); ps->SetY2NDC(0.9712);
@@ -1096,18 +1070,9 @@ Float_t drawBraggPeakGraphFit(Int_t Runs, Int_t dataType, Bool_t recreate, Float
       ps->AddText(Form("Nominal WEPL = %.2f #pm %.2f", expectedMean, expectedStraggling));
       ps->AddText(Form("Calculated WEPL = %.2f #pm %.2f", empiricalMean, empiricalSigma));
       ps->AddText(Form("WEPL deviation = %.2f #pm %.2f", empiricalMean - expectedMean, empiricalSigma - expectedStraggling));
-   
-      if (kOutputUnit == kPhysical) {
-         cFitResults->SaveAs(Form("OutputFiles/figures/Fitted_energies_%.2f_MeV_%s_%s_physical.pdf", energy, getMaterialChar(), getDataTypeChar(dataType)));
-      }
-      else if (kOutputUnit == kEnergy) {
-         cFitResults->SaveAs(Form("OutputFiles/figures/Fitted_energies_%.2f_MeV_%s_%s_energy.pdf", energy, getMaterialChar(), getDataTypeChar(dataType)));
-      }
-      
-      else if (kOutputUnit == kWEPL) {
-         cFitResults->SaveAs(Form("OutputFiles/figures/Fitted_energies_%.2f_mmDegrader_%s_%s_WEPL.png", run_degraderThickness, getMaterialChar(), getDataTypeChar(dataType)));
-      }
+      cFitResults->Modified();
    }
+
    else delete cFitResults;
 
    delete tracks;
@@ -1121,7 +1086,6 @@ Float_t drawBraggPeakGraphFit(Int_t Runs, Int_t dataType, Bool_t recreate, Float
    cout << "TRACK FIT: " << t4.RealTime() << " s.\n";
    cout << "DRAW PLOTS: " << t5.RealTime() << " s.\n";
    cout << "ANALYSIS AND CLOSE DOWN: " << t6.RealTime() << " s.\n";
-
 
    return empiricalMean;
 }
