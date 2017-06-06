@@ -85,8 +85,9 @@ Float_t getWEPLFromEnergy(Float_t energy) {
       // dz = DZ + absorberLength
 
       Float_t tl = getTLFromEnergy(energy, splineMaterial);
-      wepl -= wepl/tl * (dz-DZ);
+      wepl -= wepl/tl * (dz);
    }
+   
    
    return fmax(wepl, 0);
 }

@@ -138,12 +138,12 @@ void  createSplines() {
 
    in.close();
 
-   in.open("Data/Ranges/Water.csv");
+   in.open("Data/Ranges/WaterPSTAR.csv");
    while (1) {
       in >> energy >> range;
       if (!in.good()) break;
 
-      rangesWater[idxWater] = range;
+      rangesWater[idxWater] = range*10;
       energiesWater[idxWater++] = energy;
    }
    in.close();
@@ -190,17 +190,17 @@ void  createSplines() {
    TGraph * range_energy = new TGraph(idxDTC, energiesDTC, rangesDTC);
    TF1    * range_energy_fit = new TF1("range_energy_fit", "[0] * pow(x, [1])");
    range_energy_fit->SetParameters(0.02, 1.6);
-   range_energy->Fit("range_energy_fit", "Q,M,B");
+   range_energy->Fit("range_energy_fit", "Q,M");
    alpha_aluminum = range_energy_fit->GetParameter(0);
    p_aluminum = range_energy_fit->GetParameter(1);
    printf("Through fitting, found alpha = %.5f, p = %.5f.\n", alpha_aluminum, p_aluminum);
 
    // FIND BRAGG-KLEEMAN PARAMETERS HIGH / LOW
-   range_energy->Fit("range_energy_fit", "Q,M,B", "", 30, 40); // fit 0 - 40 MeV
+   range_energy->Fit("range_energy_fit", "Q,M", "", 0, 40); // fit 0 - 40 MeV
    alpha_material_low = range_energy_fit->GetParameter(0);
    p_material_low = range_energy_fit->GetParameter(1);
 
-   range_energy->Fit("range_energy_fit", "Q,M,B", "", 230, 240); // fit 220 - 250 MeV
+   range_energy->Fit("range_energy_fit", "Q,M", "", 220, 250); // fit 220 - 250 MeV
    alpha_material_high = range_energy_fit->GetParameter(0);
    p_material_high = range_energy_fit->GetParameter(1);
 
