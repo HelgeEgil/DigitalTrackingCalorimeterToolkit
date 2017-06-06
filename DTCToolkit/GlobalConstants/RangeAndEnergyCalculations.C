@@ -336,10 +336,10 @@ Float_t getEnergyFromDegraderThickness(Double_t degraderThickness) {
    Double_t dt, e, es;
    Int_t idx = 0;
    ifstream in;
-   in.open("Data/Ranges/EnergyAfterDegraderG4.csv");
+   in.open("Data/Ranges/EnergyAfterDegraderPSTAR.csv");
 
    while (1) {
-      in >> dt >> e;
+      in >> dt >> e >> es;
       if (!in.good()) break;
       phaseSpaceDegraderthickness[idx] = dt;
       phaseSpaceEnergy[idx++] = e;
