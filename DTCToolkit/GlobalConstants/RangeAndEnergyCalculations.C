@@ -78,6 +78,7 @@ Float_t getWEPLFromEnergy(Float_t energy) {
    if (energy == 0) return 0;
    Float_t wepl = getTLFromEnergy(energy, splineWater);
 
+   
    if (kIsFirstLayerAir) {
       // This is an approximation to increase the accuracy of the range determination
       // Due to the lack of absorber in the first layer, and thus dz * tl does not represent the 'average' energy loss path length (but DZ does)
@@ -86,6 +87,7 @@ Float_t getWEPLFromEnergy(Float_t energy) {
       Float_t tl = getTLFromEnergy(energy, splineMaterial);
       wepl -= wepl/tl * (dz);
    }
+   
    
    return fmax(wepl, 0);
 }
@@ -338,7 +340,7 @@ Float_t getEnergyFromDegraderThickness(Double_t degraderThickness) {
    in.open("Data/Ranges/EnergyAfterDegraderPSTAR.csv");
 
    while (1) {
-      in >> dt >> e  >> es;
+      in >> dt >> e >> es;
       if (!in.good()) break;
       phaseSpaceDegraderthickness[idx] = dt;
       phaseSpaceEnergy[idx++] = e;
