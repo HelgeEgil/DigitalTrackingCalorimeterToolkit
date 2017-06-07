@@ -27,7 +27,7 @@ void Run(int energy) {
 
       if (eventID != lastEventID && lastEventID >= 0) {
          rangeHistogram->Fill(lastZ);
-//         printf("The final energy loss is %.2f MeV.\n", dE);
+         printf("The final energy loss is %.2f MeV.\n", dE);
          dE = 0;
 
       }

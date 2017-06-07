@@ -75,7 +75,7 @@ void plotEnergyVsRange() {
    Float_t estimatedStraggling;
 
    ifstream in1;
-   in1.open("../../Data/Ranges/EnergyAfterDegraderG4.csv");
+   in1.open("../../Data/Ranges/EnergyAfterDegraderPSTAR.csv");
    Int_t thick, n=0;
    Double_t energy;
    while (1) {

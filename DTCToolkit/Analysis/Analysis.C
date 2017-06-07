@@ -922,6 +922,7 @@ Float_t drawBraggPeakGraphFit(Int_t Runs, Int_t dataType, Bool_t recreate, Float
 
       fitRange = thisTrack->getFitParameterRange();
       fitScale = thisTrack->getFitParameterScale();
+      if (fitIdx == 3) printf("fitScale = %.2f", fitScale);
       if (kDrawIndividualGraphs) fitError = quadratureAdd(thisTrack->getFitParameterError(), dz*0.28867); // latter term from error on layer position
 
       hFitResults->Fill(getUnitFromTL(fitRange));

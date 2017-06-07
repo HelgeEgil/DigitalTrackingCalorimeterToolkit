@@ -37,8 +37,8 @@
 /gate/geometry/setIonisationPotential Water 75 eV
 
 /gate/run/initialize
-/process/inactivate protonInelastic
-/process/inactivate hadElastic
+#/process/inactivate protonInelastic
+#/process/inactivate hadElastic
 
 #/gate/source/addSource PBS PencilBeam
 #/gate/source/PBS/setParticleType proton
