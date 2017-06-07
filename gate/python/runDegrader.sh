@@ -3,7 +3,7 @@
 echo "Usage: ./run.sh <absorberthickness> <degraderthickness_from> <degraderthickness_increment> <degraderthickness_to>"
 echo Absorber thickness: $1, Phantom thickness from $2 step $3 to $4
 
-NCORES=6
+NCORES=4
 IDX=1
 
 if [ $# -ne 4 ]; then

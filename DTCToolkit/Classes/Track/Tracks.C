@@ -127,10 +127,10 @@ void Tracks::extrapolateToLayer0() {
    }
 }
 
-void Tracks::doFit() {
+void Tracks::doTrackFit() {
    for (Int_t i=0; i<GetEntriesFast(); i++) {
       if (!At(i)) continue;
-      At(i)->doFit();
+      At(i)->doTrackFit();
    }
 }
 

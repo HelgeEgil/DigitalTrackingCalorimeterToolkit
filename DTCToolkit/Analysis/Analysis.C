@@ -643,7 +643,7 @@ void drawTungstenSpectrum(Int_t Runs, Int_t dataType, Bool_t recreate, Float_t e
 //          continue;
 //       }
       
-      outputGraph = (TGraphErrors*) thisTrack->doRangeFit();
+      outputGraph = (TGraphErrors*) thisTrack->doTrackFit(false, false);
       if (!outputGraph) continue;
       
       hFitResults->Fill(getUnitFromWEPL(thisTrack->getFitParameterRange()));
@@ -700,7 +700,7 @@ void drawFitScale(Int_t Runs, Int_t dataType, Bool_t recreate, Float_t energy) {
       if (!thisTrack) continue;
       if (thisTrack->doesTrackEndAbruptly()) continue;
 
-      outputGraph = (TGraphErrors*) thisTrack->doRangeFit(true);
+      outputGraph = (TGraphErrors*) thisTrack->doTrackFit(true, false);
       if (!outputGraph) continue;
       
       Float_t fitScale = thisTrack->getFitParameterScale();
@@ -748,7 +748,7 @@ void drawTracksWithEnergyLoss(Int_t Runs, Int_t dataType, Bool_t recreate, Float
       Track *thisTrack = tracks->At(j);
       if (!thisTrack) continue;
 
-      outputGraph = (TGraphErrors*) thisTrack->doRangeFit();
+      outputGraph = (TGraphErrors*) thisTrack->doTrackFit(false, false);
       if (!outputGraph) {
          continue;
       }
@@ -800,7 +800,7 @@ Float_t drawTH2FRangeAccuracy() {
          if (!thisTrack) continue;
          if (thisTrack->doesTrackEndAbruptly()) continue;
 
-         outputGraph = (TGraphErrors*) thisTrack->doRangeFit(false);
+         outputGraph = (TGraphErrors*) thisTrack->doTrackFit(false, true);
          hRangeAccuracy->Fill(nominalRange, thisTrack->getFitParameterRange());
      }
 
@@ -917,7 +917,7 @@ Float_t drawBraggPeakGraphFit(Int_t Runs, Int_t dataType, Bool_t recreate, Float
 
       // Do track fit, extract all parameters for this track
       t4.Start(false);
-      outputGraph = (TGraphErrors*) thisTrack->doRangeFit(false);
+      outputGraph = (TGraphErrors*) thisTrack->doTrackFit(false, false); // (bool isScaleVariable, bool useTrackLength (~ CSDA))
       if (!outputGraph) continue;
 
       fitRange = thisTrack->getFitParameterRange();

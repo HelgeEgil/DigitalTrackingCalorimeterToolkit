@@ -62,7 +62,7 @@ class Tracks : public TObject {
       virtual Bool_t    isUsedClustersInTrack(Int_t i)         { return At(i)->isUsedClustersInTrack(); }
       virtual Int_t     getNumberOfConflictClusters(Int_t i)   { return At(i)->getNumberOfConflictClusters(); }
       virtual void      extrapolateToLayer0();
-      virtual void      doFit();
+      virtual void      doTrackFit();
 
       // Search for clusters
       Int_t             getClosestCluster(vector<trackCluster> clusters, Cluster* interpolatedCluster);

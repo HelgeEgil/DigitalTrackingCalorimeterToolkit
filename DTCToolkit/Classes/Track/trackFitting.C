@@ -15,78 +15,7 @@
 #include "GlobalConstants/Constants.h"
 #include "GlobalConstants/MaterialConstants.h"
 
-TGraphErrors * Track::doFit() {
-   // Fit a bragg curve on the clusters in this track
-   // See HelperFunctions/Tools.C::fitfunc_DBP for the BC function used
-   
-   Bool_t newCutBraggPeak = (getAverageCSLastN(2) > getAverageCS()*kBPFactorAboveAverage);
-   Bool_t cutNPointsInTrack = (GetEntries()>3);
-   Bool_t cut = newCutBraggPeak * cutNPointsInTrack;
-   if (!cut) return 0;
-
-   TGraphErrors * graph = nullptr;
-   Int_t          n = GetEntriesFast();
-   Float_t        x[n], y[n];
-   Float_t        erx[n], ery[n];
-   Float_t        preTL = getPreTL();
-   Float_t        trackLength = preTL;
-   Float_t        maxEnergy, estimatedEnergy, estimatedRange;
-   Float_t        scaleParameter = 0;
-   Float_t        WEPLFactor;
-   
-   for (Int_t i=0; i<n; i++) {
-      if (!At(i)) continue;
-      trackLength += getTrackLengthmmAt(i);
-      x[i] = trackLength;
-      y[i] = getDepositedEnergy(i);
-      ery[i] = getDepositedEnergyError(i);
-      erx[i] = getAbsorberLength(i);
-   }
-
-   maxEnergy = getEnergyFromTL(trackLength + 0.8 * dz);
-   estimatedEnergy = getEnergyFromTL(trackLength + 0.25*dz); // ~ triangular function, so mean value is 33% from peak
-   estimatedRange = getWEPLFromTL(x[n-1] + 0.25*dz);
-
-   
-   if (kOutputUnit == kWEPL || kOutputUnit == kEnergy) {
-      WEPLFactor = getWEPLFactorFromEnergy(estimatedEnergy);
-      for (Int_t i=0; i<n; i++) {
-         x[i] = x[i] * WEPLFactor;
-      }
-   }
-   
-
-   graph = new TGraphErrors(n, x, y, erx, ery);
-   
-   if (kOutputUnit == kPhysical) {
-      if (kMaterial == kTungsten) scaleParameter = 14;
-      if (kMaterial == kAluminum) scaleParameter = 65;
-   }
-    
-   else if (kOutputUnit == kWEPL || kOutputUnit == kEnergy) {
-      if (kMaterial == kTungsten) scaleParameter = 100;
-      if (kMaterial == kAluminum) scaleParameter = 126;
-   }
-
-  
-   precomputeFactor = scaleParameter / (p * pow(alpha, 1/p));
-   TF1 *func = new TF1("fit_BP", fitfunc_DBP, 0, 500, 2);
-   func->SetParameter(0, estimatedRange);
-   func->SetParameter(1, scaleParameter);
-   func->SetParLimits(0, 0, maxEnergy);
-   func->SetParLimits(1, scaleParameter, scaleParameter);
-   func->SetNpx(500);
-
-   graph->Fit("fit_BP", "B, Q, N, WW", "", 0, 500);
-   
-   fitRange_ = func->GetParameter(0);
-   fitScale_ = func->GetParameter(1);
-   fitError_ = func->GetParError(0);
-
-   return graph;
-}
-
-TGraphErrors * Track::doRangeFit(Bool_t isScaleVariable) {
+TGraphErrors * Track::doTrackFit(Bool_t isScaleVariable, Bool_t useTrackLength) {
    // Fit a bragg curve on the clusters in this track
    // See HelperFunctions/Tools.C::fitfunc_DBP for the BC function used
    //
@@ -99,7 +28,8 @@ TGraphErrors * Track::doRangeFit(Bool_t isScaleVariable) {
    Float_t        x[n], y[n];
    Float_t        erx[n], ery[n];
    Float_t        preTL = getPreTL();
-   Float_t        maxRange, minRange, estimatedEnergy, estimatedRange;
+   Float_t        trackLength = preTL;
+   Float_t        maxRange, minRange, estimatedRange;
    Float_t        scaleParameter = 0;
    Float_t        overFittingDistance, startFittingDistance;
    Bool_t         checkResistivity = false;
@@ -111,7 +41,15 @@ TGraphErrors * Track::doRangeFit(Bool_t isScaleVariable) {
    for (Int_t i=0; i<n; i++) {
       if (!At(i)) continue;
 
-      x[i] = preTL + getLayermm(i);
+      if (useTrackLength) {
+         trackLength += getTrackLengthmmAt(i);
+         x[i] = trackLength;
+      }
+
+      else {
+         x[i] = preTL + getLayermm(i);
+      }
+
       y[i] = getDepositedEnergy(i, checkResistivity);
       ery[i] = getDepositedEnergyError(i, checkResistivity);
       erx[i] = dz * 0.28867; // 1/sqrt(12)
@@ -157,7 +95,7 @@ Float_t Track::getFitParameterRange() {
          return 0;
       }
       else {
-         doRangeFit();
+         doTrackFit();
       }
    }
 
@@ -170,7 +108,7 @@ Float_t Track::getFitParameterScale() {
          return 0;
       }
       else {
-         doRangeFit();
+         doTrackFit();
       }
    }
    return fitScale_;
@@ -182,7 +120,7 @@ Float_t Track::getFitParameterError() {
          return 0;
       }
       else {
-         doRangeFit();
+         doTrackFit();
       }
    }
    return fitError_;
