@@ -15,6 +15,7 @@
 #include <TPad.h>
 #include <TMath.h>
 #include <TFile.h>
+#include <TLatex.h>
 #include <TTree.h>
 #include <TGraph.h>
 #include <TGraphErrors.h>
@@ -112,7 +113,7 @@ Float_t getMCSCAngle(Float_t initialEnergy, Float_t range, Int_t phantom) {
       sumIntegral += pow(1/pv, 2) * binThickness / X0;
    }
 
-   mcs = 13.6 * ( 1 + 0.038 * log(range / X0)) * sqrt(sumIntegral);
+   mcs = 19.2 * ( 1 + 0.038 * log(range / X0)) * sqrt(sumIntegral);
    mcs *= 180 / 3.14159265358979;
       
    gamma = (initialEnergy + proton_mass) / proton_mass;
@@ -120,10 +121,10 @@ Float_t getMCSCAngle(Float_t initialEnergy, Float_t range, Int_t phantom) {
    momentum = gamma * beta * proton_mass;
    pv = beta * momentum;
 
-   Float_t mcsSimple = 13.6 / pv * sqrt(range/X0) * (1 + 0.038 * log(range / X0)) * 180 / 3.14159265;
+   Float_t mcsSimple = 19.2 / pv * sqrt(range/X0) * (1 + 0.038 * log(range / X0)) * 180 / 3.14159265;
    printf("MCS with a simple calculation is %.2f deg. MCS with the integral calculation is %.2f deg.\n", mcsSimple, mcs);
 
-   return mcsSimple;
+   return mcs;
 }
 
 
@@ -147,14 +148,14 @@ void Run()
    Bool_t   activateMCNP = true;
    Bool_t   activateFLUKA = true;
    Bool_t   activateTRIM = false;
-   Int_t    phantom = kWater;
+   Int_t    phantom = kComplex;
 
    gStyle->SetLabelSize(0.04);
    gStyle->SetLabelSize(0.04, "Y");
    gStyle->SetTitleSize(0.04);
    gStyle->SetTitleSize(0.04, "Y");
    gStyle->SetTitleOffset(1.1);
-   gStyle->SetTitleOffset(1.35, "Y");
+//   gStyle->SetTitleOffset(1.35, "Y");
    gStyle->SetOptStat(0);
    
    Float_t  X0, angle;
@@ -194,8 +195,10 @@ void Run()
    Int_t    zfrom = 0;
    Int_t    zto = 40;
    Int_t    nMax = 500000;
+   Int_t    lateralfrom = -2;
+   Int_t    lateralto = 2;
    Int_t    comparisonEnergy = 120;
-   Float_t  mu, sigma, nominalRange, distributionCutoff, fraction, fwhm;
+   Float_t  mu, sigma, nominalRange, distributionCutoff, fraction, fwhm, mutl;
    Int_t    distributionCutoffBin, totalIntegral, cutoffIntegral, stoppedIntegral, nominalEnergy, bin1, bin2;
    TF1    * fitFunction = nullptr;
 
@@ -203,6 +206,10 @@ void Run()
    Int_t    gateColor = kBlue-7;
    Int_t    expColor = kBlack;
    Int_t    mcnpColor = kRed;
+
+   Int_t    flukaStyle = 1;
+   Int_t    gateStyle = 9;
+   Int_t    mcnpStyle = 2;
       
    Float_t  energies[19]; 
    Float_t  energiesMCNP[19];
@@ -235,6 +242,9 @@ void Run()
    Float_t  rangesGATEdiff73[19] = {};
    Float_t  rangesGATEdiff72[19] = {};
    Float_t  rangesGATEdiff71[19] = {};
+   Float_t  detourGATE[19] = {};
+   Float_t  detourFLUKA[19] = {};
+   Float_t  detourMCNP[19] = {};
    Float_t  sigmaGATE[19] = {};
    Float_t  rangesPSTARWater[19] = {2.224, 3.089, 4.075, 5.176, 6.389, 7.707, 9.128, 10.65, 12.26, 13.96, 15.76, 17.63, 19.59, 21.63, 23.74, 25.93, 28.19, 30.52, 32.91};
    Float_t  rangesPSTARAl[19] = {1.08, 1.5, 1.97, 2.49, 3.07, 3.7, 4.37, 5.09, 5.85, 6.66, 7.51, 8.4, 9.32, 10.28, 11.28, 12.31, 13.38, 14.47, 15.60};
@@ -257,7 +267,13 @@ void Run()
    Float_t  stragglingJanniErrorWater[12] = {0.017, 0.017, 0.016, 0.015, 0.015, 0.015, 0.014, 0.014, 0.013, 0.013, 0.013, 0.013};
    Float_t  fractionNIJanniWater[12] = {3.487, 4.636, 5.860, 7.136, 8.465, 9.833, 13.29, 16.63, 19.92, 23.30, 26.75, 30.22};
    Float_t  fractionNIJanniErrorWater[12] = {0.24, 0.24, 0.24, 0.24, 0.24, 0.23, 0.23, 0.22, 0.22, 0.21, 0.21, 0.20};
-   
+  
+   Float_t  detourPSTARWater[19] = {0.9985, 0.9986, 0.9986, 0.9986, 0.9986, 0.9987, 0.9987, 0.9987, 0.9987, 0.9987, 0.9987, 0.9988, 0.9988, 0.9988, 0.9988, 0.9988, 0.9988, 0.9988, 0.9988};
+   Float_t  detourPSTARAl[19] =    {0.9967, 0.9968, 0.9969, 0.9970, 0.9970, 0.9971, 0.9971, 0.9972, 0.9972, 0.9972, 0.9973, 0.9973, 0.9973, 0.9974, 0.9974, 0.9974, 0.9974, 0.9975, 0.9975};
+
+   Float_t  highlandMCSAl[19] = {93.96, 93.66, 94.46, 93.33, 93.25, 93.18, 93.16, 93.14, 93.12, 92.12, 93.12, 93.12, 93.13, 93.14, 93.15, 93.17, 93.18, 93.19, 93.21}; // mrad
+   Float_t  highlandMCSWater[19] = {63.16, 63.25, 63.34, 63.45, 63.54, 63.64, 63.73, 63.81, 63.89, 63.96, 64.03, 64.10, 64.17, 64.23, 64.29, 64.34, 64.40, 64.45, 64.49};
+
    Float_t  sigmaPSTAR[19] = {};
 
    for (Int_t i=0; i<19; i++) {
@@ -324,6 +340,12 @@ void Run()
    TCanvas *c3 = new TCanvas("c3", "Fraction of nuclear interactions", 1000, 1000);
    TCanvas *c2 = new TCanvas("c2", "test", 800, 800);
    TCanvas *c1 = new TCanvas("c1", "Ranges for all codes", 1200, 1000);
+   TCanvas *c8 = new TCanvas("c8", "Detour factor", 1200, 1000);
+         
+   
+   TH1F *hGATELateral = new TH1F("hGATELateral", ";Bragg peak displacement in x [mm];Number of end points", 500, lateralfrom, lateralto);
+   TH1F * hFLUKALateral = new TH1F("hFLUKALateral", ";Bragg peak displacement in x [mm];Number of end points", 500, lateralfrom,lateralto);
+   TH1F * hMCNPLateral = new TH1F("hMCNPLateral", "Angular BP distribution;#theta [mrad];Number of end points", 500, lateralfrom,lateralto);
 
    c1->cd();
    TPad *pad1 = nullptr;
@@ -365,8 +387,8 @@ void Run()
          }
 
          TH1F *hGATE = new TH1F("hGATE", "Proton ranges in single GATE dataset;Range [cm];Number of primaries", 100, fmax(0, nominalRange - 2), nominalRange + 2);
+         TH1F *hGATETL = new TH1F("hGATE", "Proton tracklengths in single GATE dataset;Range [cm];Number of primaries", 100, fmax(0, nominalRange - 2), nominalRange + 2);
          TH1F *hGATEAll = new TH1F("hGATEAll", "Proton ranges in single GATE dataset including nuclear interactions;Range [cm];Number of primaries", 200, 0, nominalRange+2);
-         TH1F *hGATELateral = new TH1F("hGATELateral", "Angular BP distribution;#theta{plane} [deg];Number of end points", 500, -3, 3);
          
          TH1F *hGATE74 = new TH1F("hGATE74", "Proton ranges in single GATE dataset;Range [cm];Number of primaries", 100, fmax(0, nominalRange - 2), nominalRange + 2);
          TH1F *hGATE73 = new TH1F("hGATE73", "Proton ranges in single GATE dataset;Range [cm];Number of primaries", 100, fmax(0, nominalRange - 2), nominalRange + 2);
@@ -401,7 +423,9 @@ void Run()
             nTotal++;
             if (!isInelastic) {
                hGATE->Fill(z/10.);
-               angle = fabs(atan(x/10. / (z/10.)) * 180 / 3.1415926535);
+               hGATETL->Fill(sqrt(pow(z/10., 2) + pow(x/10., 2) + pow(y/10., 2)));
+               angle = atan(x/10. / (z/10.)) * 1000;
+//               hGATELateral->Fill(angle);
                hGATELateral->Fill(x/10.);
             }
             else nInelastic++;
@@ -452,6 +476,12 @@ void Run()
          
          mu = fit->GetParameter(1);
          sigma = fabs(fit->GetParameter(2));
+         
+         hGATETL->Fit("fit", "N,Q,M,B");
+         mutl = fit->GetParameter(1);
+
+         detourGATE[i] = mu / mutl;
+         printf("Detour factor GATE = %.4f.\n", detourGATE[i]);
 
          printf("GATE, %d MeV. nominal Range is %.1f, fit range is %.1f.\n", nominalEnergy, nominalRange, mu);
 
@@ -490,13 +520,19 @@ void Run()
          delete hGATE;
          if (nominalEnergy == comparisonEnergy) {
             c2->cd();
-            hGATELateral->Scale(1/hGATELateral->Integral());
+//            hGATELateral->Scale(1/hGATELateral->Integral());
             hGATELateral->SetLineColor(gateColor);
+            hGATELateral->SetLineStyle(gateStyle);
+            hGATELateral->SetLineWidth(2);
+            hGATELateral->GetXaxis()->SetTitleFont(22);
+            hGATELateral->GetXaxis()->SetLabelFont(22);
+            hGATELateral->GetYaxis()->SetTitleFont(22);
+            hGATELateral->GetYaxis()->SetLabelFont(22);
+            hGATELateral->GetYaxis()->SetTitleOffset(1.4);
+            gPad->SetLogy();
             hGATELateral->Draw();
          }
-         else {
-            delete hGATELateral;
-         }
+         hGATELateral->Reset();
       }
 
    }
@@ -536,8 +572,8 @@ void Run()
 
          cout << nominalEnergy << "... ";
          TH1F * hMCNP = new TH1F("hMCNP", "Proton ranges in single MCNP dataset;Range [cm];Number of primaries", 400, fmax(0, nominalRange - 5), nominalRange + 5);
+         TH1F * hMCNPTL = new TH1F("hMCNP", "Proton tracklengths in single MCNP dataset;Range [cm];Number of primaries", 400, fmax(0, nominalRange - 5), nominalRange + 5);
          TH1F * hMCNPAll = new TH1F("hMCNPAll", "Proton ranges in single MCNP dataset including nuclear interactions;Range [cm];Number of primaries", 200, 0, nominalRange+2);
-         TH1F * hMCNPLateral = new TH1F("hMCNPLateral", "Angular BP distribution;#theta_{plane} [deg];Number of end points", 500, -3, 3);
          
          if (phantom == kAluminium)  {
             in.open(Form("Data/MCNP/Aluminium/%dMeV_Alp", nominalEnergy));
@@ -573,7 +609,9 @@ void Run()
                   nTotal++;
                   if (terminationType != 13 && terminationType != 16) { // not a nuclear interaction
                      hMCNP->Fill((z - startZ));
-                     angle = fabs(atan(x / z) * 180 / 3.1415926535);
+                     hMCNPTL->Fill(sqrt(pow(z - startZ, 2) + pow(x, 2) + pow(y, 2)));
+                     angle = atan(x / z) * 1000;
+//                     hMCNPLateral->Fill(angle);
                      hMCNPLateral->Fill(x);
                   }
                   else nInelastic++;
@@ -608,6 +646,12 @@ void Run()
          rangesMCNP[i] = mu;
          sigmaMCNP[i] = sigma*10;
 
+         hMCNPTL->Fit("fit", "N,Q,M,B");
+         mutl = fit->GetParameter(1);
+
+         detourMCNP[i] = mu / mutl;
+         printf("Detour factor MCNP = %.4f.\n", detourMCNP[i]);
+
          // Find fraction of nuclear interactions
          distributionCutoff = mu - 3*sigma;
          distributionCutoffBin = hMCNPAll->GetXaxis()->FindBin(distributionCutoff);
@@ -623,13 +667,14 @@ void Run()
          
          if (nominalEnergy == comparisonEnergy) {
             c2->cd();
-            hMCNPLateral->Scale(1/hMCNPLateral->Integral());
+//            hMCNPLateral->Scale(1/hMCNPLateral->Integral());
             hMCNPLateral->SetLineColor(mcnpColor);
+            hMCNPLateral->SetLineStyle(mcnpStyle);
+            hMCNPLateral->SetLineWidth(2);
             hMCNPLateral->Draw("same");
          }
-         else {
-            delete hMCNPLateral;
-         }
+         hMCNPLateral->Reset();
+
          delete hMCNP;
          delete hMCNPAll;
          delete fit;
@@ -663,8 +708,8 @@ void Run()
          }
 
          TH1F * hFLUKA = new TH1F("hFLUKA", "All protons in FLUKA dataset;Range [cm];Number of primaries", 100, fmax(0, nominalRange-2), nominalRange+2);
+         TH1F * hFLUKATL = new TH1F("hFLUKATL", "All protons tracklengths in FLUKA dataset;Range [cm];Number of primaries", 100, fmax(0, nominalRange-2), nominalRange+2);
          TH1F * hFLUKAAll = new TH1F("hFLUKAAll", "Proton ranges in single FLUKA dataset including nuclear interactions;Range [cm];Number of primaries", 200, 0, nominalRange+2);
-         TH1F * hFLUKALateral = new TH1F("hFLUKALateral", "Angular BP distribution;#theta_{plane} [deg];Number of end points", 500, -3,3);
 
          if (phantom == kAluminium) { 
             in.open(Form("Data/FLUKA/Aluminium/%dMevProtonsPencil.txt", nominalEnergy));
@@ -686,10 +731,14 @@ void Run()
             nTotal++;
             if (terminationType != 11) {
                hFLUKA->Fill(z);
-               angle = fabs(atan(x / z) * 180 / 3.1415926535);
+               hFLUKATL->Fill(sqrt(pow(z, 2) + pow(x,2) + pow(y,2)));
+               angle = atan(x / z) * 1000;
+              // hFLUKALateral->Fill(angle);
                hFLUKALateral->Fill(x);
             }
-            else nInelastic++;
+            else {
+               nInelastic++;
+            }
          }
 
          in.close();
@@ -704,6 +753,11 @@ void Run()
          sigma = fabs(fit->GetParameter(2));
          rangesFLUKA[i] = mu;
          sigmaFLUKA[i] = sigma*10;
+
+         hFLUKATL->Fit("fit", "N,Q,M");
+         mutl = fit->GetParameter(1);
+         detourFLUKA[i] = mu / mutl;
+         printf("FLUKA detour factor is %.4f\n", detourFLUKA[i]);
         
          // Find fraction of nuclear interactions
          distributionCutoff = mu - 3*sigma;
@@ -722,17 +776,27 @@ void Run()
          delete hFLUKAAll;
          if (nominalEnergy == comparisonEnergy) {
             c2->cd();
-            hFLUKALateral->Scale(1/hFLUKALateral->Integral());
+//            hFLUKALateral->Scale(1/hFLUKALateral->Integral());
             hFLUKALateral->SetLineColor(flukaColor);
+            hFLUKALateral->SetLineStyle(flukaStyle);
+            hFLUKALateral->SetLineWidth(2);
             hFLUKALateral->Draw("same");
-            TF1 *mcsGauss = new TF1("mcsGauss", "gaus(0)", 0, 40);
+//            TF1 *mcsGauss = new TF1("mcsGauss", "gaus(0)", 0, 40);
             // energy, depth, phantom
-            mcsGauss->SetParameters(hFLUKALateral->GetMaximum(), 0, getMCSCAngle(nominalEnergy, mu, phantom));
-            mcsGauss->Draw("same");
+//            mcsGauss->SetParameters(hFLUKALateral->GetMaximum(), 0, getMCSCAngle(nominalEnergy, mu, phantom));
+//            mcsGauss->Draw("same");
+            TF1 *highland = new TF1("highland", "gaus(0)", -200, 200);
+            if (phantom == kWater) {
+               highland->SetParameters(hFLUKALateral->GetMaximum(), 0, 63.81);
+            }
+         
+            else if (phantom == kAluminium) {
+               highland->SetParameters(hFLUKALateral->GetMaximum(), 0, 93.14);
+            }
+//            highland->Draw("same");
+            printf("FLUKA rms is %.2f mrad\n", hFLUKALateral->GetRMS());
          }
-         else {
-            delete hFLUKALateral;
-         }
+         hFLUKALateral->Reset();
       }
    }
 
@@ -925,7 +989,7 @@ void Run()
 //   gMCNP75diff->SetLineWidth(3);
 //   gMCNP75diff->Draw("LA");
    
-   gGATE75diff->SetTitle("Ranges deviation from MCNP; Initial energy [MeV];Range error [mm]");
+   gGATE75diff->SetTitle("; Initial energy [MeV];Range deviation MCNP - GATE [mm]");
    gGATE75diff->SetLineColor(kBlue-10);
    gGATE74diff->SetLineColor(kBlue-8);
    gGATE73diff->SetLineColor(kBlue-5);
@@ -936,6 +1000,14 @@ void Run()
    gGATE73diff->SetLineWidth(3);
    gGATE72diff->SetLineWidth(3);
    gGATE71diff->SetLineWidth(3);
+
+   gGATE75diff->GetXaxis()->SetTitleFont(22);
+   gGATE75diff->GetYaxis()->SetTitleFont(22);
+   gGATE75diff->GetXaxis()->SetLabelFont(22);
+   gGATE75diff->GetYaxis()->SetLabelFont(22);
+   gGATE75diff->GetYaxis()->SetRangeUser(-1, 1.5);
+   
+
    
    for (int i=0; i<numberOfPoints; i++) {
       printf("At %.0f MeV, GATE75 = %.2f.\n", energies[i], rangesGATE[i]);
@@ -951,9 +1023,35 @@ void Run()
    gGATE72diff->Draw("L, same");
    gGATE71diff->Draw("L, same");
    
-   TLine *l = new TLine(c6->GetUxmin(), 0, c6->GetUxmax(), 0);
-   l->Draw();
+   // make text labels
+   Int_t energy_pos = 233;
+   Float_t subvalue = 0.02;
+   TLatex *text75 = new TLatex(energy_pos, gGATE75diff->Eval(230) - subvalue, "75 eV");
+   TLatex *text74 = new TLatex(energy_pos, gGATE74diff->Eval(230) - subvalue, "74 eV");
+   TLatex *text73 = new TLatex(energy_pos, gGATE73diff->Eval(230) - subvalue, "73 eV");
+   TLatex *text72 = new TLatex(energy_pos, gGATE72diff->Eval(230) - subvalue, "72 eV");
+   TLatex *text71 = new TLatex(energy_pos, gGATE71diff->Eval(230) - subvalue, "71 eV");
 
+   Float_t latexTextSize = 0.03;
+   text75->SetTextSize(latexTextSize);
+   text75->SetTextFont(22);
+   text74->SetTextSize(latexTextSize);
+   text74->SetTextFont(22);
+   text73->SetTextSize(latexTextSize);
+   text73->SetTextFont(22);
+   text72->SetTextSize(latexTextSize);
+   text72->SetTextFont(22);
+   text71->SetTextSize(latexTextSize);
+   text71->SetTextFont(22);
+
+   text75->Draw();
+   text74->Draw();
+   text73->Draw();
+   text72->Draw();
+   text71->Draw();
+
+
+/*
    TLegend *legIP = new TLegend(0.17, 0.72, 0.35, 0.88);
    legIP->AddEntry(gGATE75diff, "GATE I = 75 eV", "l");
    legIP->AddEntry(gGATE74diff, "GATE I = 74 eV", "l");
@@ -962,6 +1060,7 @@ void Run()
    legIP->AddEntry(gGATE71diff, "GATE I = 71 eV", "l");
 //   legIP->AddEntry(gMCNP75diff, "MCNP", "L");
    legIP->Draw();
+*/
 
    // Draw fraction of nuclear interactions
    c3->cd();
@@ -976,24 +1075,32 @@ void Run()
    gPad->SetGridy();
 
    if (phantom == kAluminium) {
-      gGATEFractionNI->SetTitle("Aluminium phantom;Initial energy [MeV];Fraction of Nuclear Interactions");
+      gGATEFractionNI->SetTitle(";Initial energy [MeV];Fraction of Nuclear Interactions");
    }
    else if (phantom == kWater) {
-      gGATEFractionNI->SetTitle("Water phantom;Initial energy [MeV];Fraction of Nuclear Interactions");
+      gGATEFractionNI->SetTitle(";Initial energy [MeV];Fraction of Nuclear Interactions");
    }
    else if (phantom == kComplex) {
-      gGATEFractionNI->SetTitle("Detector geometry;Initial energy [MeV];Fraction of Nuclear Interactions");
+      gGATEFractionNI->SetTitle(";Initial energy [MeV];Fraction of Nuclear Interactions");
    }
-   gGATEFractionNI->GetYaxis()->SetRangeUser(0, 0.35);
+   gGATEFractionNI->GetYaxis()->SetRangeUser(0, 0.45);
    gGATEFractionNI->SetLineColor(gateColor);
+   gGATEFractionNI->SetLineStyle(gateStyle);
    gGATEFractionNI->SetLineWidth(3);
    gGATEFractionNI->GetYaxis()->SetTitleOffset(1.35);
    gFLUKAFractionNI->SetLineColor(flukaColor);
+   gFLUKAFractionNI->SetLineStyle(flukaStyle);
    gFLUKAFractionNI->SetLineWidth(3);
    gMCNPFractionNI->SetLineColor(mcnpColor);
+   gMCNPFractionNI->SetLineStyle(mcnpStyle);
    gMCNPFractionNI->SetLineWidth(3);
    gJanniFractionNI->SetMarkerColor(expColor);
    gJanniFractionNI->SetMarkerStyle(21);
+
+   gGATEFractionNI->GetXaxis()->SetTitleFont(22);
+   gGATEFractionNI->GetXaxis()->SetLabelFont(22);
+   gGATEFractionNI->GetYaxis()->SetTitleFont(22);
+   gGATEFractionNI->GetYaxis()->SetLabelFont(22);
 
    gGATEFractionNI->Draw("AL");
    gFLUKAFractionNI->Draw("same, L");
@@ -1005,6 +1112,7 @@ void Run()
    legFraction->AddEntry(gMCNPFractionNI, "MCNP", "l");
    legFraction->AddEntry(gFLUKAFractionNI, "FLUKA", "l");
    if (phantom != kComplex) legFraction->AddEntry(gJanniFractionNI, "Janni", "Ple");
+   legFraction->SetTextFont(22);
    legFraction->Draw();
 
    // Draw lateral BP distribution FWHM
@@ -1015,25 +1123,34 @@ void Run()
    TGraph *gTheoryLateralFWHM = new TGraph(numberOfPoints, energies, beamSpreadingTheory);
 
    if (phantom == kWater) {
-      gGATELateralFWHM->SetTitle("Lateral beam spreading in water phantom;Initial Energy [MeV];Beam Spreading #sigma_{RMS} / R");
+      gGATELateralFWHM->SetTitle(";Initial Energy [MeV];Beam Spreading #sigma_{RMS} / R");
    }
    else if (phantom == kAluminium) {
-      gGATELateralFWHM->SetTitle("Lateral beam spreading in aluminium phantom;Initial Energy [MeV];Beam Spreading #sigma_{RMS} / R");
+      gGATELateralFWHM->SetTitle(";Initial Energy [MeV];Beam Spreading #sigma_{RMS} / R");
    }
    else if (phantom == kComplex) {
-      gGATELateralFWHM->SetTitle("Lateral beam spreading in detector geometry;Initial Energy [MeV];Beam Spreading #sigma_{RMS} / R");
+      gGATELateralFWHM->SetTitle(";Initial Energy [MeV];Beam Spreading #sigma_{RMS} / R");
    }
 
    gPad->SetGridx();
    gPad->SetGridy();
 
-   gGATELateralFWHM->GetYaxis()->SetTitleOffset(1.8);
+   gGATELateralFWHM->GetYaxis()->SetTitleOffset(1.4);
    gGATELateralFWHM->GetYaxis()->SetRangeUser(0, 0.07);
+
+   gGATELateralFWHM->GetXaxis()->SetTitleFont(22);
+   gGATELateralFWHM->GetXaxis()->SetLabelFont(22);
+   gGATELateralFWHM->GetYaxis()->SetTitleFont(22);
+   gGATELateralFWHM->GetYaxis()->SetLabelFont(22);
+
    gGATELateralFWHM->SetLineColor(gateColor);
+   gGATELateralFWHM->SetLineStyle(gateStyle);
    gGATELateralFWHM->SetLineWidth(3);
    gFLUKALateralFWHM->SetLineColor(flukaColor);
+   gFLUKALateralFWHM->SetLineStyle(flukaStyle);
    gFLUKALateralFWHM->SetLineWidth(3);
    gMCNPLateralFWHM->SetLineColor(mcnpColor);
+   gMCNPLateralFWHM->SetLineStyle(mcnpStyle);
    gMCNPLateralFWHM->SetLineWidth(3);
    gTheoryLateralFWHM->SetLineColor(kBlack);
    gTheoryLateralFWHM->SetLineWidth(3);
@@ -1041,13 +1158,14 @@ void Run()
    gGATELateralFWHM->Draw("AL");
    gFLUKALateralFWHM->Draw("same, L");
    gMCNPLateralFWHM->Draw("same, L");
-   gTheoryLateralFWHM->Draw("same, L");
+//   gTheoryLateralFWHM->Draw("same, L");
 
    TLegend *legFWHM = new TLegend(0.17, 0.72, 0.35, 0.88);
    legFWHM->AddEntry(gGATELateralFWHM, "GATE", "l");
    legFWHM->AddEntry(gMCNPLateralFWHM, "MCNP", "l");
    legFWHM->AddEntry(gFLUKALateralFWHM, "FLUKA", "l");
 //   legFWHM->AddEntry(gTheoryLateralFWHM, "Preston and Koehler", "l");
+   legFWHM->SetTextFont(22);
    legFWHM->Draw();
 
    for (int i=0; i<19; i++) {
@@ -1091,23 +1209,31 @@ void Run()
    gPad->SetGridx();
    gPad->SetGridy();
    if (phantom == kComplex) {
-      gGATEStraggling->SetTitle("Complex detector;Initial energy [MeV];Range straggling [mm]");
+      gGATEStraggling->SetTitle(";Initial energy [MeV];Range straggling [mm]");
    }
    else if (phantom == kAluminium) {
-      gGATEStraggling->SetTitle("Aluminium phantom;Initial energy [MeV];Range straggling [mm]");
+      gGATEStraggling->SetTitle(";Initial energy [MeV];Range straggling [mm]");
    }
    else if (phantom == kWater) {
-      gGATEStraggling->SetTitle("Water phantom;Initial energy [MeV];Range straggling [mm]");
+      gGATEStraggling->SetTitle(";Initial energy [MeV];Range straggling [mm]");
    }
 
    gGATEStraggling->SetLineColor(gateColor);
+   gGATEStraggling->SetLineStyle(gateStyle);
    gGATEStraggling->SetLineWidth(3);
    gFLUKAStraggling->SetLineColor(flukaColor);
+   gFLUKAStraggling->SetLineStyle(flukaStyle);
    gFLUKAStraggling->SetLineWidth(3);
    gMCNPStraggling->SetLineColor(mcnpColor);
+   gMCNPStraggling->SetLineStyle(mcnpStyle);
    gMCNPStraggling->SetLineWidth(3);
    gJanniStraggling->SetMarkerColor(expColor);
    gJanniStraggling->SetMarkerStyle(21);
+
+   gGATEStraggling->GetXaxis()->SetTitleFont(22);
+   gGATEStraggling->GetYaxis()->SetTitleFont(22);
+   gGATEStraggling->GetXaxis()->SetLabelFont(22);
+   gGATEStraggling->GetYaxis()->SetLabelFont(22);
 
    gGATEStraggling->Draw("AL");
    gFLUKAStraggling->Draw("same, L");
@@ -1118,7 +1244,8 @@ void Run()
    legStraggling->AddEntry(gGATEStraggling, "GATE", "l");
    legStraggling->AddEntry(gMCNPStraggling, "MCNP", "l");
    legStraggling->AddEntry(gFLUKAStraggling, "FLUKA", "l");
-   legStraggling->AddEntry(gJanniStraggling, "Janni", "PLE");
+   if (phantom != kComplex) legStraggling->AddEntry(gJanniStraggling, "Janni", "PLE");
+   legStraggling->SetTextFont(22);
    legStraggling->Draw();
 
    // Direct range comparisons
@@ -1130,39 +1257,42 @@ void Run()
    TGraph *gFLUKAvsPSTAR = new TGraph(numberOfPoints, energies, rangesFLUKAdiff);
 
    if (phantom == kComplex) {
-      gMCNPvsPSTAR->SetTitle("Detector geometry; Initial energy [MeV];Range deviation* [mm]");
+      gMCNPvsPSTAR->SetTitle(";Initial energy [MeV];Range deviation* [mm]");
    }
    else if (phantom == kAluminium) {
-      gMCNPvsPSTAR->SetTitle("Aluminium phantom; Initial energy [MeV];Range deviation* [mm]");
+      gMCNPvsPSTAR->SetTitle(";Initial energy [MeV];Range deviation* [mm]");
    }
    else if (phantom == kWater) {
-      gMCNPvsPSTAR->SetTitle("Water phantom; Initial energy [MeV];Range deviation* [mm]");
+      gMCNPvsPSTAR->SetTitle(";Initial energy [MeV];Range deviation* [mm]");
    }
 
-   gMCNPvsPSTAR->GetYaxis()->SetTitleOffset(1.35);
+   gMCNPvsPSTAR->GetYaxis()->SetTitleOffset(1.3);
    gMCNPvsPSTAR->SetLineColor(mcnpColor);
+   gMCNPvsPSTAR->SetLineStyle(mcnpStyle);
    gMCNPvsPSTAR->SetLineWidth(3);
    gMCNPvsPSTAR->GetYaxis()->SetRangeUser(-2, 0.6);
    gMCNPvsPSTAR->GetXaxis()->SetNdivisions(12);
+   gMCNPvsPSTAR->GetXaxis()->SetLabelFont(22);
+   gMCNPvsPSTAR->GetXaxis()->SetTitleFont(22);
+   gMCNPvsPSTAR->GetYaxis()->SetLabelFont(22);
+   gMCNPvsPSTAR->GetYaxis()->SetTitleFont(22);
    gMCNPvsPSTAR->Draw("AL");
    
    gGATEvsPSTAR->SetLineColor(gateColor);
+   gGATEvsPSTAR->SetLineStyle(gateStyle);
    gGATEvsPSTAR->SetLineWidth(3);
    gGATEvsPSTAR->Draw("same, L");
 
    gFLUKAvsPSTAR->SetLineColor(flukaColor);
+   gFLUKAvsPSTAR->SetLineStyle(flukaStyle);
    gFLUKAvsPSTAR->SetLineWidth(3);
    gFLUKAvsPSTAR->Draw("same, L");
 
-   gPad->Update();
-   TLine *l2 = new TLine(gPad->GetUxmin(), 0, gPad->GetUxmax(), 0);
-   l2->Draw();
-   
-   
    TLegend *leg3 = new TLegend(0.17, 0.72, 0.35, 0.88);
    leg3->AddEntry(gGATEvsPSTAR, "GATE", "l");
    leg3->AddEntry(gMCNPvsPSTAR, "MCNP", "l");
    leg3->AddEntry(gFLUKAvsPSTAR, "FLUKA", "l");
+   leg3->SetTextFont(22);
    leg3->Draw();
 
    // MAKE DATA TABLES
@@ -1195,4 +1325,58 @@ void Run()
          if (i < 13) printf("Aluminium; JANNI; %.0f; %.5f; %.5f; 0; %.5f\n", energiesJanni[i], rangesJanni[i], stragglingJanni[i], fractionNIJanni[i]);
       }
    }
+
+   c8->cd();
+   TGraph *gDetourGATE = new TGraph(numberOfPoints, energies, detourGATE);
+   TGraph *gDetourFLUKA = new TGraph(numberOfPoints, energies, detourFLUKA);
+   TGraph *gDetourMCNP = new TGraph(numberOfPoints, energies, detourMCNP);
+   TGraph *gDetourPSTARWater = new TGraph(numberOfPoints, energies, detourPSTARWater);
+   TGraph *gDetourPSTARAl = new TGraph(numberOfPoints, energies, detourPSTARAl);
+   
+   gDetourGATE->SetTitle("Detour factors;Energy [MeV];Detour Factor");
+
+   gDetourGATE->SetLineColor(gateColor);
+   gDetourGATE->SetLineWidth(3);
+   gDetourFLUKA->SetLineColor(flukaColor);
+   gDetourFLUKA->SetLineWidth(3);
+   gDetourMCNP->SetLineColor(mcnpColor);
+   gDetourMCNP->SetLineWidth(3);
+   gDetourPSTARAl->SetMarkerColor(expColor);
+   gDetourPSTARAl->SetMarkerStyle(21);
+   gDetourPSTARWater->SetMarkerColor(expColor);
+   gDetourPSTARWater->SetMarkerStyle(21);
+
+   gDetourGATE->Draw("AL");
+   gDetourFLUKA->Draw("same, L");
+   gDetourMCNP->Draw("same, L");
+   
+   if (phantom == kWater) {
+      gDetourPSTARWater->Draw("same, P");
+   }
+
+   else if (phantom == kAluminium) {
+      gDetourPSTARAl->Draw("same, P");
+   }
+   
+   TLegend *legDetour = new TLegend(0.17, 0.72, 0.35, 0.88);
+   legDetour->AddEntry(gDetourGATE, "GATE", "l");
+   legDetour->AddEntry(gDetourMCNP, "MCNP", "l");
+   legDetour->AddEntry(gDetourFLUKA, "FLUKA", "l");
+   if (phantom == kWater) {
+      legDetour->AddEntry(gDetourPSTARWater, "PSTAR", "PLE");
+   }
+   else if (phantom == kAluminium) {
+      legDetour->AddEntry(gDetourPSTARAl, "PSTAR", "PLE");
+   }
+
+   legDetour->Draw();
+
+   c2->cd();
+   TLegend *legLateral = new TLegend(0.17, 0.72, 0.35, 0.88);
+   legLateral->AddEntry(hGATELateral, "GATE", "l");
+   legLateral->AddEntry(hMCNPLateral, "MCNP", "l");
+   legLateral->AddEntry(hFLUKALateral, "FLUKA", "l");
+   legLateral->SetTextFont(22);
+   legLateral->Draw();
+
 }

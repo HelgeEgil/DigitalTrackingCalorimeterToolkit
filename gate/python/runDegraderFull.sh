@@ -3,7 +3,7 @@
 echo "Usage: ./run.sh <absorberthickness> <degraderthickness_from> <degraderthickness_increment> <degraderthickness_to>"
 echo Absorber thickness: $1, Phantom thickness from $2 step $3 to $4
 
-NCORES=10
+NCORES=4
 IDX=1
 
 if [ $# -ne 4 ]; then
@@ -17,7 +17,7 @@ do
    beampos=`echo "scale=3; -$i-5" | bc`
 	nice -n 10 Gate -a "'[absorberthickness,$1] [energy,250] [degraderthickness,$i] [halfdegraderthickness,$hdt] [beampos,$beampos]'" Main_full.mac > terminal_output.txt &
 	echo "Running: $i"
-   if (( $IDX % $NCORES == 0 ))
+   if (( $IDX % $NCORES == 0 || $i == $4))
    then
       echo "Waiting for run $i (PID $!)"
       IDX=1

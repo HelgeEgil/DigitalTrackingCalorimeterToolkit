@@ -27,7 +27,7 @@
 using namespace std;
 
 // IF FLOAT VALUES OF ABSORBER THICKNESS: USE *10 VALUES (3.5 -> 35)
-Int_t absorberThickness = 4;
+Int_t absorberThickness = 35;
 Bool_t kFilterData = false;
 Bool_t kUseCarbon = false;
 Int_t filterSize = 1;
@@ -175,8 +175,8 @@ void plotRangesAndStraggling() {
    Float_t a_wtr = 0.02387;
    Float_t p_wtr = 1.7547;
 
-   Float_t wepl_ratio = splineWater->Eval(242) / splineDTC->Eval(242);
-   Float_t wepl_ratio0 = a_wtr / a_dtc * pow(242 / a_wtr, 1 - p_dtc / p_wtr);
+   Float_t wepl_ratio = splineWater->Eval(249) / splineDTC->Eval(249);
+   Float_t wepl_ratio0 = a_wtr / a_dtc * pow(249 / a_wtr, 1 - p_dtc / p_wtr);
 
    cout << "WEPL ratio (spline) = " << wepl_ratio << endl;
    cout << "WEPL ratio (BK) = " << wepl_ratio0 << endl;

@@ -47,7 +47,7 @@ TGraphErrors * Track::doTrackFit(Bool_t isScaleVariable, Bool_t useTrackLength) 
       }
 
       else {
-         x[i] = preTL + getLayermm(i);
+         x[i] = getLayermm(i) + preTL;
       }
 
       y[i] = getDepositedEnergy(i, checkResistivity);
