@@ -148,7 +148,7 @@ void Run()
    Bool_t   activateMCNP = true;
    Bool_t   activateFLUKA = true;
    Bool_t   activateTRIM = false;
-   Int_t    phantom = kComplex;
+   Int_t    phantom = kWater;
 
    gStyle->SetLabelSize(0.04);
    gStyle->SetLabelSize(0.04, "Y");
@@ -1107,13 +1107,39 @@ void Run()
    gMCNPFractionNI->Draw("same, L");
    gJanniFractionNI->Draw("same, P");
 
-   TLegend *legFraction = new TLegend(0.17, 0.72, 0.35, 0.88);
+   TLegend *legFraction = new TLegend(0.17, 0.7, 0.5, 0.87);
    legFraction->AddEntry(gGATEFractionNI, "GATE", "l");
    legFraction->AddEntry(gMCNPFractionNI, "MCNP", "l");
    legFraction->AddEntry(gFLUKAFractionNI, "FLUKA", "l");
    if (phantom != kComplex) legFraction->AddEntry(gJanniFractionNI, "Janni", "Ple");
    legFraction->SetTextFont(22);
    legFraction->Draw();
+   
+   TLatex *nuclText = nullptr;
+   TLatex *nuclLabel = nullptr;
+
+   Float_t nuclTextFrom = 70;
+   Float_t nuclTextTo = 0.32;
+   if (phantom == kWater) {
+      nuclText = new TLatex(nuclTextFrom, nuclTextTo, "Water phantom");
+      nuclLabel = new TLatex(125, -0.05, "(d)");
+   }
+   if (phantom == kAluminium) {
+      nuclText = new TLatex(nuclTextFrom, nuclTextTo, "Aluminium phantom");
+      nuclLabel = new TLatex(125, -0.05, "(e)");
+   }
+   if (phantom == kComplex) {
+      nuclText = new TLatex(nuclTextFrom, nuclTextTo, "Detector geometry");
+      nuclLabel = new TLatex(125, -0.05, "(f)");
+   }
+
+   nuclText->SetTextFont(22);
+   nuclText->SetTextSize(0.04);
+   nuclText->Draw();
+   
+   nuclLabel->SetTextFont(22);
+   nuclLabel->SetTextSize(0.05);
+   nuclLabel->Draw();
 
    // Draw lateral BP distribution FWHM
    c4->cd();
@@ -1160,7 +1186,7 @@ void Run()
    gMCNPLateralFWHM->Draw("same, L");
 //   gTheoryLateralFWHM->Draw("same, L");
 
-   TLegend *legFWHM = new TLegend(0.17, 0.72, 0.35, 0.88);
+   TLegend *legFWHM = new TLegend(0.51, 0.69, 0.87, 0.88);
    legFWHM->AddEntry(gGATELateralFWHM, "GATE", "l");
    legFWHM->AddEntry(gMCNPLateralFWHM, "MCNP", "l");
    legFWHM->AddEntry(gFLUKALateralFWHM, "FLUKA", "l");
@@ -1171,6 +1197,32 @@ void Run()
    for (int i=0; i<19; i++) {
       printf("Lateral FWHM @ %.0f MeV: %.2f cm (FLUKA) - %.2f cm (GATE) - %.2f cm (MCNP).\n", energies[i], fwhmFLUKA[i], fwhmGATE[i], fwhmMCNP[i]);
    }
+   
+   TLatex *spreadText = nullptr;
+   TLatex *spreadLabel = nullptr;
+
+   Float_t spreadTextFrom = 170;
+   Float_t spreadTextTo = 0.049;
+   if (phantom == kWater) {
+      spreadText = new TLatex(spreadTextFrom, spreadTextTo, "Water phantom");
+      spreadLabel = new TLatex(125, -0.007, "(a)");
+   }
+   if (phantom == kAluminium) {
+      spreadText = new TLatex(spreadTextFrom, spreadTextTo, "Aluminium phantom");
+      spreadLabel = new TLatex(125, -0.007, "(b)");
+   }
+   if (phantom == kComplex) {
+      spreadText = new TLatex(spreadTextFrom, spreadTextTo, "Detector geometry");
+      spreadLabel = new TLatex(125, -0.007, "(c)");
+   }
+
+   spreadText->SetTextFont(22);
+   spreadText->SetTextSize(0.04);
+   spreadText->Draw();
+   
+   spreadLabel->SetTextFont(22);
+   spreadLabel->SetTextSize(0.05);
+   spreadLabel->Draw();
 
    // Draw straggling distribution
    c5->cd();
@@ -1240,13 +1292,40 @@ void Run()
    gMCNPStraggling->Draw("same, L");
    gJanniStraggling->Draw("same, P");
 
-   TLegend *legStraggling = new TLegend(0.17, 0.72, 0.35, 0.88);
+   TLegend *legStraggling = new TLegend(0.17, 0.65, 0.55, 0.88);
    legStraggling->AddEntry(gGATEStraggling, "GATE", "l");
    legStraggling->AddEntry(gMCNPStraggling, "MCNP", "l");
    legStraggling->AddEntry(gFLUKAStraggling, "FLUKA", "l");
    if (phantom != kComplex) legStraggling->AddEntry(gJanniStraggling, "Janni", "PLE");
    legStraggling->SetTextFont(22);
    legStraggling->Draw();
+
+
+   TLatex *stragText = nullptr;
+   TLatex *stragLabel = nullptr;
+
+   Float_t stragTextFrom = 70;
+   Float_t stragTextTo = 2.4;
+   if (phantom == kWater) {
+      stragText = new TLatex(stragTextFrom, stragTextTo, "Water phantom");
+      stragLabel = new TLatex(125, -0.18, "(d)");
+   }
+   if (phantom == kAluminium) {
+      stragText = new TLatex(stragTextFrom, stragTextTo, "Aluminium phantom");
+      stragLabel = new TLatex(125, -0.18, "(e)");
+   }
+   if (phantom == kComplex) {
+      stragText = new TLatex(stragTextFrom, stragTextTo, "Detector geometry");
+      stragLabel = new TLatex(125, -0.18, "(f)");
+   }
+
+   stragText->SetTextFont(22);
+   stragText->SetTextSize(0.04);
+   stragText->Draw();
+   
+   stragLabel->SetTextFont(22);
+   stragLabel->SetTextSize(0.05);
+   stragLabel->Draw();
 
    // Direct range comparisons
    c7->cd();
@@ -1288,12 +1367,36 @@ void Run()
    gFLUKAvsPSTAR->SetLineWidth(3);
    gFLUKAvsPSTAR->Draw("same, L");
 
-   TLegend *leg3 = new TLegend(0.17, 0.72, 0.35, 0.88);
+   TLegend *leg3 = new TLegend(0.15, 0.14, 0.46, 0.3);
    leg3->AddEntry(gGATEvsPSTAR, "GATE", "l");
    leg3->AddEntry(gMCNPvsPSTAR, "MCNP", "l");
    leg3->AddEntry(gFLUKAvsPSTAR, "FLUKA", "l");
    leg3->SetTextFont(22);
    leg3->Draw();
+
+   TLatex *rangeText = nullptr;
+   TLatex *rangeLabel = nullptr;
+
+   if (phantom == kWater) {
+      rangeText = new TLatex(51, -1.3, "Water phantom");
+      rangeLabel = new TLatex(125, -2.26, "(a)");
+   }
+   if (phantom == kAluminium) {
+      rangeText = new TLatex(51, -1.3, "Aluminium phantom");
+      rangeLabel = new TLatex(125, -2.26, "(b)");
+   }
+   if (phantom == kComplex) {
+      rangeText = new TLatex(51, -1.3, "Detector geometry");
+      rangeLabel = new TLatex(125, -2.26, "(c)");
+   }
+
+   rangeText->SetTextFont(22);
+   rangeText->SetTextSize(0.04);
+   rangeText->Draw();
+   
+   rangeLabel->SetTextFont(22);
+   rangeLabel->SetTextSize(0.05);
+   rangeLabel->Draw();
 
    // MAKE DATA TABLES
    printf("Geometry; Monte Carlo code; Energy [MeV]; Range [cm]; Range error [mm]; Range straggling [mm]; Beam spreading [1]; Fraction of inelastic collisions [%]\n");
