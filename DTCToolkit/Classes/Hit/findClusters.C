@@ -60,7 +60,7 @@ vector<Int_t> * Hits::findNeighbours(Int_t index) {
    Int_t             layer = getLayer(index);
    Int_t             idxFrom = getFirstIndexBeforeY(yGoal);
    Int_t             idxTo = getLastIndexAfterY(yGoal);
-   
+  
    neighbours->reserve(8);
 
    for (Int_t j=idxFrom; j < idxTo; j++) {
@@ -83,8 +83,8 @@ vector<Int_t> * Hits::getAllNeighboursFromCluster(Int_t i, vector<Int_t> *checke
    vector<Int_t>   * nextCandidates = nullptr;
    Int_t             currentCandidate = 0;
    
-   expandedCluster->reserve(40);
-   toCheck->reserve(40);
+   expandedCluster->reserve(60);
+   toCheck->reserve(60);
 
    expandedCluster->push_back(i);
    toCheck->push_back(i);

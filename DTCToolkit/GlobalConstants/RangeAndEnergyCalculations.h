@@ -57,6 +57,9 @@ Float_t  getEnergyLossFromAluminumAbsorber(Float_t energy);
 Float_t  getEnergyLossFromTracker(Float_t energy);
 Float_t  getEnergyLossErrorFromAluminumAbsorber();
 
+Float_t  getEnergyLossAtWEPL(Float_t wepl, Float_t initialEnegy);
+Float_t  getEnergyLossAtTL(Float_t tl, Float_t initialEnergy);
+
 Float_t getEnergyFromDegraderThickness(Double_t degraderThickness);
 
 // Fallback Bragg-Kleeman functions

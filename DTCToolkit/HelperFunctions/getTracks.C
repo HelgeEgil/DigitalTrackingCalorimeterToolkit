@@ -94,6 +94,17 @@ Tracks * loadOrCreateTracks(Bool_t recreate, Int_t Runs, Int_t dataType, Float_t
       printf("kUseAlpide = %d\n", kUseAlpide);
       if (!kUseAlpide) {
          tracks = getTracks(Runs, dataType, kCalorimeter, energy, x, y);
+
+         for (Int_t i=0; i<tracks->GetEntriesFast(); i++) {
+            if (!tracks->At(i)) continue;
+
+            for (Int_t j=0; j<tracks->At(i)->GetEntriesFast(); j++) {
+               if (!tracks->At(i)->At(j)) continue;
+
+               cout << *tracks->At(i)->At(j) << endl;
+            }
+         }
+
       
          if (tracks->GetEntries()) {
             cout << "Saving " << tracks->GetEntries() << " tracks.\n";

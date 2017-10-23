@@ -65,8 +65,8 @@ TGraphErrors * Track::doTrackFit(Bool_t isScaleVariable, Bool_t useTrackLength) 
 
    graph = new TGraphErrors(n, x, y, erx, ery); // maybe a speedup here is possible
    
-   if (kDataType == kData) scaleParameter = 2.7;
    scaleParameter = 0.73 / (p * pow(alpha, 1/p));
+   if (kDataType == kData) scaleParameter = 5.22;
 
    TF1 *func = new TF1("fit_BP", fitfunc_DBP, 0, maxRange, 2);
    func->SetParameter(0, estimatedRange);

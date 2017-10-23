@@ -291,7 +291,6 @@ void DataInterface::getDataProfile(TH2F *hProfile, TH2F *hProjection, Int_t ener
    TTree *tree = (TTree*) f->Get("tree");
 
    Int_t nentries = tree->GetEntries();
-   printf("Found %d frames in the DataFrame.\n", nentries);
 
    TLeaf *lX = tree->GetLeaf("fDataFrame.fX");
    TLeaf *lY = tree->GetLeaf("fDataFrame.fY");
@@ -306,7 +305,7 @@ void DataInterface::getDataProfile(TH2F *hProfile, TH2F *hProjection, Int_t ener
          x = lX->GetValue(j)  + nx/2;
          y = lY->GetValue(j)  + ny/2;
          layer = lLayer->GetValue(j);
-
+         
          hProfile->Fill(y, layer);
          hProjection->Fill(x, y);
       }
@@ -347,6 +346,7 @@ void DataInterface::getDataFrame(Int_t runNo, CalorimeterFrame * cf, Int_t energ
          Int_t z = lLayer->GetValue(j);
 
          cf->fillAt(z, x, y);
+
       }
       counter++;
    }

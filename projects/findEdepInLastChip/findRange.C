@@ -99,11 +99,21 @@ vector<Float_t> findRange::Run(Double_t energy, Double_t sigma_mev)
          lastRange = posZ;
       }
    }
+
+   cout << lastID << endl;
    c->cd();
-   hStopping->SetFillColor(kOrange-2);
+
+   gStyle->SetOptStat(0);
+   
+   hStopping->GetXaxis()->SetTitleFont(22);
+   hStopping->GetXaxis()->SetLabelFont(22);
+   hStopping->GetYaxis()->SetTitleFont(22);
+   hStopping->GetYaxis()->SetLabelFont(22);
+
+   hStopping->SetFillColor(kRed+2);
    hStopping->Draw();
 
-   hInelastic->SetFillColor(kOrange+2);
+   hInelastic->SetFillColor(kRed-7);
    hInelastic->Draw("same");
 
    hStopping->GetYaxis()->SetRangeUser(0, fmax(hStopping->GetMaximum(), hInelastic->GetMaximum()) * 1.2);
@@ -127,6 +137,7 @@ vector<Float_t> findRange::Run(Double_t energy, Double_t sigma_mev)
    hStopping->Fit(fStop);
    hInelastic->Fit(fInel);
 
+/*
    c->Update();
    TPaveStats *ps = (TPaveStats*) c->GetPrimitive("stats");
    hStopping->SetBit(TH1::kNoStats);
@@ -134,17 +145,19 @@ vector<Float_t> findRange::Run(Double_t energy, Double_t sigma_mev)
 //   ps->SetTextFont(22);
    ps->AddText(Form("Stopping MPV = %.2f keV/#mum", fStop->GetParameter(1)));
    ps->AddText(Form("Inelastic MPV = %.2f keV/#mum", fInel->GetParameter(1)));
-   ps->AddText(Form("Separation = %.2f keV/#mum", ixbinpos));
-
+   ps->AddText(Form("Separation point = %.2f keV/#mum", ixbinpos));
+*/
    TLegend *l = new TLegend(0.5, 0.5, 0.7, 0.7);
    l->AddEntry(hStopping, "Stopping protons", "F");
    l->AddEntry(hInelastic, "Nuclear interactions", "F");
+   l->SetTextFont(22);
    l->Draw();
 
+
    c2->cd(1);
-   hRangeAll->SetFillColor(kCyan-2);
+   hRangeAll->SetFillColor(kRed+2);
    hRangeAll->Draw();
    c2->cd(2);
-   hRangeStopping->SetFillColor(kCyan);
+   hRangeStopping->SetFillColor(kRed-7);
    hRangeStopping->Draw();
 }

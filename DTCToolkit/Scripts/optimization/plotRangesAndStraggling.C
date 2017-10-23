@@ -27,7 +27,7 @@
 using namespace std;
 
 // IF FLOAT VALUES OF ABSORBER THICKNESS: USE *10 VALUES (3.5 -> 35)
-Int_t absorberThickness = 35;
+Int_t absorberThickness = 6;
 Bool_t kFilterData = false;
 Bool_t kUseCarbon = false;
 Int_t filterSize = 1;
@@ -625,7 +625,17 @@ void plotRangesAndStraggling() {
    }
    
    cFourier->Divide(2,1,0.0000001,0.000001);
+   gPad->SetLeftMargin(0.15);
+   gPad->SetRightMargin(0.05);
+   gPad->SetTopMargin(0.05);
+   gPad->SetBottomMargin(0.15);
+   gPad->Update();
+
    cFourier->cd(1);
+   gPad->SetLeftMargin(0.15);
+   gPad->SetRightMargin(0.05);
+   gPad->SetTopMargin(0.05);
+   gPad->SetBottomMargin(0.12);
    Float_t from = arrayMC[0];
    Float_t to = arrayMC[nlines-1];
    // Want 4pi/sqrt(nlines)
@@ -651,19 +661,54 @@ void plotRangesAndStraggling() {
    hRangeError->GetXaxis()->SetRangeUser(50,300);
    hRangeError->SetLineColor(kBlack);
 //   hRangeError->SetFillColor(kOrange-3);
+   hRangeError->SetTitle(";Range [mm WEPL];Range deviation [mm WEPL]");
    hRangeError->Draw();
+   hRangeError->GetXaxis()->SetLabelFont(22);
+   hRangeError->GetXaxis()->SetTitleFont(22);
+   hRangeError->GetYaxis()->SetLabelFont(22);
+   hRangeError->GetYaxis()->SetTitleFont(22);
+   hRangeError->GetXaxis()->SetLabelSize(0.05);
+   hRangeError->GetXaxis()->SetTitleSize(0.05);
+   hRangeError->GetYaxis()->SetLabelSize(0.05);
+   hRangeError->GetYaxis()->SetTitleSize(0.05);
+   hRangeError->GetYaxis()->SetTitleOffset(1.4);
 
    cFourier->cd(2);
+   gPad->SetLeftMargin(0.15);
+   gPad->SetRightMargin(0.05);
+   gPad->SetTopMargin(0.05);
+   gPad->SetBottomMargin(0.12);
    TH1 *hm = 0;
    TVirtualFFT::SetTransform(0);
    hm = hRangeError->FFT(hm, "MAG");
    hm->Scale(1/sqrt(250));
    hm->GetXaxis()->SetRangeUser(50,250);
-   hm->SetTitle("Magnitude of Fourier transform");
-   hm->SetFillColor(kOrange);
+   hm->SetTitle(";Frequency [A.U.];Fourier magnitude [A.U.]");
+   hm->SetFillColor(kRed-4);
    hm->SetLineColor(kBlack);
-   hm->GetYaxis()->SetRangeUser(0, 5);
+   hm->GetXaxis()->SetLabelFont(22);
+   hm->GetXaxis()->SetTitleFont(22);
+   hm->GetYaxis()->SetLabelFont(22);
+   hm->GetYaxis()->SetTitleFont(22);
+   hm->GetXaxis()->SetLabelSize(0.05);
+   hm->GetXaxis()->SetTitleSize(0.05);
+   hm->GetYaxis()->SetLabelSize(0.05);
+   hm->GetYaxis()->SetTitleSize(0.05);
+   hm->GetYaxis()->SetTitleOffset(1);
+//   hm->GetYaxis()->SetRangeUser(0, 5);
    hm->Draw();
    gPad->Update();
+
+   TLegend *fLeg = new TLegend(0.41, 0.83, 0.94, 0.92);
+   if (absorberThickness < 10) {
+      fLeg->AddEntry(hm, Form("%d mm absorber thickness", absorberThickness), "F");
+   }
+   else {
+      fLeg->AddEntry(hm, Form("%.1f mm absorber thickness", float(absorberThickness)/10), "F");
+   }
+   fLeg->SetTextFont(22);
+   fLeg->SetTextSize(0.04);
+   fLeg->Draw();
+
 
 }

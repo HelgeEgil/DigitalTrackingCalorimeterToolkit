@@ -47,8 +47,15 @@ void findAPAndStraggling(Int_t absorberthickness) {
    Int_t    degraderThickness;
    ifstream inWater, inMaterial;
 
-   a = 0.0098; aw = 0.0239;
-   p = 1.7806; pw = 1.7548;
+
+   // 2 mm: 0.0096, 1.784
+   // 3 mm: 0.0097, 1.7825
+   // 4 mm: 0.0098, 1.7806
+   // Focal: 0.0004461, 1.6677
+   // H20:  0.0239, 1.7548
+
+   a = 0.004461, p = 1.6677;
+   aw = 0.0239, pw = 1.7548;
 
    inWater.open("../Data/Ranges/Water.csv");
    while (1) {
@@ -111,10 +118,19 @@ void findAPAndStraggling(Int_t absorberthickness) {
    TGraph *gWEStraggling = new TGraph(nlinesMaterial, arrayRangeWater, arrayWEPLStraggling);
    TGraph *gEnergyStraggling = new TGraph(nlinesMaterial, arrayEMaterial, arrayEnergyStraggling);
 
-   gRange->SetTitle(Form("Ranges for material in %d mm Al;Energy [MeV];Range [mm]", absorberthickness));
-   gStraggling->SetTitle(Form("Straggling in Al for %d mm absorber;Range [mm];Straggling [mm]", absorberthickness));
-   gWEStraggling->SetTitle(Form("WE straggling in Al for %d mm absorber;Water Equivalent Range [mm];Water Equivalent Straggling [mm]", absorberthickness));
-   gEnergyStraggling->SetTitle(Form("Energy straggling in DTC for %d mm absorber;Energy [MeV];Energy straggling [MeV]", absorberthickness));
+   if (absorberthickness <= 10) {
+      gRange->SetTitle(Form("Ranges for material in %d mm Al;Energy [MeV];Range [mm]", absorberthickness));
+      gStraggling->SetTitle(Form("Straggling in Al for %d mm absorber;Range [mm];Straggling [mm]", absorberthickness));
+      gWEStraggling->SetTitle(Form("WE straggling in Al for %d mm absorber;Water Equivalent Range [mm];Water Equivalent Straggling [mm]", absorberthickness));
+      gEnergyStraggling->SetTitle(Form("Energy straggling in DTC for %d mm absorber;Energy [MeV];Energy straggling [MeV]", absorberthickness));
+   }
+   else {
+      gRange->SetTitle(Form("Ranges for material in %.1f mm Al;Energy [MeV];Range [mm]", float(absorberthickness)/10));
+      gStraggling->SetTitle(Form("Straggling in Al for %.1f mm absorber;Range [mm];Straggling [mm]", float(absorberthickness)/10));
+      gWEStraggling->SetTitle(Form("WE straggling in Al for %.1f mm absorber;Water Equivalent Range [mm];Water Equivalent Straggling [mm]", float(absorberthickness)/10));
+      gEnergyStraggling->SetTitle(Form("Energy straggling in DTC for %.1f mm absorber;Energy [MeV];Energy straggling [MeV]", float(absorberthickness)/10));
+   }
+
 
    c1->cd(1);
    gRange->SetMarkerStyle(7);

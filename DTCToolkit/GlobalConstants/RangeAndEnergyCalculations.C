@@ -282,6 +282,30 @@ Float_t getUnitStragglingFromEnergy(Float_t energy, Float_t sigma_energy) {
    return res;
 }
 
+Float_t getEnergyLossAtWEPL(Float_t wepl, Float_t initialEnergy) {
+   Float_t sigma = 1e-3; // 1 um
+   Float_t totalRange = getWEPLFromEnergy(initialEnergy);
+   
+   Float_t energy_low = getEnergyFromWEPL(totalRange - (wepl - sigma / 2));
+   Float_t energy_high = getEnergyFromWEPL(totalRange - (wepl + sigma / 2));
+   
+   Float_t gradient = 1e3 * (energy_low - energy_high); // keV/um
+
+   return gradient;
+}
+
+Float_t getEnergyLossAtTL(Float_t tl, Float_t initialEnergy) {
+   Float_t sigma = 1e-2; // 0.1 um
+   Float_t totalRange = getTLFromEnergy(initialEnergy);
+
+   Float_t energy_low = getEnergyFromTL(totalRange - (tl - sigma / 2));
+   Float_t energy_high = getEnergyFromTL(totalRange - (tl + sigma / 2));
+
+   Float_t gradient = 1e2 * (energy_low - energy_high); // keV/um
+
+   return gradient;
+}
+
 Float_t getEnergyLossFromScintillators(Float_t energy, Int_t nScintillators) {
    Float_t energyLoss = 0;
    

@@ -5,7 +5,7 @@
 #include <vector>
 #include <TObject.h>
 
-#define USEALPIDE
+// #define USEALPIDE
 
 #ifdef USEDEBUG
 #define showDebug(x) std::cout << x
@@ -35,14 +35,14 @@ enum eDataType {kMC, kData};
 
 Float_t  run_energy = 0;
 Float_t  run_degraderThickness = 0;
-Bool_t   kIsAluminumPlate = false;
-Bool_t   kIsScintillator = false;
-Bool_t   kIsFirstLayerAir = true;
-Bool_t   kUseAlpide = true;
-Bool_t   kDoTracking = false;
+Bool_t   kIsAluminumPlate = true;
+Bool_t   kIsScintillator = true;
+Bool_t   kIsFirstLayerAir = false;
+Bool_t   kUseAlpide = false;
+Bool_t   kDoTracking = true;
 Bool_t   kUseEmpiricalMCS = true;
 Bool_t   kFilterNuclearInteractions = true;
-Bool_t   useDegrader = true;
+Bool_t   useDegrader = false;
 
 const Int_t sizeOfEventID = 500;
 
@@ -55,23 +55,22 @@ const Float_t kRad = 3.14159265/180.;
 const    Int_t nx = NX;
 const    Int_t ny = NY;
 const    Int_t nTrackers = 4;
-const    Float_t kAbsorberThickness = 3.5;
-// FOCAL IS 3 mm (2x absorbers = 3 mm)
+const    Float_t kAbsorberThickness = 3.3;
 
 // nLayers are loaded in MaterialConstants.C according to the detector geometry
 const Float_t dx = DX; // mm
 const Float_t dy = DY; // mm
 const Float_t dz = DZ + kAbsorberThickness;
-Int_t kEventsPerRun = 5000;
+Int_t kEventsPerRun = 50;
 
 // Used for treatment of available experimental data files
 const Int_t nEnergies = 8;
 Int_t energies[nEnergies] = {122, 140, 150, 160, 170, 180, 188, 190};
 
 enum eMaterial {kTungsten, kAluminum, kPMMA, kWater, kCarbon};
-const Int_t kMaterial = kAluminum;
+const Int_t kMaterial = kTungsten;
 
-Int_t kDataType = kMC;
+Int_t kDataType = kData;
 
 enum eOutputUnit {kPhysical, kWEPL, kEnergy};
 Int_t kOutputUnit = kWEPL;
@@ -109,5 +108,7 @@ const Int_t kMinimumTracklength = 5;
 
 // How much above the average edep must the bragg peak (last two layers) be?
 const Float_t kBPFactorAboveAverage = 1.3;
+
+Int_t GlobalLayerID = 0;
 
 #endif

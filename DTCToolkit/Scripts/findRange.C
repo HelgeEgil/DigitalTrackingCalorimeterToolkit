@@ -64,15 +64,16 @@ vector<Float_t> findRange::Run(Double_t energy, Double_t sigma_mev)
    // 2 mm: 0.0096, 1.784
    // 3 mm: 0.0097, 1.7825
    // 4 mm: 0.0098, 1.7806
+   // Focal: 0.0004461, 1.6677
    // H20:  0.0239, 1.7548
 
-   Float_t a = 0.0098, p = 1.7806;
+   Float_t a = 0.004461, p = 1.6677;
    Float_t aw = 0.0239, pw = 1.7548;
 
    Float_t expectedRange = a * pow(run_energy, p);
-   Float_t xfrom = expectedRange - 15;
+   Float_t xfrom = expectedRange - 8; // 15 for Al case
    if (xfrom < 0) xfrom = 0;
-   Float_t xto = expectedRange + 15;
+   Float_t xto = expectedRange + 3; // 15 for Al case
 
    Float_t x_compensate = 0;
 

@@ -1,7 +1,7 @@
 #!/bin/bash
 
-echo "Usage: ./run.sh <degraderthickness_from> <degraderthickness_increment> <degraderthickness_to>"
-echo Absorber thickness: $1, Phantom thickness from $2 step $3 to $4
+echo "Usage: ./run.sh <energy_from> <energy_increment> <energy_to>"
+echo Energy from $1 step $2 to $3
 
 NCORES=10
 IDX=1
@@ -12,7 +12,7 @@ if [ $# -ne 3 ]; then
 fi
 
 for i in `seq $1 $2 $3`; do
-	nice -n 10 Gate -a "'[energy,$i]'" waterphantom.mac > terminal_output.txt &
+	time nice -n 10 Gate -a "'[energy,$i]'" waterphantom.mac > terminal_output.txt &
    echo "Running: $i"
    if (( $IDX % $NCORES == 0 )); then 
       echo "Waiting for run $i (PID $!)"

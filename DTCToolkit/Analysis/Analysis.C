@@ -462,8 +462,8 @@ void drawClusterShapes(Int_t Runs, Bool_t dataType, Bool_t recreate, Float_t ene
    run_energy = energy;
    kDataType = dataType;
 
-   Int_t nRows = 15;
-   Int_t nRepeats = 20;
+   Int_t nRows = 5;
+   Int_t nRepeats = 10;
    Int_t nN = nRows * nRepeats;
    vector<TH2C*> *hClusterMaps = new vector<TH2C*>;
    hClusterMaps->reserve(nN);
@@ -501,6 +501,8 @@ void drawClusterShapes(Int_t Runs, Bool_t dataType, Bool_t recreate, Float_t ene
    
       for (UInt_t j=0; j<tempClusterHitMap->size(); j++)
          clusterHitMap->push_back( tempClusterHitMap->at(j) );
+
+      cf->Reset();
    }
    // delete tempClusterHitMap;
    delete hits;
@@ -533,20 +535,22 @@ void drawClusterShapes(Int_t Runs, Bool_t dataType, Bool_t recreate, Float_t ene
 
    Int_t nTotal = 0;
    for (Int_t i=0; i<nRows; i++) {
-      size_from = i*3;
-      size_to = size_from + 2;
+      size_from = i*9;
+      size_to = size_from + 8;
       nInRow = 0;
 
       for (UInt_t j=0; j<clusterHitMap->size(); j++) {
          Int_t csize = clusterHitMap->at(j)->GetEntriesFast();
+         if (j == 284) continue;
          if (csize >= size_from && csize <= size_to) {
             // plot the cluster in the j'th row
             for (Int_t k=0; k<clusterHitMap->at(j)->GetEntriesFast(); k++) {
                x = clusterHitMap->at(j)->getX(k);
                y = clusterHitMap->at(j)->getY(k);
-               hClusterMaps->at(nTotal)->Fill(x,y);
+               hClusterMaps->at(nTotal)->SetBinContent(x,y, 1);
             } // end loop through all points
-            hClusterMaps->at(nTotal)->SetTitle(Form("Cluster size [%i, %i]", size_from, size_to));
+            hClusterMaps->at(nTotal)->SetTitle(Form("%i", csize));
+            printf("row = %d, repeat = %d, j = %d\n", i, nInRow, j);
             nInRow++; nTotal++;
             if (nInRow >= nRepeats) break; // stop looping over clusters now
          }
@@ -560,11 +564,18 @@ void drawClusterShapes(Int_t Runs, Bool_t dataType, Bool_t recreate, Float_t ene
    // draw the canvas
    
    TCanvas *c = new TCanvas("c", "c", 1000, 800);
-   c->Divide(nRepeats, nRows, 0.0001, 0.0001);
+   c->Divide(nRepeats, nRows, 0, 0);
    for (Int_t i=0; i<nN; i++) {
       c->cd(i+1);
+      gStyle->SetTitleY(0.93);
+      gStyle->SetTitleX(0.85);
       hClusterMaps->at(i)->Draw("same, COL,ah,fb,bb");
       gStyle->SetOptStat(0);
+      gPad->Update();
+      TPaveText *title = (TPaveText*) gPad->GetPrimitive("title");
+      title->SetTextFont(22);
+      title->SetTextSize(0.18);
+      gPad->Modified();
    }
 }
 
@@ -821,7 +832,6 @@ Float_t drawBraggPeakGraphFit(Int_t Runs, Int_t dataType, Bool_t recreate, Float
    TStopwatch t1, t2, t3, t4, t5, t6, t7, t8;
    // t.Start(), t.Stop(), t.RealTime()
    
-
    t1.Start();
 
    printf("WEPL factors for different energies... \n");
@@ -842,7 +852,7 @@ Float_t drawBraggPeakGraphFit(Int_t Runs, Int_t dataType, Bool_t recreate, Float
    Bool_t         kDrawVerticalLayerLines = false;
    Bool_t         kDrawIndividualGraphs = true;
    Bool_t         kDrawFitResults = true;
-   Bool_t         acceptAngle = true;
+   Bool_t         acceptAngle = false;
    Float_t        maxAngle, thisAngle;
    Float_t        cutAngle = (run_degraderThickness * 0.0219 + 0.556) * 0.8;
    Float_t        finalEnergy = 0;
@@ -908,7 +918,7 @@ Float_t drawBraggPeakGraphFit(Int_t Runs, Int_t dataType, Bool_t recreate, Float
       t3.Start(false);
       if (thisTrack->doesTrackEndAbruptly()) {
          nCutDueToTrackEndingAbruptly++;
-         continue;
+//         continue;
       }
    
       maxAngle = thisTrack->getSlopeAngleAtLayer(1);
@@ -922,6 +932,9 @@ Float_t drawBraggPeakGraphFit(Int_t Runs, Int_t dataType, Bool_t recreate, Float
 
       fitRange = thisTrack->getFitParameterRange();
       fitScale = thisTrack->getFitParameterScale();
+
+      printf("fitRange = %.2f, fitScale = %.2f\n", fitRange, fitScale);
+
       if (kDrawIndividualGraphs) fitError = quadratureAdd(thisTrack->getFitParameterError(), dz*0.28867); // latter term from error on layer position
 
       hFitResults->Fill(getUnitFromTL(fitRange));
@@ -1016,6 +1029,12 @@ Float_t drawBraggPeakGraphFit(Int_t Runs, Int_t dataType, Bool_t recreate, Float
    */
 
    // Draw expected gaussian distribution of results from initial energy
+   
+
+
+
+
+
    Float_t expectedStraggling = 0, expectedMean = 0, dlayer_down = 0, dlayer = 0;
    Float_t separationFactor = 0.9, nullStraggling = 0;
    Float_t sigma_energy = getSigmaEnergy(run_energy);
@@ -1311,11 +1330,17 @@ void drawClusterSizeDistribution(Int_t Runs, Int_t dataType, Bool_t recreate, Fl
 
    Int_t nClusters = kEventsPerRun * 5 * nLayers;
    Int_t nHits = kEventsPerRun * 50;
+   Int_t nLayersToUse = 6;
 
    CalorimeterFrame *cf = new CalorimeterFrame();
    Clusters * clusters = new Clusters(nClusters);
    Hits * hits = new Hits(nHits);
    TH2F * hClusterSizes = new TH2F("hClusterSizes", "Cluster sizes vs layer", nLayers, 0, nLayers-1, 50, 0, 50);
+   
+   vector<TH1F*> *hCSVector = new vector<TH1F*>;
+   for (Int_t i=0; i<nLayersToUse; i++) {
+      hCSVector->push_back(new TH1F(Form("Layer %d", i), Form(";Cluster Size;Entries"), 50, 0, 50));
+   }
 
    for (Int_t i=0; i<Runs; i++) {
       if (dataType == kMC) {
@@ -1328,7 +1353,9 @@ void drawClusterSizeDistribution(Int_t Runs, Int_t dataType, Bool_t recreate, Fl
       else if (dataType == kData) {
          di->getDataFrame(i, cf, energy);
          hits = cf->findHits();
+         printf("Found %d hits\n", hits->GetEntriesFast());
          clusters = hits->findClustersFromHits();
+         printf("Found %d clusters\n", clusters->GetEntriesFast());
          clusters->removeSmallClusters(2);
          clusters->removeAllClustersAfterLayer(8);
       }
@@ -1337,12 +1364,162 @@ void drawClusterSizeDistribution(Int_t Runs, Int_t dataType, Bool_t recreate, Fl
 
       for (Int_t i=0; i<clusters->GetEntriesFast(); i++) {
          hClusterSizes->Fill(clusters->getLayer(i), clusters->getSize(i));
+         if (clusters->getLayer(i) < nLayersToUse) hCSVector->at(clusters->getLayer(i))->Fill(clusters->getSize(i));
+      }
+      cf->Reset();
+   }
+
+   TCanvas *c1 = new TCanvas("c1", "2D CS distribution", 1200, 800);
+   hClusterSizes->Draw("COLZ");
+   
+   gStyle->SetPadRightMargin(0.03);
+   gStyle->SetPadTopMargin(0.02);
+   gStyle->SetPadLeftMargin(0.15);
+   gStyle->SetPadBottomMargin(0.15);
+   TCanvas *c2 = new TCanvas("c2", "1D CS distributions", 1200, 800);
+   c2->Divide(3,2,0.0001,0.0001);
+
+   Int_t colors[7] = {3, 2, 1, -4, -7, -9, -10};
+   gStyle->SetOptStat(1111);
+   for (Int_t i=0; i<nLayersToUse; i++) {
+      c2->cd(i+1);
+      hCSVector->at(i)->GetXaxis()->SetLabelSize(0.06);
+      hCSVector->at(i)->GetXaxis()->SetTitleSize(0.06);
+      hCSVector->at(i)->GetYaxis()->SetLabelSize(0.06);
+      hCSVector->at(i)->GetYaxis()->SetTitleSize(0.06);
+      hCSVector->at(i)->GetXaxis()->SetLabelFont(22);
+      hCSVector->at(i)->GetXaxis()->SetTitleFont(22);
+      hCSVector->at(i)->GetYaxis()->SetLabelFont(22);
+      hCSVector->at(i)->GetYaxis()->SetTitleFont(22);
+      hCSVector->at(i)->GetYaxis()->SetTitleOffset(1.3);
+
+      hCSVector->at(i)->SetLineColor(kBlack);
+      hCSVector->at(i)->SetFillColor(kRed + colors[i]);
+
+      hCSVector->at(i)->Draw();
+/*   
+      TPaveText *title = (TPaveText*) gPad->GetPrimitive("title");
+      title->SetTextFont(22);
+      */
+      gPad->Update();
+      TPaveStats *s = (TPaveStats*) gPad->GetPrimitive("stats");
+      s->SetTextSize(0.05);
+      s->SetTextFont(22);
+      s->SetX1NDC(0.59);
+      s->SetY1NDC(0.75);
+      s->SetX2NDC(0.95);
+      s->SetY2NDC(0.95);
+      gPad->Modified();
+   }
+
+}
+
+void compareChargeDiffusionModels(Int_t Runs, Bool_t recreate, Float_t energy) {
+   run_energy = energy;
+
+   DataInterface *di = new DataInterface();
+
+   Int_t nClusters = kEventsPerRun * 5 * nLayers;
+   Int_t nHits = kEventsPerRun * 50;
+   Int_t nLayersToUse = 6;
+   
+   TCanvas *c = new TCanvas("c", "Compare charge diffusion models", 1200, 800);
+
+   TH2F *hEdepVSCS = new TH2F("hEdepVSCS", ";Edep [keV/#mum]; Cluster size from experimental data", 50, 0, 5, 31, 0, 30);
+//   TF1 *fPheno = new TF1("fPheno", "-4 + 3.88*x + 1.24e-2 * x ** 2 - 1.14e-3 * x ** 3 - 1.42e-6 * x ** 4", 1, 50);
+//   TF1 *fPheno = new TF1("fPheno", "0.91 + 3.91*x - 0.091 * x ** 2 + 0.00423* x ** 3 - 9.78e-5 * x**4", 0, 50);  // CS = f(Edep)
+   TF1 *fPheno = new TF1("fPheno", "4.6176 * x ** 0.86905", 0, 50);
+   // alternatively use getCSFromEdep()
+   TF1 *fAnaly_30 = new TF1("fAnaly_30", "6.16421 * x ** 3.81925e-1", 0, 50);
+   TF1 *fAnaly_45 = new TF1("fAnaly_45", "7.66260 * x ** 4.20307e-1", 0, 50);
+   TF1 *fAnaly_60 = new TF1("fAnaly_60", "8.72351 * x ** 4.47309e-1", 0, 50);
+   Cluster * cluster = nullptr;
+   Float_t inst_wepl, inst_dedx, range, calcEnergy;
+   Int_t inst_cs;
+
+   fPheno->SetLineWidth(3);
+   fAnaly_30->SetLineWidth(3);
+   fAnaly_45->SetLineWidth(3);
+   fAnaly_60->SetLineWidth(3);
+
+   fPheno->SetLineColor(kBlue-4);
+   fAnaly_30->SetLineColor(kRed+2);
+   fAnaly_45->SetLineColor(kRed);
+   fAnaly_60->SetLineColor(kRed-7);
+
+   CalorimeterFrame *cf = new CalorimeterFrame();
+   Clusters * clusters = new Clusters(nClusters);
+   Hits * hits = new Hits(nHits);
+/*
+   for (Int_t e=0; e<8; e++) {
+      energy = energies[e]; 
+      for (Int_t i=0; i<Runs; i++) {
+         di->getDataFrame(i, cf, energy);
+         hits = cf->findHits();
+         clusters = hits->findClustersFromHits();
+         clusters->removeSmallClusters(2);
+         clusters->removeAllClustersAfterLayer(8);
+         if (hits->GetEntries() == 0) break;
+         
+         for (Int_t j=0; j<clusters->GetEntriesFast(); j++) {
+            cluster = clusters->At(j);
+
+            if (!cluster) continue;
+
+            inst_wepl = getWEPLFromTL(cluster->getLayermm());
+   //         inst_dedx = getEnergyLossAtWEPL(inst_wepl, calcEnergy);
+            inst_dedx = 43.95 * pow(getEnergyAtWEPL(energy, inst_wepl), -0.748);
+            inst_cs =   cluster->getSize();
+
+            hEdepVSCS->Fill(inst_dedx, inst_cs);
+         }
+         cf->Reset();
+      }
+   }
+   */
+
+
+   Tracks * tracks = loadOrCreateTracks(recreate, Runs, 1, energy);
+
+   for (Int_t e=0; e<8; e++) {
+      energy = energies[e]; 
+
+      for (Int_t k=0; k<tracks->GetEntriesFast(); k++) {
+         if (!tracks->At(k)) continue;
+
+         TGraphErrors * graph = (TGraphErrors*) tracks->At(k)->doTrackFit(false, false);
+         if (!graph) continue;
+
+         range = tracks->At(k)->getFitParameterRange();
+         calcEnergy = getEnergyFromTL(range);
+
+         printf("Energy from doFit is %.2f MeV\n", calcEnergy);
+
+         for (Int_t j=0; j<tracks->At(k)->GetEntriesFast(); j++) {
+            if (!tracks->At(k)->At(j)) continue;
+            cluster = tracks->At(k)->At(j);
+
+            inst_wepl = getWEPLFromTL(cluster->getLayermm());
+   //         inst_dedx = getEnergyLossAtWEPL(inst_wepl, calcEnergy);
+            inst_dedx = 43.95 * pow(getEnergyAtWEPL(energy, inst_wepl), -0.748);
+            printf("Energy at depth %.2f of %.2f is %.1f Mev with edep %.1f MeV\n", inst_wepl, getWEPLFromTL(range), getEnergyAtWEPL(calcEnergy, inst_wepl), inst_dedx);
+
+            inst_cs =   cluster->getSize();
+
+            hEdepVSCS->Fill(inst_dedx, inst_cs);
+         }
       }
    }
 
-   hClusterSizes->Draw("COLZ");
+
+   hEdepVSCS->Draw("COLZ");
+   fPheno->Draw("same");
+   fAnaly_30->Draw("same");
+   fAnaly_45->Draw("same");
+   fAnaly_60->Draw("same");
+
 }
-      
+   
 void drawTracks3D(Int_t Runs, Int_t dataType, Bool_t recreate, Int_t switchLayer, Float_t energy, Float_t degraderThickness) {
    run_energy = energy;
    run_degraderThickness = degraderThickness;
@@ -1357,7 +1534,7 @@ void drawTracks3D(Int_t Runs, Int_t dataType, Bool_t recreate, Int_t switchLayer
    float fromy = 0.1 * ny;
    float toy = 0.9 * ny;
 
-   view->SetRange(fromx, 0, fromy, tox, 70, toy);
+   view->SetRange(fromx, 0, fromy, tox, 10, toy);
    Int_t iret;
    Float_t theta = 285;
    Float_t phi = 80;
@@ -1377,7 +1554,7 @@ void drawTracks3D(Int_t Runs, Int_t dataType, Bool_t recreate, Int_t switchLayer
    TPolyMarker3D *EIDMarker = new TPolyMarker3D(nClusters, 7);
    TPolyMarker3D *conflictMarker = new TPolyMarker3D(nClusters, 7);
    pMarker->SetMarkerColor(kBlue); // Missing cluster
-   pMarker->SetMarkerStyle(15);
+//   pMarker->SetMarkerStyle(15);
    EIDMarker->SetMarkerColor(kRed);
    conflictMarker->SetMarkerColor(kRed); // Conflicting cluster
    

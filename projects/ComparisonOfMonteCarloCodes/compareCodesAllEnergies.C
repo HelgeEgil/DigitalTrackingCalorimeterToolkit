@@ -83,11 +83,22 @@ Float_t getMCSCAngle(Float_t initialEnergy, Float_t range, Int_t phantom) {
       p = 1.7548;
       a = 0.00239;
    }
+   
+   else if (phantom == 4) {
+      X0 = 0.42;
+      p = 1.6677;
+      a = 0.0004461;
+   }
+
    else {
       printf("X0 undefined! Using water values.\n");
       X0 = 36.08;
       p = 1.7548;
       a = 0.00239;
+   }
+
+   if (range < 0) {
+      range = a * pow(initialEnergy, p);
    }
 
    Float_t sumIntegral = 0, depth = 0;
@@ -110,19 +121,20 @@ Float_t getMCSCAngle(Float_t initialEnergy, Float_t range, Int_t phantom) {
       momentum = gamma * beta * proton_mass;
       pv = beta * momentum;
 
-      sumIntegral += pow(1/pv, 2) * binThickness / X0;
+      sumIntegral += pow(14.1/pv, 2) * binThickness / X0;
    }
 
-   mcs = 19.2 * ( 1 + 0.038 * log(range / X0)) * sqrt(sumIntegral);
-   mcs *= 180 / 3.14159265358979;
+   mcs = ( 1 + 0.11111 * log(range / X0)) * sqrt(sumIntegral);
+//   mcs *= 180 / 3.14159265358979;
       
    gamma = (initialEnergy + proton_mass) / proton_mass;
    beta = sqrt(1 - pow(gamma, -2));
    momentum = gamma * beta * proton_mass;
    pv = beta * momentum;
 
-   Float_t mcsSimple = 19.2 / pv * sqrt(range/X0) * (1 + 0.038 * log(range / X0)) * 180 / 3.14159265;
-   printf("MCS with a simple calculation is %.2f deg. MCS with the integral calculation is %.2f deg.\n", mcsSimple, mcs);
+   Float_t mcsSimple = 14.1 / pv * sqrt(range/X0) * (1 + 0.11111 * log(range / X0)) * 180 / 3.14159265;
+   printf("MCS with a simple calculation is %.2f mrad. MCS with the integral calculation is %.2f mrad.\n", 1000*mcsSimple, 1000*mcs);
+   printf("The total lateral deviation from r*deviation is %.2f mm.\n", mcs * range * 10);
 
    return mcs;
 }
@@ -148,7 +160,7 @@ void Run()
    Bool_t   activateMCNP = true;
    Bool_t   activateFLUKA = true;
    Bool_t   activateTRIM = false;
-   Int_t    phantom = kWater;
+   Int_t    phantom = kComplex;
 
    gStyle->SetLabelSize(0.04);
    gStyle->SetLabelSize(0.04, "Y");

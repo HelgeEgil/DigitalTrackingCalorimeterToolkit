@@ -47,7 +47,7 @@ void MaterialConstants() {
    }
 
    if (kMaterial == kTungsten) {
-      nLayers = 41;
+      nLayers = 100;
       p = p_tungsten;
       alpha = alpha_tungsten;
       alpha_prime = alpha_prime_tungsten;
@@ -159,7 +159,7 @@ void  createSplines() {
 
    in.close();
 
-   in.open("Data/Ranges/3mm_W.csv");
+   in.open("Data/Ranges/33mm_W.csv");
    while (1) {
       in >> energy >> range;
       if (!in.good()) break;
@@ -194,18 +194,42 @@ void  createSplines() {
    alpha_aluminum = range_energy_fit->GetParameter(0);
    p_aluminum = range_energy_fit->GetParameter(1);
    printf("Through fitting, found alpha = %.5f, p = %.5f.\n", alpha_aluminum, p_aluminum);
+   
+   // FIND BRAGG-KLEEMAN PARAMETERS
+   TGraph * range_energyW = new TGraph(idxW, energiesW, rangesW);
+   TF1    * range_energyW_fit = new TF1("range_energyW_fit", "[0] * pow(x, [1])");
+   range_energyW_fit->SetParameters(0.002, 1.7);
+   range_energyW->Fit("range_energyW_fit", "Q,M");
+   alpha_tungsten = range_energyW_fit->GetParameter(0);
+   p_tungsten = range_energyW_fit->GetParameter(1);
+   printf("Through fitting, found TUNGSTEN alpha = %.5f, p = %.5f.\n", alpha_aluminum, p_aluminum);
 
    // FIND BRAGG-KLEEMAN PARAMETERS HIGH / LOW
-   range_energy->Fit("range_energy_fit", "Q,M", "", 0, 40); // fit 0 - 40 MeV
-   alpha_material_low = range_energy_fit->GetParameter(0);
-   p_material_low = range_energy_fit->GetParameter(1);
+   if (kMaterial == kAluminum) {
+      range_energy->Fit("range_energy_fit", "Q,M", "", 0, 40); // fit 0 - 40 MeV
+      alpha_material_low = range_energy_fit->GetParameter(0);
+      p_material_low = range_energy_fit->GetParameter(1);
 
-   range_energy->Fit("range_energy_fit", "Q,M", "", 220, 250); // fit 220 - 250 MeV
-   alpha_material_high = range_energy_fit->GetParameter(0);
-   p_material_high = range_energy_fit->GetParameter(1);
+      range_energy->Fit("range_energy_fit", "Q,M", "", 220, 250); // fit 220 - 250 MeV
+      alpha_material_high = range_energy_fit->GetParameter(0);
+      p_material_high = range_energy_fit->GetParameter(1);
+   }
+
+   else if (kMaterial == kTungsten) {
+      // FIND BRAGG-KLEEMAN PARAMETERS HIGH / LOW
+      range_energyW->Fit("range_energyW_fit", "Q,M", "", 0, 40); // fit 0 - 40 MeV
+      alpha_material_low = range_energyW_fit->GetParameter(0);
+      p_material_low = range_energyW_fit->GetParameter(1);
+
+      range_energyW->Fit("range_energyW_fit", "Q,M", "", 220, 250); // fit 220 - 250 MeV
+      alpha_material_high = range_energyW_fit->GetParameter(0);
+      p_material_high = range_energyW_fit->GetParameter(1);
+   }
+
+   else { printf("COULD NOT FIND HIGH / LOW PARAMETERS FOR MATERIAL %d!!", kMaterial); }
 
    printf("LOW parameters: alpha = %.4f, p = %.4f. HIGH parameters: alpha = %.4f, p = %.4f.\n", alpha_material_low, p_material_low, alpha_material_high, p_material_high);
-
+   
    // About the same in all geometries
    straggling_a = 1.76;
    straggling_b = 0.0012; 

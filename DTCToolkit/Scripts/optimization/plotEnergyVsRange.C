@@ -46,11 +46,16 @@ void plotEnergyVsRange() {
    Xtitle->SetTextFont(22);
    Xtitle->SetTextSize(0.6);
    Xtitle->Draw();
+   
+   gStyle->SetPadLeftMargin(0.025);
+   gStyle->SetPadRightMargin(0.025);
+   gStyle->SetPadBottomMargin(0.15);
 
    TPad *graphPad = new TPad("Graphs", "Graphs", 0.05, 0.1, 0.95, 0.95);
    graphPad->Draw();
    graphPad->cd();
    graphPad->Divide(1,6,0.00001,0.00001);
+
 
    Float_t  arrayE2[arraySize] = {0}; // energy MC
    Float_t  arrayE3[arraySize] = {0}; // energy MC
@@ -172,6 +177,7 @@ void plotEnergyVsRange() {
    hMC4->GetXaxis()->SetTitleOffset(3);
    hMC5->GetXaxis()->SetTitleOffset(3);
    hMC6->GetXaxis()->SetTitleOffset(3);
+   hMC35->GetXaxis()->SetTitleOffset(3);
 
    hMC2->SetLineColor(kRed+4);
    hMC3->SetLineColor(kRed+3);
@@ -186,8 +192,8 @@ void plotEnergyVsRange() {
    hMC5->SetLineWidth(3);
    hMC6->SetLineWidth(3);
 
-   Float_t yfrom = -1.25;
-   Float_t yto = 1.25;
+   Float_t yfrom = -3.5;
+   Float_t yto = 3.5;
 
    Float_t xfrom = 5;
    Float_t xto = 380;
@@ -211,38 +217,41 @@ void plotEnergyVsRange() {
    hMC5->GetYaxis()->SetNdivisions(404);
    hMC6->GetYaxis()->SetNdivisions(404);
 
+   Float_t textX = 25;
+   Float_t textY = 0.5;
+
    graphPad->cd(1);
    gPad->SetGridy();
    hMC2->Draw("LA");
    TText *t2 = new TText();
    t2->SetTextSize(0.2);
    t2->SetTextFont(22);
-   t2->DrawText(100, -0.5, "2 mm Al absorber"); 
+   t2->DrawText(textX, textY, "2 mm Al absorber"); 
 
    graphPad->cd(2);
    gPad->SetGridy();
    hMC3->Draw("LA");
-   t2->DrawText(100, -0.5, "3 mm Al absorber");
+   t2->DrawText(textX, textY, "3 mm Al absorber");
    
    graphPad->cd(3);
    gPad->SetGridy();
    hMC35->Draw("LA");
-   t2->DrawText(100, -0.5, "3.5 mm Al absorber");
+   t2->DrawText(textX, textY, "3.5 mm Al absorber");
 
    graphPad->cd(4);
    gPad->SetGridy();
    hMC4->Draw("LA");
-   t2->DrawText(100, -0.5, "4 mm Al absorber");
+   t2->DrawText(textX, textY, "4 mm Al absorber");
    
    graphPad->cd(5);
    gPad->SetGridy();
    hMC5->Draw("LA");
-   t2->DrawText(100, -0.5, "5 mm Al absorber");
+   t2->DrawText(textX, textY, "5 mm Al absorber");
    
    graphPad->cd(6);
    gPad->SetGridy();
    hMC6->Draw("LA");
-   t2->DrawText(100, -0.5, "6 mm Al absorber");
+   t2->DrawText(textX, textY, "6 mm Al absorber");
 
 
 }

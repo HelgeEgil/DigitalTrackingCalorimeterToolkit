@@ -27,8 +27,8 @@
 
 /gate/run/initialize
 
-#/process/inactivate hadElastic
-#/process/inactivate protonInelastic
+/process/inactivate hadElastic
+/process/inactivate protonInelastic
 
 /process/list
 
@@ -55,7 +55,7 @@
 
 /gate/output/root/enable
 /gate/output/root/setRootSinglesFlag 0
-/gate/output/root/setFileName ../../DTCToolkit/Data/MonteCarlo/DTC_Aluminium_Absorber{absorberthickness}mm_Degrader{degraderthickness}mm_{energy}MeV
+/gate/output/root/setFileName ../../DTCToolkit/Data/MonteCarlo/DTC_Tungsten_Absorber{absorberthickness}mm_Degrader{degraderthickness}mm_{energy}MeV
 
 #===============#
 # START BEAMS	#

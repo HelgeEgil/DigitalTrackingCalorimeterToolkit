@@ -48,8 +48,6 @@ void Hits::makeLayerIndex() {
    Int_t    startOffset = 0;
    Bool_t   kStarted = true;
 
-   printf("Start layer index hits\n");
-
    if (layerIndex_.size() == 0) {
       for (Int_t i=0; i<nLayers; i++)
          layerIndex_.push_back(-1);
@@ -86,7 +84,6 @@ void Hits::makeLayerIndex() {
       for (Int_t i=0; i<=startOffset; i++)
          layerIndex_.at(i) = 0;
    }
-   printf("End layer index hits\n");
 }
 
 Int_t Hits::getFirstIndexOfLayer(UInt_t layer) {
@@ -172,6 +169,7 @@ Int_t Hits::getFirstIndexBeforeY(Int_t y) {
    if (y==0) return idx;
 
    for (Int_t i=y-1; i>=0; i--) {
+      if (verticalIndexOfLayer_.size() == 0) break;
       idx = verticalIndexOfLayer_.at(i);
       if (idx>=0) break;
    }
@@ -186,6 +184,7 @@ Int_t Hits::getLastIndexAfterY(Int_t y) {
    if (y>ny-2) return idx;
 
    for (Int_t i=y+2; i<ny; i++) {
+      if (verticalIndexOfLayer_.size() == 0) break;
       idx = verticalIndexOfLayer_.at(i);
       if (idx>=0) break;
    }
