@@ -139,15 +139,18 @@ void Track::extrapolateToLayer0() {
          return;
       }
       else {
+         printf("extrapolateToLayer0: At(1)\n");
          eventID = At(1)->getEventID();
          if (getLayer(1) == 0) return; // hotfix... Why is layer 0 sometimes placed in idx 1? Must fix this.
       }
 
       if (At(2)) {
+         printf("extrapolateToLayer0: At(1) && At(2)\n");
          slope->set(getX(2) - getX(1), getY(2) - getY(1), getLayer(2) - getLayer(1));
          if (eventID<0) eventID = At(2)->getEventID();
       }
       else if (!At(2) && At(3)) {
+         printf("extrapolateToLayer0: At(1) && At(3) && !At(2)\n");
          slope->set(getX(3) - getX(1), getY(3) - getY(1), getLayer(3) - getLayer(1));
          if (eventID<0) eventID = At(3)->getEventID();
       }
@@ -164,6 +167,9 @@ void Track::extrapolateToLayer0() {
                  0); // layer = 0
 
       newStart->setEventID(eventID);
+         
+      cout << "Slope: " << *slope << endl;
+      cout << "adding point " << *newStart << endl;
    }
 }
 

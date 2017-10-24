@@ -102,8 +102,25 @@ Float_t Cluster::getDepositedEnergy(Bool_t correctSensitivity) {
       edep *= getChipCalibrationFactor(getChip());
    }
 
-   return edep / 14.; // layer is 14 modelled as um thick
+   return edep; // layer is 14 modelled as um thick
 }
+
+Float_t Cluster::getCalibratedSize() {
+   Int_t n = clusterSize_;
+
+   Float_t calibration = getChipCalibrationFactor(getChip());
+   Float_t edep = getEdepFromCS(n);
+
+   if (calibration != 0) { 
+      edep *= calibration;
+   }
+
+   Float_t n_corrected = getCSFromEdep(edep);
+
+   printf("Before calibration: %d, after: %.1f\n", n, n_corrected);
+   return n_corrected;
+}
+
 
 Float_t Cluster::getDepositedEnergyError(Bool_t correctSensitivity) {
    // sigma_E = sigma_N (dE / dN)
@@ -139,7 +156,8 @@ void Cluster::set(Float_t x, Float_t y, Int_t layer, Int_t size, Int_t eventID) 
 }
 
 ostream& operator<< (ostream &os, Cluster& c) {
-   os << "(" << c.getXmm() << ", " << c.getYmm() << ", " << c.getLayer() << ", EID " << c.getEventID() << ", CS " << c.getSize() << ")";
+   os << "(" << c.getXmm() << ", " << c.getYmm() << ", " << c.getLayermm() << ", EID " << c.getEventID() << ", CS " << c.getSize() << ")";
+   os << " IN PIXEL UNITS (" << c.getX() << ", " << c.getY() << ", " << c.getLayer() << ", EID " << c.getEventID() << ", CS " << c.getSize() << ")";
    return os;
 }
 

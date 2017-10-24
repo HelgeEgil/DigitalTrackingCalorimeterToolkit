@@ -63,12 +63,22 @@ Hits * CalorimeterFrame::findHits(Int_t eventID) {
 void CalorimeterFrame::diffuseFrame(TRandom3 *gRandom) {
    Int_t nHitsInLayer = 1;
    
-   for (Int_t layer=0; layer<nLayers; layer++) {
-      if (nHitsInLayer) {
-         nHitsInLayer = At(layer)->diffuseLayer(gRandom);
+   if (kUseRefinedClustering) {
+      for (Int_t layer=0; layer<nLayers; layer++) {
+         if (nHitsInLayer) {
+            nHitsInLayer = At(layer)->refinedDiffuseLayer(gRandom);
+         }
+         else break;
       }
-      
-      else break;
+   }
+
+   else {
+      for (Int_t layer=0; layer<nLayers; layer++) {
+         if (nHitsInLayer) {
+            nHitsInLayer = At(layer)->diffuseLayer(gRandom);
+         }
+         else break;
+      }
    }
 }
 

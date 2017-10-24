@@ -435,11 +435,30 @@ Bool_t isPointOutOfBounds(Cluster *point, Float_t padding) {
 }
 
 Float_t getEdepFromCS(Int_t cs) {
-   return -3.92 + 3.9 * cs - 0.0149 * pow(cs,2) + 0.00122 * pow(cs,3) - 1.4998e-5 * pow(cs,4);
+//   return -3.92 + 3.9 * cs - 0.0149 * pow(cs,2) + 0.00122 * pow(cs,3) - 1.4998e-5 * pow(cs,4);
+
+   Float_t edep;
+
+//   if (kUseRefinedClustering) edep = 0.1222 * pow(cs, 1.1275);
+   if (kUseRefinedClustering) edep = 0.13345 * pow(cs, 1.06576);
+   else                       edep = 0.1720 * pow(cs, 1.1615);
+
+//   return edep * 14;
+   return edep;
 }
 
 Int_t getCSFromEdep(Float_t edep) {
-   return 0.9317 + 0.2744 * edep - 0.0003392 * pow(edep,2) + 6.03427e-7 * pow(edep,3) - 3.8137e-10 * pow(edep, 4);
+//   return 0.9317 + 0.2744 * edep - 0.0003392 * pow(edep,2) + 6.03427e-7 * pow(edep,3) - 3.8137e-10 * pow(edep, 4);
+
+   Float_t cs;
+
+//   edep *= 14;
+
+//   if (kUseRefinedClustering) cs = 6.4516 * pow(edep, 0.8869);
+   if (kUseRefinedClustering) cs = 6.6177 * pow(edep, 0.9383);
+   else                       cs = 4.6176 * pow(edep, 0.86905);
+
+   return cs;
 }
 
 Bool_t isSameCluster(Cluster *a, Cluster *b) {

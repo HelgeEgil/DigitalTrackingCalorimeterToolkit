@@ -114,7 +114,7 @@ Tracks * Clusters::findCalorimeterTracks() {
    makeLayerIndex();
    fillMCSRadiusList();
    MCSMultiplicationFactor = 4; // 3
-   kMCSFactor = kMCSFactorFirstPass * 4;
+   kMCSFactor = kMCSFactorFirstPass * 2.5;
 
    // first pass, small search cone (3 sigma MCS)
    findTracksFromLayer(tracks, 0, usedClustersInSeeds);
@@ -129,6 +129,7 @@ Tracks * Clusters::findCalorimeterTracks() {
    
       // third pass, start from layer 1
       findTracksFromLayer(tracks, 1, usedClustersInSeeds);
+      findTracksFromLayer(tracks, 2, usedClustersInSeeds);
    }
 
    clustersLeft = clustersWithoutTrack_.GetEntries();

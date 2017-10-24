@@ -350,7 +350,7 @@ Tracks * getTracks(Int_t Runs, Int_t dataType, Int_t frameType, Float_t energy, 
       t5.Start();
       calorimeterTracks = clusters->findCalorimeterTracks();
       t5.Stop();
-      
+     
       tracksTotalNumberAfterRecon += calorimeterTracks->GetEntries();
 
       if (calorimeterTracks->GetEntriesFast() == 0) breakSignal = kTRUE; // to stop running

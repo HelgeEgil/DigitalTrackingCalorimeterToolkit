@@ -61,11 +61,11 @@ const    Float_t kAbsorberThickness = 3.3;
 const Float_t dx = DX; // mm
 const Float_t dy = DY; // mm
 const Float_t dz = DZ + kAbsorberThickness;
-Int_t kEventsPerRun = 50;
+Int_t kEventsPerRun = 25;
 
 // Used for treatment of available experimental data files
-const Int_t nEnergies = 8;
-Int_t energies[nEnergies] = {122, 140, 150, 160, 170, 180, 188, 190};
+const Int_t nEnergies = 6;
+Int_t energies[nEnergies] = {122, 140, 150, 170, 180, 188};
 
 enum eMaterial {kTungsten, kAluminum, kPMMA, kWater, kCarbon};
 const Int_t kMaterial = kTungsten;
@@ -95,6 +95,9 @@ const Int_t kTrackFindingAlgorithm = kNearestCluster;
  *  how close the tracks collide.
  */
 const Bool_t kUseTrackSplitting = kTRUE;
+
+// Use refined clustering model -- empirical model with updated parameters
+const Bool_t kUseRefinedClustering = kTRUE;
 
 // Tracking parameters
 Float_t initialSearchRadius = 50 * dx; // 20 if dimensionless

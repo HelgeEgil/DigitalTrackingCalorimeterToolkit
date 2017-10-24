@@ -47,6 +47,40 @@ Int_t DTC::Layer::diffuseLayer(TRandom3 *gRandom) {
    return nHits;
 }
 
+
+Int_t DTC::Layer::refinedDiffuseLayer(TRandom3 *gRandom) {
+   Int_t repeatFactor, x, y, z, randX, randY;
+   Float_t EnergyFactor = 2.5;
+   Float_t newSigma, eDep;
+
+   Hits *hits = new Hits();
+   Bool_t isHits = findHits(hits);
+   Int_t nHits = hits->GetEntriesFast();
+   
+   frame2D_.Reset();
+
+   showDebug("Diffusing layer  " << layerNo_ << ". Number of hits = " << nHits << endl);
+
+   for (Int_t h=0; h<nHits; h++) {
+      x = hits->getX(h);
+      y = hits->getY(h);
+      eDep = hits->getEdep(h); // per um
+      repeatFactor = eDep * EnergyFactor;
+      newSigma = pow(repeatFactor, 0.41) / 6;
+
+      for (Int_t j=0; j<repeatFactor; j++) {
+         randX = gRandom->Gaus(x, newSigma);
+         randY = gRandom->Gaus(y, newSigma);
+         frame2D_.Fill(randX, randY, EnergyFactor);
+      }
+   }
+
+   delete hits;
+   return nHits;
+}
+
+
+
 Bool_t DTC::Layer::findHits(Hits* hits) {
    Int_t    x, y, z, nBins;
    Bool_t   isHits = false;

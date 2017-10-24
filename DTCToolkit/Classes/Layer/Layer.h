@@ -31,6 +31,7 @@ class Layer : public TObject {
       virtual TH2F * getTH2F() { return (TH2F*) &frame2D_; }
       
       Int_t          diffuseLayer(TRandom3 *gRandom);
+      Int_t          refinedDiffuseLayer(TRandom3 *gRandom);
       virtual Bool_t findHits(Hits *hits);
       Float_t        getOccupancy();
       

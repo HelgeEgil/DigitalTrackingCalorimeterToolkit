@@ -203,7 +203,7 @@ void DataInterface::getMCData(Int_t runNo, TH3F* Frame3D) {
       x = (posX + offsetX) * nx/2 / (offsetX);
       y = (posY + offsetY) * ny/2 / (offsetY);
 
-      Frame3D->Fill(posZ, x, y, edep*1000);
+      Frame3D->Fill(posZ, x, y, edep*1000/14); // keV / um
    }
    
 } // end function GetData3D
@@ -260,7 +260,7 @@ void DataInterface::getEventIDs(Int_t runNo, Hits * hits) {
          // new layer
          xAvg = xS / n;
          yAvg = yS / n;
-         hits->appendPoint(xAvg, yAvg, lastZ, lastEventID, edepS);
+         hits->appendPoint(xAvg, yAvg, lastZ, lastEventID, edepS/14);
 //       cout << "Saving old layer: x = " << xS << "/" << n << " = " << xAvg << ", y = " << yAvg << ", edep = " << edepS << ", z = " << lastZ << ", eventID = " << lastEventID << endl;
 
          xS = x;
@@ -275,7 +275,7 @@ void DataInterface::getEventIDs(Int_t runNo, Hits * hits) {
    // last layer
    xAvg = xS / n;
    yAvg = yS / n;
-   hits->appendPoint(xAvg, yAvg, lastZ, lastEventID, edepS);
+   hits->appendPoint(xAvg, yAvg, lastZ, lastEventID, edepS/14);
 // cout << "Saving last layer: x = " << xS << "/" << n << " = " << xAvg << ", y = " << yAvg << ", edep = " << edepS << ", z = " << lastZ << ", eventID = " << lastEventID << endl;
 
 }
@@ -345,6 +345,7 @@ void DataInterface::getDataFrame(Int_t runNo, CalorimeterFrame * cf, Int_t energ
          Int_t y = lY->GetValue(j) + ny/2;
          Int_t z = lLayer->GetValue(j);
 
+         if ( x > nx || y > ny ) printf("POINT (x,y,z) = (%d\t%d\t%d) OUT OF BOUNDS!!\n", x,y,z);
          cf->fillAt(z, x, y);
 
       }
@@ -421,7 +422,7 @@ void  DataInterface::getMCClusters(Int_t runNo, Clusters *clusters) {
          x = sumX/n / dx + nx/2;
          y = sumY/n / dy + ny/2;
          
-         clusters->appendClusterEdep(x, y, lastLayer, sum_edep, lastID);
+         clusters->appendClusterEdep(x, y, lastLayer, sum_edep/14, lastID);
 
          sum_edep = 0;
          sumY = 0;
@@ -486,7 +487,7 @@ Int_t DataInterface::getMCFrame(Int_t runNo, CalorimeterFrame *cf, Float_t *x_en
          n = 0;
       }
       
-      sum_edep += edep;
+      sum_edep += edep/14;
       
       if  (x_energy && y_energy && parentID == 0) {
          x_energy[n + sizeOfEventID*eventID] = posZ + 1.5; // 1.5 for Al absorber
@@ -527,7 +528,7 @@ Int_t DataInterface::getMCFrame(Int_t runNo, CalorimeterFrame *cf, Float_t *x_en
          x = (posX + offsetX) * nx/2 / (offsetX);
          y = (posY + offsetY) * ny/2 / (offsetY);
 
-         cf->fillAt(calorimeterLayer, x, y, edep*1000);
+         cf->fillAt(calorimeterLayer, x, y, edep*1000/14);
       }
       
       lastID = eventID;

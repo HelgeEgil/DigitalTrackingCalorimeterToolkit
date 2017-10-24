@@ -995,6 +995,7 @@ void makePlots() {
    cal150->SetMinimum(0);
    cal150->SetMaximum(3);
    cal150->GetXaxis()->SetRangeUser(-1, 27);
+   cal150->GetYaxis()->SetRangeUser(0.5, 2.7);
    cal150->GetXaxis()->SetNdivisions(54);
    cal150->GetXaxis()->SetTitleFont(22);   
    cal150->GetXaxis()->SetLabelFont(22);
@@ -1023,7 +1024,7 @@ void makePlots() {
    cal188->Draw("P");
 
    for (Int_t i=-1; i<26; i++) {
-      TLine *l = new TLine(i+0.5, 0, i+0.5, 3);
+      TLine *l = new TLine(i+0.5, 0.5, i+0.5, 2.7);
       if ((i+1)%4 != 0) l->SetLineColor(kGray);
       l->Draw();
    }

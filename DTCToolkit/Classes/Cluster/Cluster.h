@@ -46,6 +46,7 @@ public:
    
    // In .C
    Double_t getLayermm(); // take into account placement of sensor layer, depends on y
+   Float_t  getCalibratedSize();
    Int_t    getChip();
    Float_t  getRadiusmm(); // cluster size as circle radius [mm]
    Float_t  getDepositedEnergy(Bool_t checkResistivity = false);
