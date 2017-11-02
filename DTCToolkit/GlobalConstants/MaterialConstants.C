@@ -202,7 +202,7 @@ void  createSplines() {
    range_energyW->Fit("range_energyW_fit", "Q,M");
    alpha_tungsten = range_energyW_fit->GetParameter(0);
    p_tungsten = range_energyW_fit->GetParameter(1);
-   printf("Through fitting, found TUNGSTEN alpha = %.5f, p = %.5f.\n", alpha_aluminum, p_aluminum);
+   printf("Through fitting, found TUNGSTEN alpha = %.5f, p = %.5f.\n", alpha_tungsten, p_tungsten);
 
    // FIND BRAGG-KLEEMAN PARAMETERS HIGH / LOW
    if (kMaterial == kAluminum) {

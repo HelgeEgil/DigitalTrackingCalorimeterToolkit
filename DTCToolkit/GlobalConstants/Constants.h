@@ -35,7 +35,7 @@ enum eDataType {kMC, kData};
 
 Float_t  run_energy = 0;
 Float_t  run_degraderThickness = 0;
-Bool_t   kIsAluminumPlate = true;
+Bool_t   kIsAluminumPlate = false;
 Bool_t   kIsScintillator = true;
 Bool_t   kIsFirstLayerAir = false;
 Bool_t   kUseAlpide = false;
@@ -55,7 +55,7 @@ const Float_t kRad = 3.14159265/180.;
 const    Int_t nx = NX;
 const    Int_t ny = NY;
 const    Int_t nTrackers = 4;
-const    Float_t kAbsorberThickness = 3.3;
+const    Float_t kAbsorberThickness = 3.3; // 3.3 focal
 
 // nLayers are loaded in MaterialConstants.C according to the detector geometry
 const Float_t dx = DX; // mm
