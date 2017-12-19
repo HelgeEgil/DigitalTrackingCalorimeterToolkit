@@ -1423,7 +1423,7 @@ void compareChargeDiffusionModels(Int_t Runs, Bool_t recreate, Float_t energy) {
    TCanvas *c3 = new TCanvas("c3", "Compare charge diffusion models", 1200, 800);
    c3->Divide(2,1,1e-6,1e-6);
 
-   int binx = 50;
+   int binx = 40;
 
    Float_t  edeps[1000];
    Float_t  css[1000];
@@ -1449,22 +1449,40 @@ void compareChargeDiffusionModels(Int_t Runs, Bool_t recreate, Float_t energy) {
    TH2F *hEnergyVSCSUncal = new TH2F("hEnergyVSCSUncal", "Uncalibrated;Residual energy [MeV];Cluster Size", 200, 0, 250, 31, 0, 30);
    TF1 *fPheno2 = new TF1("fPheno2", "6.6177 * x ** 0.9383", 0, 50);
    TF1 *fPheno3 = new TF1("fPheno3", "7.77457 * x ** 0.7674", 0, 50);
-   TF1 *fAnaly_30 = new TF1("fAnaly_30", "6.16421 * x ** 3.81925e-1", 0, 50);
-   TF1 *fAnaly_60 = new TF1("fAnaly_60", "8.72351 * x ** 4.47309e-1", 0, 50);
+   TF1 *fAnaly_30 = new TF1("fAnaly_30", "[0] + 6.16421 * x ** 3.81925e-1", 0, 50);
+   TF1 *fAnaly_60 = new TF1("fAnaly_60", "[0] + 8.72351 * x ** 4.47309e-1", 0, 50);
+   TF1 *fAnaly_65 = new TF1("fAnaly_65", "[0] + 8.99963 * x ** 4.54506e-1", 0, 50);
+   TF1 *fAnaly_45 = new TF1("fAnaly_45", "[0] + 7.66260 * x ** 4.20307e-1", 0, 50);
+   TF1 *fFinck = new TF1("fFinck", "2*3.1415 * [0] * log(14*x / (2*3.1415 * 0.0036 * [1]))", 0, 50);
    Cluster * cluster = nullptr;
    Float_t inst_wepl, inst_dedx, range, calcEnergy;
    Int_t inst_cs;
 
-   fPheno2->SetLineWidth(7);
-   fPheno3->SetLineWidth(7);
-   fAnaly_30->SetLineWidth(7);
-   fAnaly_60->SetLineWidth(7);
+   fAnaly_30->SetParameter(0, 0);
+   fAnaly_45->SetParameter(0, 0);
+   fAnaly_65->SetParameter(0, 0);
+   fAnaly_60->SetParameter(0, 0);
 
+   fAnaly_30->SetParLimits(0, 0, 0.01);
+   fAnaly_45->SetParLimits(0, 0, 0.01);
+   fAnaly_60->SetParLimits(0, 0, 0.01);
+   fAnaly_65->SetParLimits(0, 0, 0.01);
+
+   fFinck->SetParameters(1.202, 221.58);
+
+   fPheno2->SetLineWidth(5);
+   fPheno3->SetLineWidth(5);
+   fAnaly_30->SetLineWidth(5);
+   fAnaly_60->SetLineWidth(5);
+   fAnaly_45->SetLineWidth(5);
+   fAnaly_65->SetLineWidth(5);
+   fFinck->SetLineWidth(5);
+
+   fFinck->SetLineColor(kBlack);
    fPheno2->SetLineColor(kBlue-4);
-   fPheno3->SetLineColor(kBlue+3);
-   fAnaly_30->SetLineColor(kRed+2);
-   fAnaly_60->SetLineColor(kRed-7);
-
+   fPheno3->SetLineColor(kBlack);
+   fAnaly_30->SetLineColor(kBlack);
+   fAnaly_65->SetLineColor(kBlack);
 
    CalorimeterFrame *cf = new CalorimeterFrame();
    Clusters * clusters = new Clusters(nClusters);
@@ -1473,6 +1491,7 @@ void compareChargeDiffusionModels(Int_t Runs, Bool_t recreate, Float_t energy) {
 
    for (Int_t e=0; e<nEnergies; e++) {
       energy = energies[e];
+      run_energy = energy;
       tracks = loadOrCreateTracks(recreate, Runs, 1, energy);
 
       for (Int_t k=0; k<tracks->GetEntriesFast(); k++) {
@@ -1533,18 +1552,22 @@ void compareChargeDiffusionModels(Int_t Runs, Bool_t recreate, Float_t energy) {
    hEdepVSCS->Draw("COL");
    gPad->Update();
 
-   TLatex *t1 = new TLatex(5, 25, "Curve fit");
+   TLatex *t1 = new TLatex(5, 25, "Power fit");
+   TLatex *t4 = new TLatex(5, 20, "Gaussian fit");
    TLatex *t2 = new TLatex(5, 15, "#splitline{Analytical}{#lambda = 30 #mum}");
-   TLatex *t3 = new TLatex(5, 10, "#splitline{Analytical}{#lambda = 60 #mum}");
+   TLatex *t3 = new TLatex(5, 10, "Analytical model");
    t1->SetTextFont(22);
    t2->SetTextFont(22);
    t3->SetTextFont(22);
+   t4->SetTextFont(22);
    t1->SetTextSize(0.05);
    t2->SetTextSize(0.05);
    t3->SetTextSize(0.05);
+   t4->SetTextSize(0.05);
    t1->Draw();
-   t2->Draw();
+//   t2->Draw();
    t3->Draw();
+   t4->Draw();
 
    c4->cd();
    TF1 * fitFunc = new TF1("fitFunc", "[0] * x ** [1]", 0, 5);
@@ -1629,11 +1652,30 @@ void compareChargeDiffusionModels(Int_t Runs, Bool_t recreate, Float_t energy) {
    gEdepVSCS->SetMarkerStyle(21);
    gEdepVSCS->Draw("AP");
    TFitResultPtr fitResult = gEdepVSCS->Fit("fitFunc", "B,M,S", "", 0, 5);
-
+   
+   printf("Power function ---------\n");
    fitResult->NormalizeErrors();
    fitResult->Print("V");
+   fitFunc->Draw("same");
 
    printf("Fit function: %.3f * edep ^ %.3f\n", fitFunc->GetParameter(0), fitFunc->GetParameter(1));
+   TFitResultPtr fitResult2 = gEdepVSCS->Fit("fFinck", "B,M,S", "", 0, 5);
+   
+   printf("Finck function ---------\n");
+   fitResult2->NormalizeErrors();
+   fitResult2->Print("V");
+   printf("Finck function: rs = %.3f, Ts = %.3f\n", fFinck->GetParameter(0), fFinck->GetParameter(1));
+
+   fFinck->Draw("same");
+
+   TFitResultPtr fitResult5 = gEdepVSCS->Fit("fAnaly_65", "B,M,S", "", 0, 5);
+   
+   cout << "ANALY 65" << endl;
+   
+   fitResult5->NormalizeErrors();
+   fitResult5->Print("V");
+   fAnaly_65->Draw("same");
+
 
    c2->cd(1);
    gPad->SetLogz();
@@ -1657,17 +1699,18 @@ void compareChargeDiffusionModels(Int_t Runs, Bool_t recreate, Float_t energy) {
    c->cd();
 //   fPheno2->Draw("same");
    fPheno3->Draw("same");
-   fAnaly_30->Draw("same");
+//   fAnaly_30->Draw("same");
 //   fAnaly_45->Draw("same");
-   fAnaly_60->Draw("same");
+   fAnaly_65->Draw("same");
+   fFinck->Draw("same");
 
    TLegend *leg = new TLegend(0.55, 0.17, 0.85, 0.34);
 //   leg->AddEntry(fPheno, "Old Gaus.", "L");
    leg->AddEntry(fPheno3, "Phenomenological", "L");
 //   leg->AddEntry(fPheno3, "Fit result", "L");
-   leg->AddEntry(fAnaly_30, "Analytic #lambda = 30 #mum", "L");
+//   leg->AddEntry(fAnaly_30, "Analytic #lambda = 30 #mum", "L");
 //   leg->AddEntry(fAnaly_45, "Analytic w/#lambda=45", "L");
-   leg->AddEntry(fAnaly_60, "Analytic #lambda = 60 #mum", "L");
+   leg->AddEntry(fAnaly_60, "Analytic #lambda = 65 #mum", "L");
    leg->SetTextFont(22);
 //   leg->Draw();
 
@@ -1676,8 +1719,6 @@ void compareChargeDiffusionModels(Int_t Runs, Bool_t recreate, Float_t energy) {
    hEnergyVSCSCal->Draw("COLZ");
    c3->cd(2);
    hEnergyVSCSUncal->Draw("COLZ");
-
-
 
 }
    
