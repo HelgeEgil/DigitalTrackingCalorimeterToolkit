@@ -15,7 +15,7 @@ for i in `seq $1 $2 $3`;
 do
    hdt=`echo "scale=3; -$i/2-2" | bc`
    beampos=`echo "scale=3; -$i-5" | bc`
-	nice -n 10 Gate -a "'[energy,250] [degraderthickness,$i] [halfdegraderthickness,$hdt] [beampos,$beampos]'" waterphantom.mac > terminal_output.txt &
+	nice -n 10 Gate -a "'[energy,230] [degraderthickness,$i] [halfdegraderthickness,$hdt] [beampos,$beampos]'" waterphantom.mac > terminal_output.txt &
 	echo "Running: $i"
    if (( $IDX % $NCORES == 0 )); then
       echo "Waiting for run $i (PID $!)"

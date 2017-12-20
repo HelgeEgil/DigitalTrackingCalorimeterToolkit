@@ -13,6 +13,7 @@ void Run(int energy) {
    Float_t  z,edep,lastZ = -1, dE = 0;
    Int_t    eventID, parentID, lastEventID = -1;
    Float_t expectedRange = 0.0262 * pow(energy, 1.736);
+   printf("Expected range from 230 MeV beam in 160 cm water is %.2f\n", expectedRange);
 
    TH1F   * rangeHistogram = new TH1F("rangeHistogram", "Stopping position for protons;Range [mm];Entries", 800, fmax(expectedRange - 20, 0), expectedRange + 20);
    TH1F   * energyHistogram = new TH1F("energyHistogram", "Remaining energy protons;Energy [MeV];Entries", 200, 100, 150);

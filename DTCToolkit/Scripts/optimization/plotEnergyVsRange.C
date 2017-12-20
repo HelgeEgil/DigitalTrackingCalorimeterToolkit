@@ -26,6 +26,7 @@
 using namespace std;
 
 Bool_t kUseCarbon = false;
+Bool_t kUseDCCorrection = true;
 const Int_t arraySize = 1500;
 const Int_t xFrom = 40;
 
@@ -47,9 +48,10 @@ void plotEnergyVsRange() {
    Xtitle->SetTextSize(0.6);
    Xtitle->Draw();
    
-   gStyle->SetPadLeftMargin(0.025);
+   gStyle->SetPadLeftMargin(0.035);
    gStyle->SetPadRightMargin(0.025);
    gStyle->SetPadBottomMargin(0.15);
+   gStyle->SetPadTopMargin(0.23);
 
    TPad *graphPad = new TPad("Graphs", "Graphs", 0.05, 0.1, 0.95, 0.95);
    graphPad->Draw();
@@ -72,6 +74,16 @@ void plotEnergyVsRange() {
 
    Double_t energies[arraySize] = {0};
    Double_t thicknesses[arraySize] = {0};
+
+   Float_t correction_2 = -0.132, correction_3 = 0.271, correction_35 = 0.813, correction_4 = 0.734, correction_5 = 1.292, correction_6 = 1.879;
+   if (!kUseDCCorrection) {
+      correction_2 = 0;
+      correction_3 = 0;
+      correction_35 = 0;
+      correction_4 = 0;
+      correction_5 = 0;
+      correction_6 = 0;
+   }
 
    gStyle->SetOptStat(0);
 
@@ -120,12 +132,12 @@ void plotEnergyVsRange() {
       if (thickness_ == 5) arrayE5[nlines5] = nomrange_;
       if (thickness_ == 6) arrayE6[nlines6] = nomrange_;
 
-      if (thickness_ == 2) arrayMC2[nlines2++] = -nomrange_ + estrange_;
-      if (thickness_ == 3) arrayMC3[nlines3++] = estrange_ - nomrange_;
-      if (thickness_ == 35) arrayMC35[nlines35++] = estrange_ - nomrange_;
-      if (thickness_ == 4) arrayMC4[nlines4++] = -nomrange_ + estrange_;
-      if (thickness_ == 5) arrayMC5[nlines5++] = estrange_ - nomrange_;
-      if (thickness_ == 6) arrayMC6[nlines6++] = -nomrange_ + estrange_;
+      if (thickness_ == 2) arrayMC2[nlines2++] = -nomrange_ + estrange_ + correction_2;
+      if (thickness_ == 3) arrayMC3[nlines3++] = estrange_ - nomrange_ + correction_3;
+      if (thickness_ == 35) arrayMC35[nlines35++] = estrange_ - nomrange_ + correction_35;
+      if (thickness_ == 4) arrayMC4[nlines4++] = -nomrange_ + estrange_ + correction_4;
+      if (thickness_ == 5) arrayMC5[nlines5++] = estrange_ - nomrange_ + correction_5;
+      if (thickness_ == 6) arrayMC6[nlines6++] = -nomrange_ + estrange_ + correction_6;
    }
    
    in.close();
@@ -192,8 +204,8 @@ void plotEnergyVsRange() {
    hMC5->SetLineWidth(3);
    hMC6->SetLineWidth(3);
 
-   Float_t yfrom = -3.5;
-   Float_t yto = 3.5;
+   Float_t yfrom = -1;
+   Float_t yto = 1;
 
    Float_t xfrom = 5;
    Float_t xto = 380;
@@ -217,8 +229,8 @@ void plotEnergyVsRange() {
    hMC5->GetYaxis()->SetNdivisions(404);
    hMC6->GetYaxis()->SetNdivisions(404);
 
-   Float_t textX = 25;
-   Float_t textY = 0.5;
+   Float_t textX = 10.5;
+   Float_t textY = 1.1;
 
    graphPad->cd(1);
    gPad->SetGridy();

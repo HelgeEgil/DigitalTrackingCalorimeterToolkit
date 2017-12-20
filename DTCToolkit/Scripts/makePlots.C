@@ -303,6 +303,8 @@ void makePlots() {
    Float_t arrayFraction2mmY[200] = {0};
    Float_t arrayFraction3mmX[200] = {0};
    Float_t arrayFraction3mmY[200] = {0};
+   Float_t arrayFraction35mmX[200] = {0};
+   Float_t arrayFraction35mmY[200] = {0};
    Float_t arrayFraction4mmX[200] = {0};
    Float_t arrayFraction4mmY[200] = {0};
    Float_t arrayFraction5mmX[200] = {0};
@@ -310,7 +312,7 @@ void makePlots() {
    Float_t arrayFraction6mmX[200] = {0};
    Float_t arrayFraction6mmY[200] = {0};
 
-   Int_t nlinesF = 0, nlinesF2 = 0, nlinesF3 = 0, nlinesF4 = 0, nlinesF5 = 0, nlinesF6 = 0;
+   Int_t nlinesF = 0, nlinesF2 = 0, nlinesF3 = 0, nlinesF4 = 0, nlinesF5 = 0, nlinesF6 = 0, nlinesF35 = 0;
    
    Float_t lastIsFirstAllTracks;
 
@@ -347,6 +349,11 @@ void makePlots() {
       if (mmAbsorber_ == 6) {
          arrayFraction6mmX[nlinesF6] = np/100;
          arrayFraction6mmY[nlinesF6++] = lastIsFirstAllTracks * 100;
+      }
+      
+      if (mmAbsorber_ == 35) {
+         arrayFraction35mmX[nlinesF35] = np/100;
+         arrayFraction35mmY[nlinesF35++] = lastIsFirstAllTracks * 100;
       }
    }
 
@@ -814,6 +821,7 @@ void makePlots() {
    c22->cd();
    TGraph *gFraction2mm = new TGraph(nlinesF2, arrayFraction2mmX, arrayFraction2mmY);
    TGraph *gFraction3mm = new TGraph(nlinesF3, arrayFraction3mmX, arrayFraction3mmY);
+   TGraph *gFraction35mm = new TGraph(nlinesF35, arrayFraction35mmX, arrayFraction35mmY);
    TGraph *gFraction4mm = new TGraph(nlinesF4, arrayFraction4mmX, arrayFraction4mmY);
    TGraph *gFraction5mm = new TGraph(nlinesF5, arrayFraction5mmX, arrayFraction5mmY);
    TGraph *gFraction6mm = new TGraph(nlinesF6, arrayFraction6mmX, arrayFraction6mmY);
@@ -841,18 +849,21 @@ void makePlots() {
    gFraction2mm->GetYaxis()->SetLabelFont(22);
    gFraction2mm->SetLineWidth(3);
    gFraction3mm->SetLineWidth(3);
+   gFraction35mm->SetLineWidth(3);
    gFraction4mm->SetLineWidth(3);
    gFraction5mm->SetLineWidth(3);
    gFraction6mm->SetLineWidth(3);
 
-   gFraction2mm->SetLineColor(kGreen+4);
-   gFraction3mm->SetLineColor(kGreen+3);
-   gFraction4mm->SetLineColor(kGreen+2);
-   gFraction5mm->SetLineColor(kGreen+1);
-   gFraction6mm->SetLineColor(kGreen);
+   gFraction2mm->SetLineColor(kRed+4);
+   gFraction3mm->SetLineColor(kRed+3);
+   gFraction35mm->SetLineColor(kRed+2);
+   gFraction4mm->SetLineColor(kRed+1);
+   gFraction5mm->SetLineColor(kRed+0);
+   gFraction6mm->SetLineColor(kRed-7);
 
    gFraction2mm->Draw("LA");
    gFraction3mm->Draw("L");
+   gFraction35mm->Draw("L");
    gFraction4mm->Draw("L");
    gFraction5mm->Draw("L");
    gFraction6mm->Draw("L");
@@ -869,11 +880,12 @@ void makePlots() {
    TText *curveLabel = new TText();
    curveLabel->SetTextFont(22);
    curveLabel->SetTextSize(0.038);
-   curveLabel->DrawText(25.50, gFraction2mm->Eval(25.00)*0.98, "2 mm C");
-   curveLabel->DrawText(25.50, gFraction3mm->Eval(25.00)*0.98, "3 mm C");
-   curveLabel->DrawText(25.50, gFraction4mm->Eval(25.00)*0.98, "4 mm C");
-   curveLabel->DrawText(25.50, gFraction5mm->Eval(25.00)*0.98, "5 mm C");
-   curveLabel->DrawText(25.50, gFraction6mm->Eval(25.00)*0.98, "6 mm C");
+   curveLabel->DrawText(25.50, gFraction2mm->Eval(25.00)*0.98, "2 mm Al");
+   curveLabel->DrawText(25.50, gFraction3mm->Eval(25.00)*0.98, "3 mm Al");
+   curveLabel->DrawText(25.50, gFraction35mm->Eval(25.00)*0.98, "3.5 mm Al");
+   curveLabel->DrawText(25.50, gFraction4mm->Eval(25.00)*0.98, "4 mm Al");
+   curveLabel->DrawText(25.50, gFraction5mm->Eval(25.00)*0.98, "5 mm Al");
+   curveLabel->DrawText(25.50, gFraction6mm->Eval(25.00)*0.98, "6 mm Al");
 
 
    /*
