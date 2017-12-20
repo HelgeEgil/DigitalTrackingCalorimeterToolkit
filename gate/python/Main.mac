@@ -45,17 +45,21 @@
 /gate/source/uniformBeam/gps/ene/mono {energy} MeV
 /gate/source/uniformBeam/gps/ene/sigma 0 MeV
 /gate/source/uniformBeam/gps/type Plane
-/gate/source/uniformBeam/gps/shape Square
+#/gate/source/uniformBeam/gps/shape Square
+/gate/source/uniformBeam/gps/shape Circle
 /gate/source/uniformBeam/gps/direction 0 0 1
-/gate/source/uniformBeam/gps/halfx 70.71 mm
-/gate/source/uniformBeam/gps/halfy 35.355 mm
-#/gate/source/uniformBeam/gps/halfx 0 mm
-#/gate/source/uniformBeam/gps/halfy 0 mm
+/gate/source/uniformBeam/gps/radius 2. mm
+#/gate/source/uniformBeam/gps/halfx 70.71 mm
+#/gate/source/uniformBeam/gps/halfy 35.355 mm
+/gate/source/uniformBeam/gps/halfx 0 mm
+/gate/source/uniformBeam/gps/halfy 0 mm
 /gate/source/uniformBeam/gps/centre 0. 0. {beampos} mm
 
 /gate/output/root/enable
 /gate/output/root/setRootSinglesFlag 0
 /gate/output/root/setFileName ../../DTCToolkit/Data/MonteCarlo/DTC_Aluminium_Absorber{absorberthickness}mm_Degrader{degraderthickness}mm_{energy}MeV
+#/gate/output/root/setFileName ../../DTCToolkit/Data/MonteCarlo/DTC_Tungsten_Absorber{absorberthickness}mm_Degrader{degraderthickness}mm_{energy}MeV
+#/gate/output/root/setFileName ../../projects/Tracking/Data/RealisticPencilBeamThrough20cmWaterPhantom.root
 
 #===============#
 # START BEAMS	#

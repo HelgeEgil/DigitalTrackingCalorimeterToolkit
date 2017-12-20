@@ -16,8 +16,10 @@
 #include <TPaveText.h>
 #include <TAxis3D.h>
 #include <TCanvas.h>
+#include <TFitResult.h>
 #include <TGraph.h>
 #include <TGraphErrors.h>
+#include <TGraphAsymmErrors.h>
 #include <TEllipse.h>
 #include <TLegend.h>
 #include <TStopwatch.h>
@@ -830,20 +832,12 @@ Float_t drawBraggPeakGraphFit(Int_t Runs, Int_t dataType, Bool_t recreate, Float
    run_degraderThickness = degraderThickness;
    run_energy = energy;
    TStopwatch t1, t2, t3, t4, t5, t6, t7, t8;
-   // t.Start(), t.Stop(), t.RealTime()
    
    t1.Start();
 
-   printf("WEPL factors for different energies... \n");
-   for (int i=50; i<260; i += 50) {
-      printf("%d MeV -> factor = %.3f\n", i, getWEPLFactorFromEnergy(i));
-   }
-
    if (useDegrader) {
-//      run_energy = getEnergyAtWEPL(energy, degraderThickness);
       run_energy = getEnergyFromDegraderThickness(degraderThickness);
    }
-
 
    printf("Using water degrader of thickness %.0f mm, the initial energy of %.0f MeV is reduced to %.1f MeV.\n", degraderThickness, energy, run_energy);
 
@@ -882,10 +876,10 @@ Float_t drawBraggPeakGraphFit(Int_t Runs, Int_t dataType, Bool_t recreate, Float
    Float_t highHistogramLimit = getUnitFromEnergy(run_energy)*1.4 + 10;
 
    TCanvas      * cGraph = new TCanvas("cGraph", "Fitted data points", nPlotX*500, nPlotY*500);
-   TH1F         * hFitResults = new TH1F("fitResult", hTitle, fmax(nEnergyBins*6,150), lowHistogramLimit, highHistogramLimit);
+   TH1F         * hFitResults = new TH1F("fitResult", hTitle, fmax(nEnergyBins,100), lowHistogramLimit, highHistogramLimit);
  
+   printf("Using material: %s\n", sMaterial);
    printf("Histogram limits: %.2f to %.2f.\n", lowHistogramLimit, highHistogramLimit);
-
    printf("At energy %.0f, expecting range %.2f mm and WEPL %.2f mm.\n", run_energy, getTLFromEnergy(run_energy), getWEPLFromEnergy(run_energy));
    printf("This corresponds to a WEPL factor of %.2f.\n", getWEPLFactorFromEnergy(run_energy));
    cout << "Correcting for aluminum plate: " << kIsAluminumPlate << endl;
@@ -897,7 +891,6 @@ Float_t drawBraggPeakGraphFit(Int_t Runs, Int_t dataType, Bool_t recreate, Float
 
    // All gPad were gStyle, but try to limit to cGraph and not cFitResults
    gPad->SetBorderMode(0); gStyle->SetFrameBorderMode(0);
-//   gPad->SetTitleH(0.06); gPad->SetTitleYOffset(1);
    gPad->SetTickx(1); gPad->SetTicky(1);
    gPad->SetTopMargin(0.05); gPad->SetRightMargin(0.05);
    gPad->SetBottomMargin(0.05);
@@ -932,8 +925,6 @@ Float_t drawBraggPeakGraphFit(Int_t Runs, Int_t dataType, Bool_t recreate, Float
 
       fitRange = thisTrack->getFitParameterRange();
       fitScale = thisTrack->getFitParameterScale();
-
-      printf("fitRange = %.2f, fitScale = %.2f\n", fitRange, fitScale);
 
       if (kDrawIndividualGraphs) fitError = quadratureAdd(thisTrack->getFitParameterError(), dz*0.28867); // latter term from error on layer position
 
@@ -1424,72 +1415,64 @@ void compareChargeDiffusionModels(Int_t Runs, Bool_t recreate, Float_t energy) {
    Int_t nLayersToUse = 6;
    
    TCanvas *c = new TCanvas("c", "Compare charge diffusion models", 1200, 800);
+   TCanvas *c4 = new TCanvas("c4", "Compare charge diffusion models", 1200, 800);
+   
+   TCanvas *c2 = new TCanvas("c2", "Compare charge diffusion models", 1200, 800);
+   c2->Divide(3,2,1e-6,1e-6);
 
-   TH2F *hEdepVSCS = new TH2F("hEdepVSCS", ";E_{dep} [keV/#mum]; Calibrated cluster size", 40, 0, 5, 31, 0, 30);
-//   TF1 *fPheno = new TF1("fPheno", "-4 + 3.88*x + 1.24e-2 * x ** 2 - 1.14e-3 * x ** 3 - 1.42e-6 * x ** 4", 1, 50);
-//   TF1 *fPheno = new TF1("fPheno", "0.91 + 3.91*x - 0.091 * x ** 2 + 0.00423* x ** 3 - 9.78e-5 * x**4", 0, 50);  // CS = f(Edep)
-//   TF1 *fPheno = new TF1("fPheno", "4.6176 * x ** 0.86905", 0, 50);
-//   TF1 *fPheno2 = new TF1("fPheno2", "6.452 * x ** 0.8869", 0, 50);
+   TCanvas *c3 = new TCanvas("c3", "Compare charge diffusion models", 1200, 800);
+   c3->Divide(2,1,1e-6,1e-6);
+
+   int binx = 50;
+
+   Float_t  edeps[1000];
+   Float_t  css[1000];
+   Float_t  edeps_error[1000];
+   Float_t  css_error_high[1000];
+   Float_t  css_error_low[1000];
+   Int_t    graphIdx = 0;
+
+   gStyle->SetTitleFont(22);
+   gStyle->SetLabelFont(22);
+   gStyle->SetTextFont(22);
+   gStyle->SetLabelFont(22, "Y");
+   gStyle->SetTitleFont(22, "Y");
+
+   TH2F *hEdepVSCS = new TH2F("hEdepVSCS", ";E_{dep} [keV/#mum]; Calibrated cluster size", binx, 0.5, 5, 31, 0, 30);
+   TH2F *hEdepVSCS1 = new TH2F("hEdepVSCS1", "122 MeV;E_{dep} [keV/#mum]; Calibrated cluster size", binx, 0.5, 5, 31, 0, 30);
+   TH2F *hEdepVSCS2 = new TH2F("hEdepVSCS2", "140 MeV;E_{dep} [keV/#mum]; Calibrated cluster size", binx, 0.5, 5, 31, 0, 30);
+   TH2F *hEdepVSCS3 = new TH2F("hEdepVSCS3", "150 MeV;E_{dep} [keV/#mum]; Calibrated cluster size", binx, 0.5, 5, 31, 0, 30);
+   TH2F *hEdepVSCS4 = new TH2F("hEdepVSCS4", "170 MeV;E_{dep} [keV/#mum]; Calibrated cluster size", binx, 0.5, 5, 31, 0, 30);
+   TH2F *hEdepVSCS5 = new TH2F("hEdepVSCS5", "180 MeV;E_{dep} [keV/#mum]; Calibrated cluster size", binx, 0.5, 5, 31, 0, 30);
+   TH2F *hEdepVSCS6 = new TH2F("hEdepVSCS6", "188 MeV;E_{dep} [keV/#mum]; Calibrated cluster size", binx, 0.5, 5, 31, 0, 30);
+   TH2F *hEnergyVSCSCal = new TH2F("hEnergyVSCSCal", "Calibrated;Residual energy [MeV];Cluster Size", 200, 0, 250, 31, 0, 30);
+   TH2F *hEnergyVSCSUncal = new TH2F("hEnergyVSCSUncal", "Uncalibrated;Residual energy [MeV];Cluster Size", 200, 0, 250, 31, 0, 30);
    TF1 *fPheno2 = new TF1("fPheno2", "6.6177 * x ** 0.9383", 0, 50);
-   // alternatively use getCSFromEdep()
+   TF1 *fPheno3 = new TF1("fPheno3", "7.77457 * x ** 0.7674", 0, 50);
    TF1 *fAnaly_30 = new TF1("fAnaly_30", "6.16421 * x ** 3.81925e-1", 0, 50);
-//   TF1 *fAnaly_45 = new TF1("fAnaly_45", "7.66260 * x ** 4.20307e-1", 0, 50);
    TF1 *fAnaly_60 = new TF1("fAnaly_60", "8.72351 * x ** 4.47309e-1", 0, 50);
    Cluster * cluster = nullptr;
    Float_t inst_wepl, inst_dedx, range, calcEnergy;
    Int_t inst_cs;
 
-//   fPheno->SetLineWidth(3);
    fPheno2->SetLineWidth(7);
+   fPheno3->SetLineWidth(7);
    fAnaly_30->SetLineWidth(7);
-//   fAnaly_45->SetLineWidth(4);
    fAnaly_60->SetLineWidth(7);
 
-//   fPheno->SetLineColor(kBlue-4);
-   fPheno2->SetLineColor(kBlue+3);
+   fPheno2->SetLineColor(kBlue-4);
+   fPheno3->SetLineColor(kBlue+3);
    fAnaly_30->SetLineColor(kRed+2);
-//   fAnaly_45->SetLineColor(kRed);
    fAnaly_60->SetLineColor(kRed-7);
 
 
    CalorimeterFrame *cf = new CalorimeterFrame();
    Clusters * clusters = new Clusters(nClusters);
    Hits * hits = new Hits(nHits);
-/*
-   for (Int_t e=0; e<8; e++) {
-      energy = energies[e]; 
-      for (Int_t i=0; i<Runs; i++) {
-         di->getDataFrame(i, cf, energy);
-         hits = cf->findHits();
-         clusters = hits->findClustersFromHits();
-         clusters->removeSmallClusters(2);
-         clusters->removeAllClustersAfterLayer(8);
-         if (hits->GetEntries() == 0) break;
-         
-         for (Int_t j=0; j<clusters->GetEntriesFast(); j++) {
-            cluster = clusters->At(j);
-
-            if (!cluster) continue;
-
-            inst_wepl = getWEPLFromTL(cluster->getLayermm());
-   //         inst_dedx = getEnergyLossAtWEPL(inst_wepl, calcEnergy);
-            inst_dedx = 43.95 * pow(getEnergyAtWEPL(energy, inst_wepl), -0.748);
-            inst_cs =   cluster->getSize();
-
-            hEdepVSCS->Fill(inst_dedx, inst_cs);
-         }
-         cf->Reset();
-      }
-   }
-   */
-
-
-
    Tracks *tracks = nullptr;
 
    for (Int_t e=0; e<nEnergies; e++) {
-      energy = energies[e]; 
-      
+      energy = energies[e];
       tracks = loadOrCreateTracks(recreate, Runs, 1, energy);
 
       for (Int_t k=0; k<tracks->GetEntriesFast(); k++) {
@@ -1501,21 +1484,29 @@ void compareChargeDiffusionModels(Int_t Runs, Bool_t recreate, Float_t energy) {
          range = tracks->At(k)->getFitParameterRange();
          calcEnergy = getEnergyFromTL(range);
 
-//         printf("Energy from doFit is %.2f MeV\n", calcEnergy);
-
          for (Int_t j=0; j<tracks->At(k)->GetEntriesFast(); j++) {
             if (!tracks->At(k)->At(j)) continue;
-            cluster = tracks->At(k)->At(j);
+            cluster = tracks->At(k)->At(j); 
 
             inst_wepl = getWEPLFromTL(cluster->getLayermm() + tracks->At(k)->getPreTL());
-   //         inst_dedx = getEnergyLossAtWEPL(inst_wepl, calcEnergy);
-            inst_dedx = 43.95 * pow(getEnergyAtWEPL(calcEnergy, inst_wepl), -0.748);
-//            printf("Energy at depth %.2f of %.2f is %.1f Mev with edep %.1f MeV\n", inst_wepl, getWEPLFromTL(range), getEnergyAtWEPL(calcEnergy, inst_wepl), inst_dedx);
+            inst_dedx = 43.95 * pow(getEnergyAtWEPL(energy, inst_wepl), -0.748);
 
-//            inst_cs =   cluster->getCalibratedSize();
-            inst_cs = cluster->getSize();
+            inst_cs =   cluster->getCalibratedSize();
+
+            if (inst_cs < 0) continue;
+            if (inst_dedx > 3) {
+            }
+               hEnergyVSCSCal->Fill(getEnergyAtWEPL(energy, inst_wepl), inst_cs);
+               hEnergyVSCSUncal->Fill(getEnergyAtWEPL(energy, inst_wepl), cluster->getSize());
 
             hEdepVSCS->Fill(inst_dedx, inst_cs);
+
+            if       (energy == 122) hEdepVSCS1->Fill(inst_dedx, inst_cs);
+            else if  (energy == 140) hEdepVSCS2->Fill(inst_dedx, inst_cs);
+            else if  (energy == 150) hEdepVSCS3->Fill(inst_dedx, inst_cs);
+            else if  (energy == 170) hEdepVSCS4->Fill(inst_dedx, inst_cs);
+            else if  (energy == 180) hEdepVSCS5->Fill(inst_dedx, inst_cs);
+            else if  (energy == 188) hEdepVSCS6->Fill(inst_dedx, inst_cs);
          }
       }
    }
@@ -1532,23 +1523,160 @@ void compareChargeDiffusionModels(Int_t Runs, Bool_t recreate, Float_t energy) {
    hEdepVSCS->GetZaxis()->SetLabelSize(0.05);
 
    gStyle->SetOptStat(0);
-   gPad->SetLogz();
 
-   hEdepVSCS->Draw("COLZ");
+   c->cd();
+   gPad->SetBottomMargin(0.12);
+   gPad->SetRightMargin(0.2);
+   gPad->SetTopMargin(0.05);
+   gPad->SetLogz();
+   hEdepVSCS->GetYaxis()->SetTitleOffset(0.8);
+   hEdepVSCS->Draw("COL");
+   gPad->Update();
+
+   TLatex *t1 = new TLatex(5, 25, "Curve fit");
+   TLatex *t2 = new TLatex(5, 15, "#splitline{Analytical}{#lambda = 30 #mum}");
+   TLatex *t3 = new TLatex(5, 10, "#splitline{Analytical}{#lambda = 60 #mum}");
+   t1->SetTextFont(22);
+   t2->SetTextFont(22);
+   t3->SetTextFont(22);
+   t1->SetTextSize(0.05);
+   t2->SetTextSize(0.05);
+   t3->SetTextSize(0.05);
+   t1->Draw();
+   t2->Draw();
+   t3->Draw();
+
+   c4->cd();
+   TF1 * fitFunc = new TF1("fitFunc", "[0] * x ** [1]", 0, 5);
+   fitFunc->SetParameters(6.6177, 0.9383); // pheno2
+   
+   // CALCULATE STATISTICS FROM hEdepVSCS:
+   Float_t  sum_mean;
+   Float_t  sum_variance;
+   Float_t  sum_variance_high;
+   Float_t  sum_variance_low;
+   Float_t  mean;
+   Float_t  standarddeviation;
+   Float_t  standarddeviation_high;
+   Float_t  standarddeviation_low;
+   Float_t  fScale_high, fScale_low;
+   Int_t    nEntries = 0;
+   Int_t    nEntries_high = 0;
+   Int_t    nEntries_low = 0;
+   TAxis *xaxis = hEdepVSCS->GetXaxis();
+   TAxis *yaxis = hEdepVSCS->GetYaxis();
+
+   Int_t    ntotal = hEdepVSCS->Integral();
+   Int_t    nEntries0 = 0;
+
+   for (Int_t horiz=0; horiz<hEdepVSCS->GetNbinsX(); horiz++) {
+      sum_mean = 0;
+      sum_variance = 0;
+      sum_variance_high = 0;
+      sum_variance_low = 0;
+      nEntries = 0;
+      nEntries_high = 0;
+      nEntries_low = 0;
+
+      // calculate mean
+      for (Int_t vert=0; vert<hEdepVSCS->GetNbinsY(); vert++) {
+         sum_mean += yaxis->GetBinCenter(vert) * hEdepVSCS->GetBinContent(horiz, vert);
+         nEntries += hEdepVSCS->GetBinContent(horiz, vert);
+      }
+      
+      if (nEntries > 0) {
+         if (!nEntries0) nEntries0 = nEntries;
+         mean = sum_mean / nEntries;
+
+         printf("Mean value at %.1f kev/um is %.1f\n", xaxis->GetBinCenter(horiz), mean);
+      
+         for (Int_t vert=0; vert<hEdepVSCS->GetNbinsY(); vert++) {
+            if (yaxis->GetBinCenter(vert) < mean) {
+               sum_variance_low += hEdepVSCS->GetBinContent(horiz, vert) * pow( yaxis->GetBinCenter(vert) - mean, 2);
+               nEntries_low += hEdepVSCS->GetBinContent(horiz,vert);
+            }
+            else {
+               sum_variance_high += hEdepVSCS->GetBinContent(horiz, vert) * pow( yaxis->GetBinCenter(vert) - mean, 2);
+               nEntries_high += hEdepVSCS->GetBinContent(horiz,vert);
+            }
+         }
+
+         // rescale  nentries to the total number of entries, so that the nEntries number also acts as a point WEIGHT
+         // so that nEntries_high + nEntries_low = ntotal
+
+         if (!nEntries_high || !nEntries_low) continue;
+         
+         fScale_high = (nEntries0 / nEntries_high) * 2;
+         fScale_low = (nEntries0 / nEntries_low) * 2;
+
+         printf("At %.1f keV/um, fScale l/h is %.2f / %.2f.\n", xaxis->GetBinCenter(horiz), fScale_low, fScale_high);
+
+         if (nEntries_high == 1) nEntries_high = 2;
+         if (nEntries_low == 1) nEntries_low = 2;
+
+         standarddeviation_low = sqrt(fScale_low * sum_variance_low / (nEntries_low - 1));
+         standarddeviation_high = sqrt(fScale_high * sum_variance_high / (nEntries_high - 1));
+         
+         css[graphIdx] = mean;
+         css_error_high[graphIdx] = standarddeviation_high;
+         css_error_low[graphIdx] = standarddeviation_low;
+         edeps[graphIdx] = xaxis->GetBinCenter(horiz);
+         edeps_error[graphIdx++] = 0;
+      }
+   }
+
+   TGraphAsymmErrors *gEdepVSCS = new TGraphAsymmErrors(graphIdx, edeps, css, edeps_error, edeps_error, css_error_low, css_error_high);
+   gEdepVSCS->SetMarkerStyle(21);
+   gEdepVSCS->Draw("AP");
+   TFitResultPtr fitResult = gEdepVSCS->Fit("fitFunc", "B,M,S", "", 0, 5);
+
+   fitResult->NormalizeErrors();
+   fitResult->Print("V");
+
+   printf("Fit function: %.3f * edep ^ %.3f\n", fitFunc->GetParameter(0), fitFunc->GetParameter(1));
+
+   c2->cd(1);
+   gPad->SetLogz();
+   hEdepVSCS1->Draw("COLZ");
+   c2->cd(2);
+   gPad->SetLogz();
+   hEdepVSCS2->Draw("COLZ");
+   c2->cd(3);
+   gPad->SetLogz();
+   hEdepVSCS3->Draw("COLZ");
+   c2->cd(4);
+   gPad->SetLogz();
+   hEdepVSCS4->Draw("COLZ");
+   c2->cd(5);
+   gPad->SetLogz();
+   hEdepVSCS5->Draw("COLZ");
+   c2->cd(6);
+   gPad->SetLogz();
+   hEdepVSCS6->Draw("COLZ");
 //   fPheno->Draw("same");
-   fPheno2->Draw("same");
+   c->cd();
+//   fPheno2->Draw("same");
+   fPheno3->Draw("same");
    fAnaly_30->Draw("same");
 //   fAnaly_45->Draw("same");
    fAnaly_60->Draw("same");
 
-   TLegend *leg = new TLegend(0.7, 0.7, 0.95, 0.95);
+   TLegend *leg = new TLegend(0.55, 0.17, 0.85, 0.34);
 //   leg->AddEntry(fPheno, "Old Gaus.", "L");
-   leg->AddEntry(fPheno2, "Phenomenological", "L");
+   leg->AddEntry(fPheno3, "Phenomenological", "L");
+//   leg->AddEntry(fPheno3, "Fit result", "L");
    leg->AddEntry(fAnaly_30, "Analytic #lambda = 30 #mum", "L");
 //   leg->AddEntry(fAnaly_45, "Analytic w/#lambda=45", "L");
    leg->AddEntry(fAnaly_60, "Analytic #lambda = 60 #mum", "L");
    leg->SetTextFont(22);
-   leg->Draw();
+//   leg->Draw();
+
+
+   c3->cd(1);
+   hEnergyVSCSCal->Draw("COLZ");
+   c3->cd(2);
+   hEnergyVSCSUncal->Draw("COLZ");
+
 
 
 }

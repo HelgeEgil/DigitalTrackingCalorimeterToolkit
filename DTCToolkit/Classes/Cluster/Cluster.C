@@ -117,13 +117,13 @@ Float_t Cluster::getCalibratedSize() {
 
    Float_t n_corrected = getCSFromEdep(edep);
 
-   printf("Before calibration: %d, after: %.1f\n", n, n_corrected);
    return n_corrected;
 }
 
 
 Float_t Cluster::getDepositedEnergyError(Bool_t correctSensitivity) {
    // sigma_E = sigma_N (dE / dN)
+   // TODO: FIX THIS
    
    Float_t  sn = sqrt(clusterSize_);
    Int_t    n = clusterSize_;
