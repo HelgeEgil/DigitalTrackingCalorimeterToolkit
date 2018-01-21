@@ -39,6 +39,12 @@ Cluster::~Cluster() {
    // Destructor
 }
 
+Int_t Cluster::Compare(const TObject *obj) const {
+   if (layerNo_ == ((Cluster*) obj)->getLayer()) return 0;
+   else if (layerNo_ < ((Cluster*) obj)->getLayer()) return -1;
+   else return 1;
+}
+
 Double_t Cluster::getLayermm() {
    Double_t z = 0;
    Float_t discriminator = 0;
