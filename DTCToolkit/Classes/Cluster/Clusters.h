@@ -48,7 +48,7 @@ public:
    virtual Int_t     GetEntriesInLayer(Int_t i);
    virtual void      clearClusters();
    virtual void      Clear(Option_t * = "");
-   void              sortTCAByLayer();
+   void              sortClusters()             { clusters_.Sort(); }
    
    // Add and remove clusters
    virtual void      removeCluster(Cluster *c)              { clusters_.Remove((TObject*) c); }

@@ -360,37 +360,6 @@ void Clusters::matchWithEventIDs(Hits * eventIDs) {
 // cout << "Number of clusters without eventID: " << cWithoutEventID << " (" << (float) cWithoutEventID / nClusters * 100 << "%)" << endl;
 }
 
-void Clusters::sortTCAByLayer() {
-   // Depending on how the MC data are read from the MC files, it might be sorted
-   // a) By layer number (this is standard, as with exp data or cluster diffused data
-   // b) By event ID (from "truth" MC, as with the optimization simulations)
-   // If it's (b), the tracking algorithm does not work properly as it searches in the local regions of the clusters_ list
-   // So -- it needs to be sorted by Layer
-   // FIXME: HORRIBLY INEFFECTIVE, 70% of the track reconstruction time is spent here!!!!
-
-   Int_t       idx = 0;
-   Int_t       nl = 0;
-   Cluster   * c = nullptr;
-
-   clusters_.Compress();
-   TClonesArray * tempArray = new TClonesArray(clusters_);
-   clusters_.Clear("C");
-
-   for (Int_t l=0; l<nLayers; l++) {
-      for (Int_t i=0; i<tempArray->GetEntriesFast(); i++) {
-         c = (Cluster*) tempArray->At(i);
-
-         if (c->getLayer() ==  l) {
-            appendCluster(c);
-            nl = l;
-         }
-      }
-
-      if (nl != l) break;
-   }
-
-}
-
 Int_t Clusters::getClustersForEventID(Int_t eventID) {
    if (clustersPerEventID_.size() == 0) {
 //      throw logic_error("Cannot use getClustersForEventID before running findNumberOfClustersForEachEventID");

@@ -51,14 +51,15 @@
 /gate/source/uniformBeam/gps/radius 2. mm
 #/gate/source/uniformBeam/gps/halfx 70.71 mm
 #/gate/source/uniformBeam/gps/halfy 35.355 mm
-#/gate/source/uniformBeam/gps/halfx 0 mm
-#/gate/source/uniformBeam/gps/halfy 0 mm
+/gate/source/uniformBeam/gps/halfx 0 mm
+/gate/source/uniformBeam/gps/halfy 0 mm
 /gate/source/uniformBeam/gps/centre 0. 0. {beampos} mm
 
 /gate/output/root/enable
 /gate/output/root/setRootSinglesFlag 0
+/gate/output/root/setFileName ../../DTCToolkit/Data/MonteCarlo/DTC_Aluminium_Absorber{absorberthickness}mm_Degrader{degraderthickness}mm_{energy}MeV
 #/gate/output/root/setFileName ../../DTCToolkit/Data/MonteCarlo/DTC_Tungsten_Absorber{absorberthickness}mm_Degrader{degraderthickness}mm_{energy}MeV
-/gate/output/root/setFileName ../../projects/Tracking/Data/RealisticPencilBeamThrough20cmWaterPhantom.root
+#/gate/output/root/setFileName ../../projects/Tracking/Data/RealisticPencilBeamThrough20cmWaterPhantom.root
 
 #===============#
 # START BEAMS	#
@@ -66,5 +67,5 @@
 
 /gate/random/setEngineName MersenneTwister
 /gate/random/setEngineSeed auto
-/gate/application/setTotalNumberOfPrimaries 5000
+/gate/application/setTotalNumberOfPrimaries 10000
 /gate/application/start

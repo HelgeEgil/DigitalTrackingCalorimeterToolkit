@@ -853,7 +853,7 @@ Float_t drawBraggPeakGraphFit(Int_t Runs, Int_t dataType, Bool_t recreate, Float
    Float_t        finalEnergy = 0;
    Float_t        fitRange, fitScale, fitError;
    Int_t          nCutDueToTrackEndingAbruptly = 0;
-   Int_t          nPlotX = 4, nPlotY = 2;
+   Int_t          nPlotX = 1, nPlotY = 1;
    Int_t          fitIdx = 0, plotSize = nPlotX*nPlotY;
    Int_t          skipPlot = 10;
    TGraphErrors * outputGraph;
@@ -1727,10 +1727,12 @@ void drawTracks3D(Int_t Runs, Int_t dataType, Bool_t recreate, Int_t switchLayer
    float fromy = 0.1 * ny;
    float toy = 0.9 * ny;
 
+   /*
    fromy = 0, toy = ny;
    fromx = 0, tox = nx;
+   */
 
-   view->SetRange(fromx, 0, fromy, tox, 10, toy);
+   view->SetRange(fromx, 0, fromy, tox, 40, toy);
    Int_t iret;
    Float_t theta = 285;
    Float_t phi = 80;
@@ -1822,7 +1824,7 @@ void drawTracks3D(Int_t Runs, Int_t dataType, Bool_t recreate, Int_t switchLayer
             nOKMinusTracks++;
             nOKLastLayers++;
          }
-         else if (thisTrack->getWEPL() < 0.6 * getWEPLFromEnergy(run_energy)) {
+         else if (thisTrack->getWEPL() < 0.2 * getWEPLFromEnergy(run_energy)) {
             // Bad track ends early. OK...
             nOKLastLayers++;
          }
@@ -1844,7 +1846,7 @@ void drawTracks3D(Int_t Runs, Int_t dataType, Bool_t recreate, Int_t switchLayer
    cout << nOKTracks << " of total " << numberOfTracks << " tracks has the same first/last event ID (" << factorEIDOK << "%)\n";
    cout << nOKTracksAllClusters << " of total " << numberOfTracks << " tracks has the same first/last event ID and NO missing clusters in track (" << factorEIDOKAllClusters << "%)\n";
    cout << nOKMinusTracks << " of total " << numberOfTracks << " tracks has a close match (0.5 mm, 1 degree) on first / last cluster (" << factorEIDOKMinus << "%)\n";
-   cout << nOKLastLayers << " of total " << numberOfTracks << " tracks has a close match (0.5 mm, 1 degree) or is a very short tracr (" << factorLastLayers << "%)\n";
+   cout << nOKLastLayers << " of total " << numberOfTracks << " tracks has a close match (0.5 mm, 1 degree) or is a very short track (" << factorLastLayers << "%)\n";
 
    /*
    cout << "Tracks with no EID in first layer: ";

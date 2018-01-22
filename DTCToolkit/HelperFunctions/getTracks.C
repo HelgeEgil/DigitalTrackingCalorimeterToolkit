@@ -234,9 +234,7 @@ Tracks * getTracksFromClusters(Int_t Runs, Int_t dataType, Int_t frameType, Floa
       t2.Start(false);
       if (kDoTracking) {
          printf("There are %d clusters\n", clusters->GetEntriesFast());
-         t6.Start(false);
-         clusters->sortTCAByLayer();
-         t6.Stop();
+         clusters->sortClusters();
          tracks = clusters->findCalorimeterTracksAlpide(); // We ignore diffusion effects here
       }
       else {

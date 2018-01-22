@@ -22,6 +22,10 @@ public:
    Cluster(Cluster *cluster);
    Cluster(Float_t x, Float_t y, Int_t layer = -1, Int_t size = -1, Int_t eventID = -1);
    virtual ~Cluster();
+   
+   // Sorting
+   Int_t    Compare(const TObject *obj) const;
+   Bool_t   IsSortable() const { return kTRUE; }
 
    // inline getters and setters
    Float_t  getX()            { return x_; }

@@ -57,7 +57,7 @@ vector<Float_t> findRange::Run(Double_t energy, Double_t sigma_mev)
    run_energy = phaseSpaceSpline->Eval(run_degraderThickness);
    cout << "Run energy = " << run_energy << endl;
 
-   TCanvas *c2 = new TCanvas("c2", "Ranges and energies", 1200, 900);
+   TCanvas *c2 = new TCanvas("c2", "Ranges and energies", 500, 500);
 //   c2->Divide(2, 1, 0.001, 0.001);i
 
    Int_t nbinsx = 500;
@@ -67,13 +67,14 @@ vector<Float_t> findRange::Run(Double_t energy, Double_t sigma_mev)
    // Focal: 0.0004461, 1.6677
    // H20:  0.0239, 1.7548
 
-   Float_t a = 0.004461, p = 1.6677;
+   //Float_t a = 0.004461, p = 1.6677;
+   Float_t  a = 0.0098, p = 1.7806;
    Float_t aw = 0.0239, pw = 1.7548;
 
    Float_t expectedRange = a * pow(run_energy, p);
-   Float_t xfrom = expectedRange - 8; // 15 for Al case
+   Float_t xfrom = expectedRange - 15; // 15 for Al case
    if (xfrom < 0) xfrom = 0;
-   Float_t xto = expectedRange + 3; // 15 for Al case
+   Float_t xto = expectedRange + 15; // 15 for Al case
 
    Float_t x_compensate = 0;
 
@@ -199,6 +200,7 @@ vector<Float_t> findRange::Run(Double_t energy, Double_t sigma_mev)
          }
       }
    }
+   printf("Found %d proton histories in file.\n", lastID);
    
    c2->cd(1);
   

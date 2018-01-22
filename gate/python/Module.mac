@@ -27,6 +27,7 @@
 /gate/world/daughters/insert box
 /gate/scanner_1/geometry/setXLength 270.0 mm
 /gate/scanner_1/geometry/setYLength 135.0 mm
+
 /gate/scanner_1/geometry/setZLength 3.435 mm
 /gate/scanner_1/placement/setTranslation 0 0 1.7175 mm
 /gate/scanner_1/vis/setVisible false
@@ -202,4 +203,3 @@
 /gate/Layer/linear/autoCenter false
 /gate/Layer/linear/setRepeatNumber 150
 /gate/Layer/linear/setRepeatVector 0 0 3.435 mm
-

@@ -73,7 +73,7 @@ const Int_t kMaterial = kAluminum;
 Int_t kDataType = kData;
 
 enum eOutputUnit {kPhysical, kWEPL, kEnergy};
-Int_t kOutputUnit = kWEPL;
+Int_t kOutputUnit = kPhysical;
 
 /*
  * Track reconstruction algorithms
