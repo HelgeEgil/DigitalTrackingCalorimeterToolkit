@@ -13,6 +13,7 @@
 #include <THStack.h>
 #include <TRandom3.h>
 #include <TPad.h>
+#include <TFitResult.h>
 #include <TMath.h>
 #include <TFile.h>
 #include <TLatex.h>
@@ -160,7 +161,7 @@ void Run()
    Bool_t   activateMCNP = true;
    Bool_t   activateFLUKA = true;
    Bool_t   activateTRIM = false;
-   Int_t    phantom = kComplex;
+   Int_t    phantom = kWater;
 
    gStyle->SetLabelSize(0.04);
    gStyle->SetLabelSize(0.04, "Y");
@@ -209,8 +210,8 @@ void Run()
    Int_t    nMax = 500000;
    Int_t    lateralfrom = -2;
    Int_t    lateralto = 2;
-   Int_t    comparisonEnergy = 120;
-   Float_t  mu, sigma, nominalRange, distributionCutoff, fraction, fwhm, mutl;
+   Int_t    comparisonEnergy = 50;
+   Float_t  mu, sigma, rangeError, nominalRange, distributionCutoff, fraction, fwhm, mutl;
    Int_t    distributionCutoffBin, totalIntegral, cutoffIntegral, stoppedIntegral, nominalEnergy, bin1, bin2;
    TF1    * fitFunction = nullptr;
 
@@ -267,6 +268,9 @@ void Run()
    Float_t  stragglingJanniError[25] = {}; // % of %
    Float_t  fractionNIJanni[25] = {}; // % 
    Float_t  fractionNIJanniError[25] = {}; // % of %
+   Float_t  rangeErrorGATE[19] = {};
+   Float_t  rangeErrorMCNP[19] = {};
+   Float_t  rangeErrorFLUKA[19] = {};
 
    Float_t  rangesJanniAl[12] = {1.0733, 1.4848, 1.9527, 2.4744, 3.0475, 3.6698, 5.4282, 7.4545, 9.7252, 12.220, 14.920, 17.811};
    Float_t  stragglingJanniAl[12] = {1.302, 1.276, 1.254, 1.236, 1.220, 1.207, 1.176, 1.153, 1.133, 1.115, 1.100, 1.087};
@@ -345,19 +349,28 @@ void Run()
       }
    }
    
+   TCanvas *c1 = new TCanvas("c1", "Ranges for all codes", 1200, 1000);
    TCanvas *c7 = new TCanvas("c7", "Range comparisons", 1000, 1000);
    TCanvas *c6 = new TCanvas("c6", "GATE different IP vs MCNP water", 1200, 1000);
    TCanvas *c5 = new TCanvas("c5", "Straggling distribution", 1000, 1000);
    TCanvas *c4 = new TCanvas("c4", "Lateral BP distribution", 1000, 1000);
    TCanvas *c3 = new TCanvas("c3", "Fraction of nuclear interactions", 1000, 1000);
    TCanvas *c2 = new TCanvas("c2", "test", 800, 800);
-   TCanvas *c1 = new TCanvas("c1", "Ranges for all codes", 1200, 1000);
    TCanvas *c8 = new TCanvas("c8", "Detour factor", 1200, 1000);
-         
+   TCanvas *c9 = new TCanvas("c9", "150 MeV fit example", 1500, 500);
+   c9->Divide(3, 1, 1e-5, 1e-5);
    
    TH1F *hGATELateral = new TH1F("hGATELateral", ";Bragg peak displacement in x [mm];Number of end points", 500, lateralfrom, lateralto);
    TH1F * hFLUKALateral = new TH1F("hFLUKALateral", ";Bragg peak displacement in x [mm];Number of end points", 500, lateralfrom,lateralto);
    TH1F * hMCNPLateral = new TH1F("hMCNPLateral", "Angular BP distribution;#theta [mrad];Number of end points", 500, lateralfrom,lateralto);
+
+   TH1F * hGATEkeep = nullptr;
+   TH1F * hMCNPkeep = nullptr;
+   TH1F * hFLUKAkeep = nullptr;
+
+   TF1  * hGATEfitKeep = nullptr;
+   TF1  * hMCNPfitKeep = nullptr;
+   TF1  * hFLUKAfitKeep = nullptr;
 
    c1->cd();
    TPad *pad1 = nullptr;
@@ -388,6 +401,7 @@ void Run()
       for (Int_t i=0; i<19; i++) {
          printf("i = %d\n", i);
          nominalEnergy = (i+5) * 10;
+
          if (phantom == kAluminium) {
             nominalRange = 0.0012 * pow(nominalEnergy, 1.7483);
          }
@@ -395,10 +409,10 @@ void Run()
             nominalRange = 0.0022 * pow(nominalEnergy, 1.77);
          }
          else if (phantom == kComplex) {
-            nominalRange = 0.0013 * pow(nominalEnergy, 1.7447); // GUESS!!!!
+            nominalRange = 0.00117 * pow(nominalEnergy, 1.7541); // GUESS!!!!
          }
 
-         TH1F *hGATE = new TH1F("hGATE", "Proton ranges in single GATE dataset;Range [cm];Number of primaries", 100, fmax(0, nominalRange - 2), nominalRange + 2);
+         TH1F *hGATE = new TH1F("hGATE", "Proton ranges in single GATE dataset;Range [cm];Number of primaries", 400, fmax(0, nominalRange*0.7), nominalRange*1.3);
          TH1F *hGATETL = new TH1F("hGATE", "Proton tracklengths in single GATE dataset;Range [cm];Number of primaries", 100, fmax(0, nominalRange - 2), nominalRange + 2);
          TH1F *hGATEAll = new TH1F("hGATEAll", "Proton ranges in single GATE dataset including nuclear interactions;Range [cm];Number of primaries", 200, 0, nominalRange+2);
          
@@ -467,7 +481,7 @@ void Run()
        
          printf("Mean values at %d MeV: 75 = %.2f, 74 = %.2f, 73 = %.2f, 72 = %.2f, 71 = %.2f\n", nominalEnergy, hGATE->GetMean(), hGATE74->GetMean(), hGATE73->GetMean(), hGATE72->GetMean(), hGATE71->GetMean());
 
-         mu = 0; sigma = 0;
+         mu = 0; sigma = 0; rangeError = 0;
          for (Int_t j=0; j<hGATE->GetNbinsX(); j++) {
             mu += hGATE->GetBinContent(j) * hGATE->GetBinCenter(j);
          }
@@ -481,24 +495,41 @@ void Run()
          sigma /= hGATE->Integral();
          sigma = sqrt(sigma);
 
-         printf("GATE, estimated parameters are %.2f.\n", mu);
-
          TF1 *fit = new TF1("fit", "gaus");
-         hGATE->Fit("fit", "N,WW");
-         
+         /*fit->SetParameters(hGATE->GetMaximum(), mu, sigma);
+
+         fit->SetParLimits(0, hGATE->GetMaximum() * 0.7, hGATE->GetMaximum() * 1.3);
+         fit->SetParLimits(1, mu*0.7, mu*1.3);
+         fit->SetParLimits(2, sigma*0.7, sigma*1.3); 
+         */
+         TFitResultPtr res = hGATE->Fit("fit", "N,Q,M,W,S");
+         res->NormalizeErrors();
+         res->Print("V");
+
          mu = fit->GetParameter(1);
          sigma = fabs(fit->GetParameter(2));
+         rangeError = fabs(fit->GetParError(1));
          
+         if (nominalEnergy == comparisonEnergy) {
+            c9->cd(1);
+            hGATEkeep = (TH1F*) hGATE->Clone();
+            hGATEkeep->Draw();
+         }
+
          hGATETL->Fit("fit", "N,Q,M,B");
          mutl = fit->GetParameter(1);
 
          detourGATE[i] = mu / mutl;
-         printf("Detour factor GATE = %.4f.\n", detourGATE[i]);
+//         printf("Detour factor GATE = %.4f.\n", detourGATE[i]);
 
          printf("GATE, %d MeV. nominal Range is %.1f, fit range is %.1f.\n", nominalEnergy, nominalRange, mu);
+         if (!nominalEnergy % 50) {
+            printf("Energy = %d MeV; GATE (fit) = %.2f +- %.2f mm.\n", nominalEnergy, mu, sigma);
+         }
 
          rangesGATE[i] = mu;
-         sigmaGATE[i] = sigma*10;
+         sigmaGATE[i] = sigma * 10;
+         rangeErrorGATE[i] = rangeError;
 
          // FIND RANGES FOR DIFFERENT IONIZATION POTENTIALS
          hGATE74->Fit("fit", "N,Q,WW");
@@ -526,10 +557,10 @@ void Run()
          fwhmGATE[i] = hGATELateral->GetRMS() / mu;
 //         hGATELateral->Fit("fit", "N,Q,WW");
 //         fwhmGATE[i] = fit->GetParameter(2);
-         
-         delete f1;
-         delete hGATEAll;
+        
          delete hGATE;
+         delete hGATEAll;
+
          if (nominalEnergy == comparisonEnergy) {
             c2->cd();
 //            hGATELateral->Scale(1/hGATELateral->Integral());
@@ -579,11 +610,11 @@ void Run()
             nominalRange = 0.0022 * pow(nominalEnergy, 1.77);
          }
          else if (phantom == kComplex) {
-            nominalRange = 0.0013 * pow(nominalEnergy, 1.7447); // GUESS!!!!
+            nominalRange = 0.00117 * pow(nominalEnergy, 1.7541); // GUESS!!!!
          }
 
          cout << nominalEnergy << "... ";
-         TH1F * hMCNP = new TH1F("hMCNP", "Proton ranges in single MCNP dataset;Range [cm];Number of primaries", 400, fmax(0, nominalRange - 5), nominalRange + 5);
+         TH1F * hMCNP = new TH1F("hMCNP", "Proton ranges in single MCNP dataset;Range [cm];Number of primaries", 400, fmax(0, nominalRange*0.7), nominalRange*1.3);
          TH1F * hMCNPTL = new TH1F("hMCNP", "Proton tracklengths in single MCNP dataset;Range [cm];Number of primaries", 400, fmax(0, nominalRange - 5), nominalRange + 5);
          TH1F * hMCNPAll = new TH1F("hMCNPAll", "Proton ranges in single MCNP dataset including nuclear interactions;Range [cm];Number of primaries", 200, 0, nominalRange+2);
          
@@ -633,7 +664,7 @@ void Run()
 
          in.close();
      
-         mu = 0; sigma = 0;
+         mu = 0; sigma = 0; rangeError = 0;
          for (Int_t j=0; j<hMCNP->GetNbinsX(); j++) {
             mu += hMCNP->GetBinContent(j) * hMCNP->GetBinCenter(j);
          }
@@ -646,17 +677,35 @@ void Run()
 
          sigma /= hMCNP->Integral();
          sigma = sqrt(sigma);
+         
 
          // Find mu, sigma parameters from fit
          TF1 *fit = new TF1("fit", "gaus");
+         /*
+         fit->SetParameter(0, hMCNP->GetMaximum());
          fit->SetParameter(1, mu);
          fit->SetParameter(2, sigma);
-         fit->SetParLimits(1, mu-2, mu+2);
-         hMCNP->Fit("fit", "N,Q,M,B");
+         fit->SetParLimits(2, sigma * 0.6, sigma * 1.7);
+         fit->SetParLimits(1, mu*0.7, mu*1.3);
+         fit->SetParLimits(0, hMCNP->GetMaximum() * 0.5, hMCNP->GetMaximum() * 2);
+         */
+         TFitResultPtr res = hMCNP->Fit("fit", "Q,M,N,W,S");
+         res->NormalizeErrors();
+         res->Print("V");
+         
          mu = fit->GetParameter(1);
          sigma = fabs(fit->GetParameter(2));
+         rangeError = fabs(fit->GetParError(1));
+         
          rangesMCNP[i] = mu;
          sigmaMCNP[i] = sigma*10;
+         rangeErrorMCNP[i] = rangeError;
+         
+         if (nominalEnergy == comparisonEnergy) {
+            c9->cd(2);
+            hMCNPkeep = (TH1F*) hMCNP->Clone();
+            hMCNPkeep->Draw();
+         }
 
          hMCNPTL->Fit("fit", "N,Q,M,B");
          mutl = fit->GetParameter(1);
@@ -686,10 +735,10 @@ void Run()
             hMCNPLateral->Draw("same");
          }
          hMCNPLateral->Reset();
-
+         
          delete hMCNP;
          delete hMCNPAll;
-         delete fit;
+//         delete fit;
       }
    }
    if (activateFLUKA) {
@@ -702,10 +751,9 @@ void Run()
       Int_t    lastHistoryNumber = -1;
       Int_t    terminationType;
       Float_t  x, y, z;
-      Float_t  mu;
-      Float_t  sigma; 
       Int_t    nTotal = 0, nInelastic = 0;
 
+      mu = 0; sigma = 0; rangeError = 0;
       for (Int_t i=0; i<19; i++) {
          nominalEnergy = (i+5)*10;
          cout << "Nominal energy " << nominalEnergy << endl;
@@ -716,12 +764,13 @@ void Run()
             nominalRange = 0.0022 * pow(nominalEnergy, 1.77);
          }
          else if (phantom == kComplex) {
-            nominalRange = 0.0013 * pow(nominalEnergy, 1.7447) * 0.97;
+            nominalRange = 0.00117 * pow(nominalEnergy, 1.7541);
          }
 
-         TH1F * hFLUKA = new TH1F("hFLUKA", "All protons in FLUKA dataset;Range [cm];Number of primaries", 100, fmax(0, nominalRange-2), nominalRange+2);
+         TH1F * hFLUKA = new TH1F("hFLUKA", "All protons in FLUKA dataset;Range [cm];Number of primaries", 400, fmax(0, nominalRange*0.7), nominalRange*1.3);
          TH1F * hFLUKATL = new TH1F("hFLUKATL", "All protons tracklengths in FLUKA dataset;Range [cm];Number of primaries", 100, fmax(0, nominalRange-2), nominalRange+2);
          TH1F * hFLUKAAll = new TH1F("hFLUKAAll", "Proton ranges in single FLUKA dataset including nuclear interactions;Range [cm];Number of primaries", 200, 0, nominalRange+2);
+
 
          if (phantom == kAluminium) { 
             in.open(Form("Data/FLUKA/Aluminium/%dMevProtonsPencil.txt", nominalEnergy));
@@ -755,17 +804,51 @@ void Run()
 
          in.close();
 
-         mu = nominalRange;
-         sigma = 0.1;
+         mu = 0; sigma = 0; rangeError = 0;
+         for (Int_t j=0; j<hFLUKA->GetNbinsX(); j++) {
+            mu += hFLUKA->GetBinContent(j) * hFLUKA->GetBinCenter(j);
+         }
+         
+         mu /= hFLUKA->Integral();
+         
+         for (Int_t j=0; j<hFLUKA->GetNbinsX(); j++) {
+            sigma += hFLUKA->GetBinContent(j) * pow(hFLUKA->GetBinCenter(j) - mu, 2);
+         }
+
+         sigma /= hFLUKA->Integral();
+         sigma = sqrt(sigma);
+
+
+         printf("The seen parameters for fluka at energy %d MeV is %.2f with sigma %.2f.\n", nominalEnergy, mu, sigma);
 
          // Find mu, sigma parameters
          TF1 *fit = new TF1("fit", "gaus");
-         hFLUKA->Fit("fit", "N,Q,M");
+         /*
+         fit->SetParameters(hFLUKA->GetMaximum(), mu, sigma);
+         fit->SetParLimits(0, hFLUKA->GetMaximum() * 0.5, hFLUKA->GetMaximum() * 2);
+         fit->SetParLimits(1, mu*0.7, mu*1.3);
+         fit->SetParLimits(2, sigma*0.6, sigma*1.7);
+         */
+
+         hFLUKA->Fit("fit", "Q,N,M,W");
+         
+         TFitResultPtr res = hFLUKA->Fit("fit", "Q,M,N,W,S");
+         res->NormalizeErrors();
+         res->Print("V");
+
          mu = fit->GetParameter(1);
          sigma = fabs(fit->GetParameter(2));
+         rangeError = fabs(fit->GetParError(1));
          rangesFLUKA[i] = mu;
          sigmaFLUKA[i] = sigma*10;
-
+         rangeErrorFLUKA[i] = rangeError;
+         
+         if (nominalEnergy == comparisonEnergy) {
+            c9->cd(3);
+            hFLUKAkeep = (TH1F*) hFLUKA->Clone();
+            hFLUKAkeep->Draw();
+         }
+         
          hFLUKATL->Fit("fit", "N,Q,M");
          mutl = fit->GetParameter(1);
          detourFLUKA[i] = mu / mutl;
@@ -813,7 +896,7 @@ void Run()
    }
 
    cout << "Drawing in pad1\n";
-   pad1->cd();
+//   pad1->cd();
    cout << "Opened pad1\n";
 
    Float_t errorScalingFactor = 1;
@@ -845,7 +928,6 @@ void Run()
          rangesFLUKAdiff[i] = 10 * (rangesFLUKA[i] - (rangesMCNP[i] + rangesGATE[i] + rangesFLUKA[i]) / 3);
       }
    }
-
    if (phantom != kComplex) {
       Float_t maxErrorGate = -100;
       Float_t maxErrorMCNP = -100;
@@ -892,7 +974,7 @@ void Run()
 
    Int_t numberOfPoints = 19;
    if (phantom == kComplex) numberOfPoints = 17;
-
+   
    TGraphErrors *gMCNP = new TGraphErrors(numberOfPoints, energiesMCNP, rangesMCNP, energyError, sigmaMCNP);
    if (phantom == kWater) {
       gMCNP->SetTitle(Form("Range comparison between MC codes, in water phantom; Energy bin [MeV];Range [cm]", errorScalingFactor));
@@ -910,7 +992,7 @@ void Run()
    gMCNP->SetLineColor(mcnpColor);
    gMCNP->SetFillColor(mcnpColor);
    gMCNP->GetXaxis()->SetNdivisions(30);
-   gMCNP->Draw("AP");
+//   gMCNP->Draw("AP");
    gMCNP->GetXaxis()->SetRangeUser(45, 235);
 
    TGraphErrors *gGATE = new TGraphErrors(numberOfPoints, energiesGATE, rangesGATE, energyError, sigmaGATE);
@@ -919,7 +1001,7 @@ void Run()
    gGATE->SetMarkerStyle(7);
    gGATE->SetLineWidth(2);
    gGATE->SetLineColor(gateColor);
-   gGATE->Draw("same, P");
+//   gGATE->Draw("same, P");
    
    TGraphErrors *gPSTAR = new TGraphErrors(numberOfPoints, energiesPSTAR, rangesPSTAR, energyError, sigmaPSTAR);
    gPSTAR->SetMarkerColor(expColor);
@@ -928,7 +1010,7 @@ void Run()
    gPSTAR->SetLineWidth(2);
    gPSTAR->SetLineColor(expColor);
    if (phantom != kComplex) {
-      gPSTAR->Draw("same, P");
+  //    gPSTAR->Draw("same, P");
    }
 
    TGraphErrors *gFLUKA = new TGraphErrors(numberOfPoints, energiesFLUKA, rangesFLUKA, energyError, sigmaFLUKA);
@@ -937,13 +1019,13 @@ void Run()
    gFLUKA->SetFillColor(flukaColor);
    gFLUKA->SetLineColor(flukaColor);
    gFLUKA->SetLineWidth(2);
-   gFLUKA->Draw("same, P");
+//   gFLUKA->Draw("same, P");
    
-   pad1->Update();
+//   pad1->Update();
    for (Int_t i=0; i<20; i++) {
       nominalEnergy = (i+5)*10 - 5;
-      TLine *l = new TLine(nominalEnergy, pad1->GetUymin(), nominalEnergy, pad1->GetUymax());
-      l->Draw();
+//      TLine *l = new TLine(nominalEnergy, pad1->GetUymin(), nominalEnergy, pad1->GetUymax());
+//      l->Draw();
    }
 
    TLegend *leg = new TLegend(0.17, 0.72, 0.35, 0.88);
@@ -951,10 +1033,10 @@ void Run()
    leg->AddEntry(gGATE, "GATE", "Pel");
    leg->AddEntry(gMCNP, "MCNP", "Pel");
    leg->AddEntry(gFLUKA, "FLUKA", "Pel");
-   leg->Draw();
+//   leg->Draw();
 
    if (true) {
-      pad2->cd();
+  //    pad2->cd();
       cout << "Drawing in pad2\n";
 
       TGraph *gMCNPdiff = new TGraph(numberOfPoints, energies, rangesMCNPdiff);
@@ -970,23 +1052,25 @@ void Run()
       if (phantom == kComplex) gMCNPdiff->GetYaxis()->SetRangeUser(-0.5, 1);
       else if (phantom == kAluminium) gMCNPdiff->GetYaxis()->SetRangeUser(-0.5, 0.8);
       gMCNPdiff->GetXaxis()->SetNdivisions(30);
-      gMCNPdiff->Draw("AL");
+//      gMCNPdiff->Draw("AL");
       
       TGraph *gGATEdiff = new TGraph(numberOfPoints, energies, rangesGATEdiff);
       gGATEdiff->SetLineColor(gateColor);
       gGATEdiff->SetLineWidth(3);
-      gGATEdiff->Draw("same, L");
+//      gGATEdiff->Draw("same, L");
 
       TGraph *gFLUKAdiff = new TGraph(numberOfPoints, energies, rangesFLUKAdiff);
       gFLUKAdiff->SetLineColor(flukaColor);
       gFLUKAdiff->SetLineWidth(3);
-      gFLUKAdiff->Draw("same,L");
-
+//      gFLUKAdiff->Draw("same,L");
+/*
       pad2->Update();
 
       TLine *l = new TLine(pad2->GetUxmin(), 0, pad2->GetUxmax(), 0);
       l->Draw();
+      */
    }
+
 
    // Test MCNP vs GATE (different IPs)
    c6->cd();
@@ -1411,33 +1495,36 @@ void Run()
    rangeLabel->Draw();
 
    // MAKE DATA TABLES
-   printf("Geometry; Monte Carlo code; Energy [MeV]; Range [cm]; Range error [mm]; Range straggling [mm]; Beam spreading [1]; Fraction of inelastic collisions [%]\n");
+   printf("Geometry; Monte Carlo code; Energy [MeV]; Range [mm]; Range deviation [mm]; Range error [mm]; Range straggling [mm]; Beam spreading [1]; Fraction of inelastic collisions [%]\n");
    for (Int_t i=0; i<numberOfPoints; i++) {
+      rangesGATE[i] *= 10;
+      rangesFLUKA[i] *= 10;
+      rangesMCNP[i] *= 10;
       if (phantom == kWater) {
-         printf("Water; GATE 71 eV; %.0f; %.5f; %.5f; 0; 0; 0\n", energies[i], rangesGATE71[i], rangesGATEdiff71[i]);
-         printf("Water; GATE 72 eV; %.0f; %.5f; %.5f; 0; 0; 0\n", energies[i], rangesGATE72[i], rangesGATEdiff72[i]);
-         printf("Water; GATE 73 eV; %.0f; %.5f; %.5f; 0; 0; 0\n", energies[i], rangesGATE73[i], rangesGATEdiff73[i]);
-         printf("Water; GATE 74 eV; %.0f; %.5f; %.5f; 0; 0; 0\n", energies[i], rangesGATE74[i], rangesGATEdiff74[i]);
-         printf("Water; GATE 75 eV; %.0f; %.5f; %.5f; 0; 0; 0\n", energies[i], rangesGATE[i], rangesGATEdiff75[i]);
-         printf("Water; GATE (standard); %.0f; %.5f; %.5f; %.5f; %.5f; %.5f\n", energies[i], rangesGATE[i], rangesGATEdiff[i], sigmaGATE[i], fwhmGATE[i], fractionNIGATE[i]);
-         printf("Water; FLUKA; %.0f; %.5f; %.5f; %.5f; %.5f; %.5f\n", energies[i], rangesFLUKA[i], rangesFLUKAdiff[i], sigmaFLUKA[i], fwhmFLUKA[i], fractionNIFLUKA[i]);
-         printf("Water; MCNP; %.0f; %.5f; %.5f; %.5f; %.5f; %.5f\n", energies[i], rangesMCNP[i], rangesMCNPdiff[i], sigmaMCNP[i], fwhmMCNP[i], fractionNIMCNP[i]);
-         printf("Water; PSTAR; %.0f; %.5f; 0; 0; 0\n", energies[i], rangesPSTAR[i]);
-         if (i < 13) printf("Water; JANNI; %.0f; %.5f; %.5f; 0; %.5f\n", energiesJanni[i], rangesJanni[i], stragglingJanni[i], fractionNIJanni[i]);
+//         printf("Water; GATE 71 eV; %.0f; %.5f; %.5f; 0; 0; 0\n", energies[i], rangesGATE71[i], rangesGATEdiff71[i]);
+//         printf("Water; GATE 72 eV; %.0f; %.5f; %.5f; 0; 0; 0\n", energies[i], rangesGATE72[i], rangesGATEdiff72[i]);
+//         printf("Water; GATE 73 eV; %.0f; %.5f; %.5f; 0; 0; 0\n", energies[i], rangesGATE73[i], rangesGATEdiff73[i]);
+//         printf("Water; GATE 74 eV; %.0f; %.5f; %.5f; 0; 0; 0\n", energies[i], rangesGATE74[i], rangesGATEdiff74[i]);
+//         printf("Water; GATE 75 eV; %.0f; %.5f; %.5f; 0; 0; 0\n", energies[i], rangesGATE[i], rangesGATEdiff75[i]);
+         printf("Water; GATE (standard); %.0f; %.5f; %.5f; %.7f; %.5f; %.5f; %.5f\n", energies[i], rangesGATE[i], rangesGATEdiff[i], rangeErrorGATE[i], sigmaGATE[i], fwhmGATE[i], fractionNIGATE[i]);
+         printf("Water; FLUKA; %.0f; %.5f; %.5f; %.7f; %.5f; %.5f; %.5f\n", energies[i], rangesFLUKA[i], rangesFLUKAdiff[i], rangeErrorFLUKA[i], sigmaFLUKA[i], fwhmFLUKA[i], fractionNIFLUKA[i]);
+         printf("Water; MCNP; %.0f; %.5f; %.5f; %.7f; %.5f; %.5f; %.5f\n", energies[i], rangesMCNP[i], rangesMCNPdiff[i], rangeErrorMCNP[i], sigmaMCNP[i], fwhmMCNP[i], fractionNIMCNP[i]);
+//         printf("Water; PSTAR; %.0f; %.5f; 0; 0; 0; 0\n", energies[i], rangesPSTAR[i]);
+//         if (i < 13) printf("Water; JANNI; %.0f; %.5f; 0; %.5f; 0; %.5f\n", energiesJanni[i], rangesJanni[i], stragglingJanni[i], fractionNIJanni[i]);
       }
       if (phantom == kComplex) {
-         printf("DTC; GATE; %.0f; %.5f; %.5f; %.5f; %.5f; %.5f\n", energies[i], rangesGATE[i], rangesGATEdiff[i], sigmaGATE[i], fwhmGATE[i], fractionNIGATE[i]);
-         printf("DTC; FLUKA; %.0f; %.5f; %.5f; %.5f;  %.5f; %.5f\n", energies[i], rangesFLUKA[i], rangesFLUKAdiff[i], sigmaFLUKA[i], fwhmFLUKA[i], fractionNIFLUKA[i]);
-         printf("DTC; MCNP; %.0f; %.5f; %.5f; %.5f; %.5f; %.5f\n", energies[i], rangesMCNP[i], rangesMCNPdiff[i], sigmaMCNP[i], fwhmMCNP[i], fractionNIMCNP[i]);
-         printf("DTC; PSTAR; %.0f; %.5f; 0; 0; 0\n", energies[i], rangesPSTAR[i]);
-         if (i < 13) printf("DTC; Bortfeld; %.0f; %.5f\n", energiesJanni[i], stragglingJanni[i]);
+         printf("DTC; GATE; %.0f; %.5f; %.5f; %.7f; %.5f; %.5f; %.5f\n", energies[i], rangesGATE[i], rangesGATEdiff[i], rangeErrorGATE[i], sigmaGATE[i], fwhmGATE[i], fractionNIGATE[i]);
+         printf("DTC; FLUKA; %.0f; %.5f; %.5f; %.7f; %.5f; %.5f; %.5f\n", energies[i], rangesFLUKA[i], rangesFLUKAdiff[i], rangeErrorFLUKA[i], sigmaFLUKA[i], fwhmFLUKA[i], fractionNIFLUKA[i]);
+         printf("DTC; MCNP; %.0f; %.5f; %.5f; %.7f; %.5f; %.5f; %.5f\n", energies[i], rangesMCNP[i], rangesMCNPdiff[i], rangeErrorMCNP[i], sigmaMCNP[i], fwhmMCNP[i], fractionNIMCNP[i]);
+//         printf("DTC; PSTAR; %.0f; %.5f; 0; 0; 0; 0\n", energies[i], rangesPSTAR[i]);
+//         if (i < 13) printf("DTC; Bortfeld; %.0f; 0; 0; %.5f; 0; \n", energiesJanni[i], stragglingJanni[i]);
       }
       if (phantom == kAluminium) {
-         printf("Aluminium; GATE; %.0f; %.5f; %.5f; %.5f; %.5f; %.5f\n", energies[i], rangesGATE[i], rangesGATEdiff[i], sigmaGATE[i], fwhmGATE[i], fractionNIGATE[i]);
-         printf("Aluminium; FLUKA; %.0f; %.5f; %.5f; %.5f; %.5f; %.5f\n", energies[i], rangesFLUKA[i], rangesFLUKAdiff[i], sigmaFLUKA[i], fwhmFLUKA[i], fractionNIFLUKA[i]);
-         printf("Aluminium; MCNP; %.0f; %.5f; %.5f; %.5f; %.5f; %.5f\n", energies[i], rangesMCNP[i], rangesMCNPdiff[i], sigmaMCNP[i], fwhmMCNP[i], fractionNIMCNP[i]);
-         printf("Aluminium; PSTAR; %.0f; %.5f; 0; 0; 0\n", energies[i], rangesPSTAR[i]);
-         if (i < 13) printf("Aluminium; JANNI; %.0f; %.5f; %.5f; 0; %.5f\n", energiesJanni[i], rangesJanni[i], stragglingJanni[i], fractionNIJanni[i]);
+         printf("Aluminium; GATE; %.0f; %.5f; %.5f; %.7f; %.5f; %.5f; %.5f\n", energies[i], rangesGATE[i], rangesGATEdiff[i], rangeErrorGATE[i], sigmaGATE[i], fwhmGATE[i], fractionNIGATE[i]);
+         printf("Aluminium; FLUKA; %.0f; %.5f; %.5f; %.7f; %.5f; %.5f; %.5f\n", energies[i], rangesFLUKA[i], rangesFLUKAdiff[i], rangeErrorFLUKA[i], sigmaFLUKA[i], fwhmFLUKA[i], fractionNIFLUKA[i]);
+         printf("Aluminium; MCNP; %.0f; %.5f; %.5f; %.7f; %.5f; %.5f; %.5f\n", energies[i], rangesMCNP[i], rangesMCNPdiff[i], rangeErrorMCNP[i], sigmaMCNP[i], fwhmMCNP[i], fractionNIMCNP[i]);
+//         printf("Aluminium; PSTAR; %.0f; %.5f; 0; 0; 0; 0\n", energies[i], rangesPSTAR[i]);
+//         if (i < 13) printf("Aluminium; JANNI; %.0f; %.5f; 0; %.5f; 0; %.5f\n", energiesJanni[i], rangesJanni[i], stragglingJanni[i], fractionNIJanni[i]);
       }
    }
 

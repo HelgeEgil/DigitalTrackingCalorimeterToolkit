@@ -5,7 +5,7 @@
 #include <vector>
 #include <TObject.h>
 
-// #define USEALPIDE
+#define USEALPIDE
 
 #ifdef USEDEBUG
 #define showDebug(x) std::cout << x
@@ -36,13 +36,13 @@ enum eDataType {kMC, kData};
 Float_t  run_energy = 0;
 Float_t  run_degraderThickness = 0;
 Bool_t   kIsAluminumPlate = false;
-Bool_t   kIsScintillator = true;
-Bool_t   kIsFirstLayerAir = false;
-Bool_t   kUseAlpide = false;
+Bool_t   kIsScintillator = false;
+Bool_t   kIsFirstLayerAir = true;
+Bool_t   kUseAlpide = true;
 Bool_t   kDoTracking = true;
 Bool_t   kUseEmpiricalMCS = true;
 Bool_t   kFilterNuclearInteractions = true;
-Bool_t   useDegrader = false;
+Bool_t   useDegrader = true;
 
 const Int_t sizeOfEventID = 500;
 
@@ -55,20 +55,20 @@ const Float_t kRad = 3.14159265/180.;
 const    Int_t nx = NX;
 const    Int_t ny = NY;
 const    Int_t nTrackers = 4;
-const    Float_t kAbsorberThickness = 3.3; // 3.3 focal
+const    Float_t kAbsorberThickness = 3.5; // 3.3 focal
 
 // nLayers are loaded in MaterialConstants.C according to the detector geometry
 const Float_t dx = DX; // mm
 const Float_t dy = DY; // mm
 const Float_t dz = DZ + kAbsorberThickness;
-Int_t kEventsPerRun = 25;
+Int_t kEventsPerRun = 200;
 
 // Used for treatment of available experimental data files
 const Int_t nEnergies = 6;
 Int_t energies[nEnergies] = {122, 140, 150, 170, 180, 188};
 
 enum eMaterial {kTungsten, kAluminum, kPMMA, kWater, kCarbon};
-const Int_t kMaterial = kTungsten;
+const Int_t kMaterial = kAluminum;
 
 Int_t kDataType = kData;
 

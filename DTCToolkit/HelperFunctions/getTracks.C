@@ -213,22 +213,36 @@ Tracks * getTracksFromClusters(Int_t Runs, Int_t dataType, Int_t frameType, Floa
    Clusters        * clusters = nullptr;
    Tracks          * tracks = nullptr;
    Tracks          * allTracks = new Tracks(nTracks * Runs);
+   TStopwatch t1, t2, t3, t4, t5, t6;
+   t1.Reset(); // get MC clusters
+   t2.Reset(); // Stop
+   t3.Reset();
+   t4.Reset();
+   t5.Reset();
+   t6.Reset();
+
+
 
    for (Int_t i=0; i<Runs; i++) {
       clusters = new Clusters(nClusters);
       showDebug("Start getMCClusters\n");
+      t1.Start(false);
       di->getMCClusters(i, clusters);
+      t1.Stop();
 
       showDebug("Finding calorimeter tracks\n");
+      t2.Start(false);
       if (kDoTracking) {
          printf("There are %d clusters\n", clusters->GetEntriesFast());
+         t6.Start(false);
          clusters->sortTCAByLayer();
+         t6.Stop();
          tracks = clusters->findCalorimeterTracksAlpide(); // We ignore diffusion effects here
       }
-
       else {
          tracks = clusters->findCalorimeterTracksWithMCTruth();
       }
+      t2.Stop();
 
       if (tracks->GetEntriesFast() == 0) breakSignal = true; // to stop running
 
@@ -236,6 +250,7 @@ Tracks * getTracksFromClusters(Int_t Runs, Int_t dataType, Int_t frameType, Floa
       Int_t nTracksBefore = 0, nTracksAfter = 0;
       Int_t nIsInelastic = 0, nIsNotInelastic = 0;
       
+      t3.Start(false);
       nTracksBefore = tracks->GetEntries();
       tracks->removeTracksLeavingDetector();
       nTracksAfter = tracks->GetEntries();
@@ -245,6 +260,8 @@ Tracks * getTracksFromClusters(Int_t Runs, Int_t dataType, Int_t frameType, Floa
       // tracks->removeTrackCollisions();
       // tracks->retrogradeTrackImprovement(clusters);
       
+      t3.Stop();
+      t4.Start(false);
       tracks->Compress();
       tracks->CompressClusters();
       
@@ -255,12 +272,15 @@ Tracks * getTracksFromClusters(Int_t Runs, Int_t dataType, Int_t frameType, Floa
       }
 
       allTracks->appendClustersWithoutTrack(clusters->getClustersWithoutTrack());
-
+      t4.Stop();
+   
       delete clusters;
       delete tracks;
 
       if (breakSignal) break;
    }
+
+   printf("Timing: Cluster retrieval: %.3f s. Tracking: %.3f s. Track improvements: %.3f s. Logistics: %.3f s. Sort TCA by layer: %.3f s\n", t1.CpuTime(), t2.CpuTime(), t3.CpuTime(), t4.CpuTime(), t6.CpuTime());
 
    delete di;
 

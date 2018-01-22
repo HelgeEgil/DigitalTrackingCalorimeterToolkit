@@ -838,6 +838,7 @@ Float_t drawBraggPeakGraphFit(Int_t Runs, Int_t dataType, Bool_t recreate, Float
    if (useDegrader) {
       run_energy = getEnergyFromDegraderThickness(degraderThickness);
    }
+   t7.Start();
 
    printf("Using water degrader of thickness %.0f mm, the initial energy of %.0f MeV is reduced to %.1f MeV.\n", degraderThickness, energy, run_energy);
 
@@ -898,6 +899,9 @@ Float_t drawBraggPeakGraphFit(Int_t Runs, Int_t dataType, Bool_t recreate, Float
    hFitResults->SetLineColor(kBlack); hFitResults->SetFillColor(kGreen-5);
 
    t1.Stop();
+   t3.Reset();
+   t4.Reset();
+   t5.Reset();
 
    // Create or load all tracks
    t2.Start();
@@ -927,9 +931,9 @@ Float_t drawBraggPeakGraphFit(Int_t Runs, Int_t dataType, Bool_t recreate, Float
       fitScale = thisTrack->getFitParameterScale();
 
       if (kDrawIndividualGraphs) fitError = quadratureAdd(thisTrack->getFitParameterError(), dz*0.28867); // latter term from error on layer position
+      t4.Stop();
 
       hFitResults->Fill(getUnitFromTL(fitRange));
-      t4.Stop();
 
       t5.Start(false);
       if (fitIdx < plotSize && kDrawIndividualGraphs && j>=skipPlot) {
@@ -939,7 +943,6 @@ Float_t drawBraggPeakGraphFit(Int_t Runs, Int_t dataType, Bool_t recreate, Float
          if (fitIdx == 1) {
             gPad->SetRightMargin(0.01);
             gPad->SetLeftMargin(0.15);
-//            outputGraph->GetXaxis()->SetTitle("");
          }
 
          else if (fitIdx == 2) {
@@ -948,14 +951,6 @@ Float_t drawBraggPeakGraphFit(Int_t Runs, Int_t dataType, Bool_t recreate, Float
             outputGraph->GetYaxis()->SetLabelOffset(2);
             outputGraph->SetTitle(Form("Bragg-Kleeman fit to exp. data at %.0f MeV", run_energy));
          
-            /* 
-            gPad->Update();
-            TPaveText *title = (TPaveText*) gPad->GetPrimitive("title");
-            title->SetTextFont(22);
-            title->SetTextSize(0.06);
-            gPad->Modified();
-            */
-            
          }
 
          else if (fitIdx == 3) {
@@ -965,8 +960,8 @@ Float_t drawBraggPeakGraphFit(Int_t Runs, Int_t dataType, Bool_t recreate, Float
             outputGraph->GetYaxis()->SetLabelOffset(2);
          }
       }
-      
       else delete outputGraph;
+
       t5.Stop();
 
    }
@@ -1020,11 +1015,6 @@ Float_t drawBraggPeakGraphFit(Int_t Runs, Int_t dataType, Bool_t recreate, Float
    */
 
    // Draw expected gaussian distribution of results from initial energy
-   
-
-
-
-
 
    Float_t expectedStraggling = 0, expectedMean = 0, dlayer_down = 0, dlayer = 0;
    Float_t separationFactor = 0.9, nullStraggling = 0;
@@ -1087,15 +1077,16 @@ Float_t drawBraggPeakGraphFit(Int_t Runs, Int_t dataType, Bool_t recreate, Float
 
    delete tracks;
    t6.Stop();
+   t7.Stop();
    
    cout << "TIMING INFORMATION-------------\n";
-   cout << "INIT: " << t1.RealTime() << " s.\n";
-   cout << "LOAD TRACKS: " << t2.RealTime() << " s.\n";
-   cout << "TRACK INIT: " << t3.RealTime() << " s.\n";
-   cout << "STRICT TRACK INIT: " << t7.RealTime() << " s.\n";
-   cout << "TRACK FIT: " << t4.RealTime() << " s.\n";
-   cout << "DRAW PLOTS: " << t5.RealTime() << " s.\n";
-   cout << "ANALYSIS AND CLOSE DOWN: " << t6.RealTime() << " s.\n";
+   cout << "INIT + CLOSEDOWN: " << t1.CpuTime() + t6.CpuTime() << " s.\n";
+   cout << "TRACK RECONSTRUCTION: " << t2.CpuTime() << " s.\n";
+//   cout << "TRACK INIT: " << t3.CpuTime() << " s.\n";
+   cout << "TRACK FITTING: " << t3.CpuTime() + t4.CpuTime() << " s.\n";
+   cout << "DRAW PLOTS: " << t5.CpuTime() << " s.\n";
+//   cout << "ANALYSIS AND CLOSE DOWN: " << t6.CpuTime() << " s.\n";
+   cout << "TOTAL ANALYSIS TIME: " << t7.CpuTime() << " s.\n";
 
    return empiricalMean;
 }

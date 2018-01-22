@@ -59,37 +59,56 @@ Tracks * Clusters::findCalorimeterTracksAlpide() {
    Bool_t   usedClustersInSeeds = true;
    Int_t    clustersLeft;
    Float_t  factor;
+   
+   TStopwatch t0, t05, t1, t2, t3, t4, t5;
 
+
+   t0.Start();
    for (Int_t i=0; i<GetEntriesFast(); i++) {
       if (!At(i)) continue;
       appendClusterWithoutTrack(At(i));
    }
+   t0.Stop();
    
+   t05.Start();
    makeLayerIndex();
+   t05.Stop();
 
    // first pass, small search cone (3 sigma MCS)
    kMCSFactor = kMCSFactorFirstPass;
+   t1.Start();
    findTracksFromLayer(tracks, 0, usedClustersInSeeds);
+   t1.Stop();
   
+   t2.Start();
    if (GetEntriesCWT()) { 
       kMCSFactor = kMCSFactorSecondPass;
       findTracksFromLayer(tracks, 0, usedClustersInSeeds);
    }
+   t2.Stop();
 
+   t3.Start();
    if (GetEntriesCWT()) {
       kMCSFactor = kMCSFactorLastPass1;
       findRemainingTracks(tracks);
    }
+   t3.Stop();
 
+   t4.Start();
    if (GetEntriesCWT()) {
       kMCSFactor = kMCSFactorLastPass2;
     findRemainingTracks(tracks);
    }
+   t4.Stop();
    
+   t5.Start();
    if (GetEntriesCWT()) {
       kMCSFactor = kMCSFactorLastPass3;
       findRemainingTracks(tracks);
    }
+   t5.Stop();
+
+   printf("Reconstruction TIMING: t0 = %.3f, t05 = %.3f, t1 = %.3fs, t2 = %.3fs, t3 = %.3fs, t4 = %.3fs, t5 = %.3fs.\n", t0.CpuTime(), t05.CpuTime(), t1.CpuTime(), t2.CpuTime(), t3.CpuTime(), t4.CpuTime(), t5.CpuTime());
 
    clustersLeft = clustersWithoutTrack_.GetEntries();
    factor = 100 * (1 - (Float_t) clustersLeft / GetEntriesFast());

@@ -365,7 +365,8 @@ void Clusters::sortTCAByLayer() {
    // a) By layer number (this is standard, as with exp data or cluster diffused data
    // b) By event ID (from "truth" MC, as with the optimization simulations)
    // If it's (b), the tracking algorithm does not work properly as it searches in the local regions of the clusters_ list
-   // So -- it needs to be sorted by Layer.
+   // So -- it needs to be sorted by Layer
+   // FIXME: HORRIBLY INEFFECTIVE, 70% of the track reconstruction time is spent here!!!!
 
    Int_t       idx = 0;
    Int_t       nl = 0;

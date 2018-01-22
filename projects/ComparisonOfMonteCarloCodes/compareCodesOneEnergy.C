@@ -23,7 +23,7 @@ void Run()
 {
    // GATE PART
    Bool_t activateGATE = true;
-   Bool_t activateMCNP = true;
+   Bool_t activateMCNP = false;
    Bool_t activateFLUKA = true;
    Bool_t activateTRIM = false;
 
@@ -46,8 +46,10 @@ void Run()
    Float_t  fraction;
    
    TCanvas *c1 = new TCanvas("c1", "GATE", 1200 , 1050);
-   c1->Divide(3,3,0.001,0.001);
+   c1->Divide(2,1,0.001,0.001);
    c1->SetLogy();
+
+   gStyle->SetOptStat(0);
    
    TCanvas *c2 = new TCanvas("c2", "MCNP", 1200, 1050);
    c2->Divide(3,3,0.001,0.001);
@@ -56,11 +58,21 @@ void Run()
    TCanvas *c3 = new TCanvas("c3", "FLUKA", 1200, 1050);
    c3->Divide(3,3,0.001,0.001);
 
+   gStyle->SetTitleFont(22);
+   gStyle->SetLabelFont(22);
+   gStyle->SetTitleFont(22,"Y");
+   gStyle->SetLabelFont(22,"Y");
+   gStyle->SetTitleSize(0.06);
+   gStyle->SetLabelSize(0.06);
+   gStyle->SetTitleSize(0.06,"Y");
+   gStyle->SetLabelSize(0.06,"Y");
+   gStyle->SetTextFont(22);
+
    // Set logy in all pads
    TPad *p1 = (TPad *) c1->cd(1);
    TPad *p2 = (TPad *) c1->cd(2);
-   TPad *p4 = (TPad *) c1->cd(4);
-   TPad *p5 = (TPad *) c1->cd(5);
+//   TPad *p4 = (TPad *) c1->cd(4);
+//   TPad *p5 = (TPad *) c1->cd(5);
    TPad *p7 = (TPad *) c2->cd(1);
    TPad *p8 = (TPad *) c2->cd(2);
    TPad *p10 = (TPad *) c2->cd(4);
@@ -73,12 +85,14 @@ void Run()
    TPad *p20 = (TPad *) c3->cd(5);
    TPad *p22 = (TPad *) c3->cd(7);
    TPad *p23 = (TPad *) c3->cd(8);
-   TPad *p25 = (TPad *) c1->cd(7);
-   TPad *p26 = (TPad *) c1->cd(8);
-   p1->SetLogy();
+//   TPad *p25 = (TPad *) c1->cd(7);
+//   TPad *p26 = (TPad *) c1->cd(8);
+  
+p1->SetLogy();
    p2->SetLogy();
-   p4->SetLogy();
-   p5->SetLogy();
+//   p4->SetLogy();
+//   p5->SetLogy();
+/*
    p7->SetLogy();
    p8->SetLogy();
    p10->SetLogy();
@@ -91,12 +105,14 @@ void Run()
    p20->SetLogy();
    p22->SetLogy();
    p23->SetLogy();
-   p25->SetLogy();
-   p26->SetLogy();
+*/
+   //   p25->SetLogy();
+//   p26->SetLogy();
+
 
    if (activateGATE) {
       TH1F    *hGATE = new TH1F("hGATE", "All protons in GATE QGSP-BIC-EMY (LT) dataset", nbinsz, zfrom, zto);
-      TH1F    *hGATEStop = new TH1F("hGATEStop", "Protons in GATE QGSP-BIC-EMY (LT) dataset with processName == ProtonInelastic", nbinsz, zfrom, zto);
+      TH1F    *hGATEStop = new TH1F("hGATEStop", "Protons in GATE QGSP-BIC-EMY (LT) dataset with processName == ProtonInelastic", nbinsz, 5.4, 6.4);
       TH2F    *hGATELateral = new TH2F("hGATELateral", "2D distribution of BP position in GATE QGSP-BIC-EMY (LT) dataset;X position [mm];Y position [mm]", nbinsxy, xyfrom, xyto, nbinsxy, xyfrom, xyto);
       TH1F    *hGATEDefaultThreshold = new TH1F("hGATEDefaultThreshold", "All protons in GATE QGSP-BIC-EMY (DT) dataset", nbinsz, zfrom, zto);
       TH1F    *hGATEDefaultThresholdStop = new TH1F("hGATEDefaultThresholdStop", "Protons in GATE QGSP-BIC-EMY (DT) dataset with processName == ProtonInelastic", nbinsz, zfrom, zto);
@@ -109,7 +125,7 @@ void Run()
       Int_t    parentID, eventID;
       Bool_t   isInelastic;
       
-      TFile   *f1 = new TFile("Data/GATE/compressed_complex_geometry_bic.root");
+      TFile   *f1 = new TFile("Data/GATE/ComplexGeometry/compressed_complex_130MeV.root");
       TTree   *treeBic = (TTree*) f1->Get("treeOut");
       treeBic->SetBranchAddress("posX",&x);
       treeBic->SetBranchAddress("posY",&y);
@@ -123,11 +139,15 @@ void Run()
       for (Int_t i=0, N = treeBic->GetEntries(); i<N; ++i) {
          treeBic->GetEntry(i);
 
-         hGATE->Fill(z/10.);
-         if (!isInelastic)     hGATELateral->Fill(x,y);
-         else                  hGATEStop->Fill(z/10.);
+         hGATE->Fill(z/10., edep);
+         if (!isInelastic) {
+            hGATELateral->Fill(x,y);
+            hGATEStop->Fill(z/10.);
+         }
       }
       
+      /*
+
       TFile   *f2 = new TFile("Data/GATE/compressed_complex_geometry_emy_nolimit.root");
       TTree   *treeDefaultThreshold = (TTree*) f2->Get("treeOut");
       treeDefaultThreshold->SetBranchAddress("posX",&x);
@@ -167,7 +187,7 @@ void Run()
          if (!isInelastic)    hGATESingleScatterLateral->Fill(x,y);
          else                 hGATESingleScatterStop->Fill(z/10.);
       }
-
+*/
       
       c1->cd(1);
 
@@ -179,7 +199,7 @@ void Run()
 
       hGATE->SetXTitle("Range [cm]");
       hGATE->SetYTitle("Number of primaries");
-      hGATE->SetFillColor(kBlue-7);
+      hGATE->SetFillColor(kAzure+1);
       hGATE->SetLineColor(kBlack);
       hGATE->Draw();
       hGATE->Fit("fitFunction", "B,M,Q");
@@ -207,12 +227,12 @@ void Run()
       c1->cd(2);
       hGATEStop->SetXTitle("Range [cm]");
       hGATEStop->SetYTitle("Number of primaries");
-      hGATEStop->SetFillColor(kBlue-7);
+      hGATEStop->SetFillColor(kAzure+1);
       hGATEStop->SetLineColor(kBlack);
       hGATEStop->Draw();
 
-      c1->cd(3);
-      hGATELateral->Draw("COLZ");
+//      c1->cd(3);
+//      hGATELateral->Draw("COLZ");
 
       ///
 
@@ -221,7 +241,7 @@ void Run()
       fitFunctionG2->SetParameter(2, 0.13);
       fitFunctionG2->SetParLimits(1, 9, 13);
       fitFunctionG2->SetParLimits(2, 0.05, 0.4);
-
+/*
       c1->cd(4);
       hGATEDefaultThreshold->SetXTitle("Range [cm]");
       hGATEDefaultThreshold->SetYTitle("Number of primaries");
@@ -314,6 +334,7 @@ void Run()
       bin2 = hProfile->FindLastBinAbove(hProfile->GetMaximum()/2);
       fwhm = hProfile->GetBinCenter(bin2) - hProfile->GetBinCenter(bin1);
       cout << "FWHM GATE Single Scatter 2D = " << fwhm << " mm." << endl;
+      */
    }
 
    
@@ -589,7 +610,7 @@ void Run()
       Float_t  mu;
       Float_t  sigma; 
 
-      TH1F    *hFLUKAPrecisio = new TH1F("hFLUKAPrecisio", "All protons in FLUKA PRECISIO dataset;Range [cm];Number of primaries", nbinsz, zfrom, zto);
+      TH1F    *hFLUKAPrecisio = new TH1F("hFLUKAPrecisio", "All protons in FLUKA PRECISIO dataset;Range [cm];Number of primaries", nbinsz, 5.4, 6.4);
       TH1F    *hFLUKAPrecisioStop = new TH1F("hFLUKAPrecisioStop", "Protons in FLUKA PRECISIO dataset with termination type 11;Range [cm];Number of primaries", nbinsz, zfrom, zto);
       TH2F    *hFLUKAPrecisioLateral = new TH2F("hFLUKAPrecisioLateral", "2D distribution of BP position in FLUKA PRECISIO dataset;X position [mm];Y position [mm]", nbinsxy, xyfrom, xyto, nbinsxy, xyfrom, xyto);
       TH1F    *hFLUKAHadrothe = new TH1F("hFLUKAHadrothe", "All protons in FLUKA HADROTHE dataset;Range [cm];Number of primaries", nbinsz, zfrom, zto);
@@ -600,7 +621,7 @@ void Run()
       TH2F    *hFLUKACalorimeLateral = new TH2F("hFLUKACalorimeLateral", "2D distribution of BP position in FLUKA CALORIME dataset;X position [mm];Y position [mm]", nbinsxy, xyfrom, xyto, nbinsxy, xyfrom, xyto);
 
       cout << "READING PRECISIO FILE\n";
-      in.open("Data/FLUKA/FLUKA_PRECISIO.txt");
+      in.open("Data/FLUKA/ComplexGeometry/130MeVProtonsPencil.txt");
 
       while (! in.eof() ) {
          in >> historyNumber >> x >> y >> z >> terminationType;
@@ -619,11 +640,13 @@ void Run()
             }
          }
 
+         printf("FLUKA historynumber = %d\n", historyNumber);
+
          lastHistoryNumber = historyNumber; // all following entries with same history number are 2ndies
       }
 
       in.close();
-
+/*
       lastHistoryNumber = -1;
       in.open("Data/FLUKA/FLUKA_HADROTHE.txt");
       while (! in.eof() ) {
@@ -670,7 +693,7 @@ void Run()
          lastHistoryNumber = historyNumber; // all following entries with same history number are 2ndies
       }
       in.close();
-
+*/
       cout << "PLOTTING\n";
 
       c3->cd(1);
