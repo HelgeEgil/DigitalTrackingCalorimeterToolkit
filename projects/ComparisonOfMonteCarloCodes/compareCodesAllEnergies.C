@@ -211,7 +211,7 @@ void Run()
    Int_t    lateralfrom = -2;
    Int_t    lateralto = 2;
    Int_t    comparisonEnergy = 50;
-   Float_t  mu, sigma, rangeError, nominalRange, distributionCutoff, fraction, fwhm, mutl;
+   Float_t  mu, sigma, rangeError, sigmaError, nominalRange, distributionCutoff, fraction, fwhm, mutl;
    Int_t    distributionCutoffBin, totalIntegral, cutoffIntegral, stoppedIntegral, nominalEnergy, bin1, bin2;
    TF1    * fitFunction = nullptr;
 
@@ -271,6 +271,16 @@ void Run()
    Float_t  rangeErrorGATE[19] = {};
    Float_t  rangeErrorMCNP[19] = {};
    Float_t  rangeErrorFLUKA[19] = {};
+   Float_t  sigmaErrorGATE[19] = {};
+   Float_t  sigmaErrorMCNP[19] = {};
+   Float_t  sigmaErrorFLUKA[19] = {};
+   Float_t  fractionNIErrorGATE[19] = {};
+   Float_t  fractionNIErrorMCNP[19] = {};
+   Float_t  fractionNIErrorFLUKA[19] = {};
+   Float_t  fwhmErrorGATE[19] = {};
+   Float_t  fwhmErrorMCNP[19] = {};
+   Float_t  fwhmErrorFLUKA[19] = {};
+
 
    Float_t  rangesJanniAl[12] = {1.0733, 1.4848, 1.9527, 2.4744, 3.0475, 3.6698, 5.4282, 7.4545, 9.7252, 12.220, 14.920, 17.811};
    Float_t  stragglingJanniAl[12] = {1.302, 1.276, 1.254, 1.236, 1.220, 1.207, 1.176, 1.153, 1.133, 1.115, 1.100, 1.087};
@@ -413,7 +423,7 @@ void Run()
          }
 
          TH1F *hGATE = new TH1F("hGATE", "Proton ranges in single GATE dataset;Range [cm];Number of primaries", 400, fmax(0, nominalRange*0.7), nominalRange*1.3);
-         TH1F *hGATETL = new TH1F("hGATE", "Proton tracklengths in single GATE dataset;Range [cm];Number of primaries", 100, fmax(0, nominalRange - 2), nominalRange + 2);
+         TH1F *hGATETL = new TH1F("hGATETL", "Proton tracklengths in single GATE dataset;Range [cm];Number of primaries", 100, fmax(0, nominalRange - 2), nominalRange + 2);
          TH1F *hGATEAll = new TH1F("hGATEAll", "Proton ranges in single GATE dataset including nuclear interactions;Range [cm];Number of primaries", 200, 0, nominalRange+2);
          
          TH1F *hGATE74 = new TH1F("hGATE74", "Proton ranges in single GATE dataset;Range [cm];Number of primaries", 100, fmax(0, nominalRange - 2), nominalRange + 2);
@@ -504,11 +514,14 @@ void Run()
          */
          TFitResultPtr res = hGATE->Fit("fit", "N,Q,M,W,S");
          res->NormalizeErrors();
-         res->Print("V");
+         if (i == 0 || i == 5 || i == 10 || i == 16) {
+            res->Print("V");
+         }
 
          mu = fit->GetParameter(1);
          sigma = fabs(fit->GetParameter(2));
          rangeError = fabs(fit->GetParError(1));
+         sigmaError = fabs(fit->GetParError(2));
          
          if (nominalEnergy == comparisonEnergy) {
             c9->cd(1);
@@ -530,6 +543,7 @@ void Run()
          rangesGATE[i] = mu;
          sigmaGATE[i] = sigma * 10;
          rangeErrorGATE[i] = rangeError;
+         sigmaErrorGATE[i] = sigmaError * 10;
 
          // FIND RANGES FOR DIFFERENT IONIZATION POTENTIALS
          hGATE74->Fit("fit", "N,Q,WW");
@@ -550,11 +564,16 @@ void Run()
          fraction = cutoffIntegral / float(totalIntegral);
 //         fractionNIGATE[i] = fraction;
          fractionNIGATE[i] = 1 - hGATE->Integral() / hGATEAll->Integral();
-
+         Float_t ff = hGATE->Integral();
+         Float_t FF = hGATEAll->Integral();
+         fractionNIErrorGATE[i] = sqrt(FF-ff) / FF;
 
          // Calculate FWHM of lateral distribution
 //         fwhmGATE[i] = findFWHM(hGATELateral);
-         fwhmGATE[i] = hGATELateral->GetRMS() / mu;
+         Float_t rms = hGATELateral->GetRMS();
+         Float_t rmse = hGATELateral->GetRMSError();
+         fwhmGATE[i] = rms / mu;
+         fwhmErrorGATE[i] = sqrt(pow(rmse / mu, 2) + pow(rms * rangeError / pow(mu, 2), 2));
 //         hGATELateral->Fit("fit", "N,Q,WW");
 //         fwhmGATE[i] = fit->GetParameter(2);
         
@@ -615,7 +634,7 @@ void Run()
 
          cout << nominalEnergy << "... ";
          TH1F * hMCNP = new TH1F("hMCNP", "Proton ranges in single MCNP dataset;Range [cm];Number of primaries", 400, fmax(0, nominalRange*0.7), nominalRange*1.3);
-         TH1F * hMCNPTL = new TH1F("hMCNP", "Proton tracklengths in single MCNP dataset;Range [cm];Number of primaries", 400, fmax(0, nominalRange - 5), nominalRange + 5);
+         TH1F * hMCNPTL = new TH1F("hMCNPTL", "Proton tracklengths in single MCNP dataset;Range [cm];Number of primaries", 400, fmax(0, nominalRange - 5), nominalRange + 5);
          TH1F * hMCNPAll = new TH1F("hMCNPAll", "Proton ranges in single MCNP dataset including nuclear interactions;Range [cm];Number of primaries", 200, 0, nominalRange+2);
          
          if (phantom == kAluminium)  {
@@ -691,15 +710,19 @@ void Run()
          */
          TFitResultPtr res = hMCNP->Fit("fit", "Q,M,N,W,S");
          res->NormalizeErrors();
-         res->Print("V");
+         if (i == 0 || i == 5 || i == 10 || i == 16) {
+            res->Print("V");
+         }
          
          mu = fit->GetParameter(1);
          sigma = fabs(fit->GetParameter(2));
          rangeError = fabs(fit->GetParError(1));
+         sigmaError = fabs(fit->GetParError(2));
          
          rangesMCNP[i] = mu;
          sigmaMCNP[i] = sigma*10;
          rangeErrorMCNP[i] = rangeError;
+         sigmaErrorMCNP[i] = sigmaError * 10;
          
          if (nominalEnergy == comparisonEnergy) {
             c9->cd(2);
@@ -721,10 +744,16 @@ void Run()
          fraction = cutoffIntegral / float(totalIntegral);
 //         fractionNIMCNP[i] = fraction;
          fractionNIMCNP[i] = 1 - hMCNP->Integral() / hMCNPAll->Integral();
+         Float_t ff = hMCNP->Integral();
+         Float_t FF = hMCNPAll->Integral();
+         fractionNIErrorMCNP[i] = sqrt(FF-ff)/FF;
          
          // Calculate FWHM of lateral distribution
 //         fwhmMCNP[i] = findFWHM(hMCNPLateral);
-         fwhmMCNP[i] = hMCNPLateral->GetRMS() / mu;
+         Float_t rms = hMCNPLateral->GetRMS();
+         Float_t rmse = hMCNPLateral->GetRMSError();
+         fwhmMCNP[i] = rms / mu;
+         fwhmErrorMCNP[i] = sqrt(pow(rmse / mu, 2) + pow(rms * rangeError / pow(mu, 2), 2));
          
          if (nominalEnergy == comparisonEnergy) {
             c2->cd();
@@ -818,7 +847,6 @@ void Run()
          sigma /= hFLUKA->Integral();
          sigma = sqrt(sigma);
 
-
          printf("The seen parameters for fluka at energy %d MeV is %.2f with sigma %.2f.\n", nominalEnergy, mu, sigma);
 
          // Find mu, sigma parameters
@@ -834,14 +862,20 @@ void Run()
          
          TFitResultPtr res = hFLUKA->Fit("fit", "Q,M,N,W,S");
          res->NormalizeErrors();
-         res->Print("V");
+         if (i == 0 || i == 5 || i == 10 || i == 16) {
+            res->Print("V");
+         }
 
          mu = fit->GetParameter(1);
          sigma = fabs(fit->GetParameter(2));
          rangeError = fabs(fit->GetParError(1));
+         sigmaError = fabs(fit->GetParError(2));
+
+
          rangesFLUKA[i] = mu;
          sigmaFLUKA[i] = sigma*10;
          rangeErrorFLUKA[i] = rangeError;
+         sigmaErrorFLUKA[i] = sigmaError * 10;
          
          if (nominalEnergy == comparisonEnergy) {
             c9->cd(3);
@@ -862,10 +896,17 @@ void Run()
          fraction = cutoffIntegral / float(totalIntegral);
 //         fractionNIFLUKA[i] = fraction;
          fractionNIFLUKA[i] = 1 - hFLUKA->Integral() / hFLUKAAll->Integral();
+         Float_t ff = hFLUKA->Integral();
+         Float_t FF = hFLUKAAll->Integral();
+         fractionNIErrorFLUKA[i] = sqrt(FF-ff)/FF;
          
          // Calculate FWHM of lateral distribution
 //         fwhmFLUKA[i] = findFWHM(hFLUKALateral);
-         fwhmFLUKA[i] = hFLUKALateral->GetRMS() / mu;
+         Float_t rms = hFLUKALateral->GetRMS();
+         Float_t rmse = hFLUKALateral->GetRMSError();
+         fwhmFLUKA[i] = rms / mu;
+         fwhmErrorFLUKA[i] = sqrt(pow(rmse / mu, 2) + pow(rms * rangeError / pow(mu, 2), 2));
+//         hGATELateral->Fit("fit", "N,Q,WW");
 
          delete hFLUKA;
          delete hFLUKAAll;
@@ -1497,34 +1538,40 @@ void Run()
    // MAKE DATA TABLES
    printf("Geometry; Monte Carlo code; Energy [MeV]; Range [mm]; Range deviation [mm]; Range error [mm]; Range straggling [mm]; Beam spreading [1]; Fraction of inelastic collisions [%]\n");
    for (Int_t i=0; i<numberOfPoints; i++) {
+//      if (i != 0 && i != 5 && i != 10 && i != 16) continue;
+
       rangesGATE[i] *= 10;
       rangesFLUKA[i] *= 10;
       rangesMCNP[i] *= 10;
+      rangeErrorGATE[i] *= 10;
+      rangeErrorMCNP[i] *= 10;
+      rangeErrorFLUKA[i] *= 10;
+
       if (phantom == kWater) {
 //         printf("Water; GATE 71 eV; %.0f; %.5f; %.5f; 0; 0; 0\n", energies[i], rangesGATE71[i], rangesGATEdiff71[i]);
 //         printf("Water; GATE 72 eV; %.0f; %.5f; %.5f; 0; 0; 0\n", energies[i], rangesGATE72[i], rangesGATEdiff72[i]);
 //         printf("Water; GATE 73 eV; %.0f; %.5f; %.5f; 0; 0; 0\n", energies[i], rangesGATE73[i], rangesGATEdiff73[i]);
 //         printf("Water; GATE 74 eV; %.0f; %.5f; %.5f; 0; 0; 0\n", energies[i], rangesGATE74[i], rangesGATEdiff74[i]);
 //         printf("Water; GATE 75 eV; %.0f; %.5f; %.5f; 0; 0; 0\n", energies[i], rangesGATE[i], rangesGATEdiff75[i]);
-         printf("Water; GATE (standard); %.0f; %.5f; %.5f; %.7f; %.5f; %.5f; %.5f\n", energies[i], rangesGATE[i], rangesGATEdiff[i], rangeErrorGATE[i], sigmaGATE[i], fwhmGATE[i], fractionNIGATE[i]);
-         printf("Water; FLUKA; %.0f; %.5f; %.5f; %.7f; %.5f; %.5f; %.5f\n", energies[i], rangesFLUKA[i], rangesFLUKAdiff[i], rangeErrorFLUKA[i], sigmaFLUKA[i], fwhmFLUKA[i], fractionNIFLUKA[i]);
-         printf("Water; MCNP; %.0f; %.5f; %.5f; %.7f; %.5f; %.5f; %.5f\n", energies[i], rangesMCNP[i], rangesMCNPdiff[i], rangeErrorMCNP[i], sigmaMCNP[i], fwhmMCNP[i], fractionNIMCNP[i]);
-//         printf("Water; PSTAR; %.0f; %.5f; 0; 0; 0; 0\n", energies[i], rangesPSTAR[i]);
-//         if (i < 13) printf("Water; JANNI; %.0f; %.5f; 0; %.5f; 0; %.5f\n", energiesJanni[i], rangesJanni[i], stragglingJanni[i], fractionNIJanni[i]);
+         printf("Water; GATE  (standard); %.0f MeV; Range %.3f +- %.3e mm; Diff %.3e cm;\t Straggling %.3f +- %.3e mm; Spreading %.3e +- %.3e; NI fraction %.3f +- %.3e\n", energies[i], rangesGATE[i], rangeErrorGATE[i], rangesGATEdiff[i], sigmaGATE[i], sigmaErrorGATE[i], fwhmGATE[i], fwhmErrorGATE[i], fractionNIGATE[i], fractionNIErrorGATE[i]);
+         printf("Water; MCNP  (standard); %.0f MeV; Range %.3f +- %.3e mm; Diff %.3e cm;\t Straggling %.3f +- %.3e mm; Spreading %.3e +- %.3e; NI fraction %.3f +- %.3e\n", energies[i], rangesMCNP[i], rangeErrorMCNP[i], rangesMCNPdiff[i], sigmaMCNP[i], sigmaErrorMCNP[i], fwhmMCNP[i], fwhmErrorMCNP[i], fractionNIMCNP[i], fractionNIErrorMCNP[i]);
+         printf("Water; FLUKA (standard); %.0f MeV; Range %.3f +- %.3e mm; Diff %.3e cm;\t Straggling %.3f +- %.3e mm; Spreading %.3e +- %.3e; NI fraction %.3f +- %.3e\n", energies[i], rangesFLUKA[i], rangeErrorFLUKA[i], rangesFLUKAdiff[i], sigmaFLUKA[i], sigmaErrorFLUKA[i], fwhmFLUKA[i], fwhmErrorFLUKA[i], fractionNIFLUKA[i], fractionNIErrorFLUKA[i]);
+//         printf("Water; PSTAR; %.0f; %.3e; 0; 0; 0; 0\n", energies[i], rangesPSTAR[i]);
+         if (i < 13) printf("Water; JANNI; %.0f; %.3e; 0; %.3e; 0; %.3e\n", energiesJanni[i], rangesJanni[i], stragglingJanni[i], fractionNIJanni[i]);
       }
       if (phantom == kComplex) {
-         printf("DTC; GATE; %.0f; %.5f; %.5f; %.7f; %.5f; %.5f; %.5f\n", energies[i], rangesGATE[i], rangesGATEdiff[i], rangeErrorGATE[i], sigmaGATE[i], fwhmGATE[i], fractionNIGATE[i]);
-         printf("DTC; FLUKA; %.0f; %.5f; %.5f; %.7f; %.5f; %.5f; %.5f\n", energies[i], rangesFLUKA[i], rangesFLUKAdiff[i], rangeErrorFLUKA[i], sigmaFLUKA[i], fwhmFLUKA[i], fractionNIFLUKA[i]);
-         printf("DTC; MCNP; %.0f; %.5f; %.5f; %.7f; %.5f; %.5f; %.5f\n", energies[i], rangesMCNP[i], rangesMCNPdiff[i], rangeErrorMCNP[i], sigmaMCNP[i], fwhmMCNP[i], fractionNIMCNP[i]);
-//         printf("DTC; PSTAR; %.0f; %.5f; 0; 0; 0; 0\n", energies[i], rangesPSTAR[i]);
-//         if (i < 13) printf("DTC; Bortfeld; %.0f; 0; 0; %.5f; 0; \n", energiesJanni[i], stragglingJanni[i]);
+         printf("DTC; GATE  (standard); %.0f MeV; Range %.3f +- %.3e mm; Diff %.3e cm;\t Straggling %.3f +- %.3e mm; Spreading %.3e +- %.3e; NI fraction %.3f +- %.3e\n", energies[i], rangesGATE[i], rangeErrorGATE[i], rangesGATEdiff[i], sigmaGATE[i], sigmaErrorGATE[i], fwhmGATE[i], fwhmErrorGATE[i], fractionNIGATE[i], fractionNIErrorGATE[i]);
+         printf("DTC; MCNP  (standard); %.0f MeV; Range %.3f +- %.3e mm; Diff %.3e cm;\t Straggling %.3f +- %.3e mm; Spreading %.3e +- %.3e; NI fraction %.3f +- %.3e\n", energies[i], rangesMCNP[i], rangeErrorMCNP[i], rangesMCNPdiff[i], sigmaMCNP[i], sigmaErrorMCNP[i], fwhmMCNP[i], fwhmErrorMCNP[i], fractionNIMCNP[i], fractionNIErrorMCNP[i]);
+         printf("DTC; FLUKA (standard); %.0f MeV; Range %.3f +- %.3e mm; Diff %.3e cm;\t Straggling %.3f +- %.3e mm; Spreading %.3e +- %.3e; NI fraction %.3f +- %.3e\n", energies[i], rangesFLUKA[i], rangeErrorFLUKA[i], rangesFLUKAdiff[i], sigmaFLUKA[i], sigmaErrorFLUKA[i], fwhmFLUKA[i], fwhmErrorFLUKA[i], fractionNIFLUKA[i], fractionNIErrorFLUKA[i]);
+//         printf("DTC; PSTAR; %.0f; %.3e; 0; 0; 0; 0\n", energies[i], rangesPSTAR[i]);
+//         if (i < 13) printf("DTC; Bortfeld; %.0f; 0; 0; %.3e; 0; \n", energiesJanni[i], stragglingJanni[i]);
       }
       if (phantom == kAluminium) {
-         printf("Aluminium; GATE; %.0f; %.5f; %.5f; %.7f; %.5f; %.5f; %.5f\n", energies[i], rangesGATE[i], rangesGATEdiff[i], rangeErrorGATE[i], sigmaGATE[i], fwhmGATE[i], fractionNIGATE[i]);
-         printf("Aluminium; FLUKA; %.0f; %.5f; %.5f; %.7f; %.5f; %.5f; %.5f\n", energies[i], rangesFLUKA[i], rangesFLUKAdiff[i], rangeErrorFLUKA[i], sigmaFLUKA[i], fwhmFLUKA[i], fractionNIFLUKA[i]);
-         printf("Aluminium; MCNP; %.0f; %.5f; %.5f; %.7f; %.5f; %.5f; %.5f\n", energies[i], rangesMCNP[i], rangesMCNPdiff[i], rangeErrorMCNP[i], sigmaMCNP[i], fwhmMCNP[i], fractionNIMCNP[i]);
+         printf("Aluminum; GATE  (standard); %.0f MeV; Range %.3f +- %.3e mm; Diff %.3e cm;\t Straggling %.3f +- %.3e mm; Spreading %.3e +- %.3e; NI fraction %.3f +- %.3e\n", energies[i], rangesGATE[i], rangeErrorGATE[i], rangesGATEdiff[i], sigmaGATE[i], sigmaErrorGATE[i], fwhmGATE[i], fwhmErrorGATE[i], fractionNIGATE[i], fractionNIErrorGATE[i]);
+         printf("Aluminum; MCNP  (standard); %.0f MeV; Range %.3f +- %.3e mm; Diff %.3e cm;\t Straggling %.3f +- %.3e mm; Spreading %.3e +- %.3e; NI fraction %.3f +- %.3e\n", energies[i], rangesMCNP[i], rangeErrorMCNP[i], rangesMCNPdiff[i], sigmaMCNP[i], sigmaErrorMCNP[i], fwhmMCNP[i], fwhmErrorMCNP[i], fractionNIMCNP[i], fractionNIErrorMCNP[i]);
+         printf("Aluminum; FLUKA (standard); %.0f MeV; Range %.3f +- %.3e mm; Diff %.3e cm;\t Straggling %.3f +- %.3e mm; Spreading %.3e +- %.3e; NI fraction %.3f +- %.3e\n", energies[i], rangesFLUKA[i], rangeErrorFLUKA[i], rangesFLUKAdiff[i], sigmaFLUKA[i], sigmaErrorFLUKA[i], fwhmFLUKA[i], fwhmErrorFLUKA[i], fractionNIFLUKA[i], fractionNIErrorFLUKA[i]);
 //         printf("Aluminium; PSTAR; %.0f; %.5f; 0; 0; 0; 0\n", energies[i], rangesPSTAR[i]);
-//         if (i < 13) printf("Aluminium; JANNI; %.0f; %.5f; 0; %.5f; 0; %.5f\n", energiesJanni[i], rangesJanni[i], stragglingJanni[i], fractionNIJanni[i]);
+         if (i < 13) printf("Aluminium; JANNI; %.0f; %.5f; 0; %.5f; 0; %.5f\n", energiesJanni[i], rangesJanni[i], stragglingJanni[i], fractionNIJanni[i]);
       }
    }
 

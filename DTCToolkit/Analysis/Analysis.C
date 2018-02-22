@@ -149,15 +149,16 @@ void drawTrackAngleAtVaryingRunNumbers(Int_t dataType, Float_t energy, Float_t d
       run_energy = getEnergyAtWEPL(energy, degraderThickness);
    }
 
-   for (Int_t i=1; i<30; i++) { // 1 -> 30
-      nRuns = pow(2, 4 + 0.25 * i) + 0.5;
+   for (Int_t i=1; i<5; i++) { // 1 -> 30
+      //nRuns = pow(2, 2 + 0.25 * i) + 0.5;
+      nRuns = i;
 
       kEventsPerRun = nRuns;
       Float_t factor = 2;
 
       Int_t totalNumberOfRuns = 2600 / kEventsPerRun;
       if (totalNumberOfRuns < 1) totalNumberOfRuns = 1;
-      if (totalNumberOfRuns > 75) totalNumberOfRuns = 75;
+      if (totalNumberOfRuns > 250) totalNumberOfRuns = 250;
 
       Tracks * tracks = loadOrCreateTracks(1, totalNumberOfRuns, dataType, energy);
 
@@ -1443,7 +1444,8 @@ void compareChargeDiffusionModels(Int_t Runs, Bool_t recreate, Float_t energy) {
    TF1 *fAnaly_30 = new TF1("fAnaly_30", "[0] + 6.16421 * x ** 3.81925e-1", 0, 50);
    TF1 *fAnaly_60 = new TF1("fAnaly_60", "[0] + 8.72351 * x ** 4.47309e-1", 0, 50);
    TF1 *fAnaly_65 = new TF1("fAnaly_65", "[0] + 8.99963 * x ** 4.54506e-1", 0, 50);
-   TF1 *fAnaly_45 = new TF1("fAnaly_45", "[0] + 7.66260 * x ** 4.20307e-1", 0, 50);
+   TF1 *fAnaly_infty = new TF1("fAnaly_infty", "[0] + 8.99963 * x ** 4.54506e-1", 0, 50);
+   TF1 *fAnaly_45 = new TF1("fAnaly_45", "[0] + 1.67988 * x ** 5.66446e-1", 0, 50);
    TF1 *fFinck = new TF1("fFinck", "2*3.1415 * [0] * log(14*x / (2*3.1415 * 0.0036 * [1]))", 0, 50);
    Cluster * cluster = nullptr;
    Float_t inst_wepl, inst_dedx, range, calcEnergy;
@@ -1453,11 +1455,13 @@ void compareChargeDiffusionModels(Int_t Runs, Bool_t recreate, Float_t energy) {
    fAnaly_45->SetParameter(0, 0);
    fAnaly_65->SetParameter(0, 0);
    fAnaly_60->SetParameter(0, 0);
+   fAnaly_infty->SetParameter(0, 0);
 
-   fAnaly_30->SetParLimits(0, 0, 0.01);
-   fAnaly_45->SetParLimits(0, 0, 0.01);
-   fAnaly_60->SetParLimits(0, 0, 0.01);
-   fAnaly_65->SetParLimits(0, 0, 0.01);
+   fAnaly_30->SetParLimits(0, 0, 0.001);
+   fAnaly_45->SetParLimits(0, 0, 0.001);
+   fAnaly_60->SetParLimits(0, 0, 0.001);
+   fAnaly_65->SetParLimits(0, 0, 0.001);
+   fAnaly_infty->SetParLimits(0, 0, 0.001);
 
    fFinck->SetParameters(1.202, 221.58);
 
@@ -1467,6 +1471,7 @@ void compareChargeDiffusionModels(Int_t Runs, Bool_t recreate, Float_t energy) {
    fAnaly_60->SetLineWidth(5);
    fAnaly_45->SetLineWidth(5);
    fAnaly_65->SetLineWidth(5);
+   fAnaly_infty->SetLineWidth(5);
    fFinck->SetLineWidth(5);
 
    fFinck->SetLineColor(kBlack);
@@ -1474,6 +1479,7 @@ void compareChargeDiffusionModels(Int_t Runs, Bool_t recreate, Float_t energy) {
    fPheno3->SetLineColor(kBlack);
    fAnaly_30->SetLineColor(kBlack);
    fAnaly_65->SetLineColor(kBlack);
+   fAnaly_infty->SetLineColor(kBlack);
 
    CalorimeterFrame *cf = new CalorimeterFrame();
    Clusters * clusters = new Clusters(nClusters);
@@ -1628,8 +1634,10 @@ void compareChargeDiffusionModels(Int_t Runs, Bool_t recreate, Float_t energy) {
          if (nEntries_high == 1) nEntries_high = 2;
          if (nEntries_low == 1) nEntries_low = 2;
 
-         standarddeviation_low = sqrt(fScale_low * sum_variance_low / (nEntries_low - 1));
-         standarddeviation_high = sqrt(fScale_high * sum_variance_high / (nEntries_high - 1));
+//         standarddeviation_low = sqrt(fScale_low * sum_variance_low / (nEntries_low - 1));
+//         standarddeviation_high = sqrt(fScale_high * sum_variance_high / (nEntries_high - 1));
+         standarddeviation_high = sqrt(sum_variance_high / (nEntries_low - 1));
+         standarddeviation_low = sqrt(sum_variance_low / (nEntries_high - 1));
          
          css[graphIdx] = mean;
          css_error_high[graphIdx] = standarddeviation_high;
@@ -1642,30 +1650,46 @@ void compareChargeDiffusionModels(Int_t Runs, Bool_t recreate, Float_t energy) {
    TGraphAsymmErrors *gEdepVSCS = new TGraphAsymmErrors(graphIdx, edeps, css, edeps_error, edeps_error, css_error_low, css_error_high);
    gEdepVSCS->SetMarkerStyle(21);
    gEdepVSCS->Draw("AP");
-   TFitResultPtr fitResult = gEdepVSCS->Fit("fitFunc", "B,M,S", "", 0, 5);
+//    TFitResultPtr fitResult = gEdepVSCS->Fit("fitFunc", "B,M,S", "", 0, 5);
+   fitFunc->SetParameters(7.85, 0.7265);
    
-   printf("Power function ---------\n");
-   fitResult->NormalizeErrors();
-   fitResult->Print("V");
+//   printf("Power function ---------\n");
+//   fitResult->NormalizeErrors();
+//   fitResult->Print("V");
    fitFunc->Draw("same");
 
    printf("Fit function: %.3f * edep ^ %.3f\n", fitFunc->GetParameter(0), fitFunc->GetParameter(1));
-   TFitResultPtr fitResult2 = gEdepVSCS->Fit("fFinck", "B,M,S", "", 0, 5);
+//   TFitResultPtr fitResult2 = gEdepVSCS->Fit("fFinck", "B,M,S", "", 0, 5);
    
-   printf("Finck function ---------\n");
-   fitResult2->NormalizeErrors();
-   fitResult2->Print("V");
+//   printf("Finck function ---------\n");
+//   fitResult2->NormalizeErrors();
+//   fitResult2->Print("V");
    printf("Finck function: rs = %.3f, Ts = %.3f\n", fFinck->GetParameter(0), fFinck->GetParameter(1));
 
    fFinck->Draw("same");
 
-   TFitResultPtr fitResult5 = gEdepVSCS->Fit("fAnaly_65", "B,M,S", "", 0, 5);
+
+   // was 65
+//   TFitResultPtr fitResult5 = gEdepVSCS->Fit("fAnaly_infty", "B,M,S", "", 0, 5);
    
-   cout << "ANALY 65" << endl;
+//   cout << "ANALY INFTY" << endl;
    
-   fitResult5->NormalizeErrors();
-   fitResult5->Print("V");
-   fAnaly_65->Draw("same");
+//   fitResult5->NormalizeErrors();
+//   fitResult5->Print("V");
+   fAnaly_infty->Draw("same");
+   
+   TLatex *tt1 = new TLatex(5, 25, "Power Fit");
+   TLatex *tt4 = new TLatex(5, 20, "Gaussian Intensity");
+   TLatex *tt3 = new TLatex(5, 10, "First Principles");
+   tt1->SetTextFont(22);
+   tt3->SetTextFont(22);
+   tt4->SetTextFont(22);
+   tt1->SetTextSize(0.05);
+   tt3->SetTextSize(0.05);
+   tt4->SetTextSize(0.05);
+   tt1->Draw();
+   tt3->Draw();
+   tt4->Draw();
 
 
    c2->cd(1);
@@ -1692,7 +1716,8 @@ void compareChargeDiffusionModels(Int_t Runs, Bool_t recreate, Float_t energy) {
    fPheno3->Draw("same");
 //   fAnaly_30->Draw("same");
 //   fAnaly_45->Draw("same");
-   fAnaly_65->Draw("same");
+//   fAnaly_65->Draw("same");
+   fAnaly_infty->Draw("same");
    fFinck->Draw("same");
 
    TLegend *leg = new TLegend(0.55, 0.17, 0.85, 0.34);
@@ -1701,7 +1726,7 @@ void compareChargeDiffusionModels(Int_t Runs, Bool_t recreate, Float_t energy) {
 //   leg->AddEntry(fPheno3, "Fit result", "L");
 //   leg->AddEntry(fAnaly_30, "Analytic #lambda = 30 #mum", "L");
 //   leg->AddEntry(fAnaly_45, "Analytic w/#lambda=45", "L");
-   leg->AddEntry(fAnaly_60, "Analytic #lambda = 65 #mum", "L");
+   leg->AddEntry(fAnaly_infty, "Analytic #lambda = #infty #mum", "L");
    leg->SetTextFont(22);
 //   leg->Draw();
 

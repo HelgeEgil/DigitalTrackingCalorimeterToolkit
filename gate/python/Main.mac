@@ -39,21 +39,35 @@
 # ADD PROTON BEAM	      #
 #=======================#
 
-/gate/source/addSource uniformBeam gps
-/gate/source/uniformBeam/gps/particle proton
-/gate/source/uniformBeam/gps/ene/type Gauss
-/gate/source/uniformBeam/gps/ene/mono {energy} MeV
-/gate/source/uniformBeam/gps/ene/sigma 0 MeV
-/gate/source/uniformBeam/gps/type Plane
-#/gate/source/uniformBeam/gps/shape Square
-/gate/source/uniformBeam/gps/shape Circle
-/gate/source/uniformBeam/gps/direction 0 0 1
-/gate/source/uniformBeam/gps/radius 2. mm
-#/gate/source/uniformBeam/gps/halfx 70.71 mm
-#/gate/source/uniformBeam/gps/halfy 35.355 mm
-/gate/source/uniformBeam/gps/halfx 0 mm
-/gate/source/uniformBeam/gps/halfy 0 mm
-/gate/source/uniformBeam/gps/centre 0. 0. {beampos} mm
+/gate/source/addSource PBS PencilBeam
+/gate/source/PBS/setParticleType proton
+/gate/source/PBS/setEnergy 250. MeV
+/gate/source/PBS/setSigmaEnergy 0. MeV
+/gate/source/PBS/setPosition 0. 0. {beampos} mm
+/gate/source/PBS/setSigmaX 4 mm
+/gate/source/PBS/setSigmaY 2 mm
+/gate/source/PBS/setSigmaTheta 3.3 mrad
+/gate/source/PBS/setSigmaPhi 3.8 mrad
+/gate/source/PBS/setEllipseXThetaEmittance 15 mm*mrad
+/gate/source/PBS/setEllipseXThetaRotationNorm negative
+/gate/source/PBS/setEllipseYPhiEmittance 20 mm*mrad
+/gate/source/PBS/setEllipseYPhiRotationNorm negative
+
+#/gate/source/addSource uniformBeam gps
+#/gate/source/uniformBeam/gps/particle proton
+#/gate/source/uniformBeam/gps/ene/type Gauss
+#/gate/source/uniformBeam/gps/ene/mono {energy} MeV
+#/gate/source/uniformBeam/gps/ene/sigma 0 MeV
+#/gate/source/uniformBeam/gps/type Plane
+##/gate/source/uniformBeam/gps/shape Square
+#/gate/source/uniformBeam/gps/shape Circle
+#/gate/source/uniformBeam/gps/direction 0 0 1
+#/gate/source/uniformBeam/gps/radius 2. mm
+##/gate/source/uniformBeam/gps/halfx 70.71 mm
+##/gate/source/uniformBeam/gps/halfy 35.355 mm
+#/gate/source/uniformBeam/gps/halfx 0 mm
+#/gate/source/uniformBeam/gps/halfy 0 mm
+#/gate/source/uniformBeam/gps/centre 0. 0. {beampos} mm
 
 /gate/output/root/enable
 /gate/output/root/setRootSinglesFlag 0

@@ -36,8 +36,8 @@ enum eDataType {kMC, kData};
 Float_t  run_energy = 0;
 Float_t  run_degraderThickness = 0;
 Bool_t   kIsAluminumPlate = false;
-Bool_t   kIsScintillator = false;
-Bool_t   kIsFirstLayerAir = true;
+Bool_t   kIsScintillator = true;
+Bool_t   kIsFirstLayerAir = false;
 Bool_t   kUseAlpide = true;
 Bool_t   kDoTracking = true;
 Bool_t   kUseEmpiricalMCS = true;
@@ -61,7 +61,7 @@ const    Float_t kAbsorberThickness = 3.5; // 3.3 focal
 const Float_t dx = DX; // mm
 const Float_t dy = DY; // mm
 const Float_t dz = DZ + kAbsorberThickness;
-Int_t kEventsPerRun = 200;
+Int_t kEventsPerRun = 25;
 
 // Used for treatment of available experimental data files
 const Int_t nEnergies = 6;

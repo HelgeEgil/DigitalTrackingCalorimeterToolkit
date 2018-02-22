@@ -27,9 +27,8 @@
 /gate/world/daughters/insert box
 /gate/scanner_1/geometry/setXLength 270.0 mm
 /gate/scanner_1/geometry/setYLength 135.0 mm
-
-/gate/scanner_1/geometry/setZLength 3.435 mm
-/gate/scanner_1/placement/setTranslation 0 0 1.7175 mm
+/gate/scanner_1/geometry/setZLength 3.935 mm
+/gate/scanner_1/placement/setTranslation 0 0 1.9675 mm
 /gate/scanner_1/vis/setVisible false
 
 /gate/world/daughters/name scanner_2
@@ -37,15 +36,15 @@
 /gate/world/daughters/insert box
 /gate/scanner_2/geometry/setXLength 270.0 mm
 /gate/scanner_2/geometry/setYLength 135.0 mm
-/gate/scanner_2/geometry/setZLength 1030.5 mm
-/gate/scanner_2/placement/setTranslation 0 0 518.685 mm
+/gate/scanner_2/geometry/setZLength 1180.5 mm
+/gate/scanner_2/placement/setTranslation 0 0 594.185 mm
 /gate/scanner_2/vis/setVisible false
 
 /gate/scanner_1/daughters/name FM_Layer
 /gate/scanner_1/daughters/insert box
 /gate/FM_Layer/geometry/setXLength 270.0 mm
 /gate/FM_Layer/geometry/setYLength 135.0 mm
-/gate/FM_Layer/geometry/setZLength 3.435 mm
+/gate/FM_Layer/geometry/setZLength 3.935 mm
 /gate/FM_Layer/placement/setTranslation 0 0 0 mm
 /gate/FM_Layer/vis/setVisible false
 
@@ -54,7 +53,7 @@
 /gate/FirstModule/geometry/setXLength 270.0 mm
 /gate/FirstModule/geometry/setYLength 135.0 mm
 /gate/FirstModule/geometry/setZLength 0.35995 mm
-/gate/FirstModule/placement/setTranslation 0 0 -1.5375 mm
+/gate/FirstModule/placement/setTranslation 0 0 -1.7875 mm
 /gate/FirstModule/vis/setVisible false
 
 /gate/FirstModule/daughters/name FM_ActiveChip
@@ -106,7 +105,7 @@
 /gate/FM_Layer/daughters/insert box
 /gate/FM_Absorber1/geometry/setXLength 270.0 mm
 /gate/FM_Absorber1/geometry/setYLength 135.0 mm
-/gate/FM_Absorber1/geometry/setZLength 2.9999 mm
+/gate/FM_Absorber1/geometry/setZLength 3.4999 mm
 /gate/FM_Absorber1/placement/setTranslation 0 0 0.1425 mm
 /gate/FM_Absorber1/setMaterial Air
 /gate/FM_Absorber1/vis/setColor grey
@@ -116,7 +115,7 @@
 /gate/FM_AbsorberAirGap/geometry/setXLength 270.0 mm
 /gate/FM_AbsorberAirGap/geometry/setYLength 135.0 mm
 /gate/FM_AbsorberAirGap/geometry/setZLength 0.0749 mm
-/gate/FM_AbsorberAirGap/placement/setTranslation 0 0 1.68 mm
+/gate/FM_AbsorberAirGap/placement/setTranslation 0 0 1.93 mm
 /gate/FM_AbsorberAirGap/setMaterial Air
 /gate/FM_AbsorberAirGap/vis/setVisible false
 
@@ -124,8 +123,8 @@
 /gate/scanner_2/daughters/insert box
 /gate/Layer/geometry/setXLength 270.0 mm
 /gate/Layer/geometry/setYLength 135.0 mm
-/gate/Layer/geometry/setZLength 3.435 mm
-/gate/Layer/placement/setTranslation 0 0 -513.5325 mm
+/gate/Layer/geometry/setZLength 3.935 mm
+/gate/Layer/placement/setTranslation 0 0 -588.2825 mm
 /gate/Layer/vis/setVisible false
 
 /gate/Layer/daughters/name Module
@@ -133,7 +132,7 @@
 /gate/Module/geometry/setXLength 270.0 mm
 /gate/Module/geometry/setYLength 135.0 mm
 /gate/Module/geometry/setZLength 0.35995 mm
-/gate/Module/placement/setTranslation 0 0 -1.5375 mm
+/gate/Module/placement/setTranslation 0 0 -1.7875 mm
 /gate/Module/vis/setVisible false
 
 /gate/Module/daughters/name ActiveChip
@@ -185,7 +184,7 @@
 /gate/Layer/daughters/insert box
 /gate/Absorber1/geometry/setXLength 270.0 mm
 /gate/Absorber1/geometry/setYLength 135.0 mm
-/gate/Absorber1/geometry/setZLength 2.9999 mm
+/gate/Absorber1/geometry/setZLength 3.4999 mm
 /gate/Absorber1/placement/setTranslation 0 0 0.1425 mm
 /gate/Absorber1/setMaterial Aluminium
 /gate/Absorber1/vis/setColor grey
@@ -195,11 +194,12 @@
 /gate/AbsorberAirGap/geometry/setXLength 270.0 mm
 /gate/AbsorberAirGap/geometry/setYLength 135.0 mm
 /gate/AbsorberAirGap/geometry/setZLength 0.0749 mm
-/gate/AbsorberAirGap/placement/setTranslation 0 0 1.68 mm
+/gate/AbsorberAirGap/placement/setTranslation 0 0 1.93 mm
 /gate/AbsorberAirGap/setMaterial Air
 /gate/AbsorberAirGap/vis/setVisible false
 
 /gate/Layer/repeaters/insert linear
 /gate/Layer/linear/autoCenter false
 /gate/Layer/linear/setRepeatNumber 150
-/gate/Layer/linear/setRepeatVector 0 0 3.435 mm
+/gate/Layer/linear/setRepeatVector 0 0 3.935 mm
+

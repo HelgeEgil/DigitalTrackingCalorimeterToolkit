@@ -7,15 +7,18 @@
 
 using namespace std;
 
-void Run(int energy) {
-   TFile  * f = new TFile(Form("output/gate_simulation_%dMeV.root", energy));
+void Run() {
+   TFile  * f = new TFile("output/sobp_200MeV.root");
+   Int_t energy = 200;
    TTree  * tree = (TTree*) f->Get("Hits");
    Float_t  z,edep,lastZ = -1, dE = 0;
    Int_t    eventID, parentID, lastEventID = -1;
-   Float_t expectedRange = 0.0262 * pow(energy, 1.736);
+   Float_t  expectedRange = 0.022 * pow(energy, 1.77);
 
    TCanvas *c = new TCanvas("c", "c", 1000, 500);
-   c->Divide(2, 1,1e-5,1e-5);
+//   c->Divide(2, 1,1e-5,1e-5);
+
+   gStyle->SetOptStat(0);
 
    gStyle->SetTitleFont(22);
    gStyle->SetLabelFont(22);
@@ -28,8 +31,8 @@ void Run(int energy) {
    gStyle->SetLabelSize(0.06, "Y");
    gStyle->SetTitleSize(0.06, "Y");
 
-   TH1F   * doseHistogram = new TH1F("doseHistogram", "Energy deposition;Range [mm];MeV/proton", 800, fmax(expectedRange * 0.85*0, 0), expectedRange*1.07);
-   TH1F   * rangeHistogram = new TH1F("rangeHistogram", "Stopping position;Range [mm];Entries", 800, fmax(expectedRange * 0.85*0, 0), expectedRange*1.07);
+   TH1F   * doseHistogram = new TH1F("doseHistogram", "Energy deposition;Range [mm];MeV/proton", 278, 0, expectedRange*1.07);
+   TH1F   * rangeHistogram = new TH1F("rangeHistogram", "Stopping position;Range [mm];Entries", 278*1.5, 0, expectedRange*1.07);
 
    tree->SetBranchAddress("posZ", &z);
    tree->SetBranchAddress("eventID", &eventID);
@@ -55,18 +58,18 @@ void Run(int energy) {
       lastEventID = eventID;
    }
 
-   doseHistogram->SetFillColor(kAzure+1);
-   doseHistogram->SetLineColor(kBlack);
+   doseHistogram->SetFillColor(kGray);
+   doseHistogram->SetLineColor(kGray);
    doseHistogram->SetLineWidth(2);
    rangeHistogram->SetFillColor(kAzure+1);
    rangeHistogram->SetLineColor(kBlack);
    rangeHistogram->SetLineWidth(2);
 
 
-   c->cd(1);
+   rangeHistogram->Scale(doseHistogram->GetMaximum() / rangeHistogram->GetMaximum() * 0.7);
+
    doseHistogram->Draw();
-   c->cd(2);
-   rangeHistogram->Draw();
+   rangeHistogram->Draw("same");
 
 
 //   TF1 *fit = new TF1("fit", "gaus");
