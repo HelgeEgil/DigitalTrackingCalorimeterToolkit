@@ -7,6 +7,7 @@
 
 #include "GlobalConstants/Constants.h"
 #include "Classes/Cluster/Cluster.h"
+#include "Classes/Cluster/Node.h"
 #include "Classes/Track/Tracks.h"
 
 using namespace std;
@@ -91,6 +92,8 @@ public:
    Tracks    * findCalorimeterTracks();
    Tracks    * findCalorimeterTracksAlpide();
    Tracks    * findCalorimeterTracksWithMCTruth();
+   Tracks    * findTracksWithRecursiveWeighting();
+   void        doRecursiveWeightedTracking(Node * seedNode, vector<Node*> * endNodes);
    void        findTracksFromLayer(Tracks *tracks, Int_t layer, Bool_t kUsedClustersInSeeds = true);
    void        findRemainingTracks(Tracks *tracks);
    Clusters  * findSeeds(Int_t layer, Bool_t kUsedClustersInSeeds = true);

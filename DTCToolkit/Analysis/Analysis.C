@@ -149,9 +149,9 @@ void drawTrackAngleAtVaryingRunNumbers(Int_t dataType, Float_t energy, Float_t d
       run_energy = getEnergyAtWEPL(energy, degraderThickness);
    }
 
-   for (Int_t i=1; i<5; i++) { // 1 -> 30
-      //nRuns = pow(2, 2 + 0.25 * i) + 0.5;
-      nRuns = i;
+   for (Int_t i=2; i<25; i++) { // 1 -> 30
+      nRuns = pow(2, 2 + 0.25 * i) + 0.5;
+      // nRuns = i;
 
       kEventsPerRun = nRuns;
       Float_t factor = 2;
@@ -854,9 +854,9 @@ Float_t drawBraggPeakGraphFit(Int_t Runs, Int_t dataType, Bool_t recreate, Float
    Float_t        finalEnergy = 0;
    Float_t        fitRange, fitScale, fitError;
    Int_t          nCutDueToTrackEndingAbruptly = 0;
-   Int_t          nPlotX = 1, nPlotY = 1;
+   Int_t          nPlotX = 2, nPlotY = 1;
    Int_t          fitIdx = 0, plotSize = nPlotX*nPlotY;
-   Int_t          skipPlot = 10;
+   Int_t          skipPlot = 0;
    TGraphErrors * outputGraph;
    char         * sDataType = getDataTypeChar(dataType);
    char         * sMaterial = getMaterialChar();
@@ -943,19 +943,19 @@ Float_t drawBraggPeakGraphFit(Int_t Runs, Int_t dataType, Bool_t recreate, Float
          // Drawing of three panels with individual range-Edep graphs
          if (fitIdx == 1) {
             gPad->SetRightMargin(0.01);
-            gPad->SetLeftMargin(0.15);
+            gPad->SetLeftMargin(0.1);
          }
 
          else if (fitIdx == 2) {
-            gPad->SetLeftMargin(0.01);
+            gPad->SetLeftMargin(0.1);
             gPad->SetRightMargin(0.01);
             outputGraph->GetYaxis()->SetLabelOffset(2);
-            outputGraph->SetTitle(Form("Bragg-Kleeman fit to exp. data at %.0f MeV", run_energy));
+            outputGraph->SetTitle(Form("Experimental data: %.0f MeV", run_energy));
          
          }
 
          else if (fitIdx == 3) {
-            gPad->SetRightMargin(0.1);
+            gPad->SetRightMargin(0.01);
             gPad->SetLeftMargin(0.01);
             outputGraph->GetXaxis()->SetTitle("");
             outputGraph->GetYaxis()->SetLabelOffset(2);
@@ -1744,7 +1744,7 @@ void drawTracks3D(Int_t Runs, Int_t dataType, Bool_t recreate, Int_t switchLayer
 
    Tracks * tracks = loadOrCreateTracks(recreate, Runs, dataType, energy);
 
-   TCanvas *c1 = new TCanvas("c1", "c1", 1600, 800);
+   TCanvas *c1 = new TCanvas("c1", "c1", 1000, 1000);
    c1->SetTitle(Form("Tracks from %.2f MeV protons on %s", energy, getMaterialChar()));
    TView *view = TView::CreateView(1);
    float fromx = 0.1 * nx;
@@ -1759,7 +1759,7 @@ void drawTracks3D(Int_t Runs, Int_t dataType, Bool_t recreate, Int_t switchLayer
 
    view->SetRange(fromx, 0, fromy, tox, 40, toy);
    Int_t iret;
-   Float_t theta = 285;
+   Float_t theta = 280;
    Float_t phi = 80;
 
    view->SetView(theta, phi, 0, iret);
@@ -1822,8 +1822,15 @@ void drawTracks3D(Int_t Runs, Int_t dataType, Bool_t recreate, Int_t switchLayer
          medianEventID = thisTrack->getModeEventID();
       }
       
-      nMissingEID = tracks->getNMissingClustersWithEventID(thisTrack->getEventID(0), thisTrack->Last()->getLayer()); // only count missing tracks after layer
-      if (thisTrack->isFirstAndLastEventIDEqual() && nMissingEID == 0) nOKTracksAllClusters++;
+      nMissingEID = tracks->getNMissingClustersWithEventID(thisTrack->getEventID(0), thisTrack->Last()->getLayer()); // only count missing tracks after layer ''getLayer''
+      if (thisTrack->isFirstAndLastEventIDEqual() && nMissingEID == 0) {
+         printf("Track %d OK.\n", thisTrack->getEventID(0));
+         nOKTracksAllClusters++;
+      }
+      else {
+         printf("Track %d NOT OK.\n", thisTrack->getEventID(0));
+      }
+
 
       if (thisTrack->isFirstAndLastEventIDEqual()) nOKTracks++;
 

@@ -4,6 +4,7 @@
 
 #include "Classes/Cluster/Clusters.h"
 #include "Classes/Cluster/Cluster.h"
+#include "Classes/Cluster/Node.h"
 #include "Classes/Track/Track.h"
 #include "Classes/Track/Tracks.h"
 #include "GlobalConstants/Constants.h"
@@ -13,6 +14,107 @@
 
 using namespace std;
 using namespace DTC;
+
+Tracks * Clusters::findTracksWithRecursiveWeighting() {
+   Cluster   * cluster = nullptr;
+   Cluster   * nextCluster = nullptr;
+   Track     * track = nullptr;
+   Tracks    * tracks = new Tracks(kEventsPerRun * 5);
+   Float_t     clusterScore;
+   Node      * nextNode = nullptr;
+   Node      * seedNode = nullptr;
+   
+   makeLayerIndex();
+   fillMCSRadiusList();
+   kMCSFactor = 10;
+   for (Int_t i=0; i<GetEntriesFast(); i++) {
+      if (!At(i)) continue;
+      appendClusterWithoutTrack(At(i));
+   }
+
+   Clusters  * seeds = findSeeds(0, true);
+   for (Int_t i=0; i<seeds->GetEntriesFast(); i++) {
+      Cluster *seed = seeds->At(i);
+      Clusters * nextClusters = findNearestClustersInNextLayer(seed);
+      
+      seedNode = new Node(nullptr, seed, 0);
+      /*
+      for (Int_t j=0; j<nextClusters->GetEntriesFast(); j++) {
+         nextCluster = nextClusters->At(j);
+
+         clusterScore = seedNode->getNextScore(nextCluster);
+         if (clusterScore < kMaxTrackScore) {
+            nextNode = new Node(seedNode, nextCluster, clusterScore / 2); // initial vector is 50 % weighted
+            seedNode->addChild(nextNode);
+         }
+      }
+
+      seedNode->markExplored();
+*/
+      vector<Node*> * endNodes = new vector<Node*>;
+      endNodes->reserve(kEventsPerRun * 5);
+      seedNode->getUnexploredEndNodes(endNodes);
+
+      doRecursiveWeightedTracking(seedNode, endNodes);
+      
+      endNodes->clear();
+      seedNode->getEndNodes(endNodes);
+
+      track = seedNode->getBestTrack();
+      tracks->appendTrack(track);
+      removeTrackFromClustersWithoutTrack(track);
+
+      delete seedNode;
+      delete endNodes;
+   }
+
+   return tracks;
+}
+
+void Clusters::doRecursiveWeightedTracking(Node * seedNode, vector<Node*> * endNodes) {
+   // Input: vector of nodes
+   // Find all the next potential nodes segments w/acceptable score
+   // Output: Vector of nodes (new end nodes)
+
+   Node    * thisNode;
+   Node    * nextNode;
+   Cluster * nextCluster;
+   Float_t   nextScore;
+   Int_t     nPotentials;
+
+   for (UInt_t i=0; i<endNodes->size(); i++) {
+      thisNode = endNodes->at(i);
+      thisNode->markExplored();
+      nPotentials = 0;
+
+      // search all clusters for next potential node
+      Int_t searchLayer = thisNode->getCluster()->getLayer() + 1;
+      Int_t idxFrom = getFirstIndexOfLayer(searchLayer);
+      Int_t idxTo = getLastIndexOfLayer(searchLayer);
+  
+      if (idxFrom < 0) continue; // no more clusters
+
+      for (Int_t j=idxFrom; j<idxTo; j++) {
+         // Calculate scores of all potential nodes
+         nextCluster = At(j);
+         if (!nextCluster) continue;
+         
+         nextScore = thisNode->getNextScore(nextCluster);
+         if (nextScore < kMaxTrackScore) {
+            nPotentials++;
+            nextNode = new Node(thisNode, nextCluster, nextScore);
+            thisNode->addChild(nextNode);
+         }
+      }
+   }
+
+   endNodes->clear();
+   seedNode->getUnexploredEndNodes(endNodes);
+
+   if (endNodes->size() > 0) {
+      doRecursiveWeightedTracking(seedNode, endNodes);
+   }
+}
 
 Tracks * Clusters::findCalorimeterTracksWithMCTruth() {
    // Now clusters is sorted by event ID

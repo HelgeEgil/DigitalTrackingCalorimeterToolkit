@@ -44,6 +44,7 @@ Float_t     getSearchRadiusForLayer(Int_t layer);
 Float_t     getEmpiricalMCSAngle(Int_t layer);
 Float_t     getDotProductAngle(Cluster *a, Cluster *b, Cluster *c);
 Hit       * sumHits(Hit * a, Hit * b);
+Cluster   * getTrackExtrapolationCluster(Cluster *p1, Cluster *p2);
 Cluster   * getTrackExtrapolationToLayer(Track * track, Int_t layer);
 Cluster   * getTrackExtrapolationFromTo(Track * track, Int_t fromLayer, Int_t toLayer);
 Cluster   * getRetrogradeTrackExtrapolationToLayer(Track * track, Int_t layer);

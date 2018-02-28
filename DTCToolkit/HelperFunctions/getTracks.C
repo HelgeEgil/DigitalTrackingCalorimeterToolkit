@@ -105,7 +105,6 @@ Tracks * loadOrCreateTracks(Bool_t recreate, Int_t Runs, Int_t dataType, Float_t
             }
          }
 
-      
          if (tracks->GetEntries()) {
             cout << "Saving " << tracks->GetEntries() << " tracks.\n";
             saveTracks(tracks, dataType, energy);
@@ -221,8 +220,6 @@ Tracks * getTracksFromClusters(Int_t Runs, Int_t dataType, Int_t frameType, Floa
    t5.Reset();
    t6.Reset();
 
-
-
    for (Int_t i=0; i<Runs; i++) {
       clusters = new Clusters(nClusters);
       showDebug("Start getMCClusters\n");
@@ -235,7 +232,12 @@ Tracks * getTracksFromClusters(Int_t Runs, Int_t dataType, Int_t frameType, Floa
       if (kDoTracking) {
          printf("There are %d clusters\n", clusters->GetEntriesFast());
          clusters->sortClusters();
-         tracks = clusters->findCalorimeterTracksAlpide(); // We ignore diffusion effects here
+         if (kTrackFindingAlgorithm == kNearestCluster) {
+            tracks = clusters->findCalorimeterTracksAlpide(); // We ignore diffusion effects here
+         }
+         else if (kTrackFindingAlgorithm == kWeightedRecursive) {
+            tracks = clusters->findTracksWithRecursiveWeighting();
+         }
       }
       else {
          tracks = clusters->findCalorimeterTracksWithMCTruth();

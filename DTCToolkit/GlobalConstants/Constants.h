@@ -6,6 +6,7 @@
 #include <TObject.h>
 
 #define USEALPIDE
+// #define USEDEBUG
 
 #ifdef USEDEBUG
 #define showDebug(x) std::cout << x
@@ -36,7 +37,7 @@ enum eDataType {kMC, kData};
 Float_t  run_energy = 0;
 Float_t  run_degraderThickness = 0;
 Bool_t   kIsAluminumPlate = false;
-Bool_t   kIsScintillator = true;
+Bool_t   kIsScintillator = false;
 Bool_t   kIsFirstLayerAir = false;
 Bool_t   kUseAlpide = true;
 Bool_t   kDoTracking = true;
@@ -44,7 +45,9 @@ Bool_t   kUseEmpiricalMCS = true;
 Bool_t   kFilterNuclearInteractions = true;
 Bool_t   useDegrader = true;
 
-const Int_t sizeOfEventID = 500;
+const Int_t sizeOfEventID = 25;
+const Int_t nChildrenInNode = 1; // max concurrent track segments to follow
+const Float_t kMaxTrackScore = 0.25; // cumulative rad
 
 // natural unit is mm
 const Float_t cm = 0.1;
@@ -61,7 +64,7 @@ const    Float_t kAbsorberThickness = 3.5; // 3.3 focal
 const Float_t dx = DX; // mm
 const Float_t dy = DY; // mm
 const Float_t dz = DZ + kAbsorberThickness;
-Int_t kEventsPerRun = 25;
+Int_t kEventsPerRun = 600;
 
 // Used for treatment of available experimental data files
 const Int_t nEnergies = 6;
@@ -81,8 +84,9 @@ Int_t kOutputUnit = kPhysical;
  *  nearestCluster is good on everything
  */
 
-enum eTrackFindingAlgorithm {kRecursive, kNearestCluster};
-const Int_t kTrackFindingAlgorithm = kNearestCluster;
+enum eTrackFindingAlgorithm {kWeightedRecursive, kNearestCluster};
+// const Int_t kTrackFindingAlgorithm = kNearestCluster;
+const Int_t kTrackFindingAlgorithm = kWeightedRecursive;
 
 /*
  * Track splitting

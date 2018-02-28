@@ -20,6 +20,8 @@
 #include "Classes/Track/Track.C"
 #include "Classes/Track/Tracks.h"
 #include "Classes/Track/Tracks.C"
+#include "Classes/Cluster/Node.h"
+#include "Classes/Cluster/Node.C"
 #include "Classes/Track/trackAngleCalculations.C"
 #include "Classes/Track/trackClusterProperties.C"
 #include "Classes/Track/trackExtrapolations.C"

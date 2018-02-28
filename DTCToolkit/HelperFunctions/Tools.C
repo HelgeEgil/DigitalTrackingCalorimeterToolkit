@@ -393,6 +393,19 @@ Cluster * getRetrogradeTrackExtrapolationToLayer(Track * track, Int_t layer) {
    return getTrackExtrapolationFromTo(track, fromLayer, layer);
 }
 
+Cluster * getTrackExtrapolationCluster(Cluster *p1, Cluster *p2) {
+   Int_t fromLayer = p2->getLayer();
+   Int_t toLayer = p2->getLayer() + 1;
+   Int_t diffLayer = toLayer - fromLayer;
+
+   Cluster slope((p2->getX() - p1->getX()) / diffLayer, (p2->getY() - p1->getY()) / diffLayer);
+
+   Float_t x = p2->getX() + diffLayer * slope.getX();
+   Float_t y = p2->getY() + diffLayer * slope.getY();
+
+   return new Cluster(x,y,toLayer);
+}
+
 Cluster * getTrackExtrapolationFromTo(Track * track, Int_t fromLayer, Int_t toLayer) {
    Int_t diffLayer = toLayer - fromLayer;
    Int_t sign = (0 < diffLayer) - (diffLayer < 0);
@@ -681,15 +694,15 @@ void drawIndividualGraphs(TCanvas *cGraph, TGraphErrors* outputGraph, Float_t fi
    }
    
    else if (kOutputUnit == kPhysical) {
-      outputGraph->GetXaxis()->SetTitle("Projected range [mm]");
+      outputGraph->GetXaxis()->SetTitle("Proton range in DTC [mm]");
    }
 
-   outputGraph->GetYaxis()->SetTitle("Energy deposition [keV/#mum]");
+   outputGraph->GetYaxis()->SetTitle("Energy loss [keV/#mum]");
    outputGraph->GetYaxis()->SetTitleOffset(1);
    outputGraph->GetXaxis()->SetTitleSize(0.05);
    outputGraph->GetYaxis()->SetTitleSize(0.05);
-   outputGraph->GetXaxis()->SetLabelSize(0.04);
-   outputGraph->GetYaxis()->SetLabelSize(0.04);
+   outputGraph->GetXaxis()->SetLabelSize(0.05);
+   outputGraph->GetYaxis()->SetLabelSize(0.05);
    outputGraph->GetXaxis()->SetTitleFont(22);
    outputGraph->GetXaxis()->SetLabelFont(22);
    outputGraph->GetYaxis()->SetTitleFont(22);
@@ -743,7 +756,10 @@ void drawIndividualGraphs(TCanvas *cGraph, TGraphErrors* outputGraph, Float_t fi
    }
 
    if (kDrawText) {
-      TLatex *text = new TLatex(15, 18, Form("Fitted range: %.1f #pm %.1f mm", fitRange, fitError));
+      Float_t energy_error = getEnergyStragglingFromTLStraggling(fitRange, fitError); // remove this, assumes WEPL
+      Float_t energy_fit = getEnergyFromTL(fitRange); // remove this, assumes WEPL
+//      TLatex *text = new TLatex(15, 18, Form("Estimated E_{0}: %.1f #pm %.1f mm", fitRange, fitError)); // Take back this
+      TLatex *text = new TLatex(15, 18, Form("Estimated E_{0}: %.1f #pm %.1f MeV", energy_fit, energy_error));
       text->SetTextSize(0.05);
       text->SetTextFont(22);
       text->Draw();
