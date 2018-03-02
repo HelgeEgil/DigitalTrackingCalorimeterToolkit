@@ -246,33 +246,42 @@ Tracks * getTracksFromClusters(Int_t Runs, Int_t dataType, Int_t frameType, Floa
 
       if (tracks->GetEntriesFast() == 0) breakSignal = true; // to stop running
 
+      showDebug("Found all the tracks\n");
+
       // Track improvements
       Int_t nTracksBefore = 0, nTracksAfter = 0;
       Int_t nIsInelastic = 0, nIsNotInelastic = 0;
       
       t3.Start(false);
+      showDebug("Removing tracks leaving detector...");
       nTracksBefore = tracks->GetEntries();
       tracks->removeTracksLeavingDetector();
       nTracksAfter = tracks->GetEntries();
+      showDebug("ok\n");
       
       cout << "Of " << nTracksBefore << " tracks, " << nTracksBefore - nTracksAfter << " (" << 100* ( nTracksBefore - nTracksAfter) / ( (float) nTracksBefore ) << "%) were lost when leaving the detector.\n";
       
       // tracks->removeTrackCollisions();
       // tracks->retrogradeTrackImprovement(clusters);
-      
+   
+      showDebug("compress tracks and clusters...");      
       t3.Stop();
       t4.Start(false);
       tracks->Compress();
       tracks->CompressClusters();
+      showDebug("ok\n");
       
+      showDebug("append tracks to alltracks...");
       for (Int_t j=0; j<tracks->GetEntriesFast(); j++) {
          if (!tracks->At(j)) continue;
-
          allTracks->appendTrack(tracks->At(j));
       }
+      showDebug("ok\n");
 
+      showDebug("appendClustersWithoutTrack...");
       allTracks->appendClustersWithoutTrack(clusters->getClustersWithoutTrack());
       t4.Stop();
+      showDebug("ok\n");
    
       delete clusters;
       delete tracks;

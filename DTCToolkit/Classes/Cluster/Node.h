@@ -36,8 +36,10 @@ public:
    Bool_t         isExplored()         { return isExplored_; }
    Int_t          getFirstEmptyChild();
    Int_t          getWorstChild();
+   Int_t          getBestChild();
    void           addChild(Node *child);
-   
+   void           removeChild(Int_t i); 
+
    Cluster      * getParentCluster();
    Cluster      * getExtrapolatedCluster();
    Cluster      * getNextUnexploredCluster();

@@ -397,10 +397,10 @@ void  DataInterface::getMCClusters(Int_t runNo, Clusters *clusters) {
    if (runNo == 0) lastJentry_ = 0;
    
    Float_t  sum_edep = 0;
-   Int_t    lastID = 0;
+   Int_t    lastID = -1;
    Int_t    lastLayer = 0;
    Float_t  lastZ = 0;
-   Int_t    layer;
+   Int_t    layer = 0;
    Int_t    n = 0;
    Float_t  sumX = 0, sumY = 0;
    Float_t  x,y;
@@ -414,6 +414,12 @@ void  DataInterface::getMCClusters(Int_t runNo, Clusters *clusters) {
       if (ientry<0) break;
       nb = fChain->GetEntry(jentry);
       nbytes += nb;
+
+      if (lastID < 0) {
+         lastZ = posZ;
+         lastID = eventID;
+         lastLayer = layer;
+      }
 
       layer = level1ID + baseID - 1;
       if (parentID != 0) continue;
@@ -450,7 +456,18 @@ void  DataInterface::getMCClusters(Int_t runNo, Clusters *clusters) {
       lastLayer = layer;
       n++;
    }
+   
+   if (lastID != eventID || lastLayer != layer) {
+      x = sumX/n / dx + nx/2;
+      y = sumY/n / dy + ny/2;
+      
+      clusters->appendClusterEdep(x, y, lastLayer, sum_edep/14, lastID);
 
+      sum_edep = 0;
+      sumY = 0;
+      sumX = 0;
+      n = 0;
+   }
 }
 
 Int_t DataInterface::getMCFrame(Int_t runNo, CalorimeterFrame *cf, Float_t *x_energy, Float_t *y_energy) {

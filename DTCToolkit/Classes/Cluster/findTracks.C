@@ -23,10 +23,22 @@ Tracks * Clusters::findTracksWithRecursiveWeighting() {
    Float_t     clusterScore;
    Node      * nextNode = nullptr;
    Node      * seedNode = nullptr;
+  
+   ///// THESE VALUES ARE VALID FOR PENCIL BEAMS
+   // 2x2 -> 1.49
+   // 3x3 -> 2.01
+   // 4x4 -> 3.20
+   // 5x5 -> 4.22
+   // 4x2 -> 1.88
+
+   Float_t trackDensity = kEventsPerRun / 1.88;
    
+   if (trackDensity > 43)  kMaxTrackScore = 0.19;
+   else                    kMaxTrackScore = 0.30;
+
    makeLayerIndex();
    fillMCSRadiusList();
-   kMCSFactor = 10;
+   kMCSFactor = 25;
    for (Int_t i=0; i<GetEntriesFast(); i++) {
       if (!At(i)) continue;
       appendClusterWithoutTrack(At(i));
@@ -38,35 +50,43 @@ Tracks * Clusters::findTracksWithRecursiveWeighting() {
       Clusters * nextClusters = findNearestClustersInNextLayer(seed);
       
       seedNode = new Node(nullptr, seed, 0);
-      /*
       for (Int_t j=0; j<nextClusters->GetEntriesFast(); j++) {
          nextCluster = nextClusters->At(j);
 
          clusterScore = seedNode->getNextScore(nextCluster);
+         clusterScore /= 4;
          if (clusterScore < kMaxTrackScore) {
-            nextNode = new Node(seedNode, nextCluster, clusterScore / 2); // initial vector is 50 % weighted
+            nextNode = new Node(seedNode, nextCluster, clusterScore); // initial vector is 50 % weighted
             seedNode->addChild(nextNode);
          }
       }
-
       seedNode->markExplored();
-*/
+
       vector<Node*> * endNodes = new vector<Node*>;
       endNodes->reserve(kEventsPerRun * 5);
       seedNode->getUnexploredEndNodes(endNodes);
 
+      showDebug("Performing recursive tracking...");
       doRecursiveWeightedTracking(seedNode, endNodes);
+      showDebug("ok\n");
       
       endNodes->clear();
       seedNode->getEndNodes(endNodes);
-
+      
+      showDebug("Finding best track...");
       track = seedNode->getBestTrack();
-      tracks->appendTrack(track);
-      removeTrackFromClustersWithoutTrack(track);
+      showDebug("ok\n");
+      if (track->GetEntries() > 3) {
+         tracks->appendTrack(track);
+         removeTrackFromClustersWithoutTrack(track);
+      }
 
       delete seedNode;
       delete endNodes;
    }
+      
+//   kMCSFactor = kMCSFactorLastPass1;
+//   findRemainingTracks(tracks);
 
    return tracks;
 }
@@ -92,6 +112,8 @@ void Clusters::doRecursiveWeightedTracking(Node * seedNode, vector<Node*> * endN
       Int_t idxFrom = getFirstIndexOfLayer(searchLayer);
       Int_t idxTo = getLastIndexOfLayer(searchLayer);
   
+      showDebug("Recursive weighted tracking -- layer " << searchLayer << endl);
+
       if (idxFrom < 0) continue; // no more clusters
 
       for (Int_t j=idxFrom; j<idxTo; j++) {

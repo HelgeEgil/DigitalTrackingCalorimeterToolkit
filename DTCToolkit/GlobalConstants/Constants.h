@@ -46,8 +46,8 @@ Bool_t   kFilterNuclearInteractions = true;
 Bool_t   useDegrader = true;
 
 const Int_t sizeOfEventID = 25;
-const Int_t nChildrenInNode = 1; // max concurrent track segments to follow
-const Float_t kMaxTrackScore = 0.25; // cumulative rad
+const Int_t nChildrenInNode = 2; // max concurrent track segments to follow
+Float_t kMaxTrackScore = 0.3; // cumulative rad // was 0.19
 
 // natural unit is mm
 const Float_t cm = 0.1;
@@ -64,7 +64,7 @@ const    Float_t kAbsorberThickness = 3.5; // 3.3 focal
 const Float_t dx = DX; // mm
 const Float_t dy = DY; // mm
 const Float_t dz = DZ + kAbsorberThickness;
-Int_t kEventsPerRun = 600;
+Int_t kEventsPerRun = 1000;
 
 // Used for treatment of available experimental data files
 const Int_t nEnergies = 6;

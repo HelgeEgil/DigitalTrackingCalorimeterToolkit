@@ -149,16 +149,21 @@ void drawTrackAngleAtVaryingRunNumbers(Int_t dataType, Float_t energy, Float_t d
       run_energy = getEnergyAtWEPL(energy, degraderThickness);
    }
 
-   for (Int_t i=2; i<25; i++) { // 1 -> 30
-      nRuns = pow(2, 2 + 0.25 * i) + 0.5;
+//   Int_t nRunArray[8] = {19,32,64,108,215,512,1024,2048};
+   Int_t nRunArray[12] = {2,3,4,5,8,16,32,64,128,181,256,512};
+
+
+   for (Int_t i=0; i<12; i++) { // 1 -> 30
+//      nRuns = pow(2, 2 + 0.25 * i) + 0.5;
       // nRuns = i;
+      nRuns = nRunArray[i];
 
       kEventsPerRun = nRuns;
       Float_t factor = 2;
 
-      Int_t totalNumberOfRuns = 2600 / kEventsPerRun;
+      Int_t totalNumberOfRuns = 5000 / kEventsPerRun;
       if (totalNumberOfRuns < 1) totalNumberOfRuns = 1;
-      if (totalNumberOfRuns > 250) totalNumberOfRuns = 250;
+      if (totalNumberOfRuns > 500) totalNumberOfRuns = 250;
 
       Tracks * tracks = loadOrCreateTracks(1, totalNumberOfRuns, dataType, energy);
 
@@ -1744,6 +1749,8 @@ void drawTracks3D(Int_t Runs, Int_t dataType, Bool_t recreate, Int_t switchLayer
 
    Tracks * tracks = loadOrCreateTracks(recreate, Runs, dataType, energy);
 
+   Bool_t   kDraw = true;
+
    TCanvas *c1 = new TCanvas("c1", "c1", 1000, 1000);
    c1->SetTitle(Form("Tracks from %.2f MeV protons on %s", energy, getMaterialChar()));
    TView *view = TView::CreateView(1);
@@ -1938,11 +1945,6 @@ void drawTracks3D(Int_t Runs, Int_t dataType, Bool_t recreate, Int_t switchLayer
             l->SetLineColor(kRed);
          }
       }
-      /* Old method, draw all tracks with different event IDs red
-      if (!thisTrack->isFirstAndLastEventIDEqual()) {
-            l->SetLineColor(kRed);
-      }
-      */
 
       firstEID = thisTrack->getEventID(0);
       Int_t lineElementNumber = 0;
@@ -1974,7 +1976,10 @@ void drawTracks3D(Int_t Runs, Int_t dataType, Bool_t recreate, Int_t switchLayer
       }
 //      l->SetLineColor(kBlack);
       l->SetLineWidth(3);
+//      if (l->GetLineColor() == kRed) l->Draw();
       l->Draw();
+      kDraw = true;
+
       trackPoints->Draw();
 //    EIDMarker->Draw();
       conflictMarker->Draw();

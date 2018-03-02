@@ -38,6 +38,7 @@ public:
 
    // ROOT & I/O
    virtual Cluster * At(Int_t i)                { return ((Cluster*) clusters_.At(i)); }
+   virtual Cluster * AtCWT(Int_t i)             { return ((Cluster*) clustersWithoutTrack_.At(i)); }
    virtual Cluster * Last()                     { return ((Cluster*) clusters_.Last()); }
    TClonesArray    * getClustersWithoutTrack()  { return (TClonesArray*) &clustersWithoutTrack_; }
    virtual Int_t     GetEntriesFast()           { return clusters_.GetEntriesFast(); }

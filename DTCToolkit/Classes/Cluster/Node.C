@@ -38,16 +38,50 @@ Cluster * Node::getParentCluster() {
 
 
 void Node::addChild(Node *node) {
+   Float_t threshold = 0.845;
+
    Int_t i = getFirstEmptyChild();
-   if (i<0) {
+   if (i == 0) {
+      children_[i] = node;
+   }
+
+   else if (i>0) {
+      Int_t worstChild = getWorstChild();
+      Float_t worstScore = getChild(worstChild)->getScore();
+      Float_t newScore = node->getScore();
+      if (newScore < threshold * worstScore) {
+         // They are dissimilar, use instead the new one
+         children_[worstChild] = node;
+      }
+      else if (newScore < worstScore) {
+         // They are similar, use both
+         children_[i] = node;
+      }
+   }
+      
+   else if (i<0) { // All the places are full, exchange with worst
       Int_t worstChild = getWorstChild();
       Float_t worstScore = getChild(worstChild)->getScore();
       if (worstScore > node->getScore()) {
          children_[worstChild] = node; 
       }
+
+      // remove the worst if it's 10 % worse than the best
+      if (getChild(getBestChild())->getScore() * threshold < getChild(getWorstChild())->getScore()) {
+         removeChild(getWorstChild());
+      }
    }
-   else {
-      children_[i] = node;
+}
+
+void Node::removeChild(Int_t i) {
+   if (!getChild(i)) return;
+
+   delete getChild(i);
+   children_[i] = nullptr;
+
+   // Compress list to avoid holes
+   for (Int_t j=i+1; j<nChildrenInNode; j++) {
+      if (children_[j-1]) children_[j-1] = children_[j];
    }
 }
 
@@ -69,6 +103,19 @@ Int_t Node::getWorstChild() {
       }
    }
    return worstChild;
+}
+
+Int_t Node::getBestChild() {
+   Int_t bestChild = -1;
+   Float_t bestScore = 1e6;
+
+   for (Int_t i=0; i<getNChildren(); i++) {
+      if (getChild(i)->getScore() < bestScore) {
+         bestChild = i;
+         bestScore = getChild(i)->getScore();
+      }
+   }
+   return bestChild;
 }
 
 Cluster * Node::getExtrapolatedCluster() {
