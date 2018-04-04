@@ -63,7 +63,7 @@ void findMCSAngles(Int_t Runs, Int_t dataType, Bool_t recreate, Float_t energy, 
 
    run_degraderThickness = degraderThickness;
    run_energy = energy;
-   if (useDegrader) run_energy = getEnergyAtWEPL(energy, degraderThickness);
+   if (kUseDegrader) run_energy = getEnergyAtWEPL(energy, degraderThickness);
 
    Tracks * tracks = loadOrCreateTracks(recreate, Runs, dataType, run_energy);
 
@@ -145,7 +145,7 @@ void drawTrackAngleAtVaryingRunNumbers(Int_t dataType, Float_t energy, Float_t d
    run_energy = energy;
    run_degraderThickness = degraderThickness;
    
-   if (useDegrader) {
+   if (kUseDegrader) {
       run_energy = getEnergyAtWEPL(energy, degraderThickness);
    }
 
@@ -473,17 +473,18 @@ void drawClusterShapes(Int_t Runs, Bool_t dataType, Bool_t recreate, Float_t ene
    run_energy = energy;
    run_degraderThickness = degraderThickness;
 
+   Int_t useDataHits = true;
    kDataType = dataType;
 
-   Int_t nRows = 5;
+   Int_t nRows = 6;
    Int_t nRepeats = 10;
    Int_t nN = nRows * nRepeats;
-   vector<TH2C*> *hClusterMaps = new vector<TH2C*>;
+   vector<TH2C> *hClusterMaps = new vector<TH2C>;
    hClusterMaps->reserve(nN);
 
    showDebug("Creating TH2Fs...");
    for (Int_t i=0; i<nN; i++) {
-      hClusterMaps->push_back(new TH2C(Form("hClusterMap_%i",i), "", 11, 0, 11, 11, 0, 11));
+      hClusterMaps->push_back(TH2C(Form("hClusterMap_%i",i), "", 11, 0, 11, 11, 0, 11));
    }
    showDebug("OK!\n");
 
@@ -491,12 +492,20 @@ void drawClusterShapes(Int_t Runs, Bool_t dataType, Bool_t recreate, Float_t ene
    Int_t nHits = kEventsPerRun * 50;
    Int_t nTracks = kEventsPerRun * 2;
 
+   showDebug("Creaing vectors...");
    DataInterface *di = new DataInterface();
    CalorimeterFrame *cf = new CalorimeterFrame();
    Hits *hits = new Hits(nHits);
    vector<Hits*> * tempClusterHitMap;
    vector<Hits*> * clusterHitMap = new vector<Hits*>;
-   clusterHitMap->reserve(Runs*500*kEventsPerRun);
+   clusterHitMap->reserve(Runs*15*kEventsPerRun);
+   showDebug("OK\n");
+   Hits * dataHits = nullptr;
+
+   if (useDataHits) {
+      showDebug("Reserving " << Runs * 25 * nLayers * kEventsPerRun << " Hit objects in Hits\n");
+      dataHits = new Hits(Runs*25*nLayers*kEventsPerRun);
+   }
 
    for (Int_t i=0; i<Runs; i++) {
       if (dataType == kMC) { // Use Monte Carlo data
@@ -511,7 +520,7 @@ void drawClusterShapes(Int_t Runs, Bool_t dataType, Bool_t recreate, Float_t ene
          showDebug("OK!\n");
       }
 
-      else if (dataType == kData) { // Use experimental data (122, 140, 150, 160, 170, 180, 188 MeV)
+      else if (dataType == kData && useDataHits == false) { // Use experimental data (122, 140, 150, 160, 170, 180, 188 MeV)
          showDebug("getDataFrame...");
          di->getDataFrame(i, cf, energy);
          showDebug("OK!\nfindHits...");
@@ -520,6 +529,12 @@ void drawClusterShapes(Int_t Runs, Bool_t dataType, Bool_t recreate, Float_t ene
          tempClusterHitMap = hits->findClustersHitMap();
          showDebug("OK!\n");
       }
+
+      else if (dataType == kData && useDataHits == true) {
+         di->getDataHits(i, dataHits, energy);
+         tempClusterHitMap = hits->findClustersHitMap();
+      }  
+
       else {
         std::cerr << "Please choose between dataType = kMC (0) or kData (1).\n" << endl;
         exit(1);
@@ -563,6 +578,8 @@ void drawClusterShapes(Int_t Runs, Bool_t dataType, Bool_t recreate, Float_t ene
    Int_t size_from, size_to, nInRow, x, y;
 
    Int_t nTotal = 0;
+   Int_t kColor = 1;
+
    for (Int_t i=0; i<nRows; i++) {
       size_from = i*9;
       size_to = size_from + 8;
@@ -576,9 +593,12 @@ void drawClusterShapes(Int_t Runs, Bool_t dataType, Bool_t recreate, Float_t ene
             for (Int_t k=0; k<clusterHitMap->at(j)->GetEntriesFast(); k++) {
                x = clusterHitMap->at(j)->getX(k);
                y = clusterHitMap->at(j)->getY(k);
-               hClusterMaps->at(nTotal)->SetBinContent(x,y, 1);
+               if (useDataHits) {
+                  // set color according to eventID of k; be smart
+               }
+               hClusterMaps->at(nTotal).SetBinContent(x,y, kColor);
             } // end loop through all points
-            hClusterMaps->at(nTotal)->SetTitle(Form("%i", csize));
+            hClusterMaps->at(nTotal).SetTitle(Form("%i", csize));
             printf("row = %d, repeat = %d, j = %d\n", i, nInRow, j);
             nInRow++; nTotal++;
             if (nInRow >= nRepeats) break; // stop looping over clusters now
@@ -598,7 +618,7 @@ void drawClusterShapes(Int_t Runs, Bool_t dataType, Bool_t recreate, Float_t ene
       c->cd(i+1);
       gStyle->SetTitleY(0.93);
       gStyle->SetTitleX(0.85);
-      hClusterMaps->at(i)->Draw("same, COL,ah,fb,bb");
+      hClusterMaps->at(i).Draw("same, COL,ah,fb,bb");
       gStyle->SetOptStat(0);
       gPad->Update();
       TPaveText *title = (TPaveText*) gPad->GetPrimitive("title");
@@ -856,7 +876,7 @@ Float_t drawBraggPeakGraphFit(Int_t Runs, Int_t dataType, Bool_t recreate, Float
    
    t1.Start();
 
-   if (useDegrader) {
+   if (kUseDegrader) {
       run_energy = getEnergyFromDegraderThickness(degraderThickness);
    }
    t7.Start();
@@ -890,7 +910,7 @@ Float_t drawBraggPeakGraphFit(Int_t Runs, Int_t dataType, Bool_t recreate, Float
    Int_t nEnergyBins = getUnitFromEnergy(run_energy);
    gStyle->SetOptTitle(0);
 
-   if (useDegrader) {
+   if (kUseDegrader) {
       hTitle = Form("Fitted energy of a %.0f MeV nominal beam on %s DTC w/%.1f mm water degrader", energy, sMaterial, degraderThickness);
    }
 

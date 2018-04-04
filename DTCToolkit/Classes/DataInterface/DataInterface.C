@@ -59,7 +59,7 @@ DataInterface::DataInterface(TTree *tree) : fChain(0)
 
      //
       TChain * chain = new TChain("Hits","");
-      if (!useDegrader) {
+      if (!kUseDegrader) {
          chain->Add(Form("Data/MonteCarlo/DTC_%s_%.0fMeV_%.0fmm.root/Hits", materialChar, run_energy, kAbsorberThickness));
       }
       else {
@@ -350,6 +350,47 @@ void DataInterface::getDataFrame(Int_t runNo, CalorimeterFrame * cf, Int_t energ
 
       }
       counter++;
+   }
+   delete f;
+}
+
+void DataInterface::getDataHits(Int_t runNo, Hits * hits, Int_t energy) {
+   if (!existsEnergyFile(energy)) {
+      cout << "There are no data files with energy " << energy << endl;
+      return;
+   }
+
+   Int_t eventIdFrom = runNo * kEventsPerRun;
+   Int_t eventIdTo = eventIdFrom + kEventsPerRun;
+
+   TString fn = Form("Data/ExperimentalData/DataFrame_%i_MeV.root", energy);
+   TFile *f = new TFile(fn);
+   TTree *tree = (TTree*) f->Get("tree");
+
+   Int_t nentries = tree->GetEntries();
+   if (eventIdTo > nentries) {
+      eventIdTo = nentries;
+   }
+   cout << "Found " << nentries << " frames in the DataFrame.\n";
+
+   TLeaf *lX = tree->GetLeaf("fDataFrame.fX");
+   TLeaf *lY = tree->GetLeaf("fDataFrame.fY");
+   TLeaf *lLayer = tree->GetLeaf("fDataFrame.fLayer");
+
+   for (Int_t i=eventIdFrom; i<eventIdTo; i++) {
+      tree->GetEntry(i);
+
+      for (Int_t j=0; j<lX->GetLen(); j++) {
+         Int_t x = lX->GetValue(j) + nx/2;
+         Int_t y = lY->GetValue(j) + ny/2;
+         Int_t z = lLayer->GetValue(j);
+
+         if ( x > nx || y > ny ) {
+            printf("POINT (x,y,z) = (%d\t%d\t%d) OUT OF BOUNDS!!\n", x,y,z);
+         }
+
+         hits->appendPoint(x,y,z,i);
+      }
    }
    delete f;
 }

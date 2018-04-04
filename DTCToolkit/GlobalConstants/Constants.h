@@ -5,8 +5,8 @@
 #include <vector>
 #include <TObject.h>
 
-#define USEALPIDE
-#define USEDEBUG
+// #define USEALPIDE
+// #define USEDEBUG
 
 #ifdef USEDEBUG
 #define showDebug(x) std::cout << x
@@ -39,11 +39,16 @@ Float_t  run_degraderThickness = 0;
 Bool_t   kIsAluminumPlate = false;
 Bool_t   kIsScintillator = false;
 Bool_t   kIsFirstLayerAir = false;
-Bool_t   kUseAlpide = true;
+Bool_t   kUseAlpide = false;
 Bool_t   kDoTracking = true;
 Bool_t   kUseEmpiricalMCS = true;
 Bool_t   kFilterNuclearInteractions = false;
-Bool_t   useDegrader = true;
+Bool_t   kUseDegrader = false;
+
+#ifdef USEALPIDE
+kUseDegrader = true;
+kUseAlpide = true;
+#endif
 
 const Int_t sizeOfEventID = 25;
 const Int_t nChildrenInNode = 2; // max concurrent track segments to follow
@@ -55,23 +60,33 @@ const Float_t um = 1000;
 const Float_t kRad = 3.14159265/180.;
 
 // Some general run parameters
-const    Int_t nx = NX;
-const    Int_t ny = NY;
-const    Int_t nTrackers = 4;
-const    Float_t kAbsorberThickness = 3.3; // 3.3 focal, 3.5 MC
+const Int_t nx = NX;
+const Int_t ny = NY;
+const Int_t nTrackers = 4;
+
+#ifdef USEALPIDE
+const Float_t kAbsorberThickness = 3;
+#else
+const Float_t kAbsorberThickness = 3.3; // 3.3 focal, 3.5 MC
+#endif
 
 // nLayers are loaded in MaterialConstants.C according to the detector geometry
 const Float_t dx = DX; // mm
 const Float_t dy = DY; // mm
 const Float_t dz = DZ + kAbsorberThickness;
-Int_t kEventsPerRun = 100;
+Int_t kEventsPerRun = 250;
 
 // Used for treatment of available experimental data files
 const Int_t nEnergies = 6;
 Int_t energies[nEnergies] = {122, 140, 150, 170, 180, 188};
 
 enum eMaterial {kTungsten, kAluminum, kPMMA, kWater, kCarbon};
+
+#ifdef USEALPIDE
+const Int_t kMaterial = kAluminum;
+#else
 const Int_t kMaterial = kTungsten;
+#endif
 
 Int_t kDataType = kData;
 
