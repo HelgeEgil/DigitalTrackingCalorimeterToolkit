@@ -321,38 +321,38 @@ void makePlots() {
 
       if (!in2.good()) break;
      
-      if (mmAbsorber_ == 2) { 
+      if (mmAbsorber_ == 22) { 
          arrayFractionX[nlinesF] = np;
          arrayFractionY[nlinesF] = correctWhole * 100;
          arrayFractionY2[nlinesF] = lastIsFirst * 100;
          arrayFractionY3[nlinesF++] = lastIsAlmostFirst * 100;
          
-         arrayFraction2mmX[nlinesF2] = np/100;
+         arrayFraction2mmX[nlinesF2] = np;
          arrayFraction2mmY[nlinesF2++] = lastIsFirstAllTracks * 100;
       }
 
-      if (mmAbsorber_ == 3) {
-         arrayFraction3mmX[nlinesF3] = np/100;
+      if (mmAbsorber_ == 33) {
+         arrayFraction3mmX[nlinesF3] = np;
          arrayFraction3mmY[nlinesF3++] = lastIsFirstAllTracks * 100;
       }
 
-      if (mmAbsorber_ == 4) {
-         arrayFraction4mmX[nlinesF4] = np/100;
+      if (mmAbsorber_ == 55) {
+         arrayFraction4mmX[nlinesF4] = np;
          arrayFraction4mmY[nlinesF4++] = lastIsFirstAllTracks * 100;
       }
 
       if (mmAbsorber_ == 5) {
-         arrayFraction5mmX[nlinesF5] = np/100;
+         arrayFraction5mmX[nlinesF5] = np;
          arrayFraction5mmY[nlinesF5++] = lastIsFirstAllTracks * 100;
       }
 
       if (mmAbsorber_ == 6) {
-         arrayFraction6mmX[nlinesF6] = np/100;
+         arrayFraction6mmX[nlinesF6] = np;
          arrayFraction6mmY[nlinesF6++] = lastIsFirstAllTracks * 100;
       }
       
       if (mmAbsorber_ == 35) {
-         arrayFraction35mmX[nlinesF35] = np/100;
+         arrayFraction35mmX[nlinesF35] = np;
          arrayFraction35mmY[nlinesF35++] = lastIsFirstAllTracks * 100;
       }
    }
@@ -821,23 +821,27 @@ void makePlots() {
    c22->cd();
    TGraph *gFraction2mm = new TGraph(nlinesF2, arrayFraction2mmX, arrayFraction2mmY);
    TGraph *gFraction3mm = new TGraph(nlinesF3, arrayFraction3mmX, arrayFraction3mmY);
-   TGraph *gFraction35mm = new TGraph(nlinesF35, arrayFraction35mmX, arrayFraction35mmY);
+//   TGraph *gFraction35mm = new TGraph(nlinesF35, arrayFraction35mmX, arrayFraction35mmY);
    TGraph *gFraction4mm = new TGraph(nlinesF4, arrayFraction4mmX, arrayFraction4mmY);
-   TGraph *gFraction5mm = new TGraph(nlinesF5, arrayFraction5mmX, arrayFraction5mmY);
-   TGraph *gFraction6mm = new TGraph(nlinesF6, arrayFraction6mmX, arrayFraction6mmY);
+//   TGraph *gFraction5mm = new TGraph(nlinesF5, arrayFraction5mmX, arrayFraction5mmY);
+//   TGraph *gFraction6mm = new TGraph(nlinesF6, arrayFraction6mmX, arrayFraction6mmY);
 
+
+   printf("Some values in arrayFraction2mmXY: (%.2f, %.2f), (%.2f, %.2f)\n", arrayFraction2mmX[0], arrayFraction2mmY[0], arrayFraction3mmY[1], arrayFraction4mmY[1]);
+   printf("nlinesF2,F3,F4 = %d, %d, %d.\n", nlinesF2, nlinesF3, nlinesF4);
 //   c22->SetLogx();
    c22->SetGridy();
    c22->SetGridx();
    gFraction2mm->SetTitle(";Protons/cm^{2}/frame;Fraction of correctly reconstructed tracks");
-   gFraction2mm->GetXaxis()->SetRangeUser(0, 25);
+   gFraction2mm->GetXaxis()->SetRangeUser(0, 2000);
    gFraction2mm->SetMaximum(100);
-   gFraction2mm->SetMinimum(0);
-   gFraction2mm->GetXaxis()->SetTitleSize(0.045);
-   gFraction2mm->GetYaxis()->SetTitleSize(0.045);
+   gFraction2mm->SetMinimum(20);
+   gFraction2mm->GetXaxis()->SetTitleSize(0.06);
+   gFraction2mm->GetYaxis()->SetTitleSize(0.06);
    gFraction2mm->GetXaxis()->SetLabelSize(0.045);
    gFraction2mm->GetXaxis()->SetNdivisions(16);
-   gFraction2mm->GetYaxis()->SetLabelSize(0.045);
+   gFraction2mm->GetYaxis()->SetLabelSize(0.06);
+   gFraction2mm->GetXaxis()->SetLabelSize(0.06);
    gFraction2mm->GetXaxis()->SetTitleFont(22);
    gFraction2mm->GetYaxis()->SetTitleFont(22);
    gFraction2mm->GetXaxis()->SetTitleOffset(0.9);
@@ -849,43 +853,43 @@ void makePlots() {
    gFraction2mm->GetYaxis()->SetLabelFont(22);
    gFraction2mm->SetLineWidth(3);
    gFraction3mm->SetLineWidth(3);
-   gFraction35mm->SetLineWidth(3);
+//   gFraction35mm->SetLineWidth(3);
    gFraction4mm->SetLineWidth(3);
-   gFraction5mm->SetLineWidth(3);
-   gFraction6mm->SetLineWidth(3);
+//   gFraction5mm->SetLineWidth(3);
+//   gFraction6mm->SetLineWidth(3);
 
    gFraction2mm->SetLineColor(kRed+4);
    gFraction3mm->SetLineColor(kRed+3);
-   gFraction35mm->SetLineColor(kRed+2);
+//   gFraction35mm->SetLineColor(kRed+2);
    gFraction4mm->SetLineColor(kRed+1);
-   gFraction5mm->SetLineColor(kRed+0);
-   gFraction6mm->SetLineColor(kRed-7);
+//   gFraction5mm->SetLineColor(kRed+0);
+//   gFraction6mm->SetLineColor(kRed-7);
 
    gFraction2mm->Draw("LA");
    gFraction3mm->Draw("L");
-   gFraction35mm->Draw("L");
+//   gFraction35mm->Draw("L");
    gFraction4mm->Draw("L");
-   gFraction5mm->Draw("L");
-   gFraction6mm->Draw("L");
+//   gFraction5mm->Draw("L");
+//   gFraction6mm->Draw("L");
    
    TText *tt = new TText();
    tt->SetTextAlign(32);
-   tt->SetTextSize(0.04);
+   tt->SetTextSize(0.06);
    tt->SetTextFont(22);
    for (Int_t i=0; i<11;i++) {
       cout << "Drawing text at " << -0.42 << ", " << i*10 << endl;
-      tt->DrawText(-0.0042, i*10, Form("%d%%", i*10));
+      tt->DrawText(-0.0052, i*10, Form("%d%%", i*10));
    }
    
    TText *curveLabel = new TText();
    curveLabel->SetTextFont(22);
-   curveLabel->SetTextSize(0.038);
-   curveLabel->DrawText(25.50, gFraction2mm->Eval(25.00)*0.98, "2 mm Al");
-   curveLabel->DrawText(25.50, gFraction3mm->Eval(25.00)*0.98, "3 mm Al");
-   curveLabel->DrawText(25.50, gFraction35mm->Eval(25.00)*0.98, "3.5 mm Al");
-   curveLabel->DrawText(25.50, gFraction4mm->Eval(25.00)*0.98, "4 mm Al");
-   curveLabel->DrawText(25.50, gFraction5mm->Eval(25.00)*0.98, "5 mm Al");
-   curveLabel->DrawText(25.50, gFraction6mm->Eval(25.00)*0.98, "6 mm Al");
+   curveLabel->SetTextSize(0.06);
+   curveLabel->DrawText(25.50, gFraction2mm->Eval(25.00)*0.98, "2 mm");
+   curveLabel->DrawText(25.50, gFraction3mm->Eval(25.00)*0.98, "3 mm");
+//   curveLabel->DrawText(25.50, gFraction35mm->Eval(25.00)*0.98, "5x5 mm^{2}");
+   curveLabel->DrawText(25.50, gFraction4mm->Eval(25.00)*0.98, "5 mm");
+//   curveLabel->DrawText(25.50, gFraction5mm->Eval(25.00)*0.98, "5 mm Al");
+//   curveLabel->DrawText(25.50, gFraction6mm->Eval(25.00)*0.98, "6 mm Al");
 
 
    /*

@@ -31,9 +31,15 @@ Tracks * Clusters::findTracksWithRecursiveWeighting() {
    // 5x5 -> 4.22
    // 4x2 -> 1.88
 
-   Float_t trackDensity = kEventsPerRun / 1.88;
+   Float_t trackDensity = kEventsPerRun /2.01;
    
    if (trackDensity > 43)  kMaxTrackScore = 0.19;
+   else                    kMaxTrackScore = 0.30;
+
+   // UNIFORM FIELD
+   // From 0.19 to 0.3 @ 35 per cm2
+   trackDensity = kEventsPerRun / 25;
+   if (trackDensity > 35)  kMaxTrackScore = 0.19;
    else                    kMaxTrackScore = 0.30;
 
    makeLayerIndex();

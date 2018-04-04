@@ -36,6 +36,5 @@
 #include "Classes/Layer/Layer.C"
 #include "Classes/CalorimeterFrame/CalorimeterFrame.h"
 #include "Classes/CalorimeterFrame/CalorimeterFrame.C"
-
 #include "Classes/DataInterface/DataInterface.h"
 #include "Classes/DataInterface/DataInterface.C"

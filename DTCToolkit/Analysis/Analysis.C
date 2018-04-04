@@ -149,13 +149,13 @@ void drawTrackAngleAtVaryingRunNumbers(Int_t dataType, Float_t energy, Float_t d
       run_energy = getEnergyAtWEPL(energy, degraderThickness);
    }
 
-//   Int_t nRunArray[8] = {19,32,64,108,215,512,1024,2048};
-   Int_t nRunArray[12] = {2,3,4,5,8,16,32,64,128,181,256,512};
+   Int_t nRunArray[8] = {19,32,64,108,215,512,1024,2048};
+//   Int_t nRunArray[12] = {2,3,4,5,8,16,32,64,128,181,256,512};
 
 
-   for (Int_t i=0; i<12; i++) { // 1 -> 30
-//      nRuns = pow(2, 2 + 0.25 * i) + 0.5;
-      // nRuns = i;
+   for (Int_t i=0; i<40; i++) { // 1 -> 30
+//      nRuns = pow(2, 1 + 0.25 * i) + 0.5;
+//      nRuns = i;
       nRuns = nRunArray[i];
 
       kEventsPerRun = nRuns;
@@ -462,12 +462,17 @@ void getTrackStatistics(Int_t Runs, Int_t dataType, Bool_t recreate, Float_t ene
 
    delete tracks;
 }
-//
-void drawClusterShapes(Int_t Runs, Bool_t dataType, Bool_t recreate, Float_t energy) {
+
+void drawClusterShapes(Int_t Runs, Bool_t dataType, Bool_t recreate, Float_t energy, Float_t degraderThickness) {
    // get vector of TH2F's, each with a hits distribution and cluster size
    // dataType = kMC (0) or kData (1)
 
+   // See also ../Classes/Hit/findClusters.C
+
+   showDebug("Initializing function...\n");
    run_energy = energy;
+   run_degraderThickness = degraderThickness;
+
    kDataType = dataType;
 
    Int_t nRows = 5;
@@ -475,8 +480,12 @@ void drawClusterShapes(Int_t Runs, Bool_t dataType, Bool_t recreate, Float_t ene
    Int_t nN = nRows * nRepeats;
    vector<TH2C*> *hClusterMaps = new vector<TH2C*>;
    hClusterMaps->reserve(nN);
-   for (Int_t i=0; i<nN; i++)
+
+   showDebug("Creating TH2Fs...");
+   for (Int_t i=0; i<nN; i++) {
       hClusterMaps->push_back(new TH2C(Form("hClusterMap_%i",i), "", 11, 0, 11, 11, 0, 11));
+   }
+   showDebug("OK!\n");
 
    Int_t nClusters = kEventsPerRun * 5;
    Int_t nHits = kEventsPerRun * 50;
@@ -490,29 +499,41 @@ void drawClusterShapes(Int_t Runs, Bool_t dataType, Bool_t recreate, Float_t ene
    clusterHitMap->reserve(Runs*500*kEventsPerRun);
 
    for (Int_t i=0; i<Runs; i++) {
-      if (dataType == kMC) {
+      if (dataType == kMC) { // Use Monte Carlo data
+         showDebug("getMCFrame...");
          di->getMCFrame(i, cf);
-         cf->diffuseFrame(new TRandom3(0)); // THE MAGIC PART
+         showDebug("OK!\nDiffuseFrame...");
+         cf->diffuseFrame(new TRandom3(0)); // Model the cluster diffusion process
+         showDebug("OK!\nfindHits...");
          hits = cf->findHits();
+         showDebug("OK!\nfindClustersHitMap()...");
          tempClusterHitMap = hits->findClustersHitMap();
+         showDebug("OK!\n");
       }
 
-      else if (dataType == kData) {
+      else if (dataType == kData) { // Use experimental data (122, 140, 150, 160, 170, 180, 188 MeV)
+         showDebug("getDataFrame...");
          di->getDataFrame(i, cf, energy);
+         showDebug("OK!\nfindHits...");
          hits = cf->findHits();
+         showDebug("OK!\nfindClustersHitMap()...");
          tempClusterHitMap = hits->findClustersHitMap();
+         showDebug("OK!\n");
       }
       else {
         std::cerr << "Please choose between dataType = kMC (0) or kData (1).\n" << endl;
         exit(1);
       }
-   
-      for (UInt_t j=0; j<tempClusterHitMap->size(); j++)
+  
+      showDebug("Add to clusterHitMap...");
+      for (UInt_t j=0; j<tempClusterHitMap->size(); j++) {
          clusterHitMap->push_back( tempClusterHitMap->at(j) );
+      }
+      showDebug("OK!\n");
 
       cf->Reset();
    }
-   // delete tempClusterHitMap;
+   
    delete hits;
    delete cf;
    delete di;
@@ -581,19 +602,13 @@ void drawClusterShapes(Int_t Runs, Bool_t dataType, Bool_t recreate, Float_t ene
       gStyle->SetOptStat(0);
       gPad->Update();
       TPaveText *title = (TPaveText*) gPad->GetPrimitive("title");
-      title->SetTextFont(22);
-      title->SetTextSize(0.18);
+      if (title) {
+         title->SetTextFont(22);
+         title->SetTextSize(0.18);
+      }
       gPad->Modified();
    }
 }
-
-// a function of the same signature is also defined in HelperFunctions/getTracks.C
-// in the end it looks like it is not used anyway
-/*
-void makeTracks(Int_t Runs, Int_t dataType, Bool_t recreate, Float_t energy) {
-   Tracks * tracks = loadOrCreateTracks(recreate, Runs, dataType, energy);
-}
-*/
 
 void drawTrackRanges(Int_t Runs, Int_t dataType, Bool_t recreate, Float_t energy) {
    run_energy = energy;
@@ -1764,6 +1779,11 @@ void drawTracks3D(Int_t Runs, Int_t dataType, Bool_t recreate, Int_t switchLayer
    fromx = 0, tox = nx;
    */
 
+   fromx = nx/2 - 750*2;
+   fromy = ny/2 - 750*2;
+   tox = nx/2 + 750*2;
+   toy = ny/2 + 750*2;
+
    view->SetRange(fromx, 0, fromy, tox, 40, toy);
    Int_t iret;
    Float_t theta = 280;
@@ -1799,6 +1819,8 @@ void drawTracks3D(Int_t Runs, Int_t dataType, Bool_t recreate, Int_t switchLayer
 
       pMarker->SetPoint(i, x, y, z);
    }
+
+   printf("There are %d unused clusters.\n", restPoints->GetEntries());
 
    pMarker->Draw();
    
@@ -1978,15 +2000,15 @@ void drawTracks3D(Int_t Runs, Int_t dataType, Bool_t recreate, Int_t switchLayer
       l->SetLineWidth(3);
 //      if (l->GetLineColor() == kRed) l->Draw();
       l->Draw();
-      kDraw = true;
 
       trackPoints->Draw();
 //    EIDMarker->Draw();
       conflictMarker->Draw();
    }
-   view->ShowAxis();
+//   view->ShowAxis();
    c1->Update();
 
+   /*
    TAxis3D *axis = TAxis3D::GetPadAxis();
    axis->SetTitle("3D view of tracks and clusters");
    axis->SetLabelColor(kBlack);
@@ -1995,7 +2017,7 @@ void drawTracks3D(Int_t Runs, Int_t dataType, Bool_t recreate, Int_t switchLayer
    axis->SetYTitle("Layer number");
    axis->SetZTitle("Pixels in Y");
    axis->SetTitleOffset(2);
-
+*/
    vector<Int_t> * conflictTracks = tracks->getTracksWithConflictClusters();
    vector<Int_t> * oneConflictPair = nullptr;
    vector<Int_t> * allConflictPairs = new vector<Int_t>;

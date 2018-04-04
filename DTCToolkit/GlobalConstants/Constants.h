@@ -6,7 +6,7 @@
 #include <TObject.h>
 
 #define USEALPIDE
-// #define USEDEBUG
+#define USEDEBUG
 
 #ifdef USEDEBUG
 #define showDebug(x) std::cout << x
@@ -42,7 +42,7 @@ Bool_t   kIsFirstLayerAir = false;
 Bool_t   kUseAlpide = true;
 Bool_t   kDoTracking = true;
 Bool_t   kUseEmpiricalMCS = true;
-Bool_t   kFilterNuclearInteractions = true;
+Bool_t   kFilterNuclearInteractions = false;
 Bool_t   useDegrader = true;
 
 const Int_t sizeOfEventID = 25;
@@ -58,20 +58,20 @@ const Float_t kRad = 3.14159265/180.;
 const    Int_t nx = NX;
 const    Int_t ny = NY;
 const    Int_t nTrackers = 4;
-const    Float_t kAbsorberThickness = 3.5; // 3.3 focal
+const    Float_t kAbsorberThickness = 3.3; // 3.3 focal, 3.5 MC
 
 // nLayers are loaded in MaterialConstants.C according to the detector geometry
 const Float_t dx = DX; // mm
 const Float_t dy = DY; // mm
 const Float_t dz = DZ + kAbsorberThickness;
-Int_t kEventsPerRun = 1000;
+Int_t kEventsPerRun = 100;
 
 // Used for treatment of available experimental data files
 const Int_t nEnergies = 6;
 Int_t energies[nEnergies] = {122, 140, 150, 170, 180, 188};
 
 enum eMaterial {kTungsten, kAluminum, kPMMA, kWater, kCarbon};
-const Int_t kMaterial = kAluminum;
+const Int_t kMaterial = kTungsten;
 
 Int_t kDataType = kData;
 

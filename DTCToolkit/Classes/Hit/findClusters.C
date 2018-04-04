@@ -12,7 +12,7 @@
 Clusters * Hits::findClustersFromHits() {
    Clusters        * clusters = new Clusters(kEventsPerRun * 20);
    vector<Int_t>   * expandedCluster = nullptr;
-   vector<Int_t>   * checkedIndices = nullptr; // Optimization: Make this array
+   vector<Int_t>   * checkedIndices = nullptr;
    vector<Int_t>   * firstHits = nullptr;
    Int_t             layerIdxFrom, layerIdxTo;
 
@@ -33,13 +33,12 @@ Clusters * Hits::findClustersFromHits() {
          firstHits = findNeighbours(i);
 
          if (firstHits->size()) {
-            // Find expanded clusters is the time demanding function
             expandedCluster = getAllNeighboursFromCluster(i, checkedIndices); 
-
             appendNeighboursToClusters(expandedCluster, clusters);
             delete expandedCluster;
             delete firstHits;
          }
+         
       }
       delete checkedIndices;
    }
@@ -54,8 +53,9 @@ Clusters * Hits::findClustersFromHits() {
 }
 
 vector<Int_t> * Hits::findNeighbours(Int_t index) {
+   // Find all (of max 8) neighboring hits from the single hit At(index)
+
    vector<Int_t>   * neighbours = new vector<Int_t>;
-   Int_t             xGoal = getX(index);
    Int_t             yGoal = getY(index);
    Int_t             layer = getLayer(index);
    Int_t             idxFrom = getFirstIndexBeforeY(yGoal);
@@ -67,7 +67,7 @@ vector<Int_t> * Hits::findNeighbours(Int_t index) {
       if (index == j) continue;
       if (neighbours->size() == 8) break;
 
-      if (abs(xGoal - getX(j)) <= 1 && abs(yGoal - getY(j)) <= 1) {
+      if (abs(getX(index) - getX(j)) <= 1 && abs(yGoal - getY(j)) <= 1) {
          neighbours->push_back(j);
       }
    }
@@ -141,17 +141,24 @@ void Hits::checkAndAppendAllNextCandidates(vector<Int_t> * nextCandidates, vecto
    }
 }
 
+/////////////////
+/////////////////
+
 vector<Hits*> * Hits::findClustersHitMap() {
+   // Not part of the standard cluster finder routine
+   // return vector<Hits*>, where each Hits contains Hit objects in a single cluster
    vector<Hits*> *clusterHitMap = new vector<Hits*>;
    vector<Int_t> *checkedIndices = new vector<Int_t>;
    vector<Int_t> *expandedCluster = 0;
    checkedIndices->reserve(GetEntriesFast());
 
+   showDebug("Looping through " << GetEntriesFast() << " hits\n");
    for (Int_t i = 0; i < GetEntriesFast(); i++) {
       if (isItemInVector(i, checkedIndices)) continue;
 
       vector<Int_t> * firstHits = findNeighbours(i);
       if (firstHits->size()) {
+         showDebug("Finding neighbours from hit " << i << endl);
          expandedCluster = getAllNeighboursFromCluster(i, checkedIndices);
          appendExpandedClusterToClusterHitMap(expandedCluster, clusterHitMap);
          delete expandedCluster;
