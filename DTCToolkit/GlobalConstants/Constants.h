@@ -5,8 +5,11 @@
 #include <vector>
 #include <TObject.h>
 
-// #define USEALPIDE // Comment to use experimental data
-#define USEDEBUG
+// Set these compiler directives to adjust the logic flow of this file
+
+// #define USEALPIDE // Comment to use experimental data; uncomment to use Monte Carlo data
+#define USEDEBUG // Uncomment to print more debug information
+// #define ONECHIP // (MC) Limit the data area to a single chip (simplify visualization & memory usage)
 
 #ifdef USEDEBUG
 #define showDebug(x) std::cout << x
@@ -14,16 +17,13 @@
 #define showDebug(x)
 #endif
 
-
-// Was 3072x1024 w/29.3 um px
-// With 270x135 and 30 um px this should be 9000x4500
-#ifdef USEALPIDE
+#ifdef USEALPIDE // Monte Carlo
 #define NX 9000
 #define DX 0.030
 #define DY 0.030
 #define NY 4500
 #define DZ 0.435
-#else
+#else // exp. data
 #define NX 1280
 #define NY 1280
 #define DX 0.03
@@ -31,17 +31,22 @@
 #define DZ 0.975
 #endif
 
-enum eFrameType {kCalorimeter, kTracker};
-enum eDataType {kMC, kData};
+#ifdef ONECHIP // In case 9000 x 4500 x (number of layers) is too taxing
+#undef NX
+#undef NY
+#define NX 1024
+#define NY 512
+#endif
 
-Float_t  run_energy = 0;
-Float_t  run_degraderThickness = 0;
+// -------------------------------------
+
 Bool_t   kIsAluminumPlate = false;
 Bool_t   kIsScintillator = false;
 Bool_t   kIsFirstLayerAir = false;
 Bool_t   kDoTracking = true;
 Bool_t   kUseEmpiricalMCS = true;
 Bool_t   kFilterNuclearInteractions = false;
+Int_t    kEventsPerRun = 500;
 
 #ifdef USEALPIDE
 Bool_t   kUseDegrader = true;
@@ -75,13 +80,15 @@ const Float_t kAbsorberThickness = 3.3; // FOCAL EXPERIMENTAL DATA, DON'T CHANGE
 const Float_t dx = DX; // mm
 const Float_t dy = DY; // mm
 const Float_t dz = DZ + kAbsorberThickness;
-Int_t kEventsPerRun = 5000;
 
 // Used for treatment of available experimental data files
 const Int_t nEnergies = 6;
 Int_t energies[nEnergies] = {122, 140, 150, 170, 180, 188};
 
+enum eFrameType {kCalorimeter, kTracker};
+enum eDataType {kMC, kData};
 enum eMaterial {kTungsten, kAluminum, kPMMA, kWater, kCarbon};
+enum eOutputUnit {kPhysical, kWEPL, kEnergy};
 
 #ifdef USEALPIDE
 const Int_t kMaterial = kAluminum;
@@ -89,9 +96,6 @@ const Int_t kMaterial = kAluminum;
 const Int_t kMaterial = kTungsten;
 #endif
 
-Int_t kDataType = kData;
-
-enum eOutputUnit {kPhysical, kWEPL, kEnergy};
 Int_t kOutputUnit = kPhysical;
 
 /*
@@ -132,6 +136,8 @@ const Int_t kMinimumTracklength = 5;
 // How much above the average edep must the bragg peak (last two layers) be?
 const Float_t kBPFactorAboveAverage = 1.3;
 
-Int_t GlobalLayerID = 0;
-
+Int_t    GlobalLayerID = 0;
+Float_t  run_energy = 0;
+Float_t  run_degraderThickness = 0;
+Int_t    kDataType = kData;
 #endif

@@ -128,9 +128,11 @@ public :
    virtual void      Show(Long64_t entry = -1);
 
    // My own functions in DataInterface.C
-   virtual Int_t     getMCFrame(Int_t runNo, CalorimeterFrame *cf, Float_t *x_energy = 0, Float_t *y_energy = 0);
+   virtual Int_t     getMCFrame(Int_t runNo, CalorimeterFrame *cf);
+   virtual Int_t     getMCFrame(Int_t runNo, Layer *l);
    virtual void      getMCClusters(Int_t runNo, Clusters *clusters);
    virtual void      getDataFrame(Int_t runNo, CalorimeterFrame *cf, Int_t energy = 188);
+   virtual void      getDataFrame(Int_t runNo, Layer *l, Int_t energy = 188);
    virtual void      getDataHits(Int_t runNo, Hits * hits, Int_t energy = 188);
    virtual void      writeDataFrame(Int_t energy = 190);
    virtual void      getMCData(Int_t runNo, TH3F* Frame3D);

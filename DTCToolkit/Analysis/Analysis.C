@@ -463,7 +463,7 @@ void getTrackStatistics(Int_t Runs, Int_t dataType, Bool_t recreate, Float_t ene
    delete tracks;
 }
 
-void drawClusterShapes(Int_t Runs, Bool_t dataType, Bool_t recreate, Float_t energy, Float_t degraderThickness) {
+void drawClusterShapes(Int_t Runs, Bool_t dataType, Float_t energy, Float_t degraderThickness) {
    // get vector of TH2F's, each with a hits distribution and cluster size
    // dataType = kMC (0) or kData (1)
 
@@ -473,7 +473,7 @@ void drawClusterShapes(Int_t Runs, Bool_t dataType, Bool_t recreate, Float_t ene
    run_energy = energy;
    run_degraderThickness = degraderThickness;
 
-   Int_t useDataHits = true;
+   Int_t useDataHits = false; // cpu saver?
    kDataType = dataType;
 
    Int_t nRows = 6;
@@ -532,7 +532,8 @@ void drawClusterShapes(Int_t Runs, Bool_t dataType, Bool_t recreate, Float_t ene
 
       else if (dataType == kData && useDataHits == true) {
          di->getDataHits(i, dataHits, energy);
-         tempClusterHitMap = hits->findClustersHitMap();
+         showDebug("Found " << dataHits->GetEntriesFast() << " hits in exp. data\n");
+         tempClusterHitMap = dataHits->findClustersHitMap();
       }  
 
       else {
@@ -768,71 +769,6 @@ void drawFitScale(Int_t Runs, Int_t dataType, Bool_t recreate, Float_t energy) {
    hScale->SetXTitle("Parameter 1 of fit (SCALE)");
    hScale->Draw();
 }  
-
-void drawTracksWithEnergyLoss(Int_t Runs, Int_t dataType, Bool_t recreate, Float_t energy) {
-   run_energy = energy;
-   kDataType = dataType;
-   
-   Float_t x_energy[sizeOfEventID*400] = {};
-   Float_t y_energy[sizeOfEventID*400] = {};
-   
-   Tracks * tracks = loadOrCreateTracks(recreate, Runs, dataType, energy, x_energy, y_energy);
-   
-   cout << "Using aluminum plate: " << kIsAluminumPlate << endl;
-   cout << "Using scintillators: " << kIsScintillator << endl;
-
-   Int_t nPlotX = 2, nPlotY = 2;
-   Int_t fitIdx = 0, plotSize = nPlotX*nPlotY;
-   Int_t skipIdx = 0;
-
-   TGraphErrors *outputGraph;
-   TCanvas *cAccuracy = new TCanvas("cAccuracy", "Accuracy of fit", 1400, 1000);
-   TCanvas *cGraph = new TCanvas("cGraph", "Fitted data points", 1400, 1000);
-   TH2F *hAccuracy = new TH2F("hAccuracy", Form("Accuracy of fit in a %.0f MeV nominal beam", run_energy), 400, 0, 180, 400, 0, 180);
-   cGraph->Divide(nPlotX,nPlotY, 0.000001, 0.000001, 0);
-   gStyle->SetPadBorderMode(0); gStyle->SetFrameBorderMode(0);
-   gStyle->SetTitleH(0.06); gStyle->SetTitleYOffset(1);
-   hAccuracy->SetYTitle("Fit energy [MeV]"); hAccuracy->SetXTitle("Real energy [MeV]");
-
-   Float_t finalEnergy, realEnergy, preTL = 0;
-   Float_t fitEnergy, fitRange, fitScale, fitError = 0;
-   Int_t eventID = -1;
-   
-   for (Int_t j=0; j<tracks->GetEntriesFast(); j++) {
-      Track *thisTrack = tracks->At(j);
-      if (!thisTrack) continue;
-
-      outputGraph = (TGraphErrors*) thisTrack->doTrackFit(false, false);
-      if (!outputGraph) {
-         continue;
-      }
-
-      eventID = thisTrack->At(0)->getEventID()-1;
-
-      preTL = thisTrack->getPreTL() - 1.5;
-//    if       (thisTrack->getYmm(0) > 0)    { preTL = thisTrack->getPreTL() + firstUpperLayerZ; }
-//    else if  (thisTrack->getYmm(0) < 0)    { preTL = thisTrack->getPreTL() + firstLowerLayerZ; }
-      for (Int_t i=eventID*sizeOfEventID; i<(eventID+1)*sizeOfEventID; i++) { x_energy[i] += preTL; }
-
-      convertXYToWEPL(x_energy, y_energy, eventID);
-      realEnergy = getEnergyFromXY(x_energy, y_energy, eventID);
-
-      fitRange = thisTrack->getFitParameterRange();
-      fitEnergy = getEnergyFromWEPL(fitRange);
-      fitScale  = thisTrack->getFitParameterScale();
-      fitError = quadratureAdd(thisTrack->getFitParameterError(), dz/sqrt(12));
-      
-      hAccuracy->Fill(realEnergy, fitEnergy);
-
-      if (fitIdx < plotSize) {
-         drawIndividualGraphs(cGraph, outputGraph, fitRange, fitScale, fitError, fitIdx++, eventID, x_energy, y_energy);
-      }
-
-      else delete outputGraph;
-   }
-   cAccuracy->cd();
-   hAccuracy->Draw("COLZ");
-}
 
 Float_t drawTH2FRangeAccuracy() {
    TCanvas      * c = new TCanvas("c", "Range determination accuracy", 1200, 1200);
@@ -2468,48 +2404,46 @@ void drawRegionOccupancy(Int_t Runs, Int_t Layer, Float_t energy) {
    l->Draw();
 }
 
-void drawFrame2D(Int_t dataType, Int_t Layer, Float_t energy, Float_t degraderThickness) {
+void drawFrame2D(Int_t dataType, Int_t layerNo, Float_t energy, Float_t degraderThickness) {
    run_energy = energy;
    run_degraderThickness = degraderThickness;
-   TStopwatch t1, t2, t3, t4, t5, t6, t7, t8;
 
-   t1.Reset();
-   t1.Start();
+   printf("Creating a 2D histogram of layer %d using %s and %d number of primary protons\n", layerNo, getDataTypeChar(dataType), kEventsPerRun); 
+
    DataInterface *di = new DataInterface();
-   t1.Stop();
-   t2.Reset();
-   t2.Start();
-   CalorimeterFrame *cf = new CalorimeterFrame();
-   t2.Stop();
+   Layer *l = new Layer(layerNo);
+   TCanvas *c1 = new TCanvas("c1", Form("Hit distribution in layer %d", layerNo), 1200, 800);
 
-   printf("DI = %.2fs. CF = %.2fs.\n", t1.CpuTime(), t2.CpuTime());
-  
-//   TCanvas *c1 = new TCanvas("c1", "Hit distribution in layer", 1200, 800);
-
+/*
+ * // Draw several layers at once
+ *
    vector<TCanvas*> *cvec = new vector<TCanvas*>;
    for (Int_t i=0; i<nLayers; i++) {
       cvec->push_back(new TCanvas(Form("c%d", i), Form("Hit distribution in layer %d", i), 800, 800));
    }
-
+*/
    
    if (dataType == kData) {
-      di->getDataFrame(0, cf, energy);
+      di->getDataFrame(0, l, energy);
    }
 
    else {
       showDebug("Get MC frame...");
-      di->getMCFrame(0, cf);
-      showDebug("OK!\nDiffuseFrame...");
-      cf->diffuseFrame(new TRandom3(0)); // Model the cluster diffusion process
+      di->getMCFrame(0, l);
+      showDebug("OK!\nDiffuseLayer...");
+      l->diffuseLayer(new TRandom3(0)); // Model the cluster diffusion process
       showDebug("OK!\n");
    }
 
    delete di;
 
-   TH2F *Frame2D = nullptr;
-
    gStyle->SetOptStat(0);
+   TH2F *Frame2D = l->getTH2F();
+   Frame2D->Draw("COLZ");
 
+/* 
+ * // Draw several layers at once
+ *
    for (Int_t i=0; i<6; i++) {
       cvec->at(i)->cd();
       Frame2D = cf->getTH2F(i);
@@ -2517,6 +2451,8 @@ void drawFrame2D(Int_t dataType, Int_t Layer, Float_t energy, Float_t degraderTh
       Frame2D->GetXaxis()->SetRangeUser(600,900);
       Frame2D->GetYaxis()->SetRangeUser(400,700);
    }
+*/
+
 }
 
 void drawData3D(Int_t Runs, Float_t energy) {

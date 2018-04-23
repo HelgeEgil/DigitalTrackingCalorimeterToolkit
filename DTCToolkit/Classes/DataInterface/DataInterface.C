@@ -355,6 +355,48 @@ void DataInterface::getDataFrame(Int_t runNo, CalorimeterFrame * cf, Int_t energ
    delete f;
 }
 
+void DataInterface::getDataFrame(Int_t runNo, Layer * l, Int_t energy) {
+
+   if (!existsEnergyFile(energy)) {
+      cout << "There are no data files with energy " << energy << endl;
+      return;
+   }
+
+   Int_t eventIdFrom = runNo * kEventsPerRun;
+   Int_t eventIdTo = eventIdFrom + kEventsPerRun;
+
+   TString fn = Form("Data/ExperimentalData/DataFrame_%i_MeV.root", energy);
+   TFile *f = new TFile(fn);
+   TTree *tree = (TTree*) f->Get("tree");
+
+   Int_t nentries = tree->GetEntries();
+   if (eventIdTo > nentries) {
+      eventIdTo = nentries;
+   }
+   cout << "Found " << nentries << " frames in the DataFrame.\n";
+
+   TLeaf *lX = tree->GetLeaf("fDataFrame.fX");
+   TLeaf *lY = tree->GetLeaf("fDataFrame.fY");
+   TLeaf *lLayer = tree->GetLeaf("fDataFrame.fLayer");
+
+   for (Int_t i=eventIdFrom; i<eventIdTo; i++) {
+      tree->GetEntry(i);
+
+      for (Int_t j=0; j<lX->GetLen(); j++) {
+         Int_t x = lX->GetValue(j) + nx/2;
+         Int_t y = lY->GetValue(j) + ny/2;
+         Int_t z = lLayer->GetValue(j);
+
+         if ( x > nx || y > ny ) printf("POINT (x,y,z) = (%d\t%d\t%d) OUT OF BOUNDS!!\n", x,y,z);
+
+         if (l->getLayer() == z) { // Only fill the single layer in question
+            l->Fill(x, y);
+         }
+      }
+   }
+   delete f;
+}
+
 void DataInterface::getDataHits(Int_t runNo, Hits * hits, Int_t energy) {
    if (!existsEnergyFile(energy)) {
       cout << "There are no data files with energy " << energy << endl;
@@ -512,9 +554,8 @@ void  DataInterface::getMCClusters(Int_t runNo, Clusters *clusters) {
    }
 }
 
-Int_t DataInterface::getMCFrame(Int_t runNo, CalorimeterFrame *cf, Float_t *x_energy, Float_t *y_energy) {
+Int_t DataInterface::getMCFrame(Int_t runNo, CalorimeterFrame *cf) {
    // Retrieve kEventsPerRun events and put them into CalorimeterFrame*
-   // if x_energy and y_energy is supplied, it implies that a full simulation is performed, and hits are recorded everywhere
    
    Int_t eventIdFrom = runNo * kEventsPerRun;
    Int_t eventIdTo = eventIdFrom + kEventsPerRun;
@@ -551,6 +592,51 @@ Int_t DataInterface::getMCFrame(Int_t runNo, CalorimeterFrame *cf, Float_t *x_en
 
       if (calorimeterLayer < nLayers) {
          cf->fillAt(calorimeterLayer, x, y, edep*1000/14);
+      }
+   }
+
+   if (kEventsPerRun > 1) return -1;
+   return eventID;
+}
+
+Int_t DataInterface::getMCFrame(Int_t runNo, Layer *l) {
+   // Retrieve kEventsPerRun events and put them into Layer*
+   
+   Int_t eventIdFrom = runNo * kEventsPerRun;
+   Int_t eventIdTo = eventIdFrom + kEventsPerRun;
+
+   if (runNo == 0) lastJentry_ = 0;
+
+   Float_t offsetX = (nx/2+2) * dx;
+   Float_t offsetY = (ny/2) * dy;
+   Float_t x,y;
+   Int_t calorimeterLayer = -1;
+
+   if (fChain == 0) return -1;
+   Long64_t nentries = fChain->GetEntriesFast();
+   Long64_t nbytes = 0, nb = 0;
+
+   showDebug("Nentries = " << fChain->GetEntries() << endl);
+
+   for (Long64_t jentry=lastJentry_; jentry<nentries; jentry++) {
+      Long64_t ientry = LoadTree(jentry);
+      if (ientry<0) break;
+      nb = fChain->GetEntry(jentry);
+      nbytes += nb;
+      
+      if (eventID < eventIdFrom) continue;
+      else if (eventID >= eventIdTo) {
+         lastJentry_ = jentry;
+         break;
+      }
+
+      calorimeterLayer = level1ID + baseID - 1; 
+
+      x = (posX + offsetX) * nx/2 / (offsetX);
+      y = (posY + offsetY) * ny/2 / (offsetY);
+
+      if (l->getLayer() == calorimeterLayer) {
+         l->Fill(x, y, edep*1000/14);
       }
    }
 
