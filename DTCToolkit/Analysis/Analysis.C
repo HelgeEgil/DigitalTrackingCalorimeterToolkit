@@ -2468,34 +2468,55 @@ void drawRegionOccupancy(Int_t Runs, Int_t Layer, Float_t energy) {
    l->Draw();
 }
 
-void drawFrame2D(Int_t Runs, Int_t dataType, Int_t Layer, Float_t energy) {
+void drawFrame2D(Int_t dataType, Int_t Layer, Float_t energy, Float_t degraderThickness) {
    run_energy = energy;
+   run_degraderThickness = degraderThickness;
+   TStopwatch t1, t2, t3, t4, t5, t6, t7, t8;
+
+   t1.Reset();
+   t1.Start();
    DataInterface *di = new DataInterface();
+   t1.Stop();
+   t2.Reset();
+   t2.Start();
    CalorimeterFrame *cf = new CalorimeterFrame();
+   t2.Stop();
+
+   printf("DI = %.2fs. CF = %.2fs.\n", t1.CpuTime(), t2.CpuTime());
   
-   TCanvas *c1 = new TCanvas("c1", "Hit distribution in layer", 1200, 800);
+//   TCanvas *c1 = new TCanvas("c1", "Hit distribution in layer", 1200, 800);
 
-   TList *histogramList = new TList;
-   for (Int_t k=0; k<Runs; k++) {
-      if (dataType == kData) {
-         di->getDataFrame(k, cf, energy);
-      }
-      else {
-         di->getMCFrame(k, cf);
-      }
+   vector<TCanvas*> *cvec = new vector<TCanvas*>;
+   for (Int_t i=0; i<nLayers; i++) {
+      cvec->push_back(new TCanvas(Form("c%d", i), Form("Hit distribution in layer %d", i), 800, 800));
+   }
 
-      TH2F *Frame2D = cf->getTH2F(Layer);
-      histogramList->Add(Frame2D);
+   
+   if (dataType == kData) {
+      di->getDataFrame(0, cf, energy);
+   }
+
+   else {
+      showDebug("Get MC frame...");
+      di->getMCFrame(0, cf);
+      showDebug("OK!\nDiffuseFrame...");
+      cf->diffuseFrame(new TRandom3(0)); // Model the cluster diffusion process
+      showDebug("OK!\n");
    }
 
    delete di;
-   TH2F *Frame2D = new TH2F("Frame2D", Form("Hit distribution in layer %i", Layer),
-                              nx, 0, nx, ny, 0, ny);
 
-   c1->cd();
-   Frame2D->Merge(histogramList);
-   Frame2D->Draw("COLZ");
+   TH2F *Frame2D = nullptr;
+
    gStyle->SetOptStat(0);
+
+   for (Int_t i=0; i<6; i++) {
+      cvec->at(i)->cd();
+      Frame2D = cf->getTH2F(i);
+      Frame2D->Draw("COLZ");
+      Frame2D->GetXaxis()->SetRangeUser(600,900);
+      Frame2D->GetYaxis()->SetRangeUser(400,700);
+   }
 }
 
 void drawData3D(Int_t Runs, Float_t energy) {

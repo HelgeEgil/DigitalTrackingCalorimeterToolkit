@@ -13,7 +13,7 @@ using namespace DTC;
 Float_t 		drawBraggPeakGraphFit(Int_t Runs, Int_t dataType = kMC, Bool_t recreate = 0, Float_t energy = 188, Float_t degraderThickness = 0, Int_t idx = -1);
 void			drawTungstenSpectrum(Int_t Runs, Int_t dataType = kMC, Bool_t recreate = 0, Float_t energy = 188);
 Hits		 *	getEventIDs(Int_t Runs, Float_t energy);
-void			drawFrame2D(Int_t Runs, Int_t dataType = kMC, Int_t Layer = 2, Float_t energy = 170);
+void			drawFrame2D(Int_t dataType = kMC, Int_t Layer = 2, Float_t energy = 170, Float_t degraderThickness = 0);
 void        drawDiffusionCheck(Int_t Runs, Int_t Layer, Float_t energy);
 void			drawDiffusionCheck(Int_t Runs, Int_t Layer, Float_t energy);
 void			drawAlignmentCheck(Int_t Runs, Int_t dataType = kMC, Bool_t recreate = 0, Float_t energy = 188);

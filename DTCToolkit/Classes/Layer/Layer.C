@@ -56,7 +56,6 @@ Int_t DTC::Layer::refinedDiffuseLayer(TRandom3 *gRandom) {
    Hits *hits = new Hits();
    Bool_t isHits = findHits(hits);
    Int_t nHits = hits->GetEntriesFast();
-   
    frame2D_.Reset();
 
    showDebug("Diffusing layer  " << layerNo_ << ". Number of hits = " << nHits << endl);

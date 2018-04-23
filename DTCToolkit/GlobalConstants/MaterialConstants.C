@@ -47,7 +47,7 @@ void MaterialConstants() {
    }
 
    if (kMaterial == kTungsten) {
-      nLayers = 100;
+      nLayers = 24;
       p = p_tungsten;
       alpha = alpha_tungsten;
       alpha_prime = alpha_prime_tungsten;
@@ -58,7 +58,7 @@ void MaterialConstants() {
    }
 
    else if (kMaterial == kAluminum) {
-      nLayers = 150;
+      nLayers = 45;
       p = p_aluminum;
       alpha = alpha_aluminum;
       alpha_prime = alpha_prime_aluminum;

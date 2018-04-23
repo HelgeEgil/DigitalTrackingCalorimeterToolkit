@@ -5,8 +5,8 @@
 #include <vector>
 #include <TObject.h>
 
-// #define USEALPIDE
-// #define USEDEBUG
+// #define USEALPIDE // Comment to use experimental data
+#define USEDEBUG
 
 #ifdef USEDEBUG
 #define showDebug(x) std::cout << x
@@ -39,15 +39,16 @@ Float_t  run_degraderThickness = 0;
 Bool_t   kIsAluminumPlate = false;
 Bool_t   kIsScintillator = false;
 Bool_t   kIsFirstLayerAir = false;
-Bool_t   kUseAlpide = false;
 Bool_t   kDoTracking = true;
 Bool_t   kUseEmpiricalMCS = true;
 Bool_t   kFilterNuclearInteractions = false;
-Bool_t   kUseDegrader = false;
 
 #ifdef USEALPIDE
-kUseDegrader = true;
-kUseAlpide = true;
+Bool_t   kUseDegrader = true;
+Bool_t   kUseAlpide = true;
+#else
+Bool_t   kUseAlpide = false;
+Bool_t   kUseDegrader = false;
 #endif
 
 const Int_t sizeOfEventID = 25;
@@ -65,16 +66,16 @@ const Int_t ny = NY;
 const Int_t nTrackers = 4;
 
 #ifdef USEALPIDE
-const Float_t kAbsorberThickness = 3;
+const Float_t kAbsorberThickness = 3.5; // ALPIDE, CHANGE TO FIT MC DATA GEOMETRY
 #else
-const Float_t kAbsorberThickness = 3.3; // 3.3 focal, 3.5 MC
+const Float_t kAbsorberThickness = 3.3; // FOCAL EXPERIMENTAL DATA, DON'T CHANGE
 #endif
 
 // nLayers are loaded in MaterialConstants.C according to the detector geometry
 const Float_t dx = DX; // mm
 const Float_t dy = DY; // mm
 const Float_t dz = DZ + kAbsorberThickness;
-Int_t kEventsPerRun = 250;
+Int_t kEventsPerRun = 5000;
 
 // Used for treatment of available experimental data files
 const Int_t nEnergies = 6;
@@ -113,10 +114,10 @@ const Int_t kTrackFindingAlgorithm = kWeightedRecursive;
  *  The new cluster sizes range in size from 50 % to 100 % of the original cluster size, depending on
  *  how close the tracks collide.
  */
-const Bool_t kUseTrackSplitting = kTRUE;
+const Bool_t kUseTrackSplitting = true;
 
 // Use refined clustering model -- empirical model with updated parameters
-const Bool_t kUseRefinedClustering = kTRUE;
+const Bool_t kUseRefinedClustering = true;
 
 // Tracking parameters
 Float_t initialSearchRadius = 50 * dx; // 20 if dimensionless
