@@ -44,8 +44,8 @@
 /gate/source/PBS/setEnergy 250. MeV
 /gate/source/PBS/setSigmaEnergy 0. MeV
 /gate/source/PBS/setPosition 0. 0. {beampos} mm
-/gate/source/PBS/setSigmaX 4 mm
-/gate/source/PBS/setSigmaY 2 mm
+/gate/source/PBS/setSigmaX 3 mm
+/gate/source/PBS/setSigmaY 3 mm
 /gate/source/PBS/setSigmaTheta 3.3 mrad
 /gate/source/PBS/setSigmaPhi 3.8 mrad
 /gate/source/PBS/setEllipseXThetaEmittance 15 mm*mrad
@@ -71,8 +71,8 @@
 
 /gate/output/root/enable
 /gate/output/root/setRootSinglesFlag 0
-/gate/output/root/setFileName ../../DTCToolkit/Data/MonteCarlo/DTC_Aluminium_Absorber{absorberthickness}mm_Degrader{degraderthickness}mm_{energy}MeV_4x2
-#/gate/output/root/setFileName ../../DTCToolkit/Data/MonteCarlo/DTC_Tungsten_Absorber{absorberthickness}mm_Degrader{degraderthickness}mm_{energy}MeV
+#/gate/output/root/setFileName ../../DTCToolkit/Data/MonteCarlo/DTC_Aluminium_Absorber{absorberthickness}mm_Degrader{degraderthickness}mm_{energy}MeV_3x3
+/gate/output/root/setFileName ../../DTCToolkit/Data/MonteCarlo/DTC_Aluminium_Absorber{absorberthickness}mm_Degrader{degraderthickness}mm_{energy}MeV
 #/gate/output/root/setFileName ../../projects/Tracking/Data/RealisticPencilBeamThrough20cmWaterPhantom.root
 
 #===============#
@@ -81,5 +81,5 @@
 
 /gate/random/setEngineName MersenneTwister
 /gate/random/setEngineSeed auto
-/gate/application/setTotalNumberOfPrimaries 50000
+/gate/application/setTotalNumberOfPrimaries 5000
 /gate/application/start

@@ -64,7 +64,7 @@ const    Float_t kAbsorberThickness = 3.3; // 3.3 focal, 3.5 MC
 const Float_t dx = DX; // mm
 const Float_t dy = DY; // mm
 const Float_t dz = DZ + kAbsorberThickness;
-Int_t kEventsPerRun = 100;
+Int_t kEventsPerRun = 5;
 
 // Used for treatment of available experimental data files
 const Int_t nEnergies = 6;

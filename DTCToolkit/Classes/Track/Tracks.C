@@ -450,3 +450,20 @@ Int_t Tracks::getNMissingClustersWithEventID(Int_t eventID, Int_t afterLayer) {
 
    return n;
 }
+
+void Tracks::createEIDSortList() {
+   Int_t eventID;
+
+   for (Int_t i=0; i<GetEntriesFast(); i++) {
+      if (!At(i)) continue;
+      EIDindex_[i] = getEventID(i);
+      showDebug("Tracks::createEIDSortList: EIDindex_[" << i< <<"] = " << getEventID(i) << endl);
+   }
+}
+
+Track * Tracks::getTrackWithEID(Int_t eid) {
+   Int_t trackIdx = EIDindex_[eid];
+   if (!At(trackIdx)) return nullptr;
+   return At(trackIdx);
+}
+  

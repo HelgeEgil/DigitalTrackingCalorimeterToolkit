@@ -2811,3 +2811,56 @@ void generateWaterDegraderValues() {
       printf("Writing to file: %d %.4f\n", depth, getEnergyAtWEPL(250, (float) depth));
    }
 }
+
+void drawTrackingError() {
+   // Draw a histogram on the error of different track recon scenarios ...
+   // Error ^ 2 = error_xy ^ 2 + ( 15 cm * error_rads ) ^ 2 
+   // Check for different track recon efficiencies, and find RMS values :)
+   
+   run_energy = energy;
+   run_degraderThickness = degraderThickness;
+
+   Track *  thisTrack = nullptr;
+   Track *  originalTrack = nullptr;
+   Int_t    finalEID;
+   Tracks * tracks = loadOrCreateTracks(recreate, Runs, dataType, energy);
+
+   printf("Create EID index list ... ");
+   tracks->createEIDSortList();
+   printf("OK!\n");
+
+   TCanvas *c = new TCanvas("c", "Total error from tracking errors", 1200, 900);
+   c->Divide(3,1,0,0);
+
+   TH1F *hPosError = new TH1F("hPosError", "Positional Error;Error [mm];Entries", 0, 100);
+   TH1F *hAngError = new TH1F("hAngError", "Angular Error;Error [mrad];Entries", 0, 100);
+   TH1F *hTotError = new TH1F("hTotError", "Total Projected Error;Error [mm];Entries", 0, 100);
+      
+   for (Int_t i=0; i<tracks->GetEntriesFast(); i++) {
+      thisTrack = tracks->At(i);
+      if (!thisTrack) continue;
+
+      if (thisTrack->isFirstAndLastEventIDEqual()) continue;
+
+      finalEid = thisTrack->Last()->getEventID();
+      originalTrack = (Track*) tracks->getTrackWithEID(finalEid);
+
+      Float_t x0, y0, x1, y1, x0p, y0p, x1p, y0p;
+      Float_t theta0, theta1;
+      Float_t scalar0, dot0, scalar1, dot1;
+
+      x0 = thisTrack->getXmm(0);
+      y0 = thisTrack->getYmm(0);
+      x1 = thisTrack->getXmm(1);
+      y1 = thisTrack->getYmm(1);
+
+      x0p = originalTrack->getXmm(0);
+      y0p = originalTrack->getYmm(0);
+      x1p = originalTrack->getXmm(1);
+      y1p = originalTrack->getYmm(1);
+
+      scalar1 = sqrt(pow(x0, 2) + pow(y0, 2) + pow(-150, 2)) * sqrt(pow(x1, 2) + pow(y1, 2) + pow(0, 2)); // angle = 15 cm in front of first layer
+      dot1 = x0 * x1 + y0 * y1;
+
+      angle = fabs((acos(dot1 / scalar1) - acos(dot0 / scalar0) )* 1000;
+
