@@ -89,24 +89,29 @@ public:
    virtual void makeLayerIndex();
    virtual void matchWithEventIDs(Hits * eventIDs);
 
-   // in file findTracks.C
-   Tracks    * findCalorimeterTracks();
-   Tracks    * findCalorimeterTracksAlpide();
+   // in file findTracks.C 
+   // This is the tracking algo used in 2018 WoC paper
    Tracks    * findCalorimeterTracksWithMCTruth();
    Tracks    * findTracksWithRecursiveWeighting();
-   Tracks    * findTracksWithReverseRecursiveWeighting();
    void        doRecursiveWeightedTracking(Node * seedNode, vector<Node*> * endNodes);
-   void        doReverseRecursiveWeightedTracking(Node * seedNode, vector<Node*> * endNodes);
-   void        findTracksFromLayer(Tracks *tracks, Int_t layer, Bool_t kUsedClustersInSeeds = true);
-   void        findRemainingTracks(Tracks *tracks);
    Clusters  * findSeeds(Int_t layer, Bool_t kUsedClustersInSeeds = true);
-   Track     * trackPropagation(Cluster *seed);
    Clusters  * findNearestClustersInNextLayer(Cluster *seed);
-   Clusters  * findNearestClustersInLastLayer(Cluster *seed);
    Clusters  * findClustersFromSeedInLayer(Cluster *seed, Int_t nextLayer);
-   void        growTrackFromLayer(Track *track, Int_t fromLayer);
    Cluster   * findNearestNeighbour(Track* track, Cluster *projectedPoint, Bool_t rejectUsed = true);
-   Track     * findLongestTrack(Tracks *seedTracks);
+
+   // Work in progress, in file findTracksCandidateAlgorithms.C
+//    Tracks    * findTracksWithReverseRecursiveWeighting(); (*)
+//    void        doReverseRecursiveWeightedTracking(Node * seedNode, vector<Node*> * endNodes); (*)
+//    void        findRemainingTracks(Tracks *tracks); (*)
+//    Clusters  * findNearestClustersInLastLayer(Cluster *seed); (*)
+//    void        growTrackFromLayer(Track *track, Int_t fromLayer); (*)
+//    Track     * findLongestTrack(Tracks *seedTracks); (*)
+
+// Pruned functions, but kept here for posteriority: Earlier versions of tracking algo, as used in 2017 NIMA paper
+//    Tracks    * findCalorimeterTracks(); // find function in pre-2018-08 version on GH
+//    Tracks    * findCalorimeterTracksAlpide(); // find function in pre-2018-08 version on GH
+//    void        findTracksFromLayer(Tracks *tracks, Int_t layer, Bool_t kUsedClustersInSeeds = true); // find function in pre-2018-08 version on GH
+//    Track     * trackPropagation(Cluster *seed); // find function in pre-2018-08 version on GH
 
    ClassDef(Clusters,5)
 };

@@ -100,28 +100,6 @@ const Int_t kMaterial = kTungsten;
 
 Int_t kOutputUnit = kPhysical;
 
-/*
- * Track reconstruction algorithms
- *  recursive is excellent on small frames, really slow on large
- *  nearestCluster is good on everything
- */
-
-enum eTrackFindingAlgorithm {kWeightedRecursive, kReverseWeightedRecursive, kNearestCluster};
-// const Int_t kTrackFindingAlgorithm = kNearestCluster;
-const Int_t kTrackFindingAlgorithm = kWeightedRecursive;
-
-/*
- * Track splitting
- *  Look through all tracks after track finding. If any tracks miss
- *  a cluster in the vicinity of a track crossing (looks for track connected
- *  clusters near the /interpolated/ missing cluster positing (between track cluster i-1 and i+1) )
- *  Split the cluster into two, and connect the other half to the other track.
- *
- *  The new cluster sizes range in size from 50 % to 100 % of the original cluster size, depending on
- *  how close the tracks collide.
- */
-const Bool_t kUseTrackSplitting = true;
-
 // Use refined clustering model -- empirical model with updated parameters
 const Bool_t kUseRefinedClustering = true;
 

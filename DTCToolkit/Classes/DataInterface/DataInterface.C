@@ -33,8 +33,7 @@
 
 using namespace DTC;
 
-DataInterface::DataInterface(TTree *tree) : fChain(0)
-{
+DataInterface::DataInterface(TTree *tree) : fChain(0) {
 // if parameter tree is not specified (or zero), connect the file
 // used to generate this class and read the Tree.
    if (tree == 0) {
@@ -74,20 +73,18 @@ DataInterface::DataInterface(TTree *tree) : fChain(0)
    Init(tree);
 }
 
-DataInterface::~DataInterface()
-{
+DataInterface::~DataInterface() {
    if (!fChain) return;
    delete fChain->GetCurrentFile();
 }
 
-Int_t DataInterface::GetEntry(Long64_t entry)
-{
+Int_t DataInterface::GetEntry(Long64_t entry) {
 // Read contents of entry.
    if (!fChain) return 0;
    return fChain->GetEntry(entry);
 }
-Long64_t DataInterface::LoadTree(Long64_t entry)
-{
+
+Long64_t DataInterface::LoadTree(Long64_t entry) {
 // Set the environment to read one entry
    if (!fChain) return -5;
    Long64_t centry = fChain->LoadTree(entry);
@@ -99,8 +96,7 @@ Long64_t DataInterface::LoadTree(Long64_t entry)
    return centry;
 }
 
-void DataInterface::Init(TTree *tree)
-{
+void DataInterface::Init(TTree *tree) {
    // The Init() function is called when the selector needs to initialize
    // a new tree or chain. Typically here the branch addresses and branch
    // pointers of the tree will be set.
@@ -155,8 +151,7 @@ void DataInterface::Init(TTree *tree)
    Notify();
 }
 
-Bool_t DataInterface::Notify()
-{
+Bool_t DataInterface::Notify() {
    // The Notify() function is called when a new file is opened. This
    // can be either for a new TTree in a TChain or when when a new TTree
    // is started when using PROOF. It is normally not necessary to make changes
@@ -166,15 +161,14 @@ Bool_t DataInterface::Notify()
    return kTRUE;
 }
 
-void DataInterface::Show(Long64_t entry)
-{
+void DataInterface::Show(Long64_t entry) {
 // Print contents of entry.
 // If entry is not specified, print current entry
    if (!fChain) return;
    fChain->Show(entry);
 }
-Int_t DataInterface::Cut(Long64_t entry)
-{
+
+Int_t DataInterface::Cut(Long64_t entry) {
 // This function may be called from Loop.
 // returns  1 if entry is accepted.
 // returns -1 otherwise.
@@ -437,40 +431,6 @@ void DataInterface::getDataHits(Int_t runNo, Hits * hits, Int_t energy) {
    }
    delete f;
 }
-
-void DataInterface::writeDataFrame(Int_t energy) {
-   if (!existsEnergyFile(energy)) {
-      cout << "There are no data files with energy " << energy << endl;
-   }
-   
-   TString fn = Form("Data/ExperimentalData/DataFrame_%i_MeV.root", energy);
-   TFile *f = new TFile(fn);
-   TTree *tree = (TTree*) f->Get("tree");
-
-   Int_t nentries = tree->GetEntries();
-   cout << "Found " << nentries << " frames in the DataFrame.\n";
-  
-   ofstream iofile(Form("OutputFiles/DataFrameCSV_%i_MeV.csv", energy), ofstream::out);
-
-   TLeaf *lX = tree->GetLeaf("fDataFrame.fX");
-   TLeaf *lY = tree->GetLeaf("fDataFrame.fY");
-   TLeaf *lLayer = tree->GetLeaf("fDataFrame.fLayer");
-
-   Int_t counter = 0;
-   for (Int_t i=0; i<nentries; i++) {
-      tree->GetEntry(i);
-
-      for (Int_t j=0; j<lX->GetLen(); j++) {
-         Int_t x = lX->GetValue(j) + nx/2;
-         Int_t y = lY->GetValue(j) + ny/2;
-         Int_t z = lLayer->GetValue(j);
-
-         iofile << i << " " << x << " " << y << " " << z << endl;
-      }
-   }
-   delete f;
-}
-
 
 void  DataInterface::getMCClusters(Int_t runNo, Clusters *clusters) {
    Int_t eventIdFrom = runNo * kEventsPerRun + kSkipTracks;

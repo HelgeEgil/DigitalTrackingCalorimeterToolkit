@@ -72,8 +72,6 @@ TGraphErrors * Track::doTrackFit(Bool_t isScaleVariable, Bool_t useTrackLength) 
    }
 
 //   scaleParameter /= 14; // To account for edep being keV / um
-
-
    TF1 *func = new TF1("fit_BP", fitfunc_DBP, 0, maxRange, 2);
    func->SetParameter(0, estimatedRange);
    func->SetParameter(1, scaleParameter);

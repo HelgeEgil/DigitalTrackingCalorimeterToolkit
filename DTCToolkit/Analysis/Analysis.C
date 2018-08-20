@@ -46,11 +46,6 @@
 using namespace std;
 using namespace DTC;
 
-void writeDataFrame(Int_t energy) {
-   DataInterface *di = new DataInterface();
-   di->writeDataFrame(energy);
-}
-
 void findMCSAngles(Int_t Runs, Int_t dataType, Bool_t recreate, Float_t energy, Float_t degraderThickness) {
    // Make one histogram for each layer (starting at layer 1)
    // For each track (found using event ID information), find the change in angle
@@ -318,28 +313,7 @@ void drawTrackAngleAtVaryingRunNumbers(Int_t dataType, Float_t energy, Float_t d
       ofstream file2("OutputFiles/lastLayerCorrect_different_nRuns.csv", ofstream::out | ofstream::app);
       file2 << readoutAbsorber << " " << nRuns << " " << ratioCorrect << " " << ratioFirstAndLast << " " << ratioFirstAndLastAllTracksOK2nd  << " " << ratioFirstAndLastAllTracks << endl;
       file2.close();
-/*
-      c1->cd();
-      hAngles->Draw();
-      c1->SaveAs(Form("OutputFiles/figures/angles/angles_layer%.1f_with_nRuns-%d.png", factor, nRuns));
-      c1->SaveAs(Form("OutputFiles/figures/angles/angles_layer%.1f_with_nRuns-%d.root", factor, nRuns));
-
-      c2->cd();
-      hCorrectTracks->Draw();
-
-      c2->SaveAs(Form("OutputFiles/figures/angles/correctTracks_factor%.1f_nruns%d.png", factor, nRuns));
-
-      Float_t rms = hAngles->GetRMS();
-      Float_t mean = hAngles->GetMean();
-      Int_t binmax = hAngles->FindLastBinAbove(1);
-      Float_t maximum = hAngles->GetXaxis()->GetBinCenter(binmax);
-
-      ofstream file("OutputFiles/angles_different_nRuns.csv", ofstream::out | ofstream::app);
-      file << factor << ";" << nRuns << ";" << rms << ";" << mean << ";"
-           << maximum << endl;
-
-      file.close();
-*/
+      
       delete tracks;
       delete hAngles;
       delete hCorrectTracks;
@@ -721,115 +695,6 @@ void drawClusterShapes(Int_t Runs, Bool_t dataType, Float_t energy, Float_t degr
    }
 }
 
-void drawTrackRanges(Int_t Runs, Int_t dataType, Bool_t recreate, Float_t energy) {
-   run_energy = energy;
-   kDataType = dataType;
-   
-   char * sDataType = getDataTypeChar(dataType);
-   char * sMaterial = getMaterialChar();
-   char * hTitle = Form("Fitted energy of a %.2f MeV beam in %s (%s)", energy, sMaterial, sDataType);
-   TCanvas *cFitResults = new TCanvas("cFitResults", hTitle, 1400, 1000);
-   
-   gStyle->SetPadBorderMode(0);
-   gStyle->SetFrameBorderMode(0);
-   gStyle->SetTitleH(0.06);
-   gStyle->SetTitleYOffset(1);
-   
-   TGraphErrors *outputGraph;
-   TH1F *hFitResults = new TH1F("fitResult", hTitle, 500, getWEPLFromEnergy(0), getWEPLFromEnergy(energy*1.2));
-   hFitResults->SetLineColor(kBlack);
-   hFitResults->SetFillColor(kGreen-5);
-   hFitResults->SetXTitle("Range in Water Equivalent Path Length [mm]");
-   hFitResults->SetYTitle("Number of protons");
-   hFitResults->Draw();
-
-   Tracks * tracks = loadOrCreateTracks(recreate, Runs, dataType, energy);
-
-   for (Int_t j=0; j<tracks->GetEntriesFast(); j++) {
-      Track *thisTrack = tracks->At(j);
-      if (!thisTrack) continue;
-      Float_t preEnergyLoss = thisTrack->getPreEnergyLoss();
-
-      hFitResults->Fill(getWEPLFromEnergy(thisTrack->getEnergy() + preEnergyLoss)); 
-   }
-}
-
-void drawTungstenSpectrum(Int_t Runs, Int_t dataType, Bool_t recreate, Float_t energy) {
-   run_energy = energy;
-   kDataType = dataType;
-   
-   char * sDataType = getDataTypeChar(dataType);
-   char * sMaterial = getMaterialChar();
-   char * hTitle = Form("Fitted energy of a %.2f MeV beam in %s (%s)", energy, sMaterial, sDataType);
-   TCanvas *cFitResults = new TCanvas("cFitResults", hTitle, 1400, 1000);
-   
-   gStyle->SetPadBorderMode(0);
-   gStyle->SetFrameBorderMode(0);
-   gStyle->SetTitleH(0.06);
-   gStyle->SetTitleYOffset(1);
-   
-   
-   TGraphErrors *outputGraph;
-   TH1F *hFitResults = new TH1F("fitResult", hTitle, 500, getWEPLFromEnergy(0), getWEPLFromEnergy(energy*1.2));
-   hFitResults->SetLineColor(kBlack);
-   hFitResults->SetFillColor(kGreen-5);
-   hFitResults->SetXTitle("Range in Water Equivalent Path Length [mm]");
-   hFitResults->SetYTitle("Number of protons");
-   hFitResults->Draw();
-
-   Tracks * tracks = loadOrCreateTracks(recreate, Runs, dataType, energy);
-
-   for (Int_t j=0; j<tracks->GetEntriesFast(); j++) {
-      Track *thisTrack = tracks->At(j);
-      if (!thisTrack) continue;
-      
-//       if (thisTrack->doesTrackEndAbruptly()) {
-//          hFitResults->Fill(getWEPLFromEnergy(thisTrack->getEnergy()));
-//          continue;
-//       }
-      
-      outputGraph = (TGraphErrors*) thisTrack->doTrackFit(false, false);
-      if (!outputGraph) continue;
-      
-      hFitResults->Fill(getUnitFromWEPL(thisTrack->getFitParameterRange()));
-   }
-}
-
-void drawScintillatorStatistics(Int_t Runs, Int_t dataType, Bool_t recreate, Float_t energy) {
-   kDataType = dataType;
-   run_energy = energy;
-   
-   char * sDataType = getDataTypeChar(dataType);
-   char * sMaterial = getMaterialChar();
-   char * hTitle = Form("Number of scintillators hit with a %.2f MeV beam in %s (%s)", energy, sMaterial, sDataType);
-   TCanvas *cFitResults = new TCanvas("cFitResults", hTitle, 1400, 1000);
-   
-   gStyle->SetPadBorderMode(0);
-   gStyle->SetFrameBorderMode(0);
-   gStyle->SetTitleH(0.06);
-   gStyle->SetTitleYOffset(1);
-   
-   TGraphErrors *outputGraph;
-   TH1I *hFitResults = new TH1I("fitResult", hTitle, 5, 0, 4);
-   hFitResults->SetLineColor(kBlack);
-   hFitResults->SetFillColor(kGreen-5);
-   hFitResults->SetXTitle("Number of scintillators hit");
-   hFitResults->SetYTitle("Number of protons");
-   hFitResults->Draw();
-
-   Tracks * tracks = loadOrCreateTracks(recreate, Runs, dataType, energy);
-
-   Float_t nScintillators = 0;
-   
-   for (Int_t j=0; j<tracks->GetEntriesFast(); j++) {
-      Track *thisTrack = tracks->At(j);
-      if (!thisTrack) continue;
-
-      nScintillators = thisTrack->getNScintillators();   
-      hFitResults->Fill(nScintillators);  
-   }
-}
-
 void drawFitScale(Int_t Runs, Int_t dataType, Bool_t recreate, Float_t energy) {
    TCanvas *cScale = new TCanvas("cScale", "Scale histogram", 1400, 1000);
    run_energy = energy;
@@ -859,41 +724,6 @@ void drawFitScale(Int_t Runs, Int_t dataType, Bool_t recreate, Float_t energy) {
    hScale->SetXTitle("Parameter 1 of fit (SCALE)");
    hScale->Draw();
 }  
-
-void drawTH2FRangeAccuracy() {
-   TCanvas      * c = new TCanvas("c", "Range determination accuracy", 1200, 1200);
-   TH2F         * hRangeAccuracy = new TH2F("hRangeAccuracy", "Range Determination Accuracy;Nominal range [WEPL mm];Calculated range [WEPL mm]", 400, 0, 400, 800, 0, 400);
-   Float_t        nominalRange, calculatedRange;
-   TGraphErrors * outputGraph = nullptr;
-   Track        * thisTrack = nullptr;
-
-   for (Int_t degraderThickness = 20; degraderThickness < 350; degraderThickness += 2) {
-      run_degraderThickness = degraderThickness;
-      run_energy = getEnergyAtWEPL(250, degraderThickness);
-      nominalRange = getUnitFromEnergy(run_energy);
-
-      Tracks * tracks = loadOrCreateTracks(1, 1, 0, run_energy);
-
-      for (Int_t i=0; i<tracks->GetEntriesFast(); i++) {
-         thisTrack = tracks->At(i);
-
-         if (!thisTrack) continue;
-         if (thisTrack->doesTrackEndAbruptly()) continue;
-
-         outputGraph = (TGraphErrors*) thisTrack->doTrackFit(false, true);
-         hRangeAccuracy->Fill(nominalRange, thisTrack->getFitParameterRange());
-     }
-
-      delete tracks;
-   }
-   
-   gStyle->SetOptStat(0);
-   gPad->SetLogz();
-   hRangeAccuracy->Draw("COLZ");
-
-   TLine *line = new TLine(0, 0, 400, 400);
-   line->Draw();
-}
 
 Float_t drawBraggPeakGraphFit(Int_t Runs, Int_t dataType, Bool_t recreate, Float_t energy, Float_t degraderThickness, Int_t idx_txt) {
    run_degraderThickness = degraderThickness;
@@ -1072,14 +902,10 @@ Float_t drawBraggPeakGraphFit(Int_t Runs, Int_t dataType, Bool_t recreate, Float
       hFitResults->Draw();
    }
 
-   /* 
-    * Uncomment when finished making plots for optimization poster
-    *
    gPad->Update();
    TPaveText *title = (TPaveText*) gPad->GetPrimitive("title");
    title->SetTextFont(22);
    gPad->Modified();
-   */
 
    // Draw expected gaussian distribution of results from initial energy
 
@@ -1331,12 +1157,6 @@ void draw2DProjection(Int_t Runs, Int_t dataType, Bool_t recreate, Float_t energ
    beamSpecLast->GetYaxis()->SetTitleFont(22);
    beamSpecLast->GetYaxis()->SetLabelFont(22);
 
-   /*
-   gPad->Update();
-   TPaveText *title = (TPaveText*) gPad->GetPrimitive("title");
-   title->SetTextFont(22);
-   gPad->Modified();
-*/
    gStyle->SetOptStat(0);
    
    c1->cd(1);
@@ -1349,28 +1169,6 @@ void draw2DProjection(Int_t Runs, Int_t dataType, Bool_t recreate, Float_t energ
 
    c2->cd(2);
    beamSpecLast->Draw();
-
-   /*
-   // draw lines from 474 to 806
-   TLine *l1 = new TLine(474, 0, 474, 1280);
-   TLine *l2 = new TLine(806, 0, 806, 1280);
-   TLine *l3 = new TLine(0, 474, 1280, 474);
-   TLine *l4 = new TLine(0, 806, 1280, 806);
-   l1->Draw(); l2->Draw(); l3->Draw(); l4->Draw();
-   */
-}
-
-Hits * getEventIDs(Int_t Runs, Float_t energy) {
-   run_energy = energy;
-   DataInterface *di = new DataInterface();
-
-   Hits * hits = new Hits(kEventsPerRun * sizeOfEventID * Runs);
-
-   for (Int_t i=0; i<Runs; i++) {
-      di->getEventIDs(i, hits);
-   }
-
-   return hits;
 }
 
 void drawClusterSizeDistribution(Int_t Runs, Int_t dataType, Bool_t recreate, Float_t energy) {
@@ -1700,8 +1498,6 @@ void compareChargeDiffusionModels(Int_t Runs, Bool_t recreate, Float_t energy) {
          if (nEntries_high == 1) nEntries_high = 2;
          if (nEntries_low == 1) nEntries_low = 2;
 
-//         standarddeviation_low = sqrt(fScale_low * sum_variance_low / (nEntries_low - 1));
-//         standarddeviation_high = sqrt(fScale_high * sum_variance_high / (nEntries_high - 1));
          standarddeviation_high = sqrt(sum_variance_high / (nEntries_low - 1));
          standarddeviation_low = sqrt(sum_variance_low / (nEntries_high - 1));
          
@@ -1716,32 +1512,14 @@ void compareChargeDiffusionModels(Int_t Runs, Bool_t recreate, Float_t energy) {
    TGraphAsymmErrors *gEdepVSCS = new TGraphAsymmErrors(graphIdx, edeps, css, edeps_error, edeps_error, css_error_low, css_error_high);
    gEdepVSCS->SetMarkerStyle(21);
    gEdepVSCS->Draw("AP");
-//    TFitResultPtr fitResult = gEdepVSCS->Fit("fitFunc", "B,M,S", "", 0, 5);
    fitFunc->SetParameters(7.85, 0.7265);
    
-//   printf("Power function ---------\n");
-//   fitResult->NormalizeErrors();
-//   fitResult->Print("V");
    fitFunc->Draw("same");
 
    printf("Fit function: %.3f * edep ^ %.3f\n", fitFunc->GetParameter(0), fitFunc->GetParameter(1));
-//   TFitResultPtr fitResult2 = gEdepVSCS->Fit("fFinck", "B,M,S", "", 0, 5);
-   
-//   printf("Finck function ---------\n");
-//   fitResult2->NormalizeErrors();
-//   fitResult2->Print("V");
    printf("Finck function: rs = %.3f, Ts = %.3f\n", fFinck->GetParameter(0), fFinck->GetParameter(1));
 
    fFinck->Draw("same");
-
-
-   // was 65
-//   TFitResultPtr fitResult5 = gEdepVSCS->Fit("fAnaly_infty", "B,M,S", "", 0, 5);
-   
-//   cout << "ANALY INFTY" << endl;
-   
-//   fitResult5->NormalizeErrors();
-//   fitResult5->Print("V");
    fAnaly_infty->Draw("same");
    
    TLatex *tt1 = new TLatex(5, 25, "Power Fit");
@@ -1776,25 +1554,15 @@ void compareChargeDiffusionModels(Int_t Runs, Bool_t recreate, Float_t energy) {
    c2->cd(6);
    gPad->SetLogz();
    hEdepVSCS6->Draw("COLZ");
-//   fPheno->Draw("same");
    c->cd();
-//   fPheno2->Draw("same");
    fPheno3->Draw("same");
-//   fAnaly_30->Draw("same");
-//   fAnaly_45->Draw("same");
-//   fAnaly_65->Draw("same");
    fAnaly_infty->Draw("same");
    fFinck->Draw("same");
 
    TLegend *leg = new TLegend(0.55, 0.17, 0.85, 0.34);
-//   leg->AddEntry(fPheno, "Old Gaus.", "L");
    leg->AddEntry(fPheno3, "Phenomenological", "L");
-//   leg->AddEntry(fPheno3, "Fit result", "L");
-//   leg->AddEntry(fAnaly_30, "Analytic #lambda = 30 #mum", "L");
-//   leg->AddEntry(fAnaly_45, "Analytic w/#lambda=45", "L");
    leg->AddEntry(fAnaly_infty, "Analytic #lambda = #infty #mum", "L");
    leg->SetTextFont(22);
-//   leg->Draw();
 
 
    c3->cd(1);
@@ -2439,57 +2207,6 @@ void drawDiffusionCheck(Int_t Runs, Int_t Layer, Float_t energy) {
    c1->Update();
 }
 
-void drawRegionOccupancy(Int_t Runs, Int_t Layer, Float_t energy) {
-   run_energy = energy;
-   DataInterface *di = new DataInterface();
-   CalorimeterFrame *cf = new CalorimeterFrame();
-  
-   TCanvas *c2 = new TCanvas("c2", "Region dependent occupancy", 1200, 800);
-   Int_t counterOverall = 0;
-   Int_t fromX =0;
-   Int_t toX = 0;
-   Int_t counter;
-   Int_t nPixels = ny*2;
-   TH1F *hCount = new TH1F("hCount", "Priority Encoding (FOCAL) region occupancy @ 1000 protons/event;Occupancy (%);Counts",30,0,15);
-   Float_t occupancy;
-   
-   for (Int_t k=0; k<Runs; k++) {
-      di->getDataFrame(k, cf, energy);
-      TH2F *Frame2D = cf->getTH2F(Layer);
-      if (Frame2D->Integral() == 0) break;
-      cout << "Hits in calorimeterframe = " << Frame2D->Integral();
-
-      for (Int_t i=0; i<nx/2; i++) { 
-         counter = 0;
-         fromX = i*2;
-         toX = (i+1)*2;
-
-         for (Int_t j=0; j<ny; j++) {
-            if (Frame2D->GetBinContent(Frame2D->FindBin(i, j)) > 0){
-               counter++;
-               counterOverall++;
-            }
-         }
-
-         occupancy = (float) counter / nPixels * 100;
-         hCount->Fill(occupancy);
-      }
-      cf->Reset();
-   }
- 
-   delete di;
-
-   c2->cd();
-   hCount->SetFillColor(kBlue-7);
-   hCount->Draw();
-      
-   printf("The overall occupancy is %.2f %%", 100*(float) counterOverall / nx / ny);
-
-   gPad->Update();
-   TLine *l = new TLine(12.5, 0, 12.5, 500);
-   l->Draw();
-}
-
 void drawFrame2D(Int_t dataType, Int_t layerNo, Float_t energy, Float_t degraderThickness) {
    run_energy = energy;
    run_degraderThickness = degraderThickness;
@@ -2541,27 +2258,6 @@ void drawFrame2D(Int_t dataType, Int_t layerNo, Float_t energy, Float_t degrader
 
 }
 
-void drawData3D(Int_t Runs, Float_t energy) {
-   run_energy = energy;
-
-   DataInterface *di = new DataInterface();
-
-   TH3F *Frame3D = new TH3F("Frame3D", "3D map of energy deposition [keV]", 
-                              100, -120, -50, 100, 0, nx, 100, 0, ny);
-
-   Frame3D->SetXTitle("Z axis");
-   Frame3D->SetYTitle("X axis"); // to get projection right (Z is depth, not up)
-   Frame3D->SetZTitle("Y axis"); 
-
-   for (Int_t run=0; run<Runs; run++) {
-      di->getMCData(run, Frame3D);
-   }
-   
-   delete di;
-
-   Frame3D->Draw("LEGO");
-}
-
 void drawDataProfile(Float_t energy) {
    run_energy = energy;
 
@@ -2584,7 +2280,6 @@ void drawDataProfile(Float_t energy) {
    c1->cd(2);
    hProjection->Draw("colz");
 }
-
 
 void compareClusterSizes(Int_t Runs, Bool_t recreate, Float_t energy) {
    run_energy = energy;
@@ -2805,73 +2500,6 @@ void compareClusterSizes(Int_t Runs, Bool_t recreate, Float_t energy) {
       hCSVectorMC->at(i)->Draw();
       c3->cd(i+1);
       hCSVectorData->at(i)->Draw();
-   }
-}
-
-Bool_t getCutTrackLength(Float_t energy, Track *track) {
-   Int_t minTL = getMinimumTrackLength(energy);
-   Float_t TL = track->getTrackLengthmm();
-
-   Bool_t cutTL = (TL > minTL) ? true : false;
-
-   return cutTL;
-}
-
-Bool_t getCutWEPL(Track *track) {
-   Float_t minTLWEPL = 150;
-   Float_t WEPL = track->getWEPL();
-
-   Bool_t cutTL = (WEPL > minTLWEPL) ? true : false;
-
-   return cutTL;
-}
-
-Bool_t getCutChipNumber(Track *track) {
-   Int_t x0 = track->getX(0);
-   Int_t y0 = track->getY(0);
-   Int_t chip = (x0 >= nx/2) + 2 * (y0 < ny/2);
-   Bool_t cutChipNumber = (chip<2) ? true : false;
-
-   return cutChipNumber;
-}
-
-Bool_t getCutBraggPeakInTrack(Track *track) {
-   Float_t braggPeakRatio = 2.5;
-
-   Int_t lastBin = track->GetEntriesFast() - 1;
-   if (lastBin < 4) return false;
-
-   Float_t lowStd = track->getStdSizeToIdx(lastBin-1);
-   Int_t   nEmptyBins = track->getNMissingLayers();
-
-
-   if (lowStd > 4) return false;
-   if (nEmptyBins > 1) return false;
-
-   Float_t rMean = track->getMeanSizeToIdx(lastBin - 1);
-   Float_t rrMean = track->getMeanSizeToIdx(lastBin - 2);
-
-   Float_t r = track->getSize(lastBin) / rMean;
-   Float_t rr = track->getSize(lastBin-1) / rrMean;
-
-   if (r > braggPeakRatio) return true;
-   else {
-      if (rr > braggPeakRatio) return true;
-      else return false;
-   }
-}
-
-
-void generateWaterDegraderValues() {
-   // Use the Water.csv file to generate residual energies after a varying water phantom thickness
-   // Store the values in Data/Ranges/EnergyAfterDegrader.csv
-
-   // getEnergyAtWEPL(E0, depth)
-
-   ofstream file("Data/Ranges/EnergyAfterDegraderG4.csv", ofstream::out);
-   for (Int_t depth = 0; depth < 380; depth++) {
-      file << depth << " " << getEnergyAtWEPL(250, (float) depth) << endl;
-      printf("Writing to file: %d %.4f\n", depth, getEnergyAtWEPL(250, (float) depth));
    }
 }
 

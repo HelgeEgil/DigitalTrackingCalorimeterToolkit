@@ -1085,3 +1085,57 @@ Float_t doNGaussianFit ( TH1F *h, Float_t *means, Float_t *sigmas) {
 
    return empiricalMean;
 }
+
+Bool_t getCutTrackLength(Float_t energy, Track *track) {
+   Int_t minTL = getMinimumTrackLength(energy);
+   Float_t TL = track->getTrackLengthmm();
+
+   Bool_t cutTL = (TL > minTL) ? true : false;
+
+   return cutTL;
+}
+
+Bool_t getCutWEPL(Track *track) {
+   Float_t minTLWEPL = 150;
+   Float_t WEPL = track->getWEPL();
+
+   Bool_t cutTL = (WEPL > minTLWEPL) ? true : false;
+
+   return cutTL;
+}
+
+Bool_t getCutChipNumber(Track *track) {
+   Int_t x0 = track->getX(0);
+   Int_t y0 = track->getY(0);
+   Int_t chip = (x0 >= nx/2) + 2 * (y0 < ny/2);
+   Bool_t cutChipNumber = (chip<2) ? true : false;
+
+   return cutChipNumber;
+}
+
+Bool_t getCutBraggPeakInTrack(Track *track) {
+   Float_t braggPeakRatio = 2.5;
+
+   Int_t lastBin = track->GetEntriesFast() - 1;
+   if (lastBin < 4) return false;
+
+   Float_t lowStd = track->getStdSizeToIdx(lastBin-1);
+   Int_t   nEmptyBins = track->getNMissingLayers();
+
+
+   if (lowStd > 4) return false;
+   if (nEmptyBins > 1) return false;
+
+   Float_t rMean = track->getMeanSizeToIdx(lastBin - 1);
+   Float_t rrMean = track->getMeanSizeToIdx(lastBin - 2);
+
+   Float_t r = track->getSize(lastBin) / rMean;
+   Float_t rr = track->getSize(lastBin-1) / rrMean;
+
+   if (r > braggPeakRatio) return true;
+   else {
+      if (rr > braggPeakRatio) return true;
+      else return false;
+   }
+}
+
