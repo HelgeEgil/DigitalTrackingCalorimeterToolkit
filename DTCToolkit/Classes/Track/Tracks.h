@@ -26,7 +26,7 @@ class Tracks : public TObject {
 
    public:
       Tracks() : tracks_("DTC::Track", 1000), clustersWithoutTrack_("DTC::Cluster", 5000) {}
-      Tracks(Int_t nTracks) : tracks_("DTC::Track", nTracks), clustersWithoutTrack_("DTC::Cluster", nTracks*5) {if (nTracks > 20000) cout << "Remember to increase size of EIDindex array!!!! (now = 100 000)\n"}
+      Tracks(Int_t nTracks) : tracks_("DTC::Track", nTracks), clustersWithoutTrack_("DTC::Cluster", nTracks*5) { if (nTracks > 20000) cout << "Remember to increase size of EIDindex array!!!! (now = 100 000)\n"; }
       virtual ~Tracks(); 
 
       // ROOT & I/O     

@@ -11,7 +11,6 @@
 #include "GlobalConstants/MaterialConstants.h"
 #include "HelperFunctions/Tools.h"
 
-
 using namespace std;
 using namespace DTC;
 
@@ -63,7 +62,7 @@ Tracks * Clusters::findTracksWithReverseRecursiveWeighting() {
 
          clusterScore = seedNode->getNextScore(nextCluster);
          clusterScore /= 100;
-         if (isnan(clusterScore)) {
+         if (std::isnan(clusterScore)) {
             cout << "clusterScore for seed at " << *nextCluster << " isNan!\n";
          }
 
@@ -114,7 +113,7 @@ Tracks * Clusters::findTracksWithReverseRecursiveWeighting() {
 
          clusterScore = seedNode->getNextScore(nextCluster);
          clusterScore /= 100;
-         if (isnan(clusterScore)) {
+         if (std::isnan(clusterScore)) {
             cout << "clusterScore for seed at " << *nextCluster << " isNan!\n";
          }
 
@@ -164,7 +163,7 @@ Tracks * Clusters::findTracksWithReverseRecursiveWeighting() {
 
          clusterScore = seedNode->getNextScore(nextCluster);
          clusterScore /= 100;
-         if (isnan(clusterScore)) {
+         if (std::isnan(clusterScore)) {
             cout << "clusterScore for seed at " << *nextCluster << " isNan!\n";
          }
 
@@ -214,7 +213,7 @@ Tracks * Clusters::findTracksWithReverseRecursiveWeighting() {
 
          clusterScore = seedNode->getNextScore(nextCluster);
          clusterScore /= 100;
-         if (isnan(clusterScore)) {
+         if (std::isnan(clusterScore)) {
             cout << "clusterScore for seed at " << *nextCluster << " isNan!\n";
          }
 
@@ -283,7 +282,9 @@ Tracks * Clusters::findTracksWithRecursiveWeighting() {
    else if (spotSize == 55) kMaxTrackScore = 0.455 * pow(kEventsPerRun, -0.162);
    else if (spotSize == 44) kMaxTrackScore = 0.460 * pow(kEventsPerRun, -0.168);
 
-   kMaxTrackScore = 0.001;
+   kMaxTrackScore = 0.445 * pow(kEventsPerRun, -0.176); // With 4 mm geometry, 5% less (!) scattering
+
+//   kMaxTrackScore = 0.3;
 
    // kMaxTrackScore = 0.746 * pow(kEventsPerRun, -0.242); // No Inelastic scattering
    // kMaxTrackScore = 0.289 * pow(kEventsPerRun, -0.113); // No Elastic Scattering
@@ -324,7 +325,7 @@ Tracks * Clusters::findTracksWithRecursiveWeighting() {
 
          clusterScore = seedNode->getNextScore(nextCluster);
          clusterScore /= 100;
-         if (isnan(clusterScore)) {
+         if (std::isnan(clusterScore)) {
             cout << "clusterScore for seed at " << *nextCluster << " isNan!\n";
          }
 

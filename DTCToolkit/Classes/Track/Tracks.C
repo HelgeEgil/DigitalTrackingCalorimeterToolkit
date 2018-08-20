@@ -456,8 +456,8 @@ void Tracks::createEIDSortList() {
 
    for (Int_t i=0; i<GetEntriesFast(); i++) {
       if (!At(i)) continue;
-      EIDindex_[i] = getEventID(i);
-      showDebug("Tracks::createEIDSortList: EIDindex_[" << i< <<"] = " << getEventID(i) << endl);
+      EIDindex_[i] = At(i)->getEventID(0);
+      showDebug("Tracks::createEIDSortList: EIDindex_[" << i< <<"] = " << At(i)->getEventID(0) << endl);
    }
 }
 

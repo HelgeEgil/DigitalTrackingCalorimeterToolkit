@@ -352,8 +352,8 @@ Float_t getDotProductAngle(Cluster *a, Cluster *b, Cluster *c) {
    Double_t dot    = in[0] * out[0] + in[1] * out[1] + in[2] * out[2];
    Double_t scalar = sqrt(pow(out[0],2) + pow(out[1],2) + pow(out[2],2)) * sqrt(pow(in[0],2) + pow(in[1],2) + pow(in[2],2));
    
-   if (isnan(acos(dot / scalar))) {
-      if (!isnan(dot) && !isnan(scalar)) return 0; // floating point error on almost || track
+   if (std::isnan(acos(dot / scalar))) {
+      if (!std::isnan(dot) && !std::isnan(scalar)) return 0; // floating point error on almost || track
    }
 
    return acos(dot / scalar);

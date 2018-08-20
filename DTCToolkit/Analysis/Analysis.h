@@ -34,4 +34,5 @@ Bool_t		getCutWEPL(Track *track);
 Bool_t		getCutChipNumber(Track *track);
 Bool_t		getCutBraggPeakInTrack(Track *track);
 void        generateWaterDegraderValues();
+// void        drawTrackingError(Int_t Runs, Int_t dataType = kMC, Bool_t recreate = false, Float_t energy = 188, Float_t degraderThickness = 0);
 #endif

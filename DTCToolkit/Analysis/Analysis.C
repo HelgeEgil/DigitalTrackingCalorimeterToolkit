@@ -244,9 +244,9 @@ void drawTrackAngleAtVaryingRunNumbers(Int_t dataType, Float_t energy, Float_t d
       kEventsPerRun = nRuns;
       Float_t factor = 2;
 
-      Int_t totalNumberOfRuns = 3000 / kEventsPerRun;
+      Int_t totalNumberOfRuns = 5000 / kEventsPerRun;
       if (totalNumberOfRuns < 1) totalNumberOfRuns = 1;
-      if (totalNumberOfRuns > 1000) totalNumberOfRuns = 1000;
+      if (totalNumberOfRuns > 3000) totalNumberOfRuns = 3000;
 
       Tracks * tracks = loadOrCreateTracks(1, totalNumberOfRuns, dataType, energy);
 
@@ -2875,7 +2875,8 @@ void generateWaterDegraderValues() {
    }
 }
 
-void drawTrackingError() {
+/*
+void drawTrackingError(Int_t Runs, Int_t dataType = kMC, Bool_t recreate, Float_t energy, Float_t degraderThickness) {
    // Draw a histogram on the error of different track recon scenarios ...
    // Error ^ 2 = error_xy ^ 2 + ( 15 cm * error_rads ) ^ 2 
    // Check for different track recon efficiencies, and find RMS values :)
@@ -2926,4 +2927,4 @@ void drawTrackingError() {
       dot1 = x0 * x1 + y0 * y1;
 
       angle = fabs((acos(dot1 / scalar1) - acos(dot0 / scalar0) )* 1000;
-
+*/

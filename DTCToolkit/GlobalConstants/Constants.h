@@ -60,7 +60,7 @@ Bool_t   kUseDegrader = false;
 const Int_t sizeOfEventID = 25;
 const Int_t nChildrenInNode = 2; // max concurrent track segments to follow
 Float_t     kMaxTrackScore = 0.3; // cumulative angular change
-Float_t     kMaxTrackAngle = 0.0; // allow for consecutive 50 mrad changes
+Float_t     kMaxTrackAngle = 0.05; // allow for consecutive 50 mrad changes
 
 // natural unit is mm
 const Float_t cm = 0.1;
@@ -73,7 +73,7 @@ const Int_t ny = NY;
 const Int_t nTrackers = 4;
 
 #ifdef USEALPIDE
-const Float_t kAbsorberThickness = 3.5; // ALPIDE, CHANGE TO FIT MC DATA GEOMETRY
+const Float_t kAbsorberThickness = 4; // ALPIDE, CHANGE TO FIT MC DATA GEOMETRY
 #else
 const Float_t kAbsorberThickness = 3.3; // FOCAL EXPERIMENTAL DATA, DON'T CHANGE
 #endif

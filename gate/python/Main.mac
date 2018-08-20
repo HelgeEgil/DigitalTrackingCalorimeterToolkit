@@ -27,9 +27,9 @@
 
 /gate/run/initialize
 
-/process/inactivate hadElastic
-/process/inactivate protonInelastic
-/process/inactivate msc
+#/process/inactivate hadElastic
+#/process/inactivate protonInelastic
+#/process/inactivate msc
 
 /process/list
 
@@ -82,5 +82,5 @@
 
 /gate/random/setEngineName MersenneTwister
 /gate/random/setEngineSeed auto
-/gate/application/setTotalNumberOfPrimaries 5000
+/gate/application/setTotalNumberOfPrimaries 10000
 /gate/application/start
