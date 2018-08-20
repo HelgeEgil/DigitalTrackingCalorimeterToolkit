@@ -94,12 +94,15 @@ public:
    Tracks    * findCalorimeterTracksAlpide();
    Tracks    * findCalorimeterTracksWithMCTruth();
    Tracks    * findTracksWithRecursiveWeighting();
+   Tracks    * findTracksWithReverseRecursiveWeighting();
    void        doRecursiveWeightedTracking(Node * seedNode, vector<Node*> * endNodes);
+   void        doReverseRecursiveWeightedTracking(Node * seedNode, vector<Node*> * endNodes);
    void        findTracksFromLayer(Tracks *tracks, Int_t layer, Bool_t kUsedClustersInSeeds = true);
    void        findRemainingTracks(Tracks *tracks);
    Clusters  * findSeeds(Int_t layer, Bool_t kUsedClustersInSeeds = true);
    Track     * trackPropagation(Cluster *seed);
    Clusters  * findNearestClustersInNextLayer(Cluster *seed);
+   Clusters  * findNearestClustersInLastLayer(Cluster *seed);
    Clusters  * findClustersFromSeedInLayer(Cluster *seed, Int_t nextLayer);
    void        growTrackFromLayer(Track *track, Int_t fromLayer);
    Cluster   * findNearestNeighbour(Track* track, Cluster *projectedPoint, Bool_t rejectUsed = true);

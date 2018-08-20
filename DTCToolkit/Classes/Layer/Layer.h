@@ -19,7 +19,7 @@ class Layer : public TObject {
 
    public:
       // ROOT & I/O
-      Layer() : frame2D_(Form("DefCtorframe2D_%i", GlobalLayerID), Form("DefCtorframe2D_%i", GlobalLayerID++), nx, 0, nx, ny, 0, ny), layerNo_(-1), frameType_(false), dataType_(false) {}
+      Layer() : frame2D_(Form("DefCtorframe2D_%i", GlobalLayerID), Form("DefCtorframe2D_%i", GlobalLayerID), nx, 0, nx, ny, 0, ny), layerNo_(-1), frameType_(false), dataType_(false) { GlobalLayerID++; }
       Layer(Int_t layerNo, Bool_t frameType = false, Bool_t dataType = false);
       virtual        ~Layer();
       void SetProperties(Int_t layerNo, Bool_t frameType, Bool_t dataType) { layerNo_ = layerNo; frameType_ = frameType; dataType_ = dataType; }

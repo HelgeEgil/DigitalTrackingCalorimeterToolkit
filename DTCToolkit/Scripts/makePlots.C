@@ -43,8 +43,9 @@ void makePlots() {
    pad1->Draw();
    pad2->Draw();
    
-   TCanvas *c2 = new TCanvas("c2", "Correct Tracks fraction", 1200, 800);
-   TCanvas *c22 = new TCanvas("c22", "Correct Tracks fraction", 1200, 900);
+   TCanvas *c2 = new TCanvas("c2", "Correct Tracks fraction focal", 1200, 800);
+   TCanvas *c22 = new TCanvas("c22", "Correct Tracks fraction PB", 1200, 900);
+   TCanvas *c222 = new TCanvas("c222", "Correct Tracks fraction uniform", 1200, 900);
    TCanvas *c3 = new TCanvas("c3", "Reconstruction efficiency", 1200, 800);
    TCanvas *c4 = new TCanvas("c4", "Chip alignment", 1200, 800);
    TCanvas *c5 = new TCanvas("c5", "Chip sensitivity calibration", 1200, 800);
@@ -135,7 +136,7 @@ void makePlots() {
    Double_t paraLinearInvh[100] = {};
 
    Int_t nThisEnergy = 0, lastEnergy = 0;
-   Float_t  mmAbsorber;
+   Float_t  mmAbsorbator;
 
    gStyle->SetOptStat(0);
 
@@ -290,8 +291,10 @@ void makePlots() {
    in.close();
    
    ifstream in2;
+   ifstream in2uni;
 //   in2.open("OutputFiles/lastLayerCorrect_different_nRuns_elastic_noinelastic.csv");
    in2.open("OutputFiles/lastLayerCorrect_different_nRuns.csv");
+   in2uni.open("OutputFiles/lastLayerCorrect_different_nRuns_uniform.csv");
    Float_t np, correctLast, correctWhole, lastIsFirst, lastIsAlmostFirst;
    Int_t   mmAbsorber_;
    Float_t arrayFractionX[200] = {0};
@@ -311,8 +314,11 @@ void makePlots() {
    Float_t arrayFraction5mmY[200] = {0};
    Float_t arrayFraction6mmX[200] = {0};
    Float_t arrayFraction6mmY[200] = {0};
+   Float_t arrayFractionUniformX[200] = {0};
+   Float_t arrayFractionUniformY[200] = {0};
 
    Int_t nlinesF = 0, nlinesF2 = 0, nlinesF3 = 0, nlinesF4 = 0, nlinesF5 = 0, nlinesF6 = 0, nlinesF35 = 0;
+   Int_t nlinesUniform = 0;
    
    Float_t lastIsFirstAllTracks;
 
@@ -359,6 +365,15 @@ void makePlots() {
 
    in2.close();
    
+   while (1) {
+      in2uni >> mmAbsorber_ >> np >> correctWhole >> lastIsFirst >> lastIsAlmostFirst >> lastIsFirstAllTracks;
+
+      if (!in2uni.good()) break;
+      arrayFractionUniformX[nlinesUniform] = np;
+      arrayFractionUniformY[nlinesUniform++] = lastIsFirstAllTracks * 100;
+   }
+   in2uni.close();
+
    ifstream in3;
    in3.open("OutputFiles/efficiency_500.csv");
    Int_t energy, nRecon, nNotLeaving, nFinal;
@@ -677,7 +692,7 @@ void makePlots() {
    hMCD->Draw("P");
 
    gPad->Update();
-   TPaveText *title = (TPaveText*) gPad->GetPrimitive("title");
+   title = (TPaveText*) gPad->GetPrimitive("title");
    title->SetTextFont(22);
    title->SetTextSize(0.08);
    gPad->Modified();
@@ -773,7 +788,7 @@ void makePlots() {
    gFraction->GetXaxis()->SetTitleFont(22);
    gFraction->GetYaxis()->SetTitleFont(22);
    gFraction->GetXaxis()->SetTitleOffset(0.9);
-   gFraction->GetYaxis()->SetTitleOffset(1.1);
+   gFraction->GetYaxis()->SetTitleOffset(1.2);
    gFraction->GetXaxis()->SetLabelFont(22);
    gFraction->GetYaxis()->SetLabelFont(22);
    gFraction->SetTitle("f;Number of protons in frame;Fraction of correctly reconstructed tracks");
@@ -829,23 +844,23 @@ void makePlots() {
 
    printf("Some values in arrayFraction2mmXY: (%.2f, %.2f), (%.2f, %.2f)\n", arrayFraction2mmX[0], arrayFraction2mmY[0], arrayFraction3mmY[1], arrayFraction4mmY[1]);
    printf("nlinesF2,F3,F4 = %d, %d, %d.\n", nlinesF2, nlinesF3, nlinesF4);
-//   c22->SetLogx();
+   c22->SetLogx();
    c22->SetGridy();
    c22->SetGridx();
    gFraction2mm->SetTitle(";Protons/cm^{2}/frame;Fraction of correctly reconstructed tracks");
    gFraction2mm->GetXaxis()->SetRangeUser(0, 2000);
    gFraction2mm->SetMaximum(100);
    gFraction2mm->SetMinimum(20);
-   gFraction2mm->GetXaxis()->SetTitleSize(0.06);
-   gFraction2mm->GetYaxis()->SetTitleSize(0.06);
+   gFraction2mm->GetXaxis()->SetTitleSize(0.045);
+   gFraction2mm->GetYaxis()->SetTitleSize(0.045);
    gFraction2mm->GetXaxis()->SetLabelSize(0.045);
    gFraction2mm->GetXaxis()->SetNdivisions(16);
-   gFraction2mm->GetYaxis()->SetLabelSize(0.06);
-   gFraction2mm->GetXaxis()->SetLabelSize(0.06);
+   gFraction2mm->GetYaxis()->SetLabelSize(0.045);
+   gFraction2mm->GetXaxis()->SetLabelSize(0.045);
    gFraction2mm->GetXaxis()->SetTitleFont(22);
    gFraction2mm->GetYaxis()->SetTitleFont(22);
-   gFraction2mm->GetXaxis()->SetTitleOffset(0.9);
-   gFraction2mm->GetYaxis()->SetTitleOffset(1.1);
+   gFraction2mm->GetXaxis()->SetTitleOffset(1);
+   gFraction2mm->GetYaxis()->SetTitleOffset(1.2);
    gFraction2mm->GetYaxis()->SetLabelOffset(5);
    gFraction2mm->GetXaxis()->SetLabelFont(22);
    gFraction2mm->GetXaxis()->SetNoExponent();
@@ -858,10 +873,10 @@ void makePlots() {
 //   gFraction5mm->SetLineWidth(3);
 //   gFraction6mm->SetLineWidth(3);
 
-   gFraction2mm->SetLineColor(kRed+4);
-   gFraction3mm->SetLineColor(kRed+3);
+   gFraction2mm->SetLineColor(kRed-7);
+   gFraction3mm->SetLineColor(kRed-2);
 //   gFraction35mm->SetLineColor(kRed+2);
-   gFraction4mm->SetLineColor(kRed+1);
+   gFraction4mm->SetLineColor(kBlack);
 //   gFraction5mm->SetLineColor(kRed+0);
 //   gFraction6mm->SetLineColor(kRed-7);
 
@@ -872,9 +887,9 @@ void makePlots() {
 //   gFraction5mm->Draw("L");
 //   gFraction6mm->Draw("L");
    
-   TText *tt = new TText();
+   TText *tt = new TText();   
    tt->SetTextAlign(32);
-   tt->SetTextSize(0.06);
+   tt->SetTextSize(0.045);
    tt->SetTextFont(22);
    for (Int_t i=0; i<11;i++) {
       cout << "Drawing text at " << -0.42 << ", " << i*10 << endl;
@@ -883,7 +898,7 @@ void makePlots() {
    
    TText *curveLabel = new TText();
    curveLabel->SetTextFont(22);
-   curveLabel->SetTextSize(0.06);
+   curveLabel->SetTextSize(0.045);
    curveLabel->DrawText(25.50, gFraction2mm->Eval(25.00)*0.98, "2 mm");
    curveLabel->DrawText(25.50, gFraction3mm->Eval(25.00)*0.98, "3 mm");
 //   curveLabel->DrawText(25.50, gFraction35mm->Eval(25.00)*0.98, "5x5 mm^{2}");
@@ -904,7 +919,45 @@ void makePlots() {
    leg22->Draw();
    */
 
-   printf("AFTER\n");
+   c222->cd();
+   TGraph *gFractionUniform = new TGraph(nlinesUniform, arrayFractionUniformX, arrayFractionUniformY);
+   printf("Some values in arrayFractionUniformXY: (%.2f, %.2f), (%.2f, %.2f)\n", arrayFractionUniformX[0], arrayFractionUniformY[0], arrayFraction3mmY[1], arrayFraction4mmY[1]);
+   printf("nlinesUniform = %d.\n", nlinesUniform);
+   c222->SetGridy();
+   c222->SetGridx();
+   gPad->SetLogx();
+   gFractionUniform->SetTitle(";Protons/100 cm^{2}/frame;Fraction of correctly reconstructed tracks");
+   gFractionUniform->GetXaxis()->SetRangeUser(0, 15000);
+   gFractionUniform->SetMaximum(100);
+   gFractionUniform->SetMinimum(20);
+   gFractionUniform->GetXaxis()->SetTitleSize(0.045);
+   gFractionUniform->GetYaxis()->SetTitleSize(0.045);
+   gFractionUniform->GetXaxis()->SetLabelSize(0.045);
+   gFractionUniform->GetXaxis()->SetNdivisions(16);
+   gFractionUniform->GetYaxis()->SetLabelSize(0.045);
+   gFractionUniform->GetXaxis()->SetLabelSize(0.045);
+   gFractionUniform->GetXaxis()->SetTitleFont(22);
+   gFractionUniform->GetYaxis()->SetTitleFont(22);
+   gFractionUniform->GetXaxis()->SetTitleOffset(0.9);
+   gFractionUniform->GetYaxis()->SetTitleOffset(1.2);
+   gFractionUniform->GetYaxis()->SetLabelOffset(5);
+   gFractionUniform->GetXaxis()->SetLabelFont(22);
+   gFractionUniform->GetXaxis()->SetNoExponent();
+   gFractionUniform->GetXaxis()->SetMoreLogLabels();
+   gFractionUniform->GetYaxis()->SetLabelFont(22);
+   gFractionUniform->SetLineWidth(3);
+   gFractionUniform->SetLineColor(3);
+   gFractionUniform->Draw("LA");
+   
+   TText *ttt = new TText();   
+   ttt->SetTextAlign(32);
+   ttt->SetTextSize(0.045);
+   ttt->SetTextFont(22);
+   for (Int_t i=0; i<11;i++) {
+      cout << "Drawing text at " << -0.42 << ", " << i*10 << endl;
+      ttt->DrawText(-0.0052, i*10, Form("%d%%", i*10));
+   }
+
 
    c3->cd();
    TGraph *gEfficiency = new TGraph(nEnergies, arrayEfficiencyEnergy, arrayEfficiencyFinal);
@@ -1001,7 +1054,7 @@ void makePlots() {
       TLine *l = new TLine(x_value, -1000, x_value, 1000);
       l->Draw();
    }
-   TLine *vl = new TLine(0, 0, 27.5, 0);
+   vl = new TLine(0, 0, 27.5, 0);
    vl->SetLineStyle(7);
    vl->SetLineWidth(2);
    vl->Draw();
@@ -1135,6 +1188,4 @@ void makePlots() {
    
    c1->SaveAs("OutputFiles/figures/finalPlotsForArticle/estimated_ranges_all_energies.eps");
    c1->SaveAs("OutputFiles/figures/finalPlotsForArticle/estimated_ranges_all_energies.root");
-   c2->SaveAs("OutputFiles/figures/finalPlotsForArticle/fraction_of_correct_tracks.eps");
-   c2->SaveAs("OutputFiles/figures/finalPlotsForArticle/fraction_of_correct_tracks.root");
 }

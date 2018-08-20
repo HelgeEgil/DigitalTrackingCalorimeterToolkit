@@ -62,11 +62,12 @@ void Node::addChild(Node *node) {
    else if (i<0) { // All the places are full, exchange with worst
       Int_t worstChild = getWorstChild();
       Float_t worstScore = getChild(worstChild)->getScore();
+
       if (worstScore > node->getScore()) {
          children_[worstChild] = node; 
       }
 
-      // remove the worst if it's 10 % worse than the best
+      // remove the worst if it's 15 % worse than the best
       if (getChild(getBestChild())->getScore() * threshold < getChild(getWorstChild())->getScore()) {
          removeChild(getWorstChild());
       }
@@ -79,9 +80,9 @@ void Node::removeChild(Int_t i) {
    delete getChild(i);
    children_[i] = nullptr;
 
-   // Compress list to avoid holes
-   for (Int_t j=i+1; j<nChildrenInNode; j++) {
-      if (children_[j-1]) children_[j-1] = children_[j];
+   if (i == 0) { // Compress list to avoid holes
+      children_[0] = children_[1];
+      children_[1] = nullptr;
    }
 }
 
@@ -135,6 +136,7 @@ Cluster * Node::getNextUnexploredCluster() {
          return getChild(i)->getCluster();
       }
    }
+   return nullptr;
 }
 
 Int_t Node::getNChildren() {
@@ -208,6 +210,11 @@ Float_t Node::getNodeAngle(Cluster *p3) {
    Cluster *p1 = getParentCluster();
    Cluster *p2 = getCluster();
 
+   if (p2->getLayer() > p3->getLayer()) {
+      if (!p1) return getDotProductAngle(p3, p2, p2);
+      else     return getDotProductAngle(p3, p2, p1);
+   }
+
    if (!p1) return getDotProductAngle(p2, p2, p3);
    else     return getDotProductAngle(p1, p2, p3);
 }
@@ -237,6 +244,7 @@ Float_t Node::getNextScore(Cluster *c) {
    Float_t newAngle = getNodeAngle(c);
    return sqrt(pow(getScore(), 2) + pow(newAngle, 2));
 }
+
 
 Track* Node::getTrackFromBestNode(Node* bestNode) {
    vector<Node*>  reverseTrack;

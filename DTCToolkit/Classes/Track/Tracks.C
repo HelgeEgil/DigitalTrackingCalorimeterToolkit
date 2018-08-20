@@ -443,10 +443,34 @@ Int_t Tracks::getNMissingClustersWithEventID(Int_t eventID, Int_t afterLayer) {
 
    for (Int_t i=0; i<GetEntriesFastCWT(); i++) {
       if (!AtCWT(i)) continue;
-      if (AtCWT(i)->getEventID() == eventID && AtCWT(i)->getLayer() > afterLayer) {
+      if (AtCWT(i)->getEventID() == eventID && AtCWT(i)->getLayer() == afterLayer+1) {
          n++;
       }
    }
 
    return n;
+}
+
+void  Tracks::removeHighAngleTracks(Float_t mradLimit) {
+   Cluster *a = nullptr;
+   Cluster *b = nullptr;
+   Track   *thisTrack = nullptr;
+   Float_t  incomingAngle;
+   Int_t    nRemoved = 0;
+
+   for (Int_t i=0; i<GetEntriesFast(); i++) {
+      thisTrack = At(i);
+      if (!At(i)) continue;
+
+      a = thisTrack->At(0);
+      b = thisTrack->At(1);
+      incomingAngle = getDotProductAngle(a, a, b);
+      if (incomingAngle > mradLimit / 1000.) {
+         removeTrackAt(i);
+         nRemoved++;
+      }
+   }
+   printf("Removed %d tracks with higher than %.0f mrad incoming angle.\n", nRemoved, mradLimit);
+
+   Compress();
 }

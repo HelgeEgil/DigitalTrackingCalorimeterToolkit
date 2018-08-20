@@ -231,13 +231,22 @@ Tracks * getTracksFromClusters(Int_t Runs, Int_t dataType, Int_t frameType, Floa
       t2.Start(false);
       if (kDoTracking) {
          printf("There are %d clusters\n", clusters->GetEntriesFast());
+         showDebug("sortClusters...");
          clusters->sortClusters();
+         showDebug("ok!\n");
          if (kTrackFindingAlgorithm == kNearestCluster) {
+            showDebug("Start tracing (kNearestCluster)\n");
             tracks = clusters->findCalorimeterTracksAlpide(); // We ignore diffusion effects here
          }
          else if (kTrackFindingAlgorithm == kWeightedRecursive) {
+            showDebug("Start tracking (kWeightedRecursive)\n");
             tracks = clusters->findTracksWithRecursiveWeighting();
          }
+         else if (kTrackFindingAlgorithm == kReverseWeightedRecursive) {
+            showDebug("Start tracking (kReverseWeightedRecursive)\n");
+            tracks = clusters->findTracksWithReverseRecursiveWeighting();
+         }
+
       }
       else {
          tracks = clusters->findCalorimeterTracksWithMCTruth();

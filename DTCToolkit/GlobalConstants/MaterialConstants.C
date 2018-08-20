@@ -58,7 +58,7 @@ void MaterialConstants() {
    }
 
    else if (kMaterial == kAluminum) {
-      nLayers = 45;
+      nLayers = 50;
       p = p_aluminum;
       alpha = alpha_aluminum;
       alpha_prime = alpha_prime_aluminum;

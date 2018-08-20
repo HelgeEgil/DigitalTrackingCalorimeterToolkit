@@ -473,15 +473,15 @@ void DataInterface::writeDataFrame(Int_t energy) {
 
 
 void  DataInterface::getMCClusters(Int_t runNo, Clusters *clusters) {
-   Int_t eventIdFrom = runNo * kEventsPerRun;
-   Int_t eventIdTo = eventIdFrom + kEventsPerRun;
+   Int_t eventIdFrom = runNo * kEventsPerRun + kSkipTracks;
+   Int_t eventIdTo = eventIdFrom + kEventsPerRun + kSkipTracks;
 
    printf("eventIdFrom = %d, eventIdTo = %d.\n", eventIdFrom, eventIdTo);
 
    if (runNo == 0) lastJentry_ = 0;
    
    Float_t  sum_edep = 0;
-   Int_t    lastID = -1;
+   Int_t    lastEventID = -1, lastParentID = -1;
    Int_t    lastLayer = 0;
    Float_t  lastZ = 0;
    Int_t    layer = 0;
@@ -499,20 +499,35 @@ void  DataInterface::getMCClusters(Int_t runNo, Clusters *clusters) {
       nb = fChain->GetEntry(jentry);
       nbytes += nb;
 
-      if (lastID < 0) {
+      if (lastEventID < 0) {
          lastZ = posZ;
-         lastID = eventID;
+         lastEventID = eventID;
+         lastParentID = parentID;
          lastLayer = layer;
+         sumX = 0;
+         sumY = 0;
+         sum_edep = 0;
+         n = 0;
       }
 
       layer = level1ID + baseID - 1;
-      if (parentID != 0) continue;
-      
-      if (lastID != eventID || lastLayer != layer) {
+      if (kFilterNuclearInteractions == true && parentID != 0) {
+         lastEventID = -1;
+         continue;
+      }
+
+      if (lastEventID != eventID || lastLayer != layer || lastParentID != parentID) {
          x = sumX/n / dx + nx/2;
          y = sumY/n / dy + ny/2;
-         
-         clusters->appendClusterEdep(x, y, lastLayer, sum_edep/14, lastID);
+
+         if (lastLayer < nLayers) {
+            if (lastParentID != 0) {
+               clusters->appendClusterEdep(x, y, lastLayer, sum_edep/14, -1);
+            }
+            else {
+               clusters->appendClusterEdep(x, y, lastLayer, sum_edep/14, lastEventID);
+            }
+         }
 
          sum_edep = 0;
          sumY = 0;
@@ -520,7 +535,7 @@ void  DataInterface::getMCClusters(Int_t runNo, Clusters *clusters) {
          n = 0;
       }
       
-         
+
       if (eventID < eventIdFrom) {
          printf("eventID (%d) < eventIdFrom (%d), continuing.\n", eventID, eventIdFrom);
          continue;
@@ -536,16 +551,24 @@ void  DataInterface::getMCClusters(Int_t runNo, Clusters *clusters) {
       sumX += posX;
       sumY += posY;
       lastZ = posZ;
-      lastID = eventID;
+      lastEventID = eventID;
+      lastParentID = parentID;
       lastLayer = layer;
       n++;
    }
    
-   if (lastID != eventID || lastLayer != layer) {
+   if (lastEventID != eventID || lastLayer != layer || lastParentID != parentID) {
       x = sumX/n / dx + nx/2;
       y = sumY/n / dy + ny/2;
       
-      clusters->appendClusterEdep(x, y, lastLayer, sum_edep/14, lastID);
+      if (lastLayer < nLayers) {
+         if (lastParentID != 0) {
+            clusters->appendClusterEdep(x, y, lastLayer, sum_edep/14, -1);
+         }
+         else {
+            clusters->appendClusterEdep(x, y, lastLayer, sum_edep/14, lastEventID);
+         }
+      }
 
       sum_edep = 0;
       sumY = 0;

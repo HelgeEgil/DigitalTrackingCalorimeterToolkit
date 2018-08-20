@@ -17,7 +17,7 @@ void			drawFrame2D(Int_t dataType = kMC, Int_t Layer = 2, Float_t energy = 170, 
 void        drawDiffusionCheck(Int_t Runs, Int_t Layer, Float_t energy);
 void			drawDiffusionCheck(Int_t Runs, Int_t Layer, Float_t energy);
 void			drawAlignmentCheck(Int_t Runs, Int_t dataType = kMC, Bool_t recreate = 0, Float_t energy = 188);
-void			drawTracks3D(Int_t Runs, Int_t dataType = kMC, Bool_t recreate = false, Int_t switchLayer = 0, Float_t energy = 188, Float_t degraderThickness = 0);
+void			drawTracks3D(Int_t Runs, Int_t dataType = kMC, Bool_t recreate = false, Int_t switchLayer = 0, Float_t energy = 188, Float_t degraderThickness = 0, Int_t tracksperrun = kEventsPerRun);
 void			drawTrackAngleAtVaryingRunNumbers(Int_t dataType, Float_t energy, Float_t degraderThickness = 0);
 void			drawData3D(Int_t Runs, Float_t energy);
 void			writeClusterFile(Int_t Runs, Int_t dataType, Float_t energy);

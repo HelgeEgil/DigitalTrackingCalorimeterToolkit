@@ -48,6 +48,7 @@ class Tracks : public TObject {
       virtual TObject*  removeTrackAt(Int_t i)  { return tracks_.RemoveAt(i); }
       void              appendTrack(Track *copyTrack, Int_t startOffset = 0);
       void              appendClustersWithoutTrack(TClonesArray *clustersWithoutTrack);
+      void              removeHighAngleTracks(Float_t mradLimit);
 
       // Retrieve tracks
       TClonesArray    * getClustersWithoutTrack() { return (TClonesArray*) &clustersWithoutTrack_; }

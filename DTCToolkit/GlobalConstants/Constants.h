@@ -7,8 +7,8 @@
 
 // Set these compiler directives to adjust the logic flow of this file
 
-// #define USEALPIDE // Comment to use experimental data; uncomment to use Monte Carlo data
-#define USEDEBUG // Uncomment to print more debug information
+#define USEALPIDE // Comment to use experimental data; uncomment to use Monte Carlo data
+// #define USEDEBUG // Uncomment to print more debug information
 // #define ONECHIP // (MC) Limit the data area to a single chip (simplify visualization & memory usage)
 
 #ifdef USEDEBUG
@@ -46,7 +46,8 @@ Bool_t   kIsFirstLayerAir = false;
 Bool_t   kDoTracking = true;
 Bool_t   kUseEmpiricalMCS = true;
 Bool_t   kFilterNuclearInteractions = false;
-Int_t    kEventsPerRun = 500;
+Int_t    kEventsPerRun = 2;
+Int_t    kSkipTracks = 0;
 
 #ifdef USEALPIDE
 Bool_t   kUseDegrader = true;
@@ -58,7 +59,8 @@ Bool_t   kUseDegrader = false;
 
 const Int_t sizeOfEventID = 25;
 const Int_t nChildrenInNode = 2; // max concurrent track segments to follow
-Float_t kMaxTrackScore = 0.3; // cumulative rad // was 0.19
+Float_t     kMaxTrackScore = 0.3; // cumulative angular change
+Float_t     kMaxTrackAngle = 0.0; // allow for consecutive 50 mrad changes
 
 // natural unit is mm
 const Float_t cm = 0.1;
@@ -104,7 +106,7 @@ Int_t kOutputUnit = kPhysical;
  *  nearestCluster is good on everything
  */
 
-enum eTrackFindingAlgorithm {kWeightedRecursive, kNearestCluster};
+enum eTrackFindingAlgorithm {kWeightedRecursive, kReverseWeightedRecursive, kNearestCluster};
 // const Int_t kTrackFindingAlgorithm = kNearestCluster;
 const Int_t kTrackFindingAlgorithm = kWeightedRecursive;
 

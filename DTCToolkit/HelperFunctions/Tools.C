@@ -7,6 +7,7 @@
 #include <TH1F.h>
 #include <TMath.h>
 #include <TLatex.h>
+#include <TAxis.h>
 #include <TLine.h>
 #include <TCanvas.h>
 
@@ -22,6 +23,22 @@ using namespace std;
 
 Bool_t isItemInVector(Int_t i, vector<Int_t> *v) {
    return find(v->begin(), v->end(), i) != v->end();
+}
+
+void BinLogY(TH1 *h) {
+   TAxis *axis = h->GetYaxis();
+   int bins = axis->GetNbins();
+
+   Axis_t from = axis->GetXmin();
+   Axis_t to = axis->GetXmax();
+   Axis_t width = (to - from) / bins;
+   Axis_t *new_bins = new Axis_t[bins + 1];
+
+   for (int i=0; i<=bins; i++) {
+      new_bins[i] = pow(10, from + i*width);
+   }
+   axis->Set(bins, new_bins);
+   delete[] new_bins;
 }
 
 Bool_t existsEnergyFile(Int_t energy) {
@@ -334,6 +351,10 @@ Float_t getDotProductAngle(Cluster *a, Cluster *b, Cluster *c) {
 
    Double_t dot    = in[0] * out[0] + in[1] * out[1] + in[2] * out[2];
    Double_t scalar = sqrt(pow(out[0],2) + pow(out[1],2) + pow(out[2],2)) * sqrt(pow(in[0],2) + pow(in[1],2) + pow(in[2],2));
+   
+   if (isnan(acos(dot / scalar))) {
+      if (!isnan(dot) && !isnan(scalar)) return 0; // floating point error on almost || track
+   }
 
    return acos(dot / scalar);
 }
