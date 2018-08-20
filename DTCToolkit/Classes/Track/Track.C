@@ -142,7 +142,7 @@ Bool_t Track::isFirstAndLastEventIDEqual() {
    Int_t first = getEventID(0);
    Int_t last = Last()->getEventID();
 
-   return (first == last || last < 0);
+   return (first == last); // || last < 0);
 }
 
 ostream& operator<< (ostream &os, Track& t) {

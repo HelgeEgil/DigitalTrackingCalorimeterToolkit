@@ -11,10 +11,12 @@
 
 class TGraph;
 class TH1F;
+class TH1;
 
 using namespace std;
 using namespace DTC;
 
+void        BinLogY(TH1 *h);
 Bool_t      isItemInVector(Int_t i, vector<Int_t> *v);
 Float_t     diffXY(Cluster *p, Hit *h);
 Float_t     diffXY(Cluster *p1, Cluster *p2);

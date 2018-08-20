@@ -19,7 +19,7 @@ CalorimeterFrame::CalorimeterFrame() : layers_("DTC::Layer", nLayers) {
       // to create the objects one by one, there is a double delete error
       // when deleting the CalorimeterFrame
       // Needs more investigation
-      //std::cout << "CalorimeterFrame::CalorimeterFrame(): Layer " << At(i)->GetLayerNo() << ": " << At(i) << std::endl;
+      //std::cout << "CalorimeterFrame::CalorimeterFrame(): Layer " << At(i)->getLayer() << ": " << At(i) << std::endl;
    }
 }
 

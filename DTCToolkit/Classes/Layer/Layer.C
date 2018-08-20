@@ -17,6 +17,16 @@ DTC::Layer::~Layer() {
 }
 
 Int_t DTC::Layer::diffuseLayer(TRandom3 *gRandom) {
+   if (kUseRefinedClustering) {
+      return refinedDiffuseLayer(gRandom);
+   }
+   else {
+      return oldDiffuseLayer(gRandom);
+   }
+}
+
+
+Int_t DTC::Layer::oldDiffuseLayer(TRandom3 *gRandom) {
    Int_t repeatFactor, x, y, z, randX, randY;
    Float_t EnergyFactor = 2.67;
    Float_t newSigma, eDep;
@@ -56,22 +66,23 @@ Int_t DTC::Layer::refinedDiffuseLayer(TRandom3 *gRandom) {
    Hits *hits = new Hits();
    Bool_t isHits = findHits(hits);
    Int_t nHits = hits->GetEntriesFast();
-   
    frame2D_.Reset();
 
-   showDebug("Diffusing layer  " << layerNo_ << ". Number of hits = " << nHits << endl);
+   showDebug("Diffusing layer " << layerNo_ << " (refined). Number of hits = " << nHits << endl);
 
    for (Int_t h=0; h<nHits; h++) {
       x = hits->getX(h);
       y = hits->getY(h);
       eDep = hits->getEdep(h); // per um
+//      showDebug("Hit at " << x << ", " << y << ": " << eDep << "keV/um\n");
       repeatFactor = eDep * EnergyFactor;
       newSigma = pow(repeatFactor, 0.41) / 6;
 
       for (Int_t j=0; j<repeatFactor; j++) {
          randX = gRandom->Gaus(x, newSigma);
          randY = gRandom->Gaus(y, newSigma);
-         frame2D_.Fill(randX, randY, EnergyFactor);
+//         frame2D_.Fill(randX, randY, EnergyFactor);
+         frame2D_.SetBinContent(randX, randY, 1);
       }
    }
 

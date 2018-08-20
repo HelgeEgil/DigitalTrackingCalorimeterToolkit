@@ -87,13 +87,13 @@ Tracks * loadTracks(Int_t Runs, Int_t dataType, Float_t energy) {
    return tracks;
 }
 
-Tracks * loadOrCreateTracks(Bool_t recreate, Int_t Runs, Int_t dataType, Float_t energy, Float_t *x, Float_t *y) {
+Tracks * loadOrCreateTracks(Bool_t recreate, Int_t Runs, Int_t dataType, Float_t energy) {
    Tracks * tracks = nullptr;
    
    if (recreate) {
       printf("kUseAlpide = %d\n", kUseAlpide);
       if (!kUseAlpide) {
-         tracks = getTracks(Runs, dataType, kCalorimeter, energy, x, y);
+         tracks = getTracks(Runs, dataType, kCalorimeter, energy);
 
          for (Int_t i=0; i<tracks->GetEntriesFast(); i++) {
             if (!tracks->At(i)) continue;
@@ -124,7 +124,7 @@ Tracks * loadOrCreateTracks(Bool_t recreate, Int_t Runs, Int_t dataType, Float_t
          cout << "!tracks, creating new file\n";
 
          if (!kUseAlpide) {
-            tracks = getTracks(Runs, dataType, kCalorimeter, energy, x, y);
+            tracks = getTracks(Runs, dataType, kCalorimeter, energy);
          }
          else {
             tracks = getTracksFromClusters(Runs, dataType, kCalorimeter, energy);
@@ -231,13 +231,22 @@ Tracks * getTracksFromClusters(Int_t Runs, Int_t dataType, Int_t frameType, Floa
       t2.Start(false);
       if (kDoTracking) {
          printf("There are %d clusters\n", clusters->GetEntriesFast());
+         showDebug("sortClusters...");
          clusters->sortClusters();
+         showDebug("ok!\n");
          if (kTrackFindingAlgorithm == kNearestCluster) {
+            showDebug("Start tracing (kNearestCluster)\n");
             tracks = clusters->findCalorimeterTracksAlpide(); // We ignore diffusion effects here
          }
          else if (kTrackFindingAlgorithm == kWeightedRecursive) {
+            showDebug("Start tracking (kWeightedRecursive)\n");
             tracks = clusters->findTracksWithRecursiveWeighting();
          }
+         else if (kTrackFindingAlgorithm == kReverseWeightedRecursive) {
+            showDebug("Start tracking (kReverseWeightedRecursive)\n");
+            tracks = clusters->findTracksWithReverseRecursiveWeighting();
+         }
+
       }
       else {
          tracks = clusters->findCalorimeterTracksWithMCTruth();
@@ -296,7 +305,7 @@ Tracks * getTracksFromClusters(Int_t Runs, Int_t dataType, Int_t frameType, Floa
    return allTracks;
 }
 
-Tracks * getTracks(Int_t Runs, Int_t dataType, Int_t frameType, Float_t energy, Float_t *x, Float_t *y) {
+Tracks * getTracks(Int_t Runs, Int_t dataType, Int_t frameType, Float_t energy) {
    DataInterface   * di = new DataInterface();
    Misalign        * m = new Misalign();
    Int_t             nClusters = kEventsPerRun * 5 * nLayers;
@@ -334,7 +343,7 @@ Tracks * getTracks(Int_t Runs, Int_t dataType, Int_t frameType, Float_t energy, 
       if (dataType == kMC) {
          t1.Start();
 
-         eventID = di->getMCFrame(i, cf, x, y);
+         eventID = di->getMCFrame(i, cf);
          di->getEventIDs(i, eventIDs);
 
          t1.Stop(); t2.Start();
