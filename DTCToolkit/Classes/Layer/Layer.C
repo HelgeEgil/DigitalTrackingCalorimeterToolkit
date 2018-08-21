@@ -1,3 +1,6 @@
+#ifndef Layer_cxx
+#define Layer_cxx
+
 #include <math.h>
 
 #include <TH2F.h>
@@ -126,3 +129,5 @@ Float_t DTC::Layer::getOccupancy() {
 
    return occupancy;
 }
+
+#endif

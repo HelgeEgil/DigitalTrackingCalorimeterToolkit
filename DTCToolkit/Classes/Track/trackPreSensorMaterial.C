@@ -1,3 +1,6 @@
+#ifndef trackPreSensorMaterial_cxx
+#define trackPreSensorMaterial_cxx
+
 #include <iostream>
 #include <cmath>
 
@@ -128,3 +131,5 @@ Float_t Track::getPreWEPL() {
    wepl = getWEPLFromEnergy(run_energy) - getWEPLFromEnergy(run_energy - energyLoss);
    return wepl;
 }
+
+#endif

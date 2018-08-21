@@ -1,3 +1,6 @@
+#ifndef clusters_c
+#define clusters_c
+
 #include <iostream>
 #include <vector>
 
@@ -390,3 +393,5 @@ void Clusters::findNumberOfClustersForEachEventID() {
    }
    printf("...In total %d clusters.\n", sumEID);
 }
+
+#endif

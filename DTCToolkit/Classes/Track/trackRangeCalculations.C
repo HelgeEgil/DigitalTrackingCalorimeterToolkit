@@ -1,3 +1,6 @@
+#ifndef trackRangeCalculations_cxx
+#define trackRangeCalculations_cxx
+
 #include <iostream>
 #include <cmath>
 
@@ -104,5 +107,4 @@ Float_t Track::getEnergyStraggling() {
    return getEnergyStragglingFromTL(tl, 0);
 }
 
-
-
+#endif

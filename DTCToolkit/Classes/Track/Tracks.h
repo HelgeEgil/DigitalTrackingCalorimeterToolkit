@@ -90,6 +90,7 @@ class Tracks : public TObject {
       void              removeTrackCollisions();
       void              retrogradeTrackImprovement(Clusters * clusters);
       void              removeTracksEndingInBadChannels();
+      void              removeNuclearInteractions();
 
    ClassDef(Tracks,2)
 };

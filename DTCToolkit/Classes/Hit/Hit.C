@@ -1,3 +1,6 @@
+#ifndef Hit_cxx
+#define Hit_cxx
+
 #include <iostream>
 
 #include "Classes/Hit/Hit.h"
@@ -69,3 +72,4 @@ ostream &operator<< (ostream &os, Hit &h) {
    return os;
 }
 
+#endif

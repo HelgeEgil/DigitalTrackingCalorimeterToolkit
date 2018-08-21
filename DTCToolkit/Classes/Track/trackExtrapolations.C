@@ -1,3 +1,6 @@
+#ifndef trackExtrapolations_cxx
+#define trackExtrapolations_cxx
+
 #include <iostream>
 #include <cmath>
 
@@ -173,3 +176,4 @@ void Track::extrapolateToLayer0() {
    }
 }
 
+#endif

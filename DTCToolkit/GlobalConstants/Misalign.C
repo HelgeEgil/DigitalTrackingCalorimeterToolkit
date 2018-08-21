@@ -1,3 +1,6 @@
+#ifndef Misalign_cxx
+#define Misalign_cxx
+
 #include <iostream>
 #include <fstream>
 #include <algorithm>
@@ -89,3 +92,5 @@ chipAlignment Misalign::getMisalign(Cluster * cluster) {
 
     return chipAlignmentArray_[chipIdx];
 }
+
+#endif

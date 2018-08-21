@@ -1,3 +1,6 @@
+#ifndef Cluster_c
+#define Cluster_c
+
 #include <iostream>
 
 #include <math.h>
@@ -167,3 +170,4 @@ ostream& operator<< (ostream &os, Cluster& c) {
    return os;
 }
 
+#endif

@@ -46,7 +46,7 @@ Bool_t   kIsFirstLayerAir = false;
 Bool_t   kDoTracking = true;
 Bool_t   kUseEmpiricalMCS = true;
 Bool_t   kFilterNuclearInteractions = false;
-Int_t    kEventsPerRun = 2;
+Int_t    kEventsPerRun = 50;
 Int_t    kSkipTracks = 0;
 
 #ifdef USEALPIDE

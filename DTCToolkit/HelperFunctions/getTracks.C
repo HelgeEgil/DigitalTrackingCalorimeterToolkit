@@ -1,3 +1,4 @@
+#ifndef getTracks_cxx
 #define getTracks_cxx
 
 #include <ctime>
@@ -203,18 +204,8 @@ Tracks * getTracksFromClusters(Int_t Runs, Int_t dataType, Int_t frameType, Floa
          showDebug("sortClusters...");
          clusters->sortClusters();
          showDebug("ok!\n");
-         if (kTrackFindingAlgorithm == kNearestCluster) {
-            showDebug("Start tracing (kNearestCluster)\n");
-            tracks = clusters->findCalorimeterTracksAlpide(); // We ignore diffusion effects here
-         }
-         else if (kTrackFindingAlgorithm == kWeightedRecursive) {
-            showDebug("Start tracking (kWeightedRecursive)\n");
-            tracks = clusters->findTracksWithRecursiveWeighting();
-         }
-         else if (kTrackFindingAlgorithm == kReverseWeightedRecursive) {
-            showDebug("Start tracking (kReverseWeightedRecursive)\n");
-            tracks = clusters->findTracksWithReverseRecursiveWeighting();
-         }
+         showDebug("Start tracking (kWeightedRecursive)\n");
+         tracks = clusters->findTracksWithRecursiveWeighting();
 
       }
       else {
@@ -273,3 +264,5 @@ Tracks * getTracksFromClusters(Int_t Runs, Int_t dataType, Int_t frameType, Floa
 
    return allTracks;
 }
+
+#endif

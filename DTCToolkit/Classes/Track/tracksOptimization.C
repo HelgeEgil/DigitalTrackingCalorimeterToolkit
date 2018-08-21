@@ -1,3 +1,6 @@
+#ifndef tracksOptimization_cxx
+#define tracksOptimization_cxx
+
 #include <iostream>
 #include <vector>
 
@@ -348,4 +351,22 @@ void Tracks::removeTracksEndingInBadChannels() {
          removeTrackAt(i);
       }
    }
-}      
+}
+
+void Tracks::removeNuclearInteractions() {
+   Track  * thisTrack = nullptr;
+   Int_t    nRemoved = 0;
+   Int_t    nTotal = GetEntriesFast();
+
+   for (Int_t i=0; i<nTotal; i++) {
+      thisTrack = At(i);
+      if (!At(i)) continue;
+      if (thisTrack->doesTrackEndAbruptly()) {
+         removeTrack(thisTrack);
+         nRemoved++;
+      }
+   }
+   cout << "Tracks::removeNuclearInteractions() removed " << nRemoved << " of " << nTotal << "(" << nRemoved/nTotal * 100 << "%) tracks.\n";
+}
+
+#endif

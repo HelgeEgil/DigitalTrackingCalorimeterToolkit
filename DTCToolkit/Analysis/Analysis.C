@@ -1,3 +1,4 @@
+#ifndef Analysis_cxx
 #define Analysis_cxx
 
 #include <ctime>
@@ -36,7 +37,6 @@
 #include "GlobalConstants/MaterialConstants.h"
 #include "GlobalConstants/RangeAndEnergyCalculations.h"
 #include "GlobalConstants/Misalign.h"
-//#include "Classes/Track/conversionFunctions.h"
 #include "Classes/Track/Tracks.h"
 #include "Classes/Hit/Hits.h"
 #include "Classes/DataInterface/DataInterface.h"
@@ -46,48 +46,33 @@
 using namespace std;
 using namespace DTC;
 
-void findMCSAngles(Int_t Runs, Int_t dataType, Bool_t recreate, Float_t energy, Float_t degraderThickness) {
-   // Make one histogram for each layer (starting at layer 1)
+
+void drawTracksDeltaTheta(Int_t Runs, Int_t dataType, Bool_t recreate, Float_t energy, Float_t degraderThickness) {
    // For each track (found using event ID information), find the change in angle
    // at layer 1, 2, 3, 4, 5, ..., nLayers.
-   // The angle at layer 1 is defined as 
-   // THETA1 = atan2(sqrt((x2-x1)^2 + (y2-y1)^2), dz)/sqrt(2) - atan2(sqrt(x1-x0)^2 + (y1-y0)^2, dz)/sqrt(2).
-   // Use MM units for all distances.
-   
 
-   kDoTracking = false;
-   kEventsPerRun = 50000;
-
-   Int_t layers = 50;
-   Int_t lastActivatedLayer = 0;
-   Bool_t drawIndividualLayers = true;
-
-   run_degraderThickness = degraderThickness;
-   run_energy = energy;
-   if (kUseDegrader) run_energy = getEnergyAtWEPL(energy, degraderThickness);
-
-   Tracks * tracks = loadOrCreateTracks(recreate, Runs, dataType, run_energy);
-
-   vector<TH1F*> *hAngleDifference = new vector<TH1F*>;
-   vector<TCanvas*> *cCanvases = new vector<TCanvas*>;
-   hAngleDifference->reserve(layers);
-   cCanvases->reserve(layers);
-
-   TCanvas *cSum = new TCanvas("cSum", "Total angular spread at increasing depth", 1200, 900);
-   TH2F * hAngleSumInAllLayers = new TH2F("hAngleSumInAllLayers", ";Layer number;Total angular spread [mrad]", layers, 0, layers-1, 100, 0.18, 2.8);
-   BinLogY(hAngleSumInAllLayers);
-
-   for (Int_t layer=0; layer<layers; layer++) {
-      hAngleDifference->push_back(new TH1F(Form("hAngleDifference_layer_%i",layer), Form("Angular spread in layer %d for %.0f mm absorbator;Angular spread [rad];Entries",layer, degraderThickness), 1000, 0, 500));
-   }
-
-   Track *thisTrack = nullptr;
-   Float_t angle, totalAngle, y2, y1, y0, x2, x1, x0;
-   Float_t entering[3] = {};
-   Float_t leaving[3] = {};
-   Float_t dotproduct, scalarproduct;
+   Int_t    layers = 50;
+   Int_t    lastActivatedLayer = 0;
+   Bool_t   drawIndividualLayers = true;
+   Track   *thisTrack = nullptr;
+   Float_t  angle, totalAngle, y2, y1, y0, x2, x1, x0;
+   Float_t  entering[3] = {};
+   Float_t  leaving[3] = {};
+   Float_t  dotproduct, scalarproduct;
    Double_t mus[50] = {};
    Double_t sigmas[50] = {};
+   TCanvas *cSum = new TCanvas("cSum", "Total angular spread at increasing depth", 1200, 900);
+   TH2F    *hAngleSumInAllLayers = new TH2F("hAngleSumInAllLayers", ";Layer number;Total angular spread [mrad]", layers, 0, layers-1, 100, 0.18, 2.8);
+   
+   kDoTracking = false;
+   kEventsPerRun = 50000;
+   run_degraderThickness = degraderThickness;
+   run_energy = energy;
+
+   if (kUseDegrader) run_energy = getEnergyAtWEPL(energy, degraderThickness);
+   BinLogY(hAngleSumInAllLayers);
+
+   Tracks * tracks = loadOrCreateTracks(recreate, Runs, dataType, run_energy);
 
    for (Int_t i=0; i<tracks->GetEntriesFast(); i++) {
       thisTrack = tracks->At(i);
@@ -124,60 +109,10 @@ void findMCSAngles(Int_t Runs, Int_t dataType, Bool_t recreate, Float_t energy, 
          angle = acos(dotproduct / scalarproduct);
          totalAngle = sqrt(pow(1000 * angle, 2) + pow(totalAngle, 2));
 
-         hAngleDifference->at(layer)->Fill(totalAngle);
          hAngleSumInAllLayers->Fill(layer, totalAngle);
       }
    }
 
-   if (drawIndividualLayers) {   
-      for (Int_t layer=0; layer<lastActivatedLayer; layer++) {
-         cCanvases->push_back(new TCanvas(Form("canvas_%d", layer), Form("LAYER %d", layer), 1200, 900));
-      }
-
-      TH1F *h = nullptr;
-      printf("Layer mean_angle sigma_angle\n");
-      TLine *indLine1 = nullptr;
-      TLine *indLine2 = nullptr;
-      for (Int_t layer=0; layer<lastActivatedLayer; layer++) {
-         cCanvases->at(layer)->cd();
-         h = hAngleDifference->at(layer);
-         h->SetFillColor(kBlue-4);
-         h->Draw();
-         TF1 *fit = new TF1("fit", "gaus");
-         h->Fit(fit, "Q");
-
-         printf("%d %.3f %.3f\n", layer, fit->GetParameter(1), fit->GetParameter(2));
-         
-         mus[layer] = h->GetBinCenter(h->GetMaximumBin());
-         
-         Float_t totalArea = h->Integral();
-         Int_t binAt = 0;
-         for (int i=h->GetNbinsX(); i>0; i--) {
-            if (h->Integral(i, h->GetNbinsX()) > (1-0.97752) * totalArea) { // 2 sigma
-               binAt = i;
-               break;
-            }
-         }
-         
-         h->GetXaxis()->SetRange(h->GetMaximumBin(), 1000);
-         sigmas[layer] = h->GetXaxis()->GetBinCenter(binAt);
-         
-         indLine1 = new TLine(mus[layer], 0, mus[layer], 5000);
-         indLine2 = new TLine(sigmas[layer], 0, sigmas[layer], 5000);
-         indLine1->SetLineColor(kRed);
-         indLine2->SetLineColor(kBlack);
-         indLine1->Draw();
-         indLine2->Draw();
-
-//         mus[layer] = fit->GetParameter(1);
-//         sigmas[layer] = fit->GetParameter(2);
-
-         delete fit;
-      }
-   }
-
-   cSum->cd();
-   
    gStyle->SetOptStat(0);
 
    hAngleSumInAllLayers->GetXaxis()->SetTitleFont(22);
@@ -216,8 +151,122 @@ void findMCSAngles(Int_t Runs, Int_t dataType, Bool_t recreate, Float_t energy, 
    l300->Draw();
 
 }
+   
+   void drawTracksDeltaThetaEachLayer(Int_t Runs, Int_t dataType, Bool_t recreate, Float_t energy, Float_t degraderThickness) {
+   // Make one histogram for each layer (starting at layer 1)
 
-void drawTrackAngleAtVaryingRunNumbers(Int_t dataType, Float_t energy, Float_t degraderThickness) {
+   Int_t layers = 50;
+   Int_t lastActivatedLayer = 0;
+   Bool_t drawIndividualLayers = true;
+   Track *thisTrack = nullptr;
+   Float_t angle, totalAngle, y2, y1, y0, x2, x1, x0;
+   Float_t entering[3] = {};
+   Float_t leaving[3] = {};
+   Float_t dotproduct, scalarproduct;
+   Double_t mus[50] = {};
+   Double_t sigmas[50] = {};
+
+   kDoTracking = false;
+   kEventsPerRun = 50000;
+   run_degraderThickness = degraderThickness;
+   run_energy = energy;
+   if (kUseDegrader) run_energy = getEnergyAtWEPL(energy, degraderThickness);
+
+   Tracks * tracks = loadOrCreateTracks(recreate, Runs, dataType, run_energy);
+
+   vector<TH1F*> *hAngleDifference = new vector<TH1F*>;
+   vector<TCanvas*> *cCanvases = new vector<TCanvas*>;
+   hAngleDifference->reserve(layers);
+   cCanvases->reserve(layers);
+
+   for (Int_t layer=0; layer<layers; layer++) {
+      hAngleDifference->push_back(new TH1F(Form("hAngleDifference_layer_%i",layer), Form("Angular spread in layer %d for %.0f mm absorbator;Angular spread [rad];Entries",layer, degraderThickness), 1000, 0, 500));
+   }
+
+
+   for (Int_t i=0; i<tracks->GetEntriesFast(); i++) {
+      thisTrack = tracks->At(i);
+      if (!thisTrack) continue;
+      totalAngle = 0;
+
+      for (Int_t layer=0; layer<layers; layer++) {
+         if (thisTrack->GetEntriesFast() - 2 <= layer) {
+            lastActivatedLayer = fmax(layer, lastActivatedLayer);
+            break;
+         }
+
+         x2 = thisTrack->getXmm(layer+1);
+         x1 = thisTrack->getXmm(layer);
+         x0 = (layer > 0) ? thisTrack->getXmm(layer-1) : thisTrack->getXmm(layer); // parallel projection if layer=0
+
+         y2 = thisTrack->getYmm(layer+1);
+         y1 = thisTrack->getYmm(layer);
+         y0 = (layer > 0) ? thisTrack->getYmm(layer-1) : thisTrack->getYmm(layer); // parallel projection if layer=0
+         
+         entering[0] = x1-x0;
+         entering[1] = y1-y0;
+         entering[2] = dz;
+
+         leaving[0] = x2-x1;
+         leaving[1] = y2-y1;
+         leaving[2] = dz;
+
+         // DOT PRODUCT RULE
+         // dot(a,b) = |a| |b| cos theta
+         
+         scalarproduct = sqrt(pow(entering[0], 2) + pow(entering[1], 2) + pow(entering[2], 2)) * sqrt(pow(leaving[0], 2) + pow(leaving[1], 2) + pow(leaving[2], 2));
+         dotproduct = entering[0] * leaving[0] + entering[1] * leaving[1] + entering[2] * leaving[2];
+         angle = acos(dotproduct / scalarproduct);
+         totalAngle = sqrt(pow(1000 * angle, 2) + pow(totalAngle, 2));
+
+         hAngleDifference->at(layer)->Fill(totalAngle);
+      }
+   }
+
+   for (Int_t layer=0; layer<lastActivatedLayer; layer++) {
+      cCanvases->push_back(new TCanvas(Form("canvas_%d", layer), Form("LAYER %d", layer), 1200, 900));
+   }
+
+   TH1F *h = nullptr;
+   printf("Layer mean_angle sigma_angle\n");
+   TLine *indLine1 = nullptr;
+   TLine *indLine2 = nullptr;
+   for (Int_t layer=0; layer<lastActivatedLayer; layer++) {
+      cCanvases->at(layer)->cd();
+      h = hAngleDifference->at(layer);
+      h->SetFillColor(kBlue-4);
+      h->Draw();
+      TF1 *fit = new TF1("fit", "gaus");
+      h->Fit(fit, "Q");
+
+      printf("%d %.3f %.3f\n", layer, fit->GetParameter(1), fit->GetParameter(2));
+      
+      mus[layer] = h->GetBinCenter(h->GetMaximumBin());
+      
+      Float_t totalArea = h->Integral();
+      Int_t binAt = 0;
+      for (int i=h->GetNbinsX(); i>0; i--) {
+         if (h->Integral(i, h->GetNbinsX()) > (1-0.97752) * totalArea) { // 2 sigma
+            binAt = i;
+            break;
+         }
+      }
+      
+      h->GetXaxis()->SetRange(h->GetMaximumBin(), 1000);
+      sigmas[layer] = h->GetXaxis()->GetBinCenter(binAt);
+      
+      indLine1 = new TLine(mus[layer], 0, mus[layer], 5000);
+      indLine2 = new TLine(sigmas[layer], 0, sigmas[layer], 5000);
+      indLine1->SetLineColor(kRed);
+      indLine2->SetLineColor(kBlack);
+      indLine1->Draw();
+      indLine2->Draw();
+
+      delete fit;
+   }
+}
+
+void getTracksReconstructionEfficiency(Int_t dataType, Float_t energy, Float_t degraderThickness) {
    Int_t nRuns = 0;
 
    run_energy = energy;
@@ -230,7 +279,6 @@ void drawTrackAngleAtVaryingRunNumbers(Int_t dataType, Float_t energy, Float_t d
 //   Int_t nRunArray[8] = {19,32,64,108,215,512,1024,2048};
 //   Int_t nRunArray[7] = {10,25,50,100,150,250,500};
    Int_t nRunArray[12] = {3,4,5,8,16,32,64,128,181,256,512,1024};
-
 
    for (Int_t i=0; i<12; i++) { // 1 -> 30
 //      nRuns = pow(2, 1 + 0.4 * i) + 0.5;
@@ -321,210 +369,6 @@ void drawTrackAngleAtVaryingRunNumbers(Int_t dataType, Float_t energy, Float_t d
       delete c1;
       delete c2;
    }
-}
-
-void getTrackStatistics(Int_t Runs, Int_t dataType, Bool_t recreate, Float_t energy, Int_t epr) {
-   run_energy = energy;
-   kDataType = dataType;
-   
-   if (epr>0) {
-      kEventsPerRun = epr;
-   }
-
-   Tracks * tracks = loadOrCreateTracks(recreate, Runs, dataType, energy);
-   
-   Int_t nTracksToPlot = 25;
-   Int_t nTracksToPlot1D = 5;
-
-   char * sDataType = getDataTypeChar(dataType);
-
-   TCanvas *c1 = new TCanvas("c1", "c1", 800, 600);
-   TCanvas *c2 = new TCanvas("c2", "c2", 800, 600);
-   TCanvas *c3 = new TCanvas("c3", "c3", 800, 600);
-   TCanvas *c4 = new TCanvas("c4", "c4", 800, 600);
-   TCanvas *c5 = new TCanvas("c5", "c5", 800, 600);
-   TCanvas *c6 = new TCanvas("c6", "c6", 1000, 800);
-   TCanvas *c7 = new TCanvas("c7", "c7", 1000, 800);
-   TCanvas *c8 = new TCanvas("c8", "c8", 1000, 800);
-
-   c5->Divide(2, 2, 0.01, 0.01, 0);
-   c6->Divide(3, 3, 0.01, 0.01, 0);
-   c7->Divide(nTracksToPlot1D, nTracksToPlot1D, 0.001, 0.001, 0);
-   c8->Divide(3,3,0.01,0.01,0);
-
-   TH1F *hTrackLengths = new TH1F("hTrackLengths", Form("Track Lengths (%s)", sDataType), 100, 0, 120);
-   TH2F *hClusterSizeAlongTrack = new TH2F("hClusterSizeAlongTrack",
-            Form("Cluster size along track length (%s)", sDataType), 1.5*nLayers, 0, 1.5*nLayers*dz, 50, 0, 50);
-   TH1F *hStraightness = new TH1F("hStraightness", Form("Sinuosity plot (%s)", sDataType), 500, 1, 1.01);
-   TH1F *hSlope = new TH1F("hSlope", Form("Proton angle plot (%s)", sDataType), 500, 0, 20);
-
-   // Average cluster size
-   vector<TH1F*> *hAvgCS = new vector<TH1F*>;
-   hAvgCS->reserve(4);
-   for (Int_t chip=0; chip<4; chip++) {
-      hAvgCS->push_back(new TH1F(Form("hAvgCS_chip_%i",chip),
-            Form("Average Cluster Size vs Track Length for chip %i (%s)",chip, sDataType), 50, 0, 50));
-   }
-
-   // Cluster size for individual layers
-   vector<TH1F*> *hCSLayer = new vector<TH1F*>;
-   hCSLayer->reserve(9);
-   for (Int_t layer=0; layer<9; layer++) {
-      hCSLayer->push_back(new TH1F(Form("hCSLayer_%i", layer),
-            Form("Cluster size for layer %i (%s)", layer, sDataType), 50, 0, 50));
-   }
-
-   // Cluster size along track length for a single track
-   vector<TH1F*> *hFollowTrack = new vector<TH1F*>;
-   hFollowTrack->reserve(nTracksToPlot);
-   for (Int_t track=0; track<nTracksToPlot; track++) {
-      hFollowTrack->push_back(new TH1F(Form("hFollowTrack_%i", track),
-            Form("Cluster size along track length for a single track (%s)", sDataType), 50, 0, 50));
-      hFollowTrack->at(track)->SetXTitle("Track Length [mm]");
-      hFollowTrack->at(track)->SetYTitle("Cluster size [# of pixels]");
-   }
-
-   // Proton angle distribution in layer
-   vector<TH1F*> *hAngles = new vector<TH1F*>;
-   hAngles->reserve(9);
-   for (Int_t layer=0; layer<9; layer++) {
-      hAngles->push_back(new TH1F(Form("hAngles_%i", layer),
-            Form("Proton angle distribution in layer %i (%s)", layer, sDataType), 50, 0, 20));
-      hAngles->at(layer)->SetXTitle("Proton angle [deg]");
-      hAngles->at(layer)->SetYTitle("Cluster size [# of pixels]");
-   }
-   
-   hTrackLengths->SetXTitle("Track length [mm]");
-   hClusterSizeAlongTrack->SetXTitle("Track length [mm]");
-   hClusterSizeAlongTrack->SetYTitle("Cluster size [# of pixels]");
-   hStraightness->SetXTitle("Sinuosity parameter");
-   hSlope->SetXTitle("Total track angle (degree)");
-
-   Float_t trackLengthSoFar = 0;
-   Int_t trackNum = 0;
-   Int_t chip = 0; // the quadrant
-   Bool_t cutTL = false;
-   Bool_t cutCHIP = false;
-   Int_t okTL = 0;
-   Int_t okCHIP = 0;
-   Float_t ang = 0;
-
-   Track *thisTrack;
-   for (Int_t i=0; i<tracks->GetEntriesFast(); i++) {
-      thisTrack = tracks->At(i);
-
-      Float_t TL = thisTrack->getTrackLengthmm();
-      Int_t x0 = thisTrack->getX(0);
-      Int_t y0 = thisTrack->getY(0);
-
-      cutTL = (TL > kMinimumTracklength) ? true : false;
-
-      chip = (x0 >= nx/2) + 2 * (y0 < ny/2);
-      cutCHIP = (chip<2 || dataType == kMC) ? true : false;
-
-      hTrackLengths->Fill(TL);
-      hStraightness->Fill(thisTrack->getSinuosity());
-      hSlope->Fill(thisTrack->getSlopeAngle());
-
-      for (Int_t j=0; j<tracks->GetEntriesFast(i); j++) {
-
-         trackLengthSoFar += thisTrack->getTrackLengthmmAt(j);
-         if (cutTL && cutCHIP)
-            hClusterSizeAlongTrack->Fill(trackLengthSoFar, thisTrack->getSize(j));
-
-         if (cutTL)
-            hAvgCS->at(chip)->Fill(trackLengthSoFar, thisTrack->getSize(j));
-
-         Int_t layer = thisTrack->getLayer(j);
-         if (layer<9) {
-            hCSLayer->at(layer)->Fill(thisTrack->getSize(j));
-//          hAngles->at(layer)->Fill(thisTrack->getSlopeAngleAtLayer(j));
-            ang = thisTrack->getSlopeAngleChangeBetweenLayers(j);
-            if (ang>=0) {
-               hAngles->at(layer)->Fill(ang);
-            }
-         }
-
-         if (trackNum < nTracksToPlot && cutTL && cutCHIP) {
-            hFollowTrack->at(trackNum)->Fill(trackLengthSoFar, thisTrack->getSize(j));
-            hFollowTrack->at(trackNum)->SetTitle(Form("Track length histogram for run %i (%s)", i, sDataType));
-         }
-      }
-      trackLengthSoFar = 0;
-
-      if (cutTL) okTL++;
-      if (cutCHIP) okCHIP++;
-      if (cutTL && cutCHIP) trackNum++;
-   }
-
-   cout << "Total number of tracks: " << tracks->GetEntriesFast() << endl;
-   cout << "Passed track length: " << okTL << " (" << 100 * okTL / tracks->GetEntriesFast() << ")\n";
-   cout << "Passed chip #: " << okCHIP << " (" << 100 * okCHIP / tracks->GetEntriesFast() << ")\n";
-
-   c1->cd();
-      hTrackLengths->Draw();
-   c2->cd();
-      gStyle->SetOptStat(0);
-      hClusterSizeAlongTrack->Draw("COLZ");
-   c3->cd();
-      hStraightness->Draw();
-   c4->cd();
-      hSlope->Draw();
-
-   for (Int_t chip=0; chip<4; chip++) {
-      c5->cd(chip+1);
-      hAvgCS->at(chip)->SetFillColor(kRed-chip*2);
-      hAvgCS->at(chip)->Draw();
-   }
-   for (Int_t layer=0; layer<9; layer++) {
-      c6->cd(layer+1);
-      hCSLayer->at(layer)->SetFillColor(kRed-9+layer);
-      hCSLayer->at(layer)->Draw("same");
-
-//    cout << "Average cluster size and RMS for layer " << layer << " is \033[1m " << hCSLayer->at(layer)->GetMean() << " pixels \033[0m and \033[1m " << hCSLayer->at(layer)->GetRMS() << "pixels \033[0m\n";
-   }
-
-   for (Int_t track=0; track<nTracksToPlot; track++) {
-      c7->cd(track+1);
-      gPad->DrawFrame(0, 0, 50, 35);
-      hFollowTrack->at(track)->SetFillColor(kBlue-2);
-      hFollowTrack->at(track)->Draw("same");
-   }
-
-   fillMCSRadiusList(1);
-   for (Int_t layer=0; layer<9; layer++) {
-      c8->cd(layer+1);
-
-
-      Float_t meanAngleAtLayer = findMCSAtLayerRad(layer, run_energy);
-      Float_t mcs = getMCSAngleForLayer(layer) / cos(meanAngleAtLayer);
-
-//    cout << "The added MCS factor due to inclined crossing is " << 1/(cos(meanAngleAtLayer)) << ".\n";
-
-      TF1 *mcsGauss = new TF1("mcsGauss", "gaus(0)", 0, 25);
-      if (hAngles->at(layer)->Integral()>0) {
-         mcsGauss->SetParameters(10, 0, mcs);
-         mcsGauss->SetParLimits(0, 1, 1000);
-         mcsGauss->SetParLimits(1, 0, 0);
-         mcsGauss->SetParLimits(2, mcs, mcs);
-
-         hAngles->at(layer)->Fit("mcsGauss", "M,B,Q");
-      }
-
-      int maxHeight = hAngles->at(layer)->GetMaximum();
-      TLine *line = new TLine(mcs, 0, mcs, maxHeight * 1.05);
-      TLine *line2 = new TLine(mcs  * 2, 0, mcs * 2, maxHeight * 1.05);
-      TLine *line3 = new TLine(mcs  * 3, 0, mcs * 3, maxHeight * 1.05);
-
-      hAngles->at(layer)->SetFillColor(kRed-9+layer);
-      hAngles->at(layer)->Draw("same");
-      mcsGauss->Draw("same");
-      line->Draw("same");
-      line2->Draw("same");
-      line3->Draw("same");
-   }
-
-   delete tracks;
 }
 
 void drawClusterShapes(Int_t Runs, Bool_t dataType, Float_t energy, Float_t degraderThickness) {
@@ -725,28 +569,88 @@ void drawFitScale(Int_t Runs, Int_t dataType, Bool_t recreate, Float_t energy) {
    hScale->Draw();
 }  
 
-Float_t drawBraggPeakGraphFit(Int_t Runs, Int_t dataType, Bool_t recreate, Float_t energy, Float_t degraderThickness, Int_t idx_txt) {
+void drawTracksDepthDose(Int_t Runs, Int_t dataType, Bool_t recreate, Float_t energy, Float_t degraderThickness, Int_t eventsPerRun) {
    run_degraderThickness = degraderThickness;
    run_energy = energy;
-   TStopwatch t1, t2, t3, t4, t5, t6, t7, t8;
+   kDataType = dataType;
+   kEventsPerRun = eventsPerRun;
    
-   t1.Start();
+   if (kUseDegrader) {
+      run_energy = getEnergyFromDegraderThickness(degraderThickness);
+      printf("Using degrader, expecting nominal residual energy %.2f MeV\n", run_energy);
+   }
+   
+   Bool_t         removeHighAngleTracks = false;
+   Bool_t         removeNuclearInteractions = true;
+   Float_t        fitRange, fitScale, fitError;
+   Int_t          nCutDueToTrackEndingAbruptly = 0;
+   Int_t          nPlotX = 3, nPlotY = 2;
+   Int_t          fitIdx = 0, plotSize = nPlotX*nPlotY;
+   Int_t          skipPlot = 0;
+   TGraphErrors * outputGraph;
+   char         * sDataType = getDataTypeChar(dataType);
+   char         * sMaterial = getMaterialChar();
+   TCanvas      * cGraph = new TCanvas("cGraph", "Fitted data points", nPlotX*500, nPlotY*500);
 
+   cGraph->Divide(nPlotX,nPlotY, 0.000001, 0.000001, 0);
+   cGraph->cd();
+   gPad->SetBorderMode(0); gStyle->SetFrameBorderMode(0);
+   gPad->SetTickx(1); gPad->SetTicky(1);
+   gPad->SetTopMargin(0.05); gPad->SetRightMargin(0.05);
+   gPad->SetBottomMargin(0.05);
+   gPad->SetLeftMargin(0.15);
+
+   Tracks * tracks = loadOrCreateTracks(recreate, Runs, dataType, run_energy);
+
+   if (removeHighAngleTracks) {
+      tracks->removeHighAngleTracks(100);
+   }
+
+   if (removeNuclearInteractions) {
+      tracks->removeNuclearInteractions();
+   }
+
+
+   for (Int_t j=0; j<tracks->GetEntriesFast(); j++) {
+      if (j < skipPlot) continue;
+
+      Track *thisTrack = tracks->At(j);
+      if (!thisTrack) continue;
+
+      // Do track fit, extract all parameters for this track
+      outputGraph = (TGraphErrors*) thisTrack->doTrackFit(false, false); // (bool isScaleVariable, bool useTrackLength (~ CSDA))
+      if (!outputGraph) continue;
+
+      fitRange = thisTrack->getFitParameterRange();
+      fitScale = thisTrack->getFitParameterScale();
+      fitError = quadratureAdd(thisTrack->getFitParameterError(), dz*0.28867); // latter term from error on layer position
+
+      if (fitIdx < plotSize) {
+         drawIndividualGraphs(cGraph, outputGraph, fitRange, fitScale, fitError, fitIdx++);
+         printf("Drawing plot number %d.\n", fitIdx);
+      }
+   
+      else break;
+   }
+}
+
+void drawTracksRangeHistogram(Int_t Runs, Int_t dataType, Bool_t recreate, Float_t energy, Float_t degraderThickness, Int_t eventsPerRun) {
+   run_degraderThickness = degraderThickness;
+   run_energy = energy;
+   kEventsPerRun = eventsPerRun;
+   
    if (kUseDegrader) {
       run_energy = getEnergyFromDegraderThickness(degraderThickness);
    }
-   t7.Start();
 
    printf("Using water degrader of thickness %.0f mm, the initial energy of %.0f MeV is reduced to %.1f MeV.\n", degraderThickness, energy, run_energy);
 
    kDataType = dataType;
-   Bool_t         kDrawHorizontalLines = false;
-   Bool_t         kDrawVerticalLayerLines = false;
-   Bool_t         kDrawIndividualGraphs = true;
    Bool_t         kDrawFitResults = true;
-   Bool_t         acceptAngle = false;
-   Float_t        maxAngle, thisAngle;
-   Float_t        cutAngle = (run_degraderThickness * 0.0219 + 0.556) * 0.8;
+   Bool_t         removeHighAngleTracks = true;
+   Bool_t         removeNuclearInteractions = true;
+   Bool_t         drawVerticalLayerLines = false;
+
    Float_t        finalEnergy = 0;
    Float_t        fitRange, fitScale, fitError;
    Int_t          nCutDueToTrackEndingAbruptly = 0;
@@ -758,11 +662,6 @@ Float_t drawBraggPeakGraphFit(Int_t Runs, Int_t dataType, Bool_t recreate, Float
    char         * sMaterial = getMaterialChar();
    char         * hTitle = Form("Fitted energy of a %.2f MeV beam in %s (%s)", run_energy, sMaterial, sDataType);
 
-   if (idx_txt > 0) {
-      kDrawIndividualGraphs = false;
-      kDrawFitResults = false;
-   }
-
    Int_t nEnergyBins = getUnitFromEnergy(run_energy);
    gStyle->SetOptTitle(0);
 
@@ -773,8 +672,7 @@ Float_t drawBraggPeakGraphFit(Int_t Runs, Int_t dataType, Bool_t recreate, Float
    Float_t lowHistogramLimit = getUnitFromEnergy(0);
    Float_t highHistogramLimit = getUnitFromEnergy(run_energy)*1.4 + 10;
 
-   TCanvas      * cGraph = new TCanvas("cGraph", "Fitted data points", nPlotX*500, nPlotY*500);
-   TH1F         * hFitResults = new TH1F("fitResult", hTitle, fmax(nEnergyBins,100), lowHistogramLimit, highHistogramLimit);
+   TH1F * hFitResults = new TH1F("fitResult", hTitle, fmax(nEnergyBins,100), lowHistogramLimit, highHistogramLimit);
  
    printf("Using material: %s\n", sMaterial);
    printf("Histogram limits: %.2f to %.2f.\n", lowHistogramLimit, highHistogramLimit);
@@ -783,107 +681,35 @@ Float_t drawBraggPeakGraphFit(Int_t Runs, Int_t dataType, Bool_t recreate, Float
    cout << "Correcting for aluminum plate: " << kIsAluminumPlate << endl;
    cout << "Correcting for scintillators: " << kIsScintillator << endl;
 
-   // Histogram options
-   cGraph->Divide(nPlotX,nPlotY, 0.000001, 0.000001, 0);
-   cGraph->cd();
-
-   // All gPad were gStyle, but try to limit to cGraph and not cFitResults
-   gPad->SetBorderMode(0); gStyle->SetFrameBorderMode(0);
-   gPad->SetTickx(1); gPad->SetTicky(1);
-   gPad->SetTopMargin(0.05); gPad->SetRightMargin(0.05);
-   gPad->SetBottomMargin(0.05);
-   gPad->SetLeftMargin(0.15);
    hFitResults->SetLineColor(kBlack); hFitResults->SetFillColor(kGreen-5);
 
-   t1.Stop();
-   t3.Reset();
-   t4.Reset();
-   t5.Reset();
-
-   // Create or load all tracks
-   t2.Start();
    Tracks * tracks = loadOrCreateTracks(recreate, Runs, dataType, run_energy);
-   t2.Stop();
-   
+   if (removeHighAngleTracks) {
+      tracks->removeHighAngleTracks(100);
+   }
+   if (removeNuclearInteractions) {
+      tracks->removeNuclearInteractions();
+   }
+
    for (Int_t j=0; j<tracks->GetEntriesFast(); j++) {
       Track *thisTrack = tracks->At(j);
       if (!thisTrack) continue;
     
-      t3.Start(false);
       if (thisTrack->doesTrackEndAbruptly()) {
          nCutDueToTrackEndingAbruptly++;
-//         continue;
       }
-   
-      maxAngle = thisTrack->getSlopeAngleAtLayer(1);
-      if (maxAngle > cutAngle && acceptAngle) continue;
-      t3.Stop();
 
       // Do track fit, extract all parameters for this track
-      t4.Start(false);
       outputGraph = (TGraphErrors*) thisTrack->doTrackFit(false, false); // (bool isScaleVariable, bool useTrackLength (~ CSDA))
       if (!outputGraph) continue;
+   
+      delete outputGraph;
 
       fitRange = thisTrack->getFitParameterRange();
-      fitScale = thisTrack->getFitParameterScale();
-
-      if (kDrawIndividualGraphs) fitError = quadratureAdd(thisTrack->getFitParameterError(), dz*0.28867); // latter term from error on layer position
-      t4.Stop();
-
       hFitResults->Fill(getUnitFromTL(fitRange));
-
-      t5.Start(false);
-      if (fitIdx < plotSize && kDrawIndividualGraphs && j>=skipPlot) {
-         drawIndividualGraphs(cGraph, outputGraph, fitRange, fitScale, fitError, fitIdx++);
-
-         // Drawing of three panels with individual range-Edep graphs
-         if (fitIdx == 1) {
-            gPad->SetRightMargin(0.01);
-            gPad->SetLeftMargin(0.1);
-         }
-
-         else if (fitIdx == 2) {
-            gPad->SetLeftMargin(0.1);
-            gPad->SetRightMargin(0.01);
-            outputGraph->GetYaxis()->SetLabelOffset(2);
-            outputGraph->SetTitle(Form("Experimental data: %.0f MeV", run_energy));
-         
-         }
-
-         else if (fitIdx == 3) {
-            gPad->SetRightMargin(0.01);
-            gPad->SetLeftMargin(0.01);
-            outputGraph->GetXaxis()->SetTitle("");
-            outputGraph->GetYaxis()->SetLabelOffset(2);
-         }
-      }
-      else delete outputGraph;
-
-      t5.Stop();
-
    }
    
-   if (!kDrawIndividualGraphs) delete cGraph;
-   
-   t6.Start();
-
-   cout << 100 * float(nCutDueToTrackEndingAbruptly) / tracks->GetEntriesFast() << " % of the tracks were cut due to seemingly inelastic nuclear interactions.\n";
-
-//   TF1 *fMaxAngle = new TF1("fMaxAngle", "gaus(0)", 0, 25);
-//   fMaxAngle->SetParameters(100, 4, 6);
-//   hMaxAngle->Fit(fMaxAngle, "M, W, Q, N", "", 0, 25);
-
-//   Float_t angleTo = fMaxAngle->GetParameter(1) + 3 * fMaxAngle->GetParameter(2);
-
-//   cout << "3 sigma Confidence Limit for angular spread  = " << angleTo << endl;
-
-//   Int_t nAccepted = hMaxAngle->Integral(0,hMaxAngle->GetXaxis()->FindBin(angleTo));
-//   Float_t percentAccepted = 100 * nAccepted / hMaxAngle->Integral(0);
-
-//   cout << "Number of accepted events = " << nAccepted << " of total " << hMaxAngle->Integral()  << "(" <<  percentAccepted << " %) " << endl;
-
    TCanvas * cFitResults = new TCanvas("cFitResults", hTitle, 1000, 1000);
-   cFitResults->cd();
 
    if       (kOutputUnit == kPhysical) hFitResults->SetXTitle("Physical range [mm]");
    else if  (kOutputUnit == kWEPL)     hFitResults->SetXTitle("Range in Water Equivalent Path Length [mm]");
@@ -902,13 +728,7 @@ Float_t drawBraggPeakGraphFit(Int_t Runs, Int_t dataType, Bool_t recreate, Float
       hFitResults->Draw();
    }
 
-   gPad->Update();
-   TPaveText *title = (TPaveText*) gPad->GetPrimitive("title");
-   title->SetTextFont(22);
-   gPad->Modified();
-
    // Draw expected gaussian distribution of results from initial energy
-
    Float_t expectedStraggling = 0, expectedMean = 0, dlayer_down = 0, dlayer = 0;
    Float_t separationFactor = 0.9, nullStraggling = 0;
    Float_t sigma_energy = getSigmaEnergy(run_energy);
@@ -923,7 +743,7 @@ Float_t drawBraggPeakGraphFit(Int_t Runs, Int_t dataType, Bool_t recreate, Float
    Float_t means[10] = {};
    Float_t sigmas[10] = {};
 
-   TF1 *gauss = doSimpleGaussianFit(hFitResults, means, sigmas, idx_txt);
+   TF1 *gauss = doSimpleGaussianFit(hFitResults, means, sigmas, 1);
    Float_t empiricalMean = means[9];
    Float_t empiricalSigma = sigmas[9];
    
@@ -932,7 +752,7 @@ Float_t drawBraggPeakGraphFit(Int_t Runs, Int_t dataType, Bool_t recreate, Float
    if (kDrawFitResults) {
       gPad->Update();
 
-      if (kDrawVerticalLayerLines) {
+      if (drawVerticalLayerLines) {
          TLine *l = nullptr;
          Float_t line_z = 0;
          for (Int_t i=0; i<65; i++) {
@@ -944,16 +764,6 @@ Float_t drawBraggPeakGraphFit(Int_t Runs, Int_t dataType, Bool_t recreate, Float
       }
 
       gPad->Update();
-      Float_t bip_value = empiricalMean - 6 * empiricalSigma;
-      if (bip_value == 0) bip_value = getWEPLFromEnergy(run_energy)*0.9;
-      TLine *bip = new TLine(bip_value, gPad->GetUymax(), bip_value, 0);
-      if (bip_value > lowHistogramLimit) bip->Draw();
-
-      Float_t bip_value2 = empiricalMean + 6 * empiricalSigma;
-      TLine *bip2 = new TLine(bip_value2, 0, bip_value2, gPad->GetUymax());
-      if (bip_value < highHistogramLimit) bip2->Draw();
-      
-
       gStyle->SetOptStat(11);
       TPaveStats *ps = (TPaveStats*) cFitResults->GetPrimitive("stats");
       hFitResults->SetBit(TH1::kNoStats);
@@ -967,69 +777,7 @@ Float_t drawBraggPeakGraphFit(Int_t Runs, Int_t dataType, Bool_t recreate, Float
    }
 
    else delete cFitResults;
-
    delete tracks;
-   t6.Stop();
-   t7.Stop();
-   
-   cout << "TIMING INFORMATION-------------\n";
-   cout << "INIT + CLOSEDOWN: " << t1.CpuTime() + t6.CpuTime() << " s.\n";
-   cout << "TRACK RECONSTRUCTION: " << t2.CpuTime() << " s.\n";
-//   cout << "TRACK INIT: " << t3.CpuTime() << " s.\n";
-   cout << "TRACK FITTING: " << t3.CpuTime() + t4.CpuTime() << " s.\n";
-   cout << "DRAW PLOTS: " << t5.CpuTime() << " s.\n";
-//   cout << "ANALYSIS AND CLOSE DOWN: " << t6.CpuTime() << " s.\n";
-   cout << "TOTAL ANALYSIS TIME: " << t7.CpuTime() << " s.\n";
-
-   return empiricalMean;
-}
-
-void writeClusterFile(Int_t Runs, Int_t dataType, Float_t energy) {
-   run_energy = energy;
-   kDataType = dataType;
-   
-   Int_t nClusters = kEventsPerRun * 5 * nLayers;
-   Int_t nHits = kEventsPerRun * 50;
-   Bool_t kRemoveSmallClusters = true;
-   
-   DataInterface *di = new DataInterface();
-   CalorimeterFrame *cf = new CalorimeterFrame();
-   Hits * hits = new Hits(nHits);
-   Clusters * clusters = new Clusters(nClusters);
-   
-   for (Int_t i=0; i<Runs; i++) {
-      if (dataType == kMC) {
-         di->getMCFrame(i, cf);  
-         cf->diffuseFrame(new TRandom3(0));
-         hits = cf->findHits();
-         clusters = hits->findClustersFromHits();
-      }
-      
-      else if (dataType == kData) {
-         di->getDataFrame(i, cf, energy);
-         hits = cf->findHits();
-         clusters = hits->findClustersFromHits();
-         
-         if (kRemoveSmallClusters) {
-            Int_t maxRemoveSize = 2;
-            clusters->removeSmallClusters(maxRemoveSize);
-         }
-      }
-   }
-
-   delete di;
-
-   ofstream file("OutputFiles/output_all_layers.csv");
-   file << "layer;x;y;clustersize" << endl;
-
-   for (Int_t i=0; i<clusters->GetEntriesFast(); i++) {
-      file << clusters->getLayer(i) << ";" 
-           << clusters->getX(i) << ";"
-          << clusters->getY(i) << ";" 
-          << clusters->getSize(i) << endl;
-   }
-   
-   file.close();
 }
 
 void draw2DProjection(Int_t Runs, Int_t dataType, Bool_t recreate, Float_t energy) {
@@ -1802,12 +1550,12 @@ void drawTracks3D(Int_t Runs, Int_t dataType, Bool_t recreate, Int_t switchLayer
 //       l->SetLineColor(kBlack);
       l->SetLineWidth(3);
       if (l->GetLineColor() == kRed) l->Draw();
-//       l->Draw();
+      l->Draw();
 
        if (l->GetLineColor() == kGreen) badSecondary++;
        if (l->GetLineColor() == kRed)   badPrimary++;
       
-//      trackPoints->Draw();
+      trackPoints->Draw();
 //    EIDMarker->Draw();
       conflictMarker->Draw();
    }
@@ -2281,228 +2029,6 @@ void drawDataProfile(Float_t energy) {
    hProjection->Draw("colz");
 }
 
-void compareClusterSizes(Int_t Runs, Bool_t recreate, Float_t energy) {
-   run_energy = energy;
-   Tracks    * MCTracks = nullptr;
-   Tracks    * DataTracks = nullptr;
-   Cluster   * thisCluster = nullptr;
-   Clusters  * MCClusters = nullptr;
-   Clusters  * DataClusters = nullptr;
-   Int_t       nTracksMC, nTracksData, thisLayer, thisSize;
-   Bool_t      useChip = true;
-   Int_t       nClustersInChip[30] = {0};
-   Bool_t      useLowerMCEnergy = true;
-   Float_t     altEnergy = energy;
-
-   Int_t fChip = 1;
-   if (useChip) fChip = 4;
-
-   const Int_t nLayersToUse = 7*4;
-
-   if (useLowerMCEnergy) {
-      if (energy == 188) altEnergy = 184;
-      if (energy == 180) altEnergy = 171;
-      if (energy == 170) altEnergy = 166;
-      if (energy == 160) altEnergy = 155;
-      if (energy == 150) altEnergy = 150;
-   }
-   
-   cout << "Finding MC tracks...\n";
-   MCTracks = loadOrCreateTracks(recreate, Runs, kMC, altEnergy);
-
-   cout << "Finding EXP tracks...\n";
-   DataTracks = loadOrCreateTracks(recreate, Runs, kData, energy);
-
-   MCClusters = getClusters(Runs, kMC, kCalorimeter, energy);
-   DataClusters = getClusters(Runs, kData, kCalorimeter, energy);
-
-   TCanvas *c2 = new TCanvas("c2", "Individual cluster size distributions MC", 1200, 800);
-   c2->Divide(4, 2, 0.01, 0.01);
-   TCanvas *c3 = new TCanvas("c3", "Individual cluster size distributions DATA", 1200, 800);
-   c3->Divide(4, 2, 0.01, 0.01);
-   TCanvas *c1 = new TCanvas("c1", "Cluster size distribution comparison", 1022, 645);
-   c1->Divide(1,2,0.01, 0.01);
-
-   vector<TH1F*> *hCSVectorMC = new vector<TH1F*>;
-   for (Int_t i=0; i<nLayersToUse; i++) {
-      hCSVectorMC->push_back(new TH1F(Form("hCSIndMC_%d", i), Form("CS histogram %d", i), 60, 0, 60));
-   }
-   
-   vector<TH1F*> *hCSVectorData = new vector<TH1F*>;
-   for (Int_t i=0; i<nLayersToUse; i++) {
-      hCSVectorData->push_back(new TH1F(Form("hCSIndData_%d", i), Form("CS histogram %d", i), 60, 0, 60));
-   }
-   
-   vector<TH1F*> *hCSVectorDataCorrected = new vector<TH1F*>;
-   for (Int_t i=0; i<nLayersToUse; i++) {
-      hCSVectorDataCorrected->push_back(new TH1F(Form("hCSIndDataCorrected_%d", i), Form("CS histogram %d", i), 60, 0, 60));
-   }
-
-   for (Int_t i=0; i<MCClusters->GetEntriesFast(); i++) {
-      thisCluster = MCClusters->At(i);
-        if (useChip)    thisLayer = thisCluster->getChip();
-        else            thisLayer = thisCluster->getLayer();
-      
-        if (thisLayer >= nLayersToUse) continue;
-
-      thisSize = thisCluster->getDepositedEnergy(false);
-      hCSVectorMC->at(thisLayer)->Fill(thisSize);
-   }
-   
-   for (Int_t i=0; i<DataClusters->GetEntriesFast(); i++) {
-      thisCluster = DataClusters->At(i);
-
-      if (useChip) {
-        thisLayer = thisCluster->getChip();
-        nClustersInChip[thisLayer]++;
-      }
-      else {
-         thisLayer = thisCluster->getLayer();
-      }
-
-      if (thisLayer >= nLayersToUse) continue;
-      thisSize = thisCluster->getDepositedEnergy(false);
-      hCSVectorData->at(thisLayer)->Fill(thisSize);
-      hCSVectorDataCorrected->at(thisLayer)->Fill(thisCluster->getDepositedEnergy(true));
-   }
-
-   Float_t layerMC[nLayersToUse]; //= {0, 1, 2, 3, 4, 5, 6, 7};
-   Float_t layerData[nLayersToUse];// = {0, 1, 2, 3, 4, 5, 6, 7};
-     
-   for (Int_t i=0; i<nLayersToUse; i++) {
-        layerMC[i] = i;
-        layerData[i] = i;
-   }
-
-   Float_t errorLayer[nLayersToUse] = {0};
-   Float_t clusterSizeMC[nLayersToUse] = {0};
-   Float_t errorClusterSizeMC[nLayersToUse] = {0};
-   Float_t clusterSizeData[nLayersToUse] = {0};
-   Float_t clusterSizeDataCorrected[nLayersToUse] = {0};
-   Float_t errorClusterSizeData[nLayersToUse] = {0};
-   Float_t errorClusterSizeDataCorrected[nLayersToUse] = {0};
-   Float_t clusterSizeRatio[nLayersToUse] = {0};
-   Float_t errorClusterSizeRatio[nLayersToUse] = {0};
-
-
-   for (Int_t i=0; i<nLayersToUse; i++) {
-      layerMC[i] -= 0.07;
-      layerData[i] += 0.07;
-
-      clusterSizeMC[i] = hCSVectorMC->at(i)->GetMean();
-      clusterSizeData[i] = hCSVectorData->at(i)->GetMean();
-      clusterSizeDataCorrected[i] = hCSVectorDataCorrected->at(i)->GetMean();
-      errorClusterSizeMC[i] = hCSVectorMC->at(i)->GetRMS();
-      errorClusterSizeData[i] = hCSVectorData->at(i)->GetRMS();
-      errorClusterSizeDataCorrected[i] = hCSVectorDataCorrected->at(i)->GetRMS();
-      clusterSizeRatio[i] = clusterSizeData[i] / clusterSizeMC[i];
-      Float_t e_high = (clusterSizeData[i] + errorClusterSizeData[i]/2) / (clusterSizeMC[i] - errorClusterSizeMC[i]/2);
-      Float_t e_low  = (clusterSizeData[i] - errorClusterSizeData[i]/2) / (clusterSizeMC[i] + errorClusterSizeMC[i]/2);
-      errorClusterSizeRatio[i] = (e_high - e_low);
-   }
-
-   for (Int_t i=0; i<nLayersToUse; i++) {
-      cout << Form("Chip %d has a correction factor MC/data of %.3f with %d entries.\n", i, clusterSizeMC[i]/clusterSizeData[i], nClustersInChip[i]);
-   }
-
-   TGraphErrors * graphCSMC = new TGraphErrors(nLayersToUse, layerMC, clusterSizeMC, errorLayer, errorClusterSizeMC);
-   TGraphErrors * graphCSMC2 = new TGraphErrors(nLayersToUse, layerMC, clusterSizeMC, errorLayer, errorClusterSizeMC);
-   TGraphErrors * graphCSData = new TGraphErrors(nLayersToUse, layerData, clusterSizeData, errorLayer, errorClusterSizeData);
-   TGraphErrors * graphCSDataCorrected = new TGraphErrors(nLayersToUse, layerData, clusterSizeDataCorrected, errorLayer, errorClusterSizeDataCorrected);
-   TGraph       * graphRatios = new TGraphErrors(nLayersToUse, layerMC, clusterSizeRatio);
-   
-   graphCSMC->SetTitle(Form("Uncalibrated energy deposition distribution comparison at %.0f MeV;Chip number; Energy deposition [keV/#mum]", run_energy));
-   graphCSMC2->SetTitle(Form("Calibrated energy deposition distribution comparison at %.0f MeV;Chip number; Energy deposition [keV/#mum]", run_energy));
-
-   graphCSMC->SetMinimum(-2);
-   graphCSMC->SetMaximum(10);
-   graphCSMC->SetMarkerStyle(21);
-   graphCSMC->SetMarkerColor(kBlue);
-   graphCSMC2->SetMinimum(-2);
-   graphCSMC2->SetMaximum(10);
-   graphCSMC2->SetMarkerStyle(21);
-   graphCSMC2->SetMarkerColor(kBlue);
-   graphCSData->SetMarkerStyle(22);
-   graphCSData->SetMarkerColor(kRed);
-   graphCSData->SetMarkerSize(1.5);
-   graphCSData->GetXaxis()->SetTitleFont(22);
-   graphCSData->GetXaxis()->SetLabelFont(22);
-   graphCSData->GetYaxis()->SetTitleFont(22);
-   graphCSData->GetYaxis()->SetTitleSize(0.07);
-   graphCSData->GetYaxis()->SetTitleOffset(0.3);
-   graphCSData->GetYaxis()->SetLabelFont(22);
-   graphCSData->GetXaxis()->SetNdivisions(54);
-   graphCSDataCorrected->SetMarkerStyle(22);
-   graphCSDataCorrected->SetMarkerColor(kRed);
-   graphCSDataCorrected->SetMarkerSize(1.5);
-   graphCSMC->SetMarkerSize(1.25);
-   graphCSMC->GetXaxis()->SetTitleFont(22);
-   graphCSMC->GetXaxis()->SetLabelFont(22);
-   graphCSMC->GetYaxis()->SetTitleFont(22);
-   graphCSMC->GetXaxis()->SetTitleSize(0.07);
-   graphCSMC->GetXaxis()->SetLabelSize(0.07);
-   graphCSMC->GetYaxis()->SetTitleSize(0.07);
-   graphCSMC->GetYaxis()->SetTitleOffset(0.3);
-   graphCSMC->GetYaxis()->SetLabelFont(22);
-   graphCSMC->GetXaxis()->SetNdivisions(54);
-   graphCSMC2->SetMarkerSize(1.25);
-   graphCSMC2->GetXaxis()->SetTitleFont(22);
-   graphCSMC2->GetXaxis()->SetTitleSize(0.07);
-   graphCSMC2->GetXaxis()->SetLabelSize(0.07);
-   graphCSMC2->GetXaxis()->SetLabelFont(22);
-   graphCSMC2->GetYaxis()->SetTitleFont(22);
-   graphCSMC2->GetYaxis()->SetTitleSize(0.07);
-   graphCSMC2->GetYaxis()->SetTitleOffset(0.3);
-   graphCSMC2->GetYaxis()->SetLabelFont(22);
-   graphCSMC2->GetXaxis()->SetNdivisions(54);
-   graphRatios->SetMinimum(0.5);
-   graphRatios->SetMaximum(1.5);
-   graphRatios->SetTitle("Cluster size distribution ratios (DATA / MC) at 188 MeV;Layer Number;Cluster Size Ratio (DATA/MC)");
-   if (useChip) {
-      graphRatios->GetXaxis()->SetTitle("Chip number");
-      graphRatios->GetYaxis()->SetTitle("E_{dep} ratio (data / MC)");
-   }
-   graphRatios->SetMarkerStyle(21);
-   graphRatios->SetMarkerColor(kBlue);
-   graphRatios->SetMarkerSize(1.5);
-   graphRatios->GetXaxis()->SetTitleFont(22);
-   graphRatios->GetXaxis()->SetLabelFont(22);
-   graphRatios->GetYaxis()->SetTitleFont(22);
-   graphRatios->GetYaxis()->SetLabelFont(22);
-   graphRatios->GetXaxis()->SetNdivisions(54);
-
-   TLegend *leg = new TLegend(0.16, 0.70, 0.28, 0.86);
-   leg->SetTextFont(22);
-   leg->AddEntry(graphCSMC, "MC", "ep");
-   leg->AddEntry(graphCSData, "Exp. data", "ep");
-
-   c1->cd(1);
-   graphCSMC->Draw("AP");
-   graphCSData->Draw("P");
-   leg->Draw();
-
-   gPad->Update();
-   TPaveText *title = (TPaveText*) gPad->GetPrimitive("title");
-   title->SetTextFont(22);
-   gPad->Modified();
-
-   c1->cd(2);
-   graphCSMC2->Draw("AP");
-   graphCSDataCorrected->Draw("P");
-   
-   gPad->Update();
-   TPaveText *title2 = (TPaveText*) gPad->GetPrimitive("title");
-   title2->SetTextFont(22);
-   gPad->Modified();
-
-   for (Int_t i=0; i<nLayersToUse; i++) {
-      c2->cd(i+1);
-      hCSVectorMC->at(i)->Draw();
-      c3->cd(i+1);
-      hCSVectorData->at(i)->Draw();
-   }
-}
-
 /*
 void drawTrackingError(Int_t Runs, Int_t dataType = kMC, Bool_t recreate, Float_t energy, Float_t degraderThickness) {
    // Draw a histogram on the error of different track recon scenarios ...
@@ -2556,3 +2082,5 @@ void drawTrackingError(Int_t Runs, Int_t dataType = kMC, Bool_t recreate, Float_
 
       angle = fabs((acos(dot1 / scalar1) - acos(dot0 / scalar0) )* 1000;
 */
+
+#endif

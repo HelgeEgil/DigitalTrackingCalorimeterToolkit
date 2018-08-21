@@ -1,3 +1,7 @@
+#ifndef trackFitting_cxx
+#define trackFitting_cxx
+
+
 #include <iostream>
 #include <cmath>
 
@@ -180,3 +184,4 @@ Float_t Track::getTrackScore() {
    }
    return 0;
 }
+#endif

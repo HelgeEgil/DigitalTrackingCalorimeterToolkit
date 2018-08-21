@@ -1,3 +1,7 @@
+#ifndef CalorimeterFrame_cxx
+#define CalorimeterFrame_cxx
+
+
 #include <TH2F.h>
 #include <TRandom3.h>
 
@@ -94,3 +98,5 @@ Float_t CalorimeterFrame::getOccupancyLastLayer() {
 
    return lastOccupancy;
 }
+
+#endif

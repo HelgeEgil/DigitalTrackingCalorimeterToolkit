@@ -1,3 +1,6 @@
+#ifndef Node_cxx
+#define Node_cxx
+
 #include <iostream>
 #include <vector>
 #include <math.h>
@@ -271,3 +274,5 @@ Track* Node::getBestTrack() {
    Node *bestNode = getBestNode();
    return getTrackFromBestNode(bestNode);
 }
+
+#endif

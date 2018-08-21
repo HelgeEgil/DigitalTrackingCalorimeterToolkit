@@ -28,7 +28,7 @@
 #/gate/physics/SetMaxStepSizeInRegion  scanner 0.1 mm
 #/gate/physics/ActivateStepLimiter proton
 
-/gate/physics/addProcess SingleScattering proton
+#/gate/physics/addProcess SingleScattering proton
 
 /gate/run/initialize
 

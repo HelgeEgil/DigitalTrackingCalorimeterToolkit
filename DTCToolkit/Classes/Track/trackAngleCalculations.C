@@ -1,3 +1,6 @@
+#ifndef trackAngleCalculations_cxx
+#define trackAngleCalculations_cxx
+
 #include <iostream>
 #include <cmath>
 
@@ -181,3 +184,4 @@ Float_t Track::getAbsorberLength(Int_t i) {
    return absorberLength;
 }
 
+#endif

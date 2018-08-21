@@ -1,3 +1,4 @@
+#ifndef DataInterface_cxx
 #define DataInterface_cxx
 
 #include <iostream>
@@ -626,3 +627,4 @@ Int_t DataInterface::getMCFrame(Int_t runNo, Layer *l) {
    if (kEventsPerRun > 1) return -1;
    return eventID;
 }
+#endif

@@ -1,3 +1,6 @@
+#ifndef Track_cxx
+#define Track_cxx
+
 #include <iostream>
 #include <cmath>
 
@@ -157,3 +160,5 @@ ostream& operator<< (ostream &os, Track& t) {
    os << "]";
    return os;
 }
+
+#endif

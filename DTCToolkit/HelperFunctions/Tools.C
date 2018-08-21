@@ -1,3 +1,6 @@
+#ifndef Tools_cxx
+#define Tools_cxx
+
 #include <vector>
 #include <algorithm>
 
@@ -1138,4 +1141,4 @@ Bool_t getCutBraggPeakInTrack(Track *track) {
       else return false;
    }
 }
-
+#endif

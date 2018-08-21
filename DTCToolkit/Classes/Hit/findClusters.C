@@ -1,3 +1,6 @@
+#ifndef findClusters_cxx
+#define findClusters_cxx
+
 #include <vector>
 #include <algorithm>
 
@@ -197,3 +200,5 @@ void Hits::appendExpandedClusterToClusterHitMap(vector<Int_t> *expandedCluster, 
       clusterHitMap->at(cidx)->appendPoint(x, y);
    }
 }
+
+#endif

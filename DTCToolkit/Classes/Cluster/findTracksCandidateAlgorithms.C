@@ -1,3 +1,6 @@
+#ifndef findTracksCandidateAlgorithms_cxx
+#define findTracksCandidateAlgorithms_cxx
+
 #include <vector>
 
 #include <TClonesArray.h>
@@ -498,3 +501,5 @@ void Clusters::findRemainingTracks(Tracks * tracks) {
    
    showDebug("Clusters::findRemainingTracks: After cleanup, there are " << clustersWithoutTrack_.GetEntries() << " unused clusters left.\n");
 }
+
+#endif

@@ -1,3 +1,6 @@
+#ifndef findTracks_cxx
+#define findTracks_cxx
+
 #include <vector>
 
 #include <TClonesArray.h>
@@ -328,3 +331,5 @@ Cluster * Clusters::findNearestNeighbour(Track *track, Cluster *projectedPoint, 
    if (kFoundNeighbour)   return nearestNeighbour;
    else                   return nullptr;
 }
+
+#endif

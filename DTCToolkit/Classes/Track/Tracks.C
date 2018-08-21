@@ -1,3 +1,6 @@
+#ifndef Tracks_cxx
+#define Tracks_cxx
+
 #include <iostream>
 #include <vector>
 
@@ -490,3 +493,5 @@ void  Tracks::removeHighAngleTracks(Float_t mradLimit) {
 
    Compress();
 }
+
+#endif

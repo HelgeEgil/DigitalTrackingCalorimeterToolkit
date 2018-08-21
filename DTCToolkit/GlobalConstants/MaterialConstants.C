@@ -1,3 +1,6 @@
+#ifndef materialconstants_cxx
+#define materialconstants_cxx
+
 #include <cmath>
 #include <vector>
 #include <iostream>
@@ -26,8 +29,6 @@ void MaterialConstants() {
    alpha_aluminum = 0.0140203;
    p_aluminum = 1.72903;
    alpha_prime_aluminum = 0.017102; // HOW DID I FIND THIS!!!
-
-   printf("Using absorber thickness %.1f mm\n", kAbsorberThickness);
 
    p_water = 1.7547;
    alpha_water = 0.02387;
@@ -97,7 +98,6 @@ void  createSplines() {
    // create forward and backwards splines
    // store them in .h
 
-   cout << "Creating SPLINE files\n";
    ifstream in;
    Float_t  energy;
    Int_t    idxDTC = 0;
@@ -193,7 +193,6 @@ void  createSplines() {
    range_energy->Fit("range_energy_fit", "Q,M");
    alpha_aluminum = range_energy_fit->GetParameter(0);
    p_aluminum = range_energy_fit->GetParameter(1);
-   printf("Through fitting, found alpha = %.5f, p = %.5f.\n", alpha_aluminum, p_aluminum);
    
    // FIND BRAGG-KLEEMAN PARAMETERS
    TGraph * range_energyW = new TGraph(idxW, energiesW, rangesW);
@@ -202,7 +201,6 @@ void  createSplines() {
    range_energyW->Fit("range_energyW_fit", "Q,M");
    alpha_tungsten = range_energyW_fit->GetParameter(0);
    p_tungsten = range_energyW_fit->GetParameter(1);
-   printf("Through fitting, found TUNGSTEN alpha = %.5f, p = %.5f.\n", alpha_tungsten, p_tungsten);
 
    // FIND BRAGG-KLEEMAN PARAMETERS HIGH / LOW
    if (kMaterial == kAluminum) {
@@ -228,7 +226,6 @@ void  createSplines() {
 
    else { printf("COULD NOT FIND HIGH / LOW PARAMETERS FOR MATERIAL %d!!", kMaterial); }
 
-   printf("LOW parameters: alpha = %.4f, p = %.4f. HIGH parameters: alpha = %.4f, p = %.4f.\n", alpha_material_low, p_material_low, alpha_material_high, p_material_high);
    
    // About the same in all geometries
    straggling_a = 1.76;
@@ -344,3 +341,5 @@ Bool_t isBadData(Cluster *estimatedPosition) {
    
    return isBad;
 }
+
+#endif

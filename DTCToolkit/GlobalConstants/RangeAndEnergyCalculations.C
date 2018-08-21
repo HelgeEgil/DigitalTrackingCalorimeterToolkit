@@ -1,3 +1,6 @@
+#ifndef rangeandenergycalculations_cxx
+#define rangeandenergycalculations_cxx
+
 #include <cmath>
 #include <vector>
 #include <iostream>
@@ -410,3 +413,5 @@ Float_t getBKTLHigh(Float_t energy) {
 Float_t getBKTLLow(Float_t energy) {
    return getBKTL(energy, alpha_material_low, p_material_low);
 }
+
+#endif

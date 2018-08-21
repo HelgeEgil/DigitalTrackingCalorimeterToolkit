@@ -1,3 +1,6 @@
+#ifndef trackClusterProperties_cxx
+#define trackClusterProperties_cxx
+
 #include <iostream>
 #include <cmath>
 
@@ -165,3 +168,5 @@ Float_t Track::getStdSizeToIdx(Int_t toIdx) {
    std = sqrt((float) tempSum / (toIdx + 1));
    return std;
 }
+
+#endif

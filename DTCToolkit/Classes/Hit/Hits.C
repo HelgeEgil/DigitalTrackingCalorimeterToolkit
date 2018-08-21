@@ -1,3 +1,6 @@
+#ifndef Hits_cxx
+#define Hits_cxx
+
 #include <vector>
 #include <algorithm>
 
@@ -192,3 +195,5 @@ Int_t Hits::getLastIndexAfterY(Int_t y) {
    if (idx == -1) idx = GetEntriesFast()-1;
    return idx;
 }
+
+#endif

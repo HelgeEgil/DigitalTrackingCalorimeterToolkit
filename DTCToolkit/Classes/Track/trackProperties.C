@@ -1,3 +1,6 @@
+#ifndef trackProperties_cxx
+#define trackProperties_cxx
+
 #include <iostream>
 #include <cmath>
 
@@ -129,3 +132,4 @@ Int_t Track::getNMissingLayers() {
   return missingLayers;
 }
 
+#endif
