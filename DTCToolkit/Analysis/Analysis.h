@@ -15,7 +15,7 @@ void        drawTracksDeltaThetaEachLayer(Int_t Runs, Int_t dataType, Bool_t rec
 void			getTracksReconstructionEfficiency(Int_t dataType, Float_t energy = 250, Float_t degraderThickness = 0);
 void			drawClusterShapes(Int_t Runs, Bool_t dataType = kMC, Float_t energy = 250, Float_t degraderThickness = 0);
 void			drawFitScale(Int_t Runs, Int_t dataType, Bool_t recreate, Float_t energy);
-void   		drawTracksRangeHistogram(Int_t Runs, Int_t dataType = kMC, Bool_t recreate = 0, Float_t energy = 250, Float_t degraderThickness = 0, Int_t eventsPerRun = kEventsPerRun);
+void   		drawTracksRangeHistogram(Int_t Runs, Int_t dataType = kMC, Bool_t recreate = 0, Float_t energy = 250, Float_t degraderThickness = 0, Int_t eventsPerRun = kEventsPerRun, Bool_t doTracking = kDoTracking, Bool_t excludeNuclearInteractions = kFilterNuclearInteractions);
 void   		drawTracksDepthDose(Int_t Runs, Int_t dataType = kMC, Bool_t recreate = 0, Float_t energy = 250, Float_t degraderThickness = 0, Int_t eventsPerRun = kEventsPerRun);
 void			draw2DProjection(Int_t Runs, Int_t dataType, Bool_t recreate, Float_t energy);
 void			drawClusterSizeDistribution(Int_t Runs, Int_t dataType, Bool_t recreate, Float_t energy);

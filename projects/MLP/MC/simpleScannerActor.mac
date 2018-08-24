@@ -12,57 +12,42 @@
 /gate/scanner/placement/setTranslation 0 0 0. cm
 /gate/scanner/vis/forceWireframe
 
-/gate/scanner/daughters/name fronttracker
-/gate/scanner/daughters/insert box
-/gate/fronttracker/geometry/setXLength 100. cm
-/gate/fronttracker/geometry/setYLength 100. cm
-/gate/fronttracker/geometry/setZLength 0.001 mm
-/gate/fronttracker/placement/setTranslation 0 0 -120. mm
-/gate/fronttracker/setMaterial Air
-
-/gate/fronttracker/repeaters/insert linear
-/gate/fronttracker/linear/autoCenter false
-/gate/fronttracker/linear/setRepeatNumber 2
-/gate/fronttracker/linear/setRepeatVector 0 0 10. mm
-
-/gate/scanner/daughters/name backtracker
-/gate/scanner/daughters/insert box
-/gate/backtracker/geometry/setXLength 100. cm
-/gate/backtracker/geometry/setYLength 100. cm
-/gate/backtracker/geometry/setZLength 0.001 mm
-/gate/backtracker/placement/setTranslation 0 0 110. mm
-/gate/backtracker/setMaterial Air
-
-/gate/backtracker/repeaters/insert linear
-/gate/backtracker/linear/autoCenter false
-/gate/backtracker/linear/setRepeatNumber 2
-/gate/backtracker/linear/setRepeatVector 0 0 10. mm
-
 /gate/scanner/daughters/name phantom
 /gate/scanner/daughters/insert box
 /gate/phantom/geometry/setXLength 100. cm
 /gate/phantom/geometry/setYLength 100. cm
-/gate/phantom/geometry/setZLength 20.  cm
+/gate/phantom/geometry/setZLength 0.5  mm
 /gate/phantom/placement/setTranslation 0 0 0 mm
 /gate/phantom/setMaterial Water
 /gate/phantom/vis/forceWireframe
 
-/gate/scanner/daughters/name calorimeter
-/gate/scanner/daughters/insert box
-/gate/calorimeter/geometry/setXLength 200. cm
-/gate/calorimeter/geometry/setYLength 200. cm
-/gate/calorimeter/geometry/setZLength 200. cm
-/gate/calorimeter/placement/setTranslation 0 0 125. cm
-/gate/calorimeter/setMaterial Tungsten
-
 /gate/phantom/attachCrystalSD
-/gate/fronttracker/attachCrystalSD
-/gate/backtracker/attachCrystalSD
-/gate/calorimeter/attachCrystalSD
+
+/gate/actor/addActor PhaseSpaceActor PSActorOut
+/gate/actor/PSActorOut/save PSActorOut.root
+/gate/actor/PSActorOut/attachTo phantom
+/gate/actor/PSActorOut/enableEkine              true
+/gate/actor/PSActorOut/enableXPosition          true
+/gate/actor/PSActorOut/enableYPosition          true
+/gate/actor/PSActorOut/enableZPosition          true
+/gate/actor/PSActorOut/enableXDirection         true
+/gate/actor/PSActorOut/enableYDirection         true
+/gate/actor/PSActorOut/enableZDirection         true
+/gate/actor/PSActorOut/storeOutgoingParticles   true
+
+/gate/actor/addActor PhaseSpaceActor PSActorIn
+/gate/actor/PSActorIn/save PSActorIn.root
+/gate/actor/PSActorIn/attachTo phantom
+/gate/actor/PSActorIn/enableEkine              true
+/gate/actor/PSActorIn/enableXPosition          true
+/gate/actor/PSActorIn/enableYPosition          true
+/gate/actor/PSActorIn/enableZPosition          true
+/gate/actor/PSActorIn/enableXDirection         true
+/gate/actor/PSActorIn/enableYDirection         true
+/gate/actor/PSActorIn/enableZDirection         true
 
 /gate/physics/addPhysicsList QGSP_BIC_EMZ
 /gate/geometry/setIonisationPotential Water 75 eV
-
 
 /gate/physics/SetMaxStepSizeInRegion phantom 1 mm
 
@@ -88,8 +73,6 @@
 
 /gate/output/root/enable
 /gate/output/root/setRootSinglesFlag 0
-/gate/output/root/setRootHitFlag 0
-/gate/output/root/setRootNtupleFlag 1
 /gate/output/root/setFileName simpleScanner
 
 /gate/random/setEngineName MersenneTwister

@@ -569,7 +569,7 @@ void drawFitScale(Int_t Runs, Int_t dataType, Bool_t recreate, Float_t energy) {
    hScale->Draw();
 }  
 
-void drawTracksDepthDose(Int_t Runs, Int_t dataType, Bool_t recreate, Float_t energy, Float_t degraderThickness, Int_t eventsPerRun) {
+void drawTracksDepthDose(Int_t Runs, Int_t dataType, Bool_t recreate, Float_t energy, Float_t degraderThickness, Int_t eventsPerRun, Bool_t doTracking, Bool_t excludeNuclearInteractions) {
    run_degraderThickness = degraderThickness;
    run_energy = energy;
    kDataType = dataType;

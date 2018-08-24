@@ -43,9 +43,9 @@
 Bool_t   kIsAluminumPlate = false;
 Bool_t   kIsScintillator = false;
 Bool_t   kIsFirstLayerAir = false;
-Bool_t   kDoTracking = true;
+Bool_t   kDoTracking = true; // Move to argument list
 Bool_t   kUseEmpiricalMCS = true;
-Bool_t   kFilterNuclearInteractions = false;
+Bool_t   kFilterNuclearInteractions = false; // Move to argument list
 Int_t    kEventsPerRun = 50;
 Int_t    kSkipTracks = 0;
 
@@ -59,7 +59,7 @@ Bool_t   kUseDegrader = false;
 
 const Int_t sizeOfEventID = 25;
 const Int_t nChildrenInNode = 2; // max concurrent track segments to follow
-Float_t     kMaxTrackScore = 0.3; // cumulative angular change
+Float_t     kMaxTrackScore = 0.3; // This number is a placeholder, optimized through MC scans in Classes/Clusters/findTracks.C
 Float_t     kMaxTrackAngle = 0.05; // allow for consecutive 50 mrad changes
 
 // natural unit is mm
