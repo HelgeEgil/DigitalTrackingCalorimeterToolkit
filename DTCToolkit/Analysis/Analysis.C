@@ -634,10 +634,12 @@ void drawTracksDepthDose(Int_t Runs, Int_t dataType, Bool_t recreate, Float_t en
    }
 }
 
-void drawTracksRangeHistogram(Int_t Runs, Int_t dataType, Bool_t recreate, Float_t energy, Float_t degraderThickness, Int_t eventsPerRun) {
+void drawTracksRangeHistogram(Int_t Runs, Int_t dataType, Bool_t recreate, Float_t energy, Float_t degraderThickness, Int_t eventsPerRun, Int_t outputFileIdx, Bool_t drawFitResults, Bool_t doTracking, Bool_t excludeNuclearInteractions) {
    run_degraderThickness = degraderThickness;
    run_energy = energy;
    kEventsPerRun = eventsPerRun;
+   kDoTracking = doTracking;
+   kFilterNuclearInteractions = excludeNuclearInteractions;
    
    if (kUseDegrader) {
       run_energy = getEnergyFromDegraderThickness(degraderThickness);
@@ -646,7 +648,6 @@ void drawTracksRangeHistogram(Int_t Runs, Int_t dataType, Bool_t recreate, Float
    printf("Using water degrader of thickness %.0f mm, the initial energy of %.0f MeV is reduced to %.1f MeV.\n", degraderThickness, energy, run_energy);
 
    kDataType = dataType;
-   Bool_t         kDrawFitResults = true;
    Bool_t         removeHighAngleTracks = true;
    Bool_t         removeNuclearInteractions = true;
    Bool_t         drawVerticalLayerLines = false;
@@ -671,7 +672,6 @@ void drawTracksRangeHistogram(Int_t Runs, Int_t dataType, Bool_t recreate, Float
 
    Float_t lowHistogramLimit = getUnitFromEnergy(0);
    Float_t highHistogramLimit = getUnitFromEnergy(run_energy)*1.4 + 10;
-
    TH1F * hFitResults = new TH1F("fitResult", hTitle, fmax(nEnergyBins,100), lowHistogramLimit, highHistogramLimit);
  
    printf("Using material: %s\n", sMaterial);
@@ -708,26 +708,7 @@ void drawTracksRangeHistogram(Int_t Runs, Int_t dataType, Bool_t recreate, Float
       fitRange = thisTrack->getFitParameterRange();
       hFitResults->Fill(getUnitFromTL(fitRange));
    }
-   
-   TCanvas * cFitResults = new TCanvas("cFitResults", hTitle, 1000, 1000);
-
-   if       (kOutputUnit == kPhysical) hFitResults->SetXTitle("Physical range [mm]");
-   else if  (kOutputUnit == kWEPL)     hFitResults->SetXTitle("Range in Water Equivalent Path Length [mm]");
-   else if  (kOutputUnit == kEnergy)   hFitResults->SetXTitle("Energy [MeV]");
-
-   hFitResults->SetYTitle("Number of protons");
-   hFitResults->GetXaxis()->SetTitleFont(22);
-   hFitResults->GetXaxis()->SetLabelFont(22);
-   hFitResults->GetYaxis()->SetTitleFont(22);
-   hFitResults->GetYaxis()->SetLabelFont(22);
-   hFitResults->GetYaxis()->SetTitleOffset(1.5);
-
-   hFitResults->SetTitle("");   
-
-   if (kDrawFitResults) {
-      hFitResults->Draw();
-   }
-
+  
    // Draw expected gaussian distribution of results from initial energy
    Float_t expectedStraggling = 0, expectedMean = 0, dlayer_down = 0, dlayer = 0;
    Float_t separationFactor = 0.9, nullStraggling = 0;
@@ -743,13 +724,28 @@ void drawTracksRangeHistogram(Int_t Runs, Int_t dataType, Bool_t recreate, Float
    Float_t means[10] = {};
    Float_t sigmas[10] = {};
 
-   TF1 *gauss = doSimpleGaussianFit(hFitResults, means, sigmas, 1);
+   TF1 *gauss = doSimpleGaussianFit(hFitResults, means, sigmas, outputFileIdx);
    Float_t empiricalMean = means[9];
    Float_t empiricalSigma = sigmas[9];
    
    Float_t energySigma = getEnergyFromUnit(empiricalMean +  empiricalSigma/ 2) - getEnergyFromUnit(empiricalMean - empiricalSigma / 2);
 
-   if (kDrawFitResults) {
+   if (drawFitResults) {
+      TCanvas * cFitResults = new TCanvas("cFitResults", hTitle, 1000, 1000);
+      
+      if       (kOutputUnit == kPhysical) hFitResults->SetXTitle("Physical range [mm]");
+      else if  (kOutputUnit == kWEPL)     hFitResults->SetXTitle("Range in Water Equivalent Path Length [mm]");
+      else if  (kOutputUnit == kEnergy)   hFitResults->SetXTitle("Energy [MeV]");
+
+      hFitResults->SetYTitle("Number of protons");
+      hFitResults->GetXaxis()->SetTitleFont(22);
+      hFitResults->GetXaxis()->SetLabelFont(22);
+      hFitResults->GetYaxis()->SetTitleFont(22);
+      hFitResults->GetYaxis()->SetLabelFont(22);
+      hFitResults->GetYaxis()->SetTitleOffset(1.5);
+
+      hFitResults->SetTitle("");   
+      hFitResults->Draw();
       gPad->Update();
 
       if (drawVerticalLayerLines) {
@@ -776,7 +772,6 @@ void drawTracksRangeHistogram(Int_t Runs, Int_t dataType, Bool_t recreate, Float
       cFitResults->Modified();
    }
 
-   else delete cFitResults;
    delete tracks;
 }
 
@@ -1320,10 +1315,11 @@ void compareChargeDiffusionModels(Int_t Runs, Bool_t recreate, Float_t energy) {
 
 }
    
-void drawTracks3D(Int_t Runs, Int_t dataType, Bool_t recreate, Int_t switchLayer, Float_t energy, Float_t degraderThickness, Int_t tracksperrun) {
+void drawTracks3D(Int_t Runs, Int_t dataType, Bool_t recreate, Int_t switchLayer, Float_t energy, Float_t degraderThickness, Int_t tracksperrun, Bool_t doTracking) {
    run_energy = energy;
    run_degraderThickness = degraderThickness;
    kEventsPerRun = tracksperrun;
+   kDoTracking = doTracking;
 
    Tracks * tracks = loadOrCreateTracks(recreate, Runs, dataType, energy);
 

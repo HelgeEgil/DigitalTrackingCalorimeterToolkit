@@ -11,4 +11,4 @@ fi
 
 echo eventsPerRun: $1, runs: $2, degraderthickness: $3
 
-root -l -q 'Scripts/drawTracksDepthDose.C('$2', 0, 1, 250, '$3', '$1')'
+root -l -q 'Scripts/drawTracksDepthDoseScript.C('$2', 0, 1, 250, '$3', '$1', true, false)'
