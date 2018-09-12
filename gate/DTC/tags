@@ -1,0 +1,127 @@
+!_TAG_FILE_FORMAT	2	/extended format; --format=1 will not append ;" to lines/
+!_TAG_FILE_SORTED	1	/0=unsorted, 1=sorted, 2=foldcase/
+!_TAG_PROGRAM_AUTHOR	Darren Hiebert	/dhiebert@users.sourceforge.net/
+!_TAG_PROGRAM_NAME	Exuberant Ctags	//
+!_TAG_PROGRAM_URL	http://ctags.sourceforge.net	/official site/
+!_TAG_PROGRAM_VERSION	5.9~svn20110310	//
+Box	makeGeometry.py	/^class Box:$/;"	c
+Contains	makeGeometry.py	/^    def Contains(self, other):$/;"	m	class:Box
+Copy	makeGeometry.py	/^class Copy:$/;"	c
+MainMenu	makeGeometry.py	/^class MainMenu(Frame):$/;"	c
+Module	makeGeometry.py	/^class Module:$/;"	c
+Pos	makeGeometry.py	/^class Pos:$/;"	c
+Rotation	makeGeometry.py	/^class Rotation:$/;"	c
+Size	makeGeometry.py	/^class Size:$/;"	c
+World	makeGeometry.py	/^class World:$/;"	c
+__add__	makeGeometry.py	/^    def __add__(self, other):$/;"	m	class:Size	file:
+__add__	makeGeometry.py	/^    def __add__(self,other):$/;"	m	class:Pos	file:
+__div__	makeGeometry.py	/^    def __div__(self, f):$/;"	m	class:Size	file:
+__init__	makeGeometry.py	/^    def __init__(self, dx = 0, dy = 0, dz = 0):$/;"	m	class:Size
+__init__	makeGeometry.py	/^    def __init__(self, dx = 150*cm, dy = 150*cm, dz = 350*cm):$/;"	m	class:World
+__init__	makeGeometry.py	/^    def __init__(self, i=1, dx = 15*cm, dy = 15*cm, dz = 150*cm):$/;"	m	class:scanner
+__init__	makeGeometry.py	/^    def __init__(self, name = False, mother = False, pos = False, size = False, material = kNoMaterial, visible = kNotVisible, color = kNoColor, genericRepeater = False):$/;"	m	class:Box
+__init__	makeGeometry.py	/^    def __init__(self, name, filename, rotation, translationA, translationB):$/;"	m	class:Rotation
+__init__	makeGeometry.py	/^    def __init__(self, name, mother, pos, absorberMaterial, nlayers = 40, firstAbsorberMaterial = kNoMaterial, absorberThickness = 1.5):$/;"	m	class:Module
+__init__	makeGeometry.py	/^    def __init__(self, name, nlayers, translation):$/;"	m	class:Copy
+__init__	makeGeometry.py	/^    def __init__(self, parent, firstModule, module, world, scanner1, scanner2):$/;"	m	class:MainMenu
+__init__	makeGeometry.py	/^    def __init__(self, x = 0, y = 0, z = 0):$/;"	m	class:Pos
+__mul__	makeGeometry.py	/^    def __mul__(self, f):$/;"	m	class:Size	file:
+__str__	makeGeometry.py	/^    def __str__(self):$/;"	m	class:Box	file:
+__str__	makeGeometry.py	/^    def __str__(self):$/;"	m	class:Pos	file:
+__str__	makeGeometry.py	/^    def __str__(self):$/;"	m	class:Size	file:
+__sub__	makeGeometry.py	/^    def __sub__(self, other):$/;"	m	class:Pos	file:
+__sub__	makeGeometry.py	/^    def __sub__(self, other):$/;"	m	class:Size	file:
+addAbsorber	makeGeometry.py	/^    def addAbsorber(self, name, pos, size, material, visible, color):$/;"	m	class:Module
+addCopies	makeGeometry.py	/^    def addCopies(self, nlayers):$/;"	m	class:Module
+addObject	makeGeometry.py	/^    def addObject(self, name, pos, size, material, visible, color):$/;"	m	class:Module
+addRotation	makeGeometry.py	/^    def addRotation(self):$/;"	m	class:Box
+addRotation	makeGeometry.py	/^    def addRotation(self):$/;"	m	class:Module
+buildModule	makeGeometry.py	/^    def buildModule(self):$/;"	m	class:Module
+clearFile	makeGeometry.py	/^    def clearFile(self):$/;"	m	class:Module
+cm	makeGeometry.py	/^cm = 10.$/;"	v
+correctAllNames	makeGeometry.py	/^    def correctAllNames(self):$/;"	m	class:Module
+drawPlot	makeGeometry.py	/^    def drawPlot(self, figure):$/;"	m	class:MainMenu
+getFirstObjectLeftSide	makeGeometry.py	/^    def getFirstObjectLeftSide(self):$/;"	m	class:Module
+getLastObjectCenter	makeGeometry.py	/^    def getLastObjectCenter(self):$/;"	m	class:Module
+getLastObjectRightSide	makeGeometry.py	/^    def getLastObjectRightSide(self):$/;"	m	class:Module
+getLayerPosition	makeGeometry.py	/^    def getLayerPosition(self):$/;"	m	class:Module
+getLayerSize	makeGeometry.py	/^    def getLayerSize(self):$/;"	m	class:Module
+getLayerThickness	makeGeometry.py	/^    def getLayerThickness(self):$/;"	m	class:Module
+getLeftSide	makeGeometry.py	/^    def getLeftSide(self):$/;"	m	class:Module
+getLeftSideNoAbsorber	makeGeometry.py	/^    def getLeftSideNoAbsorber(self):$/;"	m	class:Module
+getModulePosition	makeGeometry.py	/^    def getModulePosition(self):$/;"	m	class:Module
+getModuleSize	makeGeometry.py	/^    def getModuleSize(self):$/;"	m	class:Module
+getPosDepth	makeGeometry.py	/^    def getPosDepth(self, x, y, size, name):$/;"	m	class:Module
+getReturnDictionary	makeGeometry.py	/^    def getReturnDictionary(self):$/;"	m	class:MainMenu
+getRightSide	makeGeometry.py	/^    def getRightSide(self):$/;"	m	class:Module
+getState	makeGeometry.py	/^    def getState(self):$/;"	m	class:MainMenu
+getThisObjectCenter	makeGeometry.py	/^    def getThisObjectCenter(self, box):$/;"	m	class:Module
+isPos	makeGeometry.py	/^    def isPos(self):$/;"	m	class:Pos
+kAir	makeGeometry.py	/^kAir = "Air"$/;"	v
+kAluminium	makeGeometry.py	/^kAluminium = "Aluminium"$/;"	v
+kBlack	makeGeometry.py	/^kBlack = "black"$/;"	v
+kBlue	makeGeometry.py	/^kBlue = "blue"$/;"	v
+kChip	makeGeometry.py	/^kChip = "Silicon"$/;"	v
+kFR4	makeGeometry.py	/^kFR4 = "FR4"$/;"	v
+kGlue	makeGeometry.py	/^kGlue = "Glue"$/;"	v
+kGreen	makeGeometry.py	/^kGreen = "green"$/;"	v
+kGrey	makeGeometry.py	/^kGrey = "grey"$/;"	v
+kIsFirstAbsorber	makeGeometry.py	/^kIsFirstAbsorber = True$/;"	v
+kNoColor	makeGeometry.py	/^kNoColor = False$/;"	v
+kNoMaterial	makeGeometry.py	/^kNoMaterial = False$/;"	v
+kNoMother	makeGeometry.py	/^kNoMother = False$/;"	v
+kNotVisible	makeGeometry.py	/^kNotVisible = False$/;"	v
+kPCB	makeGeometry.py	/^kPCB = "PCB"$/;"	v
+kRed	makeGeometry.py	/^kRed = "red"$/;"	v
+kScintillator	makeGeometry.py	/^kScintillator = "myScintillator"$/;"	v
+kTungsten	makeGeometry.py	/^kTungsten = "Tungsten"$/;"	v
+kVisible	makeGeometry.py	/^kVisible = True$/;"	v
+kWater	makeGeometry.py	/^kWater = "Water"$/;"	v
+kYellow	makeGeometry.py	/^kYellow = "yellow"$/;"	v
+m	makeGeometry.py	/^m  = 1000.$/;"	v
+main	makeGeometry.py	/^def main():$/;"	f
+makeAbsorber	makeGeometry.py	/^    def makeAbsorber(self, n, isFirstAbsorber=False):$/;"	m	class:Module
+makeAbsorberAirGap	makeGeometry.py	/^    def makeAbsorberAirGap(self):$/;"	m	class:Module
+makeActiveChips	makeGeometry.py	/^    def makeActiveChips(self):$/;"	m	class:Module
+makeAirGapAfterChip	makeGeometry.py	/^    def makeAirGapAfterChip(self):$/;"	m	class:Module
+makeAirGapAfterFiller	makeGeometry.py	/^    def makeAirGapAfterFiller(self):$/;"	m	class:Module
+makeChipGlue	makeGeometry.py	/^    def makeChipGlue(self):$/;"	m	class:Module
+makeFiller	makeGeometry.py	/^    def makeFiller(self):$/;"	m	class:Module
+makeFillerGlue	makeGeometry.py	/^    def makeFillerGlue(self):$/;"	m	class:Module
+makeMotherLayer	makeGeometry.py	/^    def makeMotherLayer(self):$/;"	m	class:Module
+makeMotherModule	makeGeometry.py	/^    def makeMotherModule(self):$/;"	m	class:Module
+makePCB	makeGeometry.py	/^    def makePCB(self):$/;"	m	class:Module
+makePCBGlue	makeGeometry.py	/^    def makePCBGlue(self):$/;"	m	class:Module
+makePassiveChips	makeGeometry.py	/^    def makePassiveChips(self):$/;"	m	class:Module
+makeString	makeGeometry.py	/^    def makeString(self):$/;"	m	class:Box
+makeString	makeGeometry.py	/^    def makeString(self):$/;"	m	class:Copy
+makeString	makeGeometry.py	/^    def makeString(self):$/;"	m	class:Rotation
+mm	makeGeometry.py	/^mm = 1.$/;"	v
+move	makeGeometry.py	/^    def move(self, pos):$/;"	m	class:Box
+moveAllBoxes	makeGeometry.py	/^    def moveAllBoxes(self, fromZ = 0):$/;"	m	class:Module
+moveAllLayerDaughters	makeGeometry.py	/^    def moveAllLayerDaughters(self, doMoveLayer = False, moveLayerTo = 0):$/;"	m	class:Module
+moveAllModuleDaughters	makeGeometry.py	/^    def moveAllModuleDaughters(self):$/;"	m	class:Module
+myQuit	makeGeometry.py	/^    def myQuit(self):$/;"	m	class:MainMenu
+nm	makeGeometry.py	/^nm = 0.000001$/;"	v
+plotGeometry	makeGeometry.py	/^    def plotGeometry(self, fig = None):$/;"	m	class:Module
+printBox	makeGeometry.py	/^    def printBox(self):$/;"	m	class:Box
+printBox	makeGeometry.py	/^    def printBox(self):$/;"	m	class:Copy
+printBox	makeGeometry.py	/^    def printBox(self):$/;"	m	class:Rotation
+printGeometry	makeGeometry.py	/^    def printGeometry(self):$/;"	m	class:Module
+printGeometry	makeGeometry.py	/^    def printGeometry(self):$/;"	m	class:World
+printGeometry	makeGeometry.py	/^    def printGeometry(self):$/;"	m	class:scanner
+print_geometry	makeGeometry.py	/^    def print_geometry(self):$/;"	m	class:MainMenu
+readyModule	makeGeometry.py	/^    def readyModule(self):$/;"	m	class:MainMenu
+recalculateSize	makeGeometry.py	/^    def recalculateSize(self):$/;"	m	class:Module
+reduceAllSizes	makeGeometry.py	/^    def reduceAllSizes(self, reduceInUm):$/;"	m	class:Module
+rotatePosition	makeGeometry.py	/^    def rotatePosition(self, mat, deg, gapY, minY, maxY, minZ, maxZ, i=0, cop=0, fromZ=0):$/;"	m	class:Box
+scanner	makeGeometry.py	/^class scanner:$/;"	c
+show_geometry	makeGeometry.py	/^    def show_geometry(self):$/;"	m	class:MainMenu
+um	makeGeometry.py	/^um = 0.001$/;"	v
+writeBox	makeGeometry.py	/^    def writeBox(self):$/;"	m	class:Box
+writeBox	makeGeometry.py	/^    def writeBox(self):$/;"	m	class:Copy
+writeBox	makeGeometry.py	/^    def writeBox(self):$/;"	m	class:Rotation
+writeGeometry	makeGeometry.py	/^    def writeGeometry(self):$/;"	m	class:Module
+writeGeometry	makeGeometry.py	/^    def writeGeometry(self):$/;"	m	class:World
+writeGeometry	makeGeometry.py	/^    def writeGeometry(self):$/;"	m	class:scanner
+write_files	makeGeometry.py	/^    def write_files(self):$/;"	m	class:MainMenu

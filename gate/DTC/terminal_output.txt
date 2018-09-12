@@ -1,0 +1,2276 @@
+[G4] 
+[G4] **************************************************************
+[G4]  Geant4 version Name: geant4-10-04-patch-02    (25-May-2018)
+[G4]                        Copyright : Geant4 Collaboration
+[G4]                       References : NIM A 506 (2003), 250-303
+[G4]                                  : IEEE-TNS 53 (2006), 270-278
+[G4]                                  : NIM A 835 (2016), 186-225
+[G4]                              WWW : http://geant4.org/
+[G4] **************************************************************
+[G4] 
+[Core-0] Initialization of geometry
+[Core-0] Initialization of physics
+[Core-0] Initialization of actors
+[Core-0] 
+[Core-0] *************************************************
+[Core-0]  GATE version 8.1.p01 (April 2018)
+[Core-0]  Copyright : OpenGATE Collaboration
+[Core-0]  Reference : Phys. Med. Biol. 49 (2004) 4543-4561
+[Core-0]  Reference : Phys. Med. Biol. 56 (2011) 881-901
+[Core-0]  Reference : Med. Phys. 41(6)    (2014)
+[Core-0]  http://www.opengatecollaboration.org        
+[Core-0] *************************************************
+[Core-0] 
+[Core-0] You are using Geant4 version 10.4.2
+/control/alias absorberthickness 35
+/control/alias energy 250
+/control/alias degraderthickness 160
+/control/alias halfdegraderthickness -82.000
+/control/alias beampos -165
+[Core-0] Starting macro Main.mac
+0: RINDEX
+1e-06   1.33
+5e-06   1.33
+6e-06   1.33
+7e-06   1.33
+9: GROUPVEL
+1e-06   225.408
+3e-06   225.408
+5.5e-06   225.408
+7e-06   225.408
+10: MIEHG
+1e-06   2.3
+5e-06   1.3
+6e-06   3.2
+7e-06   6.7
+5: MIEHG_FORWARD
+0.6
+6: MIEHG_BACKWARD
+0.6
+7: MIEHG_FORWARD_RATIO
+1
+0: RINDEX
+1.84e-06   1.00028
+4.08e-06   1.00028
+9: GROUPVEL
+1.84e-06   299.709
+4.08e-06   299.709
+14: ABSLENGTH
+1.84e-06   50000
+4.08e-06   50000
+[Physic-0] The following Geant4's physic-list is enabled :QGSP_BIC_EMZ
+[Core-0] Initialization of geometry
+[Core-0] Initialization of physics
+G4PhysListFactory::GetReferencePhysList <QGSP_BIC_EMZ>  EMoption= 4
+<<< Geant4 Physics List simulation engine: QGSP_BIC 4.0
+
+<<< Reference Physics List QGSP_BIC_EMZ is built
+
+G4VUserPhysicsList::SetDefaultCutValue: negative cut values  :-1[mm]
+### G4EmStandard_opt4 Construct Processes 
+### Adding tracking cuts for neutron  TimeCut(ns)= 10000  KinEnergyCut(MeV)= 0
+[Core-0] Initialization of actors
+     Transportation,               phot,              compt,               conv
+               Rayl,                msc,              eIoni,              eBrem
+          ePairProd,        CoulombScat,            annihil,             muIoni
+            muBrems,         muPairProd,              hIoni,             hBrems
+          hPairProd,    nuclearStopping,            ionIoni,      photonNuclear
+    electronNuclear,    positronNuclear,        muonNuclear,              Decay
+         hadElastic,   neutronInelastic,           nCapture,    protonInelastic
+       pi+Inelastic,       pi-Inelastic,     kaon+Inelastic,     kaon-Inelastic
+    kaon0LInelastic,    kaon0SInelastic,    lambdaInelastic,anti-lambdaInelastic
+    sigma-Inelastic,anti_sigma-Inelastic,    sigma+Inelastic,anti_sigma+Inelastic
+       xi-Inelastic,  anti_xi-Inelastic,       xi0Inelastic,  anti_xi0Inelastic
+    omega-Inelastic,anti_omega-Inelastic,anti_protonInelastic,anti_neutronInelastic
+anti_deuteronInelastic,anti_tritonInelastic,  anti_He3Inelastic,anti_alphaInelastic
+hFritiofCaptureAtRest,hBertiniCaptureAtRest,muMinusCaptureAtRest,         dInelastic
+         tInelastic,       He3Inelastic,     alphaInelastic,       ionInelastic
+            nKiller,        StepLimiter,     UserSpecialCut
+Running geometry overlaps check...
+Checking overlaps for volume phantom_phys ... OK! 
+Checking overlaps for volume degrader_phys ... OK! 
+Checking overlaps for volume scanner_1_phys ... OK! 
+Checking overlaps for volume FM_Layer_phys ... OK! 
+Checking overlaps for volume FirstModule_phys ... OK! 
+Checking overlaps for volume FM_ActiveChip_phys ... OK! 
+Checking overlaps for volume FM_PassiveChip_phys ... OK! 
+Checking overlaps for volume FM_ChipGlue_phys ... OK! 
+Checking overlaps for volume FM_PCB_phys ... OK! 
+Checking overlaps for volume FM_PCBGlue_phys ... OK! 
+Checking overlaps for volume FM_Absorber1_phys ... OK! 
+Checking overlaps for volume FM_AbsorberAirGap_phys ... OK! 
+Checking overlaps for volume scanner_2_phys ... OK! 
+Checking overlaps for volume Layer_phys ... OK! 
+Checking overlaps for volume Module_phys ... OK! 
+Checking overlaps for volume ActiveChip_phys ... OK! 
+Checking overlaps for volume PassiveChip_phys ... OK! 
+Checking overlaps for volume ChipGlue_phys ... OK! 
+Checking overlaps for volume PCB_phys ... OK! 
+Checking overlaps for volume PCBGlue_phys ... OK! 
+Checking overlaps for volume Absorber1_phys ... OK! 
+Checking overlaps for volume AbsorberAirGap_phys ... OK! 
+Checking overlaps for volume Layer_phys ... OK! 
+Checking overlaps for volume Module_phys ... OK! 
+Checking overlaps for volume ActiveChip_phys ... OK! 
+Checking overlaps for volume PassiveChip_phys ... OK! 
+Checking overlaps for volume ChipGlue_phys ... OK! 
+Checking overlaps for volume PCB_phys ... OK! 
+Checking overlaps for volume PCBGlue_phys ... OK! 
+Checking overlaps for volume Absorber1_phys ... OK! 
+Checking overlaps for volume AbsorberAirGap_phys ... OK! 
+Checking overlaps for volume Layer_phys ... OK! 
+Checking overlaps for volume Module_phys ... OK! 
+Checking overlaps for volume ActiveChip_phys ... OK! 
+Checking overlaps for volume PassiveChip_phys ... OK! 
+Checking overlaps for volume ChipGlue_phys ... OK! 
+Checking overlaps for volume PCB_phys ... OK! 
+Checking overlaps for volume PCBGlue_phys ... OK! 
+Checking overlaps for volume Absorber1_phys ... OK! 
+Checking overlaps for volume AbsorberAirGap_phys ... OK! 
+Checking overlaps for volume Layer_phys ... OK! 
+Checking overlaps for volume Module_phys ... OK! 
+Checking overlaps for volume ActiveChip_phys ... OK! 
+Checking overlaps for volume PassiveChip_phys ... OK! 
+Checking overlaps for volume ChipGlue_phys ... OK! 
+Checking overlaps for volume PCB_phys ... OK! 
+Checking overlaps for volume PCBGlue_phys ... OK! 
+Checking overlaps for volume Absorber1_phys ... OK! 
+Checking overlaps for volume AbsorberAirGap_phys ... OK! 
+Checking overlaps for volume Layer_phys ... OK! 
+Checking overlaps for volume Module_phys ... OK! 
+Checking overlaps for volume ActiveChip_phys ... OK! 
+Checking overlaps for volume PassiveChip_phys ... OK! 
+Checking overlaps for volume ChipGlue_phys ... OK! 
+Checking overlaps for volume PCB_phys ... OK! 
+Checking overlaps for volume PCBGlue_phys ... OK! 
+Checking overlaps for volume Absorber1_phys ... OK! 
+Checking overlaps for volume AbsorberAirGap_phys ... OK! 
+Checking overlaps for volume Layer_phys ... OK! 
+Checking overlaps for volume Module_phys ... OK! 
+Checking overlaps for volume ActiveChip_phys ... OK! 
+Checking overlaps for volume PassiveChip_phys ... OK! 
+Checking overlaps for volume ChipGlue_phys ... OK! 
+Checking overlaps for volume PCB_phys ... OK! 
+Checking overlaps for volume PCBGlue_phys ... OK! 
+Checking overlaps for volume Absorber1_phys ... OK! 
+Checking overlaps for volume AbsorberAirGap_phys ... OK! 
+Checking overlaps for volume Layer_phys ... OK! 
+Checking overlaps for volume Module_phys ... OK! 
+Checking overlaps for volume ActiveChip_phys ... OK! 
+Checking overlaps for volume PassiveChip_phys ... OK! 
+Checking overlaps for volume ChipGlue_phys ... OK! 
+Checking overlaps for volume PCB_phys ... OK! 
+Checking overlaps for volume PCBGlue_phys ... OK! 
+Checking overlaps for volume Absorber1_phys ... OK! 
+Checking overlaps for volume AbsorberAirGap_phys ... OK! 
+Checking overlaps for volume Layer_phys ... OK! 
+Checking overlaps for volume Module_phys ... OK! 
+Checking overlaps for volume ActiveChip_phys ... OK! 
+Checking overlaps for volume PassiveChip_phys ... OK! 
+Checking overlaps for volume ChipGlue_phys ... OK! 
+Checking overlaps for volume PCB_phys ... OK! 
+Checking overlaps for volume PCBGlue_phys ... OK! 
+Checking overlaps for volume Absorber1_phys ... OK! 
+Checking overlaps for volume AbsorberAirGap_phys ... OK! 
+Checking overlaps for volume Layer_phys ... OK! 
+Checking overlaps for volume Module_phys ... OK! 
+Checking overlaps for volume ActiveChip_phys ... OK! 
+Checking overlaps for volume PassiveChip_phys ... OK! 
+Checking overlaps for volume ChipGlue_phys ... OK! 
+Checking overlaps for volume PCB_phys ... OK! 
+Checking overlaps for volume PCBGlue_phys ... OK! 
+Checking overlaps for volume Absorber1_phys ... OK! 
+Checking overlaps for volume AbsorberAirGap_phys ... OK! 
+Checking overlaps for volume Layer_phys ... OK! 
+Checking overlaps for volume Module_phys ... OK! 
+Checking overlaps for volume ActiveChip_phys ... OK! 
+Checking overlaps for volume PassiveChip_phys ... OK! 
+Checking overlaps for volume ChipGlue_phys ... OK! 
+Checking overlaps for volume PCB_phys ... OK! 
+Checking overlaps for volume PCBGlue_phys ... OK! 
+Checking overlaps for volume Absorber1_phys ... OK! 
+Checking overlaps for volume AbsorberAirGap_phys ... OK! 
+Checking overlaps for volume Layer_phys ... OK! 
+Checking overlaps for volume Module_phys ... OK! 
+Checking overlaps for volume ActiveChip_phys ... OK! 
+Checking overlaps for volume PassiveChip_phys ... OK! 
+Checking overlaps for volume ChipGlue_phys ... OK! 
+Checking overlaps for volume PCB_phys ... OK! 
+Checking overlaps for volume PCBGlue_phys ... OK! 
+Checking overlaps for volume Absorber1_phys ... OK! 
+Checking overlaps for volume AbsorberAirGap_phys ... OK! 
+Checking overlaps for volume Layer_phys ... OK! 
+Checking overlaps for volume Module_phys ... OK! 
+Checking overlaps for volume ActiveChip_phys ... OK! 
+Checking overlaps for volume PassiveChip_phys ... OK! 
+Checking overlaps for volume ChipGlue_phys ... OK! 
+Checking overlaps for volume PCB_phys ... OK! 
+Checking overlaps for volume PCBGlue_phys ... OK! 
+Checking overlaps for volume Absorber1_phys ... OK! 
+Checking overlaps for volume AbsorberAirGap_phys ... OK! 
+Checking overlaps for volume Layer_phys ... OK! 
+Checking overlaps for volume Module_phys ... OK! 
+Checking overlaps for volume ActiveChip_phys ... OK! 
+Checking overlaps for volume PassiveChip_phys ... OK! 
+Checking overlaps for volume ChipGlue_phys ... OK! 
+Checking overlaps for volume PCB_phys ... OK! 
+Checking overlaps for volume PCBGlue_phys ... OK! 
+Checking overlaps for volume Absorber1_phys ... OK! 
+Checking overlaps for volume AbsorberAirGap_phys ... OK! 
+Checking overlaps for volume Layer_phys ... OK! 
+Checking overlaps for volume Module_phys ... OK! 
+Checking overlaps for volume ActiveChip_phys ... OK! 
+Checking overlaps for volume PassiveChip_phys ... OK! 
+Checking overlaps for volume ChipGlue_phys ... OK! 
+Checking overlaps for volume PCB_phys ... OK! 
+Checking overlaps for volume PCBGlue_phys ... OK! 
+Checking overlaps for volume Absorber1_phys ... OK! 
+Checking overlaps for volume AbsorberAirGap_phys ... OK! 
+Checking overlaps for volume Layer_phys ... OK! 
+Checking overlaps for volume Module_phys ... OK! 
+Checking overlaps for volume ActiveChip_phys ... OK! 
+Checking overlaps for volume PassiveChip_phys ... OK! 
+Checking overlaps for volume ChipGlue_phys ... OK! 
+Checking overlaps for volume PCB_phys ... OK! 
+Checking overlaps for volume PCBGlue_phys ... OK! 
+Checking overlaps for volume Absorber1_phys ... OK! 
+Checking overlaps for volume AbsorberAirGap_phys ... OK! 
+Checking overlaps for volume Layer_phys ... OK! 
+Checking overlaps for volume Module_phys ... OK! 
+Checking overlaps for volume ActiveChip_phys ... OK! 
+Checking overlaps for volume PassiveChip_phys ... OK! 
+Checking overlaps for volume ChipGlue_phys ... OK! 
+Checking overlaps for volume PCB_phys ... OK! 
+Checking overlaps for volume PCBGlue_phys ... OK! 
+Checking overlaps for volume Absorber1_phys ... OK! 
+Checking overlaps for volume AbsorberAirGap_phys ... OK! 
+Checking overlaps for volume Layer_phys ... OK! 
+Checking overlaps for volume Module_phys ... OK! 
+Checking overlaps for volume ActiveChip_phys ... OK! 
+Checking overlaps for volume PassiveChip_phys ... OK! 
+Checking overlaps for volume ChipGlue_phys ... OK! 
+Checking overlaps for volume PCB_phys ... OK! 
+Checking overlaps for volume PCBGlue_phys ... OK! 
+Checking overlaps for volume Absorber1_phys ... OK! 
+Checking overlaps for volume AbsorberAirGap_phys ... OK! 
+Checking overlaps for volume Layer_phys ... OK! 
+Checking overlaps for volume Module_phys ... OK! 
+Checking overlaps for volume ActiveChip_phys ... OK! 
+Checking overlaps for volume PassiveChip_phys ... OK! 
+Checking overlaps for volume ChipGlue_phys ... OK! 
+Checking overlaps for volume PCB_phys ... OK! 
+Checking overlaps for volume PCBGlue_phys ... OK! 
+Checking overlaps for volume Absorber1_phys ... OK! 
+Checking overlaps for volume AbsorberAirGap_phys ... OK! 
+Checking overlaps for volume Layer_phys ... OK! 
+Checking overlaps for volume Module_phys ... OK! 
+Checking overlaps for volume ActiveChip_phys ... OK! 
+Checking overlaps for volume PassiveChip_phys ... OK! 
+Checking overlaps for volume ChipGlue_phys ... OK! 
+Checking overlaps for volume PCB_phys ... OK! 
+Checking overlaps for volume PCBGlue_phys ... OK! 
+Checking overlaps for volume Absorber1_phys ... OK! 
+Checking overlaps for volume AbsorberAirGap_phys ... OK! 
+Checking overlaps for volume Layer_phys ... OK! 
+Checking overlaps for volume Module_phys ... OK! 
+Checking overlaps for volume ActiveChip_phys ... OK! 
+Checking overlaps for volume PassiveChip_phys ... OK! 
+Checking overlaps for volume ChipGlue_phys ... OK! 
+Checking overlaps for volume PCB_phys ... OK! 
+Checking overlaps for volume PCBGlue_phys ... OK! 
+Checking overlaps for volume Absorber1_phys ... OK! 
+Checking overlaps for volume AbsorberAirGap_phys ... OK! 
+Checking overlaps for volume Layer_phys ... OK! 
+Checking overlaps for volume Module_phys ... OK! 
+Checking overlaps for volume ActiveChip_phys ... OK! 
+Checking overlaps for volume PassiveChip_phys ... OK! 
+Checking overlaps for volume ChipGlue_phys ... OK! 
+Checking overlaps for volume PCB_phys ... OK! 
+Checking overlaps for volume PCBGlue_phys ... OK! 
+Checking overlaps for volume Absorber1_phys ... OK! 
+Checking overlaps for volume AbsorberAirGap_phys ... OK! 
+Checking overlaps for volume Layer_phys ... OK! 
+Checking overlaps for volume Module_phys ... OK! 
+Checking overlaps for volume ActiveChip_phys ... OK! 
+Checking overlaps for volume PassiveChip_phys ... OK! 
+Checking overlaps for volume ChipGlue_phys ... OK! 
+Checking overlaps for volume PCB_phys ... OK! 
+Checking overlaps for volume PCBGlue_phys ... OK! 
+Checking overlaps for volume Absorber1_phys ... OK! 
+Checking overlaps for volume AbsorberAirGap_phys ... OK! 
+Checking overlaps for volume Layer_phys ... OK! 
+Checking overlaps for volume Module_phys ... OK! 
+Checking overlaps for volume ActiveChip_phys ... OK! 
+Checking overlaps for volume PassiveChip_phys ... OK! 
+Checking overlaps for volume ChipGlue_phys ... OK! 
+Checking overlaps for volume PCB_phys ... OK! 
+Checking overlaps for volume PCBGlue_phys ... OK! 
+Checking overlaps for volume Absorber1_phys ... OK! 
+Checking overlaps for volume AbsorberAirGap_phys ... OK! 
+Checking overlaps for volume Layer_phys ... OK! 
+Checking overlaps for volume Module_phys ... OK! 
+Checking overlaps for volume ActiveChip_phys ... OK! 
+Checking overlaps for volume PassiveChip_phys ... OK! 
+Checking overlaps for volume ChipGlue_phys ... OK! 
+Checking overlaps for volume PCB_phys ... OK! 
+Checking overlaps for volume PCBGlue_phys ... OK! 
+Checking overlaps for volume Absorber1_phys ... OK! 
+Checking overlaps for volume AbsorberAirGap_phys ... OK! 
+Checking overlaps for volume Layer_phys ... OK! 
+Checking overlaps for volume Module_phys ... OK! 
+Checking overlaps for volume ActiveChip_phys ... OK! 
+Checking overlaps for volume PassiveChip_phys ... OK! 
+Checking overlaps for volume ChipGlue_phys ... OK! 
+Checking overlaps for volume PCB_phys ... OK! 
+Checking overlaps for volume PCBGlue_phys ... OK! 
+Checking overlaps for volume Absorber1_phys ... OK! 
+Checking overlaps for volume AbsorberAirGap_phys ... OK! 
+Checking overlaps for volume Layer_phys ... OK! 
+Checking overlaps for volume Module_phys ... OK! 
+Checking overlaps for volume ActiveChip_phys ... OK! 
+Checking overlaps for volume PassiveChip_phys ... OK! 
+Checking overlaps for volume ChipGlue_phys ... OK! 
+Checking overlaps for volume PCB_phys ... OK! 
+Checking overlaps for volume PCBGlue_phys ... OK! 
+Checking overlaps for volume Absorber1_phys ... OK! 
+Checking overlaps for volume AbsorberAirGap_phys ... OK! 
+Checking overlaps for volume Layer_phys ... OK! 
+Checking overlaps for volume Module_phys ... OK! 
+Checking overlaps for volume ActiveChip_phys ... OK! 
+Checking overlaps for volume PassiveChip_phys ... OK! 
+Checking overlaps for volume ChipGlue_phys ... OK! 
+Checking overlaps for volume PCB_phys ... OK! 
+Checking overlaps for volume PCBGlue_phys ... OK! 
+Checking overlaps for volume Absorber1_phys ... OK! 
+Checking overlaps for volume AbsorberAirGap_phys ... OK! 
+Checking overlaps for volume Layer_phys ... OK! 
+Checking overlaps for volume Module_phys ... OK! 
+Checking overlaps for volume ActiveChip_phys ... OK! 
+Checking overlaps for volume PassiveChip_phys ... OK! 
+Checking overlaps for volume ChipGlue_phys ... OK! 
+Checking overlaps for volume PCB_phys ... OK! 
+Checking overlaps for volume PCBGlue_phys ... OK! 
+Checking overlaps for volume Absorber1_phys ... OK! 
+Checking overlaps for volume AbsorberAirGap_phys ... OK! 
+Checking overlaps for volume Layer_phys ... OK! 
+Checking overlaps for volume Module_phys ... OK! 
+Checking overlaps for volume ActiveChip_phys ... OK! 
+Checking overlaps for volume PassiveChip_phys ... OK! 
+Checking overlaps for volume ChipGlue_phys ... OK! 
+Checking overlaps for volume PCB_phys ... OK! 
+Checking overlaps for volume PCBGlue_phys ... OK! 
+Checking overlaps for volume Absorber1_phys ... OK! 
+Checking overlaps for volume AbsorberAirGap_phys ... OK! 
+Checking overlaps for volume Layer_phys ... OK! 
+Checking overlaps for volume Module_phys ... OK! 
+Checking overlaps for volume ActiveChip_phys ... OK! 
+Checking overlaps for volume PassiveChip_phys ... OK! 
+Checking overlaps for volume ChipGlue_phys ... OK! 
+Checking overlaps for volume PCB_phys ... OK! 
+Checking overlaps for volume PCBGlue_phys ... OK! 
+Checking overlaps for volume Absorber1_phys ... OK! 
+Checking overlaps for volume AbsorberAirGap_phys ... OK! 
+Checking overlaps for volume Layer_phys ... OK! 
+Checking overlaps for volume Module_phys ... OK! 
+Checking overlaps for volume ActiveChip_phys ... OK! 
+Checking overlaps for volume PassiveChip_phys ... OK! 
+Checking overlaps for volume ChipGlue_phys ... OK! 
+Checking overlaps for volume PCB_phys ... OK! 
+Checking overlaps for volume PCBGlue_phys ... OK! 
+Checking overlaps for volume Absorber1_phys ... OK! 
+Checking overlaps for volume AbsorberAirGap_phys ... OK! 
+Checking overlaps for volume Layer_phys ... OK! 
+Checking overlaps for volume Module_phys ... OK! 
+Checking overlaps for volume ActiveChip_phys ... OK! 
+Checking overlaps for volume PassiveChip_phys ... OK! 
+Checking overlaps for volume ChipGlue_phys ... OK! 
+Checking overlaps for volume PCB_phys ... OK! 
+Checking overlaps for volume PCBGlue_phys ... OK! 
+Checking overlaps for volume Absorber1_phys ... OK! 
+Checking overlaps for volume AbsorberAirGap_phys ... OK! 
+Checking overlaps for volume Layer_phys ... OK! 
+Checking overlaps for volume Module_phys ... OK! 
+Checking overlaps for volume ActiveChip_phys ... OK! 
+Checking overlaps for volume PassiveChip_phys ... OK! 
+Checking overlaps for volume ChipGlue_phys ... OK! 
+Checking overlaps for volume PCB_phys ... OK! 
+Checking overlaps for volume PCBGlue_phys ... OK! 
+Checking overlaps for volume Absorber1_phys ... OK! 
+Checking overlaps for volume AbsorberAirGap_phys ... OK! 
+Checking overlaps for volume Layer_phys ... OK! 
+Checking overlaps for volume Module_phys ... OK! 
+Checking overlaps for volume ActiveChip_phys ... OK! 
+Checking overlaps for volume PassiveChip_phys ... OK! 
+Checking overlaps for volume ChipGlue_phys ... OK! 
+Checking overlaps for volume PCB_phys ... OK! 
+Checking overlaps for volume PCBGlue_phys ... OK! 
+Checking overlaps for volume Absorber1_phys ... OK! 
+Checking overlaps for volume AbsorberAirGap_phys ... OK! 
+Checking overlaps for volume Layer_phys ... OK! 
+Checking overlaps for volume Module_phys ... OK! 
+Checking overlaps for volume ActiveChip_phys ... OK! 
+Checking overlaps for volume PassiveChip_phys ... OK! 
+Checking overlaps for volume ChipGlue_phys ... OK! 
+Checking overlaps for volume PCB_phys ... OK! 
+Checking overlaps for volume PCBGlue_phys ... OK! 
+Checking overlaps for volume Absorber1_phys ... OK! 
+Checking overlaps for volume AbsorberAirGap_phys ... OK! 
+Checking overlaps for volume Layer_phys ... OK! 
+Checking overlaps for volume Module_phys ... OK! 
+Checking overlaps for volume ActiveChip_phys ... OK! 
+Checking overlaps for volume PassiveChip_phys ... OK! 
+Checking overlaps for volume ChipGlue_phys ... OK! 
+Checking overlaps for volume PCB_phys ... OK! 
+Checking overlaps for volume PCBGlue_phys ... OK! 
+Checking overlaps for volume Absorber1_phys ... OK! 
+Checking overlaps for volume AbsorberAirGap_phys ... OK! 
+Checking overlaps for volume Layer_phys ... OK! 
+Checking overlaps for volume Module_phys ... OK! 
+Checking overlaps for volume ActiveChip_phys ... OK! 
+Checking overlaps for volume PassiveChip_phys ... OK! 
+Checking overlaps for volume ChipGlue_phys ... OK! 
+Checking overlaps for volume PCB_phys ... OK! 
+Checking overlaps for volume PCBGlue_phys ... OK! 
+Checking overlaps for volume Absorber1_phys ... OK! 
+Checking overlaps for volume AbsorberAirGap_phys ... OK! 
+Checking overlaps for volume Layer_phys ... OK! 
+Checking overlaps for volume Module_phys ... OK! 
+Checking overlaps for volume ActiveChip_phys ... OK! 
+Checking overlaps for volume PassiveChip_phys ... OK! 
+Checking overlaps for volume ChipGlue_phys ... OK! 
+Checking overlaps for volume PCB_phys ... OK! 
+Checking overlaps for volume PCBGlue_phys ... OK! 
+Checking overlaps for volume Absorber1_phys ... OK! 
+Checking overlaps for volume AbsorberAirGap_phys ... OK! 
+Checking overlaps for volume Layer_phys ... OK! 
+Checking overlaps for volume Module_phys ... OK! 
+Checking overlaps for volume ActiveChip_phys ... OK! 
+Checking overlaps for volume PassiveChip_phys ... OK! 
+Checking overlaps for volume ChipGlue_phys ... OK! 
+Checking overlaps for volume PCB_phys ... OK! 
+Checking overlaps for volume PCBGlue_phys ... OK! 
+Checking overlaps for volume Absorber1_phys ... OK! 
+Checking overlaps for volume AbsorberAirGap_phys ... OK! 
+Checking overlaps for volume Layer_phys ... OK! 
+Checking overlaps for volume Module_phys ... OK! 
+Checking overlaps for volume ActiveChip_phys ... OK! 
+Checking overlaps for volume PassiveChip_phys ... OK! 
+Checking overlaps for volume ChipGlue_phys ... OK! 
+Checking overlaps for volume PCB_phys ... OK! 
+Checking overlaps for volume PCBGlue_phys ... OK! 
+Checking overlaps for volume Absorber1_phys ... OK! 
+Checking overlaps for volume AbsorberAirGap_phys ... OK! 
+Checking overlaps for volume Layer_phys ... OK! 
+Checking overlaps for volume Module_phys ... OK! 
+Checking overlaps for volume ActiveChip_phys ... OK! 
+Checking overlaps for volume PassiveChip_phys ... OK! 
+Checking overlaps for volume ChipGlue_phys ... OK! 
+Checking overlaps for volume PCB_phys ... OK! 
+Checking overlaps for volume PCBGlue_phys ... OK! 
+Checking overlaps for volume Absorber1_phys ... OK! 
+Checking overlaps for volume AbsorberAirGap_phys ... OK! 
+Checking overlaps for volume Layer_phys ... OK! 
+Checking overlaps for volume Module_phys ... OK! 
+Checking overlaps for volume ActiveChip_phys ... OK! 
+Checking overlaps for volume PassiveChip_phys ... OK! 
+Checking overlaps for volume ChipGlue_phys ... OK! 
+Checking overlaps for volume PCB_phys ... OK! 
+Checking overlaps for volume PCBGlue_phys ... OK! 
+Checking overlaps for volume Absorber1_phys ... OK! 
+Checking overlaps for volume AbsorberAirGap_phys ... OK! 
+Checking overlaps for volume Layer_phys ... OK! 
+Checking overlaps for volume Module_phys ... OK! 
+Checking overlaps for volume ActiveChip_phys ... OK! 
+Checking overlaps for volume PassiveChip_phys ... OK! 
+Checking overlaps for volume ChipGlue_phys ... OK! 
+Checking overlaps for volume PCB_phys ... OK! 
+Checking overlaps for volume PCBGlue_phys ... OK! 
+Checking overlaps for volume Absorber1_phys ... OK! 
+Checking overlaps for volume AbsorberAirGap_phys ... OK! 
+Checking overlaps for volume Layer_phys ... OK! 
+Checking overlaps for volume Module_phys ... OK! 
+Checking overlaps for volume ActiveChip_phys ... OK! 
+Checking overlaps for volume PassiveChip_phys ... OK! 
+Checking overlaps for volume ChipGlue_phys ... OK! 
+Checking overlaps for volume PCB_phys ... OK! 
+Checking overlaps for volume PCBGlue_phys ... OK! 
+Checking overlaps for volume Absorber1_phys ... OK! 
+Checking overlaps for volume AbsorberAirGap_phys ... OK! 
+Checking overlaps for volume Layer_phys ... OK! 
+Checking overlaps for volume Module_phys ... OK! 
+Checking overlaps for volume ActiveChip_phys ... OK! 
+Checking overlaps for volume PassiveChip_phys ... OK! 
+Checking overlaps for volume ChipGlue_phys ... OK! 
+Checking overlaps for volume PCB_phys ... OK! 
+Checking overlaps for volume PCBGlue_phys ... OK! 
+Checking overlaps for volume Absorber1_phys ... OK! 
+Checking overlaps for volume AbsorberAirGap_phys ... OK! 
+Checking overlaps for volume Layer_phys ... OK! 
+Checking overlaps for volume Module_phys ... OK! 
+Checking overlaps for volume ActiveChip_phys ... OK! 
+Checking overlaps for volume PassiveChip_phys ... OK! 
+Checking overlaps for volume ChipGlue_phys ... OK! 
+Checking overlaps for volume PCB_phys ... OK! 
+Checking overlaps for volume PCBGlue_phys ... OK! 
+Checking overlaps for volume Absorber1_phys ... OK! 
+Checking overlaps for volume AbsorberAirGap_phys ... OK! 
+Checking overlaps for volume Layer_phys ... OK! 
+Checking overlaps for volume Module_phys ... OK! 
+Checking overlaps for volume ActiveChip_phys ... OK! 
+Checking overlaps for volume PassiveChip_phys ... OK! 
+Checking overlaps for volume ChipGlue_phys ... OK! 
+Checking overlaps for volume PCB_phys ... OK! 
+Checking overlaps for volume PCBGlue_phys ... OK! 
+Checking overlaps for volume Absorber1_phys ... OK! 
+Checking overlaps for volume AbsorberAirGap_phys ... OK! 
+Checking overlaps for volume Layer_phys ... OK! 
+Checking overlaps for volume Module_phys ... OK! 
+Checking overlaps for volume ActiveChip_phys ... OK! 
+Checking overlaps for volume PassiveChip_phys ... OK! 
+Checking overlaps for volume ChipGlue_phys ... OK! 
+Checking overlaps for volume PCB_phys ... OK! 
+Checking overlaps for volume PCBGlue_phys ... OK! 
+Checking overlaps for volume Absorber1_phys ... OK! 
+Checking overlaps for volume AbsorberAirGap_phys ... OK! 
+Checking overlaps for volume Layer_phys ... OK! 
+Checking overlaps for volume Module_phys ... OK! 
+Checking overlaps for volume ActiveChip_phys ... OK! 
+Checking overlaps for volume PassiveChip_phys ... OK! 
+Checking overlaps for volume ChipGlue_phys ... OK! 
+Checking overlaps for volume PCB_phys ... OK! 
+Checking overlaps for volume PCBGlue_phys ... OK! 
+Checking overlaps for volume Absorber1_phys ... OK! 
+Checking overlaps for volume AbsorberAirGap_phys ... OK! 
+Checking overlaps for volume Layer_phys ... OK! 
+Checking overlaps for volume Module_phys ... OK! 
+Checking overlaps for volume ActiveChip_phys ... OK! 
+Checking overlaps for volume PassiveChip_phys ... OK! 
+Checking overlaps for volume ChipGlue_phys ... OK! 
+Checking overlaps for volume PCB_phys ... OK! 
+Checking overlaps for volume PCBGlue_phys ... OK! 
+Checking overlaps for volume Absorber1_phys ... OK! 
+Checking overlaps for volume AbsorberAirGap_phys ... OK! 
+Checking overlaps for volume Layer_phys ... OK! 
+Checking overlaps for volume Module_phys ... OK! 
+Checking overlaps for volume ActiveChip_phys ... OK! 
+Checking overlaps for volume PassiveChip_phys ... OK! 
+Checking overlaps for volume ChipGlue_phys ... OK! 
+Checking overlaps for volume PCB_phys ... OK! 
+Checking overlaps for volume PCBGlue_phys ... OK! 
+Checking overlaps for volume Absorber1_phys ... OK! 
+Checking overlaps for volume AbsorberAirGap_phys ... OK! 
+Checking overlaps for volume Layer_phys ... OK! 
+Checking overlaps for volume Module_phys ... OK! 
+Checking overlaps for volume ActiveChip_phys ... OK! 
+Checking overlaps for volume PassiveChip_phys ... OK! 
+Checking overlaps for volume ChipGlue_phys ... OK! 
+Checking overlaps for volume PCB_phys ... OK! 
+Checking overlaps for volume PCBGlue_phys ... OK! 
+Checking overlaps for volume Absorber1_phys ... OK! 
+Checking overlaps for volume AbsorberAirGap_phys ... OK! 
+Checking overlaps for volume Layer_phys ... OK! 
+Checking overlaps for volume Module_phys ... OK! 
+Checking overlaps for volume ActiveChip_phys ... OK! 
+Checking overlaps for volume PassiveChip_phys ... OK! 
+Checking overlaps for volume ChipGlue_phys ... OK! 
+Checking overlaps for volume PCB_phys ... OK! 
+Checking overlaps for volume PCBGlue_phys ... OK! 
+Checking overlaps for volume Absorber1_phys ... OK! 
+Checking overlaps for volume AbsorberAirGap_phys ... OK! 
+Checking overlaps for volume Layer_phys ... OK! 
+Checking overlaps for volume Module_phys ... OK! 
+Checking overlaps for volume ActiveChip_phys ... OK! 
+Checking overlaps for volume PassiveChip_phys ... OK! 
+Checking overlaps for volume ChipGlue_phys ... OK! 
+Checking overlaps for volume PCB_phys ... OK! 
+Checking overlaps for volume PCBGlue_phys ... OK! 
+Checking overlaps for volume Absorber1_phys ... OK! 
+Checking overlaps for volume AbsorberAirGap_phys ... OK! 
+Checking overlaps for volume Layer_phys ... OK! 
+Checking overlaps for volume Module_phys ... OK! 
+Checking overlaps for volume ActiveChip_phys ... OK! 
+Checking overlaps for volume PassiveChip_phys ... OK! 
+Checking overlaps for volume ChipGlue_phys ... OK! 
+Checking overlaps for volume PCB_phys ... OK! 
+Checking overlaps for volume PCBGlue_phys ... OK! 
+Checking overlaps for volume Absorber1_phys ... OK! 
+Checking overlaps for volume AbsorberAirGap_phys ... OK! 
+Checking overlaps for volume Layer_phys ... OK! 
+Checking overlaps for volume Module_phys ... OK! 
+Checking overlaps for volume ActiveChip_phys ... OK! 
+Checking overlaps for volume PassiveChip_phys ... OK! 
+Checking overlaps for volume ChipGlue_phys ... OK! 
+Checking overlaps for volume PCB_phys ... OK! 
+Checking overlaps for volume PCBGlue_phys ... OK! 
+Checking overlaps for volume Absorber1_phys ... OK! 
+Checking overlaps for volume AbsorberAirGap_phys ... OK! 
+Checking overlaps for volume Layer_phys ... OK! 
+Checking overlaps for volume Module_phys ... OK! 
+Checking overlaps for volume ActiveChip_phys ... OK! 
+Checking overlaps for volume PassiveChip_phys ... OK! 
+Checking overlaps for volume ChipGlue_phys ... OK! 
+Checking overlaps for volume PCB_phys ... OK! 
+Checking overlaps for volume PCBGlue_phys ... OK! 
+Checking overlaps for volume Absorber1_phys ... OK! 
+Checking overlaps for volume AbsorberAirGap_phys ... OK! 
+Checking overlaps for volume Layer_phys ... OK! 
+Checking overlaps for volume Module_phys ... OK! 
+Checking overlaps for volume ActiveChip_phys ... OK! 
+Checking overlaps for volume PassiveChip_phys ... OK! 
+Checking overlaps for volume ChipGlue_phys ... OK! 
+Checking overlaps for volume PCB_phys ... OK! 
+Checking overlaps for volume PCBGlue_phys ... OK! 
+Checking overlaps for volume Absorber1_phys ... OK! 
+Checking overlaps for volume AbsorberAirGap_phys ... OK! 
+Checking overlaps for volume Layer_phys ... OK! 
+Checking overlaps for volume Module_phys ... OK! 
+Checking overlaps for volume ActiveChip_phys ... OK! 
+Checking overlaps for volume PassiveChip_phys ... OK! 
+Checking overlaps for volume ChipGlue_phys ... OK! 
+Checking overlaps for volume PCB_phys ... OK! 
+Checking overlaps for volume PCBGlue_phys ... OK! 
+Checking overlaps for volume Absorber1_phys ... OK! 
+Checking overlaps for volume AbsorberAirGap_phys ... OK! 
+Checking overlaps for volume Layer_phys ... OK! 
+Checking overlaps for volume Module_phys ... OK! 
+Checking overlaps for volume ActiveChip_phys ... OK! 
+Checking overlaps for volume PassiveChip_phys ... OK! 
+Checking overlaps for volume ChipGlue_phys ... OK! 
+Checking overlaps for volume PCB_phys ... OK! 
+Checking overlaps for volume PCBGlue_phys ... OK! 
+Checking overlaps for volume Absorber1_phys ... OK! 
+Checking overlaps for volume AbsorberAirGap_phys ... OK! 
+Checking overlaps for volume Layer_phys ... OK! 
+Checking overlaps for volume Module_phys ... OK! 
+Checking overlaps for volume ActiveChip_phys ... OK! 
+Checking overlaps for volume PassiveChip_phys ... OK! 
+Checking overlaps for volume ChipGlue_phys ... OK! 
+Checking overlaps for volume PCB_phys ... OK! 
+Checking overlaps for volume PCBGlue_phys ... OK! 
+Checking overlaps for volume Absorber1_phys ... OK! 
+Checking overlaps for volume AbsorberAirGap_phys ... OK! 
+Checking overlaps for volume Layer_phys ... OK! 
+Checking overlaps for volume Module_phys ... OK! 
+Checking overlaps for volume ActiveChip_phys ... OK! 
+Checking overlaps for volume PassiveChip_phys ... OK! 
+Checking overlaps for volume ChipGlue_phys ... OK! 
+Checking overlaps for volume PCB_phys ... OK! 
+Checking overlaps for volume PCBGlue_phys ... OK! 
+Checking overlaps for volume Absorber1_phys ... OK! 
+Checking overlaps for volume AbsorberAirGap_phys ... OK! 
+Checking overlaps for volume Layer_phys ... OK! 
+Checking overlaps for volume Module_phys ... OK! 
+Checking overlaps for volume ActiveChip_phys ... OK! 
+Checking overlaps for volume PassiveChip_phys ... OK! 
+Checking overlaps for volume ChipGlue_phys ... OK! 
+Checking overlaps for volume PCB_phys ... OK! 
+Checking overlaps for volume PCBGlue_phys ... OK! 
+Checking overlaps for volume Absorber1_phys ... OK! 
+Checking overlaps for volume AbsorberAirGap_phys ... OK! 
+Checking overlaps for volume Layer_phys ... OK! 
+Checking overlaps for volume Module_phys ... OK! 
+Checking overlaps for volume ActiveChip_phys ... OK! 
+Checking overlaps for volume PassiveChip_phys ... OK! 
+Checking overlaps for volume ChipGlue_phys ... OK! 
+Checking overlaps for volume PCB_phys ... OK! 
+Checking overlaps for volume PCBGlue_phys ... OK! 
+Checking overlaps for volume Absorber1_phys ... OK! 
+Checking overlaps for volume AbsorberAirGap_phys ... OK! 
+Checking overlaps for volume Layer_phys ... OK! 
+Checking overlaps for volume Module_phys ... OK! 
+Checking overlaps for volume ActiveChip_phys ... OK! 
+Checking overlaps for volume PassiveChip_phys ... OK! 
+Checking overlaps for volume ChipGlue_phys ... OK! 
+Checking overlaps for volume PCB_phys ... OK! 
+Checking overlaps for volume PCBGlue_phys ... OK! 
+Checking overlaps for volume Absorber1_phys ... OK! 
+Checking overlaps for volume AbsorberAirGap_phys ... OK! 
+Checking overlaps for volume Layer_phys ... OK! 
+Checking overlaps for volume Module_phys ... OK! 
+Checking overlaps for volume ActiveChip_phys ... OK! 
+Checking overlaps for volume PassiveChip_phys ... OK! 
+Checking overlaps for volume ChipGlue_phys ... OK! 
+Checking overlaps for volume PCB_phys ... OK! 
+Checking overlaps for volume PCBGlue_phys ... OK! 
+Checking overlaps for volume Absorber1_phys ... OK! 
+Checking overlaps for volume AbsorberAirGap_phys ... OK! 
+Checking overlaps for volume Layer_phys ... OK! 
+Checking overlaps for volume Module_phys ... OK! 
+Checking overlaps for volume ActiveChip_phys ... OK! 
+Checking overlaps for volume PassiveChip_phys ... OK! 
+Checking overlaps for volume ChipGlue_phys ... OK! 
+Checking overlaps for volume PCB_phys ... OK! 
+Checking overlaps for volume PCBGlue_phys ... OK! 
+Checking overlaps for volume Absorber1_phys ... OK! 
+Checking overlaps for volume AbsorberAirGap_phys ... OK! 
+Checking overlaps for volume Layer_phys ... OK! 
+Checking overlaps for volume Module_phys ... OK! 
+Checking overlaps for volume ActiveChip_phys ... OK! 
+Checking overlaps for volume PassiveChip_phys ... OK! 
+Checking overlaps for volume ChipGlue_phys ... OK! 
+Checking overlaps for volume PCB_phys ... OK! 
+Checking overlaps for volume PCBGlue_phys ... OK! 
+Checking overlaps for volume Absorber1_phys ... OK! 
+Checking overlaps for volume AbsorberAirGap_phys ... OK! 
+Checking overlaps for volume Layer_phys ... OK! 
+Checking overlaps for volume Module_phys ... OK! 
+Checking overlaps for volume ActiveChip_phys ... OK! 
+Checking overlaps for volume PassiveChip_phys ... OK! 
+Checking overlaps for volume ChipGlue_phys ... OK! 
+Checking overlaps for volume PCB_phys ... OK! 
+Checking overlaps for volume PCBGlue_phys ... OK! 
+Checking overlaps for volume Absorber1_phys ... OK! 
+Checking overlaps for volume AbsorberAirGap_phys ... OK! 
+Checking overlaps for volume Layer_phys ... OK! 
+Checking overlaps for volume Module_phys ... OK! 
+Checking overlaps for volume ActiveChip_phys ... OK! 
+Checking overlaps for volume PassiveChip_phys ... OK! 
+Checking overlaps for volume ChipGlue_phys ... OK! 
+Checking overlaps for volume PCB_phys ... OK! 
+Checking overlaps for volume PCBGlue_phys ... OK! 
+Checking overlaps for volume Absorber1_phys ... OK! 
+Checking overlaps for volume AbsorberAirGap_phys ... OK! 
+Checking overlaps for volume Layer_phys ... OK! 
+Checking overlaps for volume Module_phys ... OK! 
+Checking overlaps for volume ActiveChip_phys ... OK! 
+Checking overlaps for volume PassiveChip_phys ... OK! 
+Checking overlaps for volume ChipGlue_phys ... OK! 
+Checking overlaps for volume PCB_phys ... OK! 
+Checking overlaps for volume PCBGlue_phys ... OK! 
+Checking overlaps for volume Absorber1_phys ... OK! 
+Checking overlaps for volume AbsorberAirGap_phys ... OK! 
+Checking overlaps for volume Layer_phys ... OK! 
+Checking overlaps for volume Module_phys ... OK! 
+Checking overlaps for volume ActiveChip_phys ... OK! 
+Checking overlaps for volume PassiveChip_phys ... OK! 
+Checking overlaps for volume ChipGlue_phys ... OK! 
+Checking overlaps for volume PCB_phys ... OK! 
+Checking overlaps for volume PCBGlue_phys ... OK! 
+Checking overlaps for volume Absorber1_phys ... OK! 
+Checking overlaps for volume AbsorberAirGap_phys ... OK! 
+Checking overlaps for volume Layer_phys ... OK! 
+Checking overlaps for volume Module_phys ... OK! 
+Checking overlaps for volume ActiveChip_phys ... OK! 
+Checking overlaps for volume PassiveChip_phys ... OK! 
+Checking overlaps for volume ChipGlue_phys ... OK! 
+Checking overlaps for volume PCB_phys ... OK! 
+Checking overlaps for volume PCBGlue_phys ... OK! 
+Checking overlaps for volume Absorber1_phys ... OK! 
+Checking overlaps for volume AbsorberAirGap_phys ... OK! 
+Checking overlaps for volume Layer_phys ... OK! 
+Checking overlaps for volume Module_phys ... OK! 
+Checking overlaps for volume ActiveChip_phys ... OK! 
+Checking overlaps for volume PassiveChip_phys ... OK! 
+Checking overlaps for volume ChipGlue_phys ... OK! 
+Checking overlaps for volume PCB_phys ... OK! 
+Checking overlaps for volume PCBGlue_phys ... OK! 
+Checking overlaps for volume Absorber1_phys ... OK! 
+Checking overlaps for volume AbsorberAirGap_phys ... OK! 
+Checking overlaps for volume Layer_phys ... OK! 
+Checking overlaps for volume Module_phys ... OK! 
+Checking overlaps for volume ActiveChip_phys ... OK! 
+Checking overlaps for volume PassiveChip_phys ... OK! 
+Checking overlaps for volume ChipGlue_phys ... OK! 
+Checking overlaps for volume PCB_phys ... OK! 
+Checking overlaps for volume PCBGlue_phys ... OK! 
+Checking overlaps for volume Absorber1_phys ... OK! 
+Checking overlaps for volume AbsorberAirGap_phys ... OK! 
+Checking overlaps for volume Layer_phys ... OK! 
+Checking overlaps for volume Module_phys ... OK! 
+Checking overlaps for volume ActiveChip_phys ... OK! 
+Checking overlaps for volume PassiveChip_phys ... OK! 
+Checking overlaps for volume ChipGlue_phys ... OK! 
+Checking overlaps for volume PCB_phys ... OK! 
+Checking overlaps for volume PCBGlue_phys ... OK! 
+Checking overlaps for volume Absorber1_phys ... OK! 
+Checking overlaps for volume AbsorberAirGap_phys ... OK! 
+Checking overlaps for volume Layer_phys ... OK! 
+Checking overlaps for volume Module_phys ... OK! 
+Checking overlaps for volume ActiveChip_phys ... OK! 
+Checking overlaps for volume PassiveChip_phys ... OK! 
+Checking overlaps for volume ChipGlue_phys ... OK! 
+Checking overlaps for volume PCB_phys ... OK! 
+Checking overlaps for volume PCBGlue_phys ... OK! 
+Checking overlaps for volume Absorber1_phys ... OK! 
+Checking overlaps for volume AbsorberAirGap_phys ... OK! 
+Checking overlaps for volume Layer_phys ... OK! 
+Checking overlaps for volume Module_phys ... OK! 
+Checking overlaps for volume ActiveChip_phys ... OK! 
+Checking overlaps for volume PassiveChip_phys ... OK! 
+Checking overlaps for volume ChipGlue_phys ... OK! 
+Checking overlaps for volume PCB_phys ... OK! 
+Checking overlaps for volume PCBGlue_phys ... OK! 
+Checking overlaps for volume Absorber1_phys ... OK! 
+Checking overlaps for volume AbsorberAirGap_phys ... OK! 
+Checking overlaps for volume Layer_phys ... OK! 
+Checking overlaps for volume Module_phys ... OK! 
+Checking overlaps for volume ActiveChip_phys ... OK! 
+Checking overlaps for volume PassiveChip_phys ... OK! 
+Checking overlaps for volume ChipGlue_phys ... OK! 
+Checking overlaps for volume PCB_phys ... OK! 
+Checking overlaps for volume PCBGlue_phys ... OK! 
+Checking overlaps for volume Absorber1_phys ... OK! 
+Checking overlaps for volume AbsorberAirGap_phys ... OK! 
+Checking overlaps for volume Layer_phys ... OK! 
+Checking overlaps for volume Module_phys ... OK! 
+Checking overlaps for volume ActiveChip_phys ... OK! 
+Checking overlaps for volume PassiveChip_phys ... OK! 
+Checking overlaps for volume ChipGlue_phys ... OK! 
+Checking overlaps for volume PCB_phys ... OK! 
+Checking overlaps for volume PCBGlue_phys ... OK! 
+Checking overlaps for volume Absorber1_phys ... OK! 
+Checking overlaps for volume AbsorberAirGap_phys ... OK! 
+Checking overlaps for volume Layer_phys ... OK! 
+Checking overlaps for volume Module_phys ... OK! 
+Checking overlaps for volume ActiveChip_phys ... OK! 
+Checking overlaps for volume PassiveChip_phys ... OK! 
+Checking overlaps for volume ChipGlue_phys ... OK! 
+Checking overlaps for volume PCB_phys ... OK! 
+Checking overlaps for volume PCBGlue_phys ... OK! 
+Checking overlaps for volume Absorber1_phys ... OK! 
+Checking overlaps for volume AbsorberAirGap_phys ... OK! 
+Checking overlaps for volume Layer_phys ... OK! 
+Checking overlaps for volume Module_phys ... OK! 
+Checking overlaps for volume ActiveChip_phys ... OK! 
+Checking overlaps for volume PassiveChip_phys ... OK! 
+Checking overlaps for volume ChipGlue_phys ... OK! 
+Checking overlaps for volume PCB_phys ... OK! 
+Checking overlaps for volume PCBGlue_phys ... OK! 
+Checking overlaps for volume Absorber1_phys ... OK! 
+Checking overlaps for volume AbsorberAirGap_phys ... OK! 
+Checking overlaps for volume Layer_phys ... OK! 
+Checking overlaps for volume Module_phys ... OK! 
+Checking overlaps for volume ActiveChip_phys ... OK! 
+Checking overlaps for volume PassiveChip_phys ... OK! 
+Checking overlaps for volume ChipGlue_phys ... OK! 
+Checking overlaps for volume PCB_phys ... OK! 
+Checking overlaps for volume PCBGlue_phys ... OK! 
+Checking overlaps for volume Absorber1_phys ... OK! 
+Checking overlaps for volume AbsorberAirGap_phys ... OK! 
+Checking overlaps for volume Layer_phys ... OK! 
+Checking overlaps for volume Module_phys ... OK! 
+Checking overlaps for volume ActiveChip_phys ... OK! 
+Checking overlaps for volume PassiveChip_phys ... OK! 
+Checking overlaps for volume ChipGlue_phys ... OK! 
+Checking overlaps for volume PCB_phys ... OK! 
+Checking overlaps for volume PCBGlue_phys ... OK! 
+Checking overlaps for volume Absorber1_phys ... OK! 
+Checking overlaps for volume AbsorberAirGap_phys ... OK! 
+Checking overlaps for volume Layer_phys ... OK! 
+Checking overlaps for volume Module_phys ... OK! 
+Checking overlaps for volume ActiveChip_phys ... OK! 
+Checking overlaps for volume PassiveChip_phys ... OK! 
+Checking overlaps for volume ChipGlue_phys ... OK! 
+Checking overlaps for volume PCB_phys ... OK! 
+Checking overlaps for volume PCBGlue_phys ... OK! 
+Checking overlaps for volume Absorber1_phys ... OK! 
+Checking overlaps for volume AbsorberAirGap_phys ... OK! 
+Checking overlaps for volume Layer_phys ... OK! 
+Checking overlaps for volume Module_phys ... OK! 
+Checking overlaps for volume ActiveChip_phys ... OK! 
+Checking overlaps for volume PassiveChip_phys ... OK! 
+Checking overlaps for volume ChipGlue_phys ... OK! 
+Checking overlaps for volume PCB_phys ... OK! 
+Checking overlaps for volume PCBGlue_phys ... OK! 
+Checking overlaps for volume Absorber1_phys ... OK! 
+Checking overlaps for volume AbsorberAirGap_phys ... OK! 
+Checking overlaps for volume Layer_phys ... OK! 
+Checking overlaps for volume Module_phys ... OK! 
+Checking overlaps for volume ActiveChip_phys ... OK! 
+Checking overlaps for volume PassiveChip_phys ... OK! 
+Checking overlaps for volume ChipGlue_phys ... OK! 
+Checking overlaps for volume PCB_phys ... OK! 
+Checking overlaps for volume PCBGlue_phys ... OK! 
+Checking overlaps for volume Absorber1_phys ... OK! 
+Checking overlaps for volume AbsorberAirGap_phys ... OK! 
+Checking overlaps for volume Layer_phys ... OK! 
+Checking overlaps for volume Module_phys ... OK! 
+Checking overlaps for volume ActiveChip_phys ... OK! 
+Checking overlaps for volume PassiveChip_phys ... OK! 
+Checking overlaps for volume ChipGlue_phys ... OK! 
+Checking overlaps for volume PCB_phys ... OK! 
+Checking overlaps for volume PCBGlue_phys ... OK! 
+Checking overlaps for volume Absorber1_phys ... OK! 
+Checking overlaps for volume AbsorberAirGap_phys ... OK! 
+Checking overlaps for volume Layer_phys ... OK! 
+Checking overlaps for volume Module_phys ... OK! 
+Checking overlaps for volume ActiveChip_phys ... OK! 
+Checking overlaps for volume PassiveChip_phys ... OK! 
+Checking overlaps for volume ChipGlue_phys ... OK! 
+Checking overlaps for volume PCB_phys ... OK! 
+Checking overlaps for volume PCBGlue_phys ... OK! 
+Checking overlaps for volume Absorber1_phys ... OK! 
+Checking overlaps for volume AbsorberAirGap_phys ... OK! 
+Checking overlaps for volume Layer_phys ... OK! 
+Checking overlaps for volume Module_phys ... OK! 
+Checking overlaps for volume ActiveChip_phys ... OK! 
+Checking overlaps for volume PassiveChip_phys ... OK! 
+Checking overlaps for volume ChipGlue_phys ... OK! 
+Checking overlaps for volume PCB_phys ... OK! 
+Checking overlaps for volume PCBGlue_phys ... OK! 
+Checking overlaps for volume Absorber1_phys ... OK! 
+Checking overlaps for volume AbsorberAirGap_phys ... OK! 
+Checking overlaps for volume Layer_phys ... OK! 
+Checking overlaps for volume Module_phys ... OK! 
+Checking overlaps for volume ActiveChip_phys ... OK! 
+Checking overlaps for volume PassiveChip_phys ... OK! 
+Checking overlaps for volume ChipGlue_phys ... OK! 
+Checking overlaps for volume PCB_phys ... OK! 
+Checking overlaps for volume PCBGlue_phys ... OK! 
+Checking overlaps for volume Absorber1_phys ... OK! 
+Checking overlaps for volume AbsorberAirGap_phys ... OK! 
+Checking overlaps for volume Layer_phys ... OK! 
+Checking overlaps for volume Module_phys ... OK! 
+Checking overlaps for volume ActiveChip_phys ... OK! 
+Checking overlaps for volume PassiveChip_phys ... OK! 
+Checking overlaps for volume ChipGlue_phys ... OK! 
+Checking overlaps for volume PCB_phys ... OK! 
+Checking overlaps for volume PCBGlue_phys ... OK! 
+Checking overlaps for volume Absorber1_phys ... OK! 
+Checking overlaps for volume AbsorberAirGap_phys ... OK! 
+Checking overlaps for volume Layer_phys ... OK! 
+Checking overlaps for volume Module_phys ... OK! 
+Checking overlaps for volume ActiveChip_phys ... OK! 
+Checking overlaps for volume PassiveChip_phys ... OK! 
+Checking overlaps for volume ChipGlue_phys ... OK! 
+Checking overlaps for volume PCB_phys ... OK! 
+Checking overlaps for volume PCBGlue_phys ... OK! 
+Checking overlaps for volume Absorber1_phys ... OK! 
+Checking overlaps for volume AbsorberAirGap_phys ... OK! 
+Checking overlaps for volume Layer_phys ... OK! 
+Checking overlaps for volume Module_phys ... OK! 
+Checking overlaps for volume ActiveChip_phys ... OK! 
+Checking overlaps for volume PassiveChip_phys ... OK! 
+Checking overlaps for volume ChipGlue_phys ... OK! 
+Checking overlaps for volume PCB_phys ... OK! 
+Checking overlaps for volume PCBGlue_phys ... OK! 
+Checking overlaps for volume Absorber1_phys ... OK! 
+Checking overlaps for volume AbsorberAirGap_phys ... OK! 
+Checking overlaps for volume Layer_phys ... OK! 
+Checking overlaps for volume Module_phys ... OK! 
+Checking overlaps for volume ActiveChip_phys ... OK! 
+Checking overlaps for volume PassiveChip_phys ... OK! 
+Checking overlaps for volume ChipGlue_phys ... OK! 
+Checking overlaps for volume PCB_phys ... OK! 
+Checking overlaps for volume PCBGlue_phys ... OK! 
+Checking overlaps for volume Absorber1_phys ... OK! 
+Checking overlaps for volume AbsorberAirGap_phys ... OK! 
+Checking overlaps for volume Layer_phys ... OK! 
+Checking overlaps for volume Module_phys ... OK! 
+Checking overlaps for volume ActiveChip_phys ... OK! 
+Checking overlaps for volume PassiveChip_phys ... OK! 
+Checking overlaps for volume ChipGlue_phys ... OK! 
+Checking overlaps for volume PCB_phys ... OK! 
+Checking overlaps for volume PCBGlue_phys ... OK! 
+Checking overlaps for volume Absorber1_phys ... OK! 
+Checking overlaps for volume AbsorberAirGap_phys ... OK! 
+Checking overlaps for volume Layer_phys ... OK! 
+Checking overlaps for volume Module_phys ... OK! 
+Checking overlaps for volume ActiveChip_phys ... OK! 
+Checking overlaps for volume PassiveChip_phys ... OK! 
+Checking overlaps for volume ChipGlue_phys ... OK! 
+Checking overlaps for volume PCB_phys ... OK! 
+Checking overlaps for volume PCBGlue_phys ... OK! 
+Checking overlaps for volume Absorber1_phys ... OK! 
+Checking overlaps for volume AbsorberAirGap_phys ... OK! 
+Checking overlaps for volume Layer_phys ... OK! 
+Checking overlaps for volume Module_phys ... OK! 
+Checking overlaps for volume ActiveChip_phys ... OK! 
+Checking overlaps for volume PassiveChip_phys ... OK! 
+Checking overlaps for volume ChipGlue_phys ... OK! 
+Checking overlaps for volume PCB_phys ... OK! 
+Checking overlaps for volume PCBGlue_phys ... OK! 
+Checking overlaps for volume Absorber1_phys ... OK! 
+Checking overlaps for volume AbsorberAirGap_phys ... OK! 
+Checking overlaps for volume Layer_phys ... OK! 
+Checking overlaps for volume Module_phys ... OK! 
+Checking overlaps for volume ActiveChip_phys ... OK! 
+Checking overlaps for volume PassiveChip_phys ... OK! 
+Checking overlaps for volume ChipGlue_phys ... OK! 
+Checking overlaps for volume PCB_phys ... OK! 
+Checking overlaps for volume PCBGlue_phys ... OK! 
+Checking overlaps for volume Absorber1_phys ... OK! 
+Checking overlaps for volume AbsorberAirGap_phys ... OK! 
+Checking overlaps for volume Layer_phys ... OK! 
+Checking overlaps for volume Module_phys ... OK! 
+Checking overlaps for volume ActiveChip_phys ... OK! 
+Checking overlaps for volume PassiveChip_phys ... OK! 
+Checking overlaps for volume ChipGlue_phys ... OK! 
+Checking overlaps for volume PCB_phys ... OK! 
+Checking overlaps for volume PCBGlue_phys ... OK! 
+Checking overlaps for volume Absorber1_phys ... OK! 
+Checking overlaps for volume AbsorberAirGap_phys ... OK! 
+Checking overlaps for volume Layer_phys ... OK! 
+Checking overlaps for volume Module_phys ... OK! 
+Checking overlaps for volume ActiveChip_phys ... OK! 
+Checking overlaps for volume PassiveChip_phys ... OK! 
+Checking overlaps for volume ChipGlue_phys ... OK! 
+Checking overlaps for volume PCB_phys ... OK! 
+Checking overlaps for volume PCBGlue_phys ... OK! 
+Checking overlaps for volume Absorber1_phys ... OK! 
+Checking overlaps for volume AbsorberAirGap_phys ... OK! 
+Checking overlaps for volume Layer_phys ... OK! 
+Checking overlaps for volume Module_phys ... OK! 
+Checking overlaps for volume ActiveChip_phys ... OK! 
+Checking overlaps for volume PassiveChip_phys ... OK! 
+Checking overlaps for volume ChipGlue_phys ... OK! 
+Checking overlaps for volume PCB_phys ... OK! 
+Checking overlaps for volume PCBGlue_phys ... OK! 
+Checking overlaps for volume Absorber1_phys ... OK! 
+Checking overlaps for volume AbsorberAirGap_phys ... OK! 
+Checking overlaps for volume Layer_phys ... OK! 
+Checking overlaps for volume Module_phys ... OK! 
+Checking overlaps for volume ActiveChip_phys ... OK! 
+Checking overlaps for volume PassiveChip_phys ... OK! 
+Checking overlaps for volume ChipGlue_phys ... OK! 
+Checking overlaps for volume PCB_phys ... OK! 
+Checking overlaps for volume PCBGlue_phys ... OK! 
+Checking overlaps for volume Absorber1_phys ... OK! 
+Checking overlaps for volume AbsorberAirGap_phys ... OK! 
+Checking overlaps for volume Layer_phys ... OK! 
+Checking overlaps for volume Module_phys ... OK! 
+Checking overlaps for volume ActiveChip_phys ... OK! 
+Checking overlaps for volume PassiveChip_phys ... OK! 
+Checking overlaps for volume ChipGlue_phys ... OK! 
+Checking overlaps for volume PCB_phys ... OK! 
+Checking overlaps for volume PCBGlue_phys ... OK! 
+Checking overlaps for volume Absorber1_phys ... OK! 
+Checking overlaps for volume AbsorberAirGap_phys ... OK! 
+Checking overlaps for volume Layer_phys ... OK! 
+Checking overlaps for volume Module_phys ... OK! 
+Checking overlaps for volume ActiveChip_phys ... OK! 
+Checking overlaps for volume PassiveChip_phys ... OK! 
+Checking overlaps for volume ChipGlue_phys ... OK! 
+Checking overlaps for volume PCB_phys ... OK! 
+Checking overlaps for volume PCBGlue_phys ... OK! 
+Checking overlaps for volume Absorber1_phys ... OK! 
+Checking overlaps for volume AbsorberAirGap_phys ... OK! 
+Checking overlaps for volume Layer_phys ... OK! 
+Checking overlaps for volume Module_phys ... OK! 
+Checking overlaps for volume ActiveChip_phys ... OK! 
+Checking overlaps for volume PassiveChip_phys ... OK! 
+Checking overlaps for volume ChipGlue_phys ... OK! 
+Checking overlaps for volume PCB_phys ... OK! 
+Checking overlaps for volume PCBGlue_phys ... OK! 
+Checking overlaps for volume Absorber1_phys ... OK! 
+Checking overlaps for volume AbsorberAirGap_phys ... OK! 
+Checking overlaps for volume Layer_phys ... OK! 
+Checking overlaps for volume Module_phys ... OK! 
+Checking overlaps for volume ActiveChip_phys ... OK! 
+Checking overlaps for volume PassiveChip_phys ... OK! 
+Checking overlaps for volume ChipGlue_phys ... OK! 
+Checking overlaps for volume PCB_phys ... OK! 
+Checking overlaps for volume PCBGlue_phys ... OK! 
+Checking overlaps for volume Absorber1_phys ... OK! 
+Checking overlaps for volume AbsorberAirGap_phys ... OK! 
+Checking overlaps for volume Layer_phys ... OK! 
+Checking overlaps for volume Module_phys ... OK! 
+Checking overlaps for volume ActiveChip_phys ... OK! 
+Checking overlaps for volume PassiveChip_phys ... OK! 
+Checking overlaps for volume ChipGlue_phys ... OK! 
+Checking overlaps for volume PCB_phys ... OK! 
+Checking overlaps for volume PCBGlue_phys ... OK! 
+Checking overlaps for volume Absorber1_phys ... OK! 
+Checking overlaps for volume AbsorberAirGap_phys ... OK! 
+Checking overlaps for volume Layer_phys ... OK! 
+Checking overlaps for volume Module_phys ... OK! 
+Checking overlaps for volume ActiveChip_phys ... OK! 
+Checking overlaps for volume PassiveChip_phys ... OK! 
+Checking overlaps for volume ChipGlue_phys ... OK! 
+Checking overlaps for volume PCB_phys ... OK! 
+Checking overlaps for volume PCBGlue_phys ... OK! 
+Checking overlaps for volume Absorber1_phys ... OK! 
+Checking overlaps for volume AbsorberAirGap_phys ... OK! 
+Checking overlaps for volume Layer_phys ... OK! 
+Checking overlaps for volume Module_phys ... OK! 
+Checking overlaps for volume ActiveChip_phys ... OK! 
+Checking overlaps for volume PassiveChip_phys ... OK! 
+Checking overlaps for volume ChipGlue_phys ... OK! 
+Checking overlaps for volume PCB_phys ... OK! 
+Checking overlaps for volume PCBGlue_phys ... OK! 
+Checking overlaps for volume Absorber1_phys ... OK! 
+Checking overlaps for volume AbsorberAirGap_phys ... OK! 
+Checking overlaps for volume Layer_phys ... OK! 
+Checking overlaps for volume Module_phys ... OK! 
+Checking overlaps for volume ActiveChip_phys ... OK! 
+Checking overlaps for volume PassiveChip_phys ... OK! 
+Checking overlaps for volume ChipGlue_phys ... OK! 
+Checking overlaps for volume PCB_phys ... OK! 
+Checking overlaps for volume PCBGlue_phys ... OK! 
+Checking overlaps for volume Absorber1_phys ... OK! 
+Checking overlaps for volume AbsorberAirGap_phys ... OK! 
+Checking overlaps for volume Layer_phys ... OK! 
+Checking overlaps for volume Module_phys ... OK! 
+Checking overlaps for volume ActiveChip_phys ... OK! 
+Checking overlaps for volume PassiveChip_phys ... OK! 
+Checking overlaps for volume ChipGlue_phys ... OK! 
+Checking overlaps for volume PCB_phys ... OK! 
+Checking overlaps for volume PCBGlue_phys ... OK! 
+Checking overlaps for volume Absorber1_phys ... OK! 
+Checking overlaps for volume AbsorberAirGap_phys ... OK! 
+Checking overlaps for volume Layer_phys ... OK! 
+Checking overlaps for volume Module_phys ... OK! 
+Checking overlaps for volume ActiveChip_phys ... OK! 
+Checking overlaps for volume PassiveChip_phys ... OK! 
+Checking overlaps for volume ChipGlue_phys ... OK! 
+Checking overlaps for volume PCB_phys ... OK! 
+Checking overlaps for volume PCBGlue_phys ... OK! 
+Checking overlaps for volume Absorber1_phys ... OK! 
+Checking overlaps for volume AbsorberAirGap_phys ... OK! 
+Checking overlaps for volume Layer_phys ... OK! 
+Checking overlaps for volume Module_phys ... OK! 
+Checking overlaps for volume ActiveChip_phys ... OK! 
+Checking overlaps for volume PassiveChip_phys ... OK! 
+Checking overlaps for volume ChipGlue_phys ... OK! 
+Checking overlaps for volume PCB_phys ... OK! 
+Checking overlaps for volume PCBGlue_phys ... OK! 
+Checking overlaps for volume Absorber1_phys ... OK! 
+Checking overlaps for volume AbsorberAirGap_phys ... OK! 
+Checking overlaps for volume Layer_phys ... OK! 
+Checking overlaps for volume Module_phys ... OK! 
+Checking overlaps for volume ActiveChip_phys ... OK! 
+Checking overlaps for volume PassiveChip_phys ... OK! 
+Checking overlaps for volume ChipGlue_phys ... OK! 
+Checking overlaps for volume PCB_phys ... OK! 
+Checking overlaps for volume PCBGlue_phys ... OK! 
+Checking overlaps for volume Absorber1_phys ... OK! 
+Checking overlaps for volume AbsorberAirGap_phys ... OK! 
+Checking overlaps for volume Layer_phys ... OK! 
+Checking overlaps for volume Module_phys ... OK! 
+Checking overlaps for volume ActiveChip_phys ... OK! 
+Checking overlaps for volume PassiveChip_phys ... OK! 
+Checking overlaps for volume ChipGlue_phys ... OK! 
+Checking overlaps for volume PCB_phys ... OK! 
+Checking overlaps for volume PCBGlue_phys ... OK! 
+Checking overlaps for volume Absorber1_phys ... OK! 
+Checking overlaps for volume AbsorberAirGap_phys ... OK! 
+Checking overlaps for volume Layer_phys ... OK! 
+Checking overlaps for volume Module_phys ... OK! 
+Checking overlaps for volume ActiveChip_phys ... OK! 
+Checking overlaps for volume PassiveChip_phys ... OK! 
+Checking overlaps for volume ChipGlue_phys ... OK! 
+Checking overlaps for volume PCB_phys ... OK! 
+Checking overlaps for volume PCBGlue_phys ... OK! 
+Checking overlaps for volume Absorber1_phys ... OK! 
+Checking overlaps for volume AbsorberAirGap_phys ... OK! 
+Checking overlaps for volume Layer_phys ... OK! 
+Checking overlaps for volume Module_phys ... OK! 
+Checking overlaps for volume ActiveChip_phys ... OK! 
+Checking overlaps for volume PassiveChip_phys ... OK! 
+Checking overlaps for volume ChipGlue_phys ... OK! 
+Checking overlaps for volume PCB_phys ... OK! 
+Checking overlaps for volume PCBGlue_phys ... OK! 
+Checking overlaps for volume Absorber1_phys ... OK! 
+Checking overlaps for volume AbsorberAirGap_phys ... OK! 
+Checking overlaps for volume Layer_phys ... OK! 
+Checking overlaps for volume Module_phys ... OK! 
+Checking overlaps for volume ActiveChip_phys ... OK! 
+Checking overlaps for volume PassiveChip_phys ... OK! 
+Checking overlaps for volume ChipGlue_phys ... OK! 
+Checking overlaps for volume PCB_phys ... OK! 
+Checking overlaps for volume PCBGlue_phys ... OK! 
+Checking overlaps for volume Absorber1_phys ... OK! 
+Checking overlaps for volume AbsorberAirGap_phys ... OK! 
+Checking overlaps for volume Layer_phys ... OK! 
+Checking overlaps for volume Module_phys ... OK! 
+Checking overlaps for volume ActiveChip_phys ... OK! 
+Checking overlaps for volume PassiveChip_phys ... OK! 
+Checking overlaps for volume ChipGlue_phys ... OK! 
+Checking overlaps for volume PCB_phys ... OK! 
+Checking overlaps for volume PCBGlue_phys ... OK! 
+Checking overlaps for volume Absorber1_phys ... OK! 
+Checking overlaps for volume AbsorberAirGap_phys ... OK! 
+Checking overlaps for volume Layer_phys ... OK! 
+Checking overlaps for volume Module_phys ... OK! 
+Checking overlaps for volume ActiveChip_phys ... OK! 
+Checking overlaps for volume PassiveChip_phys ... OK! 
+Checking overlaps for volume ChipGlue_phys ... OK! 
+Checking overlaps for volume PCB_phys ... OK! 
+Checking overlaps for volume PCBGlue_phys ... OK! 
+Checking overlaps for volume Absorber1_phys ... OK! 
+Checking overlaps for volume AbsorberAirGap_phys ... OK! 
+Checking overlaps for volume Layer_phys ... OK! 
+Checking overlaps for volume Module_phys ... OK! 
+Checking overlaps for volume ActiveChip_phys ... OK! 
+Checking overlaps for volume PassiveChip_phys ... OK! 
+Checking overlaps for volume ChipGlue_phys ... OK! 
+Checking overlaps for volume PCB_phys ... OK! 
+Checking overlaps for volume PCBGlue_phys ... OK! 
+Checking overlaps for volume Absorber1_phys ... OK! 
+Checking overlaps for volume AbsorberAirGap_phys ... OK! 
+Checking overlaps for volume Layer_phys ... OK! 
+Checking overlaps for volume Module_phys ... OK! 
+Checking overlaps for volume ActiveChip_phys ... OK! 
+Checking overlaps for volume PassiveChip_phys ... OK! 
+Checking overlaps for volume ChipGlue_phys ... OK! 
+Checking overlaps for volume PCB_phys ... OK! 
+Checking overlaps for volume PCBGlue_phys ... OK! 
+Checking overlaps for volume Absorber1_phys ... OK! 
+Checking overlaps for volume AbsorberAirGap_phys ... OK! 
+Checking overlaps for volume Layer_phys ... OK! 
+Checking overlaps for volume Module_phys ... OK! 
+Checking overlaps for volume ActiveChip_phys ... OK! 
+Checking overlaps for volume PassiveChip_phys ... OK! 
+Checking overlaps for volume ChipGlue_phys ... OK! 
+Checking overlaps for volume PCB_phys ... OK! 
+Checking overlaps for volume PCBGlue_phys ... OK! 
+Checking overlaps for volume Absorber1_phys ... OK! 
+Checking overlaps for volume AbsorberAirGap_phys ... OK! 
+Checking overlaps for volume Layer_phys ... OK! 
+Checking overlaps for volume Module_phys ... OK! 
+Checking overlaps for volume ActiveChip_phys ... OK! 
+Checking overlaps for volume PassiveChip_phys ... OK! 
+Checking overlaps for volume ChipGlue_phys ... OK! 
+Checking overlaps for volume PCB_phys ... OK! 
+Checking overlaps for volume PCBGlue_phys ... OK! 
+Checking overlaps for volume Absorber1_phys ... OK! 
+Checking overlaps for volume AbsorberAirGap_phys ... OK! 
+Checking overlaps for volume Layer_phys ... OK! 
+Checking overlaps for volume Module_phys ... OK! 
+Checking overlaps for volume ActiveChip_phys ... OK! 
+Checking overlaps for volume PassiveChip_phys ... OK! 
+Checking overlaps for volume ChipGlue_phys ... OK! 
+Checking overlaps for volume PCB_phys ... OK! 
+Checking overlaps for volume PCBGlue_phys ... OK! 
+Checking overlaps for volume Absorber1_phys ... OK! 
+Checking overlaps for volume AbsorberAirGap_phys ... OK! 
+Checking overlaps for volume Layer_phys ... OK! 
+Checking overlaps for volume Module_phys ... OK! 
+Checking overlaps for volume ActiveChip_phys ... OK! 
+Checking overlaps for volume PassiveChip_phys ... OK! 
+Checking overlaps for volume ChipGlue_phys ... OK! 
+Checking overlaps for volume PCB_phys ... OK! 
+Checking overlaps for volume PCBGlue_phys ... OK! 
+Checking overlaps for volume Absorber1_phys ... OK! 
+Checking overlaps for volume AbsorberAirGap_phys ... OK! 
+Checking overlaps for volume Layer_phys ... OK! 
+Checking overlaps for volume Module_phys ... OK! 
+Checking overlaps for volume ActiveChip_phys ... OK! 
+Checking overlaps for volume PassiveChip_phys ... OK! 
+Checking overlaps for volume ChipGlue_phys ... OK! 
+Checking overlaps for volume PCB_phys ... OK! 
+Checking overlaps for volume PCBGlue_phys ... OK! 
+Checking overlaps for volume Absorber1_phys ... OK! 
+Checking overlaps for volume AbsorberAirGap_phys ... OK! 
+Checking overlaps for volume Layer_phys ... OK! 
+Checking overlaps for volume Module_phys ... OK! 
+Checking overlaps for volume ActiveChip_phys ... OK! 
+Checking overlaps for volume PassiveChip_phys ... OK! 
+Checking overlaps for volume ChipGlue_phys ... OK! 
+Checking overlaps for volume PCB_phys ... OK! 
+Checking overlaps for volume PCBGlue_phys ... OK! 
+Checking overlaps for volume Absorber1_phys ... OK! 
+Checking overlaps for volume AbsorberAirGap_phys ... OK! 
+Checking overlaps for volume Layer_phys ... OK! 
+Checking overlaps for volume Module_phys ... OK! 
+Checking overlaps for volume ActiveChip_phys ... OK! 
+Checking overlaps for volume PassiveChip_phys ... OK! 
+Checking overlaps for volume ChipGlue_phys ... OK! 
+Checking overlaps for volume PCB_phys ... OK! 
+Checking overlaps for volume PCBGlue_phys ... OK! 
+Checking overlaps for volume Absorber1_phys ... OK! 
+Checking overlaps for volume AbsorberAirGap_phys ... OK! 
+Checking overlaps for volume Layer_phys ... OK! 
+Checking overlaps for volume Module_phys ... OK! 
+Checking overlaps for volume ActiveChip_phys ... OK! 
+Checking overlaps for volume PassiveChip_phys ... OK! 
+Checking overlaps for volume ChipGlue_phys ... OK! 
+Checking overlaps for volume PCB_phys ... OK! 
+Checking overlaps for volume PCBGlue_phys ... OK! 
+Checking overlaps for volume Absorber1_phys ... OK! 
+Checking overlaps for volume AbsorberAirGap_phys ... OK! 
+Checking overlaps for volume Layer_phys ... OK! 
+Checking overlaps for volume Module_phys ... OK! 
+Checking overlaps for volume ActiveChip_phys ... OK! 
+Checking overlaps for volume PassiveChip_phys ... OK! 
+Checking overlaps for volume ChipGlue_phys ... OK! 
+Checking overlaps for volume PCB_phys ... OK! 
+Checking overlaps for volume PCBGlue_phys ... OK! 
+Checking overlaps for volume Absorber1_phys ... OK! 
+Checking overlaps for volume AbsorberAirGap_phys ... OK! 
+Checking overlaps for volume Layer_phys ... OK! 
+Checking overlaps for volume Module_phys ... OK! 
+Checking overlaps for volume ActiveChip_phys ... OK! 
+Checking overlaps for volume PassiveChip_phys ... OK! 
+Checking overlaps for volume ChipGlue_phys ... OK! 
+Checking overlaps for volume PCB_phys ... OK! 
+Checking overlaps for volume PCBGlue_phys ... OK! 
+Checking overlaps for volume Absorber1_phys ... OK! 
+Checking overlaps for volume AbsorberAirGap_phys ... OK! 
+Checking overlaps for volume Layer_phys ... OK! 
+Checking overlaps for volume Module_phys ... OK! 
+Checking overlaps for volume ActiveChip_phys ... OK! 
+Checking overlaps for volume PassiveChip_phys ... OK! 
+Checking overlaps for volume ChipGlue_phys ... OK! 
+Checking overlaps for volume PCB_phys ... OK! 
+Checking overlaps for volume PCBGlue_phys ... OK! 
+Checking overlaps for volume Absorber1_phys ... OK! 
+Checking overlaps for volume AbsorberAirGap_phys ... OK! 
+Checking overlaps for volume Layer_phys ... OK! 
+Checking overlaps for volume Module_phys ... OK! 
+Checking overlaps for volume ActiveChip_phys ... OK! 
+Checking overlaps for volume PassiveChip_phys ... OK! 
+Checking overlaps for volume ChipGlue_phys ... OK! 
+Checking overlaps for volume PCB_phys ... OK! 
+Checking overlaps for volume PCBGlue_phys ... OK! 
+Checking overlaps for volume Absorber1_phys ... OK! 
+Checking overlaps for volume AbsorberAirGap_phys ... OK! 
+Checking overlaps for volume Layer_phys ... OK! 
+Checking overlaps for volume Module_phys ... OK! 
+Checking overlaps for volume ActiveChip_phys ... OK! 
+Checking overlaps for volume PassiveChip_phys ... OK! 
+Checking overlaps for volume ChipGlue_phys ... OK! 
+Checking overlaps for volume PCB_phys ... OK! 
+Checking overlaps for volume PCBGlue_phys ... OK! 
+Checking overlaps for volume Absorber1_phys ... OK! 
+Checking overlaps for volume AbsorberAirGap_phys ... OK! 
+Checking overlaps for volume Layer_phys ... OK! 
+Checking overlaps for volume Module_phys ... OK! 
+Checking overlaps for volume ActiveChip_phys ... OK! 
+Checking overlaps for volume PassiveChip_phys ... OK! 
+Checking overlaps for volume ChipGlue_phys ... OK! 
+Checking overlaps for volume PCB_phys ... OK! 
+Checking overlaps for volume PCBGlue_phys ... OK! 
+Checking overlaps for volume Absorber1_phys ... OK! 
+Checking overlaps for volume AbsorberAirGap_phys ... OK! 
+Checking overlaps for volume Layer_phys ... OK! 
+Checking overlaps for volume Module_phys ... OK! 
+Checking overlaps for volume ActiveChip_phys ... OK! 
+Checking overlaps for volume PassiveChip_phys ... OK! 
+Checking overlaps for volume ChipGlue_phys ... OK! 
+Checking overlaps for volume PCB_phys ... OK! 
+Checking overlaps for volume PCBGlue_phys ... OK! 
+Checking overlaps for volume Absorber1_phys ... OK! 
+Checking overlaps for volume AbsorberAirGap_phys ... OK! 
+Checking overlaps for volume Layer_phys ... OK! 
+Checking overlaps for volume Module_phys ... OK! 
+Checking overlaps for volume ActiveChip_phys ... OK! 
+Checking overlaps for volume PassiveChip_phys ... OK! 
+Checking overlaps for volume ChipGlue_phys ... OK! 
+Checking overlaps for volume PCB_phys ... OK! 
+Checking overlaps for volume PCBGlue_phys ... OK! 
+Checking overlaps for volume Absorber1_phys ... OK! 
+Checking overlaps for volume AbsorberAirGap_phys ... OK! 
+Checking overlaps for volume Layer_phys ... OK! 
+Checking overlaps for volume Module_phys ... OK! 
+Checking overlaps for volume ActiveChip_phys ... OK! 
+Checking overlaps for volume PassiveChip_phys ... OK! 
+Checking overlaps for volume ChipGlue_phys ... OK! 
+Checking overlaps for volume PCB_phys ... OK! 
+Checking overlaps for volume PCBGlue_phys ... OK! 
+Checking overlaps for volume Absorber1_phys ... OK! 
+Checking overlaps for volume AbsorberAirGap_phys ... OK! 
+Checking overlaps for volume Layer_phys ... OK! 
+Checking overlaps for volume Module_phys ... OK! 
+Checking overlaps for volume ActiveChip_phys ... OK! 
+Checking overlaps for volume PassiveChip_phys ... OK! 
+Checking overlaps for volume ChipGlue_phys ... OK! 
+Checking overlaps for volume PCB_phys ... OK! 
+Checking overlaps for volume PCBGlue_phys ... OK! 
+Checking overlaps for volume Absorber1_phys ... OK! 
+Checking overlaps for volume AbsorberAirGap_phys ... OK! 
+Checking overlaps for volume Layer_phys ... OK! 
+Checking overlaps for volume Module_phys ... OK! 
+Checking overlaps for volume ActiveChip_phys ... OK! 
+Checking overlaps for volume PassiveChip_phys ... OK! 
+Checking overlaps for volume ChipGlue_phys ... OK! 
+Checking overlaps for volume PCB_phys ... OK! 
+Checking overlaps for volume PCBGlue_phys ... OK! 
+Checking overlaps for volume Absorber1_phys ... OK! 
+Checking overlaps for volume AbsorberAirGap_phys ... OK! 
+Checking overlaps for volume Layer_phys ... OK! 
+Checking overlaps for volume Module_phys ... OK! 
+Checking overlaps for volume ActiveChip_phys ... OK! 
+Checking overlaps for volume PassiveChip_phys ... OK! 
+Checking overlaps for volume ChipGlue_phys ... OK! 
+Checking overlaps for volume PCB_phys ... OK! 
+Checking overlaps for volume PCBGlue_phys ... OK! 
+Checking overlaps for volume Absorber1_phys ... OK! 
+Checking overlaps for volume AbsorberAirGap_phys ... OK! 
+Checking overlaps for volume Layer_phys ... OK! 
+Checking overlaps for volume Module_phys ... OK! 
+Checking overlaps for volume ActiveChip_phys ... OK! 
+Checking overlaps for volume PassiveChip_phys ... OK! 
+Checking overlaps for volume ChipGlue_phys ... OK! 
+Checking overlaps for volume PCB_phys ... OK! 
+Checking overlaps for volume PCBGlue_phys ... OK! 
+Checking overlaps for volume Absorber1_phys ... OK! 
+Checking overlaps for volume AbsorberAirGap_phys ... OK! 
+Checking overlaps for volume Layer_phys ... OK! 
+Checking overlaps for volume Module_phys ... OK! 
+Checking overlaps for volume ActiveChip_phys ... OK! 
+Checking overlaps for volume PassiveChip_phys ... OK! 
+Checking overlaps for volume ChipGlue_phys ... OK! 
+Checking overlaps for volume PCB_phys ... OK! 
+Checking overlaps for volume PCBGlue_phys ... OK! 
+Checking overlaps for volume Absorber1_phys ... OK! 
+Checking overlaps for volume AbsorberAirGap_phys ... OK! 
+Checking overlaps for volume Layer_phys ... OK! 
+Checking overlaps for volume Module_phys ... OK! 
+Checking overlaps for volume ActiveChip_phys ... OK! 
+Checking overlaps for volume PassiveChip_phys ... OK! 
+Checking overlaps for volume ChipGlue_phys ... OK! 
+Checking overlaps for volume PCB_phys ... OK! 
+Checking overlaps for volume PCBGlue_phys ... OK! 
+Checking overlaps for volume Absorber1_phys ... OK! 
+Checking overlaps for volume AbsorberAirGap_phys ... OK! 
+Checking overlaps for volume Layer_phys ... OK! 
+Checking overlaps for volume Module_phys ... OK! 
+Checking overlaps for volume ActiveChip_phys ... OK! 
+Checking overlaps for volume PassiveChip_phys ... OK! 
+Checking overlaps for volume ChipGlue_phys ... OK! 
+Checking overlaps for volume PCB_phys ... OK! 
+Checking overlaps for volume PCBGlue_phys ... OK! 
+Checking overlaps for volume Absorber1_phys ... OK! 
+Checking overlaps for volume AbsorberAirGap_phys ... OK! 
+Checking overlaps for volume Layer_phys ... OK! 
+Checking overlaps for volume Module_phys ... OK! 
+Checking overlaps for volume ActiveChip_phys ... OK! 
+Checking overlaps for volume PassiveChip_phys ... OK! 
+Checking overlaps for volume ChipGlue_phys ... OK! 
+Checking overlaps for volume PCB_phys ... OK! 
+Checking overlaps for volume PCBGlue_phys ... OK! 
+Checking overlaps for volume Absorber1_phys ... OK! 
+Checking overlaps for volume AbsorberAirGap_phys ... OK! 
+Checking overlaps for volume Layer_phys ... OK! 
+Checking overlaps for volume Module_phys ... OK! 
+Checking overlaps for volume ActiveChip_phys ... OK! 
+Checking overlaps for volume PassiveChip_phys ... OK! 
+Checking overlaps for volume ChipGlue_phys ... OK! 
+Checking overlaps for volume PCB_phys ... OK! 
+Checking overlaps for volume PCBGlue_phys ... OK! 
+Checking overlaps for volume Absorber1_phys ... OK! 
+Checking overlaps for volume AbsorberAirGap_phys ... OK! 
+Checking overlaps for volume Layer_phys ... OK! 
+Checking overlaps for volume Module_phys ... OK! 
+Checking overlaps for volume ActiveChip_phys ... OK! 
+Checking overlaps for volume PassiveChip_phys ... OK! 
+Checking overlaps for volume ChipGlue_phys ... OK! 
+Checking overlaps for volume PCB_phys ... OK! 
+Checking overlaps for volume PCBGlue_phys ... OK! 
+Checking overlaps for volume Absorber1_phys ... OK! 
+Checking overlaps for volume AbsorberAirGap_phys ... OK! 
+Geometry overlaps check completed !
+[Acquisition-0]   
+[Acquisition-0] ============= Source initialization =============
+[Acquisition-0]   
+[Acquisition-0] ============= Acquisition starts! =============
+[Acquisition-0] Simulation start time = 0 sec
+[Acquisition-0] Simulation end time   = 1 sec
+[Acquisition-0] Simulation will have  = 1 run(s)
+[Acquisition-0] Slice 0 from 0 to 1 s [slice=1 s]
+
+### ===  Deexcitation model UAtomDeexcitation is activated for 23 regions:
+          DefaultRegionForTheWorld  1  1  1
+          phantom  1  1  1
+          degrader  1  1  1
+          scanner_1  1  1  1
+          FM_Layer  1  1  1
+          FirstModule  1  1  1
+          FM_ActiveChip  1  1  1
+          FM_PassiveChip  1  1  1
+          FM_ChipGlue  1  1  1
+          FM_PCB  1  1  1
+          FM_PCBGlue  1  1  1
+          FM_Absorber1  1  1  1
+          FM_AbsorberAirGap  1  1  1
+          scanner_2  1  1  1
+          Layer  1  1  1
+          Module  1  1  1
+          ActiveChip  1  1  1
+          PassiveChip  1  1  1
+          ChipGlue  1  1  1
+          PCB  1  1  1
+          PCBGlue  1  1  1
+          Absorber1  1  1  1
+          AbsorberAirGap  1  1  1
+### ===  Auger cascade flag: 1
+### ===  Ignore cuts flag:   0
+
+phot:   for  gamma, applyCuts: 1     SubType= 12  BuildTable= 0
+      LambdaPrime table from 200 keV to 10 TeV in 154 bins 
+      ===== EM models for the G4Region  DefaultRegionForTheWorld ======
+ LivermorePhElectric :  Emin=        0 eV    Emax=       10 TeV   AngularGenSauterGavrila  FluoActive
+
+compt:   for  gamma, applyCuts: 1     SubType= 13  BuildTable= 1
+      Lambda table from 100 eV  to 1 MeV, 20 bins per decade, spline: 1
+      LambdaPrime table from 1 MeV to 10 TeV in 140 bins 
+      ===== EM models for the G4Region  DefaultRegionForTheWorld ======
+   LowEPComptonModel :  Emin=        0 eV    Emax=       20 MeV  FluoActive
+        KleinNishina :  Emin=       20 MeV   Emax=       10 TeV  FluoActive
+
+conv:   for  gamma, applyCuts: 1     SubType= 14  BuildTable= 1
+      Lambda table from 1.022 MeV to 10 TeV, 20 bins per decade, spline: 1
+      ===== EM models for the G4Region  DefaultRegionForTheWorld ======
+       PenConversion :  Emin=        0 eV    Emax=       80 GeV
+     BetheHeitlerLPM :  Emin=       80 GeV   Emax=       10 TeV
+
+Rayl:   for  gamma, applyCuts: 1     SubType= 11  BuildTable= 1
+      Lambda table from 100 eV  to 100 keV, 20 bins per decade, spline: 0
+      LambdaPrime table from 100 keV to 10 TeV in 160 bins 
+      ===== EM models for the G4Region  DefaultRegionForTheWorld ======
+   LivermoreRayleigh :  Emin=        0 eV    Emax=       10 TeV   CullenGenerator
+
+msc:   for e-    SubType= 10
+      RangeFactor= 0.2, stepLimitType: 2, latDisplacement: 1
+      ===== EM models for the G4Region  DefaultRegionForTheWorld ======
+  GoudsmitSaunderson :  Emin=        0 eV    Emax=      100 MeV  Table with 120 bins Emin=    100 eV    Emax=    100 MeV
+        WentzelVIUni :  Emin=      100 MeV   Emax=       10 TeV  Table with 100 bins Emin=    100 MeV   Emax=     10 TeV
+
+eIoni:   for  e-    SubType= 2
+      dE/dx and range tables from 100 eV  to 10 TeV in 220 bins
+      Lambda tables from threshold to 10 TeV, 20 bins per decade, spline: 1
+      finalRange(mm)= 0.01, dRoverRange= 0.2, integral: 1, fluct: 1, linLossLimit= 0.01
+      ===== EM models for the G4Region  DefaultRegionForTheWorld ======
+             PenIoni :  Emin=        0 eV    Emax=        1 MeV
+        MollerBhabha :  Emin=        1 MeV   Emax=       10 TeV   deltaVI
+
+eBrem:   for  e-    SubType= 3
+      dE/dx and range tables from 100 eV  to 10 TeV in 220 bins
+      Lambda tables from threshold to 10 TeV, 20 bins per decade, spline: 1
+      LPM flag: 1 for E > 1 GeV,  VertexHighEnergyTh(GeV)= 100000
+      ===== EM models for the G4Region  DefaultRegionForTheWorld ======
+             eBremSB :  Emin=        0 eV    Emax=        1 GeV   AngularGen2BS
+            eBremLPM :  Emin=        1 GeV   Emax=       10 TeV   AngularGen2BS
+
+ePairProd:   for  e-    SubType= 4
+      dE/dx and range tables from 100 eV  to 10 TeV in 220 bins
+      Lambda tables from threshold to 10 TeV, 20 bins per decade, spline: 1
+      Sampling table 21x1001; from 0.1 GeV to 10 TeV 
+      ===== EM models for the G4Region  DefaultRegionForTheWorld ======
+          muPairProd :  Emin=        0 eV    Emax=       10 TeV
+
+CoulombScat:   for  e-, integral: 1 , applyCuts: 1     SubType= 1  BuildTable= 1
+      Lambda table from 100 MeV to 10 TeV, 20 bins per decade, spline: 1
+      ThetaMin(p) < Theta(degree) < 180; pLimit(GeV^1)= 0.139531
+      ===== EM models for the G4Region  DefaultRegionForTheWorld ======
+  eCoulombScattering :  Emin=      100 MeV   Emax=       10 TeV
+
+msc:   for e+    SubType= 10
+      RangeFactor= 0.2, stepLimitType: 2, latDisplacement: 1
+      ===== EM models for the G4Region  DefaultRegionForTheWorld ======
+  GoudsmitSaunderson :  Emin=        0 eV    Emax=      100 MeV  Table with 120 bins Emin=    100 eV    Emax=    100 MeV
+        WentzelVIUni :  Emin=      100 MeV   Emax=       10 TeV  Table with 100 bins Emin=    100 MeV   Emax=     10 TeV
+
+eIoni:   for  e+    SubType= 2
+      dE/dx and range tables from 100 eV  to 10 TeV in 220 bins
+      Lambda tables from threshold to 10 TeV, 20 bins per decade, spline: 1
+      finalRange(mm)= 0.01, dRoverRange= 0.2, integral: 1, fluct: 1, linLossLimit= 0.01
+      ===== EM models for the G4Region  DefaultRegionForTheWorld ======
+             PenIoni :  Emin=        0 eV    Emax=        1 MeV
+        MollerBhabha :  Emin=        1 MeV   Emax=       10 TeV   deltaVI
+
+eBrem:   for  e+    SubType= 3
+      dE/dx and range tables from 100 eV  to 10 TeV in 220 bins
+      Lambda tables from threshold to 10 TeV, 20 bins per decade, spline: 1
+      LPM flag: 1 for E > 1 GeV,  VertexHighEnergyTh(GeV)= 100000
+      ===== EM models for the G4Region  DefaultRegionForTheWorld ======
+             eBremSB :  Emin=        0 eV    Emax=        1 GeV   AngularGen2BS
+            eBremLPM :  Emin=        1 GeV   Emax=       10 TeV   AngularGen2BS
+
+ePairProd:   for  e+    SubType= 4
+      dE/dx and range tables from 100 eV  to 10 TeV in 220 bins
+      Lambda tables from threshold to 10 TeV, 20 bins per decade, spline: 1
+      Sampling table 21x1001; from 0.1 GeV to 10 TeV 
+      ===== EM models for the G4Region  DefaultRegionForTheWorld ======
+          muPairProd :  Emin=        0 eV    Emax=       10 TeV
+
+annihil:   for  e+, integral: 1 , applyCuts: 1     SubType= 5  BuildTable= 0
+      ===== EM models for the G4Region  DefaultRegionForTheWorld ======
+            eplus2gg :  Emin=        0 eV    Emax=       10 TeV
+
+CoulombScat:   for  e+, integral: 1 , applyCuts: 1     SubType= 1  BuildTable= 1
+      Lambda table from 100 MeV to 10 TeV, 20 bins per decade, spline: 1
+      ThetaMin(p) < Theta(degree) < 180; pLimit(GeV^1)= 0.139531
+      ===== EM models for the G4Region  DefaultRegionForTheWorld ======
+  eCoulombScattering :  Emin=      100 MeV   Emax=       10 TeV
+
+msc:   for proton    SubType= 10
+      RangeFactor= 0.2, stepLimitType: 0, latDisplacement: 1
+      ===== EM models for the G4Region  DefaultRegionForTheWorld ======
+        WentzelVIUni :  Emin=        0 eV    Emax=       10 TeV  Table with 220 bins Emin=    100 eV    Emax=     10 TeV
+
+hIoni:   for  proton    SubType= 2
+      dE/dx and range tables from 100 eV  to 10 TeV in 220 bins
+      Lambda tables from threshold to 10 TeV, 20 bins per decade, spline: 1
+      finalRange(mm)= 0.01, dRoverRange= 0.1, integral: 1, fluct: 1, linLossLimit= 0.01
+      ===== EM models for the G4Region  DefaultRegionForTheWorld ======
+               Bragg :  Emin=        0 eV    Emax=        2 MeV   deltaVI
+          BetheBloch :  Emin=        2 MeV   Emax=       10 TeV   deltaVI
+
+hBrems:   for  proton    SubType= 3
+      dE/dx and range tables from 100 eV  to 10 TeV in 220 bins
+      Lambda tables from threshold to 10 TeV, 20 bins per decade, spline: 1
+      ===== EM models for the G4Region  DefaultRegionForTheWorld ======
+               hBrem :  Emin=        0 eV    Emax=       10 TeV
+      ===== Limit on energy threshold has been applied 
+
+hPairProd:   for  proton    SubType= 4
+      dE/dx and range tables from 100 eV  to 10 TeV in 220 bins
+      Lambda tables from threshold to 10 TeV, 20 bins per decade, spline: 1
+      Sampling table 13x1001; from 7.50618 GeV to 10 TeV 
+      ===== EM models for the G4Region  DefaultRegionForTheWorld ======
+           hPairProd :  Emin=        0 eV    Emax=       10 TeV
+
+CoulombScat:   for  proton, integral: 1 , applyCuts: 1     SubType= 1  BuildTable= 1
+      Lambda table from threshold  to 10 TeV, 20 bins per decade, spline: 1
+      ThetaMin(p) < Theta(degree) < 180; pLimit(GeV^1)= 0.139531
+      ===== EM models for the G4Region  DefaultRegionForTheWorld ======
+  eCoulombScattering :  Emin=        0 eV    Emax=       10 TeV
+
+nuclearStopping:   for  proton, applyCuts: 1     SubType= 8  BuildTable= 0
+      ===== EM models for the G4Region  DefaultRegionForTheWorld ======
+   ICRU49NucStopping :  Emin=        0 eV    Emax=        1 MeV
+
+msc:   for GenericIon    SubType= 10
+      RangeFactor= 0.2, stepLimitType: 0, latDisplacement: 0
+      ===== EM models for the G4Region  DefaultRegionForTheWorld ======
+            UrbanMsc :  Emin=        0 eV    Emax=       10 TeV
+
+ionIoni:   for  GenericIon    SubType= 2
+      dE/dx and range tables from 100 eV  to 10 TeV in 220 bins
+      Lambda tables from threshold to 10 TeV, 20 bins per decade, spline: 1
+      finalRange(mm)= 0.001, dRoverRange= 0.1, integral: 1, fluct: 1, linLossLimit= 0.02
+      ===== EM models for the G4Region  DefaultRegionForTheWorld ======
+         ParamICRU73 :  Emin=        0 eV    Emax=       10 TeV   deltaVI
+
+nuclearStopping:   for  GenericIon, applyCuts: 1     SubType= 8  BuildTable= 0
+      ===== EM models for the G4Region  DefaultRegionForTheWorld ======
+   ICRU49NucStopping :  Emin=        0 eV    Emax=        1 MeV
+
+msc:   for alpha    SubType= 10
+      RangeFactor= 0.2, stepLimitType: 0, latDisplacement: 1
+      ===== EM models for the G4Region  DefaultRegionForTheWorld ======
+            UrbanMsc :  Emin=        0 eV    Emax=       10 TeV  Table with 220 bins Emin=    100 eV    Emax=     10 TeV
+
+ionIoni:   for  alpha    SubType= 2
+      dE/dx and range tables from 100 eV  to 10 TeV in 220 bins
+      Lambda tables from threshold to 10 TeV, 20 bins per decade, spline: 1
+      finalRange(mm)= 0.01, dRoverRange= 0.1, integral: 1, fluct: 1, linLossLimit= 0.02
+      ===== EM models for the G4Region  DefaultRegionForTheWorld ======
+            BraggIon :  Emin=        0 eV    Emax=   7.9452 MeV   deltaVI
+          BetheBloch :  Emin=   7.9452 MeV   Emax=       10 TeV   deltaVI
+
+nuclearStopping:   for  alpha, applyCuts: 1     SubType= 8  BuildTable= 0
+      ===== EM models for the G4Region  DefaultRegionForTheWorld ======
+   ICRU49NucStopping :  Emin=        0 eV    Emax=        1 MeV
+
+msc:   for anti_proton    SubType= 10
+      RangeFactor= 0.2, stepLimitType: 0, latDisplacement: 1
+      ===== EM models for the G4Region  DefaultRegionForTheWorld ======
+        WentzelVIUni :  Emin=        0 eV    Emax=       10 TeV  Table with 220 bins Emin=    100 eV    Emax=     10 TeV
+
+hIoni:   for  anti_proton    SubType= 2
+      dE/dx and range tables from 100 eV  to 10 TeV in 220 bins
+      Lambda tables from threshold to 10 TeV, 20 bins per decade, spline: 1
+      finalRange(mm)= 0.01, dRoverRange= 0.1, integral: 1, fluct: 1, linLossLimit= 0.01
+      ===== EM models for the G4Region  DefaultRegionForTheWorld ======
+            ICRU73QO :  Emin=        0 eV    Emax=        2 MeV   deltaVI
+          BetheBloch :  Emin=        2 MeV   Emax=       10 TeV   deltaVI
+
+hBrems:   for  anti_proton    SubType= 3
+      dE/dx and range tables from 100 eV  to 10 TeV in 220 bins
+      Lambda tables from threshold to 10 TeV, 20 bins per decade, spline: 1
+      ===== EM models for the G4Region  DefaultRegionForTheWorld ======
+               hBrem :  Emin=        0 eV    Emax=       10 TeV
+      ===== Limit on energy threshold has been applied 
+
+hPairProd:   for  anti_proton    SubType= 4
+      dE/dx and range tables from 100 eV  to 10 TeV in 220 bins
+      Lambda tables from threshold to 10 TeV, 20 bins per decade, spline: 1
+      Sampling table 13x1001; from 7.50618 GeV to 10 TeV 
+      ===== EM models for the G4Region  DefaultRegionForTheWorld ======
+           hPairProd :  Emin=        0 eV    Emax=       10 TeV
+
+CoulombScat:   for  anti_proton, integral: 1 , applyCuts: 1     SubType= 1  BuildTable= 1
+      Lambda table from threshold  to 10 TeV, 20 bins per decade, spline: 1
+      ThetaMin(p) < Theta(degree) < 180; pLimit(GeV^1)= 0.139531
+      ===== EM models for the G4Region  DefaultRegionForTheWorld ======
+  eCoulombScattering :  Emin=        0 eV    Emax=       10 TeV
+
+nuclearStopping:   for  anti_proton, applyCuts: 1     SubType= 8  BuildTable= 0
+      ===== EM models for the G4Region  DefaultRegionForTheWorld ======
+   ICRU49NucStopping :  Emin=        0 eV    Emax=        1 MeV
+
+msc:   for kaon+    SubType= 10
+      RangeFactor= 0.2, stepLimitType: 0, latDisplacement: 1
+      ===== EM models for the G4Region  DefaultRegionForTheWorld ======
+        WentzelVIUni :  Emin=        0 eV    Emax=       10 TeV  Table with 220 bins Emin=    100 eV    Emax=     10 TeV
+
+hIoni:   for  kaon+    SubType= 2
+      dE/dx and range tables from 100 eV  to 10 TeV in 220 bins
+      Lambda tables from threshold to 10 TeV, 20 bins per decade, spline: 1
+      finalRange(mm)= 0.01, dRoverRange= 0.2, integral: 1, fluct: 1, linLossLimit= 0.01
+      ===== EM models for the G4Region  DefaultRegionForTheWorld ======
+               Bragg :  Emin=        0 eV    Emax=  1.05231 MeV   deltaVI
+          BetheBloch :  Emin=  1.05231 MeV   Emax=       10 TeV   deltaVI
+
+hBrems:   for  kaon+    SubType= 3
+      dE/dx and range tables from 100 eV  to 10 TeV in 220 bins
+      Lambda tables from threshold to 10 TeV, 20 bins per decade, spline: 1
+      ===== EM models for the G4Region  DefaultRegionForTheWorld ======
+               hBrem :  Emin=        0 eV    Emax=       10 TeV
+      ===== Limit on energy threshold has been applied 
+
+hPairProd:   for  kaon+    SubType= 4
+      dE/dx and range tables from 100 eV  to 10 TeV in 220 bins
+      Lambda tables from threshold to 10 TeV, 20 bins per decade, spline: 1
+      Sampling table 14x1001; from 3.94942 GeV to 10 TeV 
+      ===== EM models for the G4Region  DefaultRegionForTheWorld ======
+           hPairProd :  Emin=        0 eV    Emax=       10 TeV
+
+CoulombScat:   for  kaon+, integral: 1 , applyCuts: 1     SubType= 1  BuildTable= 1
+      Lambda table from threshold  to 10 TeV, 20 bins per decade, spline: 1
+      ThetaMin(p) < Theta(degree) < 180; pLimit(GeV^1)= 0.139531
+      ===== EM models for the G4Region  DefaultRegionForTheWorld ======
+  eCoulombScattering :  Emin=        0 eV    Emax=       10 TeV
+
+msc:   for kaon-    SubType= 10
+      RangeFactor= 0.2, stepLimitType: 0, latDisplacement: 1
+      ===== EM models for the G4Region  DefaultRegionForTheWorld ======
+        WentzelVIUni :  Emin=        0 eV    Emax=       10 TeV  Table with 220 bins Emin=    100 eV    Emax=     10 TeV
+
+hIoni:   for  kaon-    SubType= 2
+      dE/dx and range tables from 100 eV  to 10 TeV in 220 bins
+      Lambda tables from threshold to 10 TeV, 20 bins per decade, spline: 1
+      finalRange(mm)= 0.01, dRoverRange= 0.2, integral: 1, fluct: 1, linLossLimit= 0.01
+      ===== EM models for the G4Region  DefaultRegionForTheWorld ======
+            ICRU73QO :  Emin=        0 eV    Emax=  1.05231 MeV   deltaVI
+          BetheBloch :  Emin=  1.05231 MeV   Emax=       10 TeV   deltaVI
+
+hBrems:   for  kaon-    SubType= 3
+      dE/dx and range tables from 100 eV  to 10 TeV in 220 bins
+      Lambda tables from threshold to 10 TeV, 20 bins per decade, spline: 1
+      ===== EM models for the G4Region  DefaultRegionForTheWorld ======
+               hBrem :  Emin=        0 eV    Emax=       10 TeV
+      ===== Limit on energy threshold has been applied 
+
+hPairProd:   for  kaon-    SubType= 4
+      dE/dx and range tables from 100 eV  to 10 TeV in 220 bins
+      Lambda tables from threshold to 10 TeV, 20 bins per decade, spline: 1
+      Sampling table 14x1001; from 3.94942 GeV to 10 TeV 
+      ===== EM models for the G4Region  DefaultRegionForTheWorld ======
+           hPairProd :  Emin=        0 eV    Emax=       10 TeV
+
+CoulombScat:   for  kaon-, integral: 1 , applyCuts: 1     SubType= 1  BuildTable= 1
+      Used Lambda table of kaon+
+      ThetaMin(p) < Theta(degree) < 180; pLimit(GeV^1)= 0.139531
+      ===== EM models for the G4Region  DefaultRegionForTheWorld ======
+  eCoulombScattering :  Emin=        0 eV    Emax=       10 TeV
+
+msc:   for mu+    SubType= 10
+      RangeFactor= 0.2, step limit type: 0, lateralDisplacement: 1, polarAngleLimit(deg)= 180
+      ===== EM models for the G4Region  DefaultRegionForTheWorld ======
+        WentzelVIUni :  Emin=        0 eV    Emax=       10 TeV  Table with 220 bins Emin=    100 eV    Emax=     10 TeV
+
+muIoni:   for  mu+    SubType= 2
+      dE/dx and range tables from 100 eV  to 10 TeV in 220 bins
+      Lambda tables from threshold to 10 TeV, 20 bins per decade, spline: 1
+      finalRange(mm)= 0.01, dRoverRange= 0.2, integral: 1, fluct: 1, linLossLimit= 0.01
+      ===== EM models for the G4Region  DefaultRegionForTheWorld ======
+               Bragg :  Emin=        0 eV    Emax=      200 keV   deltaVI
+          BetheBloch :  Emin=      200 keV   Emax=        1 GeV   deltaVI
+        MuBetheBloch :  Emin=        1 GeV   Emax=       10 TeV
+
+muBrems:   for  mu+    SubType= 3
+      dE/dx and range tables from 100 eV  to 10 TeV in 220 bins
+      Lambda tables from threshold to 10 TeV, 20 bins per decade, spline: 1
+      ===== EM models for the G4Region  DefaultRegionForTheWorld ======
+              MuBrem :  Emin=        0 eV    Emax=       10 TeV
+      ===== Limit on energy threshold has been applied 
+
+muPairProd:   for  mu+    SubType= 4
+      dE/dx and range tables from 100 eV  to 10 TeV in 220 bins
+      Lambda tables from threshold to 10 TeV, 20 bins per decade, spline: 1
+      Sampling table 17x1001; from 1 GeV to 10 TeV 
+      ===== EM models for the G4Region  DefaultRegionForTheWorld ======
+          muPairProd :  Emin=        0 eV    Emax=       10 TeV
+
+CoulombScat:   for  mu+, integral: 1 , applyCuts: 1     SubType= 1  BuildTable= 1
+      Lambda table from threshold  to 10 TeV, 20 bins per decade, spline: 1
+      ThetaMin(p) < Theta(degree) < 180; pLimit(GeV^1)= 0.139531
+      ===== EM models for the G4Region  DefaultRegionForTheWorld ======
+  eCoulombScattering :  Emin=        0 eV    Emax=       10 TeV
+
+msc:   for mu-    SubType= 10
+      RangeFactor= 0.2, step limit type: 0, lateralDisplacement: 1, polarAngleLimit(deg)= 180
+      ===== EM models for the G4Region  DefaultRegionForTheWorld ======
+        WentzelVIUni :  Emin=        0 eV    Emax=       10 TeV  Table with 220 bins Emin=    100 eV    Emax=     10 TeV
+
+muIoni:   for  mu-    SubType= 2
+      dE/dx and range tables from 100 eV  to 10 TeV in 220 bins
+      Lambda tables from threshold to 10 TeV, 20 bins per decade, spline: 1
+      finalRange(mm)= 0.01, dRoverRange= 0.2, integral: 1, fluct: 1, linLossLimit= 0.01
+      ===== EM models for the G4Region  DefaultRegionForTheWorld ======
+            ICRU73QO :  Emin=        0 eV    Emax=      200 keV   deltaVI
+          BetheBloch :  Emin=      200 keV   Emax=        1 GeV   deltaVI
+        MuBetheBloch :  Emin=        1 GeV   Emax=       10 TeV
+
+muBrems:   for  mu-    SubType= 3
+      dE/dx and range tables from 100 eV  to 10 TeV in 220 bins
+      Lambda tables from threshold to 10 TeV, 20 bins per decade, spline: 1
+      ===== EM models for the G4Region  DefaultRegionForTheWorld ======
+              MuBrem :  Emin=        0 eV    Emax=       10 TeV
+      ===== Limit on energy threshold has been applied 
+
+muPairProd:   for  mu-    SubType= 4
+      dE/dx and range tables from 100 eV  to 10 TeV in 220 bins
+      Lambda tables from threshold to 10 TeV, 20 bins per decade, spline: 1
+      Sampling table 17x1001; from 1 GeV to 10 TeV 
+      ===== EM models for the G4Region  DefaultRegionForTheWorld ======
+          muPairProd :  Emin=        0 eV    Emax=       10 TeV
+
+CoulombScat:   for  mu-, integral: 1 , applyCuts: 1     SubType= 1  BuildTable= 1
+      Used Lambda table of mu+
+      ThetaMin(p) < Theta(degree) < 180; pLimit(GeV^1)= 0.139531
+      ===== EM models for the G4Region  DefaultRegionForTheWorld ======
+  eCoulombScattering :  Emin=        0 eV    Emax=       10 TeV
+
+msc:   for pi+    SubType= 10
+      RangeFactor= 0.2, stepLimitType: 0, latDisplacement: 1
+      ===== EM models for the G4Region  DefaultRegionForTheWorld ======
+        WentzelVIUni :  Emin=        0 eV    Emax=       10 TeV  Table with 220 bins Emin=    100 eV    Emax=     10 TeV
+
+hIoni:   for  pi+    SubType= 2
+      dE/dx and range tables from 100 eV  to 10 TeV in 220 bins
+      Lambda tables from threshold to 10 TeV, 20 bins per decade, spline: 1
+      finalRange(mm)= 0.01, dRoverRange= 0.2, integral: 1, fluct: 1, linLossLimit= 0.01
+      ===== EM models for the G4Region  DefaultRegionForTheWorld ======
+               Bragg :  Emin=        0 eV    Emax=  297.505 keV   deltaVI
+          BetheBloch :  Emin=  297.505 keV   Emax=       10 TeV   deltaVI
+
+hBrems:   for  pi+    SubType= 3
+      dE/dx and range tables from 100 eV  to 10 TeV in 220 bins
+      Lambda tables from threshold to 10 TeV, 20 bins per decade, spline: 1
+      ===== EM models for the G4Region  DefaultRegionForTheWorld ======
+               hBrem :  Emin=        0 eV    Emax=       10 TeV
+      ===== Limit on energy threshold has been applied 
+
+hPairProd:   for  pi+    SubType= 4
+      dE/dx and range tables from 100 eV  to 10 TeV in 220 bins
+      Lambda tables from threshold to 10 TeV, 20 bins per decade, spline: 1
+      Sampling table 16x1001; from 1.11656 GeV to 10 TeV 
+      ===== EM models for the G4Region  DefaultRegionForTheWorld ======
+           hPairProd :  Emin=        0 eV    Emax=       10 TeV
+
+CoulombScat:   for  pi+, integral: 1 , applyCuts: 1     SubType= 1  BuildTable= 1
+      Lambda table from threshold  to 10 TeV, 20 bins per decade, spline: 1
+      ThetaMin(p) < Theta(degree) < 180; pLimit(GeV^1)= 0.139531
+      ===== EM models for the G4Region  DefaultRegionForTheWorld ======
+  eCoulombScattering :  Emin=        0 eV    Emax=       10 TeV
+
+msc:   for pi-    SubType= 10
+      RangeFactor= 0.2, stepLimitType: 0, latDisplacement: 1
+      ===== EM models for the G4Region  DefaultRegionForTheWorld ======
+        WentzelVIUni :  Emin=        0 eV    Emax=       10 TeV  Table with 220 bins Emin=    100 eV    Emax=     10 TeV
+
+hIoni:   for  pi-    SubType= 2
+      dE/dx and range tables from 100 eV  to 10 TeV in 220 bins
+      Lambda tables from threshold to 10 TeV, 20 bins per decade, spline: 1
+      finalRange(mm)= 0.01, dRoverRange= 0.2, integral: 1, fluct: 1, linLossLimit= 0.01
+      ===== EM models for the G4Region  DefaultRegionForTheWorld ======
+            ICRU73QO :  Emin=        0 eV    Emax=  297.505 keV   deltaVI
+          BetheBloch :  Emin=  297.505 keV   Emax=       10 TeV   deltaVI
+
+hBrems:   for  pi-    SubType= 3
+      dE/dx and range tables from 100 eV  to 10 TeV in 220 bins
+      Lambda tables from threshold to 10 TeV, 20 bins per decade, spline: 1
+      ===== EM models for the G4Region  DefaultRegionForTheWorld ======
+               hBrem :  Emin=        0 eV    Emax=       10 TeV
+      ===== Limit on energy threshold has been applied 
+
+hPairProd:   for  pi-    SubType= 4
+      dE/dx and range tables from 100 eV  to 10 TeV in 220 bins
+      Lambda tables from threshold to 10 TeV, 20 bins per decade, spline: 1
+      Sampling table 16x1001; from 1.11656 GeV to 10 TeV 
+      ===== EM models for the G4Region  DefaultRegionForTheWorld ======
+           hPairProd :  Emin=        0 eV    Emax=       10 TeV
+
+CoulombScat:   for  pi-, integral: 1 , applyCuts: 1     SubType= 1  BuildTable= 1
+      Used Lambda table of pi+
+      ThetaMin(p) < Theta(degree) < 180; pLimit(GeV^1)= 0.139531
+      ===== EM models for the G4Region  DefaultRegionForTheWorld ======
+  eCoulombScattering :  Emin=        0 eV    Emax=       10 TeV
+
+====================================================================
+                  HADRONIC PROCESSES SUMMARY (verbose level 1)
+
+---------------------------------------------------
+                           Hadronic Processes for neutron
+
+  Process: hadElastic
+        Model:             hElasticCHIPS: 0 eV  ---> 100 TeV
+     Cr_sctns:        G4NeutronElasticXS: 0 eV  ---> 100 TeV
+     Cr_sctns:            GheishaElastic: 0 eV  ---> 100 TeV
+
+  Process: neutronInelastic
+        Model:                      QGSP: 12 GeV ---> 100 TeV
+        Model:                      FTFP: 9.5 GeV ---> 25 GeV
+        Model:            Binary Cascade: 0 eV  ---> 9.9 GeV
+     Cr_sctns:      G4NeutronInelasticXS: 0 eV  ---> 100 TeV
+     Cr_sctns:       Barashenkov-Glauber: 0 eV  ---> 100 TeV
+     Cr_sctns:       Barashenkov-Glauber: 0 eV  ---> 100 TeV
+     Cr_sctns:          GheishaInelastic: 0 eV  ---> 100 TeV
+
+  Process: nCapture
+        Model:               nRadCapture: 0 eV  ---> 100 TeV
+     Cr_sctns:        G4NeutronCaptureXS: 0 eV  ---> 100 TeV
+     Cr_sctns:          GheishaCaptureXS: 0 eV  ---> 100 TeV
+
+  Process: nKiller
+
+---------------------------------------------------
+                           Hadronic Processes for GenericIon
+
+  Process: ionInelastic
+        Model:  Binary Light Ion Cascade: 0 eV /n ---> 4 GeV/n
+        Model:                      FTFP: 2 GeV/n ---> 100 TeV/n
+     Cr_sctns: Glauber-Gribov nucleus nucleus: 0 eV  ---> 2.88022e+295 J  
+     Cr_sctns:          GheishaInelastic: 0 eV  ---> 100 TeV
+
+---------------------------------------------------
+                           Hadronic Processes for He3
+
+  Process: hadElastic
+        Model:              hElasticLHEP: 0 eV /n ---> 100 TeV/n
+     Cr_sctns: Glauber-Gribov nucleus nucleus: 0 eV  ---> 2.88022e+295 J  
+     Cr_sctns:            GheishaElastic: 0 eV  ---> 100 TeV
+
+  Process: He3Inelastic
+        Model:  Binary Light Ion Cascade: 0 eV /n ---> 4 GeV/n
+        Model:                      FTFP: 2 GeV/n ---> 100 TeV/n
+     Cr_sctns: Glauber-Gribov nucleus nucleus: 0 eV  ---> 2.88022e+295 J  
+     Cr_sctns:          GheishaInelastic: 0 eV  ---> 100 TeV
+
+---------------------------------------------------
+                           Hadronic Processes for alpha
+
+  Process: hadElastic
+        Model:              hElasticLHEP: 0 eV /n ---> 100 TeV/n
+     Cr_sctns:            GheishaElastic: 0 eV  ---> 100 TeV
+
+  Process: alphaInelastic
+        Model:  Binary Light Ion Cascade: 0 eV /n ---> 4 GeV/n
+        Model:                      FTFP: 2 GeV/n ---> 100 TeV/n
+     Cr_sctns: Glauber-Gribov nucleus nucleus: 0 eV  ---> 2.88022e+295 J  
+     Cr_sctns:          GheishaInelastic: 0 eV  ---> 100 TeV
+
+---------------------------------------------------
+                           Hadronic Processes for anti_He3
+
+  Process: hadElastic
+        Model:              hElasticLHEP: 0 eV /n ---> 100.1 MeV/n
+        Model:              AntiAElastic: 100 MeV/n ---> 100 TeV/n
+     Cr_sctns:              AntiAGlauber: 0 eV  ---> 2.88022e+295 J  
+     Cr_sctns:            GheishaElastic: 0 eV  ---> 100 TeV
+
+  Process: anti_He3Inelastic
+        Model:                      FTFP: 0 eV /n ---> 100 TeV/n
+     Cr_sctns:              AntiAGlauber: 0 eV  ---> 2.88022e+295 J  
+     Cr_sctns:          GheishaInelastic: 0 eV  ---> 100 TeV
+
+  Process: hFritiofCaptureAtRest
+
+---------------------------------------------------
+                           Hadronic Processes for anti_alpha
+
+  Process: hadElastic
+        Model:              hElasticLHEP: 0 eV /n ---> 100.1 MeV/n
+        Model:              AntiAElastic: 100 MeV/n ---> 100 TeV/n
+     Cr_sctns:              AntiAGlauber: 0 eV  ---> 2.88022e+295 J  
+     Cr_sctns:            GheishaElastic: 0 eV  ---> 100 TeV
+
+  Process: anti_alphaInelastic
+        Model:                      FTFP: 0 eV /n ---> 100 TeV/n
+     Cr_sctns:              AntiAGlauber: 0 eV  ---> 2.88022e+295 J  
+     Cr_sctns:          GheishaInelastic: 0 eV  ---> 100 TeV
+
+  Process: hFritiofCaptureAtRest
+
+---------------------------------------------------
+                           Hadronic Processes for anti_deuteron
+
+  Process: hadElastic
+        Model:              hElasticLHEP: 0 eV /n ---> 100.1 MeV/n
+        Model:              AntiAElastic: 100 MeV/n ---> 100 TeV/n
+     Cr_sctns:              AntiAGlauber: 0 eV  ---> 2.88022e+295 J  
+     Cr_sctns:            GheishaElastic: 0 eV  ---> 100 TeV
+
+  Process: anti_deuteronInelastic
+        Model:                      FTFP: 0 eV /n ---> 100 TeV/n
+     Cr_sctns:              AntiAGlauber: 0 eV  ---> 2.88022e+295 J  
+     Cr_sctns:          GheishaInelastic: 0 eV  ---> 100 TeV
+
+  Process: hFritiofCaptureAtRest
+
+---------------------------------------------------
+                           Hadronic Processes for anti_neutron
+
+  Process: hadElastic
+        Model:              hElasticLHEP: 0 eV  ---> 100 TeV
+     Cr_sctns:            GheishaElastic: 0 eV  ---> 100 TeV
+
+  Process: anti_neutronInelastic
+        Model:                      FTFP: 0 eV  ---> 100 TeV
+     Cr_sctns:              AntiAGlauber: 0 eV  ---> 2.88022e+295 J  
+     Cr_sctns:          GheishaInelastic: 0 eV  ---> 100 TeV
+
+---------------------------------------------------
+                           Hadronic Processes for anti_proton
+
+  Process: hadElastic
+        Model:              hElasticLHEP: 0 eV  ---> 100.1 MeV
+        Model:              AntiAElastic: 100 MeV ---> 100 TeV
+     Cr_sctns:              AntiAGlauber: 0 eV  ---> 2.88022e+295 J  
+     Cr_sctns:            GheishaElastic: 0 eV  ---> 100 TeV
+
+  Process: anti_protonInelastic
+        Model:                      FTFP: 0 eV  ---> 100 TeV
+     Cr_sctns:              AntiAGlauber: 0 eV  ---> 2.88022e+295 J  
+     Cr_sctns:          GheishaInelastic: 0 eV  ---> 100 TeV
+
+  Process: hFritiofCaptureAtRest
+
+---------------------------------------------------
+                           Hadronic Processes for anti_triton
+
+  Process: hadElastic
+        Model:              hElasticLHEP: 0 eV /n ---> 100.1 MeV/n
+        Model:              AntiAElastic: 100 MeV/n ---> 100 TeV/n
+     Cr_sctns:              AntiAGlauber: 0 eV  ---> 2.88022e+295 J  
+     Cr_sctns:            GheishaElastic: 0 eV  ---> 100 TeV
+
+  Process: anti_tritonInelastic
+        Model:                      FTFP: 0 eV /n ---> 100 TeV/n
+     Cr_sctns:              AntiAGlauber: 0 eV  ---> 2.88022e+295 J  
+     Cr_sctns:          GheishaInelastic: 0 eV  ---> 100 TeV
+
+  Process: hFritiofCaptureAtRest
+
+---------------------------------------------------
+                           Hadronic Processes for deuteron
+
+  Process: hadElastic
+        Model:              hElasticLHEP: 0 eV /n ---> 100 TeV/n
+     Cr_sctns:            GheishaElastic: 0 eV  ---> 100 TeV
+
+  Process: dInelastic
+        Model:  Binary Light Ion Cascade: 0 eV /n ---> 4 GeV/n
+        Model:                      FTFP: 2 GeV/n ---> 100 TeV/n
+     Cr_sctns: Glauber-Gribov nucleus nucleus: 0 eV  ---> 2.88022e+295 J  
+     Cr_sctns:          GheishaInelastic: 0 eV  ---> 100 TeV
+
+---------------------------------------------------
+                           Hadronic Processes for e+
+
+  Process: positronNuclear
+        Model:   G4ElectroVDNuclearModel: 0 eV  ---> 1 PeV
+     Cr_sctns:          ElectroNuclearXS: 0 eV  ---> 100 TeV
+     Cr_sctns:          GheishaInelastic: 0 eV  ---> 100 TeV
+
+---------------------------------------------------
+                           Hadronic Processes for e-
+
+  Process: electronNuclear
+        Model:   G4ElectroVDNuclearModel: 0 eV  ---> 1 PeV
+     Cr_sctns:          ElectroNuclearXS: 0 eV  ---> 100 TeV
+     Cr_sctns:          GheishaInelastic: 0 eV  ---> 100 TeV
+
+---------------------------------------------------
+                           Hadronic Processes for gamma
+
+  Process: photonNuclear
+        Model:            BertiniCascade: 0 eV  ---> 3.5 GeV
+        Model:           TheoFSGenerator: 3 GeV ---> 100 TeV
+     Cr_sctns:            PhotoNuclearXS: 0 eV  ---> 100 TeV
+     Cr_sctns:          GheishaInelastic: 0 eV  ---> 100 TeV
+
+---------------------------------------------------
+                           Hadronic Processes for kaon+
+
+  Process: hadElastic
+        Model:              hElasticLHEP: 0 eV  ---> 100 TeV
+     Cr_sctns:            Glauber-Gribov: 0 eV  ---> 2.88022e+295 J  
+     Cr_sctns:            GheishaElastic: 0 eV  ---> 100 TeV
+
+  Process: kaon+Inelastic
+        Model:                      QGSP: 12 GeV ---> 100 TeV
+        Model:                      FTFP: 4 GeV ---> 25 GeV
+        Model:            BertiniCascade: 0 eV  ---> 5 GeV
+     Cr_sctns:            Glauber-Gribov: 0 eV  ---> 2.88022e+295 J  
+     Cr_sctns:  ChipsKaonPlusInelasticXS: 0 eV  ---> 100 TeV
+     Cr_sctns:          GheishaInelastic: 0 eV  ---> 100 TeV
+
+---------------------------------------------------
+                           Hadronic Processes for kaon-
+
+  Process: hadElastic
+        Model:              hElasticLHEP: 0 eV  ---> 100 TeV
+     Cr_sctns:            Glauber-Gribov: 0 eV  ---> 2.88022e+295 J  
+     Cr_sctns:            GheishaElastic: 0 eV  ---> 100 TeV
+
+  Process: kaon-Inelastic
+        Model:                      QGSP: 12 GeV ---> 100 TeV
+        Model:                      FTFP: 4 GeV ---> 25 GeV
+        Model:            BertiniCascade: 0 eV  ---> 5 GeV
+     Cr_sctns:            Glauber-Gribov: 0 eV  ---> 2.88022e+295 J  
+     Cr_sctns: ChipsKaonMinusInelasticXS: 0 eV  ---> 100 TeV
+     Cr_sctns:          GheishaInelastic: 0 eV  ---> 100 TeV
+
+  Process: hBertiniCaptureAtRest
+
+---------------------------------------------------
+                           Hadronic Processes for lambda
+
+  Process: hadElastic
+        Model:              hElasticLHEP: 0 eV  ---> 100 TeV
+     Cr_sctns:            GheishaElastic: 0 eV  ---> 100 TeV
+
+  Process: lambdaInelastic
+        Model:            BertiniCascade: 0 eV  ---> 6 GeV
+        Model:                      FTFP: 2 GeV ---> 100 TeV
+     Cr_sctns:   ChipsHyperonInelasticXS: 0 eV  ---> 100 TeV
+     Cr_sctns:          GheishaInelastic: 0 eV  ---> 100 TeV
+
+---------------------------------------------------
+                           Hadronic Processes for mu+
+
+  Process: muonNuclear
+        Model:      G4MuonVDNuclearModel: 0 eV  ---> 1 PeV
+     Cr_sctns:     KokoulinMuonNuclearXS: 0 eV  ---> 100 TeV
+
+---------------------------------------------------
+                           Hadronic Processes for mu-
+
+  Process: muonNuclear
+        Model:      G4MuonVDNuclearModel: 0 eV  ---> 1 PeV
+     Cr_sctns:     KokoulinMuonNuclearXS: 0 eV  ---> 100 TeV
+
+  Process: muMinusCaptureAtRest
+
+---------------------------------------------------
+                           Hadronic Processes for pi+
+
+  Process: hadElastic
+        Model:              hElasticLHEP: 0 eV  ---> 1.0001 GeV
+        Model:           hElasticGlauber: 1 GeV ---> 100 TeV
+     Cr_sctns:       Barashenkov-Glauber: 0 eV  ---> 100 TeV
+     Cr_sctns:            GheishaElastic: 0 eV  ---> 100 TeV
+
+  Process: pi+Inelastic
+        Model:                      QGSP: 12 GeV ---> 100 TeV
+        Model:                      FTFP: 4 GeV ---> 25 GeV
+        Model:            BertiniCascade: 0 eV  ---> 5 GeV
+     Cr_sctns:      G4CrossSectionPairGG: 0 eV  ---> 100 TeV
+                         G4CrossSectionPairGG: G4PiNuclearCrossSection cross sections 
+                           below 91 GeV, Glauber-Gribov above 
+     Cr_sctns:      G4CrossSectionPairGG: 0 eV  ---> 100 TeV
+                         G4CrossSectionPairGG: G4PiNuclearCrossSection cross sections 
+                           below 91 GeV, Glauber-Gribov above 
+     Cr_sctns:          GheishaInelastic: 0 eV  ---> 100 TeV
+
+---------------------------------------------------
+                           Hadronic Processes for pi-
+
+  Process: hadElastic
+        Model:              hElasticLHEP: 0 eV  ---> 1.0001 GeV
+        Model:           hElasticGlauber: 1 GeV ---> 100 TeV
+     Cr_sctns:       Barashenkov-Glauber: 0 eV  ---> 100 TeV
+     Cr_sctns:            GheishaElastic: 0 eV  ---> 100 TeV
+
+  Process: pi-Inelastic
+        Model:                      QGSP: 12 GeV ---> 100 TeV
+        Model:                      FTFP: 4 GeV ---> 25 GeV
+        Model:            BertiniCascade: 0 eV  ---> 5 GeV
+     Cr_sctns:      G4CrossSectionPairGG: 0 eV  ---> 100 TeV
+                         G4CrossSectionPairGG: G4PiNuclearCrossSection cross sections 
+                           below 91 GeV, Glauber-Gribov above 
+     Cr_sctns:      G4CrossSectionPairGG: 0 eV  ---> 100 TeV
+                         G4CrossSectionPairGG: G4PiNuclearCrossSection cross sections 
+                           below 91 GeV, Glauber-Gribov above 
+     Cr_sctns:          GheishaInelastic: 0 eV  ---> 100 TeV
+
+  Process: hBertiniCaptureAtRest
+
+---------------------------------------------------
+                           Hadronic Processes for proton
+
+  Process: hadElastic
+        Model:             hElasticCHIPS: 0 eV  ---> 100 TeV
+     Cr_sctns:      ChipsProtonElasticXS: 0 eV  ---> 100 TeV
+     Cr_sctns:            GheishaElastic: 0 eV  ---> 100 TeV
+
+  Process: protonInelastic
+        Model:                      QGSP: 12 GeV ---> 100 TeV
+        Model:                      FTFP: 9.5 GeV ---> 25 GeV
+        Model:            Binary Cascade: 0 eV  ---> 9.9 GeV
+     Cr_sctns:       Barashenkov-Glauber: 0 eV  ---> 100 TeV
+     Cr_sctns:       Barashenkov-Glauber: 0 eV  ---> 100 TeV
+     Cr_sctns:          GheishaInelastic: 0 eV  ---> 100 TeV
+
+---------------------------------------------------
+                           Hadronic Processes for triton
+
+  Process: hadElastic
+        Model:              hElasticLHEP: 0 eV /n ---> 100 TeV/n
+     Cr_sctns:            GheishaElastic: 0 eV  ---> 100 TeV
+
+  Process: tInelastic
+        Model:  Binary Light Ion Cascade: 0 eV /n ---> 4 GeV/n
+        Model:                      FTFP: 2 GeV/n ---> 100 TeV/n
+     Cr_sctns: Glauber-Gribov nucleus nucleus: 0 eV  ---> 2.88022e+295 J  
+     Cr_sctns:          GheishaInelastic: 0 eV  ---> 100 TeV
+
+================================================================
+=======================================================================
+======       Pre-compound/De-excitation Physics Parameters     ========
+=======================================================================
+Type of pre-compound inverse x-section              3
+Pre-compound model active                           1
+Pre-compound low energy (MeV)                       0.1
+Type of de-excitation inverse x-section             3
+Type of de-excitation factory                       Evaporation
+Number of de-excitation channels                    8
+Min excitation energy (keV)                         0.01
+Min energy per nucleon for multifragmentation (MeV) 1e+05
+Level density (1/MeV)                               0.1
+Time limit for long lived isomeres (ns)             1e+12
+Internal e- conversion flag                         1
+Store e- internal conversion data                   0
+Electron internal conversion ID                     2
+Correlated gamma emission flag                      0
+Max 2J for sampling of angular correlations         10
+=======================================================================
+WARNING: Scene "none" not found.
+  /vis/scene/list to see scenes.
+
+### ===  Deexcitation model UAtomDeexcitation is activated for 23 regions:
+          DefaultRegionForTheWorld  1  1  1
+          phantom  1  1  1
+          degrader  1  1  1
+          scanner_1  1  1  1
+          FM_Layer  1  1  1
+          FirstModule  1  1  1
+          FM_ActiveChip  1  1  1
+          FM_PassiveChip  1  1  1
+          FM_ChipGlue  1  1  1
+          FM_PCB  1  1  1
+          FM_PCBGlue  1  1  1
+          FM_Absorber1  1  1  1
+          FM_AbsorberAirGap  1  1  1
+          scanner_2  1  1  1
+          Layer  1  1  1
+          Module  1  1  1
+          ActiveChip  1  1  1
+          PassiveChip  1  1  1
+          ChipGlue  1  1  1
+          PCB  1  1  1
+          PCBGlue  1  1  1
+          Absorber1  1  1  1
+          AbsorberAirGap  1  1  1
+### ===  Auger cascade flag: 1
+### ===  Ignore cuts flag:   0
+WARNING: command "/vis/viewer/update" could not be applied: no current viewer.
+[Core-0] End of macro Main.mac
+Graphics systems deleted.
+Visualization Manager deleting...
