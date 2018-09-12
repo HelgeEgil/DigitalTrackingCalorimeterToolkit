@@ -27,15 +27,10 @@ Tracks * Clusters::findTracksWithRecursiveWeighting() {
    Node      * nextNode = nullptr;
    Node      * seedNode = nullptr;
   
-   ///// THESE VALUES ARE VALID FOR PENCIL BEAMS
-   // 2x2 -> 1.49
-   // 3x3 -> 2.01
-   // 4x4 -> 3.20
-   // 5x5 -> 4.22
-   // 4x2 -> 1.88
-
    Int_t spotSize = 33;
+   // for pencil beams.
    // 22 = 2x2 mm, 33 = 3x3 mm etc.
+   // See WoC publication for description of functions below
 
    if      (spotSize == 22) kMaxTrackScore = 0.433 * pow(kEventsPerRun, -0.172);
    else if (spotSize == 33) kMaxTrackScore = 0.469 * pow(kEventsPerRun, -0.176);
@@ -45,20 +40,14 @@ Tracks * Clusters::findTracksWithRecursiveWeighting() {
 
    kMaxTrackScore = 0.445 * pow(kEventsPerRun, -0.176); // With 4 mm geometry, 5% less (!) scattering
 
-//   kMaxTrackScore = 0.3;
-
    // kMaxTrackScore = 0.746 * pow(kEventsPerRun, -0.242); // No Inelastic scattering
    // kMaxTrackScore = 0.289 * pow(kEventsPerRun, -0.113); // No Elastic Scattering
    // kMaxTrackScore = 0.382 * pow(kEventsPerRun, -0.151); // No nuclear scattering
    // kMaxTrackScore = 0.200 * pow(kEventsPerRun, -0.05); // no scattering
-
-   // UNIFORM FIELD
-   // From 0.19 to 0.3 @ 35 per cm2
-   /*
-   trackDensity = kEventsPerRun / 100;
-   if (trackDensity > 140)  kMaxTrackScore = 0.19;
-   else                     kMaxTrackScore = 0.30;
-   */
+   
+   // A constant allowance of 50 mrad per layer is always allowed
+   // If that's unwanted uncomment the line below (or see Constants.h)
+   // kMaxTrackAngle = 0;
    
    showDebug("makeLayerIndex..\n");
    makeLayerIndex();
