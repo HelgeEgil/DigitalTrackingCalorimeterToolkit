@@ -807,10 +807,10 @@ TF1 *  doSimpleGaussianFit (TH1F *h, Float_t *means, Float_t *sigmas, Int_t idx_
    gauss->SetParameter(1, nominalMean);
    gauss->SetParameter(2, nominalSigma);
    if (idx_txt < 0) {
-      h->Fit("gauss", "B,W,M");
+      h->Fit("gauss", "B,Q,W,M");
    }
    else {
-      h->Fit("gauss", "B,W,M,N");
+      h->Fit("gauss", "B,Q,W,M,N");
    }
 
    Float_t mu, sigma;

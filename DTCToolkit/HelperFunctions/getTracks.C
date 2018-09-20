@@ -182,6 +182,9 @@ Tracks * getTracksFromClusters(Int_t Runs, Int_t dataType, Int_t frameType, Floa
    Clusters        * clusters = nullptr;
    Tracks          * tracks = nullptr;
    Tracks          * allTracks = new Tracks(nTracks * Runs);
+
+   allTracks->SetOwner(kTRUE);
+
    TStopwatch t1, t2, t3, t4, t5, t6;
    t1.Reset(); // get MC clusters
    t2.Reset(); // Stop
@@ -223,16 +226,8 @@ Tracks * getTracksFromClusters(Int_t Runs, Int_t dataType, Int_t frameType, Floa
       
       t3.Start(false);
       showDebug("Removing tracks leaving detector...");
-      nTracksBefore = tracks->GetEntries();
       tracks->removeTracksLeavingDetector();
-      nTracksAfter = tracks->GetEntries();
       showDebug("ok\n");
-      
-      cout << "Of " << nTracksBefore << " tracks, " << nTracksBefore - nTracksAfter << " (" << 100* ( nTracksBefore - nTracksAfter) / ( (float) nTracksBefore ) << "%) were lost when leaving the detector.\n";
-      
-      // tracks->removeTrackCollisions();
-      // tracks->retrogradeTrackImprovement(clusters);
-   
       showDebug("compress tracks and clusters...");      
       t3.Stop();
       t4.Start(false);

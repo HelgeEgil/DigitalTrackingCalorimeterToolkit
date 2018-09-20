@@ -146,7 +146,7 @@ void Tracks::removeTracksLeavingDetector() {
       }
    }
 
-   cout << "Tracks::removeTracksLeavingDetector() has removed " << nTracksRemoved  << " tracks.\n";
+//   cout << "Tracks::removeTracksLeavingDetector() has removed " << nTracksRemoved  << " tracks.\n";
 }
 
 

@@ -21,6 +21,8 @@ Clusters::Clusters(Bool_t frameType) : clusters_("DTC::Cluster", kEventsPerRun*2
                                        clustersWithoutTrack_("DTC::Cluster", kEventsPerRun*2) {
    frameType_ = frameType;
 
+   clusters_.SetOwner(kTRUE);
+   clustersWithoutTrack_.SetOwner(kTRUE);
    kMCSFactorFirstPass = 2; // 1
    kMCSFactorSecondPass = 3; // 4
    kMCSFactorLastPass1 = 3; // 6
@@ -30,8 +32,10 @@ Clusters::Clusters(Bool_t frameType) : clusters_("DTC::Cluster", kEventsPerRun*2
 
 Clusters::~Clusters() {
    // Destructor
-   clusters_.Delete();
-   clustersWithoutTrack_.Delete();
+//   delete clusters_;
+//   delete clustersWithoutTrack_;
+//   clusters_.Clear("C");
+//   clustersWithoutTrack_.Clear("C");
 }
 
 Int_t Clusters::GetEntriesFastLastLayer() {
@@ -117,13 +121,15 @@ void Clusters::removeTrackFromClustersWithoutTrack(Track *track) {
    Int_t    lastIndex = 0;
    Int_t    layer;
    Float_t  x, y;
+   
 
+   showDebug("RemoveTrackFromCWT:\n");
    for (Int_t i = 0; i < track->GetEntriesFast(); i++) {
       if (!track->At(i)) continue;
       layer = track->getLayer(i);
       x = track->getX(i);
       y = track->getY(i);
-
+      
       for (Int_t j=lastIndex; j<GetEntriesFastCWT(); j++) {
          Cluster *cluster = (Cluster *) clustersWithoutTrack_.At(j);
 
@@ -137,6 +143,7 @@ void Clusters::removeTrackFromClustersWithoutTrack(Track *track) {
             if (cluster->getY() == y && cluster->getLayer() == layer) {
                removeClusterWithoutTrackAt(j);
                lastIndex = j+1;
+               showDebug("OK!\n");
                break;
             }
          }

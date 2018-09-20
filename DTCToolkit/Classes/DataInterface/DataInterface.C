@@ -437,7 +437,7 @@ void  DataInterface::getMCClusters(Int_t runNo, Clusters *clusters) {
    Int_t eventIdFrom = runNo * kEventsPerRun + kSkipTracks;
    Int_t eventIdTo = eventIdFrom + kEventsPerRun + kSkipTracks;
 
-   printf("eventIdFrom = %d, eventIdTo = %d.\n", eventIdFrom, eventIdTo);
+//   printf("eventIdFrom = %d, eventIdTo = %d.\n", eventIdFrom, eventIdTo);
 
    if (runNo == 0) lastJentry_ = 0;
    
@@ -498,12 +498,12 @@ void  DataInterface::getMCClusters(Int_t runNo, Clusters *clusters) {
       
 
       if (eventID < eventIdFrom) {
-         printf("eventID (%d) < eventIdFrom (%d), continuing.\n", eventID, eventIdFrom);
+//         printf("eventID (%d) < eventIdFrom (%d), continuing.\n", eventID, eventIdFrom);
          continue;
       }
       
       else if (eventID >= eventIdTo) {
-         printf("eventID (%d) >= eventIdTo (%d), breaking.\n", eventID, eventIdTo);
+//         printf("eventID (%d) >= eventIdTo (%d), breaking.\n", eventID, eventIdTo);
          lastJentry_ = jentry;
          break;
       }

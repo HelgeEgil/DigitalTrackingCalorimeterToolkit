@@ -14,7 +14,7 @@ fi
 for i in `seq $2 $3 $4`; do
    hdt=`echo "scale=3; -$i/2-2" | bc`
    beampos=`echo "scale=3; -$i-5" | bc`
-	nice -n 10 Gate -a "'[absorberthickness,$1] [energy,250] [degraderthickness,$i] [halfdegraderthickness,$hdt] [beampos,$beampos]'" Main.mac > terminal_output.txt &
+	nice -n 19 cpulimit -l 50 Gate -a "'[absorberthickness,$1] [energy,250] [degraderthickness,$i] [halfdegraderthickness,$hdt] [beampos,$beampos]'" Main.mac > terminal_output.txt &
    PIDLIST="$PIDLIST $!"
    echo "Running: $i"
 

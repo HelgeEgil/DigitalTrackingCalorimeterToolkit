@@ -29,8 +29,12 @@ using namespace std;
 using namespace DTC;
 
 Tracks::~Tracks() {
-   tracks_.Delete();
-   clustersWithoutTrack_.Delete();
+//   tracks_.Delete();
+//   clustersWithoutTrack_.Delete();
+//   tracks_.Clear("C");
+//   clustersWithoutTrack_.Clear("C");
+//   delete tracks_;
+//   delete clustersWithoutTrack_;
 }
 
 void Tracks::CompressClusters() {
@@ -48,13 +52,16 @@ void Tracks::Clear(Option_t *) {
 void Tracks::appendTrack(Track *copyTrack, Int_t startOffset /* default 0 */) {
    Int_t    newIdx = tracks_.GetEntriesFast();
    Track  * track = (Track*) tracks_.ConstructedAt(newIdx);
-
+   
+   showDebug("Copying track ... i = ");
    for (Int_t i=0; i<copyTrack->GetEntriesFast(); i++) {
+      showDebug(i << ", ");
       if(!copyTrack->At(i))
          continue;
 
       track->appendCluster(copyTrack->At(i), startOffset);
    }
+   showDebug(endl);
 }
 
 void Tracks::appendClustersWithoutTrack(TClonesArray *copyCWT) {
@@ -460,7 +467,7 @@ void Tracks::createEIDSortList() {
    for (Int_t i=0; i<GetEntriesFast(); i++) {
       if (!At(i)) continue;
       EIDindex_[i] = At(i)->getEventID(0);
-      showDebug("Tracks::createEIDSortList: EIDindex_[" << i< <<"] = " << At(i)->getEventID(0) << endl);
+      showDebug("Tracks::createEIDSortList: EIDindex_[" << i <<"] = " << At(i)->getEventID(0) << endl);
    }
 }
 

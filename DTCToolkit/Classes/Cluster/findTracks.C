@@ -18,8 +18,8 @@ using namespace std;
 using namespace DTC;
 
 Tracks * Clusters::findTracksWithRecursiveWeighting() {
-   Cluster   * cluster = nullptr;
    Cluster   * nextCluster = nullptr;
+   Clusters  * nextClusters = nullptr;
    Int_t       nFirstCandidates = 0;
    Track     * track = nullptr;
    Tracks    * tracks = new Tracks(kEventsPerRun * 5);
@@ -65,8 +65,7 @@ Tracks * Clusters::findTracksWithRecursiveWeighting() {
    for (Int_t i=0; i<seeds->GetEntriesFast(); i++) {
       nFirstCandidates = 0;
       Cluster *seed = seeds->At(i);
-      Clusters * nextClusters = findNearestClustersInNextLayer(seed);
-      
+      nextClusters = findNearestClustersInNextLayer(seed);
       seedNode = new Node(nullptr, seed, 0);
       for (Int_t j=0; j<nextClusters->GetEntriesFast(); j++) {
          nextCluster = nextClusters->At(j);
@@ -86,31 +85,40 @@ Tracks * Clusters::findTracksWithRecursiveWeighting() {
       
       seedNode->markExplored();
 
+      showDebug("getUnexploredEndNodes\n");
       vector<Node*> * endNodes = new vector<Node*>;
       endNodes->reserve(kEventsPerRun * 5);
       seedNode->getUnexploredEndNodes(endNodes);
 
-      showDebug("Performing recursive tracking...");
+      showDebug("doRecursiveWeightedTracking\n");
       doRecursiveWeightedTracking(seedNode, endNodes);
-      showDebug("ok\n");
-      
+     
       endNodes->clear();
       seedNode->getEndNodes(endNodes);
 
-      showDebug("Finding best track...");
       track = seedNode->getBestTrack();
-      showDebug("ok\n");
+      
       if (track->GetEntries() > 3) {
          tracks->appendTrack(track);
          removeTrackFromClustersWithoutTrack(track);
       }
 
+      track->Clear("C");
+      nextClusters->Clear("C");
+
+      seedNode->deleteNodeTree();
       delete seedNode;
-      delete endNodes;
+      delete endNodes; // vector
    }
 
 //   kMCSFactor = kMCSFactorLastPass1;
 //   findRemainingTracks(tracks);
+
+   seeds->Clear("C");
+   delete seeds;
+
+   delete track;
+   delete nextClusters;
 
    return tracks;
 }
@@ -202,6 +210,7 @@ Tracks * Clusters::findCalorimeterTracksWithMCTruth() {
    // Store last track
    tracks->appendTrack(track);
 
+   delete track;
    return tracks;
 }
 
@@ -228,12 +237,12 @@ Clusters * Clusters::findSeeds(Int_t layer, Bool_t kUsedClustersInSeeds) {
 
 Clusters * Clusters::findNearestClustersInNextLayer(Cluster *seed) {
    Clusters *nextClusters = new Clusters(50);
-   Clusters *clustersFromThisLayer = 0;
+   Clusters *clustersFromThisLayer = new Clusters(50);
 
    Int_t layerCounter = 1;
    for (Int_t skipLayers=0; skipLayers<2; skipLayers++) {
       Int_t nextLayer = seed->getLayer() + 1 + skipLayers;
-      clustersFromThisLayer = findClustersFromSeedInLayer(seed, nextLayer);
+      findClustersFromSeedInLayer(seed, nextLayer, clustersFromThisLayer);
 
       if (clustersFromThisLayer->GetEntriesFast()) {
          break;
@@ -247,15 +256,15 @@ Clusters * Clusters::findNearestClustersInNextLayer(Cluster *seed) {
       nextClusters->appendCluster(clustersFromThisLayer->At(i));
    }
 
+   clustersFromThisLayer->Clear("C");
    delete clustersFromThisLayer;
-
    return nextClusters;
 }
 
-Clusters * Clusters::findClustersFromSeedInLayer(Cluster *seed, Int_t nextLayer) {
+void Clusters::findClustersFromSeedInLayer(Cluster *seed, Int_t nextLayer, Clusters* clustersFromThisLayer) {
    Int_t layerIdxFrom = getFirstIndexOfLayer(nextLayer);
    Int_t layerIdxTo = getLastIndexOfLayer(nextLayer);
-   Clusters *clustersFromThisLayer = new Clusters(50);
+   clustersFromThisLayer->Clear("C");
 
    Float_t maxAngle, thisAngle;
 
@@ -264,21 +273,18 @@ Clusters * Clusters::findClustersFromSeedInLayer(Cluster *seed, Int_t nextLayer)
 
    maxAngle *= 3;
 
-   if (layerIdxFrom < 0)
-      return clustersFromThisLayer; // empty
+   if (layerIdxFrom >= 0) {
+      for (Int_t i=layerIdxFrom; i<layerIdxTo; i++) {
+         if (!At(i)) { continue; }
 
-   for (Int_t i=layerIdxFrom; i<layerIdxTo; i++) {
-      if (!At(i)) { continue; }
+         if (kUseEmpiricalMCS)   thisAngle = getDotProductAngle(seed, seed, At(i));
+         else                    thisAngle = diffmmXY(seed, At(i));
 
-      if (kUseEmpiricalMCS)   thisAngle = getDotProductAngle(seed, seed, At(i));
-      else                    thisAngle = diffmmXY(seed, At(i));
-
-      if (thisAngle < maxAngle) {
-         clustersFromThisLayer->appendCluster(At(i));
+         if (thisAngle < maxAngle) {
+            clustersFromThisLayer->appendCluster(At(i));
+         }
       }
    }
-
-   return clustersFromThisLayer;
 }
 
 Cluster * Clusters::findNearestNeighbour(Track *track, Cluster *projectedPoint, Bool_t rejectUsed) {

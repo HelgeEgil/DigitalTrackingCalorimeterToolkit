@@ -38,7 +38,8 @@ public:
    Int_t          getWorstChild();
    Int_t          getBestChild();
    void           addChild(Node *child);
-   void           removeChild(Int_t i); 
+   void           removeChild(Int_t i);
+   void           deleteNodeTree();
 
    Cluster      * getParentCluster();
    Cluster      * getExtrapolatedCluster();

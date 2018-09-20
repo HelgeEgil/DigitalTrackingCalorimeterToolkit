@@ -21,6 +21,7 @@ using namespace std;
 using namespace DTC;
 
 Track::Track() : track_("DTC::Cluster", MaxTrackLength) {
+   track_.SetOwner(kTRUE);
    fitEnergy_ = 0;
    fitRange_ = 0;
    fitScale_ = 0;
@@ -28,6 +29,7 @@ Track::Track() : track_("DTC::Cluster", MaxTrackLength) {
 }
 
 Track::Track(Cluster *cluster) : track_("DTC::Cluster", MaxTrackLength) {
+   track_.SetOwner(kTRUE);
    appendCluster(cluster);
    fitEnergy_ = 0;
    fitRange_ = 0;
@@ -36,7 +38,9 @@ Track::Track(Cluster *cluster) : track_("DTC::Cluster", MaxTrackLength) {
 }
 
 Track::~Track() {
-   track_.Delete();
+//   track_.Delete();
+//   track_.Clear();
+//   delete track_;
 }
 
 void Track::setTrack(Track *copyTrack, Int_t startOffset /* default 0 */) {

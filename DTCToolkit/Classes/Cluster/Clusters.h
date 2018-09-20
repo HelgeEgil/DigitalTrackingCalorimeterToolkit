@@ -96,7 +96,7 @@ public:
    void        doRecursiveWeightedTracking(Node * seedNode, vector<Node*> * endNodes);
    Clusters  * findSeeds(Int_t layer, Bool_t kUsedClustersInSeeds = true);
    Clusters  * findNearestClustersInNextLayer(Cluster *seed);
-   Clusters  * findClustersFromSeedInLayer(Cluster *seed, Int_t nextLayer);
+   void        findClustersFromSeedInLayer(Cluster *seed, Int_t nextLayer, Clusters* clustersInNextLayer);
    Cluster   * findNearestNeighbour(Track* track, Cluster *projectedPoint, Bool_t rejectUsed = true);
 
    // Work in progress, in file findTracksCandidateAlgorithms.C

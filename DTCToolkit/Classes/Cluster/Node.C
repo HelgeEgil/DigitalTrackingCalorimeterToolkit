@@ -24,14 +24,29 @@ Node::Node(Node *parent, Cluster *connectedCluster, Float_t score) {
 }
 
 Node::~Node() {
+   // delete[] children_;
+   /*
    if (getNChildren() > 0) {
       for (Int_t i=0; i<nChildrenInNode; i++) { // max 5 children per node
          if (getChild(i)) {
             delete children_[i]; // illegal in 45 states
+            children_[i] = nullptr;
          }
       }
    }
+   */
 }
+
+void  Node::deleteNodeTree() {
+   vector<Node*> *allNodes = new vector<Node*>;
+   getAllNodes(allNodes);
+   for (UInt_t i=0; i<allNodes->size(); i++) {
+      if (allNodes->at(i) == this) continue;
+      delete allNodes->at(i);
+   }
+   delete allNodes;
+}
+
 
 Cluster * Node::getParentCluster() {
    Node * parent = getParent();
@@ -189,9 +204,9 @@ void  Node::getAllNodes(vector<Node*> *allNodes) {
    if (!allNodes) {
       allNodes = new vector<Node*>;
    }
-      
-   allNodes->push_back(this);
    
+   allNodes->push_back(this);
+
    Int_t nChildren = getNChildren();
 
    if (nChildren > 0) {
@@ -254,24 +269,30 @@ Track* Node::getTrackFromBestNode(Node* bestNode) {
    Node         * nextSegment = bestNode;
    Track        * bestTrack = new Track();
 
-
+   showDebug("getTrackFromBestNode ... ");
    Int_t n = 0;
    while (nextSegment && n<100) {
+      showDebug("PushBack n = " << n);
       reverseTrack.push_back(nextSegment);
       nextSegment = (Node*) nextSegment->getParent();
       n++;
    }
+   showDebug("\nDone pushing back tree - append to besttrack");
    
    while (reverseTrack.size() > 0) {
       bestTrack->appendCluster(reverseTrack.back()->getCluster());
       reverseTrack.pop_back();
    }
 
+   showDebug("done!\n");
+
    return bestTrack;
 }
 
 Track* Node::getBestTrack() {
+   showDebug("getBestNode...");
    Node *bestNode = getBestNode();
+   showDebug("ok!");
    return getTrackFromBestNode(bestNode);
 }
 

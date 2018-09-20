@@ -634,7 +634,7 @@ void drawTracksDepthDose(Int_t Runs, Int_t dataType, Bool_t recreate, Float_t en
    }
 }
 
-void drawTracksRangeHistogram(Int_t Runs, Int_t dataType, Bool_t recreate, Float_t energy, Float_t degraderThickness, Int_t eventsPerRun, Int_t outputFileIdx, Bool_t drawFitResults, Bool_t doTracking, Bool_t excludeNuclearInteractions) {
+void drawTracksRangeHistogram(Int_t Runs, Int_t dataType, Bool_t recreate, Float_t energy, Float_t degraderThickness, Int_t eventsPerRun, Int_t outputFileIdx, Bool_t drawFitResults, Bool_t doTracking, Bool_t excludeNuclearInteractions, Int_t skipTracks) {
    run_degraderThickness = degraderThickness;
    run_energy = energy;
    kEventsPerRun = eventsPerRun;
@@ -694,6 +694,7 @@ void drawTracksRangeHistogram(Int_t Runs, Int_t dataType, Bool_t recreate, Float
    for (Int_t j=0; j<tracks->GetEntriesFast(); j++) {
       Track *thisTrack = tracks->At(j);
       if (!thisTrack) continue;
+      if (j < skipTracks) continue;
     
       if (thisTrack->doesTrackEndAbruptly()) {
          nCutDueToTrackEndingAbruptly++;
@@ -768,11 +769,113 @@ void drawTracksRangeHistogram(Int_t Runs, Int_t dataType, Bool_t recreate, Float
       ps->SetTextFont(22);
       ps->AddText(Form("Nominal WEPL = %.2f #pm %.2f", expectedMean, expectedStraggling));
       ps->AddText(Form("Calculated WEPL = %.2f #pm %.2f", empiricalMean, empiricalSigma));
-      ps->AddText(Form("WEPL deviation = %.2f #pm %.2f", empiricalMean - expectedMean, empiricalSigma - expectedStraggling));
+      ps->AddText(Form("WEPL deviation = %.2f #pm %.2f", empiricalMean - expectedMean, sqrt(pow(empiricalSigma, 2) - pow(expectedStraggling, 2))));
       cFitResults->Modified();
    }
 
    delete tracks;
+}
+
+void findTracksRangeAccuracy(Int_t Runs, Int_t dataType, Bool_t recreate, Float_t energy, Float_t degraderThickness, Int_t eventsPerRun, Int_t outputFileIdx, Bool_t doTracking, Bool_t excludeNuclearInteractions) {
+   run_degraderThickness = degraderThickness;
+   run_energy = energy;
+   kEventsPerRun = eventsPerRun;
+   kDoTracking = doTracking;
+   kFilterNuclearInteractions = excludeNuclearInteractions;
+         
+   gROOT->SetBatch(kTRUE);
+
+   if (kUseDegrader) {
+      run_energy = getEnergyFromDegraderThickness(degraderThickness);
+   }
+
+   printf("Using water degrader of thickness %.0f mm, the initial energy of %.0f MeV is reduced to %.1f MeV.\n", degraderThickness, energy, run_energy);
+
+   kDataType = dataType;
+   Bool_t         removeHighAngleTracks = true;
+   Bool_t         removeNuclearInteractions = true;
+
+   Float_t        finalEnergy = 0;
+   Float_t        fitRange, fitScale, fitError;
+   Int_t          nCutDueToTrackEndingAbruptly = 0;
+   Int_t          skipPlot = 0;
+   TGraphErrors * outputGraph;
+   Float_t        expectedMean = getUnitFromEnergy(run_energy);
+   Float_t        expectedStraggling = getUnitStragglingFromEnergy(run_energy, getSigmaEnergy(run_energy));
+   Float_t        empiricalMean, empiricalSigma;
+   Float_t        means[10] = {};
+   Float_t        sigmas[10] = {};
+   Float_t        listOfErrorValues[10000] = {};
+   Int_t          idxOfErrorValues = 0;
+
+   Int_t          nEnergyBins = getUnitFromEnergy(run_energy);
+   Float_t        lowHistogramLimit = getUnitFromEnergy(0);
+   Float_t        highHistogramLimit = getUnitFromEnergy(run_energy)*1.4 + 10;
+   TH1F         * hFitResults = new TH1F("fitResult", "noDrawHistogram", fmax(nEnergyBins,100), lowHistogramLimit, highHistogramLimit);
+ 
+   Tracks * tracks = loadOrCreateTracks(recreate, Runs*2, dataType, run_energy);
+
+   if (removeHighAngleTracks) {
+      tracks->removeHighAngleTracks(100);
+   }
+   if (removeNuclearInteractions) {
+      tracks->removeNuclearInteractions();
+   }
+
+   Int_t nTracks = 0;
+   for (Int_t j=0; j<tracks->GetEntriesFast(); j++) {
+      Track *thisTrack = tracks->At(j);
+      if (!thisTrack) continue;
+
+      outputGraph = (TGraphErrors*) thisTrack->doTrackFit(false, false); // (bool isScaleVariable, bool useTrackLength (~ CSDA))
+      if (!outputGraph) continue;
+      delete outputGraph;
+      
+      nTracks++;
+      if (nTracks > Runs * eventsPerRun) break;
+
+      fitRange = thisTrack->getFitParameterRange();
+      hFitResults->Fill(getUnitFromTL(fitRange));
+
+      if (nTracks % eventsPerRun == 0) { // DO ANALYSIS
+         TF1 *gauss = doSimpleGaussianFit(hFitResults, means, sigmas, outputFileIdx);
+         delete gauss;
+
+         empiricalMean = means[9];
+         empiricalSigma = sigmas[9];
+         
+         printf("Run %d of %d ... Range error is %.2f mm WET, with %d protons.\n", nTracks / eventsPerRun, Runs, empiricalMean - expectedMean, eventsPerRun);
+         if (!isnan(empiricalMean)) {
+            listOfErrorValues[idxOfErrorValues++] = empiricalMean - expectedMean;
+         }
+         hFitResults->Reset();
+      }
+   }
+
+   delete hFitResults;
+   tracks->Delete();
+//   delete tracks;
+
+   Float_t meanError = 0;
+   Float_t sigmaError = 0;
+
+   for (Int_t i=0; i<idxOfErrorValues; i++) {
+      meanError += listOfErrorValues[i];
+   }
+   
+   meanError /= (idxOfErrorValues + 1);
+
+   for (Int_t i=0; i<idxOfErrorValues; i++) {
+      sigmaError += pow(listOfErrorValues[i] - meanError, 2);
+   }
+
+   sigmaError = sqrt(sigmaError / idxOfErrorValues);
+
+   printf("Mean error from %d runs is %.2f mm +- %.2f mm. Expected error is %.2f.\n", Runs, meanError, sigmaError, expectedStraggling / sqrt(eventsPerRun));
+   ofstream file("OutputFiles/tracksRangeAccuracy.csv", ofstream::out | ofstream::app);
+   file << run_energy << " " << Runs << " " << eventsPerRun<< " " << meanError << " " << sigmaError << endl;
+   file.close();
+
 }
 
 void draw2DProjection(Int_t Runs, Int_t dataType, Bool_t recreate, Float_t energy) {
