@@ -19,8 +19,8 @@ private:
    vector<Int_t> verticalIndexOfLayer_;
 
 public:
-   Hits(Int_t nHits) : hits_("DTC::Hit", nHits) {}
-   Hits() : hits_("DTC::Hit", kEventsPerRun*200) {}
+   Hits(Int_t nHits) : hits_("DTC::Hit", nHits) { hits_.SetOwner(kTRUE); }
+   Hits() : hits_("DTC::Hit", kEventsPerRun*200) { hits_.SetOwner(kTRUE); }
    virtual ~Hits(); 
 
    // ROOT & I/O

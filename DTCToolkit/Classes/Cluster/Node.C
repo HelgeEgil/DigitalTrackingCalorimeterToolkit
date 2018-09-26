@@ -69,11 +69,16 @@ void Node::addChild(Node *node) {
       Float_t newScore = node->getScore();
       if (newScore < threshold * worstScore) {
          // They are dissimilar, use instead the new one
+         removeChild(worstChild);
          children_[worstChild] = node;
+         
       }
       else if (newScore < worstScore) {
          // They are similar, use both
          children_[i] = node;
+      }
+      else { // Don't add node, delete it
+         delete node;
       }
    }
       
@@ -83,6 +88,10 @@ void Node::addChild(Node *node) {
 
       if (worstScore > node->getScore()) {
          children_[worstChild] = node; 
+      }
+
+      else {
+         delete node;
       }
 
       // remove the worst if it's 15 % worse than the best
@@ -137,7 +146,7 @@ Int_t Node::getBestChild() {
    return bestChild;
 }
 
-Cluster * Node::getExtrapolatedCluster() {
+Cluster  * Node::getExtrapolatedCluster() {
    if (!getParent()) return nullptr;
    Cluster *p2 = getCluster();
    Cluster *p1 = getParentCluster();
@@ -191,6 +200,7 @@ void Node::getUnexploredEndNodes(vector<Node*> *endNodes) {
    if (nChildren == 0 && !isExplored()) {
       endNodes->push_back(this);
    }
+
    else if (nChildren > 0) {
       for (Int_t i=0; i<nChildren; i++) {
          if (getChild(i)) {
@@ -221,7 +231,10 @@ void  Node::getAllNodes(vector<Node*> *allNodes) {
 Int_t Node::getClusterCount() {
    vector<Node*> * allNodes = new vector<Node*>;
    getAllNodes(allNodes);
-   return allNodes->size();
+   Int_t clusterCount = allNodes->size();
+   delete allNodes;
+
+   return clusterCount;
 }
 
 Float_t Node::getNodeAngle(Cluster *p3) {
@@ -255,6 +268,8 @@ Node* Node::getBestNode() {
       }
    }
 
+   delete endNodes;
+
    return bestNode;
 }
 
@@ -269,7 +284,6 @@ Track* Node::getTrackFromBestNode(Node* bestNode) {
    Node         * nextSegment = bestNode;
    Track        * bestTrack = new Track();
 
-   showDebug("getTrackFromBestNode ... ");
    Int_t n = 0;
    while (nextSegment && n<100) {
       showDebug("PushBack n = " << n);
@@ -277,22 +291,17 @@ Track* Node::getTrackFromBestNode(Node* bestNode) {
       nextSegment = (Node*) nextSegment->getParent();
       n++;
    }
-   showDebug("\nDone pushing back tree - append to besttrack");
    
    while (reverseTrack.size() > 0) {
       bestTrack->appendCluster(reverseTrack.back()->getCluster());
       reverseTrack.pop_back();
    }
 
-   showDebug("done!\n");
-
    return bestTrack;
 }
 
 Track* Node::getBestTrack() {
-   showDebug("getBestNode...");
    Node *bestNode = getBestNode();
-   showDebug("ok!");
    return getTrackFromBestNode(bestNode);
 }
 

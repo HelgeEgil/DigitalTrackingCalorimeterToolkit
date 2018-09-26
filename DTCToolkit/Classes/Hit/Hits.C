@@ -6,6 +6,8 @@
 
 #include <TStopwatch.h>
 
+#include <TObject.h>
+#include <TObjArray.h>
 #include "Classes/Hit/Hits.h"
 #include "Classes/Cluster/Clusters.h"
 #include "GlobalConstants/Constants.h"
@@ -18,8 +20,8 @@ Hits::~Hits() {
    hits_.Delete();
 }
 
-void Hits::Clear(Option_t *) {
-   hits_.Clear("C");
+void Hits::Clear(Option_t *option) {
+   hits_.Clear(option);
 }
 
 void Hits::appendPoint(Int_t x, Int_t y, Int_t layer, Int_t event, Float_t edep) {

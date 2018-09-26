@@ -853,8 +853,7 @@ void findTracksRangeAccuracy(Int_t Runs, Int_t dataType, Bool_t recreate, Float_
    }
 
    delete hFitResults;
-   tracks->Delete();
-//   delete tracks;
+   delete tracks;
 
    Float_t meanError = 0;
    Float_t sigmaError = 0;
@@ -875,7 +874,6 @@ void findTracksRangeAccuracy(Int_t Runs, Int_t dataType, Bool_t recreate, Float_
    ofstream file("OutputFiles/tracksRangeAccuracy.csv", ofstream::out | ofstream::app);
    file << run_energy << " " << Runs << " " << eventsPerRun<< " " << meanError << " " << sigmaError << endl;
    file.close();
-
 }
 
 void draw2DProjection(Int_t Runs, Int_t dataType, Bool_t recreate, Float_t energy) {

@@ -42,7 +42,7 @@ class Tracks : public TObject {
       virtual void      Compress()              { tracks_.Compress(); }
       virtual void      CompressCWT()           { clustersWithoutTrack_.Compress(); }
       virtual void      CompressClusters();
-      virtual void      Clear(Option_t * = "");
+      virtual void      Clear(Option_t * option = "");
 
       // Add and remove tracks
       virtual void      removeTrack(Track *t)   { tracks_.Remove((TObject*) t); }

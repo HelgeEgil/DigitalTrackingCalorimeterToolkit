@@ -198,28 +198,28 @@ void  createSplines() {
    TGraph * range_energyW = new TGraph(idxW, energiesW, rangesW);
    TF1    * range_energyW_fit = new TF1("range_energyW_fit", "[0] * pow(x, [1])");
    range_energyW_fit->SetParameters(0.002, 1.7);
-   range_energyW->Fit("range_energyW_fit", "Q,M");
+   range_energyW->Fit("range_energyW_fit", "Q,M,N");
    alpha_tungsten = range_energyW_fit->GetParameter(0);
    p_tungsten = range_energyW_fit->GetParameter(1);
 
    // FIND BRAGG-KLEEMAN PARAMETERS HIGH / LOW
    if (kMaterial == kAluminum) {
-      range_energy->Fit("range_energy_fit", "Q,M", "", 0, 40); // fit 0 - 40 MeV
+      range_energy->Fit("range_energy_fit", "Q,M,N", "", 0, 40); // fit 0 - 40 MeV
       alpha_material_low = range_energy_fit->GetParameter(0);
       p_material_low = range_energy_fit->GetParameter(1);
 
-      range_energy->Fit("range_energy_fit", "Q,M", "", 220, 250); // fit 220 - 250 MeV
+      range_energy->Fit("range_energy_fit", "Q,M,N", "", 220, 250); // fit 220 - 250 MeV
       alpha_material_high = range_energy_fit->GetParameter(0);
       p_material_high = range_energy_fit->GetParameter(1);
    }
 
    else if (kMaterial == kTungsten) {
       // FIND BRAGG-KLEEMAN PARAMETERS HIGH / LOW
-      range_energyW->Fit("range_energyW_fit", "Q,M", "", 0, 40); // fit 0 - 40 MeV
+      range_energyW->Fit("range_energyW_fit", "Q,M,N", "", 0, 40); // fit 0 - 40 MeV
       alpha_material_low = range_energyW_fit->GetParameter(0);
       p_material_low = range_energyW_fit->GetParameter(1);
 
-      range_energyW->Fit("range_energyW_fit", "Q,M", "", 220, 250); // fit 220 - 250 MeV
+      range_energyW->Fit("range_energyW_fit", "Q,M,N", "", 220, 250); // fit 220 - 250 MeV
       alpha_material_high = range_energyW_fit->GetParameter(0);
       p_material_high = range_energyW_fit->GetParameter(1);
    }
@@ -229,7 +229,12 @@ void  createSplines() {
    
    // About the same in all geometries
    straggling_a = 1.76;
-   straggling_b = 0.0012; 
+   straggling_b = 0.0012;
+
+   delete range_energy;
+   delete range_energy_fit;
+   delete range_energyW;
+   delete range_energyW_fit;
 }
 
 Double_t getLayerPositionmm(Int_t i) {

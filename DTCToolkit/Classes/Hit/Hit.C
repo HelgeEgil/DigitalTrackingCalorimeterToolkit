@@ -35,6 +35,14 @@ Hit::Hit(Hit* hit) {
 Hit::~Hit() {
 }
 
+void Hit::Clear(Option_t *) {
+   x_ = -1;
+   y_ = 1;
+   layerNo_ = -1;
+   eventID_ = -1;
+   edep_ = 0;
+}
+
 Int_t Hit::getChip() {
    Int_t x = getX();
    Int_t y = getY();

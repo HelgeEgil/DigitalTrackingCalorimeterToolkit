@@ -48,8 +48,7 @@ public:
    virtual void      Compress()                 { clusters_.Compress(); }
    virtual Int_t     GetEntriesFastLastLayer();
    virtual Int_t     GetEntriesInLayer(Int_t i);
-   virtual void      clearClusters();
-   virtual void      Clear(Option_t * = "");
+   virtual void      Clear(Option_t * option= "");
    void              sortClusters()             { clusters_.Sort(); }
    
    // Add and remove clusters
@@ -94,9 +93,9 @@ public:
    Tracks    * findCalorimeterTracksWithMCTruth();
    Tracks    * findTracksWithRecursiveWeighting();
    void        doRecursiveWeightedTracking(Node * seedNode, vector<Node*> * endNodes);
-   Clusters  * findSeeds(Int_t layer, Bool_t kUsedClustersInSeeds = true);
-   Clusters  * findNearestClustersInNextLayer(Cluster *seed);
-   void        findClustersFromSeedInLayer(Cluster *seed, Int_t nextLayer, Clusters* clustersInNextLayer);
+   void        findSeeds(vector<Int_t> *seeds, Int_t layer, Bool_t kUsedClustersInSeeds = true);
+   void        findNearestClustersInNextLayer(Cluster *seed, vector<Int_t> * nextClusters);
+   void        findClustersFromSeedInLayer(Cluster *seed, Int_t nextLayer, vector<Int_t> * nextClusters);
    Cluster   * findNearestNeighbour(Track* track, Cluster *projectedPoint, Bool_t rejectUsed = true);
 
    // Work in progress, in file findTracksCandidateAlgorithms.C

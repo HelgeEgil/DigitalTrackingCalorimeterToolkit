@@ -417,7 +417,7 @@ Cluster * getRetrogradeTrackExtrapolationToLayer(Track * track, Int_t layer) {
    return getTrackExtrapolationFromTo(track, fromLayer, layer);
 }
 
-Cluster * getTrackExtrapolationCluster(Cluster *p1, Cluster *p2) {
+Cluster  * getTrackExtrapolationCluster(Cluster *p1, Cluster *p2) {
    Int_t fromLayer = p2->getLayer();
    Int_t toLayer = p2->getLayer() + 1;
    Int_t diffLayer = toLayer - fromLayer;

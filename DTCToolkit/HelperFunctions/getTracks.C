@@ -113,7 +113,7 @@ Clusters * getClusters(Int_t Runs, Int_t dataType, Int_t frameType, Float_t ener
    Int_t             nTracks = kEventsPerRun * 2;
    Bool_t            breakSignal = false;
    CalorimeterFrame *cf = new CalorimeterFrame();
-   Clusters        * clusters = new Clusters(nClusters);
+   Clusters        * clusters = nullptr;
    Clusters        * trackerClusters = new Clusters(nClusters);
    Clusters        * allClusters = new Clusters(nClusters * Runs);
    Hits            * hits = new Hits(nHits);
@@ -135,7 +135,7 @@ Clusters * getClusters(Int_t Runs, Int_t dataType, Int_t frameType, Float_t ener
          clusters->removeSmallClusters(2);
 
          clusters->matchWithEventIDs(eventIDs);
-         eventIDs->Clear();
+         eventIDs->Clear("C");
       }
       
       else if (dataType == kData) {
@@ -155,17 +155,17 @@ Clusters * getClusters(Int_t Runs, Int_t dataType, Int_t frameType, Float_t ener
       }
 
       cf->Reset();
-      hits->clearHits();
-      trackerHits->clearHits();
-      clusters->clearClusters();
-      trackerClusters->clearClusters();
+      cf->Clear("C");
+      hits->Clear("C");
+      trackerHits->Clear("C");
+      delete clusters;
+      trackerClusters->Clear("C");
       
       if (breakSignal) break;
    }
 
 
    delete cf;
-   delete clusters;
    delete trackerClusters;
    delete hits;
    delete trackerHits;
@@ -203,13 +203,11 @@ Tracks * getTracksFromClusters(Int_t Runs, Int_t dataType, Int_t frameType, Floa
       showDebug("Finding calorimeter tracks\n");
       t2.Start(false);
       if (kDoTracking) {
-         printf("There are %d clusters\n", clusters->GetEntriesFast());
          showDebug("sortClusters...");
          clusters->sortClusters();
-         showDebug("ok!\n");
-         showDebug("Start tracking (kWeightedRecursive)\n");
+         showDebug("ok!\n Start tracking (kWeightedRecursive)\n");
          tracks = clusters->findTracksWithRecursiveWeighting();
-
+         printf("Found %d tracks from %d Clusters in run %d.\n", tracks->GetEntriesFast(), clusters->GetEntriesFast(), i);
       }
       else {
          tracks = clusters->findCalorimeterTracksWithMCTruth();
@@ -227,8 +225,7 @@ Tracks * getTracksFromClusters(Int_t Runs, Int_t dataType, Int_t frameType, Floa
       t3.Start(false);
       showDebug("Removing tracks leaving detector...");
       tracks->removeTracksLeavingDetector();
-      showDebug("ok\n");
-      showDebug("compress tracks and clusters...");      
+      showDebug("ok\ncompress tracks and clusters...");      
       t3.Stop();
       t4.Start(false);
       tracks->Compress();

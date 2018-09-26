@@ -17,7 +17,7 @@
 #include "GlobalConstants/Constants.h"
 #include "GlobalConstants/MaterialConstants.h"
 
-Cluster * Track::getInterpolatedClusterAt(Int_t layer) {
+Cluster *  Track::getInterpolatedClusterAt(Int_t layer) {
    Cluster   * pre = 0;
    Cluster   * post = 0;
    Int_t       lastIdx = 0;

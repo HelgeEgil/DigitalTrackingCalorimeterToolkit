@@ -69,16 +69,16 @@ TGraphErrors * Track::doTrackFit(Bool_t isScaleVariable, Bool_t useTrackLength) 
 
    graph = new TGraphErrors(n, x, y, erx, ery); // maybe a speedup here is possible
    
-   scaleParameter = 0.73 / (p * pow(alpha, 1/p));
+   scaleParameter = 0.73 / (p * pow(alpha, 1/p)); // Found from fits to all tracks
+
    if (kDataType == kData) {
       if (kUseRefinedClustering) scaleParameter = 3.42;
       else                       scaleParameter = 5.22;
    }
 
-   scaleParameter *= 1.2;
+   scaleParameter *= 1.2; // Empirical tests to reduce range bias
 
-//   scaleParameter /= 14; // To account for edep being keV / um
-   TF1 *func = new TF1("fit_BP", fitfunc_DBP, 0, maxRange, 2);
+   TF1 * func = new TF1("fit_BP", fitfunc_DBP, 0, maxRange, 2);
    func->SetParameter(0, estimatedRange);
    func->SetParameter(1, scaleParameter);
    func->SetParLimits(0, minRange, maxRange);
@@ -90,11 +90,13 @@ TGraphErrors * Track::doTrackFit(Bool_t isScaleVariable, Bool_t useTrackLength) 
 
    func->SetNpx(750);
 
-   graph->Fit("fit_BP", "B, N, Q, W", "", 0, maxRange*1.2);
+   graph->Fit("fit_BP", "B, N, Q, W, G", "", 0, maxRange*1.2);
    
    fitRange_ = func->GetParameter(0);
    fitScale_ = func->GetParameter(1);
    fitError_ = func->GetParError(0);
+
+   delete func;
 
    return graph;
 }

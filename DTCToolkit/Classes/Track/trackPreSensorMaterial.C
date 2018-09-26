@@ -23,12 +23,14 @@ Bool_t Track::isHitOnScintillatorH() {
    // see chapter in tracking documentation) using extrapolation - > 0
    
    Bool_t      isOnScintillator = false;
-   Cluster   * extrapolatedCluster = getExtrapolatedClusterAt(0);
+   Cluster    * extrapolatedCluster = getExtrapolatedClusterAt(0);
    Float_t     y = extrapolatedCluster->getYmm();
 
    if (fabs(y)<5) {
       isOnScintillator = true;
    }
+
+   delete extrapolatedCluster;
 
    return isOnScintillator;
 }
@@ -39,12 +41,14 @@ Bool_t Track::isHitOnScintillatorV() {
    // see chapter in tracking documentation) using extrapolation - > 0
    
    Bool_t      isOnScintillator = false;
-   Cluster   * extrapolatedCluster = getExtrapolatedClusterAt(0);
+   Cluster    * extrapolatedCluster = getExtrapolatedClusterAt(0);
    Float_t     x = extrapolatedCluster->getXmm();
 
    if (fabs(x)<5) {
       isOnScintillator = true;
    }
+
+   delete extrapolatedCluster;
 
    return isOnScintillator;
 }

@@ -32,10 +32,9 @@ Clusters::Clusters(Bool_t frameType) : clusters_("DTC::Cluster", kEventsPerRun*2
 
 Clusters::~Clusters() {
    // Destructor
-//   delete clusters_;
-//   delete clustersWithoutTrack_;
-//   clusters_.Clear("C");
-//   clustersWithoutTrack_.Clear("C");
+   Clear("C");
+   clusters_.Delete();
+   clustersWithoutTrack_.Delete();
 }
 
 Int_t Clusters::GetEntriesFastLastLayer() {
@@ -71,20 +70,15 @@ Int_t Clusters::GetEntriesInLayer(Int_t layer) {
    return nInLayer;
 }
 
-void Clusters::clearClusters() {
-    clusters_.Clear("C");
-    clustersWithoutTrack_.Clear("C");
+void Clusters::Clear(Option_t *option) {
+   clusters_.Clear(option);
+   clustersWithoutTrack_.Clear(option);
 
-    for (UInt_t i=0; i<layerIndex_.size(); i++) {
-       layerIndex_.at(i) = - 1;
-    }
+   for (UInt_t i=0; i<layerIndex_.size(); i++) {
+      layerIndex_.at(i) = - 1;
+   }
 
-    frameType_ = 0;
-}
-
-void Clusters::Clear(Option_t *) {
-   clusters_.Clear("C");
-   clustersWithoutTrack_.Clear("C");
+   frameType_ = 0;
 }
 
 void Clusters::removeAllClustersInTrack(Track *track) {
@@ -304,13 +298,6 @@ void Clusters::makeLayerIndex() {
          layerIndex_.at(i) = 0;
       }
    }
-
-#ifdef USEDEBUG
-   printf("Layer Index -------\n");
-   for (UInt_t i=0; i<layerIndex_.size(); i++) {
-      printf("layer %d: Layer Index = %d.\n", i, layerIndex_.at(i));
-   }
-#endif
 
 }
 

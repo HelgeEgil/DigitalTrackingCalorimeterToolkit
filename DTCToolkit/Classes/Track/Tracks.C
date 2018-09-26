@@ -29,12 +29,9 @@ using namespace std;
 using namespace DTC;
 
 Tracks::~Tracks() {
-//   tracks_.Delete();
-//   clustersWithoutTrack_.Delete();
-//   tracks_.Clear("C");
-//   clustersWithoutTrack_.Clear("C");
-//   delete tracks_;
-//   delete clustersWithoutTrack_;
+   Clear("C+C");
+   tracks_.Delete();
+   clustersWithoutTrack_.Delete();
 }
 
 void Tracks::CompressClusters() {
@@ -44,9 +41,9 @@ void Tracks::CompressClusters() {
    }
 }
 
-void Tracks::Clear(Option_t *) {
-   tracks_.Clear("C");
-   clustersWithoutTrack_.Clear("C");
+void Tracks::Clear(Option_t *option) {
+   tracks_.Clear(option);
+   clustersWithoutTrack_.Clear(option);
 }
 
 void Tracks::appendTrack(Track *copyTrack, Int_t startOffset /* default 0 */) {
@@ -313,6 +310,7 @@ void Tracks::matchWithEventIDs(Hits * eventIDs) {
 
 void Tracks::sortTrackByLayer(Int_t trackIdx) {
    // FIXME Check that this functions does what it should... It looks a bit strange!
+   // FIXME2 : Add Sort function on track, use this instead
 
    Int_t       lastLayer = 0;
    Bool_t      isSorted = true;
@@ -355,7 +353,7 @@ void Tracks::sortTrackByLayer(Int_t trackIdx) {
       if (newTrack->GetEntriesFast()) {
          appendTrack(newTrack);
          removeTrackAt(trackIdx);
-         newTrack->clearTrack();
+         newTrack->Clear("C");
       }
    }
 }

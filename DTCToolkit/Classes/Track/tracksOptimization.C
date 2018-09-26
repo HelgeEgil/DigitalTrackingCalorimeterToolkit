@@ -40,8 +40,8 @@ void Tracks::splitSharedClusters() {
    Track     * missingTrack = nullptr;
    Track     * closestTrack = nullptr;
    Track     * thisTrack = nullptr;
-   Clusters  * interpolatedClusters = new Clusters();
-   Clusters  * interpolatedClosestClusters = new Clusters();
+//   Clusters  * interpolatedClusters = new Clusters();
+//   Clusters  * interpolatedClosestClusters = new Clusters();
 
    
 
@@ -84,7 +84,7 @@ void Tracks::splitSharedClusters() {
             if (minIdx<0) continue; // no clusters this layer? What else could provoke this error?
             nInterpolated++;
 
-            interpolatedClusters->appendCluster(interpolatedCluster);
+//            interpolatedClusters->appendCluster(interpolatedCluster);
             trackCluster closestTC = clustersThisLayer.at(minIdx); // THE CULPRIT
             closestTrack = At(closestTC.track);
             closestCluster = closestTrack->At(closestTC.cluster);
@@ -95,7 +95,7 @@ void Tracks::splitSharedClusters() {
                
                interpolatedClosestCluster = closestTrack->getInterpolatedClusterAt(layer);
                if (interpolatedClosestCluster) {
-                  interpolatedClosestClusters->appendCluster(interpolatedClosestCluster);
+//                  interpolatedClosestClusters->appendCluster(interpolatedClosestCluster);
                   
                   // Charge conservation: Each cluster gets half of the 'charge' ~ deposited energy
                   totalEdep = closestCluster->getDepositedEnergy();
@@ -112,8 +112,10 @@ void Tracks::splitSharedClusters() {
 
                   sortTrackByLayer(trackIdx);
                }
+               delete interpolatedClosestCluster;
             }
          }
+         delete interpolatedCluster;
       }
    }
 
@@ -144,6 +146,8 @@ void Tracks::removeTracksLeavingDetector() {
          removeTrack(At(i));
          nTracksRemoved++;
       }
+
+      delete nextPoint;
    }
 
 //   cout << "Tracks::removeTracksLeavingDetector() has removed " << nTracksRemoved  << " tracks.\n";
@@ -332,6 +336,7 @@ void Tracks::retrogradeTrackImprovement(Clusters * clusters) {
          appendTrack(newTracks->At(i));
       }
    }
+   delete newTracks;
 }
 
 void Tracks::removeTracksEndingInBadChannels() {
@@ -350,6 +355,7 @@ void Tracks::removeTracksEndingInBadChannels() {
          cout << "Removing track " << *thisTrack << " due to bad channel at " << *extrapolatedCluster << "\n";
          removeTrackAt(i);
       }
+      delete extrapolatedCluster;
    }
 }
 
@@ -366,7 +372,9 @@ void Tracks::removeNuclearInteractions() {
          nRemoved++;
       }
    }
-   cout << "Tracks::removeNuclearInteractions() removed " << nRemoved << " of " << nTotal << "(" << nRemoved/nTotal * 100 << "%) tracks.\n";
+
+   Float_t fraction = nTotal ? nRemoved : 0;
+   cout << "Tracks::removeNuclearInteractions() removed " << nRemoved << " of " << nTotal << "(" << fraction * 100 << "%) tracks.\n";
 }
 
 #endif

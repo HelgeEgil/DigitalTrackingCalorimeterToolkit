@@ -38,13 +38,12 @@ Track::Track(Cluster *cluster) : track_("DTC::Cluster", MaxTrackLength) {
 }
 
 Track::~Track() {
-//   track_.Delete();
-//   track_.Clear();
-//   delete track_;
+   Clear("C");
+   track_.Delete();
 }
 
 void Track::setTrack(Track *copyTrack, Int_t startOffset /* default 0 */) {
-   clearTrack();
+   Clear("C");
 
    for (Int_t i=0; i<copyTrack->GetEntriesFast(); i++) {
       appendCluster(copyTrack->At(i), startOffset);
