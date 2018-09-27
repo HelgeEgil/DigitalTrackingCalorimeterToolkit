@@ -207,7 +207,7 @@ Tracks * getTracksFromClusters(Int_t Runs, Int_t dataType, Int_t frameType, Floa
          clusters->sortClusters();
          showDebug("ok!\n Start tracking (kWeightedRecursive)\n");
          tracks = clusters->findTracksWithRecursiveWeighting();
-         printf("Found %d tracks from %d Clusters in run %d.\n", tracks->GetEntriesFast(), clusters->GetEntriesFast(), i);
+         if (i%10 == 0) printf("Found %d tracks from %d Clusters in run %.2f-%d.\n", tracks->GetEntriesFast(), clusters->GetEntriesFast(), run_energy, i);
       }
       else {
          tracks = clusters->findCalorimeterTracksWithMCTruth();

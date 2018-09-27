@@ -76,7 +76,7 @@ TGraphErrors * Track::doTrackFit(Bool_t isScaleVariable, Bool_t useTrackLength) 
       else                       scaleParameter = 5.22;
    }
 
-   scaleParameter *= 1.2; // Empirical tests to reduce range bias
+   // scaleParameter *= 1.2; // Empirical tests to reduce range bias
 
    TF1 * func = new TF1("fit_BP", fitfunc_DBP, 0, maxRange, 2);
    func->SetParameter(0, estimatedRange);
@@ -97,6 +97,8 @@ TGraphErrors * Track::doTrackFit(Bool_t isScaleVariable, Bool_t useTrackLength) 
    fitError_ = func->GetParError(0);
 
    delete func;
+   
+   cout << gROOT->GetListOfFunctions() << endl;
 
    return graph;
 }

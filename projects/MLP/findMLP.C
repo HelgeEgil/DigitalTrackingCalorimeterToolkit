@@ -4,6 +4,7 @@
 #include <TH2F.h>
 #include <TCanvas.h>
 #include <fstream>
+#include <TBranch.h>
 #include <TGraph.h>
 #include <TSpline.h>
 #include <TStyle.h>
@@ -25,12 +26,13 @@ XYZVector SplineMLP(Double_t t, XYZVector X0, XYZVector X1, XYZVector P0, XYZVec
    return S;
 }
 
-void findMLP(Float_t sigmaScaleFactor = 0.60, Float_t vectorScaleFactor = -5.85) {
-   TFile *f = new TFile("MC/simpleScanner.root");
+void findMLP(Float_t AX = 0.60, Float_t AP = -5.85) {
+   TFile *f = new TFile("MC/Output/simpleScanner_phantom200mm_energy200MeV.root");
    TTree *tree = (TTree*) f->Get("Hits");
 
-   Float_t     initialEnergy = 230;
-   Int_t       eventsToUse = 1000;
+   Float_t     phantomSize = 200;
+   Float_t     initialEnergy = 200;
+   const Int_t eventsToUse = 250;
    Float_t     x, y, z, edep, sum_edep = 0, residualEnergy = 0;
    Int_t       eventID, parentID, lastEID = -1;
    XYZVector   Xp0, Xp1, Xp2, Xp3, X0, X1, X0est, X0err, X0NoTrk, P0, P0NoTrk, P1, P0hat, P1hat, S; // Xp are the plane coordinates, X are the tracker coordinates (X1 = (Xp1 + Xp2) / 2)
@@ -50,11 +52,14 @@ void findMLP(Float_t sigmaScaleFactor = 0.60, Float_t vectorScaleFactor = -5.85)
    Int_t       idxWater = 0;
    Double_t    energiesWater[500], rangesWater[500];
    Float_t     energy, range;
-   Float_t     sigmaFilter = 128.47;
+//   Float_t     sigmaFilter = 128.47;
+   Float_t     sigmaFilter =5.0;
    Double_t    aPosMCx[10000], aPosMCz[10000];
    Double_t    aPosMLPx[10000], aPosMLPz[10000];
    Double_t    aPosMLPNoTrkx[10000];
    Double_t    aPosMLPestx[10000];
+   Int_t       volumeID[10];
+   TBranch   * b_volumeID;
    Int_t       aIdxMC = 0;
    Int_t       aIdxMLP = 0;
    Bool_t      stop = false, stopacc = false;
@@ -83,8 +88,8 @@ void findMLP(Float_t sigmaScaleFactor = 0.60, Float_t vectorScaleFactor = -5.85)
    TSpline3 *splineWater = new TSpline3("splineWater", energiesWater, rangesWater, idxWater);
 
    TH1F *hResEnergy = new TH1F("hResEnergy", "Residual energy in calorimeter;Energy [MeV];Entries", 300, 0, 150);
-   TH2F *hErrorNaive = new TH2F("hErrorNaive", "Beamspot uncertainty (assume point beam);X position [mm];Y position [mm]", 200, -10, 10, 200, -10, 10);
-   TH2F *hErrorSigmaScale = new TH2F("hErrorSigmaScale", Form("Beamspot uncertainty (use X1 * %.2f + P1 * %.2f);X position [mm];Y position [mm]", sigmaScaleFactor, vectorScaleFactor), 200, -10, 10, 200, -10, 10);
+   TH2F *hErrorNaive = new TH2F("hErrorNaive", "Beamspot uncertainty (assume point beam);X position [mm];Y position [mm]", 100, -25, 25, 100, -25, 25);
+   TH2F *hErrorSigmaScale = new TH2F("hErrorSigmaScale", Form("Beamspot uncertainty (use X1 * %.2f + P1 * %.2f);X position [mm];Y position [mm]", sigmaScaleFactor, vectorScaleFactor), 100, -25, 25, 100, -25, 25);
 
    tree->SetBranchAddress("posX", &x);
    tree->SetBranchAddress("posY", &y);
@@ -92,15 +97,18 @@ void findMLP(Float_t sigmaScaleFactor = 0.60, Float_t vectorScaleFactor = -5.85)
    tree->SetBranchAddress("edep", &edep);
    tree->SetBranchAddress("eventID", &eventID);
    tree->SetBranchAddress("parentID", &parentID);
+   tree->SetBranchAddress("volumeID", volumeID, &b_volumeID);
    
-   X0NoTrk.SetCoordinates(0,0, -115);
+   X0NoTrk.SetCoordinates(0,0, -phantomSize/2 - 15);
    P0NoTrk.SetCoordinates(0, 0, 1); // Normalized
 
+   Int_t maxAcc = 10;
+
    for (Int_t i=0; i<tree->GetEntries(); ++i) {
+      tree->GetEntry(i);
+
       if (eventID > eventsToUse) stop = true;
       if (eventID > 5) stopacc = true;
-
-      tree->GetEntry(i);
 
       if (lastEID < 0) {
          lastEID = eventID;
@@ -121,8 +129,9 @@ void findMLP(Float_t sigmaScaleFactor = 0.60, Float_t vectorScaleFactor = -5.85)
             P0hat = P0.Unit();
             P1hat = P1.Unit();
 
-            X0est = X1 * sigmaScaleFactor + P1 * vectorScaleFactor;
-            X0err = X1 * sigmaScaleFactor + P1 * vectorScaleFactor - X0;
+            X0est = X1 * AX + P1 * AP;
+            X0est.SetZ(-phantomSize/2 - 15);
+            X0err = X1 * AX + P1 * AP - X0;
 
             hErrorNaive->Fill(X0.X(), X0.Y());
             hErrorSigmaScale->Fill(X0err.X(), X0err.Y());
@@ -137,7 +146,7 @@ void findMLP(Float_t sigmaScaleFactor = 0.60, Float_t vectorScaleFactor = -5.85)
 
             for (Float_t t=0; t<1; t += 0.01) {
                S = SplineMLP(t, X0, X1, P0hat, P1hat, Lambda0, Lambda1);
-               if (!stopacc) {
+               if (lastEID < maxAcc) {
                   aPosMLPx[aIdxMLP] = S.X(); // Collect many tracks 10 times
                   aPosMLPz[aIdxMLP] = S.Z();
                }
@@ -150,7 +159,7 @@ void findMLP(Float_t sigmaScaleFactor = 0.60, Float_t vectorScaleFactor = -5.85)
                arSplineMLPNoTrkx[idxSplineMLP] = S.X();
                arSplineMLPNoTrky[idxSplineMLP] = S.Y();
 
-               if (!stopacc) {
+               if (lastEID < maxAcc) {
                   aPosMLPNoTrkx[aIdxMLP] = S.X();
                }
 
@@ -158,7 +167,7 @@ void findMLP(Float_t sigmaScaleFactor = 0.60, Float_t vectorScaleFactor = -5.85)
                arSplineMLPestx[idxSplineMLP] = S.X();
                arSplineMLPesty[idxSplineMLP++] = S.Y();
                
-               if (!stopacc) {
+               if (lastEID < maxAcc) {
                   aPosMLPestx[aIdxMLP++] = S.X();
                }
             }
@@ -178,10 +187,11 @@ void findMLP(Float_t sigmaScaleFactor = 0.60, Float_t vectorScaleFactor = -5.85)
             Double_t diff_x, diff_y;
             idxDifferenceArray = 0; // Sweep each time
             nInDifferenceArray++; // To average at end
-            for (Double_t zSweep = -110; zSweep <= 110; zSweep += 2) { // Keep Sweep increment high to speed up!
+            for (Double_t zSweep = -phantomSize/2; zSweep <= phantomSize/2; zSweep += 2) { // Keep Sweep increment high to speed up!
+               differenceArrayZ[idxDifferenceArray] = zSweep;
+            
                diff_x = fabs(splineMCx->Eval(zSweep) - splineMLPx->Eval(zSweep));
                diff_y = fabs(splineMCy->Eval(zSweep) - splineMLPy->Eval(zSweep));
-               differenceArrayZ[idxDifferenceArray] = zSweep;
                differenceArrayDiff[idxDifferenceArray] += sqrt(pow(diff_x, 2) + pow(diff_y, 2));
 
                diff_x = fabs(splineMCx->Eval(zSweep) - splineMLPNoTrkx->Eval(zSweep));
@@ -192,6 +202,10 @@ void findMLP(Float_t sigmaScaleFactor = 0.60, Float_t vectorScaleFactor = -5.85)
                diff_y = fabs(splineMCy->Eval(zSweep) - splineMLPesty->Eval(zSweep));
                differenceArrayDiffest[idxDifferenceArray++] += sqrt(pow(diff_x, 2) + pow(diff_y, 2));
             }
+
+            delete splineMCx, splineMCy, splineMLPx, splineMLPy;
+            delete splineMLPNoTrkx, splineMLPNoTrky;
+            delete splineMLPestx, splineMLPesty;
          }
          
          if (stop) break;
@@ -205,29 +219,33 @@ void findMLP(Float_t sigmaScaleFactor = 0.60, Float_t vectorScaleFactor = -5.85)
       }
 
       else { // Still following the same particle
-         sum_edep += edep;
+         if (parentID == 0) { sum_edep += edep; }
+         lastEID = eventID;
       }
 
       if (parentID == 0) {
-         if       (z < -119 && z > -121) { Xp0.SetCoordinates(x,y,z); }
-         else if  (z < -109 && z > -111) { Xp1.SetCoordinates(x,y,z); }
-         else if  (z >  109 && z <  111) { Xp2.SetCoordinates(x,y,z); }
-         else if  (z >  119 && z <  121) { Xp3.SetCoordinates(x,y,z); }
-         else if  (z >  130)             { residualEnergy += edep; }
-         if (z < 130 && !stopacc) {
-            aPosMCx[aIdxMC] = x;
-            aPosMCz[aIdxMC++] = z;
-         }
-         if (z < 130) {
+         if       (volumeID[2] == 0) Xp0.SetCoordinates(x,y,z);
+         else if  (volumeID[2] == 1) Xp1.SetCoordinates(x,y,z);
+         else if  (volumeID[2] == 2) Xp2.SetCoordinates(x,y,z);
+         else if  (volumeID[2] == 3) Xp3.SetCoordinates(x,y,z);
+         else if  (volumeID[2] == 5) residualEnergy += edep;
+
+
+         if  (volumeID[2] < 5) {
             arSplineMCx[idxSplineMC] = x;
             arSplineMCy[idxSplineMC] = y;
             arSplineMCz[idxSplineMC++] = z;
+            
+            if (eventID < maxAcc and eventID != 2) {
+               aPosMCx[aIdxMC] = x;
+               aPosMCz[aIdxMC++] = z;
+            }
          }
       }
    }
 
+   TCanvas *c0 = new TCanvas("c0", "Residual Energy", 1500, 600);
    hResEnergy->Draw();
-
 
    TCanvas *c1 = new TCanvas("c1", "MLP estimation", 1500, 600);
    c1->Divide(3, 1, 0.001, 0.001);
@@ -278,7 +296,7 @@ void findMLP(Float_t sigmaScaleFactor = 0.60, Float_t vectorScaleFactor = -5.85)
       differenceArrayDiff[i] /= nInDifferenceArray;
       differenceArrayDiffNoTrk[i]  /= nInDifferenceArray;
       differenceArrayDiffest[i] /= nInDifferenceArray;
-      differenceArrayZ[i] += 110;
+      differenceArrayZ[i] += phantomSize/2 + 10;
    }
 
    TCanvas *c2 = new TCanvas("c2", "MC vs MLP difference", 1500, 600);

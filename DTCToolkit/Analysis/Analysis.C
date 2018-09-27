@@ -813,7 +813,7 @@ void findTracksRangeAccuracy(Int_t Runs, Int_t dataType, Bool_t recreate, Float_
    Float_t        highHistogramLimit = getUnitFromEnergy(run_energy)*1.4 + 10;
    TH1F         * hFitResults = new TH1F("fitResult", "noDrawHistogram", fmax(nEnergyBins,100), lowHistogramLimit, highHistogramLimit);
  
-   Tracks * tracks = loadOrCreateTracks(recreate, Runs*2, dataType, run_energy);
+   Tracks * tracks = loadOrCreateTracks(recreate, Runs*1.7, dataType, run_energy);
 
    if (removeHighAngleTracks) {
       tracks->removeHighAngleTracks(100);
@@ -862,13 +862,14 @@ void findTracksRangeAccuracy(Int_t Runs, Int_t dataType, Bool_t recreate, Float_
       meanError += listOfErrorValues[i];
    }
    
-   meanError /= (idxOfErrorValues + 1);
+   meanError /= (idxOfErrorValues);
 
    for (Int_t i=0; i<idxOfErrorValues; i++) {
       sigmaError += pow(listOfErrorValues[i] - meanError, 2);
    }
 
-   sigmaError = sqrt(sigmaError / idxOfErrorValues);
+   if (idxOfErrorValues == 1) sigmaError = 1e5;
+   else sigmaError = sqrt(sigmaError / (idxOfErrorValues-1));
 
    printf("Mean error from %d runs is %.2f mm +- %.2f mm. Expected error is %.2f.\n", Runs, meanError, sigmaError, expectedStraggling / sqrt(eventsPerRun));
    ofstream file("OutputFiles/tracksRangeAccuracy.csv", ofstream::out | ofstream::app);

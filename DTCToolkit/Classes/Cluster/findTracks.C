@@ -51,7 +51,7 @@ Tracks * Clusters::findTracksWithRecursiveWeighting() {
    
    nextClusters->reserve(50);
    
-   showDebug("makeLayerIndex..\n");
+   showDebug("makeLayerIndex...");
    makeLayerIndex();
    showDebug("ok!\nfillMSCradiusList...");
    fillMCSRadiusList();
@@ -91,12 +91,13 @@ Tracks * Clusters::findTracksWithRecursiveWeighting() {
       endNodes->reserve(kEventsPerRun * 5);
       seedNode->getUnexploredEndNodes(endNodes);
 
-      showDebug("doRecursiveWeightedTracking\n");
+      showDebug("doRecursiveWeightedTracking");
       doRecursiveWeightedTracking(seedNode, endNodes);
-
+      showDebug("..ok!\ngetBestTrack...");
       track = seedNode->getBestTrack();
+      showDebug("ok!\n");
       
-      if (track->GetEntries() > 3) {
+      if (track->GetEntries() >= 3) {
          tracks->appendTrack(track);
          removeTrackFromClustersWithoutTrack(track);
       }
@@ -122,7 +123,7 @@ void Clusters::doRecursiveWeightedTracking(Node * seedNode, vector<Node*> * endN
    Node    * thisNode;
    Cluster * nextCluster;
    Float_t   nextScore, nextAngle;
-
+   
    for (UInt_t i=0; i<endNodes->size(); i++) { // All identified endpoints to the tree so far
       thisNode = endNodes->at(i);
       thisNode->markExplored();
