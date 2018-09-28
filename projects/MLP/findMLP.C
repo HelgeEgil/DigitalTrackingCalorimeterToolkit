@@ -26,13 +26,13 @@ XYZVector SplineMLP(Double_t t, XYZVector X0, XYZVector X1, XYZVector P0, XYZVec
    return S;
 }
 
-void findMLP(Float_t AX = 0.60, Float_t AP = -5.85) {
-   TFile *f = new TFile("MC/Output/simpleScanner_phantom200mm_energy200MeV.root");
+void findMLP(Float_t AX = 0.885, Float_t AP = -10.3056) {
+   TFile *f = new TFile("MC/Output/simpleScanner_energy200MeV_Water_phantom200mm.root");
    TTree *tree = (TTree*) f->Get("Hits");
 
    Float_t     phantomSize = 200;
    Float_t     initialEnergy = 200;
-   const Int_t eventsToUse = 250;
+   const Int_t eventsToUse = 10000;
    Float_t     x, y, z, edep, sum_edep = 0, residualEnergy = 0;
    Int_t       eventID, parentID, lastEID = -1;
    XYZVector   Xp0, Xp1, Xp2, Xp3, X0, X1, X0est, X0err, X0NoTrk, P0, P0NoTrk, P1, P0hat, P1hat, S; // Xp are the plane coordinates, X are the tracker coordinates (X1 = (Xp1 + Xp2) / 2)
@@ -89,7 +89,7 @@ void findMLP(Float_t AX = 0.60, Float_t AP = -5.85) {
 
    TH1F *hResEnergy = new TH1F("hResEnergy", "Residual energy in calorimeter;Energy [MeV];Entries", 300, 0, 150);
    TH2F *hErrorNaive = new TH2F("hErrorNaive", "Beamspot uncertainty (assume point beam);X position [mm];Y position [mm]", 100, -25, 25, 100, -25, 25);
-   TH2F *hErrorSigmaScale = new TH2F("hErrorSigmaScale", Form("Beamspot uncertainty (use X1 * %.2f + P1 * %.2f);X position [mm];Y position [mm]", sigmaScaleFactor, vectorScaleFactor), 100, -25, 25, 100, -25, 25);
+   TH2F *hErrorSigmaScale = new TH2F("hErrorSigmaScale", Form("Beamspot uncertainty (use X1 * %.2f + P1 * %.2f);X position [mm];Y position [mm]", AX, AP), 100, -25, 25, 100, -25, 25);
 
    tree->SetBranchAddress("posX", &x);
    tree->SetBranchAddress("posY", &y);
@@ -203,7 +203,8 @@ void findMLP(Float_t AX = 0.60, Float_t AP = -5.85) {
                differenceArrayDiffest[idxDifferenceArray++] += sqrt(pow(diff_x, 2) + pow(diff_y, 2));
             }
 
-            delete splineMCx, splineMCy, splineMLPx, splineMLPy;
+            delete splineMCx, splineMCy;
+            delete splineMLPx, splineMLPy;
             delete splineMLPNoTrkx, splineMLPNoTrky;
             delete splineMLPestx, splineMLPesty;
          }
@@ -236,7 +237,7 @@ void findMLP(Float_t AX = 0.60, Float_t AP = -5.85) {
             arSplineMCy[idxSplineMC] = y;
             arSplineMCz[idxSplineMC++] = z;
             
-            if (eventID < maxAcc and eventID != 2) {
+            if (eventID < maxAcc && eventID != 2) {
                aPosMCx[aIdxMC] = x;
                aPosMCz[aIdxMC++] = z;
             }

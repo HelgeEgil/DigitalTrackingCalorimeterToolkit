@@ -10,6 +10,8 @@
 #include <TStyle.h>
 #include <Math/Vector3D.h>
 
+void findMLPLoop(Float_t phantomSize = 200, Float_t spotSize = -1);
+
 using namespace std;
 typedef ROOT::Math::DisplacementVector3D<ROOT::Math::Cartesian3D<double> > XYZVector;
 
@@ -26,14 +28,10 @@ XYZVector SplineMLP(Double_t t, XYZVector X0, XYZVector X1, XYZVector P0, XYZVec
    return S;
 }
 
-void findMLPLoop(Float_t sigmaScaleFactor = 0.60, Float_t vectorScaleFactor = -5.85) {
-   TFile *f = new TFile("MC/Output/simpleScanner_phantom200mm_energy200MeV.root");
-   TTree *tree = (TTree*) f->Get("Hits");
-
-   Float_t     phantomSize = 200;
-   Float_t     differenceArrayDZ = 3;
+void findMLPLoop(Float_t phantomSize, Float_t spotSize) {
    Float_t     initialEnergy = 200;
-   const Int_t eventsToUse = 250;
+   Float_t     differenceArrayDZ = 3;
+   const Int_t eventsToUse = 500;
    Float_t     x, y, z, edep, sum_edep = 0, residualEnergy = 0;
    Int_t       eventID, parentID, lastEID = -1;
    XYZVector   Xp0, Xp1, Xp2, Xp3, X0, X1, X0est, X0err, X0NoTrk, P0, P0NoTrk, P1, P0hat, P1hat, S; // Xp are the plane coordinates, X are the tracker coordinates (X1 = (Xp1 + Xp2) / 2)
@@ -50,7 +48,7 @@ void findMLPLoop(Float_t sigmaScaleFactor = 0.60, Float_t vectorScaleFactor = -5
    Int_t       idxWater = 0;
    Double_t    energiesWater[500], rangesWater[500];
    Float_t     energy, range;
-//   Float_t     sigmaFilter = 128.47;
+   //   Float_t     sigmaFilter = 128.47;
    Float_t     sigmaFilter = 60.0;
    Double_t    aPosMCx[10000], aPosMCz[10000];
    Double_t    aPosMLPx[10000], aPosMLPz[10000];
@@ -75,6 +73,19 @@ void findMLPLoop(Float_t sigmaScaleFactor = 0.60, Float_t vectorScaleFactor = -5
    gStyle->SetTitleSize(0.045, "Y");
    gStyle->SetTextSize(0.045);
 
+   TFile *f;
+
+   if (spotSize <0) {
+      f = new TFile(Form("MC/Output/simpleScanner_energy%.0fMeV_Water_phantom%.0fmm.root", initialEnergy, phantomSize)); 
+   }
+   else {
+      f = new TFile(Form("MC/Output/simpleScanner_energy%.0fMeV_Water_phantom%.0fmm_spotsize%.3fmm.root", initialEnergy, phantomSize, spotSize)); 
+   }
+
+   printf("Loaded file\n");
+
+   TTree *tree = (TTree*) f->Get("Hits");
+
    // Load Energy <-> Range spline
    in.open("Data/WaterPSTAR.csv");
    while (1) {
@@ -84,20 +95,37 @@ void findMLPLoop(Float_t sigmaScaleFactor = 0.60, Float_t vectorScaleFactor = -5
       energiesWater[idxWater++] = energy;
    }
    in.close();
-   TSpline3 *splineWater = new TSpline3("splineWater", energiesWater, rangesWater, idxWater);
 
-   Float_t  AXlow = 0.8;
-   Float_t  AXhigh = 1;
-   Float_t  APlow = -12;
-   Float_t  APhigh = -8;
+/*
+   in.open("Data/B100PSTAR.csv");
+   while (1) {
+      in >> energy >> range;
+      rangesB100[idxB100] = range*10;
+      energiesWater[idxB100++] = energy;
+   }
+*/
+
+   in.close();
+   TSpline3 *splineWater = new TSpline3("splineWater", energiesWater, rangesWater, idxWater);
+//   TSpline3 *splineB100 = new TSpline3("splineB100", energiesB100, rangesB100, idxB100);
+
+   Float_t  estAX = 0.9978 + 6.984e-5 * phantomSize - 5.146e-7 * pow(phantomSize,2) - 8.574e-9 * pow(phantomSize, 3);
+   Float_t  estAP = -2.01972 - 0.0753 * phantomSize + 0.0001497 * pow(phantomSize,2);
+
+   Float_t  AXlow = estAX * 0.9;
+   Float_t  AXhigh = estAX * 1.1;
+   Float_t  APlow = estAP * 1.6;
+   Float_t  APhigh = estAP * 0.5;
    
-   Float_t  APdelta = 0.05;
-   Float_t  AXdelta = 0.01;
+   Float_t  APdelta = 0.06;
+   Float_t  AXdelta = 0.002;
 
    Int_t    AXbins = (AXhigh - AXlow) / AXdelta;
-   Float_t  APbins = (APhigh - APlow) / APdelta;
+   Int_t    APbins = (APhigh - APlow) / APdelta;
 
-   TH2F * hErrorMatrix = new TH2F("hErrorMatrix", "Error Matrix;A_{X} parameter;A_{P} parameter", AXbins, AXlow, AXhigh, APbins, APlow, APhigh);
+   printf("Using %d AXbins and %d APbins.\n", AXbins, APbins);
+
+   TH2F * hErrorMatrix = new TH2F("hErrorMatrix", Form("AUC of Errors between MC and MLP, %.0f mm B100 phantom;A_{X} parameter;A_{P} parameter", phantomSize), AXbins, AXlow, AXhigh, APbins, APlow, APhigh);
    TH2I * hIdxMatrix = new TH2I("hIdxMatrix", "Normalization matrix;A_{X} parameter;A_{P} parameter", AXbins, AXlow, AXhigh, APbins, APlow, APhigh);
 
    tree->SetBranchAddress("posX", &x);
@@ -145,7 +173,7 @@ void findMLPLoop(Float_t sigmaScaleFactor = 0.60, Float_t vectorScaleFactor = -5
             splineMCy  = new TSpline3("splineMCy", arSplineMCz, arSplineMCy, idxSplineMC);
          
             // INNER MINIMIZATION LOOP
-            for (Float_t AX = AXlow; AX <= AXhigh; AX += AXdelta) { 
+            for (Float_t AX = AXlow; AX <= AXhigh; AX += AXdelta) {
                for (Float_t AP = APlow; AP <= APhigh; AP += APdelta) {
                   X0est = X1 * AX + P1 * AP;
                   X0est.SetZ(-phantomSize/2 - 15); // We know the Z coordinate...
@@ -153,7 +181,7 @@ void findMLPLoop(Float_t sigmaScaleFactor = 0.60, Float_t vectorScaleFactor = -5
                   S = SplineMLP(0, X0est, X1, P0NoTrk, P1hat, Lambda0, Lambda1);
                   
                   Float_t lastZ = -1;
-                  for (Float_t t=0; t<1; t+= 0.1) { // was 0.01
+                  for (Float_t t=0; t<1; t+= 0.01) { // was 0.01
                      S = SplineMLP(t, X0est, X1, P0NoTrk, P1hat, Lambda0, Lambda1);
                      if (lastZ<1) lastZ = S.Z();
                      diff_x = fabs(splineMCx->Eval(S.Z()) - S.X());
@@ -196,17 +224,13 @@ void findMLPLoop(Float_t sigmaScaleFactor = 0.60, Float_t vectorScaleFactor = -5
       }
    }
 
-   TCanvas *c = new TCanvas();
-   hIdxMatrix->Draw("COLZ");
-
    gStyle->SetOptStat(0);
+   gStyle->SetNumberContours(99);
 
    hErrorMatrix->Divide(hIdxMatrix);
    
    TCanvas *c2 = new TCanvas();
    hErrorMatrix->Draw("COLZ");
-
-   gPad->SetLogz();
 
    Int_t binx, biny, binz;
    hErrorMatrix->GetMinimumBin(binx, biny, binz);
@@ -214,4 +238,11 @@ void findMLPLoop(Float_t sigmaScaleFactor = 0.60, Float_t vectorScaleFactor = -5
    Float_t minXvalue = hErrorMatrix->GetXaxis()->GetBinCenter(binx);
    Float_t minYvalue = hErrorMatrix->GetYaxis()->GetBinCenter(biny);
    printf("The lowest AUC, %.2f mm, is achieved with the parameters: AX = %.3f, AP = %.3f\n", hErrorMatrix->GetBinContent(binx,biny), minXvalue, minYvalue);
+
+   c2->SaveAs(Form("Output/accuracy_energy%.0fMeV_%.0fmm_B100.pdf", initialEnergy, phantomSize));
+
+   // Phantom size, error , AX , AP
+   ofstream file(Form("Output/accuracy_energy%.0fMeV_B100_phantom.csv", initialEnergy), ofstream::out | ofstream::app); 
+   file << phantomSize << " " << hErrorMatrix->GetBinContent(binx,biny) << " " << minXvalue << " " << minYvalue << endl;
+   file.close();
 }
