@@ -117,7 +117,7 @@ const Int_t kMinimumTracklength = 5;
 const Float_t kBPFactorAboveAverage = 1.3;
 
 Int_t    GlobalLayerID = 0;
-Float_t  run_energy = 0;
-Float_t  run_degraderThickness = 0;
+const Float_t  run_energy = 250;
+const Float_t  run_degraderThickness = 160;
 Int_t    kDataType = kData;
 #endif

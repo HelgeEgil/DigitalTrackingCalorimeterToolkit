@@ -48,7 +48,6 @@ void MaterialConstants() {
    }
 
    if (kMaterial == kTungsten) {
-      nLayers = 24;
       p = p_tungsten;
       alpha = alpha_tungsten;
       alpha_prime = alpha_prime_tungsten;
@@ -59,7 +58,6 @@ void MaterialConstants() {
    }
 
    else if (kMaterial == kAluminum) {
-      nLayers = 70;
       p = p_aluminum;
       alpha = alpha_aluminum;
       alpha_prime = alpha_prime_aluminum;
@@ -70,7 +68,6 @@ void MaterialConstants() {
    }
 
    else if (kMaterial == kPMMA) {
-      nLayers = 65;
       alpha_prime = alpha_prime_water; // MUST VERIFY
       p = p_water; // MUST VERIFY
       alpha = alpha_water; // MUST VERIFY
@@ -81,7 +78,6 @@ void MaterialConstants() {
    }
 
    else if (kMaterial == kCarbon) {
-      nLayers = 100;
       p = p_aluminum;
       alpha = alpha_aluminum;
       alpha_prime = alpha_prime_aluminum;

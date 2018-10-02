@@ -8,7 +8,7 @@ namespace DTC {
 class Cluster;
 }
 
-Int_t nLayers;
+const Int_t nLayers = 70;
 
 // range = alpha * energy ^ p
 // range straggling is proportionate to alpha_prime

@@ -90,7 +90,10 @@ Tracks * loadTracks(Int_t Runs, Int_t dataType, Float_t energy) {
 
 Tracks * loadOrCreateTracks(Bool_t recreate, Int_t Runs, Int_t dataType, Float_t energy) {
    Tracks * tracks = nullptr;
-   
+
+   printf("run_energy = %.2f\n", run_energy);
+   printf("::run_energy = %.2f\n", ::run_energy);
+
    if (recreate) {
       tracks = getTracksFromClusters(Runs, dataType, kCalorimeter, energy);
    }

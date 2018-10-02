@@ -46,7 +46,6 @@
 using namespace std;
 using namespace DTC;
 
-
 void drawTracksDeltaTheta(Int_t Runs, Int_t dataType, Bool_t recreate, Float_t energy, Float_t degraderThickness) {
    // For each track (found using event ID information), find the change in angle
    // at layer 1, 2, 3, 4, 5, ..., nLayers.
@@ -66,13 +65,10 @@ void drawTracksDeltaTheta(Int_t Runs, Int_t dataType, Bool_t recreate, Float_t e
    
    kDoTracking = false;
    kEventsPerRun = 50000;
-   run_degraderThickness = degraderThickness;
-   run_energy = energy;
 
-   if (kUseDegrader) run_energy = getEnergyAtWEPL(energy, degraderThickness);
    BinLogY(hAngleSumInAllLayers);
 
-   Tracks * tracks = loadOrCreateTracks(recreate, Runs, dataType, run_energy);
+   Tracks * tracks = loadOrCreateTracks(recreate, Runs, dataType, getEnergyAtWEPL(energy, degraderThickness));
 
    for (Int_t i=0; i<tracks->GetEntriesFast(); i++) {
       thisTrack = tracks->At(i);
@@ -168,11 +164,8 @@ void drawTracksDeltaTheta(Int_t Runs, Int_t dataType, Bool_t recreate, Float_t e
 
    kDoTracking = false;
    kEventsPerRun = 50000;
-   run_degraderThickness = degraderThickness;
-   run_energy = energy;
-   if (kUseDegrader) run_energy = getEnergyAtWEPL(energy, degraderThickness);
 
-   Tracks * tracks = loadOrCreateTracks(recreate, Runs, dataType, run_energy);
+   Tracks * tracks = loadOrCreateTracks(recreate, Runs, dataType, getEnergyAtWEPL(energy, degraderThickness));
 
    vector<TH1F*> *hAngleDifference = new vector<TH1F*>;
    vector<TCanvas*> *cCanvases = new vector<TCanvas*>;
@@ -268,13 +261,6 @@ void drawTracksDeltaTheta(Int_t Runs, Int_t dataType, Bool_t recreate, Float_t e
 
 void getTracksReconstructionEfficiency(Int_t dataType, Float_t energy, Float_t degraderThickness) {
    Int_t nRuns = 0;
-
-   run_energy = energy;
-   run_degraderThickness = degraderThickness;
-   
-   if (kUseDegrader) {
-      run_energy = getEnergyAtWEPL(energy, degraderThickness);
-   }
 
 //   Int_t nRunArray[8] = {19,32,64,108,215,512,1024,2048};
 //   Int_t nRunArray[7] = {10,25,50,100,150,250,500};
@@ -378,8 +364,6 @@ void drawClusterShapes(Int_t Runs, Bool_t dataType, Float_t energy, Float_t degr
    // See also ../Classes/Hit/findClusters.C
 
    showDebug("Initializing function...\n");
-   run_energy = energy;
-   run_degraderThickness = degraderThickness;
 
    Int_t useDataHits = false; // cpu saver?
    kDataType = dataType;
@@ -541,7 +525,6 @@ void drawClusterShapes(Int_t Runs, Bool_t dataType, Float_t energy, Float_t degr
 
 void drawFitScale(Int_t Runs, Int_t dataType, Bool_t recreate, Float_t energy) {
    TCanvas *cScale = new TCanvas("cScale", "Scale histogram", 1400, 1000);
-   run_energy = energy;
    kDataType = dataType;
    
    TH1F *hScale = new TH1F("hScale", "Scale histogram", 800, 0, 50);
@@ -570,15 +553,8 @@ void drawFitScale(Int_t Runs, Int_t dataType, Bool_t recreate, Float_t energy) {
 }  
 
 void drawTracksDepthDose(Int_t Runs, Int_t dataType, Bool_t recreate, Float_t energy, Float_t degraderThickness, Int_t eventsPerRun, Bool_t doTracking, Bool_t excludeNuclearInteractions) {
-   run_degraderThickness = degraderThickness;
-   run_energy = energy;
    kDataType = dataType;
    kEventsPerRun = eventsPerRun;
-   
-   if (kUseDegrader) {
-      run_energy = getEnergyFromDegraderThickness(degraderThickness);
-      printf("Using degrader, expecting nominal residual energy %.2f MeV\n", run_energy);
-   }
    
    Bool_t         removeHighAngleTracks = false;
    Bool_t         removeNuclearInteractions = true;
@@ -600,7 +576,7 @@ void drawTracksDepthDose(Int_t Runs, Int_t dataType, Bool_t recreate, Float_t en
    gPad->SetBottomMargin(0.05);
    gPad->SetLeftMargin(0.15);
 
-   Tracks * tracks = loadOrCreateTracks(recreate, Runs, dataType, run_energy);
+   Tracks * tracks = loadOrCreateTracks(recreate, Runs, dataType, getEnergyFromDegraderThickness(run_degraderThickness));
 
    if (removeHighAngleTracks) {
       tracks->removeHighAngleTracks(100);
@@ -635,15 +611,9 @@ void drawTracksDepthDose(Int_t Runs, Int_t dataType, Bool_t recreate, Float_t en
 }
 
 void drawTracksRangeHistogram(Int_t Runs, Int_t dataType, Bool_t recreate, Float_t energy, Float_t degraderThickness, Int_t eventsPerRun, Int_t outputFileIdx, Bool_t drawFitResults, Bool_t doTracking, Bool_t excludeNuclearInteractions, Int_t skipTracks) {
-   run_degraderThickness = degraderThickness;
-   run_energy = energy;
    kEventsPerRun = eventsPerRun;
    kDoTracking = doTracking;
    kFilterNuclearInteractions = excludeNuclearInteractions;
-   
-   if (kUseDegrader) {
-      run_energy = getEnergyFromDegraderThickness(degraderThickness);
-   }
 
    printf("Using water degrader of thickness %.0f mm, the initial energy of %.0f MeV is reduced to %.1f MeV.\n", degraderThickness, energy, run_energy);
 
@@ -663,7 +633,7 @@ void drawTracksRangeHistogram(Int_t Runs, Int_t dataType, Bool_t recreate, Float
    char         * sMaterial = getMaterialChar();
    char         * hTitle = Form("Fitted energy of a %.2f MeV beam in %s (%s)", run_energy, sMaterial, sDataType);
 
-   Int_t nEnergyBins = getUnitFromEnergy(run_energy);
+   Int_t nEnergyBins = getUnitFromEnergy(getEnergyFromDegraderThickness(run_energy));
    gStyle->SetOptTitle(0);
 
    if (kUseDegrader) {
@@ -671,19 +641,19 @@ void drawTracksRangeHistogram(Int_t Runs, Int_t dataType, Bool_t recreate, Float
    }
 
    Float_t lowHistogramLimit = getUnitFromEnergy(0);
-   Float_t highHistogramLimit = getUnitFromEnergy(run_energy)*1.4 + 10;
+   Float_t highHistogramLimit = getUnitFromEnergy(getEnergyFromDegraderThickness(run_energy))*1.4 + 10;
    TH1F * hFitResults = new TH1F("fitResult", hTitle, fmax(nEnergyBins,100), lowHistogramLimit, highHistogramLimit);
  
    printf("Using material: %s\n", sMaterial);
    printf("Histogram limits: %.2f to %.2f.\n", lowHistogramLimit, highHistogramLimit);
-   printf("At energy %.0f, expecting range %.2f mm and WEPL %.2f mm.\n", run_energy, getTLFromEnergy(run_energy), getWEPLFromEnergy(run_energy));
-   printf("This corresponds to a WEPL factor of %.2f.\n", getWEPLFactorFromEnergy(run_energy));
+   printf("At energy %.0f, expecting range %.2f mm and WEPL %.2f mm.\n", getEnergyFromDegraderThickness(run_energy), getTLFromEnergy(getEnergyFromDegraderThickness(run_energy)), getWEPLFromEnergy(getEnergyFromDegraderThickness(run_energy)));
+   printf("This corresponds to a WEPL factor of %.2f.\n", getWEPLFactorFromEnergy(getEnergyFromDegraderThickness(run_energy)));
    cout << "Correcting for aluminum plate: " << kIsAluminumPlate << endl;
    cout << "Correcting for scintillators: " << kIsScintillator << endl;
 
    hFitResults->SetLineColor(kBlack); hFitResults->SetFillColor(kGreen-5);
 
-   Tracks * tracks = loadOrCreateTracks(recreate, Runs, dataType, run_energy);
+   Tracks * tracks = loadOrCreateTracks(recreate, Runs, dataType, getEnergyFromDegraderThickness(run_degraderThickness));
    if (removeHighAngleTracks) {
       tracks->removeHighAngleTracks(100);
    }
@@ -713,11 +683,11 @@ void drawTracksRangeHistogram(Int_t Runs, Int_t dataType, Bool_t recreate, Float
    // Draw expected gaussian distribution of results from initial energy
    Float_t expectedStraggling = 0, expectedMean = 0, dlayer_down = 0, dlayer = 0;
    Float_t separationFactor = 0.9, nullStraggling = 0;
-   Float_t sigma_energy = getSigmaEnergy(run_energy);
+   Float_t sigma_energy = getSigmaEnergy(getEnergyFromDegraderThickness(run_energy));
    
-   expectedMean = getUnitFromEnergy(run_energy);
-   expectedStraggling = getUnitStragglingFromEnergy(run_energy, sigma_energy);
-   nullStraggling = getUnitStragglingFromEnergy(run_energy, 0);
+   expectedMean = getUnitFromEnergy(getEnergyFromDegraderThickness(run_energy));
+   expectedStraggling = getUnitStragglingFromEnergy(getEnergyFromDegraderThickness(run_energy), sigma_energy);
+   nullStraggling = getUnitStragglingFromEnergy(getEnergyFromDegraderThickness(run_energy), 0);
    
    cout << "OutputUnit is " << kOutputUnit << " and the expected mean value is " << expectedMean 
        << ". The straggling including / excluding energy variation is " << expectedStraggling << " / " << nullStraggling << ".\n";
@@ -777,19 +747,14 @@ void drawTracksRangeHistogram(Int_t Runs, Int_t dataType, Bool_t recreate, Float
 }
 
 void findTracksRangeAccuracy(Int_t Runs, Int_t dataType, Bool_t recreate, Float_t energy, Float_t degraderThickness, Int_t eventsPerRun, Int_t outputFileIdx, Bool_t doTracking, Bool_t excludeNuclearInteractions) {
-   run_degraderThickness = degraderThickness;
-   run_energy = energy;
    kEventsPerRun = eventsPerRun;
    kDoTracking = doTracking;
    kFilterNuclearInteractions = excludeNuclearInteractions;
          
    gROOT->SetBatch(kTRUE);
 
-   if (kUseDegrader) {
-      run_energy = getEnergyFromDegraderThickness(degraderThickness);
-   }
 
-   printf("Using water degrader of thickness %.0f mm, the initial energy of %.0f MeV is reduced to %.1f MeV.\n", degraderThickness, energy, run_energy);
+   printf("Using water degrader of thickness %.0f mm, the initial energy of %.0f MeV is reduced to %.1f MeV.\n", degraderThickness, energy, getEnergyFromDegraderThickness(run_energy));
 
    kDataType = dataType;
    Bool_t         removeHighAngleTracks = true;
@@ -800,20 +765,20 @@ void findTracksRangeAccuracy(Int_t Runs, Int_t dataType, Bool_t recreate, Float_
    Int_t          nCutDueToTrackEndingAbruptly = 0;
    Int_t          skipPlot = 0;
    TGraphErrors * outputGraph;
-   Float_t        expectedMean = getUnitFromEnergy(run_energy);
-   Float_t        expectedStraggling = getUnitStragglingFromEnergy(run_energy, getSigmaEnergy(run_energy));
+   Float_t        expectedMean = getUnitFromEnergy(getEnergyFromDegraderThickness(run_energy));
+   Float_t        expectedStraggling = getUnitStragglingFromEnergy(getEnergyFromDegraderThickness(run_energy), getSigmaEnergy(getEnergyFromDegraderThickness(run_energy)));
    Float_t        empiricalMean, empiricalSigma;
    Float_t        means[10] = {};
    Float_t        sigmas[10] = {};
    Float_t        listOfErrorValues[10000] = {};
    Int_t          idxOfErrorValues = 0;
 
-   Int_t          nEnergyBins = getUnitFromEnergy(run_energy);
+   Int_t          nEnergyBins = getUnitFromEnergy(getEnergyFromDegraderThickness(run_energy));
    Float_t        lowHistogramLimit = getUnitFromEnergy(0);
-   Float_t        highHistogramLimit = getUnitFromEnergy(run_energy)*1.4 + 10;
+   Float_t        highHistogramLimit = getUnitFromEnergy(getEnergyFromDegraderThickness(run_energy))*1.4 + 10;
    TH1F         * hFitResults = new TH1F("fitResult", "noDrawHistogram", fmax(nEnergyBins,100), lowHistogramLimit, highHistogramLimit);
  
-   Tracks * tracks = loadOrCreateTracks(recreate, Runs*1.7, dataType, run_energy);
+   Tracks * tracks = loadOrCreateTracks(recreate, Runs*1.7, dataType, getEnergyFromDegraderThickness(run_energy));
 
    if (removeHighAngleTracks) {
       tracks->removeHighAngleTracks(100);
@@ -873,12 +838,11 @@ void findTracksRangeAccuracy(Int_t Runs, Int_t dataType, Bool_t recreate, Float_
 
    printf("Mean error from %d runs is %.2f mm +- %.2f mm. Expected error is %.2f.\n", Runs, meanError, sigmaError, expectedStraggling / sqrt(eventsPerRun));
    ofstream file("OutputFiles/tracksRangeAccuracy.csv", ofstream::out | ofstream::app);
-   file << run_energy << " " << Runs << " " << eventsPerRun<< " " << meanError << " " << sigmaError << endl;
+   file << getEnergyFromDegraderThickness(run_energy) << " " << Runs << " " << eventsPerRun<< " " << meanError << " " << sigmaError << endl;
    file.close();
 }
 
 void draw2DProjection(Int_t Runs, Int_t dataType, Bool_t recreate, Float_t energy) {
-   run_energy = energy;
    
    Tracks * tracks1 = loadOrCreateTracks(recreate, Runs, dataType, 170);
    Tracks * tracks2 = loadOrCreateTracks(recreate, Runs, dataType, 188);
@@ -1017,7 +981,6 @@ void draw2DProjection(Int_t Runs, Int_t dataType, Bool_t recreate, Float_t energ
 }
 
 void drawClusterSizeDistribution(Int_t Runs, Int_t dataType, Bool_t recreate, Float_t energy) {
-   run_energy = energy;
    DataInterface *di = new DataInterface();
 
    Int_t nClusters = kEventsPerRun * 5 * nLayers;
@@ -1107,7 +1070,6 @@ void drawClusterSizeDistribution(Int_t Runs, Int_t dataType, Bool_t recreate, Fl
 }
 
 void compareChargeDiffusionModels(Int_t Runs, Bool_t recreate, Float_t energy) {
-   run_energy = energy;
 
    DataInterface *di = new DataInterface();
 
@@ -1197,7 +1159,6 @@ void compareChargeDiffusionModels(Int_t Runs, Bool_t recreate, Float_t energy) {
 
    for (Int_t e=0; e<nEnergies; e++) {
       energy = energies[e];
-      run_energy = energy;
       tracks = loadOrCreateTracks(recreate, Runs, 1, energy);
 
       for (Int_t k=0; k<tracks->GetEntriesFast(); k++) {
@@ -1417,20 +1378,20 @@ void compareChargeDiffusionModels(Int_t Runs, Bool_t recreate, Float_t energy) {
 
 }
    
-void drawTracks3D(Int_t Runs, Int_t dataType, Bool_t recreate, Int_t switchLayer, Float_t energy, Float_t degraderThickness, Int_t tracksperrun, Bool_t doTracking) {
-   run_energy = energy;
-   run_degraderThickness = degraderThickness;
+void drawTracks3D(Int_t Runs, Int_t tracksperrun, Bool_t doTracking) {
    kEventsPerRun = tracksperrun;
    kDoTracking = doTracking;
 
-   Tracks * tracks = loadOrCreateTracks(recreate, Runs, dataType, energy);
+   Int_t switchLayer = 100;
+   
+   Tracks * tracks = loadOrCreateTracks(1, Runs, 0, run_energy);
 
 //   tracks->removeHighAngleTracks(100); // mrad
 
    Bool_t   kDraw = true;
 
    TCanvas *c1 = new TCanvas("c1", "c1", 1000, 1000);
-   c1->SetTitle(Form("Tracks from %.2f MeV protons on %s", energy, getMaterialChar()));
+   c1->SetTitle(Form("Tracks from %.2f MeV protons on %s", run_energy, getMaterialChar()));
    TView *view = TView::CreateView(1);
    float fromx = 0.1 * nx;
    float tox = 0.9 * nx;
@@ -1728,7 +1689,6 @@ void drawTracks3D(Int_t Runs, Int_t dataType, Bool_t recreate, Int_t switchLayer
 }
 
 void drawAlignmentCheck(Int_t Runs, Int_t dataType, Bool_t recreate, Float_t energy) {
-   run_energy = energy;
    kDataType = dataType;
 
    Tracks * tracks = loadOrCreateTracks(recreate, Runs, dataType, energy);
@@ -2022,7 +1982,6 @@ void drawAlignmentCheck(Int_t Runs, Int_t dataType, Bool_t recreate, Float_t ene
 }
 
 void drawDiffusionCheck(Int_t Runs, Int_t Layer, Float_t energy) {
-   run_energy = energy;
    DataInterface *di = new DataInterface();
    CalorimeterFrame *cf = new CalorimeterFrame();
    
@@ -2054,8 +2013,6 @@ void drawDiffusionCheck(Int_t Runs, Int_t Layer, Float_t energy) {
 }
 
 void drawFrame2D(Int_t dataType, Int_t layerNo, Float_t energy, Float_t degraderThickness) {
-   run_energy = energy;
-   run_degraderThickness = degraderThickness;
 
    printf("Creating a 2D histogram of layer %d using %s and %d number of primary protons\n", layerNo, getDataTypeChar(dataType), kEventsPerRun); 
 
@@ -2105,7 +2062,6 @@ void drawFrame2D(Int_t dataType, Int_t layerNo, Float_t energy, Float_t degrader
 }
 
 void drawDataProfile(Float_t energy) {
-   run_energy = energy;
 
    TCanvas *c1 = new TCanvas("c1", "Beam profiles", 1200, 700);
    c1->Divide(2,1,0.0001,0.0001);
