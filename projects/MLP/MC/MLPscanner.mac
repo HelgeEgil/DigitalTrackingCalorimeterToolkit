@@ -67,28 +67,30 @@
 
 /gate/run/initialize
 
+/geometry/test/run
+
 /process/inactivate hadElastic
 /process/inactivate protonInelastic
 
 /gate/source/addSource PBS PencilBeam
 /gate/source/PBS/setParticleType proton
-/gate/source/PBS/setEnergy 200 MeV
+/gate/source/PBS/setEnergy 230 MeV
 /gate/source/PBS/setSigmaEnergy 0. MeV
 /gate/source/PBS/setPosition 0 0 -{zcalorimeter} mm
 /gate/source/PBS/setSigmaX {spotsize} mm
 /gate/source/PBS/setSigmaY {spotsize} mm
-/gate/source/PBS/setSigmaTheta 3 mrad
-/gate/source/PBS/setSigmaPhi 3 mrad
-/gate/source/PBS/setEllipseXThetaEmittance 15 mm*mrad
+/gate/source/PBS/setSigmaTheta {divergence} mrad # was 3
+/gate/source/PBS/setSigmaPhi {divergence} mrad # was 3
+/gate/source/PBS/setEllipseXThetaEmittance {emittance} mm*mrad # was 15
 /gate/source/PBS/setEllipseXThetaRotationNorm negative
-/gate/source/PBS/setEllipseYPhiEmittance 15 mm*mrad
+/gate/source/PBS/setEllipseYPhiEmittance {emittance} mm*mrad # was 15
 /gate/source/PBS/setEllipseYPhiRotationNorm negative
-/gate/application/setTotalNumberOfPrimaries 1000
+/gate/application/setTotalNumberOfPrimaries 5000
 
 /gate/output/root/enable
 /gate/output/root/setRootSinglesFlag 0
 /gate/output/root/setRootHitFlag 1
-/gate/output/root/setFileName Output/simpleScanner_energy200MeV_{material}_phantom{dz}mm
+/gate/output/root/setFileName Output/simpleScanner_energy230MeV_{material}_phantom{dz}mm
 
 /gate/random/setEngineName MersenneTwister
 /gate/random/setEngineSeed auto

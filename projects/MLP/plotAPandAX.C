@@ -67,7 +67,31 @@ void plotAPandAX() {
    Float_t  arrayAXspot[arraySize] = {0};
    Float_t  arrayAPspot[arraySize] = {0};
    Float_t  arraySpotsize[arraySize] = {0};
+
+   Float_t  arrayDivergence[arraySize] = {0};
+   Float_t  arrayBeamSpotErrorNoTrk[arraySize] = {0};
+   Float_t  arrayBeamSpotErrorEst[arraySize] = {0};
+   Float_t  arrayMLPmidErrorNoTrk[arraySize] = {0};
+   Float_t  arrayMLPmidErrorEst[arraySize] = {0};
+   Float_t  arrayMLPstartErrorNoTrk[arraySize] = {0};
+   Float_t  arrayMLPstartErrorEst[arraySize] = {0};
    
+   Float_t  arrayA150Divergence[arraySize] = {0};
+   Float_t  arrayA150BeamSpotErrorNoTrk[arraySize] = {0};
+   Float_t  arrayA150BeamSpotErrorEst[arraySize] = {0};
+   Float_t  arrayA150MLPmidErrorNoTrk[arraySize] = {0};
+   Float_t  arrayA150MLPmidErrorEst[arraySize] = {0};
+   Float_t  arrayA150MLPstartErrorNoTrk[arraySize] = {0};
+   Float_t  arrayA150MLPstartErrorEst[arraySize] = {0};
+   
+   Float_t  arrayCorticalBoneDivergence[arraySize] = {0};
+   Float_t  arrayCorticalBoneBeamSpotErrorNoTrk[arraySize] = {0};
+   Float_t  arrayCorticalBoneBeamSpotErrorEst[arraySize] = {0};
+   Float_t  arrayCorticalBoneMLPmidErrorNoTrk[arraySize] = {0};
+   Float_t  arrayCorticalBoneMLPmidErrorEst[arraySize] = {0};
+   Float_t  arrayCorticalBoneMLPstartErrorNoTrk[arraySize] = {0};
+   Float_t  arrayCorticalBoneMLPstartErrorEst[arraySize] = {0};
+
    Double_t rangesWater[arraySize] = {};
    Double_t energiesWater[arraySize] = {};
    Double_t rangesB100[arraySize] = {};
@@ -90,6 +114,9 @@ void plotAPandAX() {
    Int_t    arrayIdxA150200 = 0;
    Int_t    arrayIdx230 = 0;
    Int_t    arrayIdxSpot = 0;
+   Int_t    arrayIdxDivergence = 0;
+   Int_t    arrayA150IdxDivergence = 0;
+   Int_t    arrayCorticalBoneIdxDivergence = 0;
 
    
    ifstream in;
@@ -184,7 +211,7 @@ void plotAPandAX() {
 
       arrayPhantomSize200[arrayIdx200] = phantomSize_;
       arrayWetWepl200[arrayIdx200] = pow(wet/wepl, 2);
-      arrayResidualEnergy200[arrayIdx200] = pow(wet/wepl,2) * weplFactor;
+      arrayResidualEnergy200[arrayIdx200] = pow(wet/wepl,10) * weplFactor;
       arrayError200[arrayIdx200] = error_;
       arrayAX200[arrayIdx200] = AX_;
       arrayAP200[arrayIdx200++] = AP_;
@@ -214,7 +241,7 @@ void plotAPandAX() {
 
       arrayPhantomSizeB100200[arrayIdxB100200] = phantomSize_;
       arrayWetWeplB100200[arrayIdxB100200] = pow(wet/wepl, 2); // * pow(weplFactor, weplPower);
-      arrayResidualEnergyB100200[arrayIdxB100200] = pow(wet/wepl, 2); // * weplFactor;
+      arrayResidualEnergyB100200[arrayIdxB100200] = pow(wet/wepl, 10); // * weplFactor;
       arrayAXB100200[arrayIdxB100200] = AX_;
       arrayAPB100200[arrayIdxB100200++] = AP_;
    }
@@ -231,7 +258,7 @@ void plotAPandAX() {
 
       arrayPhantomSizeAdipose200[arrayIdxAdipose200] = phantomSize_;
       arrayWetWeplAdipose200[arrayIdxAdipose200] = pow(wet/wepl, 2); // * pow(weplFactor, weplPower);
-      arrayResidualEnergyAdipose200[arrayIdxAdipose200] = pow(wet/wepl, 2); // * weplFactor;
+      arrayResidualEnergyAdipose200[arrayIdxAdipose200] = pow(wet/wepl, 10); // * weplFactor;
       arrayAXAdipose200[arrayIdxAdipose200] = AX_;
       arrayAPAdipose200[arrayIdxAdipose200++] = AP_;
    }
@@ -248,7 +275,7 @@ void plotAPandAX() {
 
       arrayPhantomSizeCorticalBone200[arrayIdxCorticalBone200] = phantomSize_;
       arrayWetWeplCorticalBone200[arrayIdxCorticalBone200] = pow(wet/wepl, 2); // * pow(weplFactor, weplPower);
-      arrayResidualEnergyCorticalBone200[arrayIdxCorticalBone200] = pow(wet/wepl, 2); // * weplFactor;
+      arrayResidualEnergyCorticalBone200[arrayIdxCorticalBone200] = pow(wet/wepl, 10); // * weplFactor;
       arrayAXCorticalBone200[arrayIdxCorticalBone200] = AX_;
       arrayAPCorticalBone200[arrayIdxCorticalBone200++] = AP_;
    }
@@ -265,7 +292,7 @@ void plotAPandAX() {
 
       arrayPhantomSizeA150200[arrayIdxA150200] = phantomSize_;
       arrayWetWeplA150200[arrayIdxA150200] = pow(wet/wepl, 2); // * pow(weplFactor, weplPower);
-      arrayResidualEnergyA150200[arrayIdxA150200] = pow(wet/wepl, 2); // * weplFactor;
+      arrayResidualEnergyA150200[arrayIdxA150200] = pow(wet/wepl, 10); // * weplFactor;
       arrayAXA150200[arrayIdxA150200] = AX_;
       arrayAPA150200[arrayIdxA150200++] = AP_;
    }
@@ -282,10 +309,57 @@ void plotAPandAX() {
 
       arrayPhantomSize230[arrayIdx230] = phantomSize_;
       arrayWetWepl230[arrayIdx230] = pow(wet/wepl, 2);
-      arrayResidualEnergy230[arrayIdx230] = pow(wet/wepl,2);
+      arrayResidualEnergy230[arrayIdx230] = pow(wet/wepl,10);
       arrayError230[arrayIdx230] = error_;
       arrayAX230[arrayIdx230] = AX_;
       arrayAP230[arrayIdx230++] = AP_;
+   }
+   in.close();
+
+   Float_t divergence_, mlpMidNoTrk_, mlpMidEst_, mlpStartNoTrk_, mlpStartEst_, bsNoTrk_, bsEst_;
+   in.open("Output/MLPerror_energy230MeV_Water_degrader.csv");
+   while (1) {
+      in >> phantomSize_ >> divergence_ >> mlpStartNoTrk_ >> mlpMidNoTrk_ >> mlpStartEst_ >> mlpMidEst_ >> bsNoTrk_ >> bsEst_;
+      if (!in.good()) break;
+
+      arrayDivergence[arrayIdxDivergence] = phantomSize_; //divergence_;
+      arrayMLPmidErrorNoTrk[arrayIdxDivergence] = mlpMidNoTrk_;
+      arrayMLPmidErrorEst[arrayIdxDivergence] = mlpMidEst_;
+      arrayMLPstartErrorNoTrk[arrayIdxDivergence] = mlpStartNoTrk_;
+      arrayMLPstartErrorEst[arrayIdxDivergence] = mlpStartEst_;
+      arrayBeamSpotErrorNoTrk[arrayIdxDivergence] = bsNoTrk_;
+      arrayBeamSpotErrorEst[arrayIdxDivergence++] = bsEst_;
+   }
+   in.close();
+  
+   Int_t dummy;
+   in.open("Output/MLPerror_energy230MeV_A150_degrader.csv");
+   while (1) {
+      in >> phantomSize_ >> dummy >> mlpStartNoTrk_ >> mlpMidNoTrk_ >> mlpStartEst_ >> mlpMidEst_ >> bsNoTrk_ >> bsEst_;
+      if (!in.good()) break;
+
+      arrayA150Divergence[arrayA150IdxDivergence] = phantomSize_; //divergence_;
+      arrayA150MLPmidErrorNoTrk[arrayA150IdxDivergence] = mlpMidNoTrk_;
+      arrayA150MLPmidErrorEst[arrayA150IdxDivergence] = mlpMidEst_;
+      arrayA150MLPstartErrorNoTrk[arrayA150IdxDivergence] = mlpStartNoTrk_;
+      arrayA150MLPstartErrorEst[arrayA150IdxDivergence] = mlpStartEst_;
+      arrayA150BeamSpotErrorNoTrk[arrayA150IdxDivergence] = bsNoTrk_;
+      arrayA150BeamSpotErrorEst[arrayA150IdxDivergence++] = bsEst_;
+   }
+   in.close();
+   
+   in.open("Output/MLPerror_energy230MeV_CorticalBone_degrader.csv");
+   while (1) {
+      in >> phantomSize_ >> dummy >> mlpStartNoTrk_ >> mlpMidNoTrk_ >> mlpStartEst_ >> mlpMidEst_ >> bsNoTrk_ >> bsEst_;
+      if (!in.good()) break;
+
+      arrayCorticalBoneDivergence[arrayCorticalBoneIdxDivergence] = phantomSize_; //divergence_;
+      arrayCorticalBoneMLPmidErrorNoTrk[arrayCorticalBoneIdxDivergence] = mlpMidNoTrk_;
+      arrayCorticalBoneMLPmidErrorEst[arrayCorticalBoneIdxDivergence] = mlpMidEst_;
+      arrayCorticalBoneMLPstartErrorNoTrk[arrayCorticalBoneIdxDivergence] = mlpStartNoTrk_;
+      arrayCorticalBoneMLPstartErrorEst[arrayCorticalBoneIdxDivergence] = mlpStartEst_;
+      arrayCorticalBoneBeamSpotErrorNoTrk[arrayCorticalBoneIdxDivergence] = bsNoTrk_;
+      arrayCorticalBoneBeamSpotErrorEst[arrayCorticalBoneIdxDivergence++] = bsEst_;
    }
    in.close();
 
@@ -400,4 +474,89 @@ void plotAPandAX() {
    c2->cd(2);
    gAPspot->Draw("AP");
 */
+   
+   TCanvas *c3 = new TCanvas("c3", "Error vs divergence", 2000, 900);
+   c3->Divide(3,1,1e-3,1e-3);
+
+   c3->cd(1);
+   TGraph *gMLPstartErrorNoTrk = new TGraph(arrayIdxDivergence, arrayDivergence, arrayMLPstartErrorNoTrk);
+   TGraph *gMLPstartErrorEst = new TGraph(arrayIdxDivergence, arrayDivergence, arrayMLPstartErrorEst);
+   TGraph *gA150MLPstartErrorEst = new TGraph(arrayA150IdxDivergence, arrayA150Divergence, arrayA150MLPstartErrorEst);
+   TGraph *gCorticalBoneMLPstartErrorEst = new TGraph(arrayCorticalBoneIdxDivergence, arrayCorticalBoneDivergence, arrayCorticalBoneMLPstartErrorEst);
+   gMLPstartErrorNoTrk->SetMarkerColor(kRed);
+   gMLPstartErrorNoTrk->SetMarkerStyle(21);
+   gMLPstartErrorNoTrk->SetMarkerSize(0.8);
+   gMLPstartErrorEst->SetMarkerColor(kBlue);
+   gMLPstartErrorEst->SetMarkerStyle(21);
+   gMLPstartErrorEst->SetMarkerSize(0.8);
+   gA150MLPstartErrorEst->SetMarkerColor(kGreen);
+   gA150MLPstartErrorEst->SetMarkerStyle(21);
+   gA150MLPstartErrorEst->SetMarkerSize(0.8);
+   gCorticalBoneMLPstartErrorEst->SetMarkerColor(kBlack);
+   gCorticalBoneMLPstartErrorEst->SetMarkerStyle(21);
+   gCorticalBoneMLPstartErrorEst->SetMarkerSize(0.8);
+   gMLPstartErrorNoTrk->SetTitle("MLP - MC error at z=0;Phantom size [mm];MLP - MC [mm]");
+   gMLPstartErrorNoTrk->Draw("AP");
+   gMLPstartErrorEst->Draw("P");
+   gA150MLPstartErrorEst->Draw("P");
+   gCorticalBoneMLPstartErrorEst->Draw("P");
+   gMLPstartErrorNoTrk->GetYaxis()->SetRangeUser(0,10);
+   
+  
+   c3->cd(2);
+   TGraph *gMLPmidErrorEst = new TGraph(arrayIdxDivergence, arrayDivergence, arrayMLPmidErrorEst);
+   TGraph *gA150MLPmidErrorEst = new TGraph(arrayA150IdxDivergence, arrayA150Divergence, arrayA150MLPmidErrorEst);
+   TGraph *gCorticalBoneMLPmidErrorEst = new TGraph(arrayCorticalBoneIdxDivergence, arrayCorticalBoneDivergence, arrayCorticalBoneMLPmidErrorEst);
+   TGraph *gMLPmidErrorNoTrk = new TGraph(arrayIdxDivergence, arrayDivergence, arrayMLPmidErrorNoTrk);
+   gMLPmidErrorNoTrk->SetMarkerColor(kRed);
+   gMLPmidErrorNoTrk->SetMarkerStyle(21);
+   gMLPmidErrorNoTrk->SetMarkerSize(0.8);
+   gMLPmidErrorEst->SetMarkerColor(kBlue);
+   gMLPmidErrorEst->SetMarkerStyle(21);
+   gMLPmidErrorEst->SetMarkerSize(0.8);
+   gA150MLPmidErrorEst->SetMarkerColor(kGreen);
+   gA150MLPmidErrorEst->SetMarkerStyle(21);
+   gA150MLPmidErrorEst->SetMarkerSize(0.8);
+   gCorticalBoneMLPmidErrorEst->SetMarkerColor(kBlack);
+   gCorticalBoneMLPmidErrorEst->SetMarkerStyle(21);
+   gCorticalBoneMLPmidErrorEst->SetMarkerSize(0.8);
+   gMLPmidErrorNoTrk->SetTitle("MLP - MC error at z=middle of phantom;Phantom size [mm];MLP - MC [mm]");
+   gMLPmidErrorNoTrk->Draw("AP");
+   gMLPmidErrorEst->Draw("P");
+   gA150MLPmidErrorEst->Draw("P");
+   gCorticalBoneMLPmidErrorEst->Draw("P");
+   gMLPmidErrorNoTrk->GetYaxis()->SetRangeUser(0,10);
+
+   c3->cd(3);
+   TGraph *gBeamspotNoTrk = new TGraph(arrayIdxDivergence, arrayDivergence, arrayBeamSpotErrorNoTrk);
+   TGraph *gBeamspotEst = new TGraph(arrayIdxDivergence, arrayDivergence, arrayBeamSpotErrorEst);
+   TGraph *gA150BeamspotEst = new TGraph(arrayA150IdxDivergence, arrayA150Divergence, arrayA150BeamSpotErrorEst);
+   TGraph *gCorticalBoneBeamspotEst = new TGraph(arrayCorticalBoneIdxDivergence, arrayCorticalBoneDivergence, arrayCorticalBoneBeamSpotErrorEst);
+   gBeamspotNoTrk->SetMarkerColor(kRed);
+   gBeamspotNoTrk->SetMarkerStyle(21);
+   gBeamspotNoTrk->SetMarkerSize(0.8);
+   gBeamspotEst->SetMarkerColor(kBlue);
+   gBeamspotEst->SetMarkerStyle(21);
+   gBeamspotEst->SetMarkerSize(0.8);
+   gA150BeamspotEst->SetMarkerColor(kGreen);
+   gA150BeamspotEst->SetMarkerStyle(21);
+   gA150BeamspotEst->SetMarkerSize(0.8);
+   gCorticalBoneBeamspotEst->SetMarkerColor(kBlack);
+   gCorticalBoneBeamspotEst->SetMarkerStyle(21);
+   gCorticalBoneBeamspotEst->SetMarkerSize(0.8);
+   gBeamspotNoTrk->SetTitle("Beamspot sigma;Phantom size [mm];Beamspot sigma [mm]");
+   gBeamspotNoTrk->Draw("AP");
+   gBeamspotEst->Draw("P");
+   gA150BeamspotEst->Draw("P");
+   gCorticalBoneBeamspotEst->Draw("P");
+   gBeamspotNoTrk->GetYaxis()->SetRangeUser(0,10);
+   
+
+   TLegend *leg2 = new TLegend(.16, .17, .50, .37);
+   leg2->AddEntry(gBeamspotNoTrk, "Use X0 = (0,0)", "P");
+   leg2->AddEntry(gBeamspotEst, "Estimate X0", "P");
+   leg2->AddEntry(gA150BeamspotEst, "Estimate X0 A150", "P");
+   leg2->AddEntry(gCorticalBoneBeamspotEst, "Estimate X0 CorticalBone", "P");
+   leg2->Draw();
+
 }

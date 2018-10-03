@@ -26,12 +26,20 @@ XYZVector SplineMLP(Double_t t, XYZVector X0, XYZVector X1, XYZVector P0, XYZVec
    return S;
 }
 
-void findMLP(Float_t AX = 0.885, Float_t AP = -10.3056) {
-   TFile *f = new TFile("MC/Output/simpleScanner_energy200MeV_Water_phantom200mm.root");
+void findMLP(Float_t divergence = -1, Float_t phantomSize = 160, Float_t initialEnergy = 230, Float_t AX = 0.955, Float_t AP = -9.975) {
+   TFile *f = nullptr;
+
+   if (divergence < 0) {
+      f = new TFile(Form("MC/Output/simpleScanner_energy%.0fMeV_CorticalBone_phantom%.0fmm.root", initialEnergy, phantomSize));
+   }
+
+   else {
+      f = new TFile(Form("MC/Output/simpleScanner_energy%.0fMeV_Water_phantom%.0fmm_divergence%.3fmrad.root", initialEnergy, phantomSize, divergence));
+   }
+
    TTree *tree = (TTree*) f->Get("Hits");
 
-   Float_t     phantomSize = 200;
-   Float_t     initialEnergy = 200;
+   Int_t      printed = 0;
    const Int_t eventsToUse = 10000;
    Float_t     x, y, z, edep, sum_edep = 0, residualEnergy = 0;
    Int_t       eventID, parentID, lastEID = -1;
@@ -54,10 +62,10 @@ void findMLP(Float_t AX = 0.885, Float_t AP = -10.3056) {
    Float_t     energy, range;
 //   Float_t     sigmaFilter = 128.47;
    Float_t     sigmaFilter =5.0;
-   Double_t    aPosMCx[10000], aPosMCz[10000];
-   Double_t    aPosMLPx[10000], aPosMLPz[10000];
-   Double_t    aPosMLPNoTrkx[10000];
-   Double_t    aPosMLPestx[10000];
+   Double_t    aPosMCx[10000], aPosMCy[10000], aPosMCz[10000];
+   Double_t    aPosMLPx[10000], aPosMLPy[10000], aPosMLPz[10000];
+   Double_t    aPosMLPNoTrkx[10000], aPosMLPNoTrky[10000];
+   Double_t    aPosMLPestx[10000], aPosMLPesty[10000];
    Int_t       volumeID[10];
    TBranch   * b_volumeID;
    Int_t       aIdxMC = 0;
@@ -89,7 +97,7 @@ void findMLP(Float_t AX = 0.885, Float_t AP = -10.3056) {
 
    TH1F *hResEnergy = new TH1F("hResEnergy", "Residual energy in calorimeter;Energy [MeV];Entries", 300, 0, 150);
    TH2F *hErrorNaive = new TH2F("hErrorNaive", "Beamspot uncertainty (assume point beam);X position [mm];Y position [mm]", 100, -25, 25, 100, -25, 25);
-   TH2F *hErrorSigmaScale = new TH2F("hErrorSigmaScale", Form("Beamspot uncertainty (use X1 * %.2f + P1 * %.2f);X position [mm];Y position [mm]", AX, AP), 100, -25, 25, 100, -25, 25);
+   TH2F *hErrorSigmaScale = new TH2F("hErrorSigmaScale", Form("Beamspot uncertainty (est);X position [mm];Y position [mm]"), 100, -25, 25, 100, -25, 25);
 
    tree->SetBranchAddress("posX", &x);
    tree->SetBranchAddress("posY", &y);
@@ -119,6 +127,20 @@ void findMLP(Float_t AX = 0.885, Float_t AP = -10.3056) {
       if (lastEID != eventID) {
          // New particle, store last values
          if (residualEnergy > sigmaFilter) {
+            
+            // calculate Spline
+            wepl = splineWater->Eval(initialEnergy);
+            wet = splineWater->Eval(initialEnergy) - splineWater->Eval(residualEnergy);
+
+            Float_t w = pow(wet / wepl, 2);
+            AP = -2.8 - 10 * w;
+            AX = 1 - 0.2 * pow(w, 5);
+
+            if (printed < 10) {
+               printf("w = %.2f -> using AX = %.2f, and AP = %.2f.\n", w, AX, AP);
+               printed++;
+            }
+
             hResEnergy->Fill(residualEnergy);
 
             // Find vectors as defined in paper
@@ -135,19 +157,16 @@ void findMLP(Float_t AX = 0.885, Float_t AP = -10.3056) {
 
             hErrorNaive->Fill(X0.X(), X0.Y());
             hErrorSigmaScale->Fill(X0err.X(), X0err.Y());
-            
-            // calculate Spline
-            wepl = splineWater->Eval(initialEnergy);
-            wet = splineWater->Eval(initialEnergy) - splineWater->Eval(residualEnergy);
 
             // Find lambda values using polynomial in Fig. 4 in Fekete et al. 2015
-            Lambda0 = 1.01 + 0.43 * pow(wet/wepl, 2);
-            Lambda1 = 0.99 - 0.46 * pow(wet/wepl, 2);
+            Lambda0 = 1.01 + 0.43 * w;
+            Lambda1 = 0.99 - 0.46 * w;
 
             for (Float_t t=0; t<1; t += 0.01) {
                S = SplineMLP(t, X0, X1, P0hat, P1hat, Lambda0, Lambda1);
                if (lastEID < maxAcc) {
                   aPosMLPx[aIdxMLP] = S.X(); // Collect many tracks 10 times
+                  aPosMLPy[aIdxMLP] = S.Y();
                   aPosMLPz[aIdxMLP] = S.Z();
                }
 
@@ -160,6 +179,7 @@ void findMLP(Float_t AX = 0.885, Float_t AP = -10.3056) {
                arSplineMLPNoTrky[idxSplineMLP] = S.Y();
 
                if (lastEID < maxAcc) {
+                  aPosMLPNoTrky[aIdxMLP] = S.Y();
                   aPosMLPNoTrkx[aIdxMLP] = S.X();
                }
 
@@ -168,6 +188,7 @@ void findMLP(Float_t AX = 0.885, Float_t AP = -10.3056) {
                arSplineMLPesty[idxSplineMLP++] = S.Y();
                
                if (lastEID < maxAcc) {
+                  aPosMLPesty[aIdxMLP] = S.Y();
                   aPosMLPestx[aIdxMLP++] = S.X();
                }
             }
@@ -203,10 +224,14 @@ void findMLP(Float_t AX = 0.885, Float_t AP = -10.3056) {
                differenceArrayDiffest[idxDifferenceArray++] += sqrt(pow(diff_x, 2) + pow(diff_y, 2));
             }
 
-            delete splineMCx, splineMCy;
-            delete splineMLPx, splineMLPy;
-            delete splineMLPNoTrkx, splineMLPNoTrky;
-            delete splineMLPestx, splineMLPesty;
+            delete splineMCx;
+            delete splineMCy;
+            delete splineMLPx;
+            delete splineMLPy;
+            delete splineMLPNoTrkx;
+            delete splineMLPNoTrky;
+            delete splineMLPestx;
+            delete splineMLPesty;
          }
          
          if (stop) break;
@@ -239,6 +264,7 @@ void findMLP(Float_t AX = 0.885, Float_t AP = -10.3056) {
             
             if (eventID < maxAcc && eventID != 2) {
                aPosMCx[aIdxMC] = x;
+               aPosMCy[aIdxMC] = y;
                aPosMCz[aIdxMC++] = z;
             }
          }
@@ -248,18 +274,29 @@ void findMLP(Float_t AX = 0.885, Float_t AP = -10.3056) {
    TCanvas *c0 = new TCanvas("c0", "Residual Energy", 1500, 600);
    hResEnergy->Draw();
 
-   TCanvas *c1 = new TCanvas("c1", "MLP estimation", 1500, 600);
-   c1->Divide(3, 1, 0.001, 0.001);
+   TCanvas *c1 = new TCanvas("c1", "MLP estimation", 1500, 1200);
+   c1->Divide(3, 2, 0.001, 0.001);
    c1->cd(1);
    TGraph *gMC = new TGraph(aIdxMC, aPosMCz, aPosMCx);
+   TGraph *gMCy = new TGraph(aIdxMC, aPosMCz, aPosMCy);
    TGraph *gMLP = new TGraph(aIdxMLP, aPosMLPz, aPosMLPx);
+   TGraph *gMLPy = new TGraph(aIdxMLP, aPosMLPz, aPosMLPy);
    gMC->SetMarkerStyle(7);
    gMLP->SetMarkerStyle(7);
    gMC->SetMarkerColor(kRed);
    gMLP->SetMarkerColor(kBlue);
    gMC->Draw("AP");
    gMLP->Draw("P");
-   gMC->SetTitle("Perfect knowledge;Depth [mm];Lateral position [mm]");
+   gMC->SetTitle("Perfect knowledge;Depth [mm];X position [mm]");
+
+   c1->cd(4);
+   gMCy->SetMarkerStyle(7);
+   gMLPy->SetMarkerStyle(7);
+   gMCy->SetMarkerColor(kRed);
+   gMLPy->SetMarkerColor(kBlue);
+   gMCy->Draw("AP");
+   gMLPy->Draw("P");
+   gMCy->SetTitle("Perfect knowledge;Depth [mm];Y position [mm]");
 
    c1->cd(2);
    TGraph *gMCNoTrk = new TGraph(aIdxMC, aPosMCz, aPosMCx);
@@ -270,7 +307,18 @@ void findMLP(Float_t AX = 0.885, Float_t AP = -10.3056) {
    gMCNoTrk->SetMarkerColor(kRed);
    gMCNoTrk->Draw("AP");
    gMLPNoTrk->Draw("P");
-   gMCNoTrk->SetTitle("No Front Tracker - use (0,0);Depth [mm];Lateral position [mm]");
+   gMCNoTrk->SetTitle("No Front Tracker - use (0,0);Depth [mm];X position [mm]");
+   
+   c1->cd(5);
+   TGraph *gMCNoTrky = new TGraph(aIdxMC, aPosMCz, aPosMCy);
+   TGraph *gMLPNoTrky = new TGraph(aIdxMLP, aPosMLPz, aPosMLPNoTrky);
+   gMLPNoTrky->SetMarkerStyle(7);
+   gMLPNoTrky->SetMarkerColor(kBlue);
+   gMCNoTrky->SetMarkerStyle(7);
+   gMCNoTrky->SetMarkerColor(kRed);
+   gMCNoTrky->Draw("AP");
+   gMLPNoTrky->Draw("P");
+   gMCNoTrky->SetTitle("No Front Tracker - use (0,0);Depth [mm];Y position [mm]");
 
    c1->cd(3);
    TGraph *gMCest = new TGraph(aIdxMC, aPosMCz, aPosMCx);
@@ -281,7 +329,18 @@ void findMLP(Float_t AX = 0.885, Float_t AP = -10.3056) {
    gMCest->SetMarkerColor(kRed);
    gMCest->Draw("AP");
    gMLPest->Draw("P");
-   gMCest->SetTitle("No Front Tracker - estimate PB;Depth [mm];Lateral position [mm]");
+   gMCest->SetTitle("No Front Tracker - estimate PB;Depth [mm];X position [mm]");
+   
+   c1->cd(6);
+   TGraph *gMCesty = new TGraph(aIdxMC, aPosMCz, aPosMCy);
+   TGraph *gMLPesty = new TGraph(aIdxMLP, aPosMLPz, aPosMLPesty);
+   gMLPesty->SetMarkerStyle(7);
+   gMLPesty->SetMarkerColor(kBlue);
+   gMCesty->SetMarkerStyle(7);
+   gMCesty->SetMarkerColor(kRed);
+   gMCesty->Draw("AP");
+   gMLPesty->Draw("P");
+   gMCesty->SetTitle("No Front Tracker - estimate PB;Depth [mm];Y position [mm]");
 
    TCanvas *c = new TCanvas("c", "Beam spot estimation", 1000, 600);
    c->Divide(2, 1, 0.001, 0.001);
@@ -328,4 +387,34 @@ void findMLP(Float_t AX = 0.885, Float_t AP = -10.3056) {
    gDifferenceest->SetLineWidth(2);
    gDifferenceest->Draw("AL");
    gDifferenceest->GetYaxis()->SetRangeUser(0, 4);
+
+//   if (divergence > 0) {
+
+      Float_t sigmaNoTrk = (hErrorNaive->GetStdDev(1) + hErrorNaive->GetStdDev(2)) / 2;
+      Float_t sigmaEst = (hErrorSigmaScale->GetStdDev(1) + hErrorSigmaScale->GetStdDev(2)) / 2;
+
+      ofstream file(Form("Output/MLPerror_energy%.0fMeV_CorticalBone_degrader.csv", initialEnergy), ofstream::out | ofstream::app);
+      file << phantomSize << " " << divergence << " " <<  gDifferenceNoTrk->Eval(0) << " " << gDifferenceNoTrk->Eval(phantomSize/2) << " " << gDifferenceest->Eval(0) << " " << gDifferenceest->Eval(phantomSize/2) << " " << sigmaNoTrk << " " << sigmaEst << endl;
+      file.close();
+  // }
+
+   /*
+   delete gDifferencePerfect;
+   delete gDifferenceNoTrk;
+   delete gDifferenceest;
+
+   delete c1;
+   delete c0;
+   delete c2;
+
+   delete gMC;
+   delete gMLP;
+   delete gMCNoTrk;
+   delete gMLPNoTrk;
+   delete gMCest;
+   delete gMLPest;
+
+   f->Close();
+
+   */
 }
