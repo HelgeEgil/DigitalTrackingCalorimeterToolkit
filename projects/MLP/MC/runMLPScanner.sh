@@ -11,17 +11,17 @@ IDX=1
 #	exit
 #fi
 
-for i in `seq 10 10 200`; do
+for i in `seq 10 10 320`; do
    ztracker=`echo "scale=3; $i/2+15" | bc`
    zcalorimeter=`echo "scale=3; $i/2+30+1000" | bc`
 #   divergence=`echo "scale=3; $i/100" | bc`
 #   emittance=`echo "scale=3; $i/100 * 9" | bc`
-	Gate -a "'[energy,$1] [dz,$i] [ztracker,$ztracker] [spotsize,3] [divergence,3] [emittance,15] [material,CorticalBone] [zcalorimeter,$zcalorimeter]'" MLPscanner.mac > terminal_output.txt &
+	Gate -a "'[energy,230] [dz,$i] [ztracker,$ztracker] [spotsize,3] [divergence,2] [emittance,15] [rotation,0] [material,Water] [zcalorimeter,$zcalorimeter]'" MLPscanner.mac > terminal_output.txt &
   # Gate -a "'[energy,230] [dz,160] [spotsize,3] [divergence,$divergence] [emittance,$emittance] [ztracker,$ztracker] [zcalorimeter,$zcalorimeter] [material,]'" MLPscanner.mac  > terminal_output.txt &
    PIDLIST="$PIDLIST $!"
    echo "Running with i = $i"
 
-   if (( $IDX % $NCORES == 0 || $i == 10 )); then 
+   if (( $IDX % $NCORES == 0 || $i == 50 )); then 
       echo "Waiting for (PIDS $PIDLIST)"
       time wait $PIDLIST
       unset PIDLIST

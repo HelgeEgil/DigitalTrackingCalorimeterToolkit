@@ -30,11 +30,11 @@ void findMLP(Float_t divergence = -1, Float_t phantomSize = 160, Float_t initial
    TFile *f = nullptr;
 
    if (divergence < 0) {
-      f = new TFile(Form("MC/Output/simpleScanner_energy%.0fMeV_CorticalBone_phantom%.0fmm.root", initialEnergy, phantomSize));
+      f = new TFile(Form("MC/Output/simpleScanner_energy%.0fMeV_Water_phantom%.0fmm.root", initialEnergy, phantomSize));
    }
 
    else {
-      f = new TFile(Form("MC/Output/simpleScanner_energy%.0fMeV_Water_phantom%.0fmm_divergence%.3fmrad.root", initialEnergy, phantomSize, divergence));
+      f = new TFile(Form("MC/Output/simpleScanner_energy%.0fMeV_Water_phantom%.0fmm_rotation%.0fmrad.root", initialEnergy, phantomSize, divergence));
    }
 
    TTree *tree = (TTree*) f->Get("Hits");
@@ -95,7 +95,7 @@ void findMLP(Float_t divergence = -1, Float_t phantomSize = 160, Float_t initial
    in.close();
    TSpline3 *splineWater = new TSpline3("splineWater", energiesWater, rangesWater, idxWater);
 
-   TH1F *hResEnergy = new TH1F("hResEnergy", "Residual energy in calorimeter;Energy [MeV];Entries", 300, 0, 150);
+   TH1F *hResEnergy = new TH1F("hResEnergy", "Residual energy in calorimeter;Energy [MeV];Entries", 300, 0, 230);
    TH2F *hErrorNaive = new TH2F("hErrorNaive", "Beamspot uncertainty (assume point beam);X position [mm];Y position [mm]", 100, -25, 25, 100, -25, 25);
    TH2F *hErrorSigmaScale = new TH2F("hErrorSigmaScale", Form("Beamspot uncertainty (est);X position [mm];Y position [mm]"), 100, -25, 25, 100, -25, 25);
 
@@ -107,8 +107,13 @@ void findMLP(Float_t divergence = -1, Float_t phantomSize = 160, Float_t initial
    tree->SetBranchAddress("parentID", &parentID);
    tree->SetBranchAddress("volumeID", volumeID, &b_volumeID);
    
-   X0NoTrk.SetCoordinates(0,0, -phantomSize/2 - 15);
-   P0NoTrk.SetCoordinates(0, 0, 1); // Normalized
+   X0NoTrk.SetCoordinates(0,-divergence*1.015, -phantomSize/2);
+   if (divergence < 1) {
+      P0NoTrk.SetCoordinates(0, 0, 1); // Normalized
+   }
+   else {
+      P0NoTrk.SetCoordinates(0, -sin(divergence / 1000), cos(divergence / 1000));
+   }
 
    Int_t maxAcc = 10;
 
@@ -130,11 +135,11 @@ void findMLP(Float_t divergence = -1, Float_t phantomSize = 160, Float_t initial
             
             // calculate Spline
             wepl = splineWater->Eval(initialEnergy);
-            wet = splineWater->Eval(initialEnergy) - splineWater->Eval(residualEnergy);
+            wet = wepl - splineWater->Eval(residualEnergy);
 
             Float_t w = pow(wet / wepl, 2);
-            AP = -2.8 - 10 * w;
-            AX = 1 - 0.2 * pow(w, 5);
+            AX = 1.02 - 0.38 * w;
+            AP = -13.74 * (wet/wepl);
 
             if (printed < 10) {
                printf("w = %.2f -> using AX = %.2f, and AP = %.2f.\n", w, AX, AP);
@@ -151,8 +156,16 @@ void findMLP(Float_t divergence = -1, Float_t phantomSize = 160, Float_t initial
             P0hat = P0.Unit();
             P1hat = P1.Unit();
 
+            X0.SetZ(X0.Z() + 15);
+            X1.SetCoordinates(X1.X() - 15 * P1hat.X(), X1.Y() - 15 * P1hat.Y(), X1.Z() - 15);
+
             X0est = X1 * AX + P1 * AP;
-            X0est.SetZ(-phantomSize/2 - 15);
+            X0est.SetZ(-phantomSize/2);
+            if (divergence) {
+               X0est.SetX(X0est.X() - phantomSize * P0NoTrk.X());
+               X0est.SetY(X0est.Y() - phantomSize * P0NoTrk.Y());
+            }
+            
             X0err = X1 * AX + P1 * AP - X0;
 
             hErrorNaive->Fill(X0.X(), X0.Y());
@@ -177,6 +190,7 @@ void findMLP(Float_t divergence = -1, Float_t phantomSize = 160, Float_t initial
                S = SplineMLP(t, X0NoTrk, X1, P0NoTrk, P1hat, Lambda0, Lambda1);
                arSplineMLPNoTrkx[idxSplineMLP] = S.X();
                arSplineMLPNoTrky[idxSplineMLP] = S.Y();
+
 
                if (lastEID < maxAcc) {
                   aPosMLPNoTrky[aIdxMLP] = S.Y();
@@ -262,7 +276,7 @@ void findMLP(Float_t divergence = -1, Float_t phantomSize = 160, Float_t initial
             arSplineMCy[idxSplineMC] = y;
             arSplineMCz[idxSplineMC++] = z;
             
-            if (eventID < maxAcc && eventID != 2) {
+            if (eventID < maxAcc) {
                aPosMCx[aIdxMC] = x;
                aPosMCy[aIdxMC] = y;
                aPosMCz[aIdxMC++] = z;
@@ -393,7 +407,7 @@ void findMLP(Float_t divergence = -1, Float_t phantomSize = 160, Float_t initial
       Float_t sigmaNoTrk = (hErrorNaive->GetStdDev(1) + hErrorNaive->GetStdDev(2)) / 2;
       Float_t sigmaEst = (hErrorSigmaScale->GetStdDev(1) + hErrorSigmaScale->GetStdDev(2)) / 2;
 
-      ofstream file(Form("Output/MLPerror_energy%.0fMeV_CorticalBone_degrader.csv", initialEnergy), ofstream::out | ofstream::app);
+      ofstream file(Form("Output/MLPerror_energy%.0fMeV_water_rotation%.0fmrad.csv", initialEnergy, divergence), ofstream::out | ofstream::app);
       file << phantomSize << " " << divergence << " " <<  gDifferenceNoTrk->Eval(0) << " " << gDifferenceNoTrk->Eval(phantomSize/2) << " " << gDifferenceest->Eval(0) << " " << gDifferenceest->Eval(phantomSize/2) << " " << sigmaNoTrk << " " << sigmaEst << endl;
       file.close();
   // }

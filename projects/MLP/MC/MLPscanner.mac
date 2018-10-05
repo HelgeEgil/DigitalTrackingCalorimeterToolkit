@@ -79,6 +79,8 @@
 /gate/source/PBS/setPosition 0 0 -{zcalorimeter} mm
 /gate/source/PBS/setSigmaX {spotsize} mm
 /gate/source/PBS/setSigmaY {spotsize} mm
+/gate/source/PBS/setRotationAxis 1 0 0
+/gate/source/PBS/setRotationAngle {rotation} mrad
 /gate/source/PBS/setSigmaTheta {divergence} mrad # was 3
 /gate/source/PBS/setSigmaPhi {divergence} mrad # was 3
 /gate/source/PBS/setEllipseXThetaEmittance {emittance} mm*mrad # was 15

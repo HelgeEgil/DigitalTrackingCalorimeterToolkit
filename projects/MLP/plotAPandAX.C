@@ -194,7 +194,7 @@ void plotAPandAX() {
    gStyle->SetTitleSize(0.045, "Y");
    gStyle->SetTextSize(0.045);
 
-   Float_t  phantomSize_, error_, AX_, AP_; 
+   Float_t  phantomSize_, error_, AX_, AP_, residualEnergy_; 
 
    Float_t  wepl = splineWater->Eval(200);
    Float_t  residualEnergy, wet;
@@ -301,15 +301,15 @@ void plotAPandAX() {
    wepl = splineWater->Eval(230);
    in.open("Output/accuracy_energy230MeV_Water_phantom.csv");
    while (1) {
-      in >> phantomSize_ >> error_ >> AX_ >> AP_;
+      in >> phantomSize_ >> error_ >> AX_ >> AP_ >> residualEnergy_;
       if (!in.good()) break;
       
-      residualEnergy = 230 - splineWaterInv->Eval(phantomSize_);
-      wet = wepl - splineWater->Eval(residualEnergy);
+      wet = wepl - splineWater->Eval(residualEnergy_);
+      printf("Residual energy for a %.2f mm phantom is %.2f MeV.\n", phantomSize_, residualEnergy_);
 
       arrayPhantomSize230[arrayIdx230] = phantomSize_;
       arrayWetWepl230[arrayIdx230] = pow(wet/wepl, 2);
-      arrayResidualEnergy230[arrayIdx230] = pow(wet/wepl,10);
+      arrayResidualEnergy230[arrayIdx230] = pow(wet/wepl,4);
       arrayError230[arrayIdx230] = error_;
       arrayAX230[arrayIdx230] = AX_;
       arrayAP230[arrayIdx230++] = AP_;
@@ -443,8 +443,8 @@ void plotAPandAX() {
    gAX230->SetMarkerSize(0.8);
    gAP230->SetMarkerSize(0.8);
 
-   gAX230->SetTitle("Optimal A_{X} parameter for a 230 MeV beam;(WET/WEPL)^{10};A_{X}");
-   gAP230->SetTitle("Optimal A_{P} parameter for a 230 MeV beam;(WET/WEPL)^{2};A_{P}");
+   gAX230->SetTitle("Optimal A_{X} parameter for a 230 MeV beam;(WET/WEPL)^{2};A_{X}");
+   gAP230->SetTitle("Optimal A_{P} parameter for a 230 MeV beam;(WET/WEPL);A_{P}");
 
    c1->cd(3);
    gAX230->Draw("AP");
@@ -453,6 +453,7 @@ void plotAPandAX() {
 
    c1->cd(4);
    gAP230->Draw("AP");
+   gAX230->Fit("pol1");
 /*
    TCanvas *c2 = new TCanvas("c2", "params vs spot sizes", 1200, 800);
    c2->Divide(1,2,1e-5,1e-5);
