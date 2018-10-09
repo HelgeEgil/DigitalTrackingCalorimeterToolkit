@@ -76,13 +76,15 @@ void findMLPLoop(Float_t phantomSize, Float_t spotSize) {
    TFile *f;
 
    if (spotSize <0) {
-      f = new TFile(Form("MC/Output/simpleScanner_energy%.0fMeV_Water_phantom%.0fmm.root", initialEnergy, phantomSize)); 
+      f = new TFile(Form("MC/Output/simpleScanner_energy%.0fMeV_myAdipose_phantom%03.0fmm.root", initialEnergy, phantomSize)); 
    }
    else {
-      f = new TFile(Form("MC/Output/simpleScanner_energy%.0fMeV_Water_phantom%.0fmm_spotsize%.3fmm.root", initialEnergy, phantomSize, spotSize)); 
+      f = new TFile(Form("MC/Output/simpleScanner_energy%.0fMeV_Water_phantom%03.0fmm_spotsize%.3fmm.root", initialEnergy, phantomSize, spotSize)); 
    }
-   
+
    TTree *tree = (TTree*) f->Get("Hits");
+
+   if (!tree) exit(0);
 
    in.open("Data/WaterPSTAR.csv");
    while (1) {
@@ -98,7 +100,7 @@ void findMLPLoop(Float_t phantomSize, Float_t spotSize) {
    Float_t  AXlow = 0.1;
    Float_t  AXhigh = 1.05;
    Float_t  APlow = -11;
-   Float_t  APhigh = 5;
+   Float_t  APhigh = 0;
    
    Float_t  APdelta = 0.1;
    Float_t  AXdelta = 0.01;
@@ -228,10 +230,10 @@ void findMLPLoop(Float_t phantomSize, Float_t spotSize) {
    Float_t minYvalue = hErrorMatrix->GetYaxis()->GetBinCenter(biny);
    printf("The lowest AUC, %.2f mm, is achieved with the parameters: AX = %.3f, AP = %.3f\n", hErrorMatrix->GetBinContent(binx,biny), minXvalue, minYvalue);
 
-   c2->SaveAs(Form("Output/accuracy_energy%.0fMeV_%.0fmm_Water.pdf", initialEnergy, phantomSize));
+//   c2->SaveAs(Form("Output/accuracy_energy%.0fMeV_%.0fmm_A150.pdf", initialEnergy, phantomSize));
 
    // Phantom size, error , AX , AP
-   ofstream file(Form("Output/accuracy_energy%.0fMeV_Water_phantom.csv", initialEnergy), ofstream::out | ofstream::app); 
+   ofstream file(Form("Output/accuracy_energy%.0fMeV_Adipose_phantom.csv", initialEnergy), ofstream::out | ofstream::app); 
    file << phantomSize << " " << hErrorMatrix->GetBinContent(binx,biny) << " " << minXvalue << " " << minYvalue << " " <<  hResidualEnergy->GetMean() << endl;
    file.close();
 }

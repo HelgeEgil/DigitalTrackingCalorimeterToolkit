@@ -26,24 +26,30 @@ XYZVector SplineMLP(Double_t t, XYZVector X0, XYZVector X1, XYZVector P0, XYZVec
    return S;
 }
 
-void findMLP(Float_t divergence = -1, Float_t phantomSize = 160, Float_t initialEnergy = 230, Float_t AX = 0.955, Float_t AP = -9.975) {
+void findMLP(Float_t phantomSize = 160, Float_t rotation = -1, Float_t spotsize = -1, Float_t initialEnergy = 230) {
    TFile *f = nullptr;
 
-   if (divergence < 0) {
-      f = new TFile(Form("MC/Output/simpleScanner_energy%.0fMeV_Water_phantom%.0fmm.root", initialEnergy, phantomSize));
+   if (rotation > 0) {
+      f = new TFile(Form("MC/Output/simpleScanner_energy%.0fMeV_Water_phantom%03.0fmm_rotation%02.0fmrad.root", initialEnergy, phantomSize, rotation));
    }
 
+   else if (spotsize > 0)  {
+      f = new TFile(Form("MC/Output/simpleScanner_energy%.0fMeV_Water_phantom%03.0fmm_spotsize%04.1fmm.root", initialEnergy, phantomSize, spotsize));
+   }
+   
    else {
-      f = new TFile(Form("MC/Output/simpleScanner_energy%.0fMeV_Water_phantom%.0fmm_rotation%.0fmrad.root", initialEnergy, phantomSize, divergence));
+      f = new TFile(Form("MC/Output/simpleScanner_energy%.0fMeV_myAdipose_phantom%03.0fmm.root", initialEnergy, phantomSize));
    }
 
    TTree *tree = (TTree*) f->Get("Hits");
 
+   if (!tree) exit(0);
+
    Int_t      printed = 0;
-   const Int_t eventsToUse = 10000;
+   const Int_t eventsToUse = 5000;
    Float_t     x, y, z, edep, sum_edep = 0, residualEnergy = 0;
    Int_t       eventID, parentID, lastEID = -1;
-   XYZVector   Xp0, Xp1, Xp2, Xp3, X0, X1, X0est, X0err, X0NoTrk, P0, P0NoTrk, P1, P0hat, P1hat, S; // Xp are the plane coordinates, X are the tracker coordinates (X1 = (Xp1 + Xp2) / 2)
+   XYZVector   Xp0, Xp1, Xp2, Xp3, X0, X1, X0est, X0err, X0NoTrk, P0, P0NoTrk, P1, P0hat, P1hat, S, P1Rotated; // Xp are the plane coordinates, X are the tracker coordinates (X1 = (Xp1 + Xp2) / 2)
    Float_t     wepl, wet, Lambda0, Lambda1;
    ifstream    in;
    TSpline3  * splineMCx, * splineMCy, * splineMLPx, * splineMLPy;
@@ -55,13 +61,14 @@ void findMLP(Float_t divergence = -1, Float_t phantomSize = 160, Float_t initial
    Double_t    differenceArrayDiff[1000] = {};
    Double_t    differenceArrayDiffNoTrk[1000] = {};
    Double_t    differenceArrayDiffest[1000] = {};
+   Float_t     sourceToX0dist = 100;
    Int_t       nInDifferenceArray = 0;
    Int_t       idxDifferenceArray = 0;
    Int_t       idxWater = 0;
    Double_t    energiesWater[500], rangesWater[500];
    Float_t     energy, range;
-//   Float_t     sigmaFilter = 128.47;
-   Float_t     sigmaFilter =5.0;
+   Float_t     energyFilter = 0; // 128.47;
+   Float_t     sigmaFilter = 1e5;
    Double_t    aPosMCx[10000], aPosMCy[10000], aPosMCz[10000];
    Double_t    aPosMLPx[10000], aPosMLPy[10000], aPosMLPz[10000];
    Double_t    aPosMLPNoTrkx[10000], aPosMLPNoTrky[10000];
@@ -96,6 +103,7 @@ void findMLP(Float_t divergence = -1, Float_t phantomSize = 160, Float_t initial
    TSpline3 *splineWater = new TSpline3("splineWater", energiesWater, rangesWater, idxWater);
 
    TH1F *hResEnergy = new TH1F("hResEnergy", "Residual energy in calorimeter;Energy [MeV];Entries", 300, 0, 230);
+   TH1F *hP1 = new TH1F("hP1", "Outgoing angle histgram;#sqrt{#theta_{x}^{2} + #theta_{y}^{2}} [mrad];Frequency", 200, 0, 250);
    TH2F *hErrorNaive = new TH2F("hErrorNaive", "Beamspot uncertainty (assume point beam);X position [mm];Y position [mm]", 100, -25, 25, 100, -25, 25);
    TH2F *hErrorSigmaScale = new TH2F("hErrorSigmaScale", Form("Beamspot uncertainty (est);X position [mm];Y position [mm]"), 100, -25, 25, 100, -25, 25);
 
@@ -107,12 +115,13 @@ void findMLP(Float_t divergence = -1, Float_t phantomSize = 160, Float_t initial
    tree->SetBranchAddress("parentID", &parentID);
    tree->SetBranchAddress("volumeID", volumeID, &b_volumeID);
    
-   X0NoTrk.SetCoordinates(0,-divergence*1.015, -phantomSize/2);
-   if (divergence < 1) {
+   if (rotation < 1) {
       P0NoTrk.SetCoordinates(0, 0, 1); // Normalized
+      X0NoTrk.SetCoordinates(0, 0,-phantomSize/2);
    }
    else {
-      P0NoTrk.SetCoordinates(0, -sin(divergence / 1000), cos(divergence / 1000));
+      P0NoTrk.SetCoordinates(0, -sin(rotation / 1000), cos(rotation / 1000));
+      X0NoTrk.SetCoordinates(0, -sin(rotation / 1000) * sourceToX0dist, -phantomSize/2);
    }
 
    Int_t maxAcc = 10;
@@ -131,42 +140,52 @@ void findMLP(Float_t divergence = -1, Float_t phantomSize = 160, Float_t initial
 
       if (lastEID != eventID) {
          // New particle, store last values
-         if (residualEnergy > sigmaFilter) {
-            
-            // calculate Spline
-            wepl = splineWater->Eval(initialEnergy);
-            wet = wepl - splineWater->Eval(residualEnergy);
-
-            Float_t w = pow(wet / wepl, 2);
-            AX = 1.02 - 0.38 * w;
-            AP = -13.74 * (wet/wepl);
-
-            if (printed < 10) {
-               printf("w = %.2f -> using AX = %.2f, and AP = %.2f.\n", w, AX, AP);
-               printed++;
-            }
-
-            hResEnergy->Fill(residualEnergy);
-
-            // Find vectors as defined in paper
             X0 = (Xp0 + Xp1) / 2;
             X1 = (Xp2 + Xp3) / 2;
             P0 = Xp1 - Xp0;
             P1 = Xp3 - Xp2;
             P0hat = P0.Unit();
             P1hat = P1.Unit();
+           
+            P1Rotated = P1 - P0NoTrk;
+            P1Rotated = P1Rotated.Unit();
 
+            Float_t dxy = sqrt(pow(P1hat.X(), 2) + pow(P1hat.Y(), 2));
+            Float_t angle = fabs(atan2(dxy,1)) * 1000;
+            
+            wepl = splineWater->Eval(initialEnergy);
+            wet = wepl - splineWater->Eval(residualEnergy);
+            Float_t w = pow(wet / wepl, 2);
+            
+            sigmaFilter = 139.15 * sqrt(w) + 13.991;
+
+         if (residualEnergy > energyFilter && angle < sigmaFilter) {
+            Float_t AX = 0.992 - pow(w,2);
+            Float_t AP = -1.677 - 44.96 * pow(w,1) + 110.93 * pow(w,2) - 125.29 * pow(w,3) + 62.48 * pow(w,4);
+
+            if (printed < 15) {
+               printf("w = %.2f -> using AX = %.2f, and AP = %.2f.\n", w, AX, AP);
+               printed++;
+            }
+
+            hResEnergy->Fill(residualEnergy);
+
+            hP1->Fill(fabs(atan2(dxy, 1)) * 1000);
             X0.SetZ(X0.Z() + 15);
+            X0.SetY(X0.Y() + 15 * P0hat.Y()); // it's not || 
+            X0.SetX(X0.X() + 15 * P0hat.X()); // it's not ||
+            
             X1.SetCoordinates(X1.X() - 15 * P1hat.X(), X1.Y() - 15 * P1hat.Y(), X1.Z() - 15);
 
             X0est = X1 * AX + P1 * AP;
             X0est.SetZ(-phantomSize/2);
-            if (divergence) {
-               X0est.SetX(X0est.X() - phantomSize * P0NoTrk.X());
-               X0est.SetY(X0est.Y() - phantomSize * P0NoTrk.Y());
+
+            if (rotation > 0) {
+               X0est.SetX(X0est.X() - (sourceToX0dist + 15) * P0NoTrk.X());
+               X0est.SetY(X0est.Y() - (sourceToX0dist + 15) * P0NoTrk.Y());
             }
             
-            X0err = X1 * AX + P1 * AP - X0;
+            X0err = X0est - X0;
 
             hErrorNaive->Fill(X0.X(), X0.Y());
             hErrorSigmaScale->Fill(X0err.X(), X0err.Y());
@@ -286,7 +305,11 @@ void findMLP(Float_t divergence = -1, Float_t phantomSize = 160, Float_t initial
    }
 
    TCanvas *c0 = new TCanvas("c0", "Residual Energy", 1500, 600);
+   c0->Divide(2,1,0.001,0.001);
+   c0->cd(1);
    hResEnergy->Draw();
+   c0->cd(2);
+   hP1->Draw();
 
    TCanvas *c1 = new TCanvas("c1", "MLP estimation", 1500, 1200);
    c1->Divide(3, 2, 0.001, 0.001);
@@ -370,7 +393,7 @@ void findMLP(Float_t divergence = -1, Float_t phantomSize = 160, Float_t initial
       differenceArrayDiff[i] /= nInDifferenceArray;
       differenceArrayDiffNoTrk[i]  /= nInDifferenceArray;
       differenceArrayDiffest[i] /= nInDifferenceArray;
-      differenceArrayZ[i] += phantomSize/2 + 10;
+      differenceArrayZ[i] += phantomSize/2;
    }
 
    TCanvas *c2 = new TCanvas("c2", "MC vs MLP difference", 1500, 600);
@@ -382,7 +405,7 @@ void findMLP(Float_t divergence = -1, Float_t phantomSize = 160, Float_t initial
    gDifferencePerfect->SetLineColor(kRed);
    gDifferencePerfect->SetLineWidth(2);
    gDifferencePerfect->Draw("AL");
-   gDifferencePerfect->GetYaxis()->SetRangeUser(0, 4);
+   gDifferencePerfect->GetYaxis()->SetRangeUser(0, 6);
 
    c2->cd(2);
    TGraph *gDifferenceNoTrk = new TGraph(idxDifferenceArray, differenceArrayZ, differenceArrayDiffNoTrk);
@@ -391,7 +414,7 @@ void findMLP(Float_t divergence = -1, Float_t phantomSize = 160, Float_t initial
    gDifferenceNoTrk->SetLineColor(kRed);
    gDifferenceNoTrk->SetLineWidth(2);
    gDifferenceNoTrk->Draw("AL");
-   gDifferenceNoTrk->GetYaxis()->SetRangeUser(0, 4);
+   gDifferenceNoTrk->GetYaxis()->SetRangeUser(0, 6);
 
    c2->cd(3);
    TGraph *gDifferenceest = new TGraph(idxDifferenceArray, differenceArrayZ, differenceArrayDiffest);
@@ -400,17 +423,27 @@ void findMLP(Float_t divergence = -1, Float_t phantomSize = 160, Float_t initial
    gDifferenceest->SetLineColor(kRed);
    gDifferenceest->SetLineWidth(2);
    gDifferenceest->Draw("AL");
-   gDifferenceest->GetYaxis()->SetRangeUser(0, 4);
+   gDifferenceest->GetYaxis()->SetRangeUser(0, 6);
 
-//   if (divergence > 0) {
+   Float_t sigmaNoTrk = (hErrorNaive->GetStdDev(1) + hErrorNaive->GetStdDev(2)) / 2;
+   Float_t sigmaEst = (hErrorSigmaScale->GetStdDev(1) + hErrorSigmaScale->GetStdDev(2)) / 2;
 
-      Float_t sigmaNoTrk = (hErrorNaive->GetStdDev(1) + hErrorNaive->GetStdDev(2)) / 2;
-      Float_t sigmaEst = (hErrorSigmaScale->GetStdDev(1) + hErrorSigmaScale->GetStdDev(2)) / 2;
-
-      ofstream file(Form("Output/MLPerror_energy%.0fMeV_water_rotation%.0fmrad.csv", initialEnergy, divergence), ofstream::out | ofstream::app);
-      file << phantomSize << " " << divergence << " " <<  gDifferenceNoTrk->Eval(0) << " " << gDifferenceNoTrk->Eval(phantomSize/2) << " " << gDifferenceest->Eval(0) << " " << gDifferenceest->Eval(phantomSize/2) << " " << sigmaNoTrk << " " << sigmaEst << endl;
+   if (spotsize > 0) {
+      ofstream file(Form("Output/MLPerror_energy%.0fMeV_Water_spotsize.csv", initialEnergy), ofstream::out | ofstream::app);
+      file << phantomSize << " " << spotsize << " " <<  gDifferenceNoTrk->Eval(0) << " " << gDifferenceNoTrk->Eval(phantomSize/2) << " " << gDifferenceest->Eval(0) << " " << gDifferenceest->Eval(phantomSize/2) << " " << sigmaNoTrk << " " << sigmaEst << endl;
       file.close();
-  // }
+   }
+   else if (rotation > 0) {
+      ofstream file(Form("Output/MLPerror_energy%.0fMeV_Water_rotation.csv", initialEnergy), ofstream::out | ofstream::app);
+      file << phantomSize << " " << rotation << " " <<  gDifferenceNoTrk->Eval(0) << " " << gDifferenceNoTrk->Eval(phantomSize/2) << " " << gDifferenceest->Eval(0) << " " << gDifferenceest->Eval(phantomSize/2) << " " << sigmaNoTrk << " " << sigmaEst << endl;
+      file.close();
+   }
+   else {
+      ofstream file(Form("Output/MLPerror_energy%.0fMeV_Adipose_degrader.csv", initialEnergy), ofstream::out | ofstream::app);
+      file << phantomSize << " " << rotation << " " <<  gDifferenceNoTrk->Eval(0) << " " << gDifferenceNoTrk->Eval(phantomSize/2) << " " << gDifferenceest->Eval(0) << " " << gDifferenceest->Eval(phantomSize/2) << " " << sigmaNoTrk << " " << sigmaEst << endl;
+      file.close();
+   }
+
 
    /*
    delete gDifferencePerfect;
