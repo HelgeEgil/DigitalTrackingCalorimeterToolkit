@@ -26,19 +26,19 @@ XYZVector SplineMLP(Double_t t, XYZVector X0, XYZVector X1, XYZVector P0, XYZVec
    return S;
 }
 
-void findMLP(Float_t phantomSize = 160, Float_t rotation = -1, Float_t spotsize = -1, Float_t initialEnergy = 230) {
+void findMLP(Float_t phantomSize = 200, Float_t rotation = -1, Float_t spotsize = -1, Float_t initialEnergy = 230) {
    TFile *f = nullptr;
 
-   if (rotation > 0) {
+   if (rotation >= 0) {
       f = new TFile(Form("MC/Output/simpleScanner_energy%.0fMeV_Water_phantom%03.0fmm_rotation%02.0fmrad.root", initialEnergy, phantomSize, rotation));
    }
 
-   else if (spotsize > 0)  {
+   else if (spotsize >= 0)  {
       f = new TFile(Form("MC/Output/simpleScanner_energy%.0fMeV_Water_phantom%03.0fmm_spotsize%04.1fmm.root", initialEnergy, phantomSize, spotsize));
    }
    
    else {
-      f = new TFile(Form("MC/Output/simpleScanner_energy%.0fMeV_myAdipose_phantom%03.0fmm.root", initialEnergy, phantomSize));
+      f = new TFile(Form("MC/Output/simpleScanner_energy%.0fMeV_Water_phantom%03.0fmm.root", initialEnergy, phantomSize));
    }
 
    TTree *tree = (TTree*) f->Get("Hits");
@@ -115,13 +115,14 @@ void findMLP(Float_t phantomSize = 160, Float_t rotation = -1, Float_t spotsize 
    tree->SetBranchAddress("parentID", &parentID);
    tree->SetBranchAddress("volumeID", volumeID, &b_volumeID);
    
-   if (rotation < 1) {
+   if (rotation < 0) {
       P0NoTrk.SetCoordinates(0, 0, 1); // Normalized
       X0NoTrk.SetCoordinates(0, 0,-phantomSize/2);
    }
+
    else {
       P0NoTrk.SetCoordinates(0, -sin(rotation / 1000), cos(rotation / 1000));
-      X0NoTrk.SetCoordinates(0, -sin(rotation / 1000) * sourceToX0dist, -phantomSize/2);
+      X0NoTrk.SetCoordinates(0, -sin(rotation / 1000) * (sourceToX0dist + 15), -phantomSize/2);
    }
 
    Int_t maxAcc = 10;
@@ -147,10 +148,11 @@ void findMLP(Float_t phantomSize = 160, Float_t rotation = -1, Float_t spotsize 
             P0hat = P0.Unit();
             P1hat = P1.Unit();
            
-            P1Rotated = P1 - P0NoTrk;
+            P1Rotated = P1hat - P0NoTrk;
+            P1Rotated.SetZ(P1hat.Z());
             P1Rotated = P1Rotated.Unit();
 
-            Float_t dxy = sqrt(pow(P1hat.X(), 2) + pow(P1hat.Y(), 2));
+            Float_t dxy = sqrt(pow(P1Rotated.X(), 2) + pow(P1Rotated.Y(), 2));
             Float_t angle = fabs(atan2(dxy,1)) * 1000;
             
             wepl = splineWater->Eval(initialEnergy);
@@ -163,6 +165,10 @@ void findMLP(Float_t phantomSize = 160, Float_t rotation = -1, Float_t spotsize 
             Float_t AX = 0.992 - pow(w,2);
             Float_t AP = -1.677 - 44.96 * pow(w,1) + 110.93 * pow(w,2) - 125.29 * pow(w,3) + 62.48 * pow(w,4);
 
+            AP *= 10;
+
+//            AX = 0.84; AP = -65.198;
+
             if (printed < 15) {
                printf("w = %.2f -> using AX = %.2f, and AP = %.2f.\n", w, AX, AP);
                printed++;
@@ -171,19 +177,32 @@ void findMLP(Float_t phantomSize = 160, Float_t rotation = -1, Float_t spotsize 
             hResEnergy->Fill(residualEnergy);
 
             hP1->Fill(fabs(atan2(dxy, 1)) * 1000);
-            X0.SetZ(X0.Z() + 15);
-            X0.SetY(X0.Y() + 15 * P0hat.Y()); // it's not || 
-            X0.SetX(X0.X() + 15 * P0hat.X()); // it's not ||
+
+            XYZVector projectedPathX0;
+            projectedPathX0.SetCoordinates(15 * P0hat.X(), 15 * P0hat.Y(), 15);
             
+            // Project X0 to the phantom's edges (with full knowledge)
+            X0 += projectedPathX0;
+            
+            // Project X1 to the phantom's edges
             X1.SetCoordinates(X1.X() - 15 * P1hat.X(), X1.Y() - 15 * P1hat.Y(), X1.Z() - 15);
+            
+            // transpose X1 to origin along X0
+            XYZVector projectedPath;
+            projectedPath.SetCoordinates(X0NoTrk.X() + phantomSize * P0NoTrk.X(), X0NoTrk.Y() + phantomSize * P0NoTrk.Y(), 0);
 
-            X0est = X1 * AX + P1 * AP;
-            X0est.SetZ(-phantomSize/2);
-
-            if (rotation > 0) {
-               X0est.SetX(X0est.X() - (sourceToX0dist + 15) * P0NoTrk.X());
-               X0est.SetY(X0est.Y() - (sourceToX0dist + 15) * P0NoTrk.Y());
+            if (rotation >= 0) {
+               X1 -= projectedPath;
             }
+
+            X0est = X1 * AX + P1Rotated * AP;
+
+            if (rotation >= 0) {
+               X0est += projectedPathX0 / 15 * 115;
+               X1 += projectedPath;
+            }
+            
+            X0est.SetZ(-phantomSize/2);
             
             X0err = X0est - X0;
 
@@ -238,23 +257,25 @@ void findMLP(Float_t phantomSize = 160, Float_t rotation = -1, Float_t spotsize 
             splineMLPesty = new TSpline3("splineMLPesty", arSplineMLPz, arSplineMLPesty, idxSplineMLP);
 
             // 2) Sweep Z values and add the absolute difference to an array
-            Double_t diff_x, diff_y;
-            idxDifferenceArray = 0; // Sweep each time
-            nInDifferenceArray++; // To average at end
-            for (Double_t zSweep = -phantomSize/2; zSweep <= phantomSize/2; zSweep += 2) { // Keep Sweep increment high to speed up!
-               differenceArrayZ[idxDifferenceArray] = zSweep;
-            
-               diff_x = fabs(splineMCx->Eval(zSweep) - splineMLPx->Eval(zSweep));
-               diff_y = fabs(splineMCy->Eval(zSweep) - splineMLPy->Eval(zSweep));
-               differenceArrayDiff[idxDifferenceArray] += sqrt(pow(diff_x, 2) + pow(diff_y, 2));
+            if (!isnan(splineMCx->Eval(0))) {
+               Double_t diff_x, diff_y;
+               idxDifferenceArray = 0; // Sweep each time
+               nInDifferenceArray++; // To average at end
+               for (Double_t zSweep = -phantomSize/2; zSweep <= phantomSize/2; zSweep += 2) { // Keep Sweep increment high to speed up!
+                  differenceArrayZ[idxDifferenceArray] = zSweep;
+               
+                  diff_x = fabs(splineMCx->Eval(zSweep) - splineMLPx->Eval(zSweep));
+                  diff_y = fabs(splineMCy->Eval(zSweep) - splineMLPy->Eval(zSweep));
+                  differenceArrayDiff[idxDifferenceArray] += sqrt(pow(diff_x, 2) + pow(diff_y, 2));
 
-               diff_x = fabs(splineMCx->Eval(zSweep) - splineMLPNoTrkx->Eval(zSweep));
-               diff_y = fabs(splineMCy->Eval(zSweep) - splineMLPNoTrky->Eval(zSweep));
-               differenceArrayDiffNoTrk[idxDifferenceArray] += sqrt(pow(diff_x, 2) + pow(diff_y, 2));
+                  diff_x = fabs(splineMCx->Eval(zSweep) - splineMLPNoTrkx->Eval(zSweep));
+                  diff_y = fabs(splineMCy->Eval(zSweep) - splineMLPNoTrky->Eval(zSweep));
+                  differenceArrayDiffNoTrk[idxDifferenceArray] += sqrt(pow(diff_x, 2) + pow(diff_y, 2));
 
-               diff_x = fabs(splineMCx->Eval(zSweep) - splineMLPestx->Eval(zSweep));
-               diff_y = fabs(splineMCy->Eval(zSweep) - splineMLPesty->Eval(zSweep));
-               differenceArrayDiffest[idxDifferenceArray++] += sqrt(pow(diff_x, 2) + pow(diff_y, 2));
+                  diff_x = fabs(splineMCx->Eval(zSweep) - splineMLPestx->Eval(zSweep));
+                  diff_y = fabs(splineMCy->Eval(zSweep) - splineMLPesty->Eval(zSweep));
+                  differenceArrayDiffest[idxDifferenceArray++] += sqrt(pow(diff_x, 2) + pow(diff_y, 2));
+               }
             }
 
             delete splineMCx;
@@ -396,6 +417,9 @@ void findMLP(Float_t phantomSize = 160, Float_t rotation = -1, Float_t spotsize 
       differenceArrayZ[i] += phantomSize/2;
    }
 
+
+   printf("idxDifferenceArray = %d, differenceArrayZ[10] = %.2f, differenceArrayDiff[10] = %.2f\n", idxDifferenceArray, differenceArrayZ[10], differenceArrayDiff[10]);
+
    TCanvas *c2 = new TCanvas("c2", "MC vs MLP difference", 1500, 600);
    c2->Divide(3,1,0.001,0.001);
    c2->cd(1);
@@ -428,18 +452,18 @@ void findMLP(Float_t phantomSize = 160, Float_t rotation = -1, Float_t spotsize 
    Float_t sigmaNoTrk = (hErrorNaive->GetStdDev(1) + hErrorNaive->GetStdDev(2)) / 2;
    Float_t sigmaEst = (hErrorSigmaScale->GetStdDev(1) + hErrorSigmaScale->GetStdDev(2)) / 2;
 
-   if (spotsize > 0) {
+   if (spotsize >= 0) {
       ofstream file(Form("Output/MLPerror_energy%.0fMeV_Water_spotsize.csv", initialEnergy), ofstream::out | ofstream::app);
       file << phantomSize << " " << spotsize << " " <<  gDifferenceNoTrk->Eval(0) << " " << gDifferenceNoTrk->Eval(phantomSize/2) << " " << gDifferenceest->Eval(0) << " " << gDifferenceest->Eval(phantomSize/2) << " " << sigmaNoTrk << " " << sigmaEst << endl;
       file.close();
    }
-   else if (rotation > 0) {
+   else if (rotation >= 0) {
       ofstream file(Form("Output/MLPerror_energy%.0fMeV_Water_rotation.csv", initialEnergy), ofstream::out | ofstream::app);
       file << phantomSize << " " << rotation << " " <<  gDifferenceNoTrk->Eval(0) << " " << gDifferenceNoTrk->Eval(phantomSize/2) << " " << gDifferenceest->Eval(0) << " " << gDifferenceest->Eval(phantomSize/2) << " " << sigmaNoTrk << " " << sigmaEst << endl;
       file.close();
    }
    else {
-      ofstream file(Form("Output/MLPerror_energy%.0fMeV_Adipose_degrader.csv", initialEnergy), ofstream::out | ofstream::app);
+      ofstream file(Form("Output/MLPerror_energy%.0fMeV_Water_degrader.csv", initialEnergy), ofstream::out | ofstream::app);
       file << phantomSize << " " << rotation << " " <<  gDifferenceNoTrk->Eval(0) << " " << gDifferenceNoTrk->Eval(phantomSize/2) << " " << gDifferenceest->Eval(0) << " " << gDifferenceest->Eval(phantomSize/2) << " " << sigmaNoTrk << " " << sigmaEst << endl;
       file.close();
    }

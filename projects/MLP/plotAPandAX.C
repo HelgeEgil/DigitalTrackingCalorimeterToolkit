@@ -108,6 +108,12 @@ void plotAPandAX() {
    Float_t  arrayCorticalBoneMLPstartErrorNoTrk[arraySize] = {0};
    Float_t  arrayCorticalBoneMLPstartErrorEst[arraySize] = {0};
 
+   Float_t  arrayRotation[arraySize] = {0};
+   Float_t  arrayRotationError[arraySize] = {0};
+   
+   Float_t  arraySpotsize[arraySize] = {0};
+   Float_t  arraySpotsizeError[arraySize] = {0};
+
    Double_t rangesWater[arraySize] = {};
    Double_t energiesWater[arraySize] = {};
    Double_t rangesB100[arraySize] = {};
@@ -118,6 +124,8 @@ void plotAPandAX() {
    Double_t energiesCorticalBone[arraySize] = {};
    Double_t rangesA150[arraySize] = {};
    Double_t energiesA150[arraySize] = {};
+   Int_t    idxRotation = 0;
+   Int_t    idxSpotsize = 0;
    Int_t    idxB100 = 0;
    Int_t    idxWater = 0;
    Int_t    idxAdipose = 0;
@@ -405,6 +413,28 @@ void plotAPandAX() {
    }
    in.close();
 
+   in.open("Output/MLPerror_energy230MeV_Water_rotation.csv");
+   Float_t rotation_;
+   while (1) {
+      in >> dummy >> rotation_ >> mlpStartNoTrk_ >> mlpMidNoTrk_ >> mlpStartEst_ >> mlpMidEst_ >> bsNoTrk_ >> bsEst_;
+      if (!in.good()) break;
+
+      arrayRotation[idxRotation] = rotation_;
+      arrayRotationError[idxRotation++] = mlpMidEst_;
+   }
+   in.close();
+
+   in.open("Output/MLPerror_energy230MeV_Water_spotsize.csv");
+   while (1) {
+      in >> dummy >> rotation_ >> mlpStartNoTrk_ >> mlpMidNoTrk_ >> mlpStartEst_ >> mlpMidEst_ >> bsNoTrk_ >> bsEst_;
+      if (!in.good()) break;
+
+      arraySpotsize[idxSpotsize] = rotation_;
+      arraySpotsizeError[idxSpotsize++] = mlpMidEst_;
+   }
+   in.close();
+
+
    TCanvas *c1 = new TCanvas("c1", "Fit results", 1200, 800);
    c1->Divide(2,1,1e-4,1e-4);
 
@@ -628,7 +658,7 @@ void plotAPandAX() {
    gMLPErrorVsWAdipose->SetMarkerSize(0.8);
    gMLPErrorVsWCorticalBone->SetMarkerSize(0.8);
 
-   gMLPErrorVsWWater->SetTitle("MLP estimation error with #hat{X_{0}}, 230 MeV beam;(WET/WEPL)^{2};Error MLP-MC at middle of phantom[mm]");
+   gMLPErrorVsWWater->SetTitle("MLP estimation error with #hat{X_{0}}, 230 MeV beam;(WET/WEPL)^{2};Error MLP-MC at middle of phantom [mm]");
 
    gMLPErrorVsWWater->Draw("AP");
    gMLPErrorVsWA150->Draw("P");
@@ -643,4 +673,32 @@ void plotAPandAX() {
    leg3->AddEntry(gMLPErrorVsWCorticalBone, "ICRU Cortical Bone", "P");
    leg3->AddEntry(gMLPErrorVsWA150, "ICRU A150 T.E.P.", "P");
    leg3->Draw();
+
+   TCanvas *c5 = new TCanvas("c5", "Errors vs rotation", 600, 600);
+   TGraph *gRotationError = new TGraph(idxRotation, arrayRotation, arrayRotationError);
+
+   gRotationError->SetTitle("MLP estimation error with #hat{X_{0}}, 230 MeV beam/160 mm phantom;Beam rotation angle [mrad];Error MLP-MC at middle of phantom [mm]");
+
+   gRotationError->SetMarkerColor(kBlue);
+   gRotationError->SetMarkerStyle(21);
+   gRotationError->SetMarkerSize(0.8);
+
+   gRotationError->Draw("PA");
+   gRotationError->GetYaxis()->SetRangeUser(0,1);
+   gRotationError->GetYaxis()->SetTitleOffset(1.2);
+   
+   
+   TCanvas *c6 = new TCanvas("c6", "Errors vs rotation", 600, 600);
+   TGraph *gSpotsizeError = new TGraph(idxSpotsize, arraySpotsize, arraySpotsizeError);
+
+   gSpotsizeError->SetTitle("MLP estimation error with #hat{X_{0}}, 230 MeV beam/160 mm phantom;Beam spotsize [mm];Error MLP-MC at middle of phantom [mm]");
+
+   gSpotsizeError->SetMarkerColor(kBlue);
+   gSpotsizeError->SetMarkerStyle(21);
+   gSpotsizeError->SetMarkerSize(0.8);
+
+   gSpotsizeError->Draw("PA");
+   gSpotsizeError->GetYaxis()->SetRangeUser(0,1);
+   gSpotsizeError->GetYaxis()->SetTitleOffset(1.2);
+
 }
