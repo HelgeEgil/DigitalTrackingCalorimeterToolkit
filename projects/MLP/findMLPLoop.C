@@ -76,7 +76,7 @@ void findMLPLoop(Float_t phantomSize, Float_t spotSize) {
    TFile *f;
 
    if (spotSize <0) {
-      f = new TFile(Form("MC/Output/simpleScanner_energy%.0fMeV_Water_phantom%03.0fmm.root", initialEnergy, phantomSize)); 
+      f = new TFile(Form("MC/Output/simpleScanner_energy%.0fMeV_A150_phantom%03.0fmm.root", initialEnergy, phantomSize)); 
    }
    else {
       f = new TFile(Form("MC/Output/simpleScanner_energy%.0fMeV_Water_phantom%03.0fmm_spotsize%.3fmm.root", initialEnergy, phantomSize, spotSize)); 
@@ -97,10 +97,10 @@ void findMLPLoop(Float_t phantomSize, Float_t spotSize) {
    
    TSpline3 *splineWater = new TSpline3("splineWater", energiesWater, rangesWater, idxWater);
 
-   Float_t  AXlow = 0;
-   Float_t  AXhigh = 0.3;
-   Float_t  APlow = -1;
-   Float_t  APhigh = 4;
+   Float_t  AXlow = 0.3;
+   Float_t  AXhigh = 1.04;
+   Float_t  APlow = -11;
+   Float_t  APhigh = 0;
    
    Float_t  APdelta = 0.1;
    Float_t  AXdelta = 0.02;
@@ -233,7 +233,7 @@ void findMLPLoop(Float_t phantomSize, Float_t spotSize) {
 //   c2->SaveAs(Form("Output/accuracy_energy%.0fMeV_%.0fmm_A150.pdf", initialEnergy, phantomSize));
 
    // Phantom size, error , AX , AP
-   ofstream file(Form("Output/accuracy_energy%.0fMeV_Water_phantom.csv", initialEnergy), ofstream::out | ofstream::app); 
+   ofstream file(Form("Output/accuracy_energy%.0fMeV_A150_phantom.csv", initialEnergy), ofstream::out | ofstream::app); 
    file << phantomSize << " " << hErrorMatrix->GetBinContent(binx,biny) << " " << minXvalue << " " << minYvalue << " " <<  hResidualEnergy->GetMean() << endl;
    file.close();
 }
