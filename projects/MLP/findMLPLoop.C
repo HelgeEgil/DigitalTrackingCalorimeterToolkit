@@ -31,7 +31,7 @@ XYZVector SplineMLP(Double_t t, XYZVector X0, XYZVector X1, XYZVector P0, XYZVec
 void findMLPLoop(Float_t phantomSize, Float_t spotSize) {
    Float_t     initialEnergy = 230;
    Float_t     differenceArrayDZ = 3;
-   const Int_t eventsToUse = 800;
+   const Int_t eventsToUse = 150;
    Float_t     x, y, z, edep, sum_edep = 0, residualEnergy = 0;
    Int_t       eventID, parentID, lastEID = -1;
    XYZVector   Xp0, Xp1, Xp2, Xp3, X0, X1, X0est, X0err, X0NoTrk, P0, P0NoTrk, P1, P0hat, P1hat, S; // Xp are the plane coordinates, X are the tracker coordinates (X1 = (Xp1 + Xp2) / 2)
@@ -76,7 +76,7 @@ void findMLPLoop(Float_t phantomSize, Float_t spotSize) {
    TFile *f;
 
    if (spotSize <0) {
-      f = new TFile(Form("MC/Output/simpleScanner_energy%.0fMeV_A150_phantom%03.0fmm.root", initialEnergy, phantomSize)); 
+      f = new TFile(Form("MC/Output/simpleScanner_energy%.0fMeV_Water_phantom%03.0fmm.root", initialEnergy, phantomSize)); 
    }
    else {
       f = new TFile(Form("MC/Output/simpleScanner_energy%.0fMeV_Water_phantom%03.0fmm_spotsize%.3fmm.root", initialEnergy, phantomSize, spotSize)); 
@@ -97,13 +97,13 @@ void findMLPLoop(Float_t phantomSize, Float_t spotSize) {
    
    TSpline3 *splineWater = new TSpline3("splineWater", energiesWater, rangesWater, idxWater);
 
-   Float_t  AXlow = 0.3;
-   Float_t  AXhigh = 1.04;
-   Float_t  APlow = -11;
+   Float_t  AXlow = 0.5;
+   Float_t  AXhigh = 1.05;
+   Float_t  APlow = -120;
    Float_t  APhigh = 0;
    
-   Float_t  APdelta = 0.1;
-   Float_t  AXdelta = 0.02;
+   Float_t  APdelta = 0.5;
+   Float_t  AXdelta = 0.005;
 
    Int_t    AXbins = (AXhigh - AXlow) / AXdelta;
    Int_t    APbins = (APhigh - APlow) / APdelta;
@@ -165,13 +165,13 @@ void findMLPLoop(Float_t phantomSize, Float_t spotSize) {
             // INNER MINIMIZATION LOOP
             for (Float_t AX = AXlow; AX <= AXhigh; AX += AXdelta) {
                for (Float_t AP = APlow; AP <= APhigh; AP += APdelta) {
-                  X0est = X1 * AX + P1 * AP;
+                  X0est = X1 * AX + P1 * AP/10;
                   X0est.SetZ(-phantomSize/2); // We know the Z coordinate...
                   
                   S = SplineMLP(0, X0est, X1, P0NoTrk, P1hat, Lambda0, Lambda1);
                   
                   Float_t lastZ = -1;
-                  for (Float_t t=0; t<1; t+= 0.01) { // was 0.01
+                  for (Float_t t=0; t<=1; t+= 0.01) { // was 0.01
                      S = SplineMLP(t, X0est, X1, P0NoTrk, P1hat, Lambda0, Lambda1);
                      if (lastZ<1) lastZ = S.Z();
                      diff_x = fabs(splineMCx->Eval(S.Z()) - S.X());
@@ -233,7 +233,7 @@ void findMLPLoop(Float_t phantomSize, Float_t spotSize) {
 //   c2->SaveAs(Form("Output/accuracy_energy%.0fMeV_%.0fmm_A150.pdf", initialEnergy, phantomSize));
 
    // Phantom size, error , AX , AP
-   ofstream file(Form("Output/accuracy_energy%.0fMeV_A150_phantom.csv", initialEnergy), ofstream::out | ofstream::app); 
+   ofstream file(Form("Output/accuracy_energy%.0fMeV_Adipose_phantom.csv", initialEnergy), ofstream::out | ofstream::app); 
    file << phantomSize << " " << hErrorMatrix->GetBinContent(binx,biny) << " " << minXvalue << " " << minYvalue << " " <<  hResidualEnergy->GetMean() << endl;
    file.close();
 }

@@ -236,7 +236,7 @@ void plotAPandAX() {
       wet = wepl - splineWater->Eval(residualEnergy);
 
       arrayPhantomSize200[arrayIdx200] = phantomSize_;
-      arrayWetWepl200[arrayIdx200] = pow(wet/wepl, 2);
+      arrayWetWepl200[arrayIdx200] = pow(wet/wepl, 1);
       arrayResidualEnergy200[arrayIdx200] = pow(wet/wepl,10) * weplFactor;
       arrayError200[arrayIdx200] = error_;
       arrayAX200[arrayIdx200] = AX_;
@@ -265,7 +265,7 @@ void plotAPandAX() {
       wet = wepl - splineWater->Eval(residualEnergy_);
 
       arrayPhantomSizeB100230[arrayIdxB100230] = phantomSize_;
-      arrayWetWeplB100230[arrayIdxB100230] = pow(wet/wepl, 2); // * pow(weplFactor, weplPower);
+      arrayWetWeplB100230[arrayIdxB100230] = pow(wet/wepl, 1); // * pow(weplFactor, weplPower);
       arrayResidualEnergyB100230[arrayIdxB100230] = pow(wet/wepl, 4); // * weplFactor;
       arrayAXB100230[arrayIdxB100230] = AX_;
       arrayAPB100230[arrayIdxB100230++] = AP_;
@@ -280,7 +280,7 @@ void plotAPandAX() {
       wet = wepl - splineWater->Eval(residualEnergy_);
 
       arrayPhantomSizeAdipose230[arrayIdxAdipose230] = phantomSize_;
-      arrayWetWeplAdipose230[arrayIdxAdipose230] = pow(wet/wepl, 2); // * pow(weplFactor, weplPower);
+      arrayWetWeplAdipose230[arrayIdxAdipose230] = pow(wet/wepl, 1); // * pow(weplFactor, weplPower);
       arrayResidualEnergyAdipose230[arrayIdxAdipose230] = pow(wet/wepl, 4); // * weplFactor;
       arrayAXAdipose230[arrayIdxAdipose230] = AX_;
       arrayAPAdipose230[arrayIdxAdipose230++] = AP_;
@@ -296,7 +296,7 @@ void plotAPandAX() {
       weplFactor = phantomSize_ / wet;
 
       arrayPhantomSizeCorticalBone230[arrayIdxCorticalBone230] = phantomSize_;
-      arrayWetWeplCorticalBone230[arrayIdxCorticalBone230] = pow(wet/wepl, 2); // * pow(weplFactor, weplPower);
+      arrayWetWeplCorticalBone230[arrayIdxCorticalBone230] = pow(wet/wepl, 1); // * pow(weplFactor, weplPower);
       arrayResidualEnergyCorticalBone230[arrayIdxCorticalBone230] = pow(wet/wepl, 4); // * weplFactor;
       arrayAXCorticalBone230[arrayIdxCorticalBone230] = AX_;
       arrayAPCorticalBone230[arrayIdxCorticalBone230++] = AP_;
@@ -312,7 +312,7 @@ void plotAPandAX() {
       weplFactor = phantomSize_ / wet;
 
       arrayPhantomSizeA150230[arrayIdxA150230] = phantomSize_;
-      arrayWetWeplA150230[arrayIdxA150230] = pow(wet/wepl, 2); // * pow(weplFactor, weplPower);
+      arrayWetWeplA150230[arrayIdxA150230] = pow(wet/wepl, 1); // * pow(weplFactor, weplPower);
       arrayResidualEnergyA150230[arrayIdxA150230] = pow(wet/wepl, 4); // * weplFactor;
       arrayAXA150230[arrayIdxA150230] = AX_;
       arrayAPA150230[arrayIdxA150230++] = AP_;
@@ -328,7 +328,7 @@ void plotAPandAX() {
       printf("Residual energy for a %.2f mm phantom is %.2f MeV, wet/wepl = %.3f .\n", phantomSize_, residualEnergy_, wet/wepl);
 
       arrayPhantomSize230[arrayIdx230] = phantomSize_;
-      arrayWetWepl230[arrayIdx230] = pow(wet/wepl, 2);
+      arrayWetWepl230[arrayIdx230] = pow(wet/wepl, 1);
       arrayResidualEnergy230[arrayIdx230] = pow(wet/wepl,4);
       arrayError230[arrayIdx230] = error_;
       arrayAX230[arrayIdx230] = AX_;
