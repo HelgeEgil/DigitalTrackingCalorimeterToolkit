@@ -187,8 +187,6 @@ void findMLP(Float_t phantomSize = 200, Float_t rotation = -1, Float_t spotsize 
             double y0 = X0.Y();
             double z0 = X0.Z();
 
-            printf("Define angles\n");
-
             double angleX2rad = atan2(px0, py0);
             double angleY2rad = atan2(py0, py0);
             double angleZ2rad = atan2(pz0, py0);
@@ -221,7 +219,6 @@ void findMLP(Float_t phantomSize = 200, Float_t rotation = -1, Float_t spotsize 
 
             int a; // iterator for matrix operations
 
-            printf("Init matrices\n");
             float scatter_1[4] = {0};
             float scatter_2[4] = {0};
 
@@ -253,7 +250,6 @@ void findMLP(Float_t phantomSize = 200, Float_t rotation = -1, Float_t spotsize 
             float first[2] = {0};
             float second[2] = {0};
 
-            printf("Calculate Sigmas\n");
             sz2 = Sigmaz2(m1.z() - m0.z(), posz - m0.z());
             stz2 = Sigmatz2(m1.z() - m0.z(), posz - m0.z());
             st2 = Sigmat2(m1.z() - m0.z(), posz - m0.z());
@@ -284,8 +280,6 @@ void findMLP(Float_t phantomSize = 200, Float_t rotation = -1, Float_t spotsize 
             scatter_2[3] = st2;
 
             // pre-factors C1 + C2 as in Krah et al. (2018)
-            printf("Pre-factors\n");
-            
             C1_1[0] = (sigma_beam[0] * R_0_transpose[0]) + (sigma_beam[1] * R_0_transpose[2]);
             C1_1[1] = (sigma_beam[0] * R_0_transpose[1]) + (sigma_beam[1] * R_0_transpose[3]);
             C1_1[2] = (sigma_beam[2] * R_0_transpose[0]) + (sigma_beam[3] * R_0_transpose[2]);
@@ -370,11 +364,11 @@ void findMLP(Float_t phantomSize = 200, Float_t rotation = -1, Float_t spotsize 
             Y_mlp = first[0] + second[0];
             double theta_Y_mlp = first[1] + second[1];
 
-            printf("Finished ... \n");
-               
             XYZVector X0krah(X_mlp*10, Y_mlp*10, phantomSize/2);
             XYZVector P0krah(tan(theta_X_mlp), tan(theta_Y_mlp), 1);
             P0krah = P0krah.Unit();
+
+            cout << "X0Krah = " << X0krah  << ", P0krah = " << P0krah << endl;
 
             X0est = X1 * AX + P1hat * AP;
 
@@ -382,7 +376,6 @@ void findMLP(Float_t phantomSize = 200, Float_t rotation = -1, Float_t spotsize 
             Lambda0 = 1.01 + 0.43 * w2;
             Lambda1 = 0.99 - 0.46 * w2;
 
-            printf("Find all arrays from Spline calculation\n");
             for (Float_t t=0; t<1; t += 0.01) {
                S = SplineMLP(t, X0, X1, P0hat, P1hat, Lambda0, Lambda1); // perfect info
                arSplineMLPx[idxSplineMLP] = S.X(); 
@@ -396,6 +389,7 @@ void findMLP(Float_t phantomSize = 200, Float_t rotation = -1, Float_t spotsize 
                S = SplineMLP(t, X0krah, X1, P0krah, P1hat, Lambda0, Lambda1); // niels'
                arSplineMLPNoTrkx[idxSplineMLP] = S.X();
                arSplineMLPNoTrky[idxSplineMLP++] = S.Y();
+               cout << "splineKrah = (" << S.X() << ", " << S.Y() << ", " << S.Z() << endl;
 
 
                if (lastEID < maxAcc) {
@@ -409,55 +403,39 @@ void findMLP(Float_t phantomSize = 200, Float_t rotation = -1, Float_t spotsize 
                }
             }
 
-            printf("Compare MC and MLP. idxSplineMLP = %d\n", idxSplineMLP);
-            printf("idxSplineMC = %d, arSplineMCz[0] = %.2f, arSplineMCz[0] = %.2f\n", idxSplineMC, arSplineMCz[0], arSplineMCx[0]);
-            printf("idxSplineMLP = %d, arSplineMLPestz[0] = %.2f, arSplineMLPz[0] = %.2f\n", idxSplineMLP, arSplineMLPz[0], arSplineMLPestx[0]);
-            printf("idxSplineMLP = %d, arSplineMLPNoTrkz[0] = %.2f, arSplineMLPz[0] = %.2f\n", idxSplineMLP, arSplineMLPz[0], arSplineMLPNoTrkx[0]);
-         
             // Compare MC and MLP here
             // 1) Make splines to compare at same Z
             splineMCx  = new TSpline3("splineMCx", arSplineMCz, arSplineMCx, idxSplineMC);
             splineMCy  = new TSpline3("splineMCy", arSplineMCz, arSplineMCy, idxSplineMC);
+            splineMLPx= new TSpline3("splineMLPx", arSplineMLPz, arSplineMLPx, idxSplineMLP);
+            splineMLPy = new TSpline3("splineMLPy", arSplineMLPz, arSplineMLPy, idxSplineMLP);
             splineMLPestx = new TSpline3("splineMLPestx", arSplineMLPz, arSplineMLPestx, idxSplineMLP);
             splineMLPesty = new TSpline3("splineMLPesty", arSplineMLPz, arSplineMLPesty, idxSplineMLP);
             splineMLPKrahx = new TSpline3("splineMLPKrahx", arSplineMLPz, arSplineMLPNoTrkx, idxSplineMLP);
             splineMLPKrahy = new TSpline3("splineMLPKrahy", arSplineMLPz, arSplineMLPNoTrky, idxSplineMLP);
 
-            printf("Defined splines\n");
             // 2) Sweep Z values and add the absolute difference to an array
-            if (!isnan(splineMCx->Eval(0))) {
+            float rvalue = splineMCx->Eval(0);
+            if (!isnan(rvalue)) {
                Double_t diff_x, diff_y;
                idxDifferenceArray = 0; // Sweep each time
                nInDifferenceArray++; // To average at end
                for (Double_t zSweep = -phantomSize/2; zSweep <= phantomSize/2; zSweep += 2) { // Keep Sweep increment high to speed up!
-                  printf("zSweep = %.2f\n", zSweep);
-                  printf("1 ");
                   differenceArrayZ[idxDifferenceArray] = zSweep;
-                  printf("1a ");
-                  cout << splineMCx->Eval(zSweep) << endl;
-                  cout << splineMLPx->Eval(zSweep) << endl; // krash here
                   diff_x = fabs(splineMCx->Eval(zSweep) - splineMLPx->Eval(zSweep));
-                  printf("1b ");
                   diff_y = fabs(splineMCy->Eval(zSweep) - splineMLPy->Eval(zSweep));
-                  printf("1c ");
                   differenceArrayDiff[idxDifferenceArray] += sqrt(pow(diff_x, 2) + pow(diff_y, 2));
-
-                  printf("2 ");
 
                   diff_x = fabs(splineMCx->Eval(zSweep) - splineMLPKrahx->Eval(zSweep));
                   diff_y = fabs(splineMCy->Eval(zSweep) - splineMLPKrahy->Eval(zSweep));
                   differenceArrayDiffNoTrk[idxDifferenceArray] += sqrt(pow(diff_x, 2) + pow(diff_y, 2));
 
-                  printf("3 ");
-
                   diff_x = fabs(splineMCx->Eval(zSweep) - splineMLPestx->Eval(zSweep));
                   diff_y = fabs(splineMCy->Eval(zSweep) - splineMLPesty->Eval(zSweep));
                   differenceArrayDiffest[idxDifferenceArray++] += sqrt(pow(diff_x, 2) + pow(diff_y, 2));
-                  printf("end.\n");
                }
             }
 
-            printf("delete\n");
 
             delete splineMCx;
             delete splineMCy;
