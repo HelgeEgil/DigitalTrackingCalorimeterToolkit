@@ -161,7 +161,14 @@ void findMLP(Float_t phantomSize = 200, Float_t rotation = -1, Float_t spotsize 
          X1 = (Xp2 + Xp3) / 2;
          P0 = Xp1 - Xp0;
          P1 = Xp3 - Xp2;
+         P0hat = P0.Unit();
+         P1hat = P1.Unit();
+
+         P1Rotated = P1hat - P0NoTrk;
+         P1Rotated.SetZ(P1hat.Z());
+         P1Rotated = P1Rotated.Unit();
             
+
          wepl = splineWater->Eval(initialEnergy);
          wet = wepl - splineWater->Eval(residualEnergy);
          Float_t w = wet / wepl;
@@ -169,31 +176,31 @@ void findMLP(Float_t phantomSize = 200, Float_t rotation = -1, Float_t spotsize 
             
          Float_t AX = 1 - 0.185 * w + 0.372 * pow(w,2) - 0.916 * pow(w,3);
          Float_t AP = -3.93 - 82.23 * w - 185.6 * pow(w,2) + 273.9 * pow(w,3);
-
          
-            
+         Float_t dxy = sqrt(pow(P1Rotated.X(), 2) + pow(P1Rotated.Y(), 2));
+         Float_t angle = fabs(atan2(dxy,1)) * 1000;
          sigmaFilter = 139.15 * w + 13.991;
 
-         if (residualEnergy > energyFilter) {
+         if (residualEnergy > energyFilter && angle < sigmaFilter) {
          
             double trackerDist = 1;
             double trackerDistPhantom = 1;
 
-            double px0 = P0.X();
-            double py0 = P0.Y(); 
-            double pz0 = P0.Z(); 
+            double px0 = P0hat.X();
+            double py0 = P0hat.Y(); 
+            double pz0 = P0hat.Z(); 
 
             double x0 = X0.X();
             double y0 = X0.Y();
             double z0 = X0.Z();
 
-            double angleX2rad = atan2(px0, py0);
-            double angleY2rad = atan2(py0, py0);
-            double angleZ2rad = atan2(pz0, py0);
+            double angleX2rad = atan2(px0, pz0);
+            double angleY2rad = atan2(py0, pz0);
+            double angleZ2rad = atan2(pz0, pz0);
             
-            double angleXout = atan(P1.X()/10/trackerDist);
-            double angleYout = atan(P1.Y()/10/trackerDist);
-            double angleZout = atan(P1.Z()/10/trackerDist);
+            double angleXout = atan(P1hat.X());
+            double angleYout = atan(P1hat.Y());
+            double angleZout = atan(P1hat.Z());
 
             TVector3 m0(x0/10, y0/10, z0/10); // in cm
             TVector3 p0(angleX2rad, angleY2rad, angleZ2rad);
@@ -364,20 +371,39 @@ void findMLP(Float_t phantomSize = 200, Float_t rotation = -1, Float_t spotsize 
             Y_mlp = first[0] + second[0];
             double theta_Y_mlp = first[1] + second[1];
 
-            XYZVector X0krah(X_mlp*10, Y_mlp*10, phantomSize/2);
+            XYZVector X0krah(X_mlp*10, Y_mlp*10, -phantomSize/2);
             XYZVector P0krah(tan(theta_X_mlp), tan(theta_Y_mlp), 1);
             P0krah = P0krah.Unit();
 
-            cout << "X0Krah = " << X0krah  << ", P0krah = " << P0krah << endl;
+            XYZVector projectedPathX0;
+            projectedPathX0.SetCoordinates(15 * P0NoTrk.X(), 15 * P0NoTrk.Y(), 15);
 
-            X0est = X1 * AX + P1hat * AP;
+            XYZVector projectedPath;
+            projectedPath.SetCoordinates(X0NoTrk.X() + phantomSize * P0NoTrk.X(), X0NoTrk.Y() + phantomSize * P0NoTrk.Y(), 0);
+         
+            X0 += projectedPathX0;
+
+            X1.SetCoordinates(X1.X() - 15 * P1hat.X(), X1.Y() - 15 * P1hat.Y(), X1.Z() - 15);
+
+            X0est = X1 * AX + P1Rotated * AP;
+            X0est.SetZ(-phantomSize/2);
 
             // Find lambda values using polynomial in Fig. 4 in Fekete et al. 2015
             Lambda0 = 1.01 + 0.43 * w2;
             Lambda1 = 0.99 - 0.46 * w2;
 
+            cout << "X0Krah = " << X0krah  << ", P0krah = " << P0krah << endl;
+            cout << "X0 = " << X0 << ", X0est = " << X0est << ", X1 = " << X1 << endl;
+
             for (Float_t t=0; t<1; t += 0.01) {
                S = SplineMLP(t, X0, X1, P0hat, P1hat, Lambda0, Lambda1); // perfect info
+               if (lastEID < maxAcc) {
+                  aPosMLPx[aIdxMLP] = S.X();
+                  aPosMLPy[aIdxMLP] = S.Y();
+                  aPosMLPz[aIdxMLP] = S.Z();
+               }
+               
+               
                arSplineMLPx[idxSplineMLP] = S.X(); 
                arSplineMLPy[idxSplineMLP] = S.Y();
                arSplineMLPz[idxSplineMLP] = S.Z();
@@ -385,11 +411,15 @@ void findMLP(Float_t phantomSize = 200, Float_t rotation = -1, Float_t spotsize 
                S = SplineMLP(t, X0est, X1, P0NoTrk, P1hat, Lambda0, Lambda1); // mine
                arSplineMLPestx[idxSplineMLP] = S.X();
                arSplineMLPesty[idxSplineMLP] = S.Y();
+               
+               if (lastEID < maxAcc) {
+                  aPosMLPesty[aIdxMLP] = S.Y();
+                  aPosMLPestx[aIdxMLP++] = S.X();
+               }
 
                S = SplineMLP(t, X0krah, X1, P0krah, P1hat, Lambda0, Lambda1); // niels'
                arSplineMLPNoTrkx[idxSplineMLP] = S.X();
                arSplineMLPNoTrky[idxSplineMLP++] = S.Y();
-               cout << "splineKrah = (" << S.X() << ", " << S.Y() << ", " << S.Z() << endl;
 
 
                if (lastEID < maxAcc) {
@@ -397,10 +427,6 @@ void findMLP(Float_t phantomSize = 200, Float_t rotation = -1, Float_t spotsize 
                   aPosMLPNoTrkx[aIdxMLP] = S.X();
                }
 
-               if (lastEID < maxAcc) {
-                  aPosMLPesty[aIdxMLP] = S.Y();
-                  aPosMLPestx[aIdxMLP++] = S.X();
-               }
             }
 
             // Compare MC and MLP here

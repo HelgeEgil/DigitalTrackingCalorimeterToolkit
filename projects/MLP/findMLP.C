@@ -200,7 +200,9 @@ void findMLP(Float_t phantomSize = 200, Float_t rotation = -1, Float_t spotsize 
             }
             
             X0est.SetZ(-phantomSize/2);
-            
+           
+            cout << "X0 = " << X0 << ", X0est = " << X0est << ", X1 = " << X1 << endl;
+
             X0err = X0est - X0;
 
             hErrorNaive->Fill(X0.X(), X0.Y());
@@ -254,7 +256,7 @@ void findMLP(Float_t phantomSize = 200, Float_t rotation = -1, Float_t spotsize 
             splineMLPesty = new TSpline3("splineMLPesty", arSplineMLPz, arSplineMLPesty, idxSplineMLP);
 
             // 2) Sweep Z values and add the absolute difference to an array
-            if (!isnan(splineMCx->Eval(0))) {
+            if (!std::isnan(splineMCx->Eval(0))) {
                Double_t diff_x, diff_y;
                idxDifferenceArray = 0; // Sweep each time
                nInDifferenceArray++; // To average at end
