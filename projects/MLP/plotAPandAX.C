@@ -111,6 +111,11 @@ void plotAPandAX() {
    Float_t  arraySpotsize[arraySize] = {0};
    Float_t  arraySpotsizeError[arraySize] = {0};
 
+   Float_t  array200Phantomsize[arraySize];
+   Float_t  array200NoTrk[arraySize];
+   Float_t  array200Est[arraySize];
+   Float_t  array200Krah[arraySize];
+
    Double_t rangesWater[arraySize] = {};
    Double_t energiesWater[arraySize] = {};
    Double_t rangesB100[arraySize] = {};
@@ -123,6 +128,7 @@ void plotAPandAX() {
    Double_t energiesA150[arraySize] = {};
    Int_t    idxRotation = 0;
    Int_t    idxSpotsize = 0;
+   Int_t    idx200 = 0;
    Int_t    idxB100 = 0;
    Int_t    idxWater = 0;
    Int_t    idxAdipose = 0;
@@ -226,18 +232,17 @@ void plotAPandAX() {
    Float_t weplFactor = 1;
    in.open("Output/accuracy_energy200MeV_Water_phantom.csv");
    while (1) {
-      in >> phantomSize_ >> error_ >> AX_ >> AP_;
+      in >> phantomSize_ >> error_ >> AX_ >> AP_ >> residualEnergy_;
       if (!in.good()) break;
 
-      residualEnergy = 200 - splineWaterInv->Eval(phantomSize_);
-      wet = wepl - splineWater->Eval(residualEnergy);
+      wet = wepl - splineWater->Eval(residualEnergy_);
 
       arrayPhantomSize200[arrayIdx200] = phantomSize_;
       arrayWetWepl200[arrayIdx200] = pow(wet/wepl, 1);
       arrayResidualEnergy200[arrayIdx200] = pow(wet/wepl, 1) * weplFactor;
       arrayError200[arrayIdx200] = error_;
       arrayAX200[arrayIdx200] = AX_;
-      arrayAP200[arrayIdx200++] = AP_*10;
+      arrayAP200[arrayIdx200++] = AP_;
    }
    in.close();
    
@@ -271,7 +276,7 @@ void plotAPandAX() {
       arrayAPAdipose230[arrayIdxAdipose230++] = AP_*10;
    }
    in.close();
-   
+
    in.open("Output/accuracy_energy230MeV_CorticalBone_phantom.csv");
    while (1) {
       if (!in.good()) break;
@@ -419,6 +424,20 @@ void plotAPandAX() {
    }
    in.close();
 
+   Float_t mlpStartKrah_, mlpMidKrah_;
+   in.open("Output/MLPerror_energy200MeV_Water_krah.csv");
+   while (1) {
+      in >> phantomSize_ >> mlpStartNoTrk_ >> mlpMidNoTrk_ >> mlpStartEst_ >> mlpMidEst_ >> mlpStartKrah_ >> mlpMidKrah_;
+
+      if (!in.good()) break;
+         
+      array200Phantomsize[idx200] = phantomSize_;
+      array200NoTrk[idx200] = mlpStartNoTrk_;
+      array200Est[idx200] = mlpStartEst_;
+      array200Krah[idx200++] = mlpStartKrah_;
+   }
+   in.close();
+
 
    TCanvas *c1 = new TCanvas("c1", "Fit results", 1200, 800);
    c1->Divide(2,2,1e-4,1e-4);
@@ -478,15 +497,23 @@ void plotAPandAX() {
    TGraph *gAXA150230 = new TGraph(arrayIdxA150230, arrayResidualEnergyA150230, arrayAXA150230);
    TGraph *gAPA150230 = new TGraph(arrayIdxA150230, arrayWetWeplA150230, arrayAPA150230);
 
+   TGraph *gAX200 = new TGraph(arrayIdx200, arrayResidualEnergy200, arrayAX200);
+   TGraph *gAP200 = new TGraph(arrayIdx200, arrayResidualEnergy200, arrayAP200);
+
    TGraph *gAXall = new TGraph(fullIdx, arrayResidualEnergyAll, arrayAXall);
    TGraph *gAPall = new TGraph(fullIdx, arrayWetWeplAll, arrayAPall);
 
    gAXall->SetMarkerStyle(21); gAPall->SetMarkerStyle(21);
 
+   gAX200->SetMarkerColor(kRed);
+   gAP200->SetMarkerColor(kRed);
+
    c1->cd(3);
    gAXall->Draw("AP");
+   gAX200->Draw("P");
    c1->cd(4);
    gAPall->Draw("AP");
+   gAP200->Draw("P");
 
    gAXB100230->SetMarkerColor(kRed);
    gAPB100230->SetMarkerColor(kRed);
@@ -718,5 +745,36 @@ void plotAPandAX() {
 
    gSpotsizeError->Draw("PA");
    gSpotsizeError->GetYaxis()->SetTitleOffset(1.2);
+
+   TCanvas *c7 = new TCanvas("c7", "Different estimation models", 600, 600);
+
+   TGraph *g200NoTrk = new TGraph(idx200, array200Phantomsize, array200NoTrk);
+   TGraph *g200Est = new TGraph(idx200, array200Phantomsize, array200Est);
+   TGraph *g200Krah = new TGraph(idx200, array200Phantomsize, array200Krah);
+
+   g200NoTrk->SetMarkerColor(kBlue);
+   g200NoTrk->SetMarkerStyle(21);
+   g200NoTrk->SetMarkerSize(0.8);
+   g200Est->SetMarkerColor(kRed);
+   g200Est->SetMarkerStyle(21);
+   g200Est->SetMarkerSize(0.8);
+   g200Krah->SetMarkerColor(kGreen);
+   g200Krah->SetMarkerStyle(21);
+   g200Krah->SetMarkerSize(0.8);
+
+   g200NoTrk->SetTitle("Error from different X_{0} estimation models (200 MeV on water);Phantom size [mm];Error | X_{0}^{est} - X_{0}^{MC} | [mm]");
+
+   g200NoTrk->Draw("AP");
+   g200Est->Draw("P");
+   g200Krah->Draw("P");
+
+   g200NoTrk->GetYaxis()->SetRangeUser(0, 6);
+
+   TLegend *leg4 = new TLegend(.3, .66, .64, .8655);
+   leg4->AddEntry(g200NoTrk, "X_{0} = (0,0)", "P");
+   leg4->AddEntry(g200Krah, "Bayesian MLP", "P");
+   leg4->AddEntry(g200Est, "Projection Model", "P");
+   leg4->Draw();
+   leg4->SetTextFont(22);
 
 }

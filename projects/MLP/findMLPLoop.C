@@ -30,7 +30,7 @@ XYZVector SplineMLP(Double_t t, XYZVector X0, XYZVector X1, XYZVector P0, XYZVec
 }
 
 void findMLPLoop(Float_t phantomSize, Float_t spotSize) {
-   Float_t     initialEnergy = 230;
+   Float_t     initialEnergy = 200;
    Float_t     differenceArrayDZ = 3;
    const Int_t eventsToUse = 300;
    Float_t     x, y, z, edep, sum_edep = 0, residualEnergy = 0;
@@ -98,7 +98,7 @@ void findMLPLoop(Float_t phantomSize, Float_t spotSize) {
    
    TSpline3 *splineWater = new TSpline3("splineWater", energiesWater, rangesWater, idxWater);
 
-   Float_t  AXlow = 0.5;
+   Float_t  AXlow = 0;
    Float_t  AXhigh = 1.05;
    Float_t  APlow = -110;
    Float_t  APhigh = 0;
