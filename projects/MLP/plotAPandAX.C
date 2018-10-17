@@ -81,6 +81,15 @@ void plotAPandAX() {
    Float_t  arrayA150MLPstartErrorNoTrk[arraySize] = {0};
    Float_t  arrayA150MLPstartErrorEst[arraySize] = {0};
    
+   Float_t  arrayA150krahwetwepl[arraySize];
+   Float_t  arrayA150krahDivergence[arraySize];
+   Float_t  arrayA150krahMLPstartErrorEst[arraySize];
+   Float_t  arrayA150krahMLPstartErrorKrah[arraySize];
+   Float_t  arrayCorticalBonekrahwetwepl[arraySize];
+   Float_t  arrayCorticalBonekrahDivergence[arraySize];
+   Float_t  arrayCorticalBonekrahMLPstartErrorEst[arraySize];
+   Float_t  arrayCorticalBonekrahMLPstartErrorKrah[arraySize];
+   
    Float_t  arrayB100Divergence[arraySize] = {0};
    Float_t  arrayB100BeamSpotErrorNoTrk[arraySize] = {0};
    Float_t  arrayB100BeamSpotErrorEst[arraySize] = {0};
@@ -110,7 +119,11 @@ void plotAPandAX() {
    
    Float_t  arraySpotsize[arraySize] = {0};
    Float_t  arraySpotsizeError[arraySize] = {0};
+   
+   Float_t  arraySpotsizeKrah[arraySize] = {0};
+   Float_t  arraySpotsizeErrorKrah[arraySize] = {0};
 
+   Float_t  array200wetwepl[arraySize];
    Float_t  array200Phantomsize[arraySize];
    Float_t  array200NoTrk[arraySize];
    Float_t  array200Est[arraySize];
@@ -126,8 +139,11 @@ void plotAPandAX() {
    Double_t energiesCorticalBone[arraySize] = {};
    Double_t rangesA150[arraySize] = {};
    Double_t energiesA150[arraySize] = {};
+   Int_t    idxKrahA150 = 0;
+   Int_t    idxKrahCorticalBone = 0;
    Int_t    idxRotation = 0;
    Int_t    idxSpotsize = 0;
+   Int_t    idxSpotsizeKrah = 0;
    Int_t    idx200 = 0;
    Int_t    idxB100 = 0;
    Int_t    idxWater = 0;
@@ -414,30 +430,73 @@ void plotAPandAX() {
    }
    in.close();
 
+   /*
    in.open("Output/MLPerror_energy230MeV_Water_spotsize.csv");
    while (1) {
       in >> dummy >> rotation_ >> mlpStartNoTrk_ >> mlpMidNoTrk_ >> mlpStartEst_ >> mlpMidEst_ >> bsNoTrk_ >> bsEst_;
       if (!in.good()) break;
 
+   }
+   in.close();
+*/
+
+   Float_t mlpStartKrah_, mlpMidKrah_;
+   in.open("Output/MLPerror_energy200MeV_Water_spotsize_krah.csv");
+   while (1) {
+      in >> dummy >> rotation_ >> mlpStartNoTrk_ >> mlpMidNoTrk_ >> mlpStartEst_ >> mlpMidEst_ >> mlpStartKrah_ >> mlpMidKrah_ >> residualEnergy_;
+      if (!in.good()) break;
+
+      arraySpotsizeKrah[idxSpotsizeKrah] = rotation_;
+      arraySpotsizeErrorKrah[idxSpotsizeKrah++] = mlpStartKrah_;
       arraySpotsize[idxSpotsize] = rotation_;
       arraySpotsizeError[idxSpotsize++] = mlpStartEst_;
    }
    in.close();
 
-   Float_t mlpStartKrah_, mlpMidKrah_;
+
+   wepl = splineWater->Eval(200);
    in.open("Output/MLPerror_energy200MeV_Water_krah.csv");
    while (1) {
-      in >> phantomSize_ >> mlpStartNoTrk_ >> mlpMidNoTrk_ >> mlpStartEst_ >> mlpMidEst_ >> mlpStartKrah_ >> mlpMidKrah_;
+      in >> phantomSize_ >> mlpStartNoTrk_ >> mlpMidNoTrk_ >> mlpStartEst_ >> mlpMidEst_ >> mlpStartKrah_ >> mlpMidKrah_ >> residualEnergy_;
 
       if (!in.good()) break;
          
+      wet = wepl - splineWater->Eval(residualEnergy_);
+      array200wetwepl[idx200] = wet/wepl;
       array200Phantomsize[idx200] = phantomSize_;
       array200NoTrk[idx200] = mlpStartNoTrk_;
       array200Est[idx200] = mlpStartEst_;
       array200Krah[idx200++] = mlpStartKrah_;
    }
    in.close();
+   
+   in.open("Output/MLPerror_energy200MeV_A150_krah.csv");
+   while (1) {
+      in >> phantomSize_ >> mlpStartNoTrk_ >> mlpMidNoTrk_ >> mlpStartEst_ >> mlpMidEst_ >> mlpStartKrah_ >> mlpMidKrah_ >> residualEnergy_;
 
+      if (!in.good()) break;
+
+      wet = wepl - splineWater->Eval(residualEnergy_);
+      arrayA150krahwetwepl[idxKrahA150] = wet/wepl;
+      arrayA150krahDivergence[idxKrahA150] = phantomSize_;
+      arrayA150krahMLPstartErrorEst[idxKrahA150] = mlpStartEst_;
+      arrayA150krahMLPstartErrorKrah[idxKrahA150++] = mlpStartKrah_;
+   }
+   in.close();
+   
+   in.open("Output/MLPerror_energy200MeV_CorticalBone_krah.csv");
+   while (1) {
+      in >> phantomSize_ >> mlpStartNoTrk_ >> mlpMidNoTrk_ >> mlpStartEst_ >> mlpMidEst_ >> mlpStartKrah_ >> mlpMidKrah_ >> residualEnergy_;
+
+      if (!in.good()) break;
+
+      wet = wepl - splineWater->Eval(residualEnergy_);
+      arrayCorticalBonekrahwetwepl[idxKrahCorticalBone] = wet/wepl;
+      arrayCorticalBonekrahDivergence[idxKrahCorticalBone] = phantomSize_;
+      arrayCorticalBonekrahMLPstartErrorEst[idxKrahCorticalBone] = mlpStartEst_;
+      arrayCorticalBonekrahMLPstartErrorKrah[idxKrahCorticalBone++] = mlpStartKrah_;
+   }
+   in.close();
 
    TCanvas *c1 = new TCanvas("c1", "Fit results", 1200, 800);
    c1->Divide(2,2,1e-4,1e-4);
@@ -736,15 +795,28 @@ void plotAPandAX() {
    
    TCanvas *c6 = new TCanvas("c6", "Errors vs rotation", 600, 600);
    TGraph *gSpotsizeError = new TGraph(idxSpotsize, arraySpotsize, arraySpotsizeError);
+   TGraph *gSpotsizeErrorKrah = new TGraph(idxSpotsizeKrah, arraySpotsizeKrah, arraySpotsizeErrorKrah);
 
-   gSpotsizeError->SetTitle("MLP estimation error with #hat{X_{0}}, 230 MeV beam/160 mm phantom;Beam spotsize [mm];Error |X_{0}^{MC} - X_{0}^{est}| [mm]");
+   gSpotsizeError->SetTitle("MLP estimation error with #hat{X_{0}}, 200 MeV beam/160 mm phantom;Beam spotsize [mm];Error |X_{0}^{MC} - X_{0}^{est}| [mm]");
 
    gSpotsizeError->SetMarkerColor(kBlue);
    gSpotsizeError->SetMarkerStyle(21);
    gSpotsizeError->SetMarkerSize(0.8);
+   
+   gSpotsizeErrorKrah->SetMarkerColor(kBlack);
+   gSpotsizeErrorKrah->SetMarkerStyle(21);
+   gSpotsizeErrorKrah->SetMarkerSize(0.8);
+
 
    gSpotsizeError->Draw("PA");
-   gSpotsizeError->GetYaxis()->SetTitleOffset(1.2);
+   gSpotsizeErrorKrah->Draw("P");
+//   gSpotsizeError->GetYaxis()->SetTitleOffset(1.2);
+
+   TLegend *legss = new TLegend(.3, .66, .64, .8655);
+   legss->AddEntry(gSpotsizeError, "Projection Model", "P");
+   legss->AddEntry(gSpotsizeErrorKrah, "Bayesian MLP", "P");
+   legss->Draw();
+   legss->SetTextFont(22);
 
    TCanvas *c7 = new TCanvas("c7", "Different estimation models", 600, 600);
 
@@ -777,4 +849,50 @@ void plotAPandAX() {
    leg4->Draw();
    leg4->SetTextFont(22);
 
+   TCanvas *c8 = new TCanvas("c8", "Error in different materials", 600, 600);
+
+   TGraph *g200WaterEst = new TGraph(idx200, array200wetwepl, array200Est);
+   TGraph *g200WaterKrah = new TGraph(idx200, array200wetwepl, array200Krah);
+   TGraph *g200CorticalBoneEst = new TGraph(idxKrahCorticalBone, arrayCorticalBonekrahwetwepl, arrayCorticalBonekrahMLPstartErrorEst);
+   TGraph *g200CorticalBoneKrah = new TGraph(idxKrahCorticalBone, arrayCorticalBonekrahwetwepl, arrayCorticalBonekrahMLPstartErrorKrah);
+   TGraph *g200A150Est = new TGraph(idxKrahA150, arrayA150krahwetwepl, arrayA150krahMLPstartErrorEst);
+   TGraph *g200A150Krah = new TGraph(idxKrahA150, arrayA150krahwetwepl, arrayA150krahMLPstartErrorKrah);
+
+   g200WaterEst->SetMarkerColor(kBlue);
+   g200WaterEst->SetMarkerStyle(21);
+   g200WaterEst->SetMarkerSize(0.8);
+   g200WaterKrah->SetMarkerColor(kBlue);
+   g200WaterKrah->SetMarkerStyle(22);
+   g200WaterKrah->SetMarkerSize(1.4);
+   
+   g200CorticalBoneEst->SetMarkerColor(kRed);
+   g200CorticalBoneEst->SetMarkerStyle(21);
+   g200CorticalBoneEst->SetMarkerSize(0.8);
+   g200CorticalBoneKrah->SetMarkerColor(kRed);
+   g200CorticalBoneKrah->SetMarkerStyle(22);
+   g200CorticalBoneKrah->SetMarkerSize(1.4);
+   
+   g200A150Est->SetMarkerColor(kBlack);
+   g200A150Est->SetMarkerStyle(21);
+   g200A150Est->SetMarkerSize(0.8);
+   g200A150Krah->SetMarkerColor(kBlack);
+   g200A150Krah->SetMarkerStyle(22);
+   g200A150Krah->SetMarkerSize(1.4);
+
+   g200WaterEst->Draw("AP");
+   g200WaterKrah->Draw("P");
+   g200CorticalBoneEst->Draw("P");
+   g200CorticalBoneKrah->Draw("P");
+   g200A150Est->Draw("P");
+   g200A150Krah->Draw("P");
+   
+   TLegend *leg5 = new TLegend(.3, .66, .64, .8655);
+   leg5->AddEntry(g200WaterEst, "Projection Model (Water)", "P");
+   leg5->AddEntry(g200CorticalBoneEst, "Projection Model (Cortical Bone)", "P");
+   leg5->AddEntry(g200A150Est, "Projection Model (A150)", "P");
+   leg5->AddEntry(g200WaterKrah, "Bayesian MLP (Water)", "P");
+   leg5->AddEntry(g200CorticalBoneKrah, "Bayesian MLP (Cortical Bone)", "P");
+   leg5->AddEntry(g200A150Krah, "Bayesian MLP (A150)", "P");
+   leg5->Draw();
+   leg5->SetTextFont(22);
 }

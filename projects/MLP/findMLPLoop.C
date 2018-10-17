@@ -80,7 +80,7 @@ void findMLPLoop(Float_t phantomSize, Float_t spotSize) {
       f = new TFile(Form("MC/Output/simpleScanner_energy%.0fMeV_Water_phantom%03.0fmm.root", initialEnergy, phantomSize)); 
    }
    else {
-      f = new TFile(Form("MC/Output/simpleScanner_energy%.0fMeV_Water_phantom%03.0fmm_spotsize%.3fmm.root", initialEnergy, phantomSize, spotSize)); 
+      f = new TFile(Form("MC/Output/simpleScanner_energy%.0fMeV_Water_phantom%03.0fmm_spotsize%04.1fmm.root", initialEnergy, phantomSize, spotSize)); 
    }
 
    TTree *tree = (TTree*) f->Get("Hits");

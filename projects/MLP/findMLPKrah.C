@@ -51,7 +51,7 @@ void findMLP(Float_t phantomSize = 200, Float_t rotation = -1, Float_t spotsize 
    }
 
    else if (spotsize >= 0)  {
-      f = new TFile(Form("MC/Output/simpleScanner_energy%.0fMeV_Water_phantom%03.0fmm_spotsize%03.0fmm.root", initialEnergy, phantomSize, spotsize));
+      f = new TFile(Form("MC/Output/simpleScanner_energy%.0fMeV_Water_phantom%03.0fmm_spotsize%04.1fmm.root", initialEnergy, phantomSize, spotsize));
    }
    
    else {
@@ -122,7 +122,7 @@ void findMLP(Float_t phantomSize = 200, Float_t rotation = -1, Float_t spotsize 
    in.close();
    TSpline3 *splineWater = new TSpline3("splineWater", energiesWater, rangesWater, idxWater);
 
-   TH1F *hResEnergy = new TH1F("hResEnergy", "Residual energy in calorimeter;Energy [MeV];Entries", 300, 0, 230);
+   TH1F *hResEnergy = new TH1F("hResEnergy", "Residual energy in calorimeter;Energy [MeV];Entries", 300, 0, 250);
    TH1F *hP1x = new TH1F("hP1x", "Outgoing angle histgram;#theta_{x} [mrad];Frequency", 200, 0, 250);
    TH1F *hP1y = new TH1F("hP1y", "Outgoing angle histgram;#theta_{y} [mrad];Frequency", 200, 0, 250);
    TH1F *hP2x = new TH1F("hP2x", "Outgoing angle histgram;#theta_{x} [mrad];Frequency", 200, 0, 250);
@@ -183,26 +183,40 @@ void findMLP(Float_t phantomSize = 200, Float_t rotation = -1, Float_t spotsize 
             
          Float_t AX = 1 - 0.185 * w + 0.372 * pow(w,2) - 0.916 * pow(w,3);
          Float_t AP = -3.93 - 82.23 * w - 185.6 * pow(w,2) + 273.9 * pow(w,3);
-         
+        
+         if (spotsize >= 0) {
+            AX = 0.2333 * log(spotsize) + 0.4886;
+            AP = -17.67 * log(spotsize) - 31.793;
+         }
+
          Float_t dxy = sqrt(pow(P1Rotated.X(), 2) + pow(P1Rotated.Y(), 2));
          Float_t angle = fabs(atan2(dxy,1)) * 1000;
          hP2x->Fill(atan2(P0hat.X(), 1)*1000);
          hP2y->Fill(atan2(P0hat.Y(), 1)*1000);
+
          sigmaFilter = 139.15 * w + 13.991;
+         printf("sigmaFilter = %.2f mrad.\n", sigmaFilter);
 
          if (residualEnergy > energyFilter && angle < sigmaFilter) {
+            hResEnergy->Fill(residualEnergy);
          
             double trackerDist = 1;
             double trackerDistPhantom = 1;
 
+            /*
             double px0 = P0hat.X();
             double py0 = P0hat.Y(); 
             double pz0 = P0hat.Z(); 
+            */
+
+            double px0 = P0NoTrk.X();
+            double py0 = P0NoTrk.Y(); 
+            double pz0 = P0NoTrk.Z(); 
 
             double x0 = X0NoTrk.X();
             double y0 = X0NoTrk.Y();
             double z0 = X0NoTrk.Z();
-
+            
             double angleX2rad = atan2(px0, pz0);
             double angleY2rad = atan2(py0, pz0);
             double angleZ2rad = atan2(pz0, pz0);
@@ -211,9 +225,8 @@ void findMLP(Float_t phantomSize = 200, Float_t rotation = -1, Float_t spotsize 
             double angleYout = atan(P1hat.Y());
             double angleZout = atan(P1hat.Z());
 
-            TVector3 m0(x0/10, y0/10, z0/10); // in cm
+            TVector3 m0(x0/10, y0/10, z0/10 + trackerDistPhantom); // in cm
             TVector3 p0(angleX2rad, angleY2rad, angleZ2rad);
-
 
             TVector3 m1(Xp2.X()/10 - trackerDistPhantom * tan(angleXout),
                         Xp2.Y()/10 - trackerDistPhantom * tan(angleYout),
@@ -228,6 +241,8 @@ void findMLP(Float_t phantomSize = 200, Float_t rotation = -1, Float_t spotsize 
             float d_source = 10; // assume to first tracker layer
             float s_pos = 0.3; // cm
             float s_angle = 0.0025;
+
+            if (spotsize >= 0) s_pos = spotsize / 10;
       
             // init MLP
             float X_mlp, Y_mlp;
@@ -254,6 +269,7 @@ void findMLP(Float_t phantomSize = 200, Float_t rotation = -1, Float_t spotsize 
             double C1[4] = {0};
             double C2_1[4] = {0};
             double C2[4] = {0};
+            double C12[4];
             double C12_inverse[4] = {0};
             
             double first_first[4] = {0};
@@ -293,19 +309,15 @@ void findMLP(Float_t phantomSize = 200, Float_t rotation = -1, Float_t spotsize 
             R_1_inverse_transpose[2] = -(m1.z() - posz);
             R_1_inverse_transpose[3] = 1;
       
-            determinant_1 = (sz1*st1) - (stz1*stz1);
-            determinant_1 = 1;
-            scatter_1[0] = sz1 / determinant_1;
-            scatter_1[1] = stz1 / determinant_1;
-            scatter_1[2] = stz1 / determinant_1;
-            scatter_1[3] = st1 / determinant_1;
+            scatter_1[0] = sz1;
+            scatter_1[1] = stz1;
+            scatter_1[2] = stz1;
+            scatter_1[3] = st1;
 
-            determinant_2 = (sz2*st2)-(stz2*stz2);
-            determinant_2 = 1;
-            scatter_2[0] = sz2 / determinant_2;
-            scatter_2[1] = stz2 / determinant_2;
-            scatter_2[2] = stz2 / determinant_2;
-            scatter_2[3] = st2 / determinant_2;
+            scatter_2[0] = sz2;
+            scatter_2[1] = stz2;
+            scatter_2[2] = stz2;
+            scatter_2[3] = st2;
 
             // pre-factors C1 + C2 as in Krah et al. (2018)
             C1_1[0] = (sigma_beam[0] * R_0_transpose[0]) + (sigma_beam[1] * R_0_transpose[2]);
@@ -332,11 +344,9 @@ void findMLP(Float_t phantomSize = 200, Float_t rotation = -1, Float_t spotsize 
             C2[2] = (R_1_inverse[2] * C2_1[0]) + (R_1_inverse[3] * C2_1[2]);
             C2[3] = (R_1_inverse[2] * C2_1[1]) + (R_1_inverse[3] * C2_1[3]);
 
-            double C12[4];
             for (a=0; a<4; a++) C12[a] = C1[a] + C2[a];
 
             // invert to get the complete prefactor (C1 + C2)^-1
-            
             determinant_C12 = (C12[0] * C12[3]) - (C12[1] * C12[2]);
             C12_inverse[0] =  C12[3] / determinant_C12;
             C12_inverse[1] = -C12[1] / determinant_C12;
@@ -353,40 +363,28 @@ void findMLP(Float_t phantomSize = 200, Float_t rotation = -1, Float_t spotsize 
             second_first[2] = (C1[2] * C12_inverse[0]) + (C1[3] * C12_inverse[2]);
             second_first[3] = (C1[2] * C12_inverse[1]) + (C1[3] * C12_inverse[3]);
 
-//            printf("second_first[3] = (C2[2] %.3f * C12_inverse[1] %.3f) + (C2[3] %.3f * C12_inverse[3] %.3f) = %.3f + %.3f = %.3f\n", C2[2], C12_inverse[1], C2[3], C12_inverse[3], C2[2] * C12_inverse[1], C2[3] * C12_inverse[3], second_first[3]);
-
             y_0[0] = m0.x();
             y_0[1] = angleX2rad;
-
             y_2[0] = m1.x();
             y_2[1] = angleXout;
-
-  //          cout << "angleXout = " << angleXout << endl;
    
             first_second[0] = (R_0[0] * y_0[0]) + (R_0[1] * y_0[1]);
             first_second[1] = (R_0[2] * y_0[0]) + (R_0[3] * y_0[1]);
-
             second_second[0] = (R_1_inverse[0] * y_2[0]) + (R_1_inverse[1] * y_2[1]);
             second_second[1] = (R_1_inverse[2] * y_2[0]) + (R_1_inverse[3] * y_2[1]);
 
 
             first[0] = (first_first[0] * first_second[0]) + (first_first[1] * first_second[1]);
             first[1] = (first_first[2] * first_second[0]) + (first_first[3] * first_second[1]);
-         
             second[0] = (second_first[0] * second_second[0]) + (second_first[1] * second_second[1]);
             second[1] = (second_first[2] * second_second[0]) + (second_first[3] * second_second[1]);
 
-//            printf("first[1] = (%.3f * %.3f) + (%.3f * %.3f) = %.3f + %.3f\n", first_first[2], first_second[0], first_first[3], first_second[1], first_first[2] * first_second[0], first_first[3] * first_second[1]);
-//            printf("second[1] = (%.3f * %.3f) + (%.3f * %.3f) = %.3f + %.3f\n", second_first[2], second_second[0], second_first[3], second_second[1], second_first[2] * second_second[0], second_first[3] * second_second[1]);
-
             X_mlp = first[0] + second[0];
             double theta_X_mlp = (first[1] + second[1]);
-//            cout << "theta_X_mlp = " << theta_X_mlp << endl << endl;
 
-            // now do the v value
-
+            // now do the y value
             y_0[0] = m0.y();
-            y_0[1] = angleY2rad; // IS Z IN .cc
+            y_0[1] = angleY2rad;
 
             y_2[0] = m1.y();
             y_2[1] = angleYout;
@@ -438,9 +436,6 @@ void findMLP(Float_t phantomSize = 200, Float_t rotation = -1, Float_t spotsize 
             // Find lambda values using polynomial in Fig. 4 in Fekete et al. 2015
             Lambda0 = 1.01 + 0.43 * w2;
             Lambda1 = 0.99 - 0.46 * w2;
-
-//            cout << "X0Krah = " << X0krah  << ", P0krah = " << P0krah << endl;
-//            cout << "X0 = " << X0  << ", P0 = " << P0 << endl;
 
             for (Float_t t=0; t<1; t += 0.01) {
                S = SplineMLP(t, X0, X1, P0hat, P1hat, Lambda0, Lambda1); // perfect info
@@ -611,7 +606,7 @@ void findMLP(Float_t phantomSize = 200, Float_t rotation = -1, Float_t spotsize 
    gMCNoTrk->SetMarkerColor(kRed);
    gMCNoTrk->Draw("AP");
    gMLPNoTrk->Draw("P");
-   gMCNoTrk->SetTitle("No Front Tracker - use (0,0);Depth [mm];X position [mm]");
+   gMCNoTrk->SetTitle("No Front Tracker - use X_{0}^{est} = (0,0,z_{0});Depth [mm];X position [mm]");
    
    c1->cd(5);
    TGraph *gMCNoTrky = new TGraph(aIdxMC, aPosMCz, aPosMCy);
@@ -622,7 +617,7 @@ void findMLP(Float_t phantomSize = 200, Float_t rotation = -1, Float_t spotsize 
    gMCNoTrky->SetMarkerColor(kRed);
    gMCNoTrky->Draw("AP");
    gMLPNoTrky->Draw("P");
-   gMCNoTrky->SetTitle("No Front Tracker - use Krah's Hybrid Spline;Depth [mm];Y position [mm]");
+   gMCNoTrky->SetTitle("No Front Tracker - use Bayesian MLP;Depth [mm];Y position [mm]");
 
    c1->cd(3);
    TGraph *gMCest = new TGraph(aIdxMC, aPosMCz, aPosMCx);
@@ -682,7 +677,7 @@ void findMLP(Float_t phantomSize = 200, Float_t rotation = -1, Float_t spotsize 
    c2->cd(2);
    TGraph *gDifferenceNoTrk = new TGraph(idxDifferenceArray, differenceArrayZ, differenceArrayDiffNoTrk);
    gPad->SetGridy();
-   gDifferenceNoTrk->SetTitle("No Front Tracker - use (0,0);Depth in phantom [mm]; Error MLP - MC [mm]");
+   gDifferenceNoTrk->SetTitle("No Front Tracker - use X_{0}^{est} = (0,0,z_{0});Depth in phantom [mm]; Error MLP - MC [mm]");
    gDifferenceNoTrk->SetLineColor(kRed);
    gDifferenceNoTrk->SetLineWidth(2);
    gDifferenceNoTrk->Draw("AL");
@@ -691,7 +686,7 @@ void findMLP(Float_t phantomSize = 200, Float_t rotation = -1, Float_t spotsize 
    c2->cd(3);
    TGraph *gDifferenceKrah = new TGraph(idxDifferenceArray, differenceArrayZ, differenceArrayDiffKrah);
    gPad->SetGridy();
-   gDifferenceKrah->SetTitle("No Front Tracker - use Krah's Hybrid Spline;Depth in phantom [mm]; Error MLP - MC [mm]");
+   gDifferenceKrah->SetTitle("No Front Tracker - use Bayesian MLP;Depth in phantom [mm]; Error MLP - MC [mm]");
    gDifferenceKrah->SetLineColor(kRed);
    gDifferenceKrah->SetLineWidth(2);
    gDifferenceKrah->Draw("AL");
@@ -700,7 +695,7 @@ void findMLP(Float_t phantomSize = 200, Float_t rotation = -1, Float_t spotsize 
    c2->cd(4);
    TGraph *gDifferenceest = new TGraph(idxDifferenceArray, differenceArrayZ, differenceArrayDiffest);
    gPad->SetGridy();
-   gDifferenceest->SetTitle("No Front Tracker - Use Linear Model;Depth in phantom [mm]; Error MLP - MC [mm]");
+   gDifferenceest->SetTitle("No Front Tracker - use Projection Model;Depth in phantom [mm]; Error MLP - MC [mm]");
    gDifferenceest->SetLineColor(kRed);
    gDifferenceest->SetLineWidth(2);
    gDifferenceest->Draw("AL");
@@ -710,8 +705,9 @@ void findMLP(Float_t phantomSize = 200, Float_t rotation = -1, Float_t spotsize 
    Float_t sigmaEst = (hErrorSigmaScale->GetStdDev(1) + hErrorSigmaScale->GetStdDev(2)) / 2;
 
    if (spotsize >= 0) {
-      ofstream file(Form("Output/MLPerror_energy%.0fMeV_Water_spotsize.csv", initialEnergy), ofstream::out | ofstream::app);
-      file << phantomSize << " " << spotsize << " " <<  gDifferenceNoTrk->Eval(0) << " " << gDifferenceNoTrk->Eval(phantomSize/2) << " " << gDifferenceest->Eval(0) << " " << gDifferenceest->Eval(phantomSize/2) << " " << sigmaNoTrk << " " << sigmaEst << endl;
+      ofstream file(Form("Output/MLPerror_energy%.0fMeV_Water_spotsize_krah.csv", initialEnergy), ofstream::out | ofstream::app);
+//      file << phantomSize << " " << spotsize << " " <<  gDifferenceNoTrk->Eval(0) << " " << gDifferenceNoTrk->Eval(phantomSize/2) << " " << gDifferenceest->Eval(0) << " " << gDifferenceest->Eval(phantomSize/2) << " " << sigmaNoTrk << " " << sigmaEst << endl;
+      file << phantomSize << " " <<  spotsize << " " << gDifferenceNoTrk->Eval(0) << " " << gDifferenceNoTrk->Eval(phantomSize/2) << " " << gDifferenceest->Eval(0) << " " << gDifferenceest->Eval(phantomSize/2) << " " << gDifferenceKrah->Eval(0) << " " << gDifferenceKrah->Eval(phantomSize/2) << " " << hResEnergy->GetMean() << endl;
       file.close();
    }
    else if (rotation >= 0) {
@@ -721,7 +717,7 @@ void findMLP(Float_t phantomSize = 200, Float_t rotation = -1, Float_t spotsize 
    }
    else {
       ofstream file(Form("Output/MLPerror_energy%.0fMeV_Water_krah.csv", initialEnergy), ofstream::out | ofstream::app);
-      file << phantomSize << " " <<  gDifferenceNoTrk->Eval(0) << " " << gDifferenceNoTrk->Eval(phantomSize/2) << " " << gDifferenceest->Eval(0) << " " << gDifferenceest->Eval(phantomSize/2) << " " << gDifferenceKrah->Eval(0) << " " << gDifferenceKrah->Eval(phantomSize/2) << endl;
+      file << phantomSize << " " <<  gDifferenceNoTrk->Eval(0) << " " << gDifferenceNoTrk->Eval(phantomSize/2) << " " << gDifferenceest->Eval(0) << " " << gDifferenceest->Eval(phantomSize/2) << " " << gDifferenceKrah->Eval(0) << " " << gDifferenceKrah->Eval(phantomSize/2) << " " << hResEnergy->GetMean() << endl;
       file.close();
    }
 

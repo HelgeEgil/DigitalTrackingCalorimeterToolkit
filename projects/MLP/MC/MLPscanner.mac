@@ -61,7 +61,7 @@
 /gate/calorimeter/attachCrystalSD
 
 /gate/physics/addPhysicsList QGSP_BIC_EMZ
-/gate/geometry/setIonisationPotential Water 75 eV
+/gate/geometry/setIonisationPotential Water 78 eV
 
 /gate/physics/SetMaxStepSizeInRegion phantom 1 mm
 
@@ -69,13 +69,13 @@
 
 /geometry/test/run
 
-/process/inactivate hadElastic
-/process/inactivate protonInelastic
+#/process/inactivate hadElastic
+#/process/inactivate protonInelastic
 
 /gate/source/addSource PBS PencilBeam
 /gate/source/PBS/setParticleType proton
 /gate/source/PBS/setEnergy {energy} MeV
-/gate/source/PBS/setSigmaEnergy 0. MeV
+/gate/source/PBS/setSigmaEnergy 2. MeV
 /gate/source/PBS/setPosition 0 0 {zbeam} mm
 /gate/source/PBS/setSigmaX {spotsize} mm
 /gate/source/PBS/setSigmaY {spotsize} mm
