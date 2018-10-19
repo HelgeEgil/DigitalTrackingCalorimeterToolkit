@@ -195,7 +195,7 @@ void findMLP(Float_t phantomSize = 200, Float_t rotation = -1, Float_t spotsize 
          hP2y->Fill(atan2(P0hat.Y(), 1)*1000);
 
          sigmaFilter = 139.15 * w + 13.991;
-         printf("sigmaFilter = %.2f mrad.\n", sigmaFilter);
+//         printf("sigmaFilter = %.2f mrad.\n", sigmaFilter);
 
          if (residualEnergy > energyFilter && angle < sigmaFilter) {
             hResEnergy->Fill(residualEnergy);
@@ -236,9 +236,9 @@ void findMLP(Float_t phantomSize = 200, Float_t rotation = -1, Float_t spotsize 
             double step_length = (m1.z() - m0.z()) / 512;
             double posz = m0.z() + step_length;
 
-            float sz1, sz2, st1, st2, stz1, stz2;
+            float st2, sz2, stz2;
             float determinant_1, determinant_2, determinant_C12;
-            float d_source = 150; // assume to first tracker layer
+            float d_source = 35; // assume to first tracker layer
             float s_pos = pow(0.3, 2); // cm
             float s_angle = pow(0.002, 2); // div. so 2 mrad
 
@@ -249,7 +249,6 @@ void findMLP(Float_t phantomSize = 200, Float_t rotation = -1, Float_t spotsize 
             TVector3 p;
 
             int a; // iterator for matrix operations
-            float scatter_1[4] = {0};
             float scatter_2[4] = {0};
 
             float sigma_beam[4] = {};
@@ -593,7 +592,7 @@ void findMLP(Float_t phantomSize = 200, Float_t rotation = -1, Float_t spotsize 
    gMCNoTrk->SetMarkerColor(kRed);
    gMCNoTrk->Draw("AP");
    gMLPNoTrk->Draw("P");
-   gMCNoTrk->SetTitle("No Front Tracker - use X_{0}^{est} = (0,0,z_{0});Depth [mm];X position [mm]");
+   gMCNoTrk->SetTitle("No Front Tracker - Bayesian MLP;Depth [mm];X position [mm]");
    
    c1->cd(5);
    TGraph *gMCNoTrky = new TGraph(aIdxMC, aPosMCz, aPosMCy);
@@ -604,7 +603,7 @@ void findMLP(Float_t phantomSize = 200, Float_t rotation = -1, Float_t spotsize 
    gMCNoTrky->SetMarkerColor(kRed);
    gMCNoTrky->Draw("AP");
    gMLPNoTrky->Draw("P");
-   gMCNoTrky->SetTitle("No Front Tracker - use Bayesian MLP;Depth [mm];Y position [mm]");
+   gMCNoTrky->SetTitle("No Front Tracker - Bayesian MLP;Depth [mm];Y position [mm]");
 
    c1->cd(3);
    TGraph *gMCest = new TGraph(aIdxMC, aPosMCz, aPosMCx);

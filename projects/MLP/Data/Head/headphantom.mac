@@ -1,4 +1,4 @@
-/vis/open OGLSX
+/vis/open OGL
 /vis/viewer/reset
 /vis/viewer/set/viewpointThetaPhi 60 60
 /vis/viewer/zoom 0.1
@@ -26,16 +26,29 @@
 /gate/scanner/daughters/insert ImageRegionalizedVolume
 /gate/patient/geometry/setImage DICOM/1_dicom_125mm.dcm
 /gate/patient/geometry/setHUToMaterialFile AttenuationRange.dat
+#/gate/patient/geometry/TranslateTheImageAtThisIsoCenter 0 0 0 mm
+/gate/patient/placement/setTranslation 0 0 0 mm
+/gate/patient/placement/setRotationAxis 0 1 0
+/gate/patient/placement/setRotationAngle 90 deg
 
-#/gate/patient/geometry/buildAndDumpDistanceTransfo dmap.mhd
+/gate/patient/geometry/buildAndDumpDistanceTransfo dmap.mhd
 /gate/patient/geometry/distanceMap dmap.mhd
 
-/gate/patient/placement/setTranslation 0 0 0 mm
-/gate/patient/geometry/TranslateTheImageAtThisIsoCenter 0 0 0 mm
+#/gate/patient/geometry/buildAndDumpLabeledImage imageDump.hdr ## use this as setImage..?
 
-/gate/patient/geometry/buildAndDumpLabeledImage imageDump.hdr
+# /gate/patient/attachPhantomSD
 
-/gate/scanner/attachCrystalSD
+/gate/actor/addActor DoseActor MyActor
+/gate/actor/MyActor/save actorFile.root
+/gate/actor/MyActor/attachTo patient
+/gate/actor/MyActor/stepHitType random
+/gate/actor/MyActor/setSize 200 200 200 mm
+/gate/actor/MyActor/setResolution 150 150 1
+/gate/actor/MyActor/enableEdep true
+/gate/actor/MyActor/enableUncertaintyEdep false
+/gate/actor/MyActor/enableSquaredEdep false
+/gate/actor/MyActor/enableDose false
+/gate/actor/MyActor/normaliseDoseToMax false
 
 /gate/actor/addActor SimulationStatisticActor stat
 /gate/actor/stat/save stat-simulation.txt
