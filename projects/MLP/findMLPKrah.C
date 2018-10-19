@@ -11,12 +11,12 @@
 #include <TStyle.h>
 #include <Math/Vector3D.h>
 
-#define azero 7.457e-6
-#define aone 4.548e-7
-#define atwo (-5.777e-8)
-#define athree 1.301e-8
-#define afour (-9.228e-10)
-#define afive 2.687e-11
+#define azero   7.457e-6
+#define aone    4.548e-7
+#define atwo   (-5.777e-8)
+#define athree  1.301e-8
+#define afour  (-9.228e-10)
+#define afive   2.687e-11
 #define X_0 36.1
 
 using namespace std;
@@ -63,7 +63,7 @@ void findMLP(Float_t phantomSize = 200, Float_t rotation = -1, Float_t spotsize 
    if (!tree) exit(0);
 
    Int_t      printed = 0;
-   const Int_t eventsToUse = 10000;
+   const Int_t eventsToUse = 50000;
    Float_t     x, y, z, edep, sum_edep = 0, residualEnergy = 0;
    Int_t       eventID, parentID, lastEID = -1;
    XYZVector   Xp0, Xp1, Xp2, Xp3, X0, X1, X0est, X0err, X0NoTrk, P0, P0NoTrk, P1, P0hat, P1hat, S, P1Rotated; // Xp are the plane coordinates, X are the tracker coordinates (X1 = (Xp1 + Xp2) / 2)
@@ -238,9 +238,9 @@ void findMLP(Float_t phantomSize = 200, Float_t rotation = -1, Float_t spotsize 
 
             float sz1, sz2, st1, st2, stz1, stz2;
             float determinant_1, determinant_2, determinant_C12;
-            float d_source = 10; // assume to first tracker layer
-            float s_pos = 0.3; // cm
-            float s_angle = 0.0025;
+            float d_source = 150; // assume to first tracker layer
+            float s_pos = pow(0.3, 2); // cm
+            float s_angle = pow(0.002, 2); // div. so 2 mrad
 
             if (spotsize >= 0) s_pos = spotsize / 10;
       
@@ -281,10 +281,6 @@ void findMLP(Float_t phantomSize = 200, Float_t rotation = -1, Float_t spotsize 
             double first[2] = {0};
             double second[2] = {0};
 
-            sz1 = Sigmaz1(posz - m0.z());
-            st1 = Sigmat1(posz - m0.z());
-            stz1 = Sigmatz1(posz - m0.z());
-
             sz2 = Sigmaz2(m1.z() - m0.z(), posz - m0.z());
             stz2 = Sigmatz2(m1.z() - m0.z(), posz - m0.z());
             st2 = Sigmat2(m1.z() - m0.z(), posz - m0.z());
@@ -309,11 +305,6 @@ void findMLP(Float_t phantomSize = 200, Float_t rotation = -1, Float_t spotsize 
             R_1_inverse_transpose[2] = -(m1.z() - posz);
             R_1_inverse_transpose[3] = 1;
       
-            scatter_1[0] = sz1;
-            scatter_1[1] = stz1;
-            scatter_1[2] = stz1;
-            scatter_1[3] = st1;
-
             scatter_2[0] = sz2;
             scatter_2[1] = stz2;
             scatter_2[2] = stz2;
@@ -325,14 +316,10 @@ void findMLP(Float_t phantomSize = 200, Float_t rotation = -1, Float_t spotsize 
             C1_1[2] = (sigma_beam[2] * R_0_transpose[0]) + (sigma_beam[3] * R_0_transpose[2]);
             C1_1[3] = (sigma_beam[2] * R_0_transpose[1]) + (sigma_beam[3] * R_0_transpose[3]);
 
-            C1_2[0] = (R_0[0] * C1_1[0]) + (R_0[1] * C1_1[2]);
-            C1_2[1] = (R_0[0] * C1_1[1]) + (R_0[1] * C1_1[3]);
-            C1_2[2] = (R_0[2] * C1_1[0]) + (R_0[3] * C1_1[2]);
-            C1_2[3] = (R_0[2] * C1_1[1]) + (R_0[3] * C1_1[3]);
-
-            for (a=0; a<4; a++) {
-               C1[a] = C1_2[a] + scatter_1[a];
-            }
+            C1[0] = (R_0[0] * C1_1[0]) + (R_0[1] * C1_1[2]);
+            C1[1] = (R_0[0] * C1_1[1]) + (R_0[1] * C1_1[3]);
+            C1[2] = (R_0[2] * C1_1[0]) + (R_0[3] * C1_1[2]);
+            C1[3] = (R_0[2] * C1_1[1]) + (R_0[3] * C1_1[3]);
 
             C2_1[0] = (scatter_2[0] * R_1_inverse_transpose[0]) + (scatter_2[1] * R_1_inverse_transpose[2]);
             C2_1[1] = (scatter_2[0] * R_1_inverse_transpose[1]) + (scatter_2[1] * R_1_inverse_transpose[3]);
