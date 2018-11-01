@@ -140,27 +140,27 @@ void findMLPLoop(Float_t phantomSize, Int_t eventsToUse, Float_t spotSize) {
             P0 = Xp1 - Xp0;
             P2 = Xp3 - Xp2;
 
-            P0 /= Xp1.Z() - Xp0.Z();
-            P2 /= Xp3.Z() - Xp2.Z();
+            P0 /= (Xp1.Z() - Xp0.Z());
+            P2 /= (Xp3.Z() - Xp2.Z());
 
             if (std::isnan(P2.Z())) continue; // Don't ask why this can happen ...
 
-            projectToHullX0.SetCoordinates(d_entry * P0.X(), d_entry * P0.Y(), d_entry);
+            projectToHullX0.SetCoordinates(0, 0, d_entry);
             projectToHullX2.SetCoordinates(d_exit  * P2.X(), d_exit  * P2.Y(), d_exit );
 
             X0 += projectToHullX0;
             X2 -= projectToHullX2;
             
             // INNER MINIMIZATION LOOP
-               for (Float_t AX = AXlow; AX <= AXhigh; AX += AXdelta) {
-                  for (Float_t AP = APlow; AP <= APhigh; AP += APdelta) {
-                     X0est = X2 * AX + phantomSize * AP * P2;
-                     diff_x = fabs(X0.X() - X0est.X());
-                     diff_y = fabs(X0.Y() - X0est.Y());
-                     hErrorMatrix->Fill(AX, AP, sqrt(pow(diff_x, 2) + pow(diff_y, 2)));
-                     hIdxMatrix->Fill(AX, AP);
-                  }
+            for (Float_t AX = AXlow; AX <= AXhigh; AX += AXdelta) {
+               for (Float_t AP = APlow; AP <= APhigh; AP += APdelta) {
+                  X0est = X2 * AX + phantomSize * AP * P2;
+                  diff_x = fabs(X0.X() - X0est.X());
+                  diff_y = fabs(X0.Y() - X0est.Y());
+                  hErrorMatrix->Fill(AX, AP, sqrt(pow(diff_x, 2) + pow(diff_y, 2)));
+                  hIdxMatrix->Fill(AX, AP);
                }
+            }
          }
          
          if (stop) break;
