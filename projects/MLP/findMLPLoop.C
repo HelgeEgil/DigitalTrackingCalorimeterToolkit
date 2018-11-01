@@ -11,31 +11,31 @@
 #include <TStyle.h>
 #include <Math/Vector3D.h>
 
-void findMLPLoop(Float_t phantomSize = 200, Float_t spotSize = -1);
+void findMLPLoop(Float_t phantomSize = 200, Int_t eventsToUse = -1, Float_t spotSize = -1);
 
 using namespace std;
 typedef ROOT::Math::DisplacementVector3D<ROOT::Math::Cartesian3D<double> > XYZVector;
 
-XYZVector SplineMLP(Double_t t, XYZVector X0, XYZVector X1, XYZVector P0, XYZVector P1, Double_t Lambda0, Double_t Lambda1) {
-   XYZVector P0Lambda, P1Lambda, X1mX0, S;
+XYZVector SplineMLP(Double_t t, XYZVector X0, XYZVector X2, XYZVector P0, XYZVector P2, Double_t Lambda0, Double_t Lambda1) {
+   XYZVector P0Lambda, P2Lambda, X2mX0, S;
    Float_t tt = pow(t, 2), ttt = pow(t, 3);
 
-   X1mX0 = X1 - X0;
-   P0Lambda = P0 * Lambda0 * sqrt(X1mX0.Mag2());
-   P1Lambda = P1 * Lambda1 * sqrt(X1mX0.Mag2());
+   X2mX0 = X2 - X0;
+   P0Lambda = P0 * Lambda0 * sqrt(X2mX0.Mag2());
+   P2Lambda = P2 * Lambda1 * sqrt(X2mX0.Mag2());
 
-   S = (2*ttt - 3*tt + 1) * X0 + (ttt - 2*tt + t) * P0Lambda + (-2*ttt + 3*tt) * X1 + (ttt - tt) * P1Lambda;
+   S = (2*ttt - 3*tt + 1) * X0 + (ttt - 2*tt + t) * P0Lambda + (-2*ttt + 3*tt) * X2 + (ttt - tt) * P2Lambda;
 
    return S;
 }
 
-void findMLPLoop(Float_t phantomSize, Float_t spotSize) {
-   Float_t     initialEnergy = 200;
+void findMLPLoop(Float_t phantomSize, Int_t eventsToUse, Float_t spotSize) {
+   Float_t     initialEnergy = 230;
    Float_t     differenceArrayDZ = 3;
-   const Int_t eventsToUse = 300;
+   if (eventsToUse < 0) eventsToUse = 100;
    Float_t     x, y, z, edep, sum_edep = 0, residualEnergy = 0;
    Int_t       eventID, parentID, lastEID = -1;
-   XYZVector   Xp0, Xp1, Xp2, Xp3, X0, X1, X0est, X0err, X0NoTrk, P0, P0NoTrk, P1, P0hat, P1hat, S; // Xp are the plane coordinates, X are the tracker coordinates (X1 = (Xp1 + Xp2) / 2)
+   XYZVector   Xp0, Xp1, Xp2, Xp3, X0, X2, X0est, X0err, X0NoTrk, P0, P0NoTrk, P2, S; // Xp are the plane coordinates, X are the tracker coordinates (X2 = (Xp1 + Xp2) / 2)
    Float_t     wepl, wet, Lambda0, Lambda1;
    ifstream    in;
    TSpline3  * splineMCx, * splineMCy, * splineMLPx, * splineMLPy;
@@ -47,9 +47,10 @@ void findMLPLoop(Float_t phantomSize, Float_t spotSize) {
    Double_t    differenceArrayDiffNoTrk[1000] = {};
    Double_t    differenceArrayDiffest[1000] = {};
    Int_t       idxWater = 0;
+   Int_t       d_entry = 15;
+   Int_t       d_exit = 15;
    Double_t    energiesWater[500], rangesWater[500];
    Float_t     energy, range;
-   //   Float_t     sigmaFilter = 128.47;
    Float_t     sigmaFilter = 0.0;
    Double_t    aPosMCx[10000], aPosMCz[10000];
    Double_t    aPosMLPx[10000], aPosMLPz[10000];
@@ -77,34 +78,23 @@ void findMLPLoop(Float_t phantomSize, Float_t spotSize) {
    TFile *f;
 
    if (spotSize <0) {
-      f = new TFile(Form("MC/Output/simpleScanner_energy%.0fMeV_Water_phantom%03.0fmm.root", initialEnergy, phantomSize)); 
+      f = new TFile(Form("MC/Output/simpleScanner_energy%.0fMeV_CorticalBone_phantom%03.0fmm.root", initialEnergy, phantomSize)); 
    }
    else {
-      f = new TFile(Form("MC/Output/simpleScanner_energy%.0fMeV_Water_phantom%03.0fmm_spotsize%04.1fmm.root", initialEnergy, phantomSize, spotSize)); 
+      f = new TFile(Form("MC/Output/simpleScanner_energy%.0fMeV_B100_phantom%03.0fmm_spotsize%04.1fmm.root", initialEnergy, phantomSize, spotSize)); 
    }
 
    TTree *tree = (TTree*) f->Get("Hits");
 
    if (!tree) exit(0);
 
-   in.open("Data/WaterPSTAR.csv");
-   while (1) {
-      in >> energy >> range;
-      if (!in.good()) break;
-      rangesWater[idxWater] = range*10; // [mm]
-      energiesWater[idxWater++] = energy;
-   }
-   in.close();
-   
-   TSpline3 *splineWater = new TSpline3("splineWater", energiesWater, rangesWater, idxWater);
-
-   Float_t  AXlow = 0;
+   Float_t  AXlow = 0.2;
    Float_t  AXhigh = 1.05;
-   Float_t  APlow = -110;
+   Float_t  APlow = -0.7;
    Float_t  APhigh = 0;
    
-   Float_t  AXdelta = 0.01;
-   Float_t  APdelta = 1;
+   Float_t  AXdelta = 0.005;
+   Float_t  APdelta = 0.005;
 
    Int_t    AXbins = (AXhigh - AXlow) / AXdelta;
    Int_t    APbins = (APhigh - APlow) / APdelta;
@@ -123,8 +113,6 @@ void findMLPLoop(Float_t phantomSize, Float_t spotSize) {
    tree->SetBranchAddress("parentID", &parentID);
    tree->SetBranchAddress("volumeID", volumeID, &b_volumeID);
    
-   P0NoTrk.SetCoordinates(0, 0, 1); // Normalized
-
    for (Int_t i=0; i<tree->GetEntries(); ++i) {
       tree->GetEntry(i);
 
@@ -137,52 +125,55 @@ void findMLPLoop(Float_t phantomSize, Float_t spotSize) {
       }
 
       if (lastEID != eventID) {
-         if (lastEID % 10 == 0) printf("Particle %d/%d.\n", lastEID, eventsToUse);
-         // New particle, store last values
+         if (lastEID % 100 == 0) printf("Particle %d/%d.\n", lastEID, eventsToUse);
+         
+         if (hResidualEnergy->GetEntries() > 25)   sigmaFilter = hResidualEnergy->GetMean() * 0.9;
+         else                                      sigmaFilter = 0;
+         
+         if (eventID < 50) {
+            cout << "SigmaFilter = " <<sigmaFilter << ", energy = " << residualEnergy << endl;
+         }
+
          if (residualEnergy > sigmaFilter) {
             hResidualEnergy->Fill(residualEnergy);
             // Find vectors as defined in paper
             X0 = (Xp0 + Xp1) / 2;
-            X1 = (Xp2 + Xp3) / 2;
-            P0 = Xp1 - Xp0;
-            P1 = Xp3 - Xp2;
-            P0hat = P0.Unit();
-            P1hat = P1.Unit();
+            X2 = (Xp2 + Xp3) / 2;
 
-            X0.SetZ(X0.Z() + 15);
-            X1.SetCoordinates(X1.X() - 15 * P1hat.X(), X1.Y() - 15 * P1hat.Y(), X1.Z() - 15);
+            Float_t theta_x_1 = atan2(Xp1.X() - Xp0.X(), Xp1.Z() - Xp0.Z());
+            Float_t theta_y_1 = atan2(Xp1.Y() - Xp0.Y(), Xp1.Z() - Xp0.Z());
+            Float_t theta_x_2 = atan2(Xp3.X() - Xp2.X(), Xp3.Z() - Xp2.Z());
+            Float_t theta_y_2 = atan2(Xp3.Y() - Xp2.Y(), Xp3.Z() - Xp2.Z());
 
-            // calculate Spline
-            wepl = splineWater->Eval(initialEnergy);
-            wet  = wepl - splineWater->Eval(residualEnergy);
+            P0.SetCoordinates(theta_x_1, theta_y_1, sqrt(1 - pow(theta_x_1, 2) - pow(theta_y_1, 2)));
+            P2.SetCoordinates(theta_x_2, theta_y_2, sqrt(1 - pow(theta_x_2, 2) - pow(theta_y_2, 2)));
 
-            // Find lambda values using polynomial in Fig. 4 in Fekete et al. 2015
-            Lambda0 = 1.01 + 0.43 * pow(wet/wepl, 2);
-            Lambda1 = 0.99 - 0.46 * pow(wet/wepl, 2);
+            if (std::isnan(P2.Z())) continue; // Don't ask why this can happen ...
+
+            XYZVector projectToHullX0(d_entry * tan(P0.X()), d_entry * tan(P0.Y()), d_entry);
+            XYZVector projectToHullX2(d_exit  * tan(P2.X()), d_exit  * tan(P2.Y()), d_exit );
             
-            splineMCx  = new TSpline3("splineMCx", arSplineMCz, arSplineMCx, idxSplineMC);
-            splineMCy  = new TSpline3("splineMCy", arSplineMCz, arSplineMCy, idxSplineMC);
-         
+            // Try first approach again to see if it affects phantomSize < 50 mm
+            /*
+            P0 = Xp1 - Xp0; P0 = P0.Unit();
+            P2 = Xp3 - Xp2; P2 = P2.Unit();
+            projectToHullX0.SetCoordinates(d_entry * P0.X(), d_entry * P0.Y(), d_entry);
+            projectToHullX2.SetCoordinates(d_exit  * P2.X(), d_exit  * P2.Y(), d_exit );
+            */
+
+            X0 += projectToHullX0;
+            X2 -= projectToHullX2;
+
             // INNER MINIMIZATION LOOP
-            for (Float_t AX = AXlow; AX <= AXhigh; AX += AXdelta) {
-               for (Float_t AP = APlow; AP <= APhigh; AP += APdelta) {
-                  X0est = X1 * AX + AP * P1hat; 
-                  X0est.SetZ(-phantomSize/2); // We know the Z coordinate...
-                  
-                  Float_t lastZ = -1;
-                  for (Float_t t=0; t<=1; t+= 0.05) { // was 0.01
-                     S = SplineMLP(t, X0est, X1, P0NoTrk, P1hat, Lambda0, Lambda1);
-                     if (lastZ<1) lastZ = S.Z();
-                     diff_x = fabs(splineMCx->Eval(S.Z()) - S.X());
-                     diff_y = fabs(splineMCy->Eval(S.Z()) - S.Y());
-                     hErrorMatrix->Fill(AX, AP, fabs(S.Z()-lastZ)*sqrt(pow(diff_x, 2) + pow(diff_y, 2)));
+               for (Float_t AX = AXlow; AX <= AXhigh; AX += AXdelta) {
+                  for (Float_t AP = APlow; AP <= APhigh; AP += APdelta) {
+                     X0est = X2 * AX + phantomSize * AP * P2;
+                     diff_x = fabs(X0.X() - X0est.X());
+                     diff_y = fabs(X0.Y() - X0est.Y());
+                     hErrorMatrix->Fill(AX, AP, sqrt(pow(diff_x, 2) + pow(diff_y, 2)));
                      hIdxMatrix->Fill(AX, AP);
                   }
                }
-            }
-
-            delete splineMCx;
-            delete splineMCy;
          }
          
          if (stop) break;
@@ -205,12 +196,6 @@ void findMLPLoop(Float_t phantomSize, Float_t spotSize) {
          else if  (volumeID[2] == 2) Xp2.SetCoordinates(x,y,z);
          else if  (volumeID[2] == 3) Xp3.SetCoordinates(x,y,z);
          else if  (volumeID[2] == 5) residualEnergy += edep;
-
-         if  (volumeID[2] < 5) {
-            arSplineMCx[idxSplineMC] = x;
-            arSplineMCy[idxSplineMC] = y;
-            arSplineMCz[idxSplineMC++] = z;
-         }
       }
    }
 
@@ -221,7 +206,7 @@ void findMLPLoop(Float_t phantomSize, Float_t spotSize) {
   
    Int_t nbins = hErrorMatrix->GetNcells();
    Float_t mincont = 1e5;
-   Int_t mincell;
+   Int_t mincell = 0;
    printf("There are %d cells in the matrix\n", nbins);
    Float_t cont;
    for (Int_t i=0; i<nbins; i++) {
@@ -247,7 +232,7 @@ void findMLPLoop(Float_t phantomSize, Float_t spotSize) {
 //   c2->SaveAs(Form("Output/accuracy_energy%.0fMeV_%.0fmm_A150.pdf", initialEnergy, phantomSize));
 
    // Phantom size, error , AX , AP
-   ofstream file(Form("Output/accuracy_energy%.0fMeV_Water_phantom.csv", initialEnergy), ofstream::out | ofstream::app); 
+   ofstream file(Form("Output/accuracy_energy%.0fMeV_B100_phantom.csv", initialEnergy), ofstream::out | ofstream::app); 
    file << phantomSize << " " << mincont << " " << minXvalue << " " << minYvalue << " " <<  hResidualEnergy->GetMean() << endl;
    file.close();
 }

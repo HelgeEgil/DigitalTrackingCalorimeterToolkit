@@ -10,6 +10,7 @@
 #include <TSpline.h>
 #include <TStyle.h>
 #include <Math/Vector3D.h>
+#include <TStopwatch.h>
 
 #define azero   7.457e-6
 #define aone    4.548e-7
@@ -45,7 +46,7 @@ XYZVector SplineMLP(Double_t t, XYZVector X0, XYZVector X1, XYZVector P0, XYZVec
 
 void findMLP() { 
    Float_t phantomSize = 160;
-   Float_t initialEnergy = 200; 
+   Float_t initialEnergy = 230; 
    
    TFile *f1 = new TFile("Head/PSA_1.root");
    TFile *f2 = new TFile("Head/PSA_2.root");
@@ -61,10 +62,10 @@ void findMLP() {
 
    Int_t      printed = 0;
    const Int_t eventsToUse = 50000;
-   Float_t     x_1, y_1, z_1, residualEnergy = 0;
-   Float_t     x_2, y_2, z_2;
-   Float_t     x_3, y_3, z_3, ekine_3;
-   Float_t     x_4, y_4, z_4;
+   Float_t     x1_, y1_, z1_, residualEnergy = 0;
+   Float_t     x2_, y2_, z2_;
+   Float_t     x3_, y3_, z3_, ekine_3;
+   Float_t     x4_, y4_, z4_;
 
    Int_t eventID_1, eventID_2, eventID_3, eventID_4;
 
@@ -77,6 +78,50 @@ void findMLP() {
    Float_t     energy, range;
    Float_t     energyFilter = 0; // 128.47;
    Float_t     sigmaFilter = 1e5;
+   TVector3    m0, p0, m1, p1, p;
+   Float_t  w, w2, dxy, angle, AX, AP;
+   Double_t trackerDist, trackerDistPhantom;
+   Double_t px0, py0, pz0, x0, y0, z0;
+   Double_t angleX2rad, angleY2rad, angleZ2rad;
+   Double_t angleXout, angleYout, angleZout;
+   Double_t step_length, posz, st2, sz2, stz2;
+   Double_t determinant_1, determinant_2, determinant_C12;
+   Double_t d_source, s_pos, s_angle, X_mlp, Y_mlp, theta_X_mlp, theta_Y_mlp;
+
+   Float_t  scatter_2[4];
+   Float_t  sigma_beam[4];
+   
+   double R_0[4] = {0};
+   double R_0_transpose[4] = {0};
+   double R_1_inverse[4] = {0};
+   double R_1_inverse_transpose[4] = {0};
+   double y_0[2] = {0};
+   double y_2[2] = {0};
+   double C1_1[4] = {0};
+   double C1_2[4] = {0};
+   double C1[4] = {0};
+   double C2_1[4] = {0};
+   double C2[4] = {0};
+   double C12[4];
+   double C12_inverse[4] = {0};
+   
+   double first_first[4] = {0};
+   double second_first[4] = {0};
+
+   double first_second[2] = {0};
+   double second_second[2] = {0};
+
+   double first[2] = {0};
+   double second[2] = {0};
+   XYZVector projectedPathX0, projectedPath, X0krah, P0krah, X0errNaive, X0errKrah;
+   int a; // iterator for matrix operations
+
+   trackerDist = 1;
+   trackerDistPhantom = 1;
+
+   TStopwatch tKrah, tLPM;
+
+   tKrah.Reset(); tLPM.Reset();
 
    gStyle->SetTitleFont(22);
    gStyle->SetLabelFont(22);
@@ -106,30 +151,30 @@ void findMLP() {
    TH1F *hP1y = new TH1F("hP1y", "Outgoing angle histgram;#theta_{y} [mrad];Frequency", 200, 0, 250);
    TH1F *hP2x = new TH1F("hP2x", "Outgoing angle histgram;#theta_{x} [mrad];Frequency", 200, 0, 250);
    TH1F *hP2y = new TH1F("hP2y", "Outgoing angle histgram;#theta_{y} [mrad];Frequency", 200, 0, 250);
-   TH2F *hErrorNaive = new TH2F("hErrorNaive", "Beamspot uncertainty (assume point beam);X position [mm];Y position [mm]", 100, -25, 25, 100, -25, 25);
-   TH2F *hErrorKrah = new TH2F("hErrorKrah", "Beamspot uncertainty (assume point beam);X position [mm];Y position [mm]", 100, -25, 25, 100, -25, 25);
-   TH1F *hErrorKrah1D = new TH1F("hErrorKrah1D", "Beamspot uncertainty (assume point beam);X position [mm];frequency", 100, -2, 2);
-   TH2F *hErrorSigmaScale = new TH2F("hErrorSigmaScale", Form("Beamspot uncertainty (est);X position [mm];Y position [mm]"), 100, -25, 25, 100, -25, 25);
+   TH2F *hErrorNaive = new TH2F("hErrorNaive", "True spot size at phantom entrance (X_{0});X position [mm];Y position [mm]", 100, -15, 15, 100, -15, 15);
+   TH2F *hErrorKrah = new TH2F("hErrorKrah", "Deviation between X_{0} and X_{0}^{Krah};X position [mm];Y position [mm]", 100, -15, 15, 100, -15, 15);
+   TH1F *hErrorKrah1D = new TH1F("hErrorKrah1D", "Deviation between X_{0} and X_{0}^{Krah};X position [mm];frequency", 100, -2, 2);
+   TH2F *hErrorSigmaScale = new TH2F("hErrorSigmaScale", Form("Deviation between X_{0} and X_{0}^{LPM};X position [mm];Y position [mm]"), 100, -15, 15, 100, -15, 15);
 
-   tree_1->SetBranchAddress("X", &x_1);
-   tree_1->SetBranchAddress("Y", &y_1);
-   tree_1->SetBranchAddress("Z", &z_1);
+   tree_1->SetBranchAddress("X", &x1_);
+   tree_1->SetBranchAddress("Y", &y1_);
+   tree_1->SetBranchAddress("Z", &z1_);
    tree_1->SetBranchAddress("EventID", &eventID_1);
    
-   tree_2->SetBranchAddress("X", &x_2);
-   tree_2->SetBranchAddress("Y", &y_2);
-   tree_2->SetBranchAddress("Z", &z_2);
+   tree_2->SetBranchAddress("X", &x2_);
+   tree_2->SetBranchAddress("Y", &y2_);
+   tree_2->SetBranchAddress("Z", &z2_);
    tree_2->SetBranchAddress("EventID", &eventID_2);
    
-   tree_3->SetBranchAddress("X", &x_3);
-   tree_3->SetBranchAddress("Y", &y_3);
-   tree_3->SetBranchAddress("Z", &z_3);
+   tree_3->SetBranchAddress("X", &x3_);
+   tree_3->SetBranchAddress("Y", &y3_);
+   tree_3->SetBranchAddress("Z", &z3_);
    tree_3->SetBranchAddress("EventID", &eventID_3);
    tree_3->SetBranchAddress("Ekine", &ekine_3);
 
-   tree_4->SetBranchAddress("X", &x_4);
-   tree_4->SetBranchAddress("Y", &y_4);
-   tree_4->SetBranchAddress("Z", &z_4);
+   tree_4->SetBranchAddress("X", &x4_);
+   tree_4->SetBranchAddress("Y", &y4_);
+   tree_4->SetBranchAddress("Z", &z4_);
    tree_4->SetBranchAddress("EventID", &eventID_4);
    
    P0NoTrk.SetCoordinates(0, 0, 1);
@@ -142,6 +187,7 @@ void findMLP() {
    Int_t i_4 = 0;
 
    while (eventID < eventsToUse) {
+
       while (i_1 < eventsToUse) {
          tree_1->GetEntry(i_1++);
          if (eventID <= eventID_1) break;
@@ -163,15 +209,16 @@ void findMLP() {
       }
 
       if (eventID_1 != eventID_2 || eventID_1 != eventID_3 || eventID_1 != eventID_4) {
-         i_1--; i_2 = 0; i_3--; i_4--;
+         i_1--; i_2--; i_3--; i_4--;
          eventID++;
          continue;
       }
 
-      Xp0.SetCoordinates(x_1, y_1, z_1);
-      Xp1.SetCoordinates(x_2, y_2, z_2);
-      Xp2.SetCoordinates(x_3, y_3, z_3);
-      Xp3.SetCoordinates(x_4, y_4, z_4);
+      tKrah.Start(false); tLPM.Start(false);
+      Xp0.SetCoordinates(x1_, y1_, z1_);
+      Xp1.SetCoordinates(x2_, y2_, z2_);
+      Xp2.SetCoordinates(x3_, y3_, z3_);
+      Xp3.SetCoordinates(x4_, y4_, z4_);
 
       residualEnergy = ekine_3;
       
@@ -181,94 +228,72 @@ void findMLP() {
       P1 = Xp3 - Xp2;
       P0hat = P0.Unit();
       P1hat = P1.Unit();
-         
+
       wepl = splineWater->Eval(initialEnergy);
       wet = wepl - splineWater->Eval(residualEnergy);
-      Float_t w = wet / wepl;
-      Float_t w2 = pow(wet / wepl, 2);
-         
-      Float_t AX = 1 - 0.185 * w + 0.372 * pow(w,2) - 0.916 * pow(w,3);
-      Float_t AP = -3.93 - 82.23 * w - 185.6 * pow(w,2) + 273.9 * pow(w,3);
+      w = wet / wepl;
+      w2 = pow(wet / wepl, 2);
+
+      if (printed < 10) {
+         printf("The WET is %.2f mm.\n", wet);
+         printed++;
+      }
+   
+      dxy = sqrt(pow(P1hat.X(), 2) + pow(P1hat.Y(), 2));
+      angle = fabs(atan2(dxy,1)) * 1000;
+
+      tKrah.Stop(); 
+
+      AX = 1 - 0.185 * w + 0.372 * pow(w,2) - 0.916 * pow(w,3);
+      AP = -3.93 - 82.23 * w - 185.6 * pow(w,2) + 273.9 * pow(w,3);
      
-      Float_t dxy = sqrt(pow(P1hat.X(), 2) + pow(P1hat.Y(), 2));
-      Float_t angle = fabs(atan2(dxy,1)) * 1000;
-      hP2x->Fill(atan2(P0hat.X(), 1)*1000);
+      tLPM.Stop();
+
+      hP2x->Fill(angle);
       hP2y->Fill(atan2(P0hat.Y(), 1)*1000);
+
+      sigmaFilter = 85;
 
       if (residualEnergy > energyFilter && angle < sigmaFilter) {
          hResEnergy->Fill(residualEnergy);
-      
-         double trackerDist = 1;
-         double trackerDistPhantom = 1;
+         tKrah.Start(false);
 
-         double px0 = P0NoTrk.X();
-         double py0 = P0NoTrk.Y(); 
-         double pz0 = P0NoTrk.Z(); 
+         px0 = P0NoTrk.X();
+         py0 = P0NoTrk.Y(); 
+         pz0 = P0NoTrk.Z(); 
 
-         double x0 = X0NoTrk.X();
-         double y0 = X0NoTrk.Y();
-         double z0 = X0NoTrk.Z();
+         x0 = X0NoTrk.X();
+         y0 = X0NoTrk.Y();
+         z0 = X0NoTrk.Z();
          
-         double angleX2rad = atan2(px0, pz0);
-         double angleY2rad = atan2(py0, pz0);
-         double angleZ2rad = atan2(pz0, pz0);
+         angleX2rad = atan2(px0, pz0);
+         angleY2rad = atan2(py0, pz0);
+         angleZ2rad = atan2(pz0, pz0);
          
-         double angleXout = atan(P1hat.X());
-         double angleYout = atan(P1hat.Y());
-         double angleZout = atan(P1hat.Z());
+         angleXout = atan(P1hat.X());
+         angleYout = atan(P1hat.Y());
+         angleZout = atan(P1hat.Z());
 
-         TVector3 m0(x0/10, y0/10, z0/10 + trackerDistPhantom); // in cm
-         TVector3 p0(angleX2rad, angleY2rad, angleZ2rad);
+         m0.SetXYZ(x0/10, y0/10, z0/10 + trackerDistPhantom); // in cm
+         p0.SetXYZ(angleX2rad, angleY2rad, angleZ2rad);
 
-         TVector3 m1(Xp2.X()/10 - trackerDistPhantom * tan(angleXout),
+         m1.SetXYZ(Xp2.X()/10 - trackerDistPhantom * tan(angleXout),
                      Xp2.Y()/10 - trackerDistPhantom * tan(angleYout),
                      Xp2.Z()/10 - trackerDistPhantom);
-         TVector3 p1(angleXout, angleYout, angleZout);
+         p1.SetXYZ(angleXout, angleYout, angleZout);
 
-         double step_length = (m1.z() - m0.z()) / 512;
-         double posz = m0.z() + step_length;
+         step_length = (m1.z() - m0.z()) / 512;
+         posz = m0.z() + step_length;
 
-         float st2, sz2, stz2;
-         float determinant_1, determinant_2, determinant_C12;
-         float d_source = 35; // assume to first tracker layer
-         float s_pos = pow(0.3, 2); // cm
-         float s_angle = pow(0.002, 2); // div. so 2 mrad
+         d_source = 35; // assume to first tracker layer
+         s_pos = pow(0.3, 2); // cm
+         s_angle = pow(0.002, 2); // div. so 2 mrad
 
-         // init MLP
-         float X_mlp, Y_mlp;
-         TVector3 p;
-
-         int a; // iterator for matrix operations
-         float scatter_2[4] = {0};
-
-         float sigma_beam[4] = {};
          sigma_beam[0] = s_pos;
          sigma_beam[1] = s_pos/d_source;
          sigma_beam[2] = s_pos/d_source;
          sigma_beam[3] = s_pos/(pow(d_source,2)) + s_angle;
 
-         double R_0[4] = {0};
-         double R_0_transpose[4] = {0};
-         double R_1_inverse[4] = {0};
-         double R_1_inverse_transpose[4] = {0};
-         double y_0[2] = {0};
-         double y_2[2] = {0};
-         double C1_1[4] = {0};
-         double C1_2[4] = {0};
-         double C1[4] = {0};
-         double C2_1[4] = {0};
-         double C2[4] = {0};
-         double C12[4];
-         double C12_inverse[4] = {0};
-         
-         double first_first[4] = {0};
-         double second_first[4] = {0};
-
-         double first_second[2] = {0};
-         double second_second[2] = {0};
-
-         double first[2] = {0};
-         double second[2] = {0};
 
          sz2 = Sigmaz2(m1.z() - m0.z(), posz - m0.z());
          stz2 = Sigmatz2(m1.z() - m0.z(), posz - m0.z());
@@ -356,7 +381,7 @@ void findMLP() {
          second[1] = (second_first[2] * second_second[0]) + (second_first[3] * second_second[1]);
 
          X_mlp = first[0] + second[0];
-         double theta_X_mlp = (first[1] + second[1]);
+         theta_X_mlp = (first[1] + second[1]);
 
          // now do the y value
          y_0[0] = m0.y();
@@ -378,30 +403,31 @@ void findMLP() {
          second[1] = (second_first[2] * second_second[0]) + (second_first[3] * second_second[1]);
 
          Y_mlp = first[0] + second[0];
-         double theta_Y_mlp = first[1] + second[1];
+         theta_Y_mlp = first[1] + second[1];
+
+         X0krah.SetCoordinates(X_mlp*10, Y_mlp*10, -phantomSize/2);
+         P0krah.SetCoordinates(tan(theta_X_mlp), tan(theta_Y_mlp), 1);
+         P0krah = P0krah.Unit();
+         tKrah.Stop();
+         
          hP1x->Fill(theta_X_mlp * 1000);
          hP1y->Fill(theta_Y_mlp * 1000);
 
-         XYZVector X0krah(X_mlp*10, Y_mlp*10, -phantomSize/2);
-         XYZVector P0krah(tan(theta_X_mlp), tan(theta_Y_mlp), 1);
-         P0krah = P0krah.Unit();
 
-         XYZVector projectedPathX0;
+         tLPM.Start(false);
          projectedPathX0.SetCoordinates(15 * P0NoTrk.X(), 15 * P0NoTrk.Y(), 15);
 
-         XYZVector projectedPath;
          projectedPath.SetCoordinates(X0NoTrk.X() + phantomSize * P0NoTrk.X(), X0NoTrk.Y() + phantomSize * P0NoTrk.Y(), 0);
       
          X0 += projectedPathX0;
 
          X1.SetCoordinates(X1.X() - 15 * P1hat.X(), X1.Y() - 15 * P1hat.Y(), X1.Z() - 15);
 
-         cout << "Using X1 = " << X1 << endl;
-
          X0est = X1 * AX + P1hat * AP;
          X0est.SetZ(-phantomSize/2);
 
-         XYZVector X0errNaive, X0errKrah;
+         tLPM.Stop();
+
          X0err = X0est - X0;
          X0errNaive = X0NoTrk - X0;
          X0errKrah = X0krah - X0;
@@ -416,17 +442,11 @@ void findMLP() {
    }
 
    TCanvas *c0 = new TCanvas("c0", "Residual Energy", 1500, 600);
-   c0->Divide(3,1,0.001,0.001);
+   c0->Divide(2,1,0.001,0.001);
    c0->cd(1);
    hResEnergy->Draw();
    c0->cd(2);
-   hP1x->Draw();
-   hP1x->SetFillColor(kRed);
-   hP2x->Draw("same");
-   c0->cd(3);
-   hP1y->Draw();
-   hP1y->SetFillColor(kRed);
-   hP2y->Draw("same");
+   hP2x->Draw();
 
    TCanvas *c = new TCanvas("c", "Beam spot estimation", 1570, 580);
    c->Divide(3, 1, 0.001, 0.001);
@@ -443,6 +463,9 @@ void findMLP() {
 
    Float_t sigmaNoTrk = (hErrorNaive->GetStdDev(1) + hErrorNaive->GetStdDev(2)) / 2;
    Float_t sigmaEst = (hErrorSigmaScale->GetStdDev(1) + hErrorSigmaScale->GetStdDev(2)) / 2;
+
+   printf("Time for KRAH method: %.3f s for %d events (%.3e/event).\n", tKrah.CpuTime(), eventsToUse, tKrah.CpuTime() / eventsToUse);
+   printf("Time for LPM method: %.3f s for %d events (%.3e/event).\n", tLPM.CpuTime(), eventsToUse, tLPM.CpuTime() / eventsToUse);
 
    /*
    delete gDifferencePerfect;

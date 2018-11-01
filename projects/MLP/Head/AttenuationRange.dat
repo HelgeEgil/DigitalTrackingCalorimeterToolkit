@@ -1,0 +1,8 @@
+-1010 -200  Air
+-200   40   headSoftTissue 
+ 40    80   headBrainTissue   
+ 80    190  headSpinalDisk 
+ 190   600  headTrabecularBone   
+ 600   1100 headCorticalBone  
+ 1100  1800 headToothDentine  
+ 1800  2500 headToothEnamel   

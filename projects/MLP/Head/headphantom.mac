@@ -1,0 +1,133 @@
+/vis/open OGL
+/vis/viewer/reset
+/vis/viewer/set/viewpointThetaPhi 60 60
+/vis/viewer/zoom 0.1
+/vis/viewer/set/style wireframe
+/vis/drawVolume
+/tracking/storeTrajectory 1
+/vis/scene/endOfEventAction accumulate
+/vis/viewer/update
+
+/gate/geometry/setMaterialDatabase GateMaterials.db
+
+/gate/world/geometry/setXLength 300. cm
+/gate/world/geometry/setYLength 300. cm
+/gate/world/geometry/setZLength 300. cm
+/gate/world/setMaterial Vacuum
+
+/gate/world/daughters/name patient
+/gate/world/daughters/insert ImageRegionalizedVolume
+/gate/patient/geometry/setImage imageDump.mhd
+#/gate/patient/geometry/setImage DICOM/1_dicom_125mm.dcm
+/gate/patient/geometry/setHUToMaterialFile AttenuationRange.dat
+/gate/patient/placement/setTranslation 0. 0. 0. mm
+#/gate/patient/geometry/TranslateTheImageAtThisIsoCenter 0 0 0 mm
+#/gate/patient/placement/setRotationAxis 0 1 0
+#/gate/patient/placement/setRotationAngle 90 deg
+
+/gate/world/daughters/name tracker_1
+/gate/world/daughters/insert box
+/gate/tracker_1/geometry/setXLength 150. cm
+/gate/tracker_1/geometry/setYLength 150. cm
+/gate/tracker_1/geometry/setZLength 1. mm
+/gate/tracker_1/placement/setTranslation 0 0 -100 mm
+/gate/tracker_1/setMaterial Air
+
+/gate/world/daughters/name tracker_2
+/gate/world/daughters/insert box
+/gate/tracker_2/geometry/setXLength 150. cm
+/gate/tracker_2/geometry/setYLength 150. cm
+/gate/tracker_2/geometry/setZLength 1. mm
+/gate/tracker_2/placement/setTranslation 0 0 -90 mm
+/gate/tracker_2/setMaterial Air
+
+/gate/world/daughters/name tracker_3
+/gate/world/daughters/insert box
+/gate/tracker_3/geometry/setXLength 150. cm
+/gate/tracker_3/geometry/setYLength 150. cm
+/gate/tracker_3/geometry/setZLength 1. mm
+/gate/tracker_3/placement/setTranslation 0 0 90 mm
+/gate/tracker_3/setMaterial Air
+
+/gate/world/daughters/name tracker_4
+/gate/world/daughters/insert box
+/gate/tracker_4/geometry/setXLength 150. cm
+/gate/tracker_4/geometry/setYLength 150. cm
+/gate/tracker_4/geometry/setZLength 1. mm
+/gate/tracker_4/placement/setTranslation 0 0 100 mm
+/gate/tracker_4/setMaterial Air
+
+/gate/patient/geometry/buildAndDumpDistanceTransfo dmap.mhd
+/gate/patient/geometry/distanceMap dmap.mhd
+
+#/gate/patient/geometry/buildAndDumpLabeledImage imageDump.mhd ## use this as setImage..?
+
+# /gate/patient/attachPhantomSD
+
+/gate/actor/addActor PhaseSpaceActor PSA_1
+/gate/actor/PSA_1/save PSA_1.root
+/gate/actor/PSA_1/attachTo tracker_1
+/gate/actor/PSA_1/storeOutgoingParticles false
+/gate/actor/PSA_1/addFilter IDFilter
+/gate/actor/PSA_1/IDFilter/selectID 1
+
+/gate/actor/addActor PhaseSpaceActor PSA_2
+/gate/actor/PSA_2/save PSA_2.root
+/gate/actor/PSA_2/attachTo tracker_2
+/gate/actor/PSA_2/storeOutgoingParticles false
+/gate/actor/PSA_2/addFilter IDFilter
+/gate/actor/PSA_2/IDFilter/selectID 1
+
+/gate/actor/addActor PhaseSpaceActor PSA_3
+/gate/actor/PSA_3/save PSA_3.root
+/gate/actor/PSA_3/attachTo tracker_3
+/gate/actor/PSA_3/storeOutgoingParticles false
+/gate/actor/PSA_3/addFilter IDFilter
+/gate/actor/PSA_3/IDFilter/selectID 1
+
+/gate/actor/addActor PhaseSpaceActor PSA_4
+/gate/actor/PSA_4/save PSA_4.root
+/gate/actor/PSA_4/attachTo tracker_4
+/gate/actor/PSA_4/storeOutgoingParticles false
+/gate/actor/PSA_4/addFilter IDFilter
+/gate/actor/PSA_4/IDFilter/selectID 1
+
+/gate/actor/addActor DoseActor MyActor
+/gate/actor/MyActor/save actorFile.root
+/gate/actor/MyActor/attachTo patient
+/gate/actor/MyActor/stepHitType random
+/gate/actor/MyActor/setSize 200 200 200 mm
+/gate/actor/MyActor/setResolution 1 150 150
+/gate/actor/MyActor/enableEdep true
+/gate/actor/MyActor/enableUncertaintyEdep false
+/gate/actor/MyActor/enableSquaredEdep false
+/gate/actor/MyActor/enableDose false
+/gate/actor/MyActor/normaliseDoseToMax false
+
+/gate/actor/addActor SimulationStatisticActor stat
+/gate/actor/stat/save stat-simulation.txt
+
+/gate/physics/addPhysicsList QGSP_BIC_EMZ
+/gate/geometry/setIonisationPotential Water 75 eV
+
+/gate/run/initialize
+
+/gate/source/addSource PBS PencilBeam
+/gate/source/PBS/setParticleType proton
+/gate/source/PBS/setEnergy 230. MeV
+/gate/source/PBS/setSigmaEnergy 0. MeV
+/gate/source/PBS/setPosition 0 0 -200. mm
+/gate/source/PBS/setSigmaX 3 mm
+/gate/source/PBS/setSigmaY 3 mm
+/gate/source/PBS/setSigmaTheta 3 mrad
+/gate/source/PBS/setSigmaPhi 3 mrad
+/gate/source/PBS/setEllipseXThetaEmittance 15 mm*mrad
+/gate/source/PBS/setEllipseXThetaRotationNorm negative
+/gate/source/PBS/setEllipseYPhiEmittance 15 mm*mrad
+/gate/source/PBS/setEllipseYPhiRotationNorm negative
+
+/gate/application/setTotalNumberOfPrimaries 50000
+
+/gate/random/setEngineName MersenneTwister
+/gate/random/setEngineSeed auto
+/gate/application/start
