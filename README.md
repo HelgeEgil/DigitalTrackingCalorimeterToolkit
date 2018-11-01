@@ -1,7 +1,7 @@
 # Digital Tracking Calorimeter Toolkit
 Toolkit for the Monte Carlo and data analysis for the Digital Tracking Calorimeter project.
 For more details see the publication <i>Pettersen, H. E. S. et al., Proton tracking in a high-granularity Digital Tracking Calorimeter for proton CT purposes. Nuclear Instruments and Methods in Physics Research A 860 (C): 51 - 61 (2017)</i>
-https://doi.org/10.1016/j.nima.2017.02.007
+https://doi.org/10.1016/j.nima.2017.02.007 and the PhD thesis <i>A Digital Tracking Calorimeter for Proton Computed Tomography: University of Bergen 2018. http://bora.uib.no/handle/1956/17757</i>
 
 ## Overview
 It is developed for the management, pre-processing, reconstruction, analysis and presentation of data from the beam test and from MC simulations.
