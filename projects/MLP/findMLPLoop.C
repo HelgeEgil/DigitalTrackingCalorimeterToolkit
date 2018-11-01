@@ -36,6 +36,7 @@ void findMLPLoop(Float_t phantomSize, Int_t eventsToUse, Float_t spotSize) {
    Float_t     x, y, z, edep, sum_edep = 0, residualEnergy = 0;
    Int_t       eventID, parentID, lastEID = -1;
    XYZVector   Xp0, Xp1, Xp2, Xp3, X0, X2, X0est, X0err, X0NoTrk, P0, P0NoTrk, P2, S; // Xp are the plane coordinates, X are the tracker coordinates (X2 = (Xp1 + Xp2) / 2)
+   XYZVector   projectToHullX0, projectToHullX2;
    Float_t     wepl, wet, Lambda0, Lambda1;
    ifstream    in;
    TSpline3  * splineMCx, * splineMCy, * splineMLPx, * splineMLPy;
@@ -78,10 +79,10 @@ void findMLPLoop(Float_t phantomSize, Int_t eventsToUse, Float_t spotSize) {
    TFile *f;
 
    if (spotSize <0) {
-      f = new TFile(Form("MC/Output/simpleScanner_energy%.0fMeV_CorticalBone_phantom%03.0fmm.root", initialEnergy, phantomSize)); 
+      f = new TFile(Form("MC/Output/simpleScanner_energy%.0fMeV_Water_phantom%03.0fmm.root", initialEnergy, phantomSize)); 
    }
    else {
-      f = new TFile(Form("MC/Output/simpleScanner_energy%.0fMeV_B100_phantom%03.0fmm_spotsize%04.1fmm.root", initialEnergy, phantomSize, spotSize)); 
+      f = new TFile(Form("MC/Output/simpleScanner_energy%.0fMeV_Water_phantom%03.0fmm_spotsize%04.1fmm.root", initialEnergy, phantomSize, spotSize)); 
    }
 
    TTree *tree = (TTree*) f->Get("Hits");
@@ -125,45 +126,31 @@ void findMLPLoop(Float_t phantomSize, Int_t eventsToUse, Float_t spotSize) {
       }
 
       if (lastEID != eventID) {
-         if (lastEID % 100 == 0) printf("Particle %d/%d.\n", lastEID, eventsToUse);
+         if (lastEID % 1000 == 0) printf("%.0f mm phantom: Particle %d/%d\n", phantomSize, lastEID, eventsToUse);
          
          if (hResidualEnergy->GetEntries() > 25)   sigmaFilter = hResidualEnergy->GetMean() * 0.9;
          else                                      sigmaFilter = 0;
-         
-         if (eventID < 50) {
-            cout << "SigmaFilter = " <<sigmaFilter << ", energy = " << residualEnergy << endl;
-         }
 
          if (residualEnergy > sigmaFilter) {
             hResidualEnergy->Fill(residualEnergy);
             // Find vectors as defined in paper
             X0 = (Xp0 + Xp1) / 2;
             X2 = (Xp2 + Xp3) / 2;
+            
+            P0 = Xp1 - Xp0;
+            P2 = Xp3 - Xp2;
 
-            Float_t theta_x_1 = atan2(Xp1.X() - Xp0.X(), Xp1.Z() - Xp0.Z());
-            Float_t theta_y_1 = atan2(Xp1.Y() - Xp0.Y(), Xp1.Z() - Xp0.Z());
-            Float_t theta_x_2 = atan2(Xp3.X() - Xp2.X(), Xp3.Z() - Xp2.Z());
-            Float_t theta_y_2 = atan2(Xp3.Y() - Xp2.Y(), Xp3.Z() - Xp2.Z());
-
-            P0.SetCoordinates(theta_x_1, theta_y_1, sqrt(1 - pow(theta_x_1, 2) - pow(theta_y_1, 2)));
-            P2.SetCoordinates(theta_x_2, theta_y_2, sqrt(1 - pow(theta_x_2, 2) - pow(theta_y_2, 2)));
+            P0 /= Xp1.Z() - Xp0.Z();
+            P2 /= Xp3.Z() - Xp2.Z();
 
             if (std::isnan(P2.Z())) continue; // Don't ask why this can happen ...
 
-            XYZVector projectToHullX0(d_entry * tan(P0.X()), d_entry * tan(P0.Y()), d_entry);
-            XYZVector projectToHullX2(d_exit  * tan(P2.X()), d_exit  * tan(P2.Y()), d_exit );
-            
-            // Try first approach again to see if it affects phantomSize < 50 mm
-            /*
-            P0 = Xp1 - Xp0; P0 = P0.Unit();
-            P2 = Xp3 - Xp2; P2 = P2.Unit();
             projectToHullX0.SetCoordinates(d_entry * P0.X(), d_entry * P0.Y(), d_entry);
             projectToHullX2.SetCoordinates(d_exit  * P2.X(), d_exit  * P2.Y(), d_exit );
-            */
 
             X0 += projectToHullX0;
             X2 -= projectToHullX2;
-
+            
             // INNER MINIMIZATION LOOP
                for (Float_t AX = AXlow; AX <= AXhigh; AX += AXdelta) {
                   for (Float_t AP = APlow; AP <= APhigh; AP += APdelta) {
@@ -198,13 +185,15 @@ void findMLPLoop(Float_t phantomSize, Int_t eventsToUse, Float_t spotSize) {
          else if  (volumeID[2] == 5) residualEnergy += edep;
       }
    }
+   cout << endl;
 
    gStyle->SetOptStat(0);
    gStyle->SetNumberContours(99);
 
    hErrorMatrix->Divide(hIdxMatrix);
   
-   Int_t nbins = hErrorMatrix->GetNcells();
+//   Int_t nbins = hErrorMatrix->GetNcells();
+   Int_t nbins = hErrorMatrix->GetNbinsX() * hErrorMatrix->GetNbinsY();
    Float_t mincont = 1e5;
    Int_t mincell = 0;
    printf("There are %d cells in the matrix\n", nbins);
@@ -232,7 +221,7 @@ void findMLPLoop(Float_t phantomSize, Int_t eventsToUse, Float_t spotSize) {
 //   c2->SaveAs(Form("Output/accuracy_energy%.0fMeV_%.0fmm_A150.pdf", initialEnergy, phantomSize));
 
    // Phantom size, error , AX , AP
-   ofstream file(Form("Output/accuracy_energy%.0fMeV_B100_phantom.csv", initialEnergy), ofstream::out | ofstream::app); 
+   ofstream file(Form("Output/accuracy_energy%.0fMeV_Water_phantom.csv", initialEnergy), ofstream::out | ofstream::app); 
    file << phantomSize << " " << mincont << " " << minXvalue << " " << minYvalue << " " <<  hResidualEnergy->GetMean() << endl;
    file.close();
 }

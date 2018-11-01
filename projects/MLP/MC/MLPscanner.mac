@@ -55,7 +55,7 @@
 /gate/calorimeter/placement/setTranslation 0 0 {zcalorimeter} mm # dz/2 + 30
 /gate/calorimeter/setMaterial Tungsten
 
-/gate/phantom/attachCrystalSD
+#/gate/phantom/attachCrystalSD
 /gate/fronttracker/attachCrystalSD
 /gate/backtracker/attachCrystalSD
 /gate/calorimeter/attachCrystalSD
@@ -64,6 +64,8 @@
 /gate/geometry/setIonisationPotential Water 78 eV
 
 #/gate/physics/SetMaxStepSizeInRegion phantom 2 mm
+/gate/physics/SetMinKineticEnergyInRegion calorimeter 300 MeV
+/gate/physics/ActivateSpecialCuts proton
 
 /gate/run/initialize
 
@@ -87,7 +89,7 @@
 /gate/source/PBS/setEllipseXThetaRotationNorm negative
 /gate/source/PBS/setEllipseYPhiEmittance {emittance} mm*mrad # was 15
 /gate/source/PBS/setEllipseYPhiRotationNorm negative
-/gate/application/setTotalNumberOfPrimaries 12000
+/gate/application/setTotalNumberOfPrimaries 10000
 
 /gate/output/root/enable
 /gate/output/root/setRootSinglesFlag 0

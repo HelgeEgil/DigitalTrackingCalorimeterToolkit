@@ -1,39 +1,39 @@
-#!/bin/bash
+!/bin/bash
 
-NCORES=6
+NCORES=4
 IDX=1
 
-#for i in `seq -w 10 10 320`; do
-#   ztracker=`echo "scale=3; $i/2+15" | bc`
-#   zbeam=`echo "scale=3; -$ztracker-100" | bc`
-#   zcalorimeter=`echo "scale=3; $i/2+30+1000" | bc`
-##   divergence=`echo "scale=3; $i/100" | bc`
-#   emittance=`echo "scale=3; $i * 3 * 1.5" | bc`
-#	nice -n 19 cpulimit -l 60 Gate -a "'[energy,230] [dz,$i] [ztracker,$ztracker] [zbeam,$zbeam] [spotsize,3] [divergence,2] [emittance,15] [rotation,0] [material,Water] [zcalorimeter,$zcalorimeter]'" MLPscanner.mac > terminal_output.txt &
-#   PIDLIST="$PIDLIST $!"
-#   echo "Running with i = $i"
-#
-#   if (( $IDX % $NCORES == 0)); then 
-#      echo "Waiting for (PIDS $PIDLIST)"
-#      time wait $PIDLIST
-#      unset PIDLIST
-#      IDX=1
-#   else
-#      IDX=$(( IDX+1 ))
-#   fi
-#done
-#
-#echo "Waiting for (PIDS $PIDLIST)"
-#time wait $PIDLIST
-#unset PIDLIST
-#
+for i in `seq -w 30 1 30`; do
+   ztracker=`echo "scale=3; $i/2+15" | bc`
+   zbeam=`echo "scale=3; -$ztracker-100" | bc`
+   zcalorimeter=`echo "scale=3; $i/2+30+1000" | bc`
+#   divergence=`echo "scale=3; $i/100" | bc`
+   emittance=`echo "scale=3; $i * 3 * 1.5" | bc`
+	Gate -a "'[energy,230] [dz,$i] [ztracker,$ztracker] [zbeam,$zbeam] [spotsize,3] [divergence,2] [emittance,15] [rotation,0] [material,Water] [zcalorimeter,$zcalorimeter]'" MLPscanner.mac > terminal_output.txt &
+   PIDLIST="$PIDLIST $!"
+   echo "Running with i = $i"
+
+   if (( $IDX % $NCORES == 0)); then 
+      echo "Waiting for (PIDS $PIDLIST)"
+      time wait $PIDLIST
+      unset PIDLIST
+      IDX=1
+   else
+      IDX=$(( IDX+1 ))
+   fi
+done
+
+echo "Waiting for (PIDS $PIDLIST)"
+time wait $PIDLIST
+unset PIDLIST
+
 #for i in `seq -w 10 10 340`; do
 #   ztracker=`echo "scale=3; $i/2+15" | bc`
 #   zbeam=`echo "scale=3; -$ztracker-100" | bc`
 #   zcalorimeter=`echo "scale=3; $i/2+30+1000" | bc`
 ##   divergence=`echo "scale=3; $i/100" | bc`
 #   emittance=`echo "scale=3; $i * 3 * 1.5" | bc`
-#	nice -n 19 cpulimit -l 60 Gate -a "'[energy,230] [dz,$i] [ztracker,$ztracker] [zbeam,$zbeam] [spotsize,3] [divergence,2] [emittance,15] [rotation,0] [material,A150] [zcalorimeter,$zcalorimeter]'" MLPscanner.mac > terminal_output.txt &
+#	Gate -a "'[energy,230] [dz,$i] [ztracker,$ztracker] [zbeam,$zbeam] [spotsize,3] [divergence,2] [emittance,15] [rotation,0] [material,A150] [zcalorimeter,$zcalorimeter]'" MLPscanner.mac > terminal_output.txt &
 #   PIDLIST="$PIDLIST $!"
 #   echo "Running with i = $i"
 #
@@ -57,7 +57,7 @@ IDX=1
 #   zcalorimeter=`echo "scale=3; $i/2+30+1000" | bc`
 ##   divergence=`echo "scale=3; $i/100" | bc`
 #   emittance=`echo "scale=3; $i * 3 * 1.5" | bc`
-#	nice -n 19 cpulimit -l 60 Gate -a "'[energy,230] [dz,$i] [ztracker,$ztracker] [zbeam,$zbeam] [spotsize,3] [divergence,2] [emittance,15] [rotation,0] [material,CorticalBone] [zcalorimeter,$zcalorimeter]'" MLPscanner.mac > terminal_output.txt &
+#	Gate -a "'[energy,230] [dz,$i] [ztracker,$ztracker] [zbeam,$zbeam] [spotsize,3] [divergence,2] [emittance,15] [rotation,0] [material,CorticalBone] [zcalorimeter,$zcalorimeter]'" MLPscanner.mac > terminal_output.txt &
 #   PIDLIST="$PIDLIST $!"
 #   echo "Running with i = $i"
 #
@@ -81,7 +81,7 @@ IDX=1
 #   zcalorimeter=`echo "scale=3; $i/2+30+1000" | bc`
 ##   divergence=`echo "scale=3; $i/100" | bc`
 #   emittance=`echo "scale=3; $i * 3 * 1.5" | bc`
-#	nice -n 19 cpulimit -l 60 Gate -a "'[energy,230] [dz,$i] [ztracker,$ztracker] [zbeam,$zbeam] [spotsize,3] [divergence,2] [emittance,15] [rotation,0] [material,B100] [zcalorimeter,$zcalorimeter]'" MLPscanner.mac > terminal_output.txt &
+#	Gate -a "'[energy,230] [dz,$i] [ztracker,$ztracker] [zbeam,$zbeam] [spotsize,3] [divergence,2] [emittance,15] [rotation,0] [material,B100] [zcalorimeter,$zcalorimeter]'" MLPscanner.mac > terminal_output.txt &
 #   PIDLIST="$PIDLIST $!"
 #   echo "Running with i = $i"
 #
@@ -98,27 +98,27 @@ IDX=1
 #echo "Waiting for (PIDS $PIDLIST)"
 #time wait $PIDLIST
 #unset PIDLIST
-
-for i in `seq -w 10 10 350`; do
-   ztracker=`echo "scale=3; $i/2+15" | bc`
-   zbeam=`echo "scale=3; -$ztracker-100" | bc`
-   zcalorimeter=`echo "scale=3; $i/2+30+1000" | bc`
-#   divergence=`echo "scale=3; $i/100" | bc`
-   emittance=`echo "scale=3; $i * 3 * 1.5" | bc`
-	nice -n 19 cpulimit -l 60 Gate -a "'[energy,230] [dz,$i] [ztracker,$ztracker] [zbeam,$zbeam] [spotsize,3] [divergence,2] [emittance,15] [rotation,0] [material,myAdipose] [zcalorimeter,$zcalorimeter]'" MLPscanner.mac > terminal_output.txt &
-   PIDLIST="$PIDLIST $!"
-   echo "Running with i = $i"
-
-   if (( $IDX % $NCORES == 0)); then 
-      echo "Waiting for (PIDS $PIDLIST)"
-      time wait $PIDLIST
-      unset PIDLIST
-      IDX=1
-   else
-      IDX=$(( IDX+1 ))
-   fi
-done
-
-echo "Waiting for (PIDS $PIDLIST)"
-time wait $PIDLIST
-unset PIDLIST
+#
+#for i in `seq -w 10 10 350`; do
+#   ztracker=`echo "scale=3; $i/2+15" | bc`
+#   zbeam=`echo "scale=3; -$ztracker-100" | bc`
+#   zcalorimeter=`echo "scale=3; $i/2+30+1000" | bc`
+##   divergence=`echo "scale=3; $i/100" | bc`
+#   emittance=`echo "scale=3; $i * 3 * 1.5" | bc`
+#	Gate -a "'[energy,230] [dz,$i] [ztracker,$ztracker] [zbeam,$zbeam] [spotsize,3] [divergence,2] [emittance,15] [rotation,0] [material,myAdipose] [zcalorimeter,$zcalorimeter]'" MLPscanner.mac > terminal_output.txt &
+#   PIDLIST="$PIDLIST $!"
+#   echo "Running with i = $i"
+#
+#   if (( $IDX % $NCORES == 0)); then 
+#      echo "Waiting for (PIDS $PIDLIST)"
+#      time wait $PIDLIST
+#      unset PIDLIST
+#      IDX=1
+#   else
+#      IDX=$(( IDX+1 ))
+#   fi
+#done
+#
+#echo "Waiting for (PIDS $PIDLIST)"
+#time wait $PIDLIST
+#unset PIDLIST

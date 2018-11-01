@@ -288,7 +288,7 @@ void plotAPandAX() {
       arrayWetWeplB100230[arrayIdxB100230] = pow(wet/wepl, 1); // * pow(weplFactor, weplPower);
       arrayResidualEnergyB100230[arrayIdxB100230] = pow(wet/wepl, 1); // * weplFactor;
       arrayAXB100230[arrayIdxB100230] = AX_;
-      arrayAPB100230[arrayIdxB100230++] = AP_*10/phantomSize_;
+      arrayAPB100230[arrayIdxB100230++] = AP_;
    }
    in.close();
    
@@ -303,7 +303,7 @@ void plotAPandAX() {
       arrayWetWeplAdipose230[arrayIdxAdipose230] = pow(wet/wepl, 1); // * pow(weplFactor, weplPower);
       arrayResidualEnergyAdipose230[arrayIdxAdipose230] = pow(wet/wepl, 1); // * weplFactor;
       arrayAXAdipose230[arrayIdxAdipose230] = AX_;
-      arrayAPAdipose230[arrayIdxAdipose230++] = AP_*10/phantomSize_;
+      arrayAPAdipose230[arrayIdxAdipose230++] = AP_;
    }
    in.close();
 
