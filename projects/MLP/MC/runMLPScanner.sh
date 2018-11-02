@@ -1,15 +1,15 @@
-!/bin/bash
+#!/bin/bash
 
 NCORES=4
 IDX=1
 
-for i in `seq -w 30 1 30`; do
+for i in `seq -w 10 10 330`; do
    ztracker=`echo "scale=3; $i/2+15" | bc`
    zbeam=`echo "scale=3; -$ztracker-100" | bc`
    zcalorimeter=`echo "scale=3; $i/2+30+1000" | bc`
 #   divergence=`echo "scale=3; $i/100" | bc`
    emittance=`echo "scale=3; $i * 3 * 1.5" | bc`
-	Gate -a "'[energy,230] [dz,$i] [ztracker,$ztracker] [zbeam,$zbeam] [spotsize,3] [divergence,2] [emittance,15] [rotation,0] [material,Water] [zcalorimeter,$zcalorimeter]'" MLPscanner.mac > terminal_output.txt &
+	/scratch/gate/gate_v8.1.p01-install/bin/Gate -a "'[energy,230] [dz,$i] [ztracker,$ztracker] [zbeam,$zbeam] [spotsize,3] [divergence,2] [emittance,15] [rotation,0] [material,Water] [zcalorimeter,$zcalorimeter]'" MLPscanner.mac > terminal_output.txt &
    PIDLIST="$PIDLIST $!"
    echo "Running with i = $i"
 

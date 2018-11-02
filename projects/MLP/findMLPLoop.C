@@ -11,7 +11,7 @@
 #include <TStyle.h>
 #include <Math/Vector3D.h>
 
-void findMLPLoop(Float_t phantomSize = 200, Int_t eventsToUse = -1, Float_t spotSize = -1);
+void findMLPLoop(Float_t phantomSize = 200, Int_t eventsToUse = 1000, Float_t spotSize = -1);
 
 using namespace std;
 typedef ROOT::Math::DisplacementVector3D<ROOT::Math::Cartesian3D<double> > XYZVector;
@@ -32,7 +32,6 @@ XYZVector SplineMLP(Double_t t, XYZVector X0, XYZVector X2, XYZVector P0, XYZVec
 void findMLPLoop(Float_t phantomSize, Int_t eventsToUse, Float_t spotSize) {
    Float_t     initialEnergy = 230;
    Float_t     differenceArrayDZ = 3;
-   if (eventsToUse < 0) eventsToUse = 100;
    Float_t     x, y, z, edep, sum_edep = 0, residualEnergy = 0;
    Int_t       eventID, parentID, lastEID = -1;
    XYZVector   Xp0, Xp1, Xp2, Xp3, X0, X2, X0est, X0err, X0NoTrk, P0, P0NoTrk, P2, S; // Xp are the plane coordinates, X are the tracker coordinates (X2 = (Xp1 + Xp2) / 2)
@@ -105,6 +104,9 @@ void findMLPLoop(Float_t phantomSize, Int_t eventsToUse, Float_t spotSize) {
    TH2F * hErrorMatrix = new TH2F("hErrorMatrix", Form("AUC of Errors between MC and MLP, %.0f mm B100 phantom;A_{X} parameter;A_{P} parameter", phantomSize), AXbins, AXlow, AXhigh, APbins, APlow, APhigh);
    TH2I * hIdxMatrix = new TH2I("hIdxMatrix", "Normalization matrix;A_{X} parameter;A_{P} parameter", AXbins, AXlow, AXhigh, APbins, APlow, APhigh);
    TH1I * hResidualEnergy = new TH1I("residualEnergy", "Residual Energy", 300, 0, 240);
+   
+   TH1F * hP0 = new TH1F("hP0", "P0 magnitudes (x,y) axis;Mag(x,y);Frequency",100,-15,15);
+   TH1F * hP2 = new TH1F("hP2", "P2 magnitudes (x,y) axis;Mag(x,y);Frequency",100,-15,15);
 
    tree->SetBranchAddress("posX", &x);
    tree->SetBranchAddress("posY", &y);
@@ -136,7 +138,7 @@ void findMLPLoop(Float_t phantomSize, Int_t eventsToUse, Float_t spotSize) {
             // Find vectors as defined in paper
             X0 = (Xp0 + Xp1) / 2;
             X2 = (Xp2 + Xp3) / 2;
-            
+         
             P0 = Xp1 - Xp0;
             P2 = Xp3 - Xp2;
 
@@ -146,10 +148,13 @@ void findMLPLoop(Float_t phantomSize, Int_t eventsToUse, Float_t spotSize) {
             if (std::isnan(P2.Z())) continue; // Don't ask why this can happen ...
 
             projectToHullX0.SetCoordinates(0, 0, d_entry);
-            projectToHullX2.SetCoordinates(d_exit  * P2.X(), d_exit  * P2.Y(), d_exit );
+            projectToHullX2.SetCoordinates(d_exit  * P2.X(), d_exit * P2.Y(), d_exit);
 
             X0 += projectToHullX0;
             X2 -= projectToHullX2;
+            
+            hP0->Fill(X2.X());
+            hP2->Fill(X2.Y());
             
             // INNER MINIMIZATION LOOP
             for (Float_t AX = AXlow; AX <= AXhigh; AX += AXdelta) {
@@ -217,6 +222,15 @@ void findMLPLoop(Float_t phantomSize, Int_t eventsToUse, Float_t spotSize) {
 
    TCanvas *c2 = new TCanvas();
    hErrorMatrix->Draw("COLZ");
+
+   TCanvas *c3 = new TCanvas("c3", "P0,2 magnitudes", 1600, 800);
+   c3->Divide(2,1);
+   c3->cd(1);
+   hP0->Draw();
+   c3->cd(2);
+   hP2->Draw();
+
+   printf("Mean value of X0 = %.3f +- %.3f mm, X2 = %.3f +- %.3f mm.\n", hP0->GetMean(), hP0->GetStdDev(), hP2->GetMean(), hP2->GetStdDev());
 
 //   c2->SaveAs(Form("Output/accuracy_energy%.0fMeV_%.0fmm_A150.pdf", initialEnergy, phantomSize));
 

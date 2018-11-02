@@ -63,7 +63,7 @@
 /gate/physics/addPhysicsList QGSP_BIC_EMZ
 /gate/geometry/setIonisationPotential Water 78 eV
 
-#/gate/physics/SetMaxStepSizeInRegion phantom 2 mm
+/gate/physics/SetMaxStepSizeInRegion phantom 0.25 mm
 /gate/physics/SetMinKineticEnergyInRegion calorimeter 300 MeV
 /gate/physics/ActivateSpecialCuts proton
 

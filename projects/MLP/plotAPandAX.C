@@ -600,16 +600,17 @@ void plotAPandAX() {
    gAPall->SetTitle("All materials;wet/wepl;A_{P}");
 
    gAXall->SetMarkerStyle(21); gAPall->SetMarkerStyle(21);
+   gAX200->SetMarkerStyle(21); gAP200->SetMarkerStyle(21);
 
    gAX200->SetMarkerColor(kRed);
    gAP200->SetMarkerColor(kRed);
 
    c1->cd(3);
-   gAXall->Draw("AP");
-//   gAX200->Draw("P");
+//   gAXall->Draw("AP");
+   gAX200->Draw("AP");
    c1->cd(4);
-   gAPall->Draw("AP");
-//   gAP200->Draw("P");
+//   gAPall->Draw("AP");
+   gAP200->Draw("AP");
 
    gAXB100230->SetMarkerColor(kRed);
    gAPB100230->SetMarkerColor(kRed);
