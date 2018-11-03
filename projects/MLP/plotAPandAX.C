@@ -606,11 +606,11 @@ void plotAPandAX() {
    gAP200->SetMarkerColor(kRed);
 
    c1->cd(3);
-//   gAXall->Draw("AP");
-   gAX200->Draw("AP");
-   c1->cd(4);
-//   gAPall->Draw("AP");
-   gAP200->Draw("AP");
+   gAXall->Draw("AP");
+//   gAX200->Draw("AP");
+   c1->cd(4);  
+   gAPall->Draw("AP");
+//   gAP200->Draw("AP");
 
    gAXB100230->SetMarkerColor(kRed);
    gAPB100230->SetMarkerColor(kRed);
@@ -645,8 +645,8 @@ void plotAPandAX() {
    gAX230->SetMarkerSize(0.8);
    gAP230->SetMarkerSize(0.8);
 
-   gAX230->SetTitle("Optimal A_{X} parameter for a 230 MeV beam;(WET/WEPL)^{4};A_{X}");
-   gAP230->SetTitle("Optimal A_{P} parameter for a 230 MeV beam;(WET/WEPL)^{2};A_{P}");
+   gAX230->SetTitle("Optimal A_{X} parameter for a 230 MeV beam;WET/WEPL;A_{X}");
+   gAP230->SetTitle("Optimal A_{P} parameter for a 230 MeV beam;WET/WEPL;A_{P}");
 
    c1->cd(1);
    gAX230->Draw("AP");
@@ -655,11 +655,16 @@ void plotAPandAX() {
    gAXCorticalBone230->Draw("P");
    gAXAdipose230->Draw("P");
   
-   TF1 *fitX = new TF1("fitX", "pol3");
-   fitX->SetParameters(1, -0.185, 0.372, -0.916);
+   TF1 *fitX = new TF1("fitX", "pol4");
+   fitX->SetParameters(1, -0.30, 1.53, -4.25, 2.30);
    fitX->SetLineColor(kGray+3);
    fitX->Draw("same");
 
+   TF1 *fitXtheory = new TF1("fitXtheory", "pol3");
+   fitXtheory->SetParameters(1, 0.10580611, -0.55540158, -0.47996657);
+   fitXtheory->SetLineColor(kRed);
+   fitXtheory->Draw("same");
+   
    TLegend *legX = new TLegend(.3, .66, .64, .8655);
    legX->SetTextFont(22);
    legX->AddEntry(gAX230, "Water", "P");
@@ -668,6 +673,7 @@ void plotAPandAX() {
    legX->AddEntry(gAXCorticalBone230, "ICRU Cortical Bone", "P");
    legX->AddEntry(gAXA150230, "ICRU A150 T.E.P.", "P");
    legX->AddEntry(fitX, "Polynomial fit", "L");
+   legX->AddEntry(fitXtheory, "Theoretical prediction", "L");
    legX->Draw();
 
    c1->cd(2);
@@ -677,10 +683,15 @@ void plotAPandAX() {
    gAPCorticalBone230->Draw("P");
    gAPAdipose230->Draw("P");
 
-   TF1 *fitP = new TF1("fitP", "pol2");
-   fitP->SetParameters(-0.454, -0.25, 0.682);
+   TF1 *fitP = new TF1("fitP", "pol5");
+   fitP->SetParameters(-0.659, 2.072, -8.66, 18.14, -16.27, 5.34);
    fitP->SetLineColor(kGray+3);
    fitP->Draw("same");
+
+   TF1 *fitPtheory = new TF1("fitPtheory", "pol2");
+   fitPtheory->SetParameters(-0.49409324, -0.02879423, 0.53400338);
+   fitPtheory->SetLineColor(kRed);
+   fitPtheory->Draw("same");
 
    TLegend *leg = new TLegend(.3, .66, .64, .8655);
    leg->SetTextFont(22);
@@ -690,6 +701,7 @@ void plotAPandAX() {
    leg->AddEntry(gAPCorticalBone230, "ICRU Cortical Bone", "P");
    leg->AddEntry(gAPA150230, "ICRU A150 T.E.P.", "P");
    leg->AddEntry(fitP, "Polynomial fit", "L");
+   leg->AddEntry(fitPtheory, "Theoretical prediction", "L");
    leg->SetTextFont(22);
    leg->Draw(); 
 

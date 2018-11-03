@@ -11,7 +11,16 @@
 #include <TStyle.h>
 #include <Math/Vector3D.h>
 
-void findMLPLoop(Float_t phantomSize = 200, Int_t eventsToUse = 1000, Float_t spotSize = -1);
+enum eMat {kWater, kA150, kB100, kCorticalBone, kAdipose};
+
+// 230 MeV
+// Water: 10 -> 330
+// A150: 10 -> 290
+// Adipose: 10 -> 350
+// B100: 10 -> 250
+// CorticalBone: 10 -> 200
+
+void findMLPLoop(Float_t phantomSize = 200, Int_t eventsToUse = 1000, Float_t spotSize = -1, Int_t material = kWater);
 
 using namespace std;
 typedef ROOT::Math::DisplacementVector3D<ROOT::Math::Cartesian3D<double> > XYZVector;
@@ -29,7 +38,7 @@ XYZVector SplineMLP(Double_t t, XYZVector X0, XYZVector X2, XYZVector P0, XYZVec
    return S;
 }
 
-void findMLPLoop(Float_t phantomSize, Int_t eventsToUse, Float_t spotSize) {
+void findMLPLoop(Float_t phantomSize, Int_t eventsToUse, Float_t spotSize, Int_t material) {
    Float_t     initialEnergy = 230;
    Float_t     differenceArrayDZ = 3;
    Float_t     x, y, z, edep, sum_edep = 0, residualEnergy = 0;
@@ -62,6 +71,17 @@ void findMLPLoop(Float_t phantomSize, Int_t eventsToUse, Float_t spotSize) {
    Int_t       aIdxMLP = 0;
    Bool_t      stop = false, stopacc = false;
    Double_t    diff_x, diff_y;
+   char      * sMaterial;
+
+   if      (material == kWater)        sMaterial = (char*) "Water";
+   else if (material == kB100)         sMaterial = (char*) "B100";
+   else if (material == kA150)         sMaterial = (char*) "A150";
+   else if (material == kAdipose)      sMaterial = (char*) "myAdipose";
+   else if (material == kCorticalBone) sMaterial = (char*) "CorticalBone";
+   else {
+      cout << "Material " << material << " not defined!\n";
+      exit(0);
+   }
 
    gStyle->SetTitleFont(22);
    gStyle->SetLabelFont(22);
@@ -78,11 +98,13 @@ void findMLPLoop(Float_t phantomSize, Int_t eventsToUse, Float_t spotSize) {
    TFile *f;
 
    if (spotSize <0) {
-      f = new TFile(Form("MC/Output/simpleScanner_energy%.0fMeV_Water_phantom%03.0fmm.root", initialEnergy, phantomSize)); 
+      f = new TFile(Form("MC/Output/simpleScanner_energy%.0fMeV_%s_phantom%03.0fmm.root", initialEnergy, sMaterial, phantomSize)); 
    }
    else {
-      f = new TFile(Form("MC/Output/simpleScanner_energy%.0fMeV_Water_phantom%03.0fmm_spotsize%04.1fmm.root", initialEnergy, phantomSize, spotSize)); 
+      f = new TFile(Form("MC/Output/simpleScanner_energy%.0fMeV_%s_phantom%03.0fmm_spotsize%04.1fmm.root", initialEnergy, sMaterial, phantomSize, spotSize)); 
    }
+
+   if (material == kAdipose) sMaterial = (char*) "Adipose";
 
    TTree *tree = (TTree*) f->Get("Hits");
 
@@ -101,12 +123,9 @@ void findMLPLoop(Float_t phantomSize, Int_t eventsToUse, Float_t spotSize) {
 
    printf("Using %d AXbins and %d APbins.\n", AXbins, APbins);
 
-   TH2F * hErrorMatrix = new TH2F("hErrorMatrix", Form("AUC of Errors between MC and MLP, %.0f mm B100 phantom;A_{X} parameter;A_{P} parameter", phantomSize), AXbins, AXlow, AXhigh, APbins, APlow, APhigh);
+   TH2F * hErrorMatrix = new TH2F("hErrorMatrix", Form("AUC of Errors between MC and MLP, %.0f mm %s phantom;A_{X} parameter;A_{P} parameter", phantomSize, sMaterial), AXbins, AXlow, AXhigh, APbins, APlow, APhigh);
    TH2I * hIdxMatrix = new TH2I("hIdxMatrix", "Normalization matrix;A_{X} parameter;A_{P} parameter", AXbins, AXlow, AXhigh, APbins, APlow, APhigh);
    TH1I * hResidualEnergy = new TH1I("residualEnergy", "Residual Energy", 300, 0, 240);
-   
-   TH1F * hP0 = new TH1F("hP0", "P0 magnitudes (x,y) axis;Mag(x,y);Frequency",100,-15,15);
-   TH1F * hP2 = new TH1F("hP2", "P2 magnitudes (x,y) axis;Mag(x,y);Frequency",100,-15,15);
 
    tree->SetBranchAddress("posX", &x);
    tree->SetBranchAddress("posY", &y);
@@ -128,7 +147,7 @@ void findMLPLoop(Float_t phantomSize, Int_t eventsToUse, Float_t spotSize) {
       }
 
       if (lastEID != eventID) {
-         if (lastEID % 1000 == 0) printf("%.0f mm phantom: Particle %d/%d\n", phantomSize, lastEID, eventsToUse);
+         if (lastEID % 1000 == 0) printf("%.0f mm %s phantom: Particle %d/%d\n", phantomSize, sMaterial, lastEID, eventsToUse);
          
          if (hResidualEnergy->GetEntries() > 25)   sigmaFilter = hResidualEnergy->GetMean() * 0.9;
          else                                      sigmaFilter = 0;
@@ -139,22 +158,19 @@ void findMLPLoop(Float_t phantomSize, Int_t eventsToUse, Float_t spotSize) {
             X0 = (Xp0 + Xp1) / 2;
             X2 = (Xp2 + Xp3) / 2;
          
-            P0 = Xp1 - Xp0;
-            P2 = Xp3 - Xp2;
+            P0 = (Xp1 - Xp0) / (Xp1.Z() - Xp0.Z());
+            P2 = (Xp3 - Xp2) / (Xp3.Z() - Xp2.Z());
 
-            P0 /= (Xp1.Z() - Xp0.Z());
-            P2 /= (Xp3.Z() - Xp2.Z());
-
-            if (std::isnan(P2.Z())) continue; // Don't ask why this can happen ...
+            if (std::isnan(P2.Z())) {
+               cout << "P2 isnan!!\n";
+               continue; // Don't ask why this can happen ...
+            }
 
             projectToHullX0.SetCoordinates(0, 0, d_entry);
             projectToHullX2.SetCoordinates(d_exit  * P2.X(), d_exit * P2.Y(), d_exit);
 
             X0 += projectToHullX0;
             X2 -= projectToHullX2;
-            
-            hP0->Fill(X2.X());
-            hP2->Fill(X2.Y());
             
             // INNER MINIMIZATION LOOP
             for (Float_t AX = AXlow; AX <= AXhigh; AX += AXdelta) {
@@ -220,22 +236,13 @@ void findMLPLoop(Float_t phantomSize, Int_t eventsToUse, Float_t spotSize) {
    Float_t minZvalue = hErrorMatrix->GetZaxis()->GetBinCenter(binz);
    printf("The bin with the minimum nonzero content is %.2f. AX = %.3f and AP = %.3f.\n", mincont, minXvalue, minYvalue);
 
-   TCanvas *c2 = new TCanvas();
+   TCanvas *c2 = new TCanvas("c2", "param values", 1500, 1000);
    hErrorMatrix->Draw("COLZ");
 
-   TCanvas *c3 = new TCanvas("c3", "P0,2 magnitudes", 1600, 800);
-   c3->Divide(2,1);
-   c3->cd(1);
-   hP0->Draw();
-   c3->cd(2);
-   hP2->Draw();
-
-   printf("Mean value of X0 = %.3f +- %.3f mm, X2 = %.3f +- %.3f mm.\n", hP0->GetMean(), hP0->GetStdDev(), hP2->GetMean(), hP2->GetStdDev());
-
-//   c2->SaveAs(Form("Output/accuracy_energy%.0fMeV_%.0fmm_A150.pdf", initialEnergy, phantomSize));
+   c2->SaveAs(Form("Output/accuracy_energy%.0fMeV_%.0fmm_%s.pdf", initialEnergy, phantomSize, sMaterial));
 
    // Phantom size, error , AX , AP
-   ofstream file(Form("Output/accuracy_energy%.0fMeV_Water_phantom.csv", initialEnergy), ofstream::out | ofstream::app); 
+   ofstream file(Form("Output/accuracy_energy%.0fMeV_%s_phantom.csv", initialEnergy, sMaterial), ofstream::out | ofstream::app); 
    file << phantomSize << " " << mincont << " " << minXvalue << " " << minYvalue << " " <<  hResidualEnergy->GetMean() << endl;
    file.close();
 }
