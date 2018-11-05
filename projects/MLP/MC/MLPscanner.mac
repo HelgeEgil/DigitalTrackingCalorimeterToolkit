@@ -63,13 +63,13 @@
 /gate/physics/addPhysicsList QGSP_BIC_EMZ
 /gate/geometry/setIonisationPotential Water 78 eV
 
-/gate/physics/SetMaxStepSizeInRegion phantom 0.5 mm
+/gate/physics/SetMaxStepSizeInRegion phantom 1 mm
 /gate/physics/SetMinKineticEnergyInRegion calorimeter 300 MeV
 /gate/physics/ActivateSpecialCuts proton
 
 /gate/run/initialize
 
-/geometry/test/run
+#/geometry/test/run
 
 #/process/inactivate hadElastic
 #/process/inactivate protonInelastic
@@ -89,12 +89,12 @@
 /gate/source/PBS/setEllipseXThetaRotationNorm negative
 /gate/source/PBS/setEllipseYPhiEmittance {emittance} mm*mrad # was 15
 /gate/source/PBS/setEllipseYPhiRotationNorm negative
-/gate/application/setTotalNumberOfPrimaries 10000
+/gate/application/setTotalNumberOfPrimaries 25000
 
 /gate/output/root/enable
 /gate/output/root/setRootSinglesFlag 0
 /gate/output/root/setRootHitFlag 1
-/gate/output/root/setFileName Output/simpleScanner_energy{energy}MeV_{material}_phantom{dz}mm
+/gate/output/root/setFileName Output/simpleScanner_energy{energy}MeV_{material}_phantom{dz}mm_spotsize{spotsize}mm
 
 /gate/random/setEngineName MersenneTwister
 /gate/random/setEngineSeed auto

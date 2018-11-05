@@ -184,7 +184,7 @@ void plotAPandAX() {
 
 
    ifstream inTheory;
-   inTheory.open("Data/theoryParams.txt");
+   inTheory.open("Data/theoryParams230MeV.txt");
    Float_t w_, a_, p_;
    while (1) {
       inTheory >> w_ >> a_ >> p_;
