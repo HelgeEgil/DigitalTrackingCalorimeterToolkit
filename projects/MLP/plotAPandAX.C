@@ -177,6 +177,22 @@ void plotAPandAX() {
    Int_t    arrayAdiposeIdxDivergence = 0;
    Int_t    arrayCorticalBoneIdxDivergence = 0;
 
+   Float_t  theoryW[arraySize];
+   Float_t  theoryAX[arraySize];
+   Float_t  theoryAP[arraySize];
+   Int_t    theoryIdx = 0;
+
+
+   ifstream inTheory;
+   inTheory.open("Data/theoryParams.txt");
+   Float_t w_, a_, p_;
+   while (1) {
+      inTheory >> w_ >> a_ >> p_;
+      if (!inTheory.good()) break;
+      theoryW[theoryIdx] = w_;
+      theoryAX[theoryIdx] = a_;
+      theoryAP[theoryIdx++] = p_;
+   }
    
    ifstream in;
    in.open("Data/WaterPSTAR.csv");
@@ -533,7 +549,7 @@ void plotAPandAX() {
    in.close();
 
    TCanvas *c1 = new TCanvas("c1", "Fit results", 1200, 800);
-   c1->Divide(2,2,1e-4,1e-4);
+   c1->Divide(2,1,1e-4,1e-4);
 
    Float_t  arrayAPall[arraySize];
    Float_t  arrayAXall[arraySize];
@@ -596,6 +612,9 @@ void plotAPandAX() {
    TGraph *gAXall = new TGraph(fullIdx, arrayResidualEnergyAll, arrayAXall);
    TGraph *gAPall = new TGraph(fullIdx, arrayWetWeplAll, arrayAPall);
 
+   TGraph *gAXtheory = new TGraph(theoryIdx, theoryW, theoryAX);
+   TGraph *gAPtheory = new TGraph(theoryIdx, theoryW, theoryAP);
+      
    gAXall->SetTitle("All materials;wet/wepl;A_{X}");
    gAPall->SetTitle("All materials;wet/wepl;A_{P}");
 
@@ -604,14 +623,14 @@ void plotAPandAX() {
 
    gAX200->SetMarkerColor(kRed);
    gAP200->SetMarkerColor(kRed);
-
+/*
    c1->cd(3);
    gAXall->Draw("AP");
 //   gAX200->Draw("AP");
    c1->cd(4);  
    gAPall->Draw("AP");
 //   gAP200->Draw("AP");
-
+*/
    gAXB100230->SetMarkerColor(kRed);
    gAPB100230->SetMarkerColor(kRed);
    gAPB100230->SetMarkerStyle(21);
@@ -657,14 +676,25 @@ void plotAPandAX() {
   
    TF1 *fitX = new TF1("fitX", "pol4");
    fitX->SetParameters(1, -0.30, 1.53, -4.25, 2.30);
-   fitX->SetLineColor(kGray+3);
+   fitX->SetLineColor(kBlack);
+   fitX->SetLineStyle(9);
+   fitX->SetLineWidth(3);
    fitX->Draw("same");
 
+   /*
    TF1 *fitXtheory = new TF1("fitXtheory", "pol3");
    fitXtheory->SetParameters(1, 0.10580611, -0.55540158, -0.47996657);
    fitXtheory->SetLineColor(kRed);
+   fitXtheory->SetLineStyle(21);
+   fitXtheory->SetLineWidth(3);
    fitXtheory->Draw("same");
+   */
    
+   gAXtheory->SetLineColor(kRed);
+   gAXtheory->SetLineStyle(9);
+   gAXtheory->SetLineWidth(3);
+   gAXtheory->Draw("same");
+
    TLegend *legX = new TLegend(.3, .66, .64, .8655);
    legX->SetTextFont(22);
    legX->AddEntry(gAX230, "Water", "P");
@@ -673,7 +703,7 @@ void plotAPandAX() {
    legX->AddEntry(gAXCorticalBone230, "ICRU Cortical Bone", "P");
    legX->AddEntry(gAXA150230, "ICRU A150 T.E.P.", "P");
    legX->AddEntry(fitX, "Polynomial fit", "L");
-   legX->AddEntry(fitXtheory, "Theoretical prediction", "L");
+   legX->AddEntry(gAXtheory, "Theoretical prediction", "L");
    legX->Draw();
 
    c1->cd(2);
@@ -685,13 +715,23 @@ void plotAPandAX() {
 
    TF1 *fitP = new TF1("fitP", "pol5");
    fitP->SetParameters(-0.659, 2.072, -8.66, 18.14, -16.27, 5.34);
-   fitP->SetLineColor(kGray+3);
+   fitP->SetLineColor(kBlack);
+   fitP->SetLineWidth(3);
+   fitP->SetLineStyle(9);
    fitP->Draw("same");
 
+   /*
    TF1 *fitPtheory = new TF1("fitPtheory", "pol2");
    fitPtheory->SetParameters(-0.49409324, -0.02879423, 0.53400338);
    fitPtheory->SetLineColor(kRed);
+   fitPtheory->SetLineStyle(9);
+   fitPtheory->SetLineWidth(3);
    fitPtheory->Draw("same");
+*/
+   gAPtheory->SetLineColor(kRed);
+   gAPtheory->SetLineStyle(9);
+   gAPtheory->SetLineWidth(3);
+   gAPtheory->Draw("same");
 
    TLegend *leg = new TLegend(.3, .66, .64, .8655);
    leg->SetTextFont(22);
@@ -701,7 +741,7 @@ void plotAPandAX() {
    leg->AddEntry(gAPCorticalBone230, "ICRU Cortical Bone", "P");
    leg->AddEntry(gAPA150230, "ICRU A150 T.E.P.", "P");
    leg->AddEntry(fitP, "Polynomial fit", "L");
-   leg->AddEntry(fitPtheory, "Theoretical prediction", "L");
+   leg->AddEntry(gAPtheory, "Theoretical prediction", "L");
    leg->SetTextFont(22);
    leg->Draw(); 
 
