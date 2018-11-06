@@ -384,7 +384,7 @@ void plotAPandAX() {
       arrayDivergence[arrayIdxDivergence] = phantomSize_; //divergence_;
       arrayMLPmidErrorNoTrk[arrayIdxDivergence] = mlpMidNoTrk_;
       arrayMLPmidErrorEst[arrayIdxDivergence] = mlpMidEst_;
-      arrayMLPstartErrorNoTrk[arrayIdxDivergence] = mlpStartNoTrk_;
+      arrayMLPstartErrorNoTrk[arrayIdxDivergence] = mlpStartKrah_;
       arrayMLPstartErrorEst[arrayIdxDivergence++] = mlpStartEst_;
    }
    in.close();
@@ -397,7 +397,7 @@ void plotAPandAX() {
       arrayA150Divergence[arrayA150IdxDivergence] = phantomSize_; //divergence_;
       arrayA150MLPmidErrorNoTrk[arrayA150IdxDivergence] = mlpMidNoTrk_;
       arrayA150MLPmidErrorEst[arrayA150IdxDivergence] = mlpMidEst_;
-      arrayA150MLPstartErrorNoTrk[arrayA150IdxDivergence] = mlpStartNoTrk_;
+      arrayA150MLPstartErrorNoTrk[arrayA150IdxDivergence] = mlpStartKrah_;
       arrayA150MLPstartErrorEst[arrayA150IdxDivergence++] = mlpStartEst_;
    }
    in.close();
@@ -410,7 +410,7 @@ void plotAPandAX() {
       arrayB100Divergence[arrayB100IdxDivergence] = phantomSize_; //divergence_;
       arrayB100MLPmidErrorNoTrk[arrayB100IdxDivergence] = mlpMidNoTrk_;
       arrayB100MLPmidErrorEst[arrayB100IdxDivergence] = mlpMidEst_;
-      arrayB100MLPstartErrorNoTrk[arrayB100IdxDivergence] = mlpStartNoTrk_;
+      arrayB100MLPstartErrorNoTrk[arrayB100IdxDivergence] = mlpStartKrah_;
       arrayB100MLPstartErrorEst[arrayB100IdxDivergence++] = mlpStartEst_;
    }
    in.close();
@@ -423,7 +423,7 @@ void plotAPandAX() {
       arrayAdiposeDivergence[arrayAdiposeIdxDivergence] = phantomSize_; //divergence_;
       arrayAdiposeMLPmidErrorNoTrk[arrayAdiposeIdxDivergence] = mlpMidNoTrk_;
       arrayAdiposeMLPmidErrorEst[arrayAdiposeIdxDivergence] = mlpMidEst_;
-      arrayAdiposeMLPstartErrorNoTrk[arrayAdiposeIdxDivergence] = mlpStartNoTrk_;
+      arrayAdiposeMLPstartErrorNoTrk[arrayAdiposeIdxDivergence] = mlpStartKrah_;
       arrayAdiposeMLPstartErrorEst[arrayAdiposeIdxDivergence++] = mlpStartEst_;
    }
    in.close();
@@ -436,7 +436,7 @@ void plotAPandAX() {
       arrayCorticalBoneDivergence[arrayCorticalBoneIdxDivergence] = phantomSize_; //divergence_;
       arrayCorticalBoneMLPmidErrorNoTrk[arrayCorticalBoneIdxDivergence] = mlpMidNoTrk_;
       arrayCorticalBoneMLPmidErrorEst[arrayCorticalBoneIdxDivergence] = mlpMidEst_;
-      arrayCorticalBoneMLPstartErrorNoTrk[arrayCorticalBoneIdxDivergence] = mlpStartNoTrk_;
+      arrayCorticalBoneMLPstartErrorNoTrk[arrayCorticalBoneIdxDivergence] = mlpStartKrah_;
       arrayCorticalBoneMLPstartErrorEst[arrayCorticalBoneIdxDivergence++] = mlpStartEst_;
    }
    in.close();
@@ -461,7 +461,7 @@ void plotAPandAX() {
    in.close();
 */
 
-   in.open("Output/MLPerror_energy200MeV_Water_spotsize_krah.csv");
+   in.open("Output/MLPerror_energy230MeV_Water_spotsize_krah.csv");
    while (1) {
       in >> dummy >> rotation_ >> mlpStartNoTrk_ >> mlpMidNoTrk_ >> mlpStartEst_ >> mlpMidEst_ >> mlpStartKrah_ >> mlpMidKrah_ >> residualEnergy_;
       if (!in.good()) break;
@@ -549,7 +549,7 @@ void plotAPandAX() {
    in.close();
 
    TCanvas *c1 = new TCanvas("c1", "Fit results", 1200, 800);
-   c1->Divide(2,1,1e-4,1e-4);
+   c1->Divide(2,2,1e-4,1e-4);
 
    Float_t  arrayAPall[arraySize];
    Float_t  arrayAXall[arraySize];
@@ -623,14 +623,14 @@ void plotAPandAX() {
 
    gAX200->SetMarkerColor(kRed);
    gAP200->SetMarkerColor(kRed);
-/*
+   
    c1->cd(3);
    gAXall->Draw("AP");
 //   gAX200->Draw("AP");
    c1->cd(4);  
    gAPall->Draw("AP");
 //   gAP200->Draw("AP");
-*/
+   
    gAXB100230->SetMarkerColor(kRed);
    gAPB100230->SetMarkerColor(kRed);
    gAPB100230->SetMarkerStyle(21);
@@ -837,12 +837,24 @@ void plotAPandAX() {
    TGraph *gMLPErrorVsWB100 = new TGraph(arrayIdxB100230, arrayWetWeplB100230, arrayB100MLPstartErrorEst);
    TGraph *gMLPErrorVsWCorticalBone = new TGraph(arrayIdxCorticalBone230, arrayWetWeplCorticalBone230, arrayCorticalBoneMLPstartErrorEst);
    TGraph *gMLPErrorVsWAdipose = new TGraph(arrayIdxAdipose230, arrayWetWeplAdipose230, arrayAdiposeMLPstartErrorEst);
+   
+   TGraph *gMLPErrorVsWWaterK = new TGraph(arrayIdxDivergence, arrayWetWepl230, arrayMLPstartErrorNoTrk);
+   TGraph *gMLPErrorVsWA150K = new TGraph(arrayIdxA150230, arrayWetWeplA150230, arrayA150MLPstartErrorNoTrk);
+   TGraph *gMLPErrorVsWB100K = new TGraph(arrayIdxB100230, arrayWetWeplB100230, arrayB100MLPstartErrorNoTrk);
+   TGraph *gMLPErrorVsWCorticalBoneK = new TGraph(arrayIdxCorticalBone230, arrayWetWeplCorticalBone230, arrayCorticalBoneMLPstartErrorNoTrk);
+   TGraph *gMLPErrorVsWAdiposeK = new TGraph(arrayIdxAdipose230, arrayWetWeplAdipose230, arrayAdiposeMLPstartErrorNoTrk);
 
    gMLPErrorVsWWater->SetMarkerColor(kBlue);
    gMLPErrorVsWA150->SetMarkerColor(kOrange+2);
    gMLPErrorVsWB100->SetMarkerColor(kRed);
    gMLPErrorVsWCorticalBone->SetMarkerColor(kBlack);
    gMLPErrorVsWAdipose->SetMarkerColor(kGreen);
+   
+   gMLPErrorVsWWaterK->SetMarkerColor(kBlue);
+   gMLPErrorVsWA150K->SetMarkerColor(kOrange+2);
+   gMLPErrorVsWB100K->SetMarkerColor(kRed);
+   gMLPErrorVsWCorticalBoneK->SetMarkerColor(kBlack);
+   gMLPErrorVsWAdiposeK->SetMarkerColor(kGreen);
 
    gMLPErrorVsWWater->SetMarkerStyle(21);
    gMLPErrorVsWA150->SetMarkerStyle(21);
@@ -854,8 +866,14 @@ void plotAPandAX() {
    gMLPErrorVsWB100->SetMarkerSize(0.8);
    gMLPErrorVsWAdipose->SetMarkerSize(0.8);
    gMLPErrorVsWCorticalBone->SetMarkerSize(0.8);
+   
+   gMLPErrorVsWWaterK->SetMarkerStyle(22);
+   gMLPErrorVsWA150K->SetMarkerStyle(22);
+   gMLPErrorVsWB100K->SetMarkerStyle(22);
+   gMLPErrorVsWAdiposeK->SetMarkerStyle(22);
+   gMLPErrorVsWCorticalBoneK->SetMarkerStyle(22);
 
-   gMLPErrorVsWWater->SetTitle(";(WET/WEPL)^{2};Error MLP-MC at middle of phantom [mm]");
+   gMLPErrorVsWWater->SetTitle(";WET/WEPL;Error |X_{0} - X_{0}^{opt}| [mm]");
 
    gMLPErrorVsWWater->Draw("AP");
    gMLPErrorVsWA150->Draw("P");
@@ -863,14 +881,30 @@ void plotAPandAX() {
    gMLPErrorVsWCorticalBone->Draw("P");
    gMLPErrorVsWAdipose->Draw("P");
    
+   gMLPErrorVsWWaterK->Draw("P");
+   gMLPErrorVsWA150K->Draw("P");
+   gMLPErrorVsWB100K->Draw("P");
+   gMLPErrorVsWCorticalBoneK->Draw("P");
+   gMLPErrorVsWAdiposeK->Draw("P");
+
+   
    TLegend *leg3 = new TLegend(.3, .66, .64, .8655);
-   leg3->AddEntry(gMLPErrorVsWWater, "Water", "P");
-   leg3->AddEntry(gMLPErrorVsWB100, "ICRU B100 Bone", "P");
-   leg3->AddEntry(gMLPErrorVsWAdipose, "ICRU Adipose", "P");
-   leg3->AddEntry(gMLPErrorVsWCorticalBone, "ICRU Cortical Bone", "P");
-   leg3->AddEntry(gMLPErrorVsWA150, "ICRU A150 T.E.P.", "P");
+   leg3->AddEntry(gMLPErrorVsWWater, "LPM", "P");
+   leg3->AddEntry(gMLPErrorVsWWaterK, "MLP", "P");
+//   leg3->AddEntry(gMLPErrorVsWB100, "ICRU B100 Bone", "P");
+//   leg3->AddEntry(gMLPErrorVsWAdipose, "ICRU Adipose", "P");
+//   leg3->AddEntry(gMLPErrorVsWCorticalBone, "ICRU Cortical Bone", "P");
+//   leg3->AddEntry(gMLPErrorVsWA150, "ICRU A150 T.E.P.", "P");
    leg3->SetTextFont(22);
    leg3->Draw();
+
+   TLatex *lat = new TLatex();
+   lat->SetTextSize(0.04);
+   lat->DrawLatex(0.6, 0.9, "B100 Bone");
+   lat->DrawLatex(0.6, 0.7, "A150 TEP");
+   lat->DrawLatex(0.6, 0.5, "Cortical Bone");
+   lat->DrawLatex(0.6, 0.3, "Adipose");
+   lat->DrawLatex(0.6, 0.1, "Water");
 
    TCanvas *c5 = new TCanvas("c5", "Errors vs rotation", 600, 600);
    TGraph *gRotationError = new TGraph(idxRotation, arrayRotation, arrayRotationError);

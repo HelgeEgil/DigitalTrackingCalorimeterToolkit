@@ -89,12 +89,12 @@
 /gate/source/PBS/setEllipseXThetaRotationNorm negative
 /gate/source/PBS/setEllipseYPhiEmittance {emittance} mm*mrad # was 15
 /gate/source/PBS/setEllipseYPhiRotationNorm negative
-/gate/application/setTotalNumberOfPrimaries 25000
+/gate/application/setTotalNumberOfPrimaries 100000
 
 /gate/output/root/enable
 /gate/output/root/setRootSinglesFlag 0
 /gate/output/root/setRootHitFlag 1
-/gate/output/root/setFileName Output/simpleScanner_energy{energy}MeV_{material}_phantom{dz}mm_spotsize{spotsize}mm
+/gate/output/root/setFileName Output/simpleScanner_energy{energy}MeV_{material}_phantom{dz}mm
 
 /gate/random/setEngineName MersenneTwister
 /gate/random/setEngineSeed auto
