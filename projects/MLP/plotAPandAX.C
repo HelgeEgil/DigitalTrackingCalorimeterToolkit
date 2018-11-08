@@ -889,8 +889,8 @@ void plotAPandAX() {
 
    
    TLegend *leg3 = new TLegend(.3, .66, .64, .8655);
-   leg3->AddEntry(gMLPErrorVsWWater, "LPM", "P");
-   leg3->AddEntry(gMLPErrorVsWWaterK, "MLP", "P");
+   leg3->AddEntry(gMLPErrorVsWCorticalBone, "LPM", "P");
+   leg3->AddEntry(gMLPErrorVsWCorticalBoneK, "MLP", "P");
 //   leg3->AddEntry(gMLPErrorVsWB100, "ICRU B100 Bone", "P");
 //   leg3->AddEntry(gMLPErrorVsWAdipose, "ICRU Adipose", "P");
 //   leg3->AddEntry(gMLPErrorVsWCorticalBone, "ICRU Cortical Bone", "P");
@@ -900,10 +900,15 @@ void plotAPandAX() {
 
    TLatex *lat = new TLatex();
    lat->SetTextSize(0.04);
+   lat->SetTextColor(kRed);
    lat->DrawLatex(0.6, 0.9, "B100 Bone");
+   lat->SetTextColor(kOrange+2);
    lat->DrawLatex(0.6, 0.7, "A150 TEP");
+   lat->SetTextColor(kBlack);
    lat->DrawLatex(0.6, 0.5, "Cortical Bone");
+   lat->SetTextColor(kGreen);
    lat->DrawLatex(0.6, 0.3, "Adipose");
+   lat->SetTextColor(kBlue);
    lat->DrawLatex(0.6, 0.1, "Water");
 
    TCanvas *c5 = new TCanvas("c5", "Errors vs rotation", 600, 600);

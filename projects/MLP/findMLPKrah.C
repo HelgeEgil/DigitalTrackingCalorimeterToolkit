@@ -36,6 +36,7 @@
 #define athree  3.41725e-9
 #define afour   (-2.20283e-10)
 #define afive   5.68267e-12
+#define asix    0
 #endif
 
 #define X_0 36.1
@@ -51,6 +52,9 @@ float Sigmatz1(float);
 float Sigmat2(float, float);
 float Sigmaz2(float, float);
 float Sigmatz2(float, float);
+float Sigmat2pol6(float, float);
+float Sigmaz2pol6(float, float);
+float Sigmatz2pol6(float, float);
 
 XYZVector SplineMLP(Double_t t, XYZVector X0, XYZVector X2, XYZVector P0, XYZVector P2, Double_t Lambda0, Double_t Lambda2) {
    XYZVector P0Lambda, P2Lambda, X2mX0, S;
@@ -68,7 +72,7 @@ XYZVector SplineMLP(Double_t t, XYZVector X0, XYZVector X2, XYZVector P0, XYZVec
 
 void findMLP(Float_t phantomSize = 200, Float_t rotation = -1, Float_t spotsize = -1, Float_t initialEnergy = 230, Int_t material = kWater) {
    Int_t      printed = 0;
-   const Int_t eventsToUse = 25000;
+   const Int_t eventsToUse = 100000;
    Float_t     Xp3sigma = 0; // scattering between last two tracker layers, dz * X mrad
    Float_t     x, y, z, edep, sum_edep = 0, residualEnergy = 0, AP, AX;
    Int_t       eventID, parentID, lastEID = -1;
@@ -306,9 +310,16 @@ void findMLP(Float_t phantomSize = 200, Float_t rotation = -1, Float_t spotsize 
             double first[2] = {0};
             double second[2] = {0};
 
+#ifdef USEHIGHENERGY
+            sz2 = Sigmaz2pol6(X2cm.Z() - X0cm.Z(), posz - X0cm.Z());
+            stz2 = Sigmatz2pol6(X2cm.Z() - X0cm.Z(), posz - X0cm.Z());
+            st2 = Sigmat2pol6(X2cm.Z() - X0cm.Z(), posz - X0cm.Z());
+#else
             sz2 = Sigmaz2(X2cm.Z() - X0cm.Z(), posz - X0cm.Z());
             stz2 = Sigmatz2(X2cm.Z() - X0cm.Z(), posz - X0cm.Z());
             st2 = Sigmat2(X2cm.Z() - X0cm.Z(), posz - X0cm.Z());
+#endif
+
 
             R_0[0] = 1;
             R_0[1] = posz - X0cm.Z();
@@ -842,14 +853,14 @@ float Sigmaz2pol6(float sep, float position)
 {
 	float p = position;
 	float s = sep;
-	float sigy2 = -pow((p-s),3)*(840*azero+210*aone*(3*p+s)+504*atwo*p*p+252*atwo*p*s+84*atwo*s*s+420*athree*p*p*p+252*athree*p*p*s+126*athree*p*s*s+42*athree*s*s*s+360*afour*p*p*p*p+240*afour*p*p*p*s+144*afour*p*p*s*s +72*afour*p*s*s*s+24*afour*s*s*s*s+315*afive*p*p*p*p*p+225*afive*p*p*p*p*s+150*afive*p*p*p*s*s+90*afive*p*p*s*s*s+45*afive*p*s*s*s*s+15*afive*s*s*s*s*s+280*asix*p*p*p*p*p*p+210*asix*p*p*p*p*p*s+150*asix*p*p*p*p*s*s+100*asix*p*p*p*s*s*s+60*asix*p*p*s*s*s*s+30*asix*p*s*s*s*s*s+10*asix*s*s*s*s*s*s)/2520;
-	return (13.6*13.6*pow((1+0.038*log((sep-position)/X_0)),2)*sigy2/X_0);
+	float sigz2 = -pow((p-s),3)*(840*azero+210*aone*(3*p+s)+504*atwo*p*p+252*atwo*p*s+84*atwo*s*s+420*athree*p*p*p+252*athree*p*p*s+126*athree*p*s*s+42*athree*s*s*s+360*afour*p*p*p*p+240*afour*p*p*p*s+144*afour*p*p*s*s +72*afour*p*s*s*s+24*afour*s*s*s*s+315*afive*p*p*p*p*p+225*afive*p*p*p*p*s+150*afive*p*p*p*s*s+90*afive*p*p*s*s*s+45*afive*p*s*s*s*s+15*afive*s*s*s*s*s+280*asix*p*p*p*p*p*p+210*asix*p*p*p*p*p*s+150*asix*p*p*p*p*s*s+100*asix*p*p*p*s*s*s+60*asix*p*p*s*s*s*s+30*asix*p*s*s*s*s*s+10*asix*s*s*s*s*s*s)/2520;
+	return (13.6*13.6*pow((1+0.038*log((sep-position)/X_0)),2)*sigz2/X_0);
 }
 
 float Sigmatz2pol6(float sep, float position)
 {
 	float p = position;
 	float s = sep;
-	float sigty2 = (420*azero*(p-s)*(p-s)+140*aone*(p-s)*(p-s)*(2*p+s)+210*atwo*p*p*p*p-280*atwo*p*p*p*s+70*atwo*s*s*s*s+168*athree*p*p*p*p*p-210*athree*p*p*p*p*s+42*athree*s*s*s*s*s+140*afour*p*p*p*p*p*p-168*afour*p*p*p*p*p*s+28*afour*s*s*s*s*s*s+120*afive*p*p*p*p*p*p*p-140*afive*p*p*p*p*p*p*s+20*afive*s*s*s*s*s*s*s+105*asix*p*p*p*p*p*p*p*p-120*asix*p*p*p*p*p*p*p*s+15*asix*s*s*s*s*s*s*s*s)/840;
-	return (13.6*13.6*pow((1+0.038*log((sep-position)/X_0)),2)*sigty2/X_0);
+	float sigtz2 = (420*azero*(p-s)*(p-s)+140*aone*(p-s)*(p-s)*(2*p+s)+210*atwo*p*p*p*p-280*atwo*p*p*p*s+70*atwo*s*s*s*s+168*athree*p*p*p*p*p-210*athree*p*p*p*p*s+42*athree*s*s*s*s*s+140*afour*p*p*p*p*p*p-168*afour*p*p*p*p*p*s+28*afour*s*s*s*s*s*s+120*afive*p*p*p*p*p*p*p-140*afive*p*p*p*p*p*p*s+20*afive*s*s*s*s*s*s*s+105*asix*p*p*p*p*p*p*p*p-120*asix*p*p*p*p*p*p*p*s+15*asix*s*s*s*s*s*s*s*s)/840;
+	return (13.6*13.6*pow((1+0.038*log((sep-position)/X_0)),2)*sigtz2/X_0);
 }
