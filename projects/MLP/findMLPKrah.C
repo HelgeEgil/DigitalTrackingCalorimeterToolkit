@@ -16,12 +16,19 @@
 #define USEHIGHENERGY
 
 #ifndef  USEHIGHENERGY
-#define azero   7.457e-6
-#define aone    4.548e-7
-#define atwo   (-5.777e-8)
-#define athree  1.301e-8
-#define afour  (-9.228e-10)
-#define afive   2.687e-11
+// #define azero   7.457e-6
+// #define aone    4.548e-7
+// #define atwo   (-5.777e-8)
+// #define athree  1.301e-8
+// #define afour  (-9.228e-10)
+// #define afive   2.687e-11
+#define azero  5.80761e-6
+#define aone   1.38079e-7
+#define atwo   3.15593e-8
+#define athree (-5.31833e-9)
+#define afour  5.49439e-10
+#define afive  (-2.48284e-11)
+#define asix   4.42984e-13
 #else
 #define azero   5.77619e-6
 #define aone    2.19784e-7
@@ -818,3 +825,5 @@ float Sigmatz2(float sep, float position)
 	
 	return (13.6*13.6*pow((1+0.038*log((sep-position)/X_0)),2)*sigtz2/X_0);
 }
+
+
