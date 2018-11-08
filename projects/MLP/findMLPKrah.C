@@ -827,3 +827,29 @@ float Sigmatz2(float sep, float position)
 }
 
 
+///////////////////////////////////////////////////////
+//pol6
+//////////////////////////////////////////////////////
+float Sigmat2pol6(float sep, float position)
+{
+	float p = position;
+	float s = sep;
+	float sigt2 = ((azero*s)+(aone*s*s/2)+(atwo*s*s*s/3)+(athree*s*s*s*s/4)+(afour*s*s*s*s*s/5)+(afive*s*s*s*s*s*s/6) + (asix*s*s*s*s*s*s*s)/7)-((azero*p)+(aone*p*p/2)+(atwo*p*p*p/3)+(athree*p*p*p*p/4)+(afour*p*p*p*p*p/5)+(afive*p*p*p*p*p*p/6)+(asix*p*p*p*p*p*p*p)/7);
+	return (13.6*13.6*pow((1+0.038*log((sep-position)/X_0)),2)*sigt2/X_0);
+}
+
+float Sigmaz2pol6(float sep, float position)
+{
+	float p = position;
+	float s = sep;
+	float sigy2 = -pow((p-s),3)*(840*azero+210*aone*(3*p+s)+504*atwo*p*p+252*atwo*p*s+84*atwo*s*s+420*athree*p*p*p+252*athree*p*p*s+126*athree*p*s*s+42*athree*s*s*s+360*afour*p*p*p*p+240*afour*p*p*p*s+144*afour*p*p*s*s +72*afour*p*s*s*s+24*afour*s*s*s*s+315*afive*p*p*p*p*p+225*afive*p*p*p*p*s+150*afive*p*p*p*s*s+90*afive*p*p*s*s*s+45*afive*p*s*s*s*s+15*afive*s*s*s*s*s+280*asix*p*p*p*p*p*p+210*asix*p*p*p*p*p*s+150*asix*p*p*p*p*s*s+100*asix*p*p*p*s*s*s+60*asix*p*p*s*s*s*s+30*asix*p*s*s*s*s*s+10*asix*s*s*s*s*s*s)/2520;
+	return (13.6*13.6*pow((1+0.038*log((sep-position)/X_0)),2)*sigy2/X_0);
+}
+
+float Sigmatz2pol6(float sep, float position)
+{
+	float p = position;
+	float s = sep;
+	float sigty2 = (420*azero*(p-s)*(p-s)+140*aone*(p-s)*(p-s)*(2*p+s)+210*atwo*p*p*p*p-280*atwo*p*p*p*s+70*atwo*s*s*s*s+168*athree*p*p*p*p*p-210*athree*p*p*p*p*s+42*athree*s*s*s*s*s+140*afour*p*p*p*p*p*p-168*afour*p*p*p*p*p*s+28*afour*s*s*s*s*s*s+120*afive*p*p*p*p*p*p*p-140*afive*p*p*p*p*p*p*s+20*afive*s*s*s*s*s*s*s+105*asix*p*p*p*p*p*p*p*p-120*asix*p*p*p*p*p*p*p*s+15*asix*s*s*s*s*s*s*s*s)/840;
+	return (13.6*13.6*pow((1+0.038*log((sep-position)/X_0)),2)*sigty2/X_0);
+}
