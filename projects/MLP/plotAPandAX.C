@@ -656,9 +656,8 @@ void plotAPandAX() {
    in.close();
 
    
-
-   TCanvas *c1 = new TCanvas("c1", "Fit results", 1500, 1000);
-   c1->Divide(2,2,1e-4,1e-4);
+   TCanvas *c1 = new TCanvas("c1", "Fit results", 1500, 1200);
+//   c1->Divide(2,1,1e-4,1e-4);
 
    Float_t  arrayAPall[arraySize];
    Float_t  arrayAXall[arraySize];
@@ -704,6 +703,8 @@ void plotAPandAX() {
 
    printf("In total %d indices in arrayA[X,P]all.\n", fullIdx);
 
+   gStyle->SetMarkerSize(1.2);
+
    TGraph *gAX230 = new TGraph(arrayIdx230, arrayResidualEnergy230, arrayAX230);
    TGraph *gAP230 = new TGraph(arrayIdx230, arrayWetWepl230, arrayAP230);
    TGraph *gAXB100230 = new TGraph(arrayIdxB100230, arrayResidualEnergyB100230, arrayAXB100230);
@@ -732,51 +733,42 @@ void plotAPandAX() {
 
    gAX200->SetMarkerColor(kRed);
    gAP200->SetMarkerColor(kRed);
-   
+/*   
    c1->cd(3);
 //   gAXall->Draw("AP");
    gAX200->Draw("AP");
    c1->cd(4);  
 //   gAPall->Draw("AP");
    gAP200->Draw("AP");
+*/
 
    gAXB100230->SetMarkerColor(kRed);
    gAPB100230->SetMarkerColor(kRed);
    gAPB100230->SetMarkerStyle(21);
    gAXB100230->SetMarkerStyle(21);
-   gAXB100230->SetMarkerSize(0.8);
-   gAPB100230->SetMarkerSize(0.8);
    gAXAdipose230->SetMarkerColor(kGreen);
    gAPAdipose230->SetMarkerColor(kGreen);
    gAPAdipose230->SetMarkerStyle(21);
    gAXAdipose230->SetMarkerStyle(21);
-   gAXAdipose230->SetMarkerSize(0.8);
-   gAPAdipose230->SetMarkerSize(0.8);
    gAXCorticalBone230->SetMarkerColor(kBlack);
    gAPCorticalBone230->SetMarkerColor(kBlack);
    gAPCorticalBone230->SetMarkerStyle(21);
    gAXCorticalBone230->SetMarkerStyle(21);
-   gAXCorticalBone230->SetMarkerSize(0.8);
-   gAPCorticalBone230->SetMarkerSize(0.8);
    gAXA150230->SetMarkerColor(kOrange+2);
    gAPA150230->SetMarkerColor(kOrange+2);
    gAPA150230->SetMarkerStyle(21);
    gAXA150230->SetMarkerStyle(21);
-   gAXA150230->SetMarkerSize(0.8);
-   gAPA150230->SetMarkerSize(0.8);
 
 
    gAX230->SetMarkerColor(kBlue);
    gAP230->SetMarkerColor(kBlue);
    gAX230->SetMarkerStyle(21);
    gAP230->SetMarkerStyle(21);
-   gAX230->SetMarkerSize(0.8);
-   gAP230->SetMarkerSize(0.8);
 
-   gAX230->SetTitle("Optimal A_{X} parameter for a 230 MeV beam;WET/WEPL;A_{X}");
-   gAP230->SetTitle("Optimal A_{P} parameter for a 230 MeV beam;WET/WEPL;A_{P}");
-
-   c1->cd(1);
+   gAX230->SetTitle(";WET/WEPL;A_{X} parameter");
+   gAP230->SetTitle(";WET/WEPL;A_{P} parameter");
+/*
+//   c1->cd(1);
    gAX230->Draw("AP");
    gAXA150230->Draw("P");
    gAXB100230->Draw("P");
@@ -787,12 +779,12 @@ void plotAPandAX() {
    fitX->SetParameters(1, -0.30, 1.53, -4.25, 2.30);
    fitX->SetLineColor(kBlack);
    fitX->SetLineStyle(9);
-   fitX->SetLineWidth(3);
+   fitX->SetLineWidth(4);
    fitX->Draw("same");
 
    gAXtheory->SetLineColor(kRed);
    gAXtheory->SetLineStyle(9);
-   gAXtheory->SetLineWidth(3);
+   gAXtheory->SetLineWidth(4);
    gAXtheory->Draw("same");
 
    TLegend *legX = new TLegend(.3, .66, .64, .8655);
@@ -805,8 +797,8 @@ void plotAPandAX() {
    legX->AddEntry(fitX, "Polynomial fit", "L");
    legX->AddEntry(gAXtheory, "Theoretical prediction", "L");
    legX->Draw();
-
-   c1->cd(2);
+  */ 
+   //c1->cd(2);
    gAP230->Draw("AP");
    gAPA150230->Draw("P");
    gAPB100230->Draw("P");
@@ -816,13 +808,13 @@ void plotAPandAX() {
    TF1 *fitP = new TF1("fitP", "pol5");
    fitP->SetParameters(-0.659, 2.072, -8.66, 18.14, -16.27, 5.34);
    fitP->SetLineColor(kBlack);
-   fitP->SetLineWidth(3);
+   fitP->SetLineWidth(4);
    fitP->SetLineStyle(9);
    fitP->Draw("same");
 
    gAPtheory->SetLineColor(kRed);
    gAPtheory->SetLineStyle(9);
-   gAPtheory->SetLineWidth(3);
+   gAPtheory->SetLineWidth(4);
    gAPtheory->Draw("same");
 
    TLegend *leg = new TLegend(.3, .66, .64, .8655);
@@ -1016,32 +1008,31 @@ void plotAPandAX() {
    gRotationError->GetYaxis()->SetTitleOffset(1.2);
    
    
-   TCanvas *c6 = new TCanvas("c6", "Errors vs rotation", 600, 600);
+   TCanvas *c6 = new TCanvas("c6", "Errors vs rotation", 1500, 1200);
    TGraph *gSpotsizeError = new TGraph(idxSpotsize, arraySpotsize, arraySpotsizeError);
    TGraph *gSpotsizeErrorKrah = new TGraph(idxSpotsizeKrah, arraySpotsizeKrah, arraySpotsizeErrorKrah);
 
    gSpotsizeError->SetTitle("MLP estimation error with #hat{X_{0}}, 200 MeV beam/160 mm phantom;Beam spotsize [mm];Error |X_{0}^{MC} - X_{0}^{est}| [mm]");
 
-   gSpotsizeError->SetMarkerColor(kBlue);
+   gSpotsizeError->SetMarkerColor(kBlue-4);
    gSpotsizeError->SetMarkerStyle(21);
-   gSpotsizeError->SetMarkerSize(0.8);
+   gSpotsizeError->SetMarkerSize(1.2);
    
-   gSpotsizeErrorKrah->SetMarkerColor(kBlack);
+   gSpotsizeErrorKrah->SetMarkerColor(kRed);
    gSpotsizeErrorKrah->SetMarkerStyle(21);
-   gSpotsizeErrorKrah->SetMarkerSize(0.8);
-
+   gSpotsizeErrorKrah->SetMarkerSize(1.2);
 
    gSpotsizeError->Draw("PA");
    gSpotsizeErrorKrah->Draw("P");
 //   gSpotsizeError->GetYaxis()->SetTitleOffset(1.2);
 
    TLegend *legss = new TLegend(.3, .66, .64, .8655);
-   legss->AddEntry(gSpotsizeError, "Projection Model", "P");
+   legss->AddEntry(gSpotsizeError, "Linear Projection Model", "P");
    legss->AddEntry(gSpotsizeErrorKrah, "Bayesian MLP", "P");
    legss->Draw();
    legss->SetTextFont(22);
 
-   TCanvas *c7 = new TCanvas("c7", "Different estimation models", 1000, 800);
+   TCanvas *c7 = new TCanvas("c7", "Different estimation models", 1500, 1200);
 
    TGraph *g200NoTrk = new TGraph(idx230, array230wetwepl, array230NoTrk);
    TGraph *g200Est = new TGraph(idx200, array200wetwepl, array200Est);
@@ -1051,16 +1042,16 @@ void plotAPandAX() {
 
    g200Est->SetMarkerColor(kBlue);
    g200Est->SetMarkerStyle(21);
-   g200Est->SetMarkerSize(0.8);
-   g200Krah->SetMarkerColor(kGreen);
+   g200Est->SetMarkerSize(1.5);
+   g200Krah->SetMarkerColor(kBlue-7);
    g200Krah->SetMarkerStyle(21);
-   g200Krah->SetMarkerSize(0.8);
-   g230Est->SetMarkerColor(kBlack);
+   g200Krah->SetMarkerSize(1);
+   g230Est->SetMarkerColor(kRed);
    g230Est->SetMarkerStyle(21);
-   g230Est->SetMarkerSize(0.8);
-   g230Krah->SetMarkerColor(kOrange+2);
+   g230Est->SetMarkerSize(1.5);
+   g230Krah->SetMarkerColor(kRed-9);
    g230Krah->SetMarkerStyle(21);
-   g230Krah->SetMarkerSize(0.8);
+   g230Krah->SetMarkerSize(1);
 
    g200Est->SetTitle(";WET/WEPL;X_{0} estimation error [mm]");
 
@@ -1154,8 +1145,8 @@ void plotAPandAX() {
    leg6->SetTextFont(22);
 
    gStyle->SetMarkerStyle(21);
-   gStyle->SetMarkerSize(1);
-   TCanvas *c10 = new TCanvas("c10", "3 sigma estimation vs w", 1500, 1000);
+   gStyle->SetMarkerSize(1.2);
+   TCanvas *c10 = new TCanvas("c10", "3 sigma estimation vs w", 1500, 1200);
    TGraph *gP2Water200 = new TGraph(idxP2Water200, arrayP2Water200w, arrayP2Water200Fit);
    TGraph *gP2Water230 = new TGraph(idxP2Water230, arrayP2Water230w, arrayP2Water230Fit);
    TGraph *gP2A150230 = new TGraph(idxP2A150230, arrayP2A150230w, arrayP2A150230Fit);
@@ -1163,8 +1154,8 @@ void plotAPandAX() {
    TGraph *gP2Adipose230 = new TGraph(idxP2Adipose230, arrayP2Adipose230w, arrayP2Adipose230Fit);
    TGraph *gP2CorticalBone230 = new TGraph(idxP2CorticalBone230, arrayP2CorticalBone230w, arrayP2CorticalBone230Fit);
 
-   gP2Water200->SetMarkerColor(kBlue-2);
-   gP2Water230->SetMarkerColor(kBlue+2);
+   gP2Water200->SetMarkerColor(kBlue-7);
+   gP2Water230->SetMarkerColor(kBlue);
    gP2A150230->SetMarkerColor(kRed);
    gP2CorticalBone230->SetMarkerColor(kBlack);
    gP2Adipose230->SetMarkerColor(kGreen);
@@ -1173,19 +1164,20 @@ void plotAPandAX() {
    gP2Water230->SetTitle(";(WET/WEPL)^{2};#mu + 2.5#sigma from Gaussian fit [mrad]");
    gP2Water230->Draw("AP");
    gP2Water200->Draw("P");
-//   gP2A150230->Draw("P");
+   gP2A150230->Draw("P");
    gP2B100230->Draw("P");
    gP2CorticalBone230->Draw("P");
    gP2Adipose230->Draw("P");
 
    TF1 * gP2fit = new TF1("gP2fit", "pol3");
    gP2Water200->Fit("gP2fit");
+   gP2Water200->SetLineWidth(4);
    
    TLegend *leg7 = new TLegend(.3, .66, .64, .8655);
    leg7->AddEntry(gP2Water200, "Water 200 MeV", "P");
    leg7->AddEntry(gP2Water230, "Water 230 MeV", "P");
    leg7->AddEntry(gP2CorticalBone230, "C. B. 230 MeV", "P");
-//   leg7->AddEntry(gP2A150230, "A150 230 MeV", "P");
+   leg7->AddEntry(gP2A150230, "A150 230 MeV", "P");
    leg7->AddEntry(gP2B100230, "B100 230 MeV", "P");
    leg7->AddEntry(gP2Adipose230, "Adipose 230 MeV", "P");
    leg7->AddEntry(gP2fit, "3^{rd} order pol. fit", "L");

@@ -18,6 +18,13 @@
 
 enum eMat {kWater, kA150, kB100, kCorticalBone, kAdipose};
 
+const int kAdiposeMax = 350;
+const int kA150Max = 290;
+const int kWaterMax = 330;
+const int kWater200Max = 270;
+const int kB100Max = 250;
+const int kCorticalBoneMax = 200;
+
 using namespace std;
 typedef ROOT::Math::DisplacementVector3D<ROOT::Math::Cartesian3D<double> > XYZVector;
 
@@ -139,7 +146,7 @@ void findMLP(Float_t phantomSize = 200, Float_t rotation = -1, Float_t spotsize 
    TSpline3 *splineWater = new TSpline3("splineWater", energiesWater, rangesWater, idxWater);
 
    TH1F *hResEnergy = new TH1F("hResEnergy", "Residual energy in calorimeter;Energy [MeV];Entries", 300, 0, 250);
-   TH1F *hAngle = new TH1F("hAngle", "Outgoing angle;Energy [MeV];Entries", 300, 0, 250);
+   TH1F *hAngle = new TH1F("hAngle", "Outgoing angle;Energy [MeV];Entries", 500, 0, 1000);
 
    tree->SetBranchAddress("posX", &x);
    tree->SetBranchAddress("posY", &y);

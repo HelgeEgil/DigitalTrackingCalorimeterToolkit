@@ -9,7 +9,7 @@ for i in `seq -w 160 10 160`; do
    zcalorimeter=`echo "scale=3; $i/2+30+1000" | bc`
 #   divergence=`echo "scale=3; $i/100" | bc`
    emittance=`echo "scale=3; $i * 3 * 1.5" | bc`
-	nice -n 19 cpulimit -l 60 Gate -a "'[energy,230] [dz,$i] [ztracker,$ztracker] [zbeam,$zbeam] [spotsize,3] [divergence,2] [emittance,15] [rotation,0] [material,Water] [zcalorimeter,$zcalorimeter]'" MLPscanner.mac > terminal_output.txt &
+	/scratch/gate/gate_v8.1.p01-install/bin/Gate -a "'[energy,230] [dz,$i] [ztracker,$ztracker] [zbeam,$zbeam] [spotsize,3] [divergence,2] [emittance,15] [rotation,0] [material,Water] [zcalorimeter,$zcalorimeter]'" MLPscanner.mac > terminal_output.txt &
    PIDLIST="$PIDLIST $!"
    echo "Running with i = $i"
 

@@ -717,7 +717,8 @@ void findMLP(Float_t phantomSize = 200, Float_t rotation = -1, Float_t spotsize 
       differenceArrayDiffest[i] /= nInDifferenceArray;
    }
 
-   TCanvas *c2 = new TCanvas("c2", "MC vs MLP difference", 1500, 1000);
+
+   TCanvas *c2 = new TCanvas("c2", "MC vs MLP difference", 1500, 1200);
    TGraph *gDifferencePerfect = new TGraph(idxDifferenceArray, differenceArrayZ, differenceArrayDiff);
    TGraph *gDifferenceNoTrk = new TGraph(idxDifferenceArray, differenceArrayZ, differenceArrayDiffNoTrk);
    TGraph *gDifferenceKrah = new TGraph(idxDifferenceArray, differenceArrayZ, differenceArrayDiffKrah);
@@ -725,13 +726,13 @@ void findMLP(Float_t phantomSize = 200, Float_t rotation = -1, Float_t spotsize 
 
    gDifferencePerfect->SetTitle(";Depth in phantom [mm];Error | X_{1}^{opt} - X_{1}^{MC} | [mm]");
    gDifferencePerfect->SetLineColor(kRed);
-   gDifferencePerfect->SetLineWidth(2);
+   gDifferencePerfect->SetLineWidth(4);
    gDifferenceNoTrk->SetLineColor(kBlack);
-   gDifferenceNoTrk->SetLineWidth(2);
+   gDifferenceNoTrk->SetLineWidth(4);
    gDifferenceKrah->SetLineColor(kOrange+2);
-   gDifferenceKrah->SetLineWidth(2);
+   gDifferenceKrah->SetLineWidth(4);
    gDifferenceest->SetLineColor(kBlue);
-   gDifferenceest->SetLineWidth(2);
+   gDifferenceest->SetLineWidth(4);
    gDifferencePerfect->Draw("AL");
    gDifferenceNoTrk->Draw("L");
    gDifferenceKrah->Draw("L");
@@ -740,10 +741,10 @@ void findMLP(Float_t phantomSize = 200, Float_t rotation = -1, Float_t spotsize 
 
    TLatex *lat = new TLatex();
    lat->SetTextSize(0.05);
-   lat->DrawLatex(20,gDifferencePerfect->Eval(20), "X_{0}^{MC}");
-   lat->DrawLatex(20,gDifferenceNoTrk->Eval(20), "X_{0}^{TPS}");
-   lat->DrawLatex(20,gDifferenceKrah->Eval(20), "X_{0}^{MLP}");
-   lat->DrawLatex(20,gDifferenceest->Eval(20), "X_{0}^{LPM}");
+   lat->DrawLatex(20,gDifferencePerfect->Eval(20), "X_{1}^{MC}");
+   lat->DrawLatex(20,gDifferenceNoTrk->Eval(20), "X_{1}^{TPS}");
+   lat->DrawLatex(20,gDifferenceKrah->Eval(20), "X_{1}^{MLP}");
+   lat->DrawLatex(20,gDifferenceest->Eval(20), "X_{1}^{LPM}");
 
    /*
    TLegend *l = new TLegend(.1,.1,.5,.5);

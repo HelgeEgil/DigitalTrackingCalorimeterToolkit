@@ -110,12 +110,12 @@ void findMLPLoop(Float_t phantomSize, Int_t eventsToUse, Float_t spotSize, Int_t
 
    if (!tree) exit(0);
 
-   Float_t  AXlow = 0.8;
+   Float_t  AXlow = 0.5;
    Float_t  AXhigh = 1.05;
    Float_t  APlow = -0.7;
-   Float_t  APhigh = -0.2;
+   Float_t  APhigh = 0;
    
-   Float_t  AXdelta = 0.001;
+   Float_t  AXdelta = 0.005;
    Float_t  APdelta = 0.005;
 
    Int_t    AXbins = (AXhigh - AXlow) / AXdelta;
@@ -123,7 +123,7 @@ void findMLPLoop(Float_t phantomSize, Int_t eventsToUse, Float_t spotSize, Int_t
 
    printf("Using %d AXbins and %d APbins.\n", AXbins, APbins);
 
-   TH2F * hErrorMatrix = new TH2F("hErrorMatrix", Form("AUC of Errors between MC and MLP, %.0f mm %s phantom;A_{X} parameter;A_{P} parameter", phantomSize, sMaterial), AXbins, AXlow, AXhigh, APbins, APlow, APhigh);
+   TH2F * hErrorMatrix = new TH2F("hErrorMatrix", ";A_{X} parameter;A_{P} parameter;X_{0} error", AXbins, AXlow, AXhigh, APbins, APlow, APhigh);
    TH2I * hIdxMatrix = new TH2I("hIdxMatrix", "Normalization matrix;A_{X} parameter;A_{P} parameter", AXbins, AXlow, AXhigh, APbins, APlow, APhigh);
    TH1I * hResidualEnergy = new TH1I("residualEnergy", "Residual Energy", 300, 0, 240);
 
@@ -236,7 +236,11 @@ void findMLPLoop(Float_t phantomSize, Int_t eventsToUse, Float_t spotSize, Int_t
    Float_t minZvalue = hErrorMatrix->GetZaxis()->GetBinCenter(binz);
    printf("The bin with the minimum nonzero content is %.2f. AX = %.3f and AP = %.3f.\n", mincont, minXvalue, minYvalue);
 
-   TCanvas *c2 = new TCanvas("c2", "param values", 1500, 1000);
+   TCanvas *c2 = new TCanvas("c2", "param values", 1500, 1200);
+   hErrorMatrix->GetZaxis()->SetLabelFont(22);
+   hErrorMatrix->GetZaxis()->SetTitleFont(22);
+   hErrorMatrix->GetZaxis()->SetLabelSize(0.05);
+   hErrorMatrix->GetZaxis()->SetTitleSize(0.05);
    hErrorMatrix->Draw("COLZ");
 
    c2->SaveAs(Form("Output/accuracy_energy%.0fMeV_%.0fmm_%s.pdf", initialEnergy, phantomSize, sMaterial));
