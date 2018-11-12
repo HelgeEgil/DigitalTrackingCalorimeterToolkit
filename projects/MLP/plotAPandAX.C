@@ -113,6 +113,25 @@ void plotAPandAX() {
    Float_t  arrayCorticalBoneMLPmidErrorEst[arraySize] = {0};
    Float_t  arrayCorticalBoneMLPstartErrorNoTrk[arraySize] = {0};
    Float_t  arrayCorticalBoneMLPstartErrorEst[arraySize] = {0};
+   
+   float arrayP2Water200w[arraySize];
+   float arrayP2Water200Emp[arraySize];
+   float arrayP2Water200Fit[arraySize];
+   float arrayP2Water230w[arraySize];
+   float arrayP2Water230Emp[arraySize];
+   float arrayP2Water230Fit[arraySize];
+   float arrayP2CorticalBone230w[arraySize];
+   float arrayP2CorticalBone230Emp[arraySize];
+   float arrayP2CorticalBone230Fit[arraySize];
+   float arrayP2A150230w[arraySize];
+   float arrayP2A150230Emp[arraySize];
+   float arrayP2A150230Fit[arraySize];
+   float arrayP2B100230w[arraySize];
+   float arrayP2B100230Emp[arraySize];
+   float arrayP2B100230Fit[arraySize];
+   float arrayP2Adipose230w[arraySize];
+   float arrayP2Adipose230Emp[arraySize];
+   float arrayP2Adipose230Fit[arraySize];
 
    Float_t  arrayRotation[arraySize] = {0};
    Float_t  arrayRotationError[arraySize] = {0};
@@ -176,11 +195,19 @@ void plotAPandAX() {
    Int_t    arrayB100IdxDivergence = 0;
    Int_t    arrayAdiposeIdxDivergence = 0;
    Int_t    arrayCorticalBoneIdxDivergence = 0;
+   Int_t idxP2CorticalBone230 = 0;
+   Int_t idxP2Water200 = 0;
+   Int_t idxP2Water230 = 0;
+   Int_t idxP2A150230 = 0;
+   Int_t idxP2B100230 = 0;
+   Int_t idxP2Adipose230 = 0;
 
    Float_t  theoryW[arraySize];
    Float_t  theoryAX[arraySize];
    Float_t  theoryAP[arraySize];
    Int_t    theoryIdx = 0;
+
+   float fitMu_, fitSigma_, empMu_, empSigma_;
 
 
    ifstream inTheory;
@@ -475,7 +502,7 @@ void plotAPandAX() {
    
    in.open("Output/MLPerror_energy230MeV_Water_krah.csv");
    while (1) {
-      in >> phantomSize_ >> mlpStartNoTrk_ >> mlpMidNoTrk_ >> mlpStartEst_ >> mlpMidEst_ >> mlpStartKrah_ >> mlpMidKrah_ >> residualEnergy_;
+      in >> phantomSize_ >> mlpStartNoTrk_ >> mlpMidNoTrk_ >> mlpStartEst_ >> mlpMidEst_ >> mlpStartKrah_ >> mlpMidKrah_ >> residualEnergy_ >> fdummy;
 
       if (!in.good()) break;
          
@@ -483,8 +510,8 @@ void plotAPandAX() {
       array230wetwepl[idx230] = wet/wepl;
       array230Phantomsize[idx230] = phantomSize_;
       array230NoTrk[idx230] = mlpMidNoTrk_;
-      array230Est[idx230] = mlpMidEst_;
-      array230Krah[idx230++] = mlpMidKrah_;
+      array230Est[idx230] = mlpStartEst_;
+      array230Krah[idx230++] = mlpStartKrah_;
    }
    in.close();
 
@@ -500,8 +527,8 @@ void plotAPandAX() {
       array200wetwepl[idx200] = wet/wepl;
       array200Phantomsize[idx200] = phantomSize_;
       array200NoTrk[idx200] = mlpMidNoTrk_;
-      array200Est[idx200] = mlpMidEst_;
-      array200Krah[idx200++] = mlpMidKrah_;
+      array200Est[idx200] = mlpStartEst_;
+      array200Krah[idx200++] = mlpStartKrah_;
    }
    in.close();
    
@@ -547,8 +574,90 @@ void plotAPandAX() {
       arrayCorticalBonekrahMLPstartErrorKrah[idxKrahCorticalBone++] = mlpMidKrah_;
    }
    in.close();
+   
+   wepl = splineWater->Eval(200);
+   in.open("Output/P2_energy200MeV_Water_krah.csv");
+   while (1) {
+      in >> phantomSize_ >> empMu_ >> empSigma_ >> fitMu_ >> fitSigma_ >> residualEnergy_;
 
-   TCanvas *c1 = new TCanvas("c1", "Fit results", 1200, 800);
+      if (!in.good()) break;
+
+      wet = wepl - splineWater->Eval(residualEnergy_);
+      arrayP2Water200w[idxP2Water200] = pow(wet/wepl, 2);
+      arrayP2Water200Emp[idxP2Water200] = empMu_ + 2.5* empSigma_;
+      arrayP2Water200Fit[idxP2Water200++] = fitMu_ + 2.5*fitSigma_;
+   }
+   in.close();
+   
+   wepl = splineWater->Eval(230);
+   in.open("Output/P2_energy230MeV_Water_krah.csv");
+   while (1) {
+      in >> phantomSize_ >> empMu_ >> empSigma_ >> fitMu_ >> fitSigma_ >> residualEnergy_;
+
+      if (!in.good()) break;
+
+      wet = wepl - splineWater->Eval(residualEnergy_);
+      arrayP2Water230w[idxP2Water230] = pow(wet/wepl, 2);
+      arrayP2Water230Emp[idxP2Water230] = empMu_ + 2.5* empSigma_;
+      arrayP2Water230Fit[idxP2Water230++] = fitMu_ + 2.5*fitSigma_;
+   }
+   in.close();
+
+   in.open("Output/P2_energy230MeV_Adipose_krah.csv");
+   while (1) {
+      in >> phantomSize_ >> empMu_ >> empSigma_ >> fitMu_ >> fitSigma_ >> residualEnergy_;
+
+      if (!in.good()) break;
+
+      wet = wepl - splineWater->Eval(residualEnergy_);
+      arrayP2Adipose230w[idxP2Adipose230] = pow(wet/wepl, 2);
+      arrayP2Adipose230Emp[idxP2Adipose230] = empMu_ + 2.5* empSigma_;
+      arrayP2Adipose230Fit[idxP2Adipose230++] = fitMu_ + 2.5*fitSigma_;
+   }
+   in.close();
+
+   in.open("Output/P2_energy230MeV_B100_krah.csv");
+   while (1) {
+      in >> phantomSize_ >> empMu_ >> empSigma_ >> fitMu_ >> fitSigma_ >> residualEnergy_;
+
+      if (!in.good()) break;
+
+      wet = wepl - splineWater->Eval(residualEnergy_);
+      arrayP2B100230w[idxP2B100230] = pow(wet/wepl, 2);
+      arrayP2B100230Emp[idxP2B100230] = empMu_ + 2.5* empSigma_;
+      arrayP2B100230Fit[idxP2B100230++] = fitMu_ + 2.5*fitSigma_;
+   }
+   in.close();
+
+   in.open("Output/P2_energy230MeV_A150_krah.csv");
+   while (1) {
+      in >> phantomSize_ >> empMu_ >> empSigma_ >> fitMu_ >> fitSigma_ >> residualEnergy_;
+
+      if (!in.good()) break;
+
+      wet = wepl - splineWater->Eval(residualEnergy_);
+      arrayP2A150230w[idxP2A150230] = pow(wet/wepl, 2);
+      arrayP2A150230Emp[idxP2A150230] = empMu_ + 2.5* empSigma_;
+      arrayP2A150230Fit[idxP2A150230++] = fitMu_ + 2.5*fitSigma_;
+   }
+  in.close();
+ 
+   in.open("Output/P2_energy230MeV_CorticalBone_krah.csv");
+   while (1) {
+      in >> phantomSize_ >> empMu_ >> empSigma_ >> fitMu_ >> fitSigma_ >> residualEnergy_;
+
+      if (!in.good()) break;
+
+      wet = wepl - splineWater->Eval(residualEnergy_);
+      arrayP2CorticalBone230w[idxP2CorticalBone230] = pow(wet/wepl, 2);
+      arrayP2CorticalBone230Emp[idxP2CorticalBone230] = empMu_ + 2.5* empSigma_;
+      arrayP2CorticalBone230Fit[idxP2CorticalBone230++] = fitMu_ + 2.5*fitSigma_;
+   }
+   in.close();
+
+   
+
+   TCanvas *c1 = new TCanvas("c1", "Fit results", 1500, 1000);
    c1->Divide(2,2,1e-4,1e-4);
 
    Float_t  arrayAPall[arraySize];
@@ -625,12 +734,12 @@ void plotAPandAX() {
    gAP200->SetMarkerColor(kRed);
    
    c1->cd(3);
-   gAXall->Draw("AP");
-//   gAX200->Draw("AP");
+//   gAXall->Draw("AP");
+   gAX200->Draw("AP");
    c1->cd(4);  
-   gAPall->Draw("AP");
-//   gAP200->Draw("AP");
-   
+//   gAPall->Draw("AP");
+   gAP200->Draw("AP");
+
    gAXB100230->SetMarkerColor(kRed);
    gAPB100230->SetMarkerColor(kRed);
    gAPB100230->SetMarkerStyle(21);
@@ -681,15 +790,6 @@ void plotAPandAX() {
    fitX->SetLineWidth(3);
    fitX->Draw("same");
 
-   /*
-   TF1 *fitXtheory = new TF1("fitXtheory", "pol3");
-   fitXtheory->SetParameters(1, 0.10580611, -0.55540158, -0.47996657);
-   fitXtheory->SetLineColor(kRed);
-   fitXtheory->SetLineStyle(21);
-   fitXtheory->SetLineWidth(3);
-   fitXtheory->Draw("same");
-   */
-   
    gAXtheory->SetLineColor(kRed);
    gAXtheory->SetLineStyle(9);
    gAXtheory->SetLineWidth(3);
@@ -720,14 +820,6 @@ void plotAPandAX() {
    fitP->SetLineStyle(9);
    fitP->Draw("same");
 
-   /*
-   TF1 *fitPtheory = new TF1("fitPtheory", "pol2");
-   fitPtheory->SetParameters(-0.49409324, -0.02879423, 0.53400338);
-   fitPtheory->SetLineColor(kRed);
-   fitPtheory->SetLineStyle(9);
-   fitPtheory->SetLineWidth(3);
-   fitPtheory->Draw("same");
-*/
    gAPtheory->SetLineColor(kRed);
    gAPtheory->SetLineStyle(9);
    gAPtheory->SetLineWidth(3);
@@ -949,34 +1041,41 @@ void plotAPandAX() {
    legss->Draw();
    legss->SetTextFont(22);
 
-   TCanvas *c7 = new TCanvas("c7", "Different estimation models", 600, 600);
+   TCanvas *c7 = new TCanvas("c7", "Different estimation models", 1000, 800);
 
-   TGraph *g200NoTrk = new TGraph(idx230, array230Phantomsize, array230NoTrk);
-   TGraph *g200Est = new TGraph(idx230, array230Phantomsize, array230Est);
-   TGraph *g200Krah = new TGraph(idx230, array230Phantomsize, array230Krah);
+   TGraph *g200NoTrk = new TGraph(idx230, array230wetwepl, array230NoTrk);
+   TGraph *g200Est = new TGraph(idx200, array200wetwepl, array200Est);
+   TGraph *g230Est = new TGraph(idx230, array230wetwepl, array230Est);
+   TGraph *g200Krah = new TGraph(idx200, array200wetwepl, array200Krah);
+   TGraph *g230Krah = new TGraph(idx230, array230wetwepl, array230Krah);
 
-   g200NoTrk->SetMarkerColor(kBlue);
-   g200NoTrk->SetMarkerStyle(21);
-   g200NoTrk->SetMarkerSize(0.8);
-   g200Est->SetMarkerColor(kRed);
+   g200Est->SetMarkerColor(kBlue);
    g200Est->SetMarkerStyle(21);
    g200Est->SetMarkerSize(0.8);
    g200Krah->SetMarkerColor(kGreen);
    g200Krah->SetMarkerStyle(21);
    g200Krah->SetMarkerSize(0.8);
+   g230Est->SetMarkerColor(kBlack);
+   g230Est->SetMarkerStyle(21);
+   g230Est->SetMarkerSize(0.8);
+   g230Krah->SetMarkerColor(kOrange+2);
+   g230Krah->SetMarkerStyle(21);
+   g230Krah->SetMarkerSize(0.8);
 
-   g200NoTrk->SetTitle("Error from different X_{0} estimation models (200 MeV on water);Phantom size [mm];Error | X_{0}^{est} - X_{0}^{MC} | [mm]");
+   g200Est->SetTitle(";WET/WEPL;X_{0} estimation error [mm]");
 
-   g200NoTrk->Draw("AP");
-   g200Est->Draw("P");
+   g200Est->Draw("AP");
    g200Krah->Draw("P");
+   g230Est->Draw("P");
+   g230Krah->Draw("P");
 
-   g200NoTrk->GetYaxis()->SetRangeUser(0, 6);
+//   g200NoTrk->GetYaxis()->SetRangeUser(0, 6);
 
    TLegend *leg4 = new TLegend(.3, .66, .64, .8655);
-   leg4->AddEntry(g200NoTrk, "X_{0} = (0,0)", "P");
-   leg4->AddEntry(g200Krah, "Bayesian MLP", "P");
-   leg4->AddEntry(g200Est, "Projection Model", "P");
+   leg4->AddEntry(g200Krah, "MLP 200 MeV", "P");
+   leg4->AddEntry(g230Krah, "MLP 230 MeV", "P");
+   leg4->AddEntry(g200Est, "LPM 200 MeV", "P");
+   leg4->AddEntry(g230Est, "LPM 230 MeV", "P");
    leg4->Draw();
    leg4->SetTextFont(22);
 
@@ -1054,4 +1153,43 @@ void plotAPandAX() {
    leg6->Draw();
    leg6->SetTextFont(22);
 
+   gStyle->SetMarkerStyle(21);
+   gStyle->SetMarkerSize(1);
+   TCanvas *c10 = new TCanvas("c10", "3 sigma estimation vs w", 1500, 1000);
+   TGraph *gP2Water200 = new TGraph(idxP2Water200, arrayP2Water200w, arrayP2Water200Fit);
+   TGraph *gP2Water230 = new TGraph(idxP2Water230, arrayP2Water230w, arrayP2Water230Fit);
+   TGraph *gP2A150230 = new TGraph(idxP2A150230, arrayP2A150230w, arrayP2A150230Fit);
+   TGraph *gP2B100230 = new TGraph(idxP2B100230, arrayP2B100230w, arrayP2B100230Fit);
+   TGraph *gP2Adipose230 = new TGraph(idxP2Adipose230, arrayP2Adipose230w, arrayP2Adipose230Fit);
+   TGraph *gP2CorticalBone230 = new TGraph(idxP2CorticalBone230, arrayP2CorticalBone230w, arrayP2CorticalBone230Fit);
+
+   gP2Water200->SetMarkerColor(kBlue-2);
+   gP2Water230->SetMarkerColor(kBlue+2);
+   gP2A150230->SetMarkerColor(kRed);
+   gP2CorticalBone230->SetMarkerColor(kBlack);
+   gP2Adipose230->SetMarkerColor(kGreen);
+   gP2B100230->SetMarkerColor(kOrange+2);
+
+   gP2Water230->SetTitle(";(WET/WEPL)^{2};#mu + 2.5#sigma from Gaussian fit [mrad]");
+   gP2Water230->Draw("AP");
+   gP2Water200->Draw("P");
+//   gP2A150230->Draw("P");
+   gP2B100230->Draw("P");
+   gP2CorticalBone230->Draw("P");
+   gP2Adipose230->Draw("P");
+
+   TF1 * gP2fit = new TF1("gP2fit", "pol3");
+   gP2Water200->Fit("gP2fit");
+   
+   TLegend *leg7 = new TLegend(.3, .66, .64, .8655);
+   leg7->AddEntry(gP2Water200, "Water 200 MeV", "P");
+   leg7->AddEntry(gP2Water230, "Water 230 MeV", "P");
+   leg7->AddEntry(gP2CorticalBone230, "C. B. 230 MeV", "P");
+//   leg7->AddEntry(gP2A150230, "A150 230 MeV", "P");
+   leg7->AddEntry(gP2B100230, "B100 230 MeV", "P");
+   leg7->AddEntry(gP2Adipose230, "Adipose 230 MeV", "P");
+   leg7->AddEntry(gP2fit, "3^{rd} order pol. fit", "L");
+   leg7->SetTextFont(22);
+   leg7->Draw();
+   
 }

@@ -17,20 +17,20 @@
 
 #define USEHIGHENERGY
 
-#ifndef  USEHIGHENERGY
-#define azero   7.457e-6
-#define aone    4.548e-7
-#define atwo   (-5.777e-8)
-#define athree  1.301e-8
-#define afour  (-9.228e-10)
-#define afive   2.687e-11
+#ifdef  USEHIGHENERGY
+#define azero  5.77619e-6
+#define aone   2.19784e-7
+#define atwo   (-1.23920e-8)
+#define athree 3.41725e-9
+#define afour  (-2.20283e-10)
+#define afive  5.68267e-12
 #else
-#define azero   5.77619e-6
-#define aone    2.19784e-7
-#define atwo    (-1.23920e-8)
-#define athree  3.41725e-9
-#define afour   (-2.20283e-10)
-#define afive   5.68267e-12
+#define azero   7.556e-6
+#define aone    4.548e-7
+#define atwo    (-5.777e-8)
+#define athree  1.301e-8
+#define afour   (-9.228e-10)
+#define afive   2.687e-11
 #endif
 
 #define X_0 36.1
@@ -79,7 +79,7 @@ void findMLP(Float_t phantomSize = 200, Float_t rotation = -1, Float_t spotsize 
    if (!tree) exit(0);
 
    Int_t      printed = 0;
-   const Int_t eventsToUse = 2500;
+   const Int_t eventsToUse = 10000;
 
    TStopwatch tKrah, tLPM;
    TStopwatch tLPM1, tLPM2, tLPM3;
@@ -218,8 +218,8 @@ void findMLP(Float_t phantomSize = 200, Float_t rotation = -1, Float_t spotsize 
       tps_theta_y_0 = 0;
    }
    
-   P0tps.SetCoordinates(tan(tps_theta_x_0), tan(tps_theta_y_0), 1);
-   X0tps.SetCoordinates(tan(tps_theta_x_0) * (sourceToX0dist + d_entry), tan(tps_theta_y_0) * (sourceToX0dist + d_entry), -phantomSize/2);
+   P0tps.SetCoordinates(atan(tps_theta_x_0), atan(tps_theta_y_0), 1);
+   X0tps.SetCoordinates(atan(tps_theta_x_0) * (sourceToX0dist + d_entry), atan(tps_theta_y_0) * (sourceToX0dist + d_entry), 0);
 
    for (Int_t i=0; i<tree->GetEntries(); ++i) {
       tree->GetEntry(i);
@@ -235,7 +235,7 @@ void findMLP(Float_t phantomSize = 200, Float_t rotation = -1, Float_t spotsize 
       if (lastEID != eventID) {
          // Add scattering
          scat.SetCoordinates(gRandom->Gaus(0, Xp3sigma), gRandom->Gaus(0, Xp3sigma), 0);
-         Xp3 += scat;
+//         Xp3 += scat;
       
          tKrah.Start(false); tLPM.Start(false); tLPM1.Start(false);
          X0 = (Xp0 + Xp1) / 2;
@@ -243,15 +243,14 @@ void findMLP(Float_t phantomSize = 200, Float_t rotation = -1, Float_t spotsize 
          P0 = (Xp1 - Xp0) / (Xp1.Z() - Xp0.Z());
          P2 = (Xp3 - Xp2) / (Xp3.Z() - Xp2.Z());
 
-         projectToHullX0.SetCoordinates(0, 0, d_entry);
-         projectToHullX2.SetCoordinates(d_exit  * P2.X(), d_exit * P2.Y(), d_exit);
-
+         XYZVector projectToHullX0(d_entry * tan(P0.X()), d_entry * tan(P0.Y()), d_entry);
+         XYZVector projectToHullX2(d_exit * tan(P2.X()), d_exit * tan(P2.Y()), d_exit);
          X0 += projectToHullX0;
          X2 -= projectToHullX2;
 
          X0cm = X0tps / 10;
          X2cm = X2 / 10;
-         P0cm = P0;
+         P0cm = P0tps;
          P2cm = P2;
 
          P2prime = P2 - P0tps;
@@ -296,8 +295,8 @@ void findMLP(Float_t phantomSize = 200, Float_t rotation = -1, Float_t spotsize 
             
             tKrah.Start(false);
             for (float posz = X0cm.Z() + step_length; posz < X2cm.Z(); posz += step_length) {
-               d_source = pow(150,2); // assume to first tracker layer -- is this valid for all phantom sizes / spot sizes
-               s_pos = pow(0.3, 2); // cm
+               d_source = 200; // assume to first tracker layer -- is this valid for all phantom sizes / spot sizes
+               s_pos = pow(0.32, 2); // cm
                s_angle = pow(0.002, 2); // div. so 2 mrad
 
                if (spotsize >= 0) s_pos = pow(spotsize / 10, 2);
@@ -390,9 +389,9 @@ void findMLP(Float_t phantomSize = 200, Float_t rotation = -1, Float_t spotsize 
                second_first[3] = (C1[2] * C12_inverse[1]) + (C1[3] * C12_inverse[3]);
 
                y_0[0] = X0cm.X();
-               y_0[1] = atan(P0cm.X());
+               y_0[1] = tan(P0tps.X());
                y_2[0] = X2cm.X();
-               y_2[1] = atan(P2cm.X());
+               y_2[1] = tan(P2cm.X());
       
                first_second[0] = (R_0[0] * y_0[0]) + (R_0[1] * y_0[1]);
                first_second[1] = (R_0[2] * y_0[0]) + (R_0[3] * y_0[1]);
@@ -408,9 +407,9 @@ void findMLP(Float_t phantomSize = 200, Float_t rotation = -1, Float_t spotsize 
 
                // now do the y value
                y_0[0] = X0cm.Y();
-               y_0[1] = atan(P0cm.Y());
+               y_0[1] = tan(P0tps.Y());
                y_2[0] = X2cm.Y();
-               y_2[1] = atan(P2cm.Y());
+               y_2[1] = tan(P2cm.Y());
                
                first_second[0] = (R_0[0] * y_0[0]) + (R_0[1] * y_0[1]);
                first_second[1] = (R_0[2] * y_0[0]) + (R_0[3] * y_0[1]);
@@ -452,7 +451,7 @@ void findMLP(Float_t phantomSize = 200, Float_t rotation = -1, Float_t spotsize 
             Lambda0 = 1.01 + 0.43 * w2;
             Lambda2 = 0.99 - 0.46 * w2;
 
-            for (Float_t t=0; t<1; t += 0.01) {
+            for (Float_t t=0; t<1; t += 0.002) {
                S = SplineMLP(t, X0, X2, P0, P2, Lambda0, Lambda2, phantomSize); // perfect info
 
                if (lastEID < maxAcc) {
@@ -505,7 +504,7 @@ void findMLP(Float_t phantomSize = 200, Float_t rotation = -1, Float_t spotsize 
                Double_t diff_x, diff_y;
                idxDifferenceArray = 0; // Sweep each time
                nInDifferenceArray++; // To average at end
-               for (Double_t zSweep = -phantomSize/2; zSweep <= phantomSize/2; zSweep += 2) { // Keep Sweep increment high to speed up!
+               for (Double_t zSweep = 0; zSweep <= phantomSize; zSweep += 0.5) { // Keep Sweep increment high to speed up!
                   differenceArrayZ[idxDifferenceArray] = zSweep;
                   diff_x = fabs(splineMCx->Eval(zSweep) - splineMLPx->Eval(zSweep));
                   diff_y = fabs(splineMCy->Eval(zSweep) - splineMLPy->Eval(zSweep));
@@ -553,30 +552,31 @@ void findMLP(Float_t phantomSize = 200, Float_t rotation = -1, Float_t spotsize 
       }
 
       if (parentID == 0) {
-         if       (volumeID[2] == 0) Xp0.SetCoordinates(x,y,z);
-         else if  (volumeID[2] == 1) Xp1.SetCoordinates(x,y,z);
-         else if  (volumeID[2] == 2) Xp2.SetCoordinates(x,y,z);
-         else if  (volumeID[2] == 3) Xp3.SetCoordinates(x,y,z);
+         if       (volumeID[2] == 0) Xp0.SetCoordinates(x,y,z+phantomSize/2);
+         else if  (volumeID[2] == 1) Xp1.SetCoordinates(x,y,z+phantomSize/2);
+         else if  (volumeID[2] == 2) Xp2.SetCoordinates(x,y,z+phantomSize/2);
+         else if  (volumeID[2] == 3) Xp3.SetCoordinates(x,y,z+phantomSize/2);
          else if  (volumeID[2] == 5) residualEnergy += edep;
+
 
          if  (volumeID[2] < 5) {
             arSplineMCx[idxSplineMC] = x;
             arSplineMCy[idxSplineMC] = y;
-            arSplineMCz[idxSplineMC++] = z;
+            arSplineMCz[idxSplineMC++] = z+phantomSize/2;
             
             if (eventID < maxAcc) {
                aPosMCx[aIdxMC] = x;
                aPosMCy[aIdxMC] = y;
-               aPosMCz[aIdxMC++] = z;
+               aPosMCz[aIdxMC++] = z+phantomSize/2;
             }
          }
       }
    }
 
-   TCanvas *c0 = new TCanvas("c0", "Residual Energy", 1500, 600);
+   TCanvas *c0 = new TCanvas("c0", "Residual Energy", 1500, 1000);
    hResEnergy->Draw();
 
-   TCanvas *c1 = new TCanvas("c1", "MLP estimation", 1500, 800);
+   TCanvas *c1 = new TCanvas("c1", "MLP estimation", 1500, 1000);
    TPad *pad1 = new TPad("pad1", "pad1", 0.005, 0, 0.2855, .995);
    TPad *pad2 = new TPad("pad2", "pad2", .2865, 0, 0.5235, .995);
    TPad *pad3 = new TPad("pad3", "pad3", .5245, 0, 0.7615, .995);
@@ -696,7 +696,7 @@ void findMLP(Float_t phantomSize = 200, Float_t rotation = -1, Float_t spotsize 
    gMLPesty->Draw("P");
    gMCesty->SetTitle("X_{0}^{opt} = Linear Projection Model + Cubic Spline;Depth [mm];Y position [mm]");
 */
-   TCanvas *c = new TCanvas("c", "Beam spot estimation", 1570, 580);
+   TCanvas *c = new TCanvas("c", "Beam spot estimation", 1500, 1000);
    c->Divide(3, 1, 0.001, 0.001);
 
    c->cd(1);
@@ -706,7 +706,7 @@ void findMLP(Float_t phantomSize = 200, Float_t rotation = -1, Float_t spotsize 
    c->cd(3);
    hErrorKrah->Draw("COLZ");
 
-   TCanvas *c1D = new TCanvas("c1D", "beam spot estimation", 1000, 600);
+   TCanvas *c1D = new TCanvas("c1D", "beam spot estimation", 1000, 1000);
    hErrorKrah1D->Draw();
 
    printf("Normalizing the %d indexes of differenceArray from %d.\n", idxDifferenceArray, nInDifferenceArray);
@@ -715,10 +715,9 @@ void findMLP(Float_t phantomSize = 200, Float_t rotation = -1, Float_t spotsize 
       differenceArrayDiffNoTrk[i]  /= nInDifferenceArray;
       differenceArrayDiffKrah[i]  /= nInDifferenceArray;
       differenceArrayDiffest[i] /= nInDifferenceArray;
-      differenceArrayZ[i] += phantomSize/2;
    }
 
-   TCanvas *c2 = new TCanvas("c2", "MC vs MLP difference", 1500, 600);
+   TCanvas *c2 = new TCanvas("c2", "MC vs MLP difference", 1500, 1000);
    TGraph *gDifferencePerfect = new TGraph(idxDifferenceArray, differenceArrayZ, differenceArrayDiff);
    TGraph *gDifferenceNoTrk = new TGraph(idxDifferenceArray, differenceArrayZ, differenceArrayDiffNoTrk);
    TGraph *gDifferenceKrah = new TGraph(idxDifferenceArray, differenceArrayZ, differenceArrayDiffKrah);
