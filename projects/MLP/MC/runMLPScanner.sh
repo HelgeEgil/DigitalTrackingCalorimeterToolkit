@@ -1,6 +1,6 @@
 #!/bin/bash
 
-NCORES=6
+NCORES=4
 IDX=1
 
 for i in `seq -w 160 10 160`; do

@@ -148,11 +148,17 @@ void plotAPandAX() {
    Float_t  array200Est[arraySize];
    Float_t  array200Krah[arraySize];
    
-   Float_t  array200wetwepl10mrad[arraySize];
-   Float_t  array200Phantomsize10mrad[arraySize];
-   Float_t  array200NoTrk10mrad[arraySize];
-   Float_t  array200Est10mrad[arraySize];
-   Float_t  array200Krah10mrad[arraySize];
+   Float_t  array230wetwepl10mrad[arraySize];
+   Float_t  array230Phantomsize10mrad[arraySize];
+   Float_t  array230NoTrk10mrad[arraySize];
+   Float_t  array230Est10mrad[arraySize];
+   Float_t  array230Krah10mrad[arraySize];
+   
+   Float_t  array230wetwepl10mrad66um[arraySize];
+   Float_t  array230Phantomsize10mrad66um[arraySize];
+   Float_t  array230NoTrk10mrad66um[arraySize];
+   Float_t  array230Est10mrad66um[arraySize];
+   Float_t  array230Krah10mrad66um[arraySize];
    
    Float_t  array230wetwepl[arraySize];
    Float_t  array230Phantomsize[arraySize];
@@ -176,7 +182,8 @@ void plotAPandAX() {
    Int_t    idxSpotsize = 0;
    Int_t    idxSpotsizeKrah = 0;
    Int_t    idx200 = 0;
-   Int_t    idx20010mrad = 0;
+   Int_t    idx23010mrad = 0;
+   Int_t    idx23010mrad66um = 0;
    Int_t    idx230 = 0;
    Int_t    idxB100 = 0;
    Int_t    idxWater = 0;
@@ -322,8 +329,8 @@ void plotAPandAX() {
    wepl = splineWater->Eval(230);
    in.open("Output/accuracy_energy230MeV_B100_phantom.csv");
    while (1) {
-      if (!in.good()) break;
       in >> phantomSize_ >> error_ >> AX_ >> AP_ >> residualEnergy_;
+      if (!in.good()) break;
 
       wet = wepl - splineWater->Eval(residualEnergy_);
 
@@ -332,13 +339,15 @@ void plotAPandAX() {
       arrayResidualEnergyB100230[arrayIdxB100230] = pow(wet/wepl, 1); // * weplFactor;
       arrayAXB100230[arrayIdxB100230] = AX_;
       arrayAPB100230[arrayIdxB100230++] = AP_;
+
+      cout << "Adding wet/wepl = " << wet/wepl << endl;
    }
    in.close();
    
    in.open("Output/accuracy_energy230MeV_Adipose_phantom.csv");
    while (1) {
-      if (!in.good()) break;
       in >> phantomSize_ >> error_ >> AX_ >> AP_ >> residualEnergy_;
+      if (!in.good()) break;
 
       wet = wepl - splineWater->Eval(residualEnergy_);
 
@@ -352,8 +361,8 @@ void plotAPandAX() {
 
    in.open("Output/accuracy_energy230MeV_CorticalBone_phantom.csv");
    while (1) {
-      if (!in.good()) break;
       in >> phantomSize_ >> error_ >> AX_ >> AP_ >> residualEnergy_;
+      if (!in.good()) break;
 
       wet = wepl - splineWater->Eval(residualEnergy_);
       weplFactor = phantomSize_ / wet;
@@ -368,8 +377,8 @@ void plotAPandAX() {
    
    in.open("Output/accuracy_energy230MeV_A150_phantom.csv");
    while (1) {
-      if (!in.good()) break;
       in >> phantomSize_ >> error_ >> AX_ >> AP_ >> residualEnergy_;
+      if (!in.good()) break;
 
       wet = wepl - splineWater->Eval(residualEnergy_);
       weplFactor = phantomSize_ / wet;
@@ -514,7 +523,36 @@ void plotAPandAX() {
       array230Krah[idx230++] = mlpStartKrah_;
    }
    in.close();
+   
+   in.open("Output/MLPerror_energy230MeV_Water_krah_10mrad.csv");
+   while (1) {
+      in >> phantomSize_ >> mlpStartNoTrk_ >> mlpMidNoTrk_ >> mlpStartEst_ >> mlpMidEst_ >> mlpStartKrah_ >> mlpMidKrah_ >> residualEnergy_ >> fdummy;
 
+      if (!in.good()) break;
+         
+      wet = wepl - splineWater->Eval(residualEnergy_);
+      array230wetwepl10mrad[idx23010mrad] = wet/wepl;
+      array230Phantomsize10mrad[idx23010mrad] = phantomSize_;
+      array230NoTrk10mrad[idx23010mrad] = mlpStartNoTrk_;
+      array230Est10mrad[idx23010mrad] = mlpStartEst_;
+      array230Krah10mrad[idx23010mrad++] = mlpStartKrah_;
+   }
+   in.close();
+
+   in.open("Output/MLPerror_energy230MeV_Water_krah_66um.csv");
+   while (1) {
+      in >> phantomSize_ >> mlpStartNoTrk_ >> mlpMidNoTrk_ >> mlpStartEst_ >> mlpMidEst_ >> mlpStartKrah_ >> mlpMidKrah_ >> residualEnergy_ >> fdummy;
+
+      if (!in.good()) break;
+         
+      wet = wepl - splineWater->Eval(residualEnergy_);
+      array230wetwepl10mrad66um[idx23010mrad66um] = wet/wepl;
+      array230Phantomsize10mrad66um[idx23010mrad66um] = phantomSize_;
+      array230NoTrk10mrad66um[idx23010mrad66um] = mlpStartNoTrk_;
+      array230Est10mrad66um[idx23010mrad66um] = mlpStartEst_;
+      array230Krah10mrad66um[idx23010mrad66um++] = mlpStartKrah_;
+   }
+   in.close();
 
    wepl = splineWater->Eval(200);
    in.open("Output/MLPerror_energy200MeV_Water_krah.csv");
@@ -532,20 +570,6 @@ void plotAPandAX() {
    }
    in.close();
    
-   in.open("Output/MLPerror_energy200MeV_Water_krah_10mrad.csv");
-   while (1) {
-      in >> phantomSize_ >> mlpStartNoTrk_ >> mlpMidNoTrk_ >> mlpStartEst_ >> mlpMidEst_ >> mlpStartKrah_ >> mlpMidKrah_ >> residualEnergy_ >> fdummy;
-
-      if (!in.good()) break;
-         
-      wet = wepl - splineWater->Eval(residualEnergy_);
-      array200wetwepl10mrad[idx20010mrad] = wet/wepl;
-      array200Phantomsize10mrad[idx20010mrad] = phantomSize_;
-      array200NoTrk10mrad[idx20010mrad] = mlpMidNoTrk_;
-      array200Est10mrad[idx20010mrad] = mlpMidEst_;
-      array200Krah10mrad[idx20010mrad++] = mlpMidKrah_;
-   }
-   in.close();
    
    in.open("Output/MLPerror_energy200MeV_A150_krah.csv");
    while (1) {
@@ -913,8 +937,9 @@ void plotAPandAX() {
 //   leg2->AddEntry(gCorticalBoneBeamspotEst, "Estimate X0 CorticalBone", "P");
    leg2->Draw();
 
+   gStyle->SetMarkerSize(1.2);
 
-   TCanvas *c4 = new TCanvas("c4", "Error different materials vs w", 600,600);
+   TCanvas *c4 = new TCanvas("c4", "Error different materials vs w", 1000,800);
 
    TGraph *gMLPErrorVsWWater = new TGraph(arrayIdxDivergence, arrayWetWepl230, arrayMLPstartErrorEst);
    TGraph *gMLPErrorVsWA150 = new TGraph(arrayIdxA150230, arrayWetWeplA150230, arrayA150MLPstartErrorEst);
@@ -945,11 +970,6 @@ void plotAPandAX() {
    gMLPErrorVsWB100->SetMarkerStyle(21);
    gMLPErrorVsWAdipose->SetMarkerStyle(21);
    gMLPErrorVsWCorticalBone->SetMarkerStyle(21);
-   gMLPErrorVsWWater->SetMarkerSize(0.8);
-   gMLPErrorVsWA150->SetMarkerSize(0.8);
-   gMLPErrorVsWB100->SetMarkerSize(0.8);
-   gMLPErrorVsWAdipose->SetMarkerSize(0.8);
-   gMLPErrorVsWCorticalBone->SetMarkerSize(0.8);
    
    gMLPErrorVsWWaterK->SetMarkerStyle(22);
    gMLPErrorVsWA150K->SetMarkerStyle(22);
@@ -964,24 +984,26 @@ void plotAPandAX() {
    gMLPErrorVsWB100->Draw("P");
    gMLPErrorVsWCorticalBone->Draw("P");
    gMLPErrorVsWAdipose->Draw("P");
-   
+  
+   /*
    gMLPErrorVsWWaterK->Draw("P");
    gMLPErrorVsWA150K->Draw("P");
    gMLPErrorVsWB100K->Draw("P");
    gMLPErrorVsWCorticalBoneK->Draw("P");
    gMLPErrorVsWAdiposeK->Draw("P");
-
+*/
    
    TLegend *leg3 = new TLegend(.3, .66, .64, .8655);
-   leg3->AddEntry(gMLPErrorVsWCorticalBone, "LPM", "P");
-   leg3->AddEntry(gMLPErrorVsWCorticalBoneK, "MLP", "P");
-//   leg3->AddEntry(gMLPErrorVsWB100, "ICRU B100 Bone", "P");
-//   leg3->AddEntry(gMLPErrorVsWAdipose, "ICRU Adipose", "P");
-//   leg3->AddEntry(gMLPErrorVsWCorticalBone, "ICRU Cortical Bone", "P");
-//   leg3->AddEntry(gMLPErrorVsWA150, "ICRU A150 T.E.P.", "P");
+   leg3->AddEntry(gMLPErrorVsWWater, "Water", "P");
+//   leg3->AddEntry(gMLPErrorVsWCorticalBoneK, "MLP", "P");
+   leg3->AddEntry(gMLPErrorVsWAdipose, "Adipose", "P");
+   leg3->AddEntry(gMLPErrorVsWB100, "B100 Bone", "P");
+   leg3->AddEntry(gMLPErrorVsWA150, "A150 T.E.P.", "P");
+   leg3->AddEntry(gMLPErrorVsWCorticalBone, "Cortical Bone", "P");
    leg3->SetTextFont(22);
    leg3->Draw();
 
+   /*
    TLatex *lat = new TLatex();
    lat->SetTextSize(0.04);
    lat->SetTextColor(kRed);
@@ -994,6 +1016,7 @@ void plotAPandAX() {
    lat->DrawLatex(0.6, 0.3, "Adipose");
    lat->SetTextColor(kBlue);
    lat->DrawLatex(0.6, 0.1, "Water");
+   */
 
    TCanvas *c5 = new TCanvas("c5", "Errors vs rotation", 600, 600);
    TGraph *gRotationError = new TGraph(idxRotation, arrayRotation, arrayRotationError);
@@ -1008,13 +1031,13 @@ void plotAPandAX() {
    gRotationError->GetYaxis()->SetTitleOffset(1.2);
    
    
-   TCanvas *c6 = new TCanvas("c6", "Errors vs rotation", 1500, 1200);
+   TCanvas *c6 = new TCanvas("c6", "Errors vs rotation", 1000, 800);
    TGraph *gSpotsizeError = new TGraph(idxSpotsize, arraySpotsize, arraySpotsizeError);
    TGraph *gSpotsizeErrorKrah = new TGraph(idxSpotsizeKrah, arraySpotsizeKrah, arraySpotsizeErrorKrah);
 
    gSpotsizeError->SetTitle("MLP estimation error with #hat{X_{0}}, 200 MeV beam/160 mm phantom;Beam spotsize [mm];Error |X_{0}^{MC} - X_{0}^{est}| [mm]");
 
-   gSpotsizeError->SetMarkerColor(kBlue-4);
+   gSpotsizeError->SetMarkerColor(kBlue-7);
    gSpotsizeError->SetMarkerStyle(21);
    gSpotsizeError->SetMarkerSize(1.2);
    
@@ -1119,28 +1142,34 @@ void plotAPandAX() {
    leg5->Draw();
    leg5->SetTextFont(22);
 
-   TCanvas *c9 = new TCanvas("c9", "X0 accuracy vs different tracker uncertainties", 700, 700);
+   TCanvas *c9 = new TCanvas("c9", "X0 accuracy vs different tracker uncertainties", 1000, 800);
 
-   TGraph *g200WaterEst0mrad = new TGraph(idx200, array200Phantomsize, array200Est);
-   TGraph *g200WaterEst10mrad = new TGraph(idx20010mrad, array200Phantomsize10mrad, array200Est10mrad);
+   TGraph *g230WaterEst0mrad = new TGraph(idx230, array230Phantomsize, array230Est);
+   TGraph *g230WaterEst10mrad = new TGraph(idx23010mrad, array230Phantomsize10mrad, array230Est10mrad);
+   TGraph *g230WaterEst10mrad66um = new TGraph(idx23010mrad66um, array230Phantomsize10mrad66um, array230Est10mrad66um);
 
-   g200WaterEst0mrad->SetMarkerColor(kBlue);
-   g200WaterEst0mrad->SetMarkerStyle(21);
-   g200WaterEst0mrad->SetMarkerSize(0.8);
+   g230WaterEst0mrad->SetMarkerColor(kBlue-7);
+   g230WaterEst0mrad->SetMarkerStyle(21);
+   g230WaterEst0mrad->SetMarkerSize(1.2);
    
-   g200WaterEst10mrad->SetMarkerColor(kRed-4);
-   g200WaterEst10mrad->SetMarkerStyle(21);
-   g200WaterEst10mrad->SetMarkerSize(0.8);
-
-   g200WaterEst0mrad->SetTitle(";Phantom size [mm]; X_{0} estimation error [mm]");
-
-   g200WaterEst0mrad->Draw("AP");
-   g200WaterEst10mrad->Draw("P");
-
+   g230WaterEst10mrad->SetMarkerColor(kRed);
+   g230WaterEst10mrad->SetMarkerStyle(21);
+   g230WaterEst10mrad->SetMarkerSize(1.2);
    
+   g230WaterEst10mrad66um->SetMarkerColor(kOrange+2);
+   g230WaterEst10mrad66um->SetMarkerStyle(21);
+   g230WaterEst10mrad66um->SetMarkerSize(1.2);
+
+   g230WaterEst0mrad->SetTitle(";Phantom size [mm]; Estimation error | X_{0}^{MC} - X_{0}^{opt}| [mm]");
+
+   g230WaterEst0mrad->Draw("AP");
+   g230WaterEst10mrad->Draw("P");
+   g230WaterEst10mrad66um->Draw("P");
+
    TLegend *leg6 = new TLegend(.3, .66, .64, .8655);
-   leg6->AddEntry(g200WaterEst0mrad, "0 mrad tracker uncertainty", "P");
-   leg6->AddEntry(g200WaterEst10mrad, "10 mrad tracker uncertainty", "P");
+   leg6->AddEntry(g230WaterEst0mrad, "0 mrad tracker uncertainty", "P");
+   leg6->AddEntry(g230WaterEst10mrad, "10 mrad tracker uncertainty", "P");
+   leg6->AddEntry(g230WaterEst10mrad66um, " + 66 #mu{}m position uncertainty", "P");
    leg6->Draw();
    leg6->SetTextFont(22);
 
@@ -1163,7 +1192,7 @@ void plotAPandAX() {
 
    gP2Water230->SetTitle(";(WET/WEPL)^{2};#mu + 2.5#sigma from Gaussian fit [mrad]");
    gP2Water230->Draw("AP");
-   gP2Water200->Draw("P");
+    gP2Water200->Draw("P");
    gP2A150230->Draw("P");
    gP2B100230->Draw("P");
    gP2CorticalBone230->Draw("P");

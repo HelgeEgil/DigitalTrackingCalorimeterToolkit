@@ -1,6 +1,6 @@
 #!/bin/bash
 
-NCORES=6
+NCORES=4
 IDX=1
 
 for i in `seq -w 0.2 0.2 15`; do
@@ -9,7 +9,7 @@ for i in `seq -w 0.2 0.2 15`; do
    zcalorimeter=`echo "scale=3; 160/2+30+1000" | bc`
 #   divergence=`echo "scale=3; $i/100" | bc`
    emittance=`echo "scale=3; $i * 3 * 1.5" | bc`
-	nice -n 19 cpulimit -l 60 Gate -a "'[energy,230] [dz,160] [ztracker,$ztracker] [zbeam,$zbeam] [spotsize,$i] [divergence,2] [emittance,$emittance] [rotation,0] [material,Water] [zcalorimeter,$zcalorimeter]'" MLPscanner.mac > terminal_output.txt &
+	Gate -a "'[energy,230] [dz,160] [ztracker,$ztracker] [zbeam,$zbeam] [spotsize,$i] [divergence,2] [emittance,$emittance] [rotation,0] [material,Water] [zcalorimeter,$zcalorimeter]'" MLPscanner.mac > terminal_output.txt &
    PIDLIST="$PIDLIST $!"
    echo "Running with i = $i"
 
