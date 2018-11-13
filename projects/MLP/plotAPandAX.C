@@ -524,7 +524,7 @@ void plotAPandAX() {
    }
    in.close();
    
-   in.open("Output/MLPerror_energy230MeV_Water_krah_10mrad.csv");
+   in.open("Output/MLPerror_energy230MeV_Water_krah_uib.csv");
    while (1) {
       in >> phantomSize_ >> mlpStartNoTrk_ >> mlpMidNoTrk_ >> mlpStartEst_ >> mlpMidEst_ >> mlpStartKrah_ >> mlpMidKrah_ >> residualEnergy_ >> fdummy;
 
@@ -539,7 +539,7 @@ void plotAPandAX() {
    }
    in.close();
 
-   in.open("Output/MLPerror_energy230MeV_Water_krah_66um.csv");
+   in.open("Output/MLPerror_energy230MeV_Water_krah_ll.csv");
    while (1) {
       in >> phantomSize_ >> mlpStartNoTrk_ >> mlpMidNoTrk_ >> mlpStartEst_ >> mlpMidEst_ >> mlpStartKrah_ >> mlpMidKrah_ >> residualEnergy_ >> fdummy;
 
@@ -1167,9 +1167,9 @@ void plotAPandAX() {
    g230WaterEst10mrad66um->Draw("P");
 
    TLegend *leg6 = new TLegend(.3, .66, .64, .8655);
-   leg6->AddEntry(g230WaterEst0mrad, "0 mrad tracker uncertainty", "P");
-   leg6->AddEntry(g230WaterEst10mrad, "10 mrad tracker uncertainty", "P");
-   leg6->AddEntry(g230WaterEst10mrad66um, " + 66 #mu{}m position uncertainty", "P");
+   leg6->AddEntry(g230WaterEst0mrad, "Ideal trackers", "P");
+   leg6->AddEntry(g230WaterEst10mrad66um, "Loma Linda tracker", "P");
+   leg6->AddEntry(g230WaterEst10mrad, "Expected Bergen tracker", "P");
    leg6->Draw();
    leg6->SetTextFont(22);
 

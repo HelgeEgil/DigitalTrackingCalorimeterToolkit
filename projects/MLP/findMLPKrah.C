@@ -71,8 +71,8 @@ void findMLP(Float_t phantomSize = 200, Float_t rotation = -1, Float_t spotsize 
    printf("---------\nRunning with phantomSize = %.0f, rotation = %.0f, spotsize = %.1f, energy = %.0f and material =%d\n-----------\n", phantomSize, rotation, spotsize, initialEnergy, material);
    Int_t      printed = 0;
    const Int_t eventsToUse = 100000;
-   Float_t     Xp3sigma = 10 * 0.01; // scattering between last two tracker layers, dz * X rad
-   Float_t     Xp23sigma = 0.066; // 66 um Gaussian uncertainty on tracking layers
+   Float_t     Xp3sigma = 10 * 0.0067; // scattering between last two tracker layers, dz * X rad
+   Float_t     Xp23sigma = 0.008; // 66 um Gaussian uncertainty on tracking layers
    Bool_t      kDeleteGraphics = true;
    Float_t     x, y, z, edep, sum_edep = 0, residualEnergy = 0, AP, AX;
    Int_t       eventID, parentID, lastEID = -1;
@@ -625,7 +625,7 @@ void findMLP(Float_t phantomSize = 200, Float_t rotation = -1, Float_t spotsize 
       file.close();
    }
    else {
-      ofstream file(Form("Output/MLPerror_energy%.0fMeV_%s_krah_66um.csv", initialEnergy, sMaterial), ofstream::out | ofstream::app);
+      ofstream file(Form("Output/MLPerror_energy%.0fMeV_%s_krah_uib.csv", initialEnergy, sMaterial), ofstream::out | ofstream::app);
       file << phantomSize << " " <<  gDifferenceNoTrk->Eval(0) << " " << gDifferenceNoTrk->Eval(phantomSize/2) << " " << gDifferenceest->Eval(0) << " " << gDifferenceest->Eval(phantomSize/2) << " " << gDifferenceKrah->Eval(0) << " " << gDifferenceKrah->Eval(phantomSize/2) << " " << hResEnergy->GetMean() << " " << f10xAvg << endl;
       file.close();
    }
