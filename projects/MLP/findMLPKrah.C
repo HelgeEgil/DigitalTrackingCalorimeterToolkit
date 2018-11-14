@@ -42,7 +42,6 @@ const int kWater200Max = 270;
 const int kB100Max = 250;
 const int kCorticalBoneMax = 200;
 
-
 using namespace std;
 typedef ROOT::Math::DisplacementVector3D<ROOT::Math::Cartesian3D<double> > XYZVector;
 
@@ -66,18 +65,18 @@ XYZVector SplineMLP(Double_t t, XYZVector X0, XYZVector X2, XYZVector P0, XYZVec
    return S;
 }
 
-
 void findMLP(Float_t phantomSize = 200, Float_t rotation = -1, Float_t spotsize = -1, Float_t initialEnergy = 230, Int_t material = kWater) {
    printf("---------\nRunning with phantomSize = %.0f, rotation = %.0f, spotsize = %.1f, energy = %.0f and material =%d\n-----------\n", phantomSize, rotation, spotsize, initialEnergy, material);
    Int_t      printed = 0;
    const Int_t eventsToUse = 100000;
-   Float_t     Xp3sigma = 10 * 0.0067; // scattering between last two tracker layers, dz * X rad
-   Float_t     Xp23sigma = 0.008; // 66 um Gaussian uncertainty on tracking layers
-   Bool_t      kDeleteGraphics = true;
+   Float_t     sigmaTheta = 0.01; // scattering between last two tracker layers, rad
+   Float_t     sigmaPos = 0.066; // Position unc. in tracking layers, mm
+   Bool_t      kDeleteGraphics = false; // batch mode
    Float_t     x, y, z, edep, sum_edep = 0, residualEnergy = 0, AP, AX;
    Int_t       eventID, parentID, lastEID = -1;
-   XYZVector   Xp0, Xp1, Xp2, Xp3, X0, X2, X0est, X0err, X0tps, P0, P0tps, P2, S, P2prime, X2prime, scat, scatXp2, scatXp3; // Xp are the plane coordinates, X are the tracker coordinates (X2 = (Xp1 + Xp2) / 2)
+   XYZVector   Xp0, Xp1, Xp2, Xp2prime, Xp3, Xp3prime, X0, X2, X0est, X0err, X0tps, P0, P0tps, P2, S, P2gaus, P2prime, X2prime, scat, scatXp2, scatXp3; // Xp are the plane coordinates, X are the tracker coordinates (X2 = (Xp1 + Xp2) / 2)
    XYZVector   X0errNaive, X0errKrah, X2cm, X0cm;
+   Float_t     theta_x_gaus, theta_y_gaus;
    Float_t     wepl, wet, Lambda0, Lambda2;
    Float_t     theta_x_0, theta_y_0, theta_x_2, theta_y_2, tps_theta_x_0, tps_theta_y_0;
    ifstream    in;
@@ -94,8 +93,11 @@ void findMLP(Float_t phantomSize = 200, Float_t rotation = -1, Float_t spotsize 
    Double_t    differenceArrayDiffKrah[1000] = {};
    Double_t    differenceArrayDiffest[1000] = {};
    Float_t     sourceToX0dist = 100;
-   Float_t     d_entry = 15;
-   Float_t     d_exit = 15;
+   Float_t     d_entry = 10;
+   Float_t     d_exit = 10;
+   Float_t     d_T = 50; // mm between trackers
+   Float_t     d_entry_cm = 1;
+   Float_t     d_exit_cm = 1;
    Int_t       nInDifferenceArray = 0;
    Int_t       idxDifferenceArray = 0;
    Int_t       idxWater = 0;
@@ -103,10 +105,33 @@ void findMLP(Float_t phantomSize = 200, Float_t rotation = -1, Float_t spotsize 
    Float_t     energy, range;
    Float_t     energyFilter = 0; // 128.47;
    Float_t     sigmaFilter = 1e5;
+   Double_t    aPosMCx[1000], aPosMCy[1000], aPosMCz[1000];
+   Double_t    aPosMLPx[1000], aPosMLPy[1000], aPosMLPz[1000];
+   Double_t    aPosMLPNoTrkx[1000], aPosMLPNoTrky[1000];
+   Double_t    aPosMLPKrahx[1000], aPosMLPKrahy[1000];
+   Double_t    aPosMLPestx[1000], aPosMLPesty[1000];
+   Int_t       volumeID[10];
+   TBranch   * b_volumeID;
+   Int_t       aIdxMC = 0;
+   Int_t       aIdxMLP = 0;
+   Bool_t      stop = false; 
+   TRandom3  * gRandom = new TRandom3(0);
+   Float_t     f10xAvg = 0;
+   Float_t     f10yAvg = 0;
+   Int_t       f10xN = 0;
+   Int_t       f10yN = 0;
+   Int_t       maxAcc = 5;
+   Int_t       firstMCidx = 0;
+   char      * sMaterial;
    
+   float st1, sz1, stz1, st2, sz2, stz2;
+   float determinant_1, determinant_2, determinant_C12;
    float X_mlp, Y_mlp;
+
+   // MLP matrices
    TVector3 p;
    int a; // iterator for matrix operations
+   float scatter_1[4] = {0};
    float scatter_2[4] = {0};
    float sigma_beam[4] = {};
    double R_0[4] = {0};
@@ -119,32 +144,24 @@ void findMLP(Float_t phantomSize = 200, Float_t rotation = -1, Float_t spotsize 
    double C1_2[4] = {0};
    double C1[4] = {0};
    double C2_1[4] = {0};
+   double C2_2[4] = {0};
    double C2[4] = {0};
    double C12[4];
    double C12_inverse[4] = {0};
-   
    double first_first[4] = {0};
    double second_first[4] = {0};
-
    double first_second[2] = {0};
    double second_second[2] = {0};
-
    double first[2] = {0};
    double second[2] = {0};
+   double T_out[4];
+   double T_out_transpose[4];
+   double sigma_out[4];
+   double S_out_inverse[4];
+   double S_out_inverse_transpose[4];
+   double track_uncert_1[4];
+   double track_uncert[4];
 
-
-   Int_t       volumeID[10];
-   TBranch   * b_volumeID;
-   Int_t       aIdxMC = 0;
-   Int_t       aIdxMLP = 0;
-   Bool_t      stop = false; 
-   TRandom3  * gRandom = new TRandom3(0);
-   Float_t     f10xAvg = 0;
-   Float_t     f10yAvg = 0;
-   Int_t       f10xN = 0;
-   Int_t       f10yN = 0;
-   Int_t       maxAcc = 7;
-   char      * sMaterial;
 
 
    if      (material == kWater)        sMaterial = (char*) "Water";
@@ -168,6 +185,8 @@ void findMLP(Float_t phantomSize = 200, Float_t rotation = -1, Float_t spotsize 
    gStyle->SetTitleSize(0.045);
    gStyle->SetTitleSize(0.045, "Y");
    gStyle->SetTextSize(0.045);
+   gStyle->SetPadGridX(kTRUE);
+   gStyle->SetPadGridY(kTRUE);
 
    TFile *f = nullptr;
 
@@ -200,6 +219,9 @@ void findMLP(Float_t phantomSize = 200, Float_t rotation = -1, Float_t spotsize 
    TSpline3 *splineWater = new TSpline3("splineWater", energiesWater, rangesWater, idxWater);
 
    TH1F *hResEnergy = new TH1F("hResEnergy", "Residual energy in calorimeter;Energy [MeV];Entries", 300, 0, 250);
+   TH2F *hErrorNaive = new TH2F("hErrorNaive", "Beamspot uncertainty (X_{0}^{TPS});X position [mm];Y position [mm]", 100, -25, 25, 100, -25, 25);
+   TH2F *hErrorKrah = new TH2F("hErrorKrah", "Beamspot uncertainty (X_{0}^{MLP});X position [mm];Y position [mm]", 100, -25, 25, 100, -25, 25);
+   TH2F *hErrorSigmaScale = new TH2F("hErrorSigmaScale", Form("Beamspot uncertainty (X_{0}^{LPM});X position [mm];Y position [mm]"), 100, -25, 25, 100, -25, 25);
 
    tree->SetBranchAddress("posX", &x);
    tree->SetBranchAddress("posY", &y);
@@ -221,7 +243,6 @@ void findMLP(Float_t phantomSize = 200, Float_t rotation = -1, Float_t spotsize 
    P0tps.SetCoordinates(atan(tps_theta_x_0), atan(tps_theta_y_0), 1);
    X0tps.SetCoordinates(P0tps.X() * (sourceToX0dist + d_entry), P0tps.Y() * (sourceToX0dist + d_entry), 0);
 
-
    for (Int_t i=0; i<tree->GetEntries(); ++i) {
       tree->GetEntry(i);
 
@@ -235,18 +256,20 @@ void findMLP(Float_t phantomSize = 200, Float_t rotation = -1, Float_t spotsize 
 
       if (lastEID != eventID) {
          // Add scattering
-         scat.SetCoordinates(gRandom->Gaus(0, Xp3sigma), gRandom->Gaus(0, Xp3sigma), 0);
-         scatXp2.SetCoordinates(gRandom->Gaus(0, Xp23sigma), gRandom->Gaus(0, Xp23sigma), 2);
-         scatXp3.SetCoordinates(gRandom->Gaus(0, Xp23sigma), gRandom->Gaus(0, Xp23sigma), 2);
-         Xp3 += scat;
-         Xp2 += scatXp2;
-         Xp3 += scatXp3;
-
-         X0 = (Xp0 + Xp1) / 2;
-         X2 = (Xp2 + Xp3) / 2;
-         
-         P0 = (Xp1 - Xp0) / (Xp1.Z() - Xp0.Z());
+         scatXp2.SetCoordinates(gRandom->Gaus(0, sigmaPos), gRandom->Gaus(0, sigmaPos), 0);
+         scatXp3.SetCoordinates(gRandom->Gaus(0, sigmaPos), gRandom->Gaus(0, sigmaPos), 0);
          P2 = (Xp3 - Xp2) / (Xp3.Z() - Xp2.Z());
+         theta_x_gaus = gRandom->Gaus(tan(P2.X()), sigmaTheta);
+         theta_y_gaus = gRandom->Gaus(tan(P2.Y()), sigmaTheta);
+         P2gaus.SetCoordinates(atan(theta_x_gaus), atan(theta_y_gaus), 1);
+         Xp2prime = Xp2 + scatXp2;
+         Xp3prime = Xp2 + P2gaus * d_T + scatXp3;
+
+         // Redefine X2, P2 to account for different scattering uncertainties
+         X0 = Xp1;
+         X2 = Xp2prime;
+         P0 = (Xp1 - Xp0) / (Xp1.Z() - Xp0.Z());
+         P2 = (Xp3prime - Xp2prime) / (Xp3prime.Z() - Xp2prime.Z());
 
          P2prime = P2 - P0tps;
          P2prime.SetZ(1);
@@ -263,14 +286,21 @@ void findMLP(Float_t phantomSize = 200, Float_t rotation = -1, Float_t spotsize 
          wet = wepl - splineWater->Eval(residualEnergy);
          Float_t w = wet / wepl;
          Float_t w2 = pow(wet / wepl, 2);
-            
-         AX = 1 - 0.30 * w + 1.53 * w2 - 4.25 * pow(w,3) + 2.30 * pow(w,4);
-         AP = -0.659 + 2.072* w - 8.66 * w2 + 18.14 * pow(w,3) - 16.27 * pow(w,4) + 5.34 * pow(w,5);
+  
+//       Best fit         
+//         AX = 1 - 0.30 * w + 1.53 * w2 - 4.25 * pow(w,3) + 2.30 * pow(w,4);
+//         AP = -0.659 + 2.072* w - 8.66 * w2 + 18.14 * pow(w,3) - 16.27 * pow(w,4) + 5.34 * pow(w,5);
+
+         // Theory fit
+         AX = .999 - .00453*w + .4169*w2 - 3.447*w*w2 + 2.235*w2*w2;
+         AP = -.499 + .0708*w - .0111*w2 + 1.385*w*w2 - 1.0004*w2*w2;
          
+         /*
          if (initialEnergy == 200) {
             AX = 1.0019 - 0.297 * w + 1.427 * w2 - 3.63 * w2*w + 1.787 * w2*w2;
             AP = -0.652 + 2.028 * w - 8.349*w2 + 17.021*w*w2 - 14.923*w2*w2 + 4.843*w2*w2*w;
          }
+         */
 
          if (spotsize >= 0) {
             AX =  -3.984e-2 + 5.928e-1 * spotsize - 1.436e-1 * pow(spotsize,2) + 1.699e-2 * pow(spotsize,3) - 9.634e-4 * pow(spotsize,4) + 2.093e-5 * pow(spotsize,5);
@@ -284,12 +314,12 @@ void findMLP(Float_t phantomSize = 200, Float_t rotation = -1, Float_t spotsize 
          Float_t dxy = sqrt(pow(P2prime.X(), 2) + pow(P2prime.Y(), 2));
          Float_t angle = fabs(atan2(dxy,1)) * 1000;
 
-         sigmaFilter = 139.15 * w + 13.991;
+         sigmaFilter = 21 + 280 * w2 - 515 * pow(w2,2) + 410 * pow(w2,3);
          
          if (hResEnergy->GetEntries() > 5) {
             energyFilter = hResEnergy->GetMean() * 0.9;
          }
-         else energyFilter = 0;
+         else energyFilter = 150;
 
          if (residualEnergy > energyFilter && angle < sigmaFilter) {
             hResEnergy->Fill(residualEnergy);
@@ -297,19 +327,59 @@ void findMLP(Float_t phantomSize = 200, Float_t rotation = -1, Float_t spotsize 
             double step_length = (X2cm.Z() - X0cm.Z()) / 512;
             double posz = X0cm.Z() + step_length;
 
-            float st2, sz2, stz2;
-            float determinant_1, determinant_2, determinant_C12;
             float d_source = 200; // assume to first tracker layer -- is this valid for all phantom sizes / spot sizes
             float s_pos = pow(0.32, 2); // cm
             float s_angle = pow(0.002, 2); // div. so 2 mrad
-
-            if (spotsize >= 0) s_pos = pow(spotsize / 10, 2) + pow(0.02, 2);
-      
-            // init MLP
+            
             sigma_beam[0] = s_pos;
             sigma_beam[1] = s_pos/d_source;
             sigma_beam[2] = s_pos/d_source;
             sigma_beam[3] = s_pos/(pow(d_source,2)) + s_angle;
+
+            float d_T = 1; // distance between trackers in cm
+            float s_pos_out = sigmaPos / 10; // in cm LLU 66 um, Bergen 5 um
+            float s_scat_out = sigmaTheta; // rad LLU 10 mrad, Bergen 7 mrad
+
+            if (spotsize >= 0) s_pos = pow(spotsize / 10 + 0.02, 2);
+      
+            T_out[0] = 0;
+            T_out[1] = 0;
+            T_out[2] = -1/d_T;
+            T_out[3] = 1/d_T;
+
+            T_out_transpose[0] = T_out[0];
+            T_out_transpose[1] = T_out[2];
+            T_out_transpose[2] = T_out[1];
+            T_out_transpose[3] = T_out[3];
+
+            sigma_out[0] = pow(s_pos_out, 2) * ((T_out_transpose[0] * T_out[0]) + (T_out_transpose[1]*T_out[2]));
+            sigma_out[1] = pow(s_pos_out, 2) * ((T_out_transpose[0] * T_out[1]) + (T_out_transpose[1]*T_out[3]));
+            sigma_out[2] = pow(s_pos_out, 2) * ((T_out_transpose[2] * T_out[0]) + (T_out_transpose[3]*T_out[2]));
+            sigma_out[3] = pow(s_pos_out, 2) * ((T_out_transpose[2] * T_out[1]) + (T_out_transpose[3]*T_out[3])) + pow(s_scat_out, 2);
+
+            S_out_inverse[0] = 1;
+            S_out_inverse[1] = -d_exit_cm;
+            S_out_inverse[2] = 0;
+            S_out_inverse[3] = 1;
+
+            S_out_inverse_transpose[0] = 1;
+            S_out_inverse_transpose[1] = 0;
+            S_out_inverse_transpose[2] = -d_exit_cm;
+            S_out_inverse_transpose[3] = 1;
+
+            track_uncert_1[0] = (sigma_out[0] * S_out_inverse_transpose[0]) + (sigma_out[1] * S_out_inverse_transpose[2]);
+            track_uncert_1[1] = (sigma_out[0] * S_out_inverse_transpose[1]) + (sigma_out[1] * S_out_inverse_transpose[3]);
+            track_uncert_1[2] = (sigma_out[2] * S_out_inverse_transpose[0]) + (sigma_out[3] * S_out_inverse_transpose[2]);
+            track_uncert_1[3] = (sigma_out[2] * S_out_inverse_transpose[1]) + (sigma_out[3] * S_out_inverse_transpose[3]);
+
+            track_uncert[0] = (S_out_inverse[0] * track_uncert_1[0]) + (S_out_inverse[1] * track_uncert_1[2]);
+            track_uncert[1] = (S_out_inverse[0] * track_uncert_1[1]) + (S_out_inverse[1] * track_uncert_1[3]);
+            track_uncert[2] = (S_out_inverse[2] * track_uncert_1[0]) + (S_out_inverse[3] * track_uncert_1[2]);
+            track_uncert[3] = (S_out_inverse[2] * track_uncert_1[1]) + (S_out_inverse[3] * track_uncert_1[3]);
+         
+            sz1 = Sigmaz1(posz - X0cm.Z());
+            stz1 = Sigmatz1(posz - X0cm.Z());
+            st1 = Sigmat1(posz - X0cm.Z());
 
             sz2 = Sigmaz2(X2cm.Z() - X0cm.Z(), posz - X0cm.Z());
             stz2 = Sigmatz2(X2cm.Z() - X0cm.Z(), posz - X0cm.Z());
@@ -334,6 +404,11 @@ void findMLP(Float_t phantomSize = 200, Float_t rotation = -1, Float_t spotsize 
             R_1_inverse_transpose[1] = 0;
             R_1_inverse_transpose[2] = -(X2cm.Z() - posz);
             R_1_inverse_transpose[3] = 1;
+            
+            scatter_1[0] = sz1;
+            scatter_1[1] = stz1;
+            scatter_1[2] = stz1;
+            scatter_1[3] = st1;
       
             scatter_2[0] = sz2;
             scatter_2[1] = stz2;
@@ -346,20 +421,27 @@ void findMLP(Float_t phantomSize = 200, Float_t rotation = -1, Float_t spotsize 
             C1_1[2] = (sigma_beam[2] * R_0_transpose[0]) + (sigma_beam[3] * R_0_transpose[2]);
             C1_1[3] = (sigma_beam[2] * R_0_transpose[1]) + (sigma_beam[3] * R_0_transpose[3]);
 
-            C1[0] = (R_0[0] * C1_1[0]) + (R_0[1] * C1_1[2]);
-            C1[1] = (R_0[0] * C1_1[1]) + (R_0[1] * C1_1[3]);
-            C1[2] = (R_0[2] * C1_1[0]) + (R_0[3] * C1_1[2]);
-            C1[3] = (R_0[2] * C1_1[1]) + (R_0[3] * C1_1[3]);
+            C1_2[0] = (R_0[0] * C1_1[0]) + (R_0[1] * C1_1[2]);
+            C1_2[1] = (R_0[0] * C1_1[1]) + (R_0[1] * C1_1[3]);
+            C1_2[2] = (R_0[2] * C1_1[0]) + (R_0[3] * C1_1[2]);
+            C1_2[3] = (R_0[2] * C1_1[1]) + (R_0[3] * C1_1[3]);
 
-            C2_1[0] = (scatter_2[0] * R_1_inverse_transpose[0]) + (scatter_2[1] * R_1_inverse_transpose[2]);
-            C2_1[1] = (scatter_2[0] * R_1_inverse_transpose[1]) + (scatter_2[1] * R_1_inverse_transpose[3]);
-            C2_1[2] = (scatter_2[2] * R_1_inverse_transpose[0]) + (scatter_2[3] * R_1_inverse_transpose[2]);
-            C2_1[3] = (scatter_2[2] * R_1_inverse_transpose[1]) + (scatter_2[3] * R_1_inverse_transpose[3]);
-         
-            C2[0] = (R_1_inverse[0] * C2_1[0]) + (R_1_inverse[1] * C2_1[2]);
-            C2[1] = (R_1_inverse[0] * C2_1[1]) + (R_1_inverse[1] * C2_1[3]);
-            C2[2] = (R_1_inverse[2] * C2_1[0]) + (R_1_inverse[3] * C2_1[2]);
-            C2[3] = (R_1_inverse[2] * C2_1[1]) + (R_1_inverse[3] * C2_1[3]);
+            for (a=0; a<4; a++) C1[a] = C1_2[a] + scatter_1[a];
+
+            C2_1[0] = (track_uncert[0] * R_1_inverse_transpose[0]) + (track_uncert[1] * R_1_inverse_transpose[2]);
+            C2_1[1] = (track_uncert[0] * R_1_inverse_transpose[1]) + (track_uncert[1] * R_1_inverse_transpose[3]);
+            C2_1[2] = (track_uncert[2] * R_1_inverse_transpose[0]) + (track_uncert[3] * R_1_inverse_transpose[2]);
+            C2_1[3] = (track_uncert[2] * R_1_inverse_transpose[1]) + (track_uncert[3] * R_1_inverse_transpose[3]);
+
+            C2_2[0] = (scatter_2[0] * R_1_inverse_transpose[0]) + (scatter_2[1] * R_1_inverse_transpose[2]);
+            C2_2[1] = (scatter_2[0] * R_1_inverse_transpose[1]) + (scatter_2[1] * R_1_inverse_transpose[3]);
+            C2_2[2] = (scatter_2[2] * R_1_inverse_transpose[0]) + (scatter_2[3] * R_1_inverse_transpose[2]);
+            C2_2[3] = (scatter_2[2] * R_1_inverse_transpose[1]) + (scatter_2[3] * R_1_inverse_transpose[3]);
+        
+            C2[0] = (R_1_inverse[0] * C2_1[0]) + (R_1_inverse[1] * C2_1[2]) + (R_1_inverse[0] * C2_2[0]) + (R_1_inverse[1] * C2_2[2]);
+            C2[1] = (R_1_inverse[0] * C2_1[1]) + (R_1_inverse[1] * C2_1[3]) + (R_1_inverse[0] * C2_2[1]) + (R_1_inverse[1] * C2_2[3]);
+            C2[2] = (R_1_inverse[2] * C2_1[0]) + (R_1_inverse[3] * C2_1[2]) + (R_1_inverse[2] * C2_2[0]) + (R_1_inverse[3] * C2_2[2]);
+            C2[3] = (R_1_inverse[2] * C2_1[1]) + (R_1_inverse[3] * C2_1[3]) + (R_1_inverse[2] * C2_2[1]) + (R_1_inverse[3] * C2_2[3]);
 
             for (a=0; a<4; a++) C12[a] = C1[a] + C2[a];
 
@@ -434,10 +516,9 @@ void findMLP(Float_t phantomSize = 200, Float_t rotation = -1, Float_t spotsize 
             X0errNaive = X0tps - X0;
             X0errKrah = X0krah - X0;
 
-//            hErrorSigmaScale->Fill(X0err.X(), X0err.Y());
-//            hErrorNaive->Fill(X0errNaive.X(), X0errNaive.Y());
-//            hErrorKrah->Fill(X0errKrah.X(), X0errKrah.Y());
-//            hErrorKrah1D->Fill(X0errKrah.X() / 10 ) ;
+            hErrorSigmaScale->Fill(X0err.X(), X0err.Y());
+            hErrorNaive->Fill(X0errNaive.X(), X0errNaive.Y());
+            hErrorKrah->Fill(X0errKrah.X(), X0errKrah.Y());
 
             float f10x = sqrt(2 * log(10)) / (2 * 3.141592 * X_mlp_sigma);
             float f10y = sqrt(2 * log(10)) / (2 * 3.141592 * Y_mlp_sigma);
@@ -453,6 +534,11 @@ void findMLP(Float_t phantomSize = 200, Float_t rotation = -1, Float_t spotsize 
 
             for (Float_t t=0; t<1; t += 0.01) {
                S = SplineMLP(t, X0, X2, P0, P2, Lambda0, Lambda2); // perfect info
+               if (lastEID < maxAcc) {
+                  aPosMLPx[aIdxMLP] = S.X();
+                  aPosMLPy[aIdxMLP] = S.Y();
+                  aPosMLPz[aIdxMLP] = S.Z();
+               }
                
                arSplineMLPx[idxSplineMLP] = S.X(); 
                arSplineMLPy[idxSplineMLP] = S.Y();
@@ -461,15 +547,29 @@ void findMLP(Float_t phantomSize = 200, Float_t rotation = -1, Float_t spotsize 
                S = SplineMLP(t, X0tps, X2, P0tps, P2, Lambda0, Lambda2); // (0,0)
                arSplineMLPNoTrkx[idxSplineMLP] = S.X();
                arSplineMLPNoTrky[idxSplineMLP] = S.Y();
+
+               if (lastEID < maxAcc) {
+                  aPosMLPNoTrkx[aIdxMLP] = S.X();
+                  aPosMLPNoTrky[aIdxMLP] = S.Y();
+               }
                
                S = SplineMLP(t, X0est, X2, P0tps, P2, Lambda0, Lambda2); // mine
                arSplineMLPestx[idxSplineMLP] = S.X();
                arSplineMLPesty[idxSplineMLP] = S.Y();
                
+               if (lastEID < maxAcc) {
+                  aPosMLPesty[aIdxMLP] = S.Y();
+                  aPosMLPestx[aIdxMLP] = S.X();
+               }
+
                S = SplineMLP(t, X0krah, X2, P0krah, P2, Lambda0, Lambda2); // niels'
                arSplineMLPKrahx[idxSplineMLP] = S.X();
                arSplineMLPKrahy[idxSplineMLP++] = S.Y();
 
+               if (lastEID < maxAcc) {
+                  aPosMLPKrahx[aIdxMLP] = S.X();
+                  aPosMLPKrahy[aIdxMLP++] = S.Y();
+               }
             }
 
             // Compare MC and MLP here
@@ -491,7 +591,7 @@ void findMLP(Float_t phantomSize = 200, Float_t rotation = -1, Float_t spotsize 
                Double_t diff_x, diff_y;
                idxDifferenceArray = 0; // Sweep each time
                nInDifferenceArray++; // To average at end
-               for (Double_t zSweep = 0; zSweep <= phantomSize; zSweep += 0.5) { // Keep Sweep increment high to speed up!
+               for (Double_t zSweep = 0; zSweep <= phantomSize; zSweep += 5) { // Keep Sweep increment high to speed up!
                   differenceArrayZ[idxDifferenceArray] = zSweep;
                   diff_x = fabs(splineMCx->Eval(zSweep) - splineMLPx->Eval(zSweep));
                   diff_y = fabs(splineMCy->Eval(zSweep) - splineMLPy->Eval(zSweep));
@@ -515,12 +615,16 @@ void findMLP(Float_t phantomSize = 200, Float_t rotation = -1, Float_t spotsize 
             delete splineMCy;
             delete splineMLPx;
             delete splineMLPy;
+            delete splineMLPNoTrkx;
+            delete splineMLPNoTrky;
             delete splineMLPKrahx;
             delete splineMLPKrahy;
             delete splineMLPestx;
             delete splineMLPesty;
-            delete splineMLPNoTrkx;
-            delete splineMLPNoTrky;
+         }
+         else {
+            aIdxMC = firstMCidx; // rewrite last MC curve for visualization
+            maxAcc++;
          }
          
          if (stop) break;
@@ -539,18 +643,27 @@ void findMLP(Float_t phantomSize = 200, Float_t rotation = -1, Float_t spotsize 
       }
 
       if (parentID == 0) {
-         if       (volumeID[2] == 0) Xp0.SetCoordinates(x,y,z+phantomSize/2);
-         else if  (volumeID[2] == 1) Xp1.SetCoordinates(x,y,z+phantomSize/2);
-         else if  (volumeID[2] == 2) Xp2.SetCoordinates(x,y,z+phantomSize/2);
-         else if  (volumeID[2] == 3) Xp3.SetCoordinates(x,y,z+phantomSize/2);
-         else if  (volumeID[2] == 5) residualEnergy += edep;
-
+         if (volumeID[2] == 0 && firstMCidx != aIdxMC) { // new particle
+            firstMCidx = aIdxMC;
+         }
 
          if  (volumeID[2] < 5) {
             arSplineMCx[idxSplineMC] = x;
             arSplineMCy[idxSplineMC] = y;
             arSplineMCz[idxSplineMC++] = z+phantomSize/2;
+            
+            if (eventID < maxAcc) {
+               aPosMCx[aIdxMC] = x;
+               aPosMCy[aIdxMC] = y;
+               aPosMCz[aIdxMC++] = z+phantomSize/2;
+            }
          }
+
+         if       (volumeID[2] == 0) Xp0.SetCoordinates(x,y,z+phantomSize/2);
+         else if  (volumeID[2] == 1) Xp1.SetCoordinates(x,y,z+phantomSize/2);
+         else if  (volumeID[2] == 2) Xp2.SetCoordinates(x,y,z+phantomSize/2);
+         else if  (volumeID[2] == 3) Xp3.SetCoordinates(x,y,z+phantomSize/2);
+         else if  (volumeID[2] == 5) residualEnergy += edep;
       }
    }
 
@@ -563,7 +676,125 @@ void findMLP(Float_t phantomSize = 200, Float_t rotation = -1, Float_t spotsize 
    TCanvas *c0 = new TCanvas("c0", "Residual Energy", 1500, 600);
    hResEnergy->Draw();
 
-   /*
+   TCanvas *c1 = new TCanvas("c1", "MLP estimation", 1500, 1200);
+   TPad *pad1 = new TPad("pad1", "pad1", 0.005, 0, 0.2855, .995);
+   TPad *pad2 = new TPad("pad2", "pad2", .2865, 0, 0.5235, .995);
+   TPad *pad3 = new TPad("pad3", "pad3", .5245, 0, 0.7615, .995);
+   TPad *pad4 = new TPad("pad4", "pad4", 0.7625, 0, 0.995, .995);
+
+
+   pad1->Divide(1, 2, 1e-5, 1e-5);
+   pad2->Divide(1, 2, 1e-5, 1e-5);
+   pad3->Divide(1, 2, 1e-5, 1e-5);
+   pad4->Divide(1, 2, 1e-5, 1e-5);
+
+   pad1->Draw(); pad2->Draw(); pad3->Draw(); pad4->Draw();
+
+   pad1->cd(1);
+   TGraph *gMC = new TGraph(aIdxMC, aPosMCz, aPosMCx);
+   TGraph *gMCy = new TGraph(aIdxMC, aPosMCz, aPosMCy);
+   TGraph *gMLP = new TGraph(aIdxMLP, aPosMLPz, aPosMLPx);
+   TGraph *gMLPy = new TGraph(aIdxMLP, aPosMLPz, aPosMLPy);
+   gMC->SetMarkerStyle(21);
+   gMLP->SetMarkerStyle(21);
+   gMC->SetMarkerSize(0.3);
+   gMLP->SetMarkerSize(0.3);
+   gMC->SetMarkerColor(kRed);
+   gMLP->SetMarkerColor(kBlue);
+   gMC->Draw("AP");
+   gMLP->Draw("P");
+   gMC->SetTitle("Perfect knowledge;Depth [mm];X position [mm]");
+
+   pad1->cd(2);
+   gMCy->SetMarkerStyle(21);
+   gMLPy->SetMarkerStyle(21);
+   gMCy->SetMarkerSize(0.3);
+   gMLPy->SetMarkerSize(0.3);
+   gMCy->SetMarkerColor(kRed);
+   gMLPy->SetMarkerColor(kBlue);
+   gMCy->Draw("AP");
+   gMLPy->Draw("P");
+   gMCy->SetTitle("Perfect knowledge;Depth [mm];Y position [mm]");
+
+   // 2 and 6: Naive model
+   pad2->cd(1);
+   TGraph *gMCNoTrk = new TGraph(aIdxMC, aPosMCz, aPosMCx);
+   TGraph *gMLPNoTrk = new TGraph(aIdxMLP, aPosMLPz, aPosMLPNoTrkx);
+   gMLPNoTrk->SetMarkerStyle(21);
+   gMLPNoTrk->SetMarkerColor(kBlue);
+   gMCNoTrk->SetMarkerStyle(21);
+   gMCNoTrk->SetMarkerColor(kRed);
+   gMCNoTrk->SetMarkerSize(0.3);
+   gMLPNoTrk->SetMarkerSize(0.3);
+   gMCNoTrk->Draw("AP");
+   gMLPNoTrk->Draw("P");
+   gMCNoTrk->SetTitle("No Front Tracker - #hat{X}_{0} = (0,0,z_{0});Depth [mm];X position [mm]");
+   
+   pad2->cd(2);
+   TGraph *gMCNoTrky = new TGraph(aIdxMC, aPosMCz, aPosMCy);
+   TGraph *gMLPNoTrky = new TGraph(aIdxMLP, aPosMLPz, aPosMLPNoTrky);
+   gMLPNoTrky->SetMarkerStyle(21);
+   gMLPNoTrky->SetMarkerColor(kBlue);
+   gMCNoTrky->SetMarkerStyle(21);
+   gMCNoTrky->SetMarkerColor(kRed);
+   gMCNoTrky->SetMarkerSize(0.3);
+   gMLPNoTrky->SetMarkerSize(0.3);
+   gMCNoTrky->Draw("AP");
+   gMLPNoTrky->Draw("P");
+   gMCNoTrky->SetTitle("No Front Tracker - #hat{X}_{0} = (0,0,z_{0});Depth [mm];X position [mm]");
+
+   pad3->cd(1);
+   TGraph *gMCKrah = new TGraph(aIdxMC, aPosMCz, aPosMCx);
+   TGraph *gMLPKrah = new TGraph(aIdxMLP, aPosMLPz, aPosMLPKrahx);
+   gMLPKrah->SetMarkerStyle(21);
+   gMLPKrah->SetMarkerColor(kBlue);
+   gMCKrah->SetMarkerStyle(21);
+   gMCKrah->SetMarkerColor(kRed);
+   gMCKrah->SetMarkerSize(0.3);
+   gMLPKrah->SetMarkerSize(0.3);
+   gMCKrah->Draw("AP");
+   gMLPKrah->Draw("P");
+   gMCKrah->SetTitle("No Front Tracker - Bayesian MLP;Depth [mm];X position [mm]");
+   
+   pad3->cd(2);
+   TGraph *gMCKrahy = new TGraph(aIdxMC, aPosMCz, aPosMCy);
+   TGraph *gMLPKrahy = new TGraph(aIdxMLP, aPosMLPz, aPosMLPKrahy);
+   gMLPKrahy->SetMarkerStyle(21);
+   gMLPKrahy->SetMarkerColor(kBlue);
+   gMCKrahy->SetMarkerStyle(21);
+   gMCKrahy->SetMarkerColor(kRed);
+   gMCKrahy->SetMarkerSize(0.3);
+   gMLPKrahy->SetMarkerSize(0.3);
+   gMCKrahy->Draw("AP");
+   gMLPKrahy->Draw("P");
+   gMCKrahy->SetTitle("No Front Tracker - Bayesian MLP;Depth [mm];Y position [mm]");
+
+   pad4->cd(1);
+   TGraph *gMCest = new TGraph(aIdxMC, aPosMCz, aPosMCx);
+   TGraph *gMLPest = new TGraph(aIdxMLP, aPosMLPz, aPosMLPestx);
+   gMLPest->SetMarkerStyle(21);
+   gMLPest->SetMarkerColor(kBlue);
+   gMCest->SetMarkerStyle(21);
+   gMCest->SetMarkerColor(kRed);
+   gMCest->SetMarkerSize(0.3);
+   gMLPest->SetMarkerSize(0.3);
+   gMCest->Draw("AP");
+   gMLPest->Draw("P");
+   gMCest->SetTitle("No Front Tracker - Projection Model;Depth [mm];X position [mm]");
+   
+   pad4->cd(2);
+   TGraph *gMCesty = new TGraph(aIdxMC, aPosMCz, aPosMCy);
+   TGraph *gMLPesty = new TGraph(aIdxMLP, aPosMLPz, aPosMLPesty);
+   gMLPesty->SetMarkerStyle(21);
+   gMLPesty->SetMarkerColor(kBlue);
+   gMCesty->SetMarkerStyle(21);
+   gMCesty->SetMarkerColor(kRed);
+   gMCesty->SetMarkerSize(0.3);
+   gMLPesty->SetMarkerSize(0.3);
+   gMCesty->Draw("AP");
+   gMLPesty->Draw("P");
+   gMCesty->SetTitle("No Front Tracker - Projection Model;Depth [mm];Y position [mm]");
+
    TCanvas *c = new TCanvas("c", "Beam spot estimation", 1570, 580);
    c->Divide(3, 1, 0.001, 0.001);
 
@@ -574,16 +805,11 @@ void findMLP(Float_t phantomSize = 200, Float_t rotation = -1, Float_t spotsize 
    c->cd(3);
    hErrorKrah->Draw("COLZ");
 
-   TCanvas *c1D = new TCanvas("c1D", "beam spot estimation", 1000, 600);
-   hErrorKrah1D->Draw();
-*/
-
    for (Int_t i=0; i<idxDifferenceArray; i++) {
       differenceArrayDiff[i] /= nInDifferenceArray;
       differenceArrayDiffNoTrk[i]  /= nInDifferenceArray;
       differenceArrayDiffKrah[i]  /= nInDifferenceArray;
       differenceArrayDiffest[i] /= nInDifferenceArray;
-//      differenceArrayZ[i] += phantomSize/2;
    }
 
    TCanvas *c2 = new TCanvas("c2", "MC vs MLP difference", 600, 600);
@@ -625,18 +851,36 @@ void findMLP(Float_t phantomSize = 200, Float_t rotation = -1, Float_t spotsize 
       file.close();
    }
    else {
-      ofstream file(Form("Output/MLPerror_energy%.0fMeV_%s_krah_uib.csv", initialEnergy, sMaterial), ofstream::out | ofstream::app);
+      ofstream file(Form("Output/MLPerror_energy%.0fMeV_%s_krah_ll_model.csv", initialEnergy, sMaterial), ofstream::out | ofstream::app);
       file << phantomSize << " " <<  gDifferenceNoTrk->Eval(0) << " " << gDifferenceNoTrk->Eval(phantomSize/2) << " " << gDifferenceest->Eval(0) << " " << gDifferenceest->Eval(phantomSize/2) << " " << gDifferenceKrah->Eval(0) << " " << gDifferenceKrah->Eval(phantomSize/2) << " " << hResEnergy->GetMean() << " " << f10xAvg << endl;
       file.close();
    }
 
    printf("The Krah error is %.2f mm. The LPM error is %.2f mm.\n", gDifferenceKrah->Eval(0), gDifferenceest->Eval(0));
 
-   f->Close();
 
    if (kDeleteGraphics) {
       delete c0;
+      delete c;
+      delete c1;
       delete c2;
+      delete gMC;
+      delete gMCy;
+      delete gMLP;
+      delete gMLPy;
+      delete gMLPNoTrk;
+      delete gMLPNoTrky;
+      delete gMLPest;
+      delete gMLPesty;
+      delete gMLPKrah;
+      delete gMLPKrahy;
+      delete gMCNoTrk;
+      delete gMCNoTrky;
+      delete gMCest;
+      delete gMCesty;
+      delete gMCKrah;
+      delete gMCKrahy;
+      delete l;
       delete gDifferencePerfect;
       delete gDifferenceNoTrk;
       delete gDifferenceKrah;

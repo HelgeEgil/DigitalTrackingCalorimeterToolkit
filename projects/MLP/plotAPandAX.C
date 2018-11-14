@@ -133,6 +133,13 @@ void plotAPandAX() {
    float arrayP2Adipose230Emp[arraySize];
    float arrayP2Adipose230Fit[arraySize];
 
+   float array230UncBergenEst[arraySize];
+   float array230UncBergenKrahNoModel[arraySize];
+   float array230UncBergenKrahModel[arraySize];
+   float array230UncLLEst[arraySize];
+   float array230UncLLKrahNoModel[arraySize];
+   float array230UncLLKrahModel[arraySize];
+
    Float_t  arrayRotation[arraySize] = {0};
    Float_t  arrayRotationError[arraySize] = {0};
    
@@ -202,6 +209,8 @@ void plotAPandAX() {
    Int_t    arrayB100IdxDivergence = 0;
    Int_t    arrayAdiposeIdxDivergence = 0;
    Int_t    arrayCorticalBoneIdxDivergence = 0;
+   Int_t    idx230UncLLNoModel = 0;
+   Int_t    idx230UncLLModel = 0;
    Int_t idxP2CorticalBone230 = 0;
    Int_t idxP2Water200 = 0;
    Int_t idxP2Water230 = 0;
@@ -524,7 +533,7 @@ void plotAPandAX() {
    }
    in.close();
    
-   in.open("Output/MLPerror_energy230MeV_Water_krah_uib.csv");
+   in.open("Output/MLPerror_energy230MeV_Water_krah_uib_nomodel.csv");
    while (1) {
       in >> phantomSize_ >> mlpStartNoTrk_ >> mlpMidNoTrk_ >> mlpStartEst_ >> mlpMidEst_ >> mlpStartKrah_ >> mlpMidKrah_ >> residualEnergy_ >> fdummy;
 
@@ -534,12 +543,12 @@ void plotAPandAX() {
       array230wetwepl10mrad[idx23010mrad] = wet/wepl;
       array230Phantomsize10mrad[idx23010mrad] = phantomSize_;
       array230NoTrk10mrad[idx23010mrad] = mlpStartNoTrk_;
-      array230Est10mrad[idx23010mrad] = mlpStartEst_;
-      array230Krah10mrad[idx23010mrad++] = mlpStartKrah_;
+      array230UncBergenEst[idx23010mrad] = mlpStartEst_;
+      array230UncBergenKrahNoModel[idx23010mrad++] = mlpStartKrah_;
    }
    in.close();
 
-   in.open("Output/MLPerror_energy230MeV_Water_krah_ll.csv");
+   in.open("Output/MLPerror_energy230MeV_Water_krah_uib_model.csv");
    while (1) {
       in >> phantomSize_ >> mlpStartNoTrk_ >> mlpMidNoTrk_ >> mlpStartEst_ >> mlpMidEst_ >> mlpStartKrah_ >> mlpMidKrah_ >> residualEnergy_ >> fdummy;
 
@@ -549,10 +558,38 @@ void plotAPandAX() {
       array230wetwepl10mrad66um[idx23010mrad66um] = wet/wepl;
       array230Phantomsize10mrad66um[idx23010mrad66um] = phantomSize_;
       array230NoTrk10mrad66um[idx23010mrad66um] = mlpStartNoTrk_;
-      array230Est10mrad66um[idx23010mrad66um] = mlpStartEst_;
-      array230Krah10mrad66um[idx23010mrad66um++] = mlpStartKrah_;
+//      array230UncBergenEst[idx23010mrad66um] = mlpStartEst_;
+      array230UncBergenKrahModel[idx23010mrad66um++] = mlpStartKrah_;
    }
    in.close();
+
+   in.open("Output/MLPerror_energy230MeV_Water_krah_ll_nomodel.csv");
+   while (1) {
+      in >> phantomSize_ >> mlpStartNoTrk_ >> mlpMidNoTrk_ >> mlpStartEst_ >> mlpMidEst_ >> mlpStartKrah_ >> mlpMidKrah_ >> residualEnergy_ >> fdummy;
+
+      if (!in.good()) break;
+         
+      wet = wepl - splineWater->Eval(residualEnergy_);
+      array230wetwepl10mrad[idx230UncLLNoModel] = wet/wepl;
+      array230Phantomsize10mrad[idx230UncLLNoModel] = phantomSize_;
+      array230UncLLEst[idx230UncLLNoModel] = mlpStartEst_;
+      array230UncLLKrahNoModel[idx230UncLLNoModel++] = mlpStartKrah_;
+   }
+   in.close();
+
+   in.open("Output/MLPerror_energy230MeV_Water_krah_ll_model.csv");
+   while (1) {
+      in >> phantomSize_ >> mlpStartNoTrk_ >> mlpMidNoTrk_ >> mlpStartEst_ >> mlpMidEst_ >> mlpStartKrah_ >> mlpMidKrah_ >> residualEnergy_ >> fdummy;
+
+      if (!in.good()) break;
+         
+      wet = wepl - splineWater->Eval(residualEnergy_);
+      array230wetwepl10mrad66um[idx230UncLLModel] = wet/wepl;
+      array230Phantomsize10mrad66um[idx230UncLLModel] = phantomSize_;
+      array230UncLLKrahModel[idx230UncLLModel++] = mlpStartKrah_;
+   }
+   in.close();
+
 
    wepl = splineWater->Eval(200);
    in.open("Output/MLPerror_energy200MeV_Water_krah.csv");
@@ -765,7 +802,6 @@ void plotAPandAX() {
 //   gAPall->Draw("AP");
    gAP200->Draw("AP");
 */
-
    gAXB100230->SetMarkerColor(kRed);
    gAPB100230->SetMarkerColor(kRed);
    gAPB100230->SetMarkerStyle(21);
@@ -791,7 +827,6 @@ void plotAPandAX() {
 
    gAX230->SetTitle(";WET/WEPL;A_{X} parameter");
    gAP230->SetTitle(";WET/WEPL;A_{P} parameter");
-/*
 //   c1->cd(1);
    gAX230->Draw("AP");
    gAXA150230->Draw("P");
@@ -821,7 +856,8 @@ void plotAPandAX() {
    legX->AddEntry(fitX, "Polynomial fit", "L");
    legX->AddEntry(gAXtheory, "Theoretical prediction", "L");
    legX->Draw();
-  */ 
+   
+   /*
    //c1->cd(2);
    gAP230->Draw("AP");
    gAPA150230->Draw("P");
@@ -852,7 +888,7 @@ void plotAPandAX() {
    leg->AddEntry(gAPtheory, "Theoretical prediction", "L");
    leg->SetTextFont(22);
    leg->Draw(); 
-
+*/
    TCanvas *c3 = new TCanvas("c3", "Error vs divergence", 1200, 400);
    c3->Divide(3,1,1e-3,1e-3);
 
@@ -1055,7 +1091,7 @@ void plotAPandAX() {
    legss->Draw();
    legss->SetTextFont(22);
 
-   TCanvas *c7 = new TCanvas("c7", "Different estimation models", 1500, 1200);
+   TCanvas *c7 = new TCanvas("c7", "Different estimation models", 1000, 800);
 
    TGraph *g200NoTrk = new TGraph(idx230, array230wetwepl, array230NoTrk);
    TGraph *g200Est = new TGraph(idx200, array200wetwepl, array200Est);
@@ -1086,10 +1122,10 @@ void plotAPandAX() {
 //   g200NoTrk->GetYaxis()->SetRangeUser(0, 6);
 
    TLegend *leg4 = new TLegend(.3, .66, .64, .8655);
-   leg4->AddEntry(g200Krah, "MLP 200 MeV", "P");
    leg4->AddEntry(g230Krah, "MLP 230 MeV", "P");
-   leg4->AddEntry(g200Est, "LPM 200 MeV", "P");
    leg4->AddEntry(g230Est, "LPM 230 MeV", "P");
+   leg4->AddEntry(g200Krah, "MLP 200 MeV", "P");
+   leg4->AddEntry(g200Est, "LPM 200 MeV", "P");
    leg4->Draw();
    leg4->SetTextFont(22);
 
@@ -1144,32 +1180,58 @@ void plotAPandAX() {
 
    TCanvas *c9 = new TCanvas("c9", "X0 accuracy vs different tracker uncertainties", 1000, 800);
 
-   TGraph *g230WaterEst0mrad = new TGraph(idx230, array230Phantomsize, array230Est);
-   TGraph *g230WaterEst10mrad = new TGraph(idx23010mrad, array230Phantomsize10mrad, array230Est10mrad);
-   TGraph *g230WaterEst10mrad66um = new TGraph(idx23010mrad66um, array230Phantomsize10mrad66um, array230Est10mrad66um);
+   for (int i=0; i<idx230; i++) {
+      array230UncBergenKrahNoModel[i] -= array230Krah[i];
+      array230UncBergenKrahModel[i] -= array230Krah[i];
+      array230UncBergenEst[i] -= array230Krah[i];
+      array230UncLLKrahNoModel[i] -= array230Krah[i];
+      array230UncLLKrahModel[i] -= array230Krah[i];
+      array230UncLLEst[i] -= array230Krah[i];
+   }
 
-   g230WaterEst0mrad->SetMarkerColor(kBlue-7);
-   g230WaterEst0mrad->SetMarkerStyle(21);
-   g230WaterEst0mrad->SetMarkerSize(1.2);
+   TGraph *g230WaterEst0mrad = new TGraph(idx230, array230Phantomsize, array230Krah);
+   TGraph *g230WaterUncLLKrahNoModel = new TGraph(idx230UncLLNoModel, array230Phantomsize10mrad, array230UncLLKrahNoModel);
+   TGraph *g230WaterUncLLEst = new TGraph(idx230UncLLModel, array230Phantomsize10mrad, array230UncLLEst);
+   TGraph *g230WaterUncLLKrahModel = new TGraph(idx230UncLLModel, array230Phantomsize10mrad66um, array230UncLLKrahModel);
+   TGraph *g230WaterUncBergenKrahNoModel = new TGraph(idx23010mrad, array230Phantomsize10mrad, array230UncBergenKrahNoModel);
+   TGraph *g230WaterUncBergenEst = new TGraph(idx23010mrad, array230Phantomsize10mrad, array230UncBergenEst);
+   TGraph *g230WaterUncBergenKrahModel = new TGraph(idx23010mrad66um, array230Phantomsize10mrad66um, array230UncBergenKrahModel);
+
+   g230WaterUncLLKrahNoModel->SetLineColor(kRed);
+   g230WaterUncLLKrahNoModel->SetLineWidth(3);
+   g230WaterUncLLEst->SetLineColor(kOrange+2);
+   g230WaterUncLLEst->SetLineWidth(3);
+   g230WaterUncLLKrahModel->SetLineColor(kBlack);
+   g230WaterUncLLKrahModel->SetLineWidth(3);
    
-   g230WaterEst10mrad->SetMarkerColor(kRed);
-   g230WaterEst10mrad->SetMarkerStyle(21);
-   g230WaterEst10mrad->SetMarkerSize(1.2);
-   
-   g230WaterEst10mrad66um->SetMarkerColor(kOrange+2);
-   g230WaterEst10mrad66um->SetMarkerStyle(21);
-   g230WaterEst10mrad66um->SetMarkerSize(1.2);
+   g230WaterUncBergenKrahNoModel->SetLineColor(kRed);
+   g230WaterUncBergenKrahNoModel->SetLineWidth(3);
+   g230WaterUncBergenKrahNoModel->SetLineStyle(9);
+   g230WaterUncBergenEst->SetLineColor(kOrange+2);
+   g230WaterUncBergenEst->SetLineWidth(3);
+   g230WaterUncBergenEst->SetLineStyle(9);
+   g230WaterUncBergenKrahModel->SetLineColor(kBlack);
+   g230WaterUncBergenKrahModel->SetLineWidth(3);
+   g230WaterUncBergenKrahModel->SetLineStyle(9);
 
-   g230WaterEst0mrad->SetTitle(";Phantom size [mm]; Estimation error | X_{0}^{MC} - X_{0}^{opt}| [mm]");
+   g230WaterUncLLEst->SetTitle(";Phantom size [mm]; Difference from ideal detector (with MLP+CSP) [mm]");
 
-   g230WaterEst0mrad->Draw("AP");
-   g230WaterEst10mrad->Draw("P");
-   g230WaterEst10mrad66um->Draw("P");
+//   g230WaterEst0mrad->Draw("AL");
+   g230WaterUncLLEst->Draw("AL");
+   g230WaterUncLLKrahModel->Draw("L");
+   g230WaterUncLLKrahNoModel->Draw("L");
+   g230WaterUncBergenEst->Draw("L");
+   g230WaterUncBergenKrahModel->Draw("L");
+   g230WaterUncBergenKrahNoModel->Draw("L");
 
    TLegend *leg6 = new TLegend(.3, .66, .64, .8655);
-   leg6->AddEntry(g230WaterEst0mrad, "Ideal trackers", "P");
-   leg6->AddEntry(g230WaterEst10mrad66um, "Loma Linda tracker", "P");
-   leg6->AddEntry(g230WaterEst10mrad, "Expected Bergen tracker", "P");
+//   leg6->AddEntry(g230WaterEst0mrad, "Ideal trackers MLP", "L")
+   leg6->AddEntry(g230WaterUncLLKrahModel, "Modeled LL uncertainties MLP", "L");
+   leg6->AddEntry(g230WaterUncLLKrahNoModel, "Unmodeled LL uncertainties MLP", "L");
+   leg6->AddEntry(g230WaterUncLLEst, "LL uncertainties LPM", "L");
+   leg6->AddEntry(g230WaterUncBergenKrahModel, "Modeled Bergen uncertainties MLP", "L");
+   leg6->AddEntry(g230WaterUncBergenKrahNoModel, "Unmodeled Bergen uncertainties MLP", "L");
+   leg6->AddEntry(g230WaterUncBergenEst, "Bergen uncertainties LPM", "L");
    leg6->Draw();
    leg6->SetTextFont(22);
 
