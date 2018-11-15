@@ -1093,11 +1093,12 @@ void plotAPandAX() {
 
    TCanvas *c7 = new TCanvas("c7", "Different estimation models", 1000, 800);
 
-   TGraph *g200NoTrk = new TGraph(idx230, array230wetwepl, array230NoTrk);
-   TGraph *g200Est = new TGraph(idx200, array200wetwepl, array200Est);
-   TGraph *g230Est = new TGraph(idx230, array230wetwepl, array230Est);
-   TGraph *g200Krah = new TGraph(idx200, array200wetwepl, array200Krah);
-   TGraph *g230Krah = new TGraph(idx230, array230wetwepl, array230Krah);
+   TGraph *g200NoTrk = new TGraph(idx230, array230Phantomsize, array230NoTrk);
+   TGraph *g200Est = new TGraph(idx200, array200Phantomsize, array200Est);
+   TGraph *g230Est = new TGraph(idx230, array230Phantomsize, array230Est);
+   TGraph *g200Krah = new TGraph(idx200, array200Phantomsize, array200Krah);
+   TGraph *g230Krah = new TGraph(idx230, array230Phantomsize, array230Krah);
+
 
    g200Est->SetMarkerColor(kBlue);
    g200Est->SetMarkerStyle(21);
@@ -1112,22 +1113,23 @@ void plotAPandAX() {
    g230Krah->SetMarkerStyle(21);
    g230Krah->SetMarkerSize(1);
 
-   g200Est->SetTitle(";WET/WEPL;X_{0} estimation error [mm]");
+   g230Est->SetTitle(";Phantom size [mm];Error |X_{0}^{MC} - X_{0}^{opt}| [mm]");
 
-   g200Est->Draw("AP");
-   g200Krah->Draw("P");
-   g230Est->Draw("P");
+   g230Est->Draw("AP");
    g230Krah->Draw("P");
+   g200Est->Draw("P");
+   g200Krah->Draw("P");
 
 //   g200NoTrk->GetYaxis()->SetRangeUser(0, 6);
 
    TLegend *leg4 = new TLegend(.3, .66, .64, .8655);
-   leg4->AddEntry(g230Krah, "MLP 230 MeV", "P");
-   leg4->AddEntry(g230Est, "LPM 230 MeV", "P");
    leg4->AddEntry(g200Krah, "MLP 200 MeV", "P");
    leg4->AddEntry(g200Est, "LPM 200 MeV", "P");
+   leg4->AddEntry(g230Krah, "MLP 230 MeV", "P");
+   leg4->AddEntry(g230Est, "LPM 230 MeV", "P");
    leg4->Draw();
    leg4->SetTextFont(22);
+   leg4->SetMargin(0.2);
 
    TCanvas *c8 = new TCanvas("c8", "Error in different materials", 600, 600);
 
@@ -1179,7 +1181,7 @@ void plotAPandAX() {
    leg5->SetTextFont(22);
 
    TCanvas *c9 = new TCanvas("c9", "X0 accuracy vs different tracker uncertainties", 1000, 800);
-
+/*
    for (int i=0; i<idx230; i++) {
       array230UncBergenKrahNoModel[i] -= array230Krah[i];
       array230UncBergenKrahModel[i] -= array230Krah[i];
@@ -1188,7 +1190,7 @@ void plotAPandAX() {
       array230UncLLKrahModel[i] -= array230Krah[i];
       array230UncLLEst[i] -= array230Krah[i];
    }
-
+*/
    TGraph *g230WaterEst0mrad = new TGraph(idx230, array230Phantomsize, array230Krah);
    TGraph *g230WaterUncLLKrahNoModel = new TGraph(idx230UncLLNoModel, array230Phantomsize10mrad, array230UncLLKrahNoModel);
    TGraph *g230WaterUncLLEst = new TGraph(idx230UncLLModel, array230Phantomsize10mrad, array230UncLLEst);
@@ -1216,8 +1218,8 @@ void plotAPandAX() {
 
    g230WaterUncLLEst->SetTitle(";Phantom size [mm]; Difference from ideal detector (with MLP+CSP) [mm]");
 
-//   g230WaterEst0mrad->Draw("AL");
-   g230WaterUncLLEst->Draw("AL");
+   g230WaterEst0mrad->Draw("AL");
+   g230WaterUncLLEst->Draw("L");
    g230WaterUncLLKrahModel->Draw("L");
    g230WaterUncLLKrahNoModel->Draw("L");
    g230WaterUncBergenEst->Draw("L");

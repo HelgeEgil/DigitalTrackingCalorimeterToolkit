@@ -34,6 +34,8 @@
 #define X_0 36.1
 
 enum eMat {kWater, kA150, kB100, kCorticalBone, kAdipose};
+enum eMod {kUiB, kLL};
+
 
 const int kAdiposeMax = 350;
 const int kA150Max = 290;
@@ -65,13 +67,13 @@ XYZVector SplineMLP(Double_t t, XYZVector X0, XYZVector X2, XYZVector P0, XYZVec
    return S;
 }
 
-void findMLP(Float_t phantomSize = 200, Float_t rotation = -1, Float_t spotsize = -1, Float_t initialEnergy = 230, Int_t material = kWater) {
+void findMLP(Float_t phantomSize = 200, Float_t rotation = -1, Float_t spotsize = -1, Float_t initialEnergy = 230, Int_t material = kWater, Int_t kModelType = kUiB, Bool_t kModelUncertainties = false) {
    printf("---------\nRunning with phantomSize = %.0f, rotation = %.0f, spotsize = %.1f, energy = %.0f and material =%d\n-----------\n", phantomSize, rotation, spotsize, initialEnergy, material);
    Int_t      printed = 0;
    const Int_t eventsToUse = 100000;
-   Float_t     sigmaTheta = 0.01; // scattering between last two tracker layers, rad
-   Float_t     sigmaPos = 0.066; // Position unc. in tracking layers, mm
-   Bool_t      kDeleteGraphics = false; // batch mode
+   Float_t     sigmaTheta = 0.007; // scattering between last two tracker layers, rad
+   Float_t     sigmaPos = 0.008; // Position unc. in tracking layers, mm
+   Bool_t      kDeleteGraphics = true; // batch mode
    Float_t     x, y, z, edep, sum_edep = 0, residualEnergy = 0, AP, AX;
    Int_t       eventID, parentID, lastEID = -1;
    XYZVector   Xp0, Xp1, Xp2, Xp2prime, Xp3, Xp3prime, X0, X2, X0est, X0err, X0tps, P0, P0tps, P2, S, P2gaus, P2prime, X2prime, scat, scatXp2, scatXp3; // Xp are the plane coordinates, X are the tracker coordinates (X2 = (Xp1 + Xp2) / 2)
@@ -95,7 +97,8 @@ void findMLP(Float_t phantomSize = 200, Float_t rotation = -1, Float_t spotsize 
    Float_t     sourceToX0dist = 100;
    Float_t     d_entry = 10;
    Float_t     d_exit = 10;
-   Float_t     d_T = 50; // mm between trackers
+   Float_t     d_T = 10; // mm between trackers
+   Float_t     d_Tcm = d_T/10; // mm between trackers
    Float_t     d_entry_cm = 1;
    Float_t     d_exit_cm = 1;
    Int_t       nInDifferenceArray = 0;
@@ -162,7 +165,10 @@ void findMLP(Float_t phantomSize = 200, Float_t rotation = -1, Float_t spotsize 
    double track_uncert_1[4];
    double track_uncert[4];
 
-
+   if (kModelType == kLL) {
+      sigmaPos = 0.066;
+      sigmaTheta = 0.01;
+   }
 
    if      (material == kWater)        sMaterial = (char*) "Water";
    else if (material == kB100)         sMaterial = (char*) "B100";
@@ -319,7 +325,7 @@ void findMLP(Float_t phantomSize = 200, Float_t rotation = -1, Float_t spotsize 
          if (hResEnergy->GetEntries() > 5) {
             energyFilter = hResEnergy->GetMean() * 0.9;
          }
-         else energyFilter = 150;
+         else energyFilter = 0;
 
          if (residualEnergy > energyFilter && angle < sigmaFilter) {
             hResEnergy->Fill(residualEnergy);
@@ -336,16 +342,20 @@ void findMLP(Float_t phantomSize = 200, Float_t rotation = -1, Float_t spotsize 
             sigma_beam[2] = s_pos/d_source;
             sigma_beam[3] = s_pos/(pow(d_source,2)) + s_angle;
 
-            float d_T = 1; // distance between trackers in cm
             float s_pos_out = sigmaPos / 10; // in cm LLU 66 um, Bergen 5 um
             float s_scat_out = sigmaTheta; // rad LLU 10 mrad, Bergen 7 mrad
+
+            if (!kModelUncertainties) {
+               s_pos_out = 0;
+               s_scat_out = 0;   
+            }
 
             if (spotsize >= 0) s_pos = pow(spotsize / 10 + 0.02, 2);
       
             T_out[0] = 0;
             T_out[1] = 0;
-            T_out[2] = -1/d_T;
-            T_out[3] = 1/d_T;
+            T_out[2] = -1/d_Tcm;
+            T_out[3] = 1/d_Tcm;
 
             T_out_transpose[0] = T_out[0];
             T_out_transpose[1] = T_out[2];
@@ -532,7 +542,7 @@ void findMLP(Float_t phantomSize = 200, Float_t rotation = -1, Float_t spotsize 
             Lambda0 = 1.01 + 0.43 * w2;
             Lambda2 = 0.99 - 0.46 * w2;
 
-            for (Float_t t=0; t<1; t += 0.01) {
+            for (Float_t t=0; t<1; t += 0.1) {
                S = SplineMLP(t, X0, X2, P0, P2, Lambda0, Lambda2); // perfect info
                if (lastEID < maxAcc) {
                   aPosMLPx[aIdxMLP] = S.X();
@@ -840,6 +850,13 @@ void findMLP(Float_t phantomSize = 200, Float_t rotation = -1, Float_t spotsize 
    l->AddEntry(gDifferenceest, "LPM + CSP", "L");
    l->Draw();
 
+   char *sIsModel = (char*) "";
+   if (!kModelUncertainties) sIsModel = (char*) "no";
+
+   char *sModelType = (char*) "ll";
+   if (kModelType == kUiB) sModelType = (char*) "uib";
+
+
    if (spotsize >= 0) {
       ofstream file(Form("Output/MLPerror_energy%.0fMeV_%s_spotsize_krah.csv", initialEnergy, sMaterial), ofstream::out | ofstream::app);
       file << phantomSize << " " <<  spotsize << " " << gDifferenceNoTrk->Eval(0) << " " << gDifferenceNoTrk->Eval(phantomSize/2) << " " << gDifferenceest->Eval(0) << " " << gDifferenceest->Eval(phantomSize/2) << " " << gDifferenceKrah->Eval(0) << " " << gDifferenceKrah->Eval(phantomSize/2) << " " << hResEnergy->GetMean() << endl;
@@ -851,7 +868,7 @@ void findMLP(Float_t phantomSize = 200, Float_t rotation = -1, Float_t spotsize 
       file.close();
    }
    else {
-      ofstream file(Form("Output/MLPerror_energy%.0fMeV_%s_krah_ll_model.csv", initialEnergy, sMaterial), ofstream::out | ofstream::app);
+      ofstream file(Form("Output/MLPerror_energy%.0fMeV_%s_krah_%s_%smodel.csv", initialEnergy, sMaterial, sModelType, sIsModel), ofstream::out | ofstream::app);
       file << phantomSize << " " <<  gDifferenceNoTrk->Eval(0) << " " << gDifferenceNoTrk->Eval(phantomSize/2) << " " << gDifferenceest->Eval(0) << " " << gDifferenceest->Eval(phantomSize/2) << " " << gDifferenceKrah->Eval(0) << " " << gDifferenceKrah->Eval(phantomSize/2) << " " << hResEnergy->GetMean() << " " << f10xAvg << endl;
       file.close();
    }
