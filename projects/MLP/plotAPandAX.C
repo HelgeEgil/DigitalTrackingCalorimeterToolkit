@@ -414,7 +414,7 @@ void plotAPandAX() {
       arrayResidualEnergy230[arrayIdx230] = pow(wet/wepl, 1);
       arrayError230[arrayIdx230] = error_;
       arrayAX230[arrayIdx230] = AX_;
-      arrayAP230[arrayIdx230++] = -AP_;
+      arrayAP230[arrayIdx230++] = AP_;
    }
    in.close();
 

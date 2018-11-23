@@ -124,12 +124,12 @@ void findMLPLoop(Float_t phantomSize, Int_t eventsToUse, Float_t spotSize, Int_t
    if (!tree) exit(0);
 
    Float_t  AXlow = 0;
-   Float_t  AXhigh = 15;
+   Float_t  AXhigh = 1;
    Float_t  APlow = 0;
-   Float_t  APhigh = 15;
+   Float_t  APhigh = 1;
    
-   Float_t  AXdelta = 0.1;
-   Float_t  APdelta = 0.1;
+   Float_t  AXdelta = 0.02;
+   Float_t  APdelta = 0.02;
 
    Int_t    AXbins = (AXhigh - AXlow) / AXdelta;
    Int_t    APbins = (APhigh - APlow) / APdelta;
