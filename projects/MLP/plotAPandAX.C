@@ -145,6 +145,7 @@ void plotAPandAX() {
    
    Float_t  arraySpotsize[arraySize] = {0};
    Float_t  arraySpotsizeError[arraySize] = {0};
+   Float_t  arraySpotsizeErrorNoOpt[arraySize] = {0};
    
    Float_t  arraySpotsizeKrah[arraySize] = {0};
    Float_t  arraySpotsizeErrorKrah[arraySize] = {0};
@@ -413,7 +414,7 @@ void plotAPandAX() {
       arrayResidualEnergy230[arrayIdx230] = pow(wet/wepl, 1);
       arrayError230[arrayIdx230] = error_;
       arrayAX230[arrayIdx230] = AX_;
-      arrayAP230[arrayIdx230++] = AP_;
+      arrayAP230[arrayIdx230++] = -AP_;
    }
    in.close();
 
@@ -515,6 +516,17 @@ void plotAPandAX() {
       arraySpotsizeErrorKrah[idxSpotsizeKrah++] = mlpStartKrah_;
       arraySpotsize[idxSpotsize] = rotation_;
       arraySpotsizeError[idxSpotsize++] = mlpStartEst_;
+   }
+   in.close();
+   
+   idxSpotsize = 0;
+   in.open("Output/MLPerror_energy230MeV_Water_spotsize_krah_noopt.csv");
+   while (1) {
+      in >> dummy >> rotation_ >> mlpStartNoTrk_ >> mlpMidNoTrk_ >> mlpStartEst_ >> mlpMidEst_ >> mlpStartKrah_ >> mlpMidKrah_ >> residualEnergy_;
+      if (!in.good()) break;
+
+      arraySpotsize[idxSpotsize] = rotation_;
+      arraySpotsizeErrorNoOpt[idxSpotsize++] = mlpStartEst_;
    }
    in.close();
    
@@ -718,7 +730,7 @@ void plotAPandAX() {
 
    
    TCanvas *c1 = new TCanvas("c1", "Fit results", 1500, 1200);
-//   c1->Divide(2,1,1e-4,1e-4);
+   c1->Divide(2,1,1e-4,1e-4);
 
    Float_t  arrayAPall[arraySize];
    Float_t  arrayAXall[arraySize];
@@ -827,12 +839,15 @@ void plotAPandAX() {
 
    gAX230->SetTitle(";WET/WEPL;A_{X} parameter");
    gAP230->SetTitle(";WET/WEPL;A_{P} parameter");
-//   c1->cd(1);
+
+   c1->cd(1);
    gAX230->Draw("AP");
    gAXA150230->Draw("P");
    gAXB100230->Draw("P");
    gAXCorticalBone230->Draw("P");
    gAXAdipose230->Draw("P");
+
+   TF1 *fitExp = new TF1("fitExp", "[1] * exp([2] + x*[3] + pow(x,2)*[4])");
   
    TF1 *fitX = new TF1("fitX", "pol4");
    fitX->SetParameters(1, -0.30, 1.53, -4.25, 2.30);
@@ -857,8 +872,7 @@ void plotAPandAX() {
    legX->AddEntry(gAXtheory, "Theoretical prediction", "L");
    legX->Draw();
    
-   /*
-   //c1->cd(2);
+   c1->cd(2);
    gAP230->Draw("AP");
    gAPA150230->Draw("P");
    gAPB100230->Draw("P");
@@ -888,7 +902,7 @@ void plotAPandAX() {
    leg->AddEntry(gAPtheory, "Theoretical prediction", "L");
    leg->SetTextFont(22);
    leg->Draw(); 
-*/
+
    TCanvas *c3 = new TCanvas("c3", "Error vs divergence", 1200, 400);
    c3->Divide(3,1,1e-3,1e-3);
 
@@ -1069,6 +1083,7 @@ void plotAPandAX() {
    
    TCanvas *c6 = new TCanvas("c6", "Errors vs rotation", 1000, 800);
    TGraph *gSpotsizeError = new TGraph(idxSpotsize, arraySpotsize, arraySpotsizeError);
+   TGraph *gSpotsizeErrorNoOpt = new TGraph(idxSpotsize, arraySpotsize, arraySpotsizeErrorNoOpt);
    TGraph *gSpotsizeErrorKrah = new TGraph(idxSpotsizeKrah, arraySpotsizeKrah, arraySpotsizeErrorKrah);
 
    gSpotsizeError->SetTitle("MLP estimation error with #hat{X_{0}}, 200 MeV beam/160 mm phantom;Beam spotsize [mm];Error |X_{0}^{MC} - X_{0}^{est}| [mm]");
@@ -1077,16 +1092,22 @@ void plotAPandAX() {
    gSpotsizeError->SetMarkerStyle(21);
    gSpotsizeError->SetMarkerSize(1.2);
    
+   gSpotsizeErrorNoOpt->SetMarkerColor(kOrange+2);
+   gSpotsizeErrorNoOpt->SetMarkerStyle(21);
+   gSpotsizeErrorNoOpt->SetMarkerSize(1.2);
+
    gSpotsizeErrorKrah->SetMarkerColor(kRed);
    gSpotsizeErrorKrah->SetMarkerStyle(21);
    gSpotsizeErrorKrah->SetMarkerSize(1.2);
 
    gSpotsizeError->Draw("PA");
+   gSpotsizeErrorNoOpt->Draw("P");
    gSpotsizeErrorKrah->Draw("P");
 //   gSpotsizeError->GetYaxis()->SetTitleOffset(1.2);
 
    TLegend *legss = new TLegend(.3, .66, .64, .8655);
-   legss->AddEntry(gSpotsizeError, "Linear Projection Model", "P");
+   legss->AddEntry(gSpotsizeError, "Spotsize-optimized LPM", "P");
+   legss->AddEntry(gSpotsizeErrorNoOpt, "Fixed-parameter LPM", "P");
    legss->AddEntry(gSpotsizeErrorKrah, "Bayesian MLP", "P");
    legss->Draw();
    legss->SetTextFont(22);

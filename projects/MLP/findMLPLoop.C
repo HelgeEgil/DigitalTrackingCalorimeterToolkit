@@ -12,6 +12,14 @@
 #include <Math/Vector3D.h>
 
 enum eMat {kWater, kA150, kB100, kCorticalBone, kAdipose};
+enum eMod {kUiB, kLL};
+
+const int kAdiposeMax = 350;
+const int kA150Max = 290;
+const int kWaterMax = 330;
+const int kWater200Max = 270;
+const int kB100Max = 250;
+const int kCorticalBoneMax = 200;
 
 // 230 MeV
 // Water: 10 -> 330
@@ -101,8 +109,13 @@ void findMLPLoop(Float_t phantomSize, Int_t eventsToUse, Float_t spotSize, Int_t
       f = new TFile(Form("MC/Output/simpleScanner_energy%.0fMeV_%s_phantom%03.0fmm.root", initialEnergy, sMaterial, phantomSize)); 
    }
    else {
-      f = new TFile(Form("MC/Output/simpleScanner_energy%.0fMeV_%s_phantom%03.0fmm_spotsize%04.1fmm.root", initialEnergy, sMaterial, phantomSize, spotSize)); 
+      //f = new TFile(Form("MC/Output/simpleScanner_energy%.0fMeV_%s_phantom%03.0fmm_spotsize%04.1fmm.root", initialEnergy, sMaterial, phantomSize, spotSize)); 
+      f = new TFile(Form("MC/Output/simpleScanner_energy%.0fMeV_%s_phantom%03.0fmm_spotsize%01.0fmm.root", initialEnergy, sMaterial, phantomSize, spotSize)); 
    }
+
+   if (spotSize < 0) { spotSize = 3; }
+  
+   spotSize = 0.9867 * spotSize + 0.1985; // correct for scattering in air + divergence from source to X0 plane
 
    if (material == kAdipose) sMaterial = (char*) "Adipose";
 
@@ -110,13 +123,13 @@ void findMLPLoop(Float_t phantomSize, Int_t eventsToUse, Float_t spotSize, Int_t
 
    if (!tree) exit(0);
 
-   Float_t  AXlow = 0.5;
-   Float_t  AXhigh = 1.05;
-   Float_t  APlow = -0.7;
-   Float_t  APhigh = 0;
+   Float_t  AXlow = 0;
+   Float_t  AXhigh = 15;
+   Float_t  APlow = 0;
+   Float_t  APhigh = 15;
    
-   Float_t  AXdelta = 0.005;
-   Float_t  APdelta = 0.005;
+   Float_t  AXdelta = 0.1;
+   Float_t  APdelta = 0.1;
 
    Int_t    AXbins = (AXhigh - AXlow) / AXdelta;
    Int_t    APbins = (APhigh - APlow) / APdelta;
@@ -175,7 +188,7 @@ void findMLPLoop(Float_t phantomSize, Int_t eventsToUse, Float_t spotSize, Int_t
             // INNER MINIMIZATION LOOP
             for (Float_t AX = AXlow; AX <= AXhigh; AX += AXdelta) {
                for (Float_t AP = APlow; AP <= APhigh; AP += APdelta) {
-                  X0est = X2 * AX + phantomSize * AP * P2;
+                  X0est = X2 * AX/(pow(spotSize,-2) + AX) - phantomSize * AP/(pow(spotSize,-2)+AX) * P2;
                   diff_x = fabs(X0.X() - X0est.X());
                   diff_y = fabs(X0.Y() - X0est.Y());
                   hErrorMatrix->Fill(AX, AP, sqrt(pow(diff_x, 2) + pow(diff_y, 2)));
@@ -234,7 +247,15 @@ void findMLPLoop(Float_t phantomSize, Int_t eventsToUse, Float_t spotSize, Int_t
    Float_t minXvalue = hErrorMatrix->GetXaxis()->GetBinCenter(binx);
    Float_t minYvalue = hErrorMatrix->GetYaxis()->GetBinCenter(biny);
    Float_t minZvalue = hErrorMatrix->GetZaxis()->GetBinCenter(binz);
-   printf("The bin with the minimum nonzero content is %.2f. AX = %.3f and AP = %.3f.\n", mincont, minXvalue, minYvalue);
+   printf("The bin with the minimum nonzero content is %.4f. AX = %.3f and AP = %.3f.\n", mincont, minXvalue, minYvalue);
+   
+   for (Int_t i=0; i<nbins; i++) {
+      cont = hErrorMatrix->GetBinContent(i);
+      if (cont == mincont) {
+         hErrorMatrix->SetBinContent(i, -10);
+      }
+   }
+
 
    TCanvas *c2 = new TCanvas("c2", "param values", 1500, 1200);
    hErrorMatrix->GetZaxis()->SetLabelFont(22);

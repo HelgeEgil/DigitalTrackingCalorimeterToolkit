@@ -71,9 +71,9 @@ void findMLP(Float_t phantomSize = 200, Float_t rotation = -1, Float_t spotsize 
    printf("---------\nRunning with phantomSize = %.0f, rotation = %.0f, spotsize = %.1f, energy = %.0f and material =%d\n-----------\n", phantomSize, rotation, spotsize, initialEnergy, material);
    Int_t      printed = 0;
    const Int_t eventsToUse = 100000;
-   Float_t     sigmaTheta = 0.007; // scattering between last two tracker layers, rad
-   Float_t     sigmaPos = 0.008; // Position unc. in tracking layers, mm
-   Bool_t      kDeleteGraphics = true; // batch mode
+   Float_t     sigmaTheta = 0; // scattering between last two tracker layers, rad
+   Float_t     sigmaPos = 0; // Position unc. in tracking layers, mm
+   Bool_t      kDeleteGraphics = false; // batch mode
    Float_t     x, y, z, edep, sum_edep = 0, residualEnergy = 0, AP, AX;
    Int_t       eventID, parentID, lastEID = -1;
    XYZVector   Xp0, Xp1, Xp2, Xp2prime, Xp3, Xp3prime, X0, X2, X0est, X0err, X0tps, P0, P0tps, P2, S, P2gaus, P2prime, X2prime, scat, scatXp2, scatXp3; // Xp are the plane coordinates, X are the tracker coordinates (X2 = (Xp1 + Xp2) / 2)
@@ -121,6 +121,7 @@ void findMLP(Float_t phantomSize = 200, Float_t rotation = -1, Float_t spotsize 
    TRandom3  * gRandom = new TRandom3(0);
    Float_t     f10xAvg = 0;
    Float_t     f10yAvg = 0;
+   Float_t     spotSizeAtX0 = 0;
    Int_t       f10xN = 0;
    Int_t       f10yN = 0;
    Int_t       maxAcc = 5;
@@ -210,6 +211,9 @@ void findMLP(Float_t phantomSize = 200, Float_t rotation = -1, Float_t spotsize 
    
    if (material == kAdipose) sMaterial = (char*) "Adipose";
 
+   if (spotsize < 0) spotSizeAtX0 = 3.14; // undefined, 3 mm at source
+   else              spotSizeAtX0 = 0.9869 * spotsize + 0.1985; // correct for scattering in air + divergence from source to X0 plane
+
    TTree *tree = (TTree*) f->Get("Hits");
 
    if (!tree) exit(0);
@@ -298,8 +302,8 @@ void findMLP(Float_t phantomSize = 200, Float_t rotation = -1, Float_t spotsize 
 //         AP = -0.659 + 2.072* w - 8.66 * w2 + 18.14 * pow(w,3) - 16.27 * pow(w,4) + 5.34 * pow(w,5);
 
          // Theory fit
-         AX = .999 - .00453*w + .4169*w2 - 3.447*w*w2 + 2.235*w2*w2;
-         AP = -.499 + .0708*w - .0111*w2 + 1.385*w*w2 - 1.0004*w2*w2;
+//         AX = .999 - .00453*w + .4169*w2 - 3.447*w*w2 + 2.235*w2*w2;
+//         AP = -.499 + .0708*w - .0111*w2 + 1.385*w*w2 - 1.0004*w2*w2;
          
          /*
          if (initialEnergy == 200) {
@@ -308,13 +312,23 @@ void findMLP(Float_t phantomSize = 200, Float_t rotation = -1, Float_t spotsize 
          }
          */
 
+         // NEW VERSION OF LPM !!!!!
+         AX = 2.221 * exp(1.650 - 90.394*w) + 14.285* exp(-7.469*w) + 0.467 * exp(-3.043*w);
+         AP = 7.017 * exp(0.628 - 58.494*w) + 7.415 * exp(-7.325*w);
+         
+         if (printed++ < 5) {
+            printf("NOOPT: w = %2f -> AX = %.2f, AP = %.2f\n", w, AX, AP);
+         }
+
+         /*
          if (spotsize >= 0) {
             AX =  -3.984e-2 + 5.928e-1 * spotsize - 1.436e-1 * pow(spotsize,2) + 1.699e-2 * pow(spotsize,3) - 9.634e-4 * pow(spotsize,4) + 2.093e-5 * pow(spotsize,5);
             AP = 1.789e-2 - 2.604e-1 * spotsize + 6.261e-2  * pow(spotsize,2) - 7.354e-3 * pow(spotsize,3) + 4.145e-4 * pow(spotsize,4) - 8.953e-6 * pow(spotsize,5);
          }
+         */
 
          if (printed++ < 5) {
-            printf("w = %2f -> AX = %.2f, AP = %.2f\n", w, AX, AP);
+            printf("OPTIM: w = %2f -> AX = %.2f, AP = %.2f\n", w, AX, AP);
          }
 
          Float_t dxy = sqrt(pow(P2prime.X(), 2) + pow(P2prime.Y(), 2));
@@ -334,7 +348,7 @@ void findMLP(Float_t phantomSize = 200, Float_t rotation = -1, Float_t spotsize 
             double posz = X0cm.Z() + step_length;
 
             float d_source = 200; // assume to first tracker layer -- is this valid for all phantom sizes / spot sizes
-            float s_pos = pow(0.32, 2); // cm
+            float s_pos = pow(spotSizeAtX0/10, 2); // cm
             float s_angle = pow(0.002, 2); // div. so 2 mrad
             
             sigma_beam[0] = s_pos;
@@ -350,7 +364,6 @@ void findMLP(Float_t phantomSize = 200, Float_t rotation = -1, Float_t spotsize 
                s_scat_out = 0;   
             }
 
-            if (spotsize >= 0) s_pos = pow(spotsize / 10 + 0.02, 2);
       
             T_out[0] = 0;
             T_out[1] = 0;
@@ -518,7 +531,8 @@ void findMLP(Float_t phantomSize = 200, Float_t rotation = -1, Float_t spotsize 
 
             X2prime = X2 - X0tps - phantomSize * P0tps;
 
-            X0est = X2prime * AX + P2prime * AP * phantomSize;
+            X0est = X2prime * AX/(pow(spotSizeAtX0,-2)+AX) - P2prime * AP/(pow(spotSizeAtX0,-2)+AX) * phantomSize; // LPM
+
             X0est += X0tps + phantomSize * P0tps;
             X0est.SetZ(0);
 
@@ -542,7 +556,7 @@ void findMLP(Float_t phantomSize = 200, Float_t rotation = -1, Float_t spotsize 
             Lambda0 = 1.01 + 0.43 * w2;
             Lambda2 = 0.99 - 0.46 * w2;
 
-            for (Float_t t=0; t<1; t += 0.1) {
+            for (Float_t t=0; t<1; t += 0.5) {
                S = SplineMLP(t, X0, X2, P0, P2, Lambda0, Lambda2); // perfect info
                if (lastEID < maxAcc) {
                   aPosMLPx[aIdxMLP] = S.X();
@@ -601,7 +615,7 @@ void findMLP(Float_t phantomSize = 200, Float_t rotation = -1, Float_t spotsize 
                Double_t diff_x, diff_y;
                idxDifferenceArray = 0; // Sweep each time
                nInDifferenceArray++; // To average at end
-               for (Double_t zSweep = 0; zSweep <= phantomSize; zSweep += 5) { // Keep Sweep increment high to speed up!
+               for (Double_t zSweep = 0; zSweep <= phantomSize; zSweep += 50) { // Keep Sweep increment high to speed up!
                   differenceArrayZ[idxDifferenceArray] = zSweep;
                   diff_x = fabs(splineMCx->Eval(zSweep) - splineMLPx->Eval(zSweep));
                   diff_y = fabs(splineMCy->Eval(zSweep) - splineMLPy->Eval(zSweep));
@@ -632,10 +646,12 @@ void findMLP(Float_t phantomSize = 200, Float_t rotation = -1, Float_t spotsize 
             delete splineMLPestx;
             delete splineMLPesty;
          }
+         /*
          else {
             aIdxMC = firstMCidx; // rewrite last MC curve for visualization
             maxAcc++;
          }
+         */
          
          if (stop) break;
 
@@ -653,9 +669,11 @@ void findMLP(Float_t phantomSize = 200, Float_t rotation = -1, Float_t spotsize 
       }
 
       if (parentID == 0) {
+         /*
          if (volumeID[2] == 0 && firstMCidx != aIdxMC) { // new particle
             firstMCidx = aIdxMC;
          }
+         */
 
          if  (volumeID[2] < 5) {
             arSplineMCx[idxSplineMC] = x;
@@ -858,7 +876,7 @@ void findMLP(Float_t phantomSize = 200, Float_t rotation = -1, Float_t spotsize 
 
 
    if (spotsize >= 0) {
-      ofstream file(Form("Output/MLPerror_energy%.0fMeV_%s_spotsize_krah.csv", initialEnergy, sMaterial), ofstream::out | ofstream::app);
+      ofstream file(Form("Output/MLPerror_energy%.0fMeV_%s_spotsize_krah_noopt.csv", initialEnergy, sMaterial), ofstream::out | ofstream::app);
       file << phantomSize << " " <<  spotsize << " " << gDifferenceNoTrk->Eval(0) << " " << gDifferenceNoTrk->Eval(phantomSize/2) << " " << gDifferenceest->Eval(0) << " " << gDifferenceest->Eval(phantomSize/2) << " " << gDifferenceKrah->Eval(0) << " " << gDifferenceKrah->Eval(phantomSize/2) << " " << hResEnergy->GetMean() << endl;
       file.close();
    }
@@ -868,7 +886,8 @@ void findMLP(Float_t phantomSize = 200, Float_t rotation = -1, Float_t spotsize 
       file.close();
    }
    else {
-      ofstream file(Form("Output/MLPerror_energy%.0fMeV_%s_krah_%s_%smodel.csv", initialEnergy, sMaterial, sModelType, sIsModel), ofstream::out | ofstream::app);
+//      ofstream file(Form("Output/MLPerror_energy%.0fMeV_%s_krah.csv", initialEnergy, sMaterial, sModelType, sIsModel), ofstream::out | ofstream::app);
+      ofstream file(Form("Output/MLPerror_energy%.0fMeV_%s_krah.csv", initialEnergy, sMaterial), ofstream::out | ofstream::app);
       file << phantomSize << " " <<  gDifferenceNoTrk->Eval(0) << " " << gDifferenceNoTrk->Eval(phantomSize/2) << " " << gDifferenceest->Eval(0) << " " << gDifferenceest->Eval(phantomSize/2) << " " << gDifferenceKrah->Eval(0) << " " << gDifferenceKrah->Eval(phantomSize/2) << " " << hResEnergy->GetMean() << " " << f10xAvg << endl;
       file.close();
    }
