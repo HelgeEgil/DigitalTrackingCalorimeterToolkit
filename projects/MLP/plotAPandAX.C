@@ -228,14 +228,14 @@ void plotAPandAX() {
 
 
    ifstream inTheory;
-   inTheory.open("Data/theoryParams230MeVab.txt");
+   inTheory.open("Data/theoryParams230MeV2.txt");
    Float_t w_, a_, p_;
    while (1) {
       inTheory >> w_ >> a_ >> p_;
       if (!inTheory.good()) break;
       theoryW[theoryIdx] = w_;
-      theoryAX[theoryIdx] = a_ / (0.1+a_);
-      theoryAP[theoryIdx++] = -p_ / (0.1+a_);
+      theoryAX[theoryIdx] = a_; // / (0.1+a_);
+      theoryAP[theoryIdx++] = -p_; // (0.1+a_);
    }
    
    ifstream in;
@@ -885,13 +885,14 @@ void plotAPandAX() {
 
    c1->cd(1);
    gAX230->Draw("AP");
-   gAXA150230->Draw("P");
-   gAXB100230->Draw("P");
-   gAXCorticalBone230->Draw("P");
-   gAXAdipose230->Draw("P");
+//   gAXA150230->Draw("P");
+//   gAXB100230->Draw("P");
+//   gAXCorticalBone230->Draw("P");
+//   gAXAdipose230->Draw("P");
 
 //   TF1 *fitExpAX = new TF1("fitExpAX", "[0] * exp([1] + x*[2]) / (0.1 + [0] * exp([1] + x*[2]))");
-   TF1 *fitExpAX = new TF1("fitExpAX", "[0] * exp([1] + x*[2] + [3]*x**2)/(0.1+[0]*exp([1]+x*[2]+[3]*x**2))");
+//   TF1 *fitExpAX = new TF1("fitExpAX", "[0] * exp([1] + x*[2] + [3]*x**2)/(0.1+[0]*exp([1]+x*[2]+[3]*x**2))");
+   TF1 *fitExpAX = new TF1("fitExpAX", "[0] * exp([1] + x*[2] + [3]*x**2)");
 //   fitExpAX->SetParameters(0.406, 3.295, -5.849);
    fitExpAX->SetParameters(0.959, 2.452, -6.861, 0.763);
    fitExpAX->SetLineColor(kBlack);
@@ -917,14 +918,16 @@ void plotAPandAX() {
    legX->Draw();
    
    c1->cd(2);
-   gAP230->Draw("AP");
+   gAP230->Draw("AP"); /*
    gAPA150230->Draw("P");
    gAPB100230->Draw("P");
    gAPCorticalBone230->Draw("P");
    gAPAdipose230->Draw("P");
+   */
    
 //   TF1 *fitExpAP = new TF1("fitExpAP", "[0] * exp([1] + x*[2] + pow(x,2)*[3]) / (0.1 + 0.406 * exp(3.295 - 5.849*x))");
-   TF1 *fitExpAP = new TF1("fitExpAP", "[0] * exp([1] + x*[2] + pow(x,2)*[3])/(0.1 + 0.959 * exp(2.452 - 6.861*x + 0.763*x**2))");
+//   TF1 *fitExpAP = new TF1("fitExpAP", "[0] * exp([1] + x*[2] + pow(x,2)*[3])/(0.1 + 0.959 * exp(2.452 - 6.861*x + 0.763*x**2))");
+   TF1 *fitExpAP = new TF1("fitExpAP", "[0] * exp([1] + x*[2] + pow(x,2)*[3])");
 //   fitExpAP->SetParameters(1.032, 1.765, -5.779, -0.968);
    fitExpAP->SetParameters(1.032, 1.759, -6.451, -0.53);
    fitExpAP->SetLineColor(kBlack);
