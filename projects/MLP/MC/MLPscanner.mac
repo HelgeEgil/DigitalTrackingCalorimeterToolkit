@@ -10,6 +10,7 @@
 /gate/scanner/geometry/setYLength 500. cm
 /gate/scanner/geometry/setZLength 500. cm
 /gate/scanner/placement/setTranslation 0 0 0. cm
+/gate/scanner/setMaterial Vacuum
 /gate/scanner/vis/forceWireframe
 
 /gate/scanner/daughters/name fronttracker
@@ -18,7 +19,7 @@
 /gate/fronttracker/geometry/setYLength 100. cm
 /gate/fronttracker/geometry/setZLength 0.001 mm
 /gate/fronttracker/placement/setTranslation 0 0 -{ztracker} mm # -dz/2 - 15
-/gate/fronttracker/setMaterial Air
+/gate/fronttracker/setMaterial Vacuum
 
 /gate/fronttracker/repeaters/insert linear
 /gate/fronttracker/linear/autoCenter true
@@ -31,7 +32,7 @@
 /gate/backtracker/geometry/setYLength 100. cm
 /gate/backtracker/geometry/setZLength 0.001 mm
 /gate/backtracker/placement/setTranslation 0 0 {ztracker} mm # dz/2 + 15
-/gate/backtracker/setMaterial Air
+/gate/backtracker/setMaterial Vacuum
 
 /gate/backtracker/repeaters/insert linear
 /gate/backtracker/linear/autoCenter true
