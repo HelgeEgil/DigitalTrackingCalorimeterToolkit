@@ -228,14 +228,14 @@ void plotAPandAX() {
 
 
    ifstream inTheory;
-   inTheory.open("Data/theoryParams230MeV.txt");
+   inTheory.open("Data/theoryParams230MeVab.txt");
    Float_t w_, a_, p_;
    while (1) {
       inTheory >> w_ >> a_ >> p_;
       if (!inTheory.good()) break;
       theoryW[theoryIdx] = w_;
-      theoryAX[theoryIdx] = a_;
-      theoryAP[theoryIdx++] = p_;
+      theoryAX[theoryIdx] = a_ / (0.1+a_);
+      theoryAP[theoryIdx++] = -p_ / (0.1+a_);
    }
    
    ifstream in;
@@ -728,7 +728,10 @@ void plotAPandAX() {
    }
    in.close();
 
-   
+  
+   TCanvas *c1b = new TCanvas("c1b", "Fit results theory vs fit", 1500, 600);
+   c1b->Divide(2,1,1e-4,1e-4);
+
    TCanvas *c1 = new TCanvas("c1", "Fit results", 1500, 600);
    c1->Divide(2,1,1e-4,1e-4);
    
@@ -887,35 +890,30 @@ void plotAPandAX() {
    gAXCorticalBone230->Draw("P");
    gAXAdipose230->Draw("P");
 
-   TF1 *fitExpAX = new TF1("fitExpAX", "[0] * exp([1] + x*[2])");
-   fitExpAX->SetParameters(0.406, 3.295, -5.849);
+//   TF1 *fitExpAX = new TF1("fitExpAX", "[0] * exp([1] + x*[2]) / (0.1 + [0] * exp([1] + x*[2]))");
+   TF1 *fitExpAX = new TF1("fitExpAX", "[0] * exp([1] + x*[2] + [3]*x**2)/(0.1+[0]*exp([1]+x*[2]+[3]*x**2))");
+//   fitExpAX->SetParameters(0.406, 3.295, -5.849);
+   fitExpAX->SetParameters(0.959, 2.452, -6.861, 0.763);
+   fitExpAX->SetLineColor(kBlack);
+   fitExpAX->SetLineWidth(4);
+//   fitExpAX->SetLineStyle(9);
    
-   TF1 *fitExpAP = new TF1("fitExpAP", "[0] * exp([1] + x*[2] + pow(x,2)*[3])");
-   fitExpAP->SetParameters(1.032, 1.765, -5.779, -0.968);
-  
    fitExpAX->Draw("same");
 
-   TF1 *fitX = new TF1("fitX", "pol4");
-   fitX->SetParameters(1, -0.30, 1.53, -4.25, 2.30);
-   fitX->SetLineColor(kBlack);
-   fitX->SetLineStyle(9);
-   fitX->SetLineWidth(4);
-//   fitX->Draw("same");
-
    gAXtheory->SetLineColor(kRed);
-   gAXtheory->SetLineStyle(9);
+//   gAXtheory->SetLineStyle(9);
    gAXtheory->SetLineWidth(4);
 //   gAXtheory->Draw("same");
 
    TLegend *legX = new TLegend(.3, .66, .64, .8655);
    legX->SetTextFont(22);
    legX->AddEntry(gAX230, "Water", "P");
-   legX->AddEntry(gAXB100230, "ICRU B100 Bone", "P");
-   legX->AddEntry(gAXAdipose230, "ICRU Adipose", "P");
-   legX->AddEntry(gAXCorticalBone230, "ICRU Cortical Bone", "P");
-   legX->AddEntry(gAXA150230, "ICRU A150 T.E.P.", "P");
-   legX->AddEntry(fitX, "Polynomial fit", "L");
-   legX->AddEntry(gAXtheory, "Theoretical prediction", "L");
+   legX->AddEntry(gAXB100230, "B100 Bone", "P");
+   legX->AddEntry(gAXAdipose230, "Adipose", "P");
+   legX->AddEntry(gAXCorticalBone230, "Cortical Bone", "P");
+   legX->AddEntry(gAXA150230, "A150 T.E.P.", "P");
+   legX->AddEntry(fitExpAX, "e^{f(w)} fit", "L");
+//   legX->AddEntry(gAXtheory, "Theory prediction", "L");
    legX->Draw();
    
    c1->cd(2);
@@ -924,20 +922,20 @@ void plotAPandAX() {
    gAPB100230->Draw("P");
    gAPCorticalBone230->Draw("P");
    gAPAdipose230->Draw("P");
-
+   
+//   TF1 *fitExpAP = new TF1("fitExpAP", "[0] * exp([1] + x*[2] + pow(x,2)*[3]) / (0.1 + 0.406 * exp(3.295 - 5.849*x))");
+   TF1 *fitExpAP = new TF1("fitExpAP", "[0] * exp([1] + x*[2] + pow(x,2)*[3])/(0.1 + 0.959 * exp(2.452 - 6.861*x + 0.763*x**2))");
+//   fitExpAP->SetParameters(1.032, 1.765, -5.779, -0.968);
+   fitExpAP->SetParameters(1.032, 1.759, -6.451, -0.53);
+   fitExpAP->SetLineColor(kBlack);
+   fitExpAP->SetLineWidth(4);
+//   fitExpAP->SetLineStyle(9);
    fitExpAP->Draw("same");
 
-   TF1 *fitP = new TF1("fitP", "pol5");
-   fitP->SetParameters(-0.659, 2.072, -8.66, 18.14, -16.27, 5.34);
-   fitP->SetLineColor(kBlack);
-   fitP->SetLineWidth(4);
-   fitP->SetLineStyle(9);
-//   fitP->Draw("same");
-
    gAPtheory->SetLineColor(kRed);
-   gAPtheory->SetLineStyle(9);
+//   gAPtheory->SetLineStyle(9);
    gAPtheory->SetLineWidth(4);
-//   gAPtheory->Draw("same");
+   gAPtheory->Draw("same");
 
    TLegend *leg = new TLegend(.3, .66, .64, .8655);
    leg->SetTextFont(22);
@@ -946,10 +944,29 @@ void plotAPandAX() {
    leg->AddEntry(gAPAdipose230, "Adipose", "P");
    leg->AddEntry(gAPCorticalBone230, "Cortical Bone", "P");
    leg->AddEntry(gAPA150230, "A150 T.E.P.", "P");
-   leg->AddEntry(fitP, "Exp. fit", "L");
+   leg->AddEntry(fitExpAP, "e^{f(x)} fit", "L");
    leg->AddEntry(gAPtheory, "Theory prediction", "L");
    leg->SetTextFont(22);
-   leg->Draw(); 
+//   leg->Draw(); 
+
+   c1b->cd(1);
+   gAXtheory->SetTitle(";WET/WEPL;A_{X}/(#sigma^{-2} + A_{X})");
+   gAPtheory->SetTitle(";WET/WEPL;A_{P}/(#sigma^{-2} + A_{X})");
+
+   gAXtheory->Draw("AL");
+   fitExpAX->Draw("same");
+   
+   TLegend *leg1b = new TLegend(.3, .66, .64, .8655);
+   leg1b->AddEntry(fitExpAX, "Best fit (water only)", "L");
+   leg1b->AddEntry(gAXtheory, "Theoretical prediction", "L");
+   leg1b->SetTextFont(22);
+   leg1b->Draw();
+
+   c1b->cd(2);
+   gAPtheory->Draw("AL");
+   fitExpAP->Draw("same");
+
+
 
    TCanvas *c3 = new TCanvas("c3", "Error vs divergence", 1200, 400);
    c3->Divide(3,1,1e-3,1e-3);
@@ -1134,13 +1151,13 @@ void plotAPandAX() {
    TGraph *gSpotsizeErrorNoOpt = new TGraph(idxSpotsize, arraySpotsize, arraySpotsizeErrorNoOpt);
    TGraph *gSpotsizeErrorKrah = new TGraph(idxSpotsizeKrah, arraySpotsizeKrah, arraySpotsizeErrorKrah);
 
-   gSpotsizeError->SetTitle("MLP estimation error with #hat{X_{0}}, 200 MeV beam/160 mm phantom;Beam spotsize [mm];Error |X_{0}^{MC} - X_{0}^{est}| [mm]");
+   gSpotsizeErrorNoOpt->SetTitle(";Beam spotsize [mm];Error |X_{0}^{MC} - X_{0}^{est}| [mm]");
 
    gSpotsizeError->SetMarkerColor(kBlue-7);
    gSpotsizeError->SetMarkerStyle(21);
    gSpotsizeError->SetMarkerSize(1.2);
    
-   gSpotsizeErrorNoOpt->SetMarkerColor(kOrange+2);
+   gSpotsizeErrorNoOpt->SetMarkerColor(kBlue-7);
    gSpotsizeErrorNoOpt->SetMarkerStyle(21);
    gSpotsizeErrorNoOpt->SetMarkerSize(1.2);
 
@@ -1148,15 +1165,15 @@ void plotAPandAX() {
    gSpotsizeErrorKrah->SetMarkerStyle(21);
    gSpotsizeErrorKrah->SetMarkerSize(1.2);
 
-   gSpotsizeError->Draw("PA");
-   gSpotsizeErrorNoOpt->Draw("P");
+//   gSpotsizeError->Draw("PA");
+   gSpotsizeErrorNoOpt->Draw("AP");
    gSpotsizeErrorKrah->Draw("P");
 //   gSpotsizeError->GetYaxis()->SetTitleOffset(1.2);
 
    TLegend *legss = new TLegend(.3, .66, .64, .8655);
-   legss->AddEntry(gSpotsizeError, "Spotsize-optimized LPM", "P");
-   legss->AddEntry(gSpotsizeErrorNoOpt, "Fixed-parameter LPM", "P");
-   legss->AddEntry(gSpotsizeErrorKrah, "Bayesian MLP", "P");
+//   legss->AddEntry(gSpotsizeError, "Spotsize-optimized LPM", "P");
+   legss->AddEntry(gSpotsizeErrorNoOpt, "Linear Projection Model", "P");
+   legss->AddEntry(gSpotsizeErrorKrah, "Bayesian Most Likely Path", "P");
    legss->Draw();
    legss->SetTextFont(22);
 
