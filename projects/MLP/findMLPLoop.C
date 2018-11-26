@@ -116,6 +116,7 @@ void findMLPLoop(Float_t phantomSize, Int_t eventsToUse, Float_t spotSize, Int_t
    if (spotSize < 0) { spotSize = 3; }
   
    spotSize = 0.9867 * spotSize + 0.1985; // correct for scattering in air + divergence from source to X0 plane
+   float spos = pow(spotSize, -2);
 
    if (material == kAdipose) sMaterial = (char*) "Adipose";
 
@@ -124,20 +125,20 @@ void findMLPLoop(Float_t phantomSize, Int_t eventsToUse, Float_t spotSize, Int_t
    if (!tree) exit(0);
 
    Float_t  AXlow = 0;
-   Float_t  AXhigh = 15;
+   Float_t  AXhigh = 0.5;
    Float_t  APlow = 0;
-   Float_t  APhigh = 15;
+   Float_t  APhigh = 0.3;
    
-   Float_t  AXdelta = 0.1;
-   Float_t  APdelta = 0.1;
+   Float_t  AXdelta = 0.0051;
+   Float_t  APdelta = 0.0031;
 
    Int_t    AXbins = (AXhigh - AXlow) / AXdelta;
    Int_t    APbins = (APhigh - APlow) / APdelta;
 
    printf("Using %d AXbins and %d APbins.\n", AXbins, APbins);
 
-   TH2F * hErrorMatrix = new TH2F("hErrorMatrix", ";A_{X} parameter;A_{P} parameter;X_{0} error", AXbins, AXlow, AXhigh, APbins, APlow, APhigh);
-   TH2I * hIdxMatrix = new TH2I("hIdxMatrix", "Normalization matrix;A_{X} parameter;A_{P} parameter", AXbins, AXlow, AXhigh, APbins, APlow, APhigh);
+   TH2F * hErrorMatrix =  new TH2F("hErrorMatrix", ";A_{X} parameter;A_{P} parameter;X_{0} error", AXbins, AXlow, AXhigh, APbins, APlow, APhigh); 
+   TH2I * hIdxMatrix =  new TH2I("hIdxMatrix", "Normalization matrix;A_{X} parameter;A_{P} parameter", AXbins, AXlow, AXhigh, APbins, APlow, APhigh);
    TH1I * hResidualEnergy = new TH1I("residualEnergy", "Residual Energy", 300, 0, 240);
 
    tree->SetBranchAddress("posX", &x);
@@ -188,11 +189,11 @@ void findMLPLoop(Float_t phantomSize, Int_t eventsToUse, Float_t spotSize, Int_t
             // INNER MINIMIZATION LOOP
             for (Float_t AX = AXlow; AX <= AXhigh; AX += AXdelta) {
                for (Float_t AP = APlow; AP <= APhigh; AP += APdelta) {
-                  X0est = X2 * AX/(pow(spotSize,-2) + AX) - phantomSize * AP/(pow(spotSize,-2)+AX) * P2;
+                  X0est = X2 * AX/(spos+AX) - phantomSize * AP/(spos+AX) * P2;
                   diff_x = fabs(X0.X() - X0est.X());
                   diff_y = fabs(X0.Y() - X0est.Y());
                   hErrorMatrix->Fill(AX, AP, sqrt(pow(diff_x, 2) + pow(diff_y, 2)));
-                  hIdxMatrix->Fill(AX, AP);
+                  hIdxMatrix->Fill(AX, AP); 
                }
             }
          }
@@ -248,13 +249,16 @@ void findMLPLoop(Float_t phantomSize, Int_t eventsToUse, Float_t spotSize, Int_t
    Float_t minYvalue = hErrorMatrix->GetYaxis()->GetBinCenter(biny);
    Float_t minZvalue = hErrorMatrix->GetZaxis()->GetBinCenter(binz);
    printf("The bin with the minimum nonzero content is %.4f. AX = %.3f and AP = %.3f.\n", mincont, minXvalue, minYvalue);
-   
+
+
+   /*
    for (Int_t i=0; i<nbins; i++) {
       cont = hErrorMatrix->GetBinContent(i);
       if (cont == mincont) {
          hErrorMatrix->SetBinContent(i, -10);
       }
    }
+   */
 
 
    TCanvas *c2 = new TCanvas("c2", "param values", 1500, 1200);
@@ -263,6 +267,14 @@ void findMLPLoop(Float_t phantomSize, Int_t eventsToUse, Float_t spotSize, Int_t
    hErrorMatrix->GetZaxis()->SetLabelSize(0.05);
    hErrorMatrix->GetZaxis()->SetTitleSize(0.05);
    hErrorMatrix->Draw("COLZ");
+   
+   float pointX[1] = {minXvalue};
+   float pointY[1] = {minYvalue};
+   TGraph *gPoint = new TGraph(1, pointX, pointY);
+   gPoint->SetMarkerStyle(21);
+   gPoint->SetMarkerSize(1.6);
+   gPoint->Draw("P");
+   printf("Drawing point at %.2f, %.2f.\n", pointX[0], pointY[0]);
 
    c2->SaveAs(Form("Output/accuracy_energy%.0fMeV_%.0fmm_%s.pdf", initialEnergy, phantomSize, sMaterial));
 

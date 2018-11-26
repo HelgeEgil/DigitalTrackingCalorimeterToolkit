@@ -414,7 +414,7 @@ void plotAPandAX() {
       arrayResidualEnergy230[arrayIdx230] = pow(wet/wepl, 1);
       arrayError230[arrayIdx230] = error_;
       arrayAX230[arrayIdx230] = AX_;
-      arrayAP230[arrayIdx230++] = -AP_;
+      arrayAP230[arrayIdx230++] = AP_;
    }
    in.close();
 
@@ -729,8 +729,47 @@ void plotAPandAX() {
    in.close();
 
    
-   TCanvas *c1 = new TCanvas("c1", "Fit results", 1500, 1200);
+   TCanvas *c1 = new TCanvas("c1", "Fit results", 1500, 600);
    c1->Divide(2,1,1e-4,1e-4);
+   
+   float spos = pow(3.15, -2);
+   bool makeLog = false;
+   for (int i=0; i<arrayIdxAdipose230; i++) {
+      // AX = a / (spos^-2 + a); AP = b / (spos^-2 + a)
+      // -> a = AX spos^-2 / (1 - AX)
+      // -> b = AP spos^-2 * (1 + AX / (1 - AX))
+      
+      if (i < arrayIdx230) arrayAP230[i] = -arrayAP230[i] * spos * (1 + arrayAX230[i] / (1 - arrayAX230[i]));
+      if (i < arrayIdxB100230) arrayAPB100230[i] = -arrayAPB100230[i] * spos * (1 + arrayAXB100230[i] / (1 - arrayAXB100230[i]));
+      arrayAPAdipose230[i] = -arrayAPAdipose230[i] * spos * (1 + arrayAXAdipose230[i] / (1 - arrayAXAdipose230[i]));
+      if (i < arrayIdxCorticalBone230) arrayAPCorticalBone230[i] = -arrayAPCorticalBone230[i] * spos * (1 + arrayAXCorticalBone230[i] / (1 - arrayAXCorticalBone230[i]));
+      if (i < arrayIdxA150230) arrayAPA150230[i] = -arrayAPA150230[i] * spos * (1 + arrayAXA150230[i] / (1 - arrayAXA150230[i]));
+
+      if (i < arrayIdx230) arrayAX230[i] = arrayAX230[i] * spos / (1 - arrayAX230[i]);
+      if (i < arrayIdxB100230) arrayAXB100230[i] = arrayAXB100230[i] * spos / (1 - arrayAXB100230[i]);
+      arrayAXAdipose230[i] = arrayAXAdipose230[i] * spos / (1 - arrayAXAdipose230[i]);
+      if (i < arrayIdxCorticalBone230) arrayAXCorticalBone230[i] = arrayAXCorticalBone230[i] * spos / (1 - arrayAXCorticalBone230[i]);
+      if (i < arrayIdxA150230) arrayAXA150230[i] = arrayAXA150230[i] * spos / (1 - arrayAXA150230[i]);
+
+
+      if (makeLog) {
+         if (i < arrayIdx230) {
+            arrayAX230[i] = log(arrayAX230[i]); arrayAP230[i] = log(arrayAP230[i]);
+         }
+         if (i < arrayIdxB100230) {
+            arrayAXB100230[i] = log(arrayAXB100230[i]); arrayAPB100230[i] = log(arrayAPB100230[i]);
+         }
+         if (i < arrayIdxAdipose230) {
+            arrayAXAdipose230[i] = log(arrayAXAdipose230[i]); arrayAPAdipose230[i] = log(arrayAPAdipose230[i]);
+         }
+         if (i < arrayIdxCorticalBone230) {
+            arrayAXCorticalBone230[i] = log(arrayAXCorticalBone230[i]); arrayAPCorticalBone230[i] = log(arrayAPCorticalBone230[i]);
+         }
+         if (i < arrayIdxA150230) {
+            arrayAXA150230[i] = log(arrayAXA150230[i]); arrayAPA150230[i] = log(arrayAPA150230[i]);
+         }
+      }
+   }
 
    Float_t  arrayAPall[arraySize];
    Float_t  arrayAXall[arraySize];
@@ -806,13 +845,14 @@ void plotAPandAX() {
 
    gAX200->SetMarkerColor(kRed);
    gAP200->SetMarkerColor(kRed);
-/*   
+   
+   /*
    c1->cd(3);
-//   gAXall->Draw("AP");
-   gAX200->Draw("AP");
+   gAXall->Draw("AP");
+//   gAX200->Draw("AP");
    c1->cd(4);  
-//   gAPall->Draw("AP");
-   gAP200->Draw("AP");
+   gAPall->Draw("AP");
+//   gAP200->Draw("AP");
 */
    gAXB100230->SetMarkerColor(kRed);
    gAPB100230->SetMarkerColor(kRed);
@@ -847,19 +887,25 @@ void plotAPandAX() {
    gAXCorticalBone230->Draw("P");
    gAXAdipose230->Draw("P");
 
-   TF1 *fitExp = new TF1("fitExp", "[1] * exp([2] + x*[3] + pow(x,2)*[4])");
+   TF1 *fitExpAX = new TF1("fitExpAX", "[0] * exp([1] + x*[2])");
+   fitExpAX->SetParameters(0.406, 3.295, -5.849);
+   
+   TF1 *fitExpAP = new TF1("fitExpAP", "[0] * exp([1] + x*[2] + pow(x,2)*[3])");
+   fitExpAP->SetParameters(1.032, 1.765, -5.779, -0.968);
   
+   fitExpAX->Draw("same");
+
    TF1 *fitX = new TF1("fitX", "pol4");
    fitX->SetParameters(1, -0.30, 1.53, -4.25, 2.30);
    fitX->SetLineColor(kBlack);
    fitX->SetLineStyle(9);
    fitX->SetLineWidth(4);
-   fitX->Draw("same");
+//   fitX->Draw("same");
 
    gAXtheory->SetLineColor(kRed);
    gAXtheory->SetLineStyle(9);
    gAXtheory->SetLineWidth(4);
-   gAXtheory->Draw("same");
+//   gAXtheory->Draw("same");
 
    TLegend *legX = new TLegend(.3, .66, .64, .8655);
    legX->SetTextFont(22);
@@ -879,27 +925,29 @@ void plotAPandAX() {
    gAPCorticalBone230->Draw("P");
    gAPAdipose230->Draw("P");
 
+   fitExpAP->Draw("same");
+
    TF1 *fitP = new TF1("fitP", "pol5");
    fitP->SetParameters(-0.659, 2.072, -8.66, 18.14, -16.27, 5.34);
    fitP->SetLineColor(kBlack);
    fitP->SetLineWidth(4);
    fitP->SetLineStyle(9);
-   fitP->Draw("same");
+//   fitP->Draw("same");
 
    gAPtheory->SetLineColor(kRed);
    gAPtheory->SetLineStyle(9);
    gAPtheory->SetLineWidth(4);
-   gAPtheory->Draw("same");
+//   gAPtheory->Draw("same");
 
    TLegend *leg = new TLegend(.3, .66, .64, .8655);
    leg->SetTextFont(22);
    leg->AddEntry(gAP230, "Water", "P");
-   leg->AddEntry(gAPB100230, "ICRU B100 Bone", "P");
-   leg->AddEntry(gAPAdipose230, "ICRU Adipose", "P");
-   leg->AddEntry(gAPCorticalBone230, "ICRU Cortical Bone", "P");
-   leg->AddEntry(gAPA150230, "ICRU A150 T.E.P.", "P");
-   leg->AddEntry(fitP, "Polynomial fit", "L");
-   leg->AddEntry(gAPtheory, "Theoretical prediction", "L");
+   leg->AddEntry(gAPB100230, "B100 Bone", "P");
+   leg->AddEntry(gAPAdipose230, "Adipose", "P");
+   leg->AddEntry(gAPCorticalBone230, "Cortical Bone", "P");
+   leg->AddEntry(gAPA150230, "A150 T.E.P.", "P");
+   leg->AddEntry(fitP, "Exp. fit", "L");
+   leg->AddEntry(gAPtheory, "Theory prediction", "L");
    leg->SetTextFont(22);
    leg->Draw(); 
 

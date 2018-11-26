@@ -313,13 +313,11 @@ void findMLP(Float_t phantomSize = 200, Float_t rotation = -1, Float_t spotsize 
          */
 
          // NEW VERSION OF LPM !!!!!
-         AX = 2.221 * exp(1.650 - 90.394*w) + 14.285* exp(-7.469*w) + 0.467 * exp(-3.043*w);
-         AP = 7.017 * exp(0.628 - 58.494*w) + 7.415 * exp(-7.325*w);
+         AX = 0.406 * exp(3.295 - 5.849*w);
+         AP = 1.032 * exp(1.765 - 5.779*w - 0.968*w2);
+         float aa = AX/(pow(spotSizeAtX0,-2) + AX);
+         float bb = AP/(pow(spotSizeAtX0,-2) + AX);
          
-         if (printed++ < 5) {
-            printf("NOOPT: w = %2f -> AX = %.2f, AP = %.2f\n", w, AX, AP);
-         }
-
          /*
          if (spotsize >= 0) {
             AX =  -3.984e-2 + 5.928e-1 * spotsize - 1.436e-1 * pow(spotsize,2) + 1.699e-2 * pow(spotsize,3) - 9.634e-4 * pow(spotsize,4) + 2.093e-5 * pow(spotsize,5);
@@ -328,7 +326,7 @@ void findMLP(Float_t phantomSize = 200, Float_t rotation = -1, Float_t spotsize 
          */
 
          if (printed++ < 5) {
-            printf("OPTIM: w = %2f -> AX = %.2f, AP = %.2f\n", w, AX, AP);
+            printf("OPTIM: w = %2f -> AX = %.2f, AP = %.2f (a = %.2f, b = %.2f)\n", w, AX, AP, aa, bb);
          }
 
          Float_t dxy = sqrt(pow(P2prime.X(), 2) + pow(P2prime.Y(), 2));
@@ -533,7 +531,7 @@ void findMLP(Float_t phantomSize = 200, Float_t rotation = -1, Float_t spotsize 
 
             X0est = X2prime * AX/(pow(spotSizeAtX0,-2)+AX) - P2prime * AP/(pow(spotSizeAtX0,-2)+AX) * phantomSize; // LPM
 
-            X0est += X0tps + phantomSize * P0tps;
+            X0est += X0tps;
             X0est.SetZ(0);
 
             X0err = X0est - X0;
