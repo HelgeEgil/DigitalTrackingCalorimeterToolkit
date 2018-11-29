@@ -79,7 +79,7 @@ void findMLP(Float_t phantomSize = 200, Float_t rotation = -1, Float_t spotsize 
    if (!tree) exit(0);
 
    Int_t      printed = 0;
-   const Int_t eventsToUse = 10000;
+   const Int_t eventsToUse = 100;
 
    TStopwatch tKrah, tLPM;
    TStopwatch tLPM1, tLPM2, tLPM3;
@@ -106,8 +106,8 @@ void findMLP(Float_t phantomSize = 200, Float_t rotation = -1, Float_t spotsize 
    Double_t    differenceArrayDiffKrah[1000] = {};
    Double_t    differenceArrayDiffest[1000] = {};
    Float_t     sourceToX0dist = 100;
-   Float_t     d_entry = 15;
-   Float_t     d_exit = 15;
+   Float_t     d_entry = 10;
+   Float_t     d_exit = 10;
    Int_t       nInDifferenceArray = 0;
    Int_t       idxDifferenceArray = 0;
    Int_t       idxWater = 0;
@@ -127,6 +127,7 @@ void findMLP(Float_t phantomSize = 200, Float_t rotation = -1, Float_t spotsize 
    Int_t       aIdxMLP = 0;
    Int_t       aIdxMLPkrah = 0;
    Bool_t      stop = false; 
+   Float_t     spotSizeAtX0;
    TRandom3  * gRandom = new TRandom3(0);
    Float_t     f10xAvg = 0;
    Float_t     f10yAvg = 0;
@@ -172,17 +173,23 @@ void findMLP(Float_t phantomSize = 200, Float_t rotation = -1, Float_t spotsize 
    tKrah.Reset(); tLPM.Reset();
    tLPM1.Reset(); tLPM2.Reset(); tLPM3.Reset();
 
+   gStyle->SetTitleFont(22, "t");
    gStyle->SetTitleFont(22);
    gStyle->SetLabelFont(22);
    gStyle->SetTextFont(22);
    gStyle->SetLabelFont(22, "Y");
    gStyle->SetTitleFont(22, "Y");
    gStyle->SetTitleYOffset(1);
-   gStyle->SetLabelSize(0.045);
-   gStyle->SetLabelSize(0.045, "Y");
-   gStyle->SetTitleSize(0.045);
-   gStyle->SetTitleSize(0.045, "Y");
-   gStyle->SetTextSize(0.045);
+   gStyle->SetLabelSize(0.06);
+   gStyle->SetLabelSize(0.06, "Y");
+   gStyle->SetTitleSize(0.06);
+   gStyle->SetTitleSize(0.06, "t");
+   gStyle->SetTitleSize(0.06, "Y");
+   gStyle->SetTextSize(0.06);
+
+   if (spotsize < 0) spotSizeAtX0 = 3.15;
+   else              spotSizeAtX0 = 0.9869 * spotsize + 0.1985;
+
 
    // Load Energy <-> Range spline
    in.open("Data/WaterPSTAR.csv");
@@ -238,10 +245,13 @@ void findMLP(Float_t phantomSize = 200, Float_t rotation = -1, Float_t spotsize 
 //         Xp3 += scat;
       
          tKrah.Start(false); tLPM.Start(false); tLPM1.Start(false);
-         X0 = (Xp0 + Xp1) / 2;
-         X2 = (Xp2 + Xp3) / 2;
+         X0 = Xp1;
+         X2 = Xp2;
          P0 = (Xp1 - Xp0) / (Xp1.Z() - Xp0.Z());
          P2 = (Xp3 - Xp2) / (Xp3.Z() - Xp2.Z());
+
+         P2prime = P2 - P0tps;
+         P2prime.SetZ(1);
 
          XYZVector projectToHullX0(d_entry * tan(P0.X()), d_entry * tan(P0.Y()), d_entry);
          XYZVector projectToHullX2(d_exit * tan(P2.X()), d_exit * tan(P2.Y()), d_exit);
@@ -253,17 +263,15 @@ void findMLP(Float_t phantomSize = 200, Float_t rotation = -1, Float_t spotsize 
          P0cm = P0tps;
          P2cm = P2;
 
-         P2prime = P2 - P0tps;
-         P2prime.SetZ(1);
          tKrah.Stop();
 
          wepl = splineWater->Eval(initialEnergy);
          wet = wepl - splineWater->Eval(residualEnergy);
          w = wet / wepl;
          w2 = pow(wet / wepl, 2);
-            
-         AX = 1 - 0.30 * w + 1.53 * w2 - 4.25 * pow(w,3) + 2.30 * pow(w,4);
-         AP = -0.659 + 2.072* w - 8.66 * w2 + 18.14 * pow(w,3) - 16.27 * pow(w,4) + 5.34 * pow(w,5);
+         
+         AX = exp(2.9143 - 5.5692 * w - 1.4734 * w2 + 1.2822 * w*w2);
+         AP = exp(2.4946 - 8.0676 * w + 4.2200 * w2 - 3.2835 * w*w2);
          tLPM.Stop(); tLPM1.Stop();
          
          if (printed < 5) {
@@ -272,12 +280,6 @@ void findMLP(Float_t phantomSize = 200, Float_t rotation = -1, Float_t spotsize 
             printed++;
          }
         
-         if (spotsize >= 0) {
-            AX = 0.2333 * log(spotsize) + 0.4886;
-            AP = -17.67 * log(spotsize) - 31.793;
-            AP /= phantomSize; // fix if new parameters are defined, should be identical (except if improved..?)
-         }
-
          dxy = sqrt(pow(P2prime.X(), 2) + pow(P2prime.Y(), 2));
          angle = fabs(atan2(dxy,1)) * 1000;
 
@@ -296,11 +298,9 @@ void findMLP(Float_t phantomSize = 200, Float_t rotation = -1, Float_t spotsize 
             tKrah.Start(false);
             for (float posz = X0cm.Z() + step_length; posz < X2cm.Z(); posz += step_length) {
                d_source = 200; // assume to first tracker layer -- is this valid for all phantom sizes / spot sizes
-               s_pos = pow(0.32, 2); // cm
+               s_pos = pow(spotSizeAtX0/10, 2); // cm
                s_angle = pow(0.002, 2); // div. so 2 mrad
 
-               if (spotsize >= 0) s_pos = pow(spotsize / 10, 2);
-         
                // init MLP
                TVector3 p;
 
@@ -438,9 +438,9 @@ void findMLP(Float_t phantomSize = 200, Float_t rotation = -1, Float_t spotsize 
             tLPM.Start(false);
             X2prime = X2 - X0tps - phantomSize * P0tps;
 
-            X0est = X2prime * AX + P2prime * AP * phantomSize;
-            X0est += X0tps + phantomSize * P0tps;
-            X0est.SetZ(-phantomSize/2);
+            X0est = X2prime * AX/(pow(spotSizeAtX0,-2)+AX) - P2prime * AP/(pow(spotSizeAtX0,-2)+AX) * phantomSize;
+            X0est += X0tps;
+            X0est.SetZ(0);
 
             X0err = X0est - X0;
             X0errNaive = X0tps - X0;
@@ -451,7 +451,7 @@ void findMLP(Float_t phantomSize = 200, Float_t rotation = -1, Float_t spotsize 
             Lambda0 = 1.01 + 0.43 * w2;
             Lambda2 = 0.99 - 0.46 * w2;
 
-            for (Float_t t=0; t<1; t += 0.002) {
+            for (Float_t t=0; t<1; t += 0.001) {
                S = SplineMLP(t, X0, X2, P0, P2, Lambda0, Lambda2, phantomSize); // perfect info
 
                if (lastEID < maxAcc) {
@@ -576,23 +576,25 @@ void findMLP(Float_t phantomSize = 200, Float_t rotation = -1, Float_t spotsize 
    TCanvas *c0 = new TCanvas("c0", "Residual Energy", 1500, 1000);
    hResEnergy->Draw();
 
-   TCanvas *c1 = new TCanvas("c1", "MLP estimation", 1500, 1000);
-   TPad *pad1 = new TPad("pad1", "pad1", 0.005, 0, 0.2855, .995);
-   TPad *pad2 = new TPad("pad2", "pad2", .2865, 0, 0.5235, .995);
-   TPad *pad3 = new TPad("pad3", "pad3", .5245, 0, 0.7615, .995);
-   TPad *pad4 = new TPad("pad4", "pad4", 0.7625, 0, 0.995, .995);
+   TCanvas *c1 = new TCanvas("c1", "MLP estimation", 1000, 1000);
+   TPad *pad1 = new TPad("pad1", "pad1", 0.005, 0, 0.5235, .995);
+   TPad *pad2 = new TPad("pad2", "pad2", .5245, 0, 0.995, .995);
+//   TPad *pad1 = new TPad("pad1", "pad1", 0.005, 0, 0.2855, .995);
+//   TPad *pad2 = new TPad("pad2", "pad2", .2865, 0, 0.5235, .995);
+//   TPad *pad3 = new TPad("pad3", "pad3", .5245, 0, 0.7615, .995);
+//   TPad *pad4 = new TPad("pad4", "pad4", 0.7625, 0, 0.995, .995);
 
-//   pad1->Divide(1, 2, 1e-5, 1e-5);
-//   pad2->Divide(1, 2, 1e-5, 1e-5);
+   pad1->Divide(1, 2, 1e-5, 1e-5);
+   pad2->Divide(1, 2, 1e-5, 1e-5);
 //   pad3->Divide(1, 2, 1e-5, 1e-5);
 //   pad4->Divide(1, 2, 1e-5, 1e-5);
 
-   pad1->Draw(); pad2->Draw(); pad3->Draw(); pad4->Draw();
+   pad1->Draw(); pad2->Draw(); //pad3->Draw(); pad4->Draw();
 
-   pad1->cd();
-   TGraph *gMC = new TGraph(aIdxMC, aPosMCz, aPosMCx);
+   pad1->cd(1);
+   TGraph *gMC = new TGraph(aIdxMC, aPosMCz, aPosMCy);
    TGraph *gMCy = new TGraph(aIdxMC, aPosMCz, aPosMCy);
-   TGraph *gMLP = new TGraph(aIdxMLP, aPosMLPz, aPosMLPx);
+   TGraph *gMLP = new TGraph(aIdxMLP, aPosMLPz, aPosMLPy);
    TGraph *gMLPy = new TGraph(aIdxMLP, aPosMLPz, aPosMLPy);
    gMC->SetMarkerStyle(21);
    gMLP->SetMarkerStyle(21);
@@ -602,7 +604,11 @@ void findMLP(Float_t phantomSize = 200, Float_t rotation = -1, Float_t spotsize 
    gMLP->SetMarkerColor(kBlue);
    gMC->Draw("AP");
    gMLP->Draw("P");
-   gMC->SetTitle("Perfect knowledge;Depth [mm];X position [mm]");
+   gMC->GetXaxis()->SetRangeUser(-30, phantomSize+30);
+   gMLP->GetXaxis()->SetRangeUser(-30, phantomSize+30);
+   gMC->GetYaxis()->SetRangeUser(-11, 7);
+   gMLP->GetYaxis()->SetRangeUser(-11, 7);
+   gMC->SetTitle("Perfect knowledge + CSP;Depth [mm];X position [mm]");
 
    /*
    pad1->cd(2);
@@ -617,9 +623,9 @@ void findMLP(Float_t phantomSize = 200, Float_t rotation = -1, Float_t spotsize 
    gMCy->SetTitle("Perfect knowledge;Depth [mm];Y position [mm]");
 */
    // 2 and 6: Naive model
-   pad2->cd();
-   TGraph *gMCNoTrk = new TGraph(aIdxMC, aPosMCz, aPosMCx);
-   TGraph *gMLPNoTrk = new TGraph(aIdxMLP, aPosMLPz, aPosMLPNoTrkx);
+   pad2->cd(1);
+   TGraph *gMCNoTrk = new TGraph(aIdxMC, aPosMCz, aPosMCy);
+   TGraph *gMLPNoTrk = new TGraph(aIdxMLP, aPosMLPz, aPosMLPNoTrky);
    gMLPNoTrk->SetMarkerStyle(21);
    gMLPNoTrk->SetMarkerColor(kBlue);
    gMCNoTrk->SetMarkerStyle(21);
@@ -628,7 +634,11 @@ void findMLP(Float_t phantomSize = 200, Float_t rotation = -1, Float_t spotsize 
    gMLPNoTrk->SetMarkerSize(0.3);
    gMCNoTrk->Draw("AP");
    gMLPNoTrk->Draw("P");
-   gMCNoTrk->SetTitle("X_{0}^{opt} = X_{0}^{TPS});Depth [mm];X position [mm]");
+   gMCNoTrk->GetXaxis()->SetRangeUser(-30, phantomSize+30);
+   gMLPNoTrk->GetXaxis()->SetRangeUser(-30, phantomSize+30);
+   gMCNoTrk->GetYaxis()->SetRangeUser(-11, 7);
+   gMLPNoTrk->GetYaxis()->SetRangeUser(-11, 7);
+   gMCNoTrk->SetTitle("TPS Position + CSP;Depth [mm];X position [mm]");
    /*
    pad2->cd(2);
    TGraph *gMCNoTrky = new TGraph(aIdxMC, aPosMCz, aPosMCy);
@@ -643,9 +653,9 @@ void findMLP(Float_t phantomSize = 200, Float_t rotation = -1, Float_t spotsize 
    gMLPNoTrky->Draw("P");
    gMCNoTrky->SetTitle("X_{0}^{opt} = X_{0}^{TPS});Depth [mm];X position [mm]");
 */
-   pad3->cd();
-   TGraph *gMCKrah = new TGraph(aIdxMC, aPosMCz, aPosMCx);
-   TGraph *gMLPKrah = new TGraph(aIdxMLPkrah, aPosMLPKrahz, aPosMLPKrahx);
+   pad1->cd(2);
+   TGraph *gMCKrah = new TGraph(aIdxMC, aPosMCz, aPosMCy);
+   TGraph *gMLPKrah = new TGraph(aIdxMLPkrah, aPosMLPKrahz, aPosMLPKrahy);
    gMLPKrah->SetMarkerStyle(21);
    gMLPKrah->SetMarkerColor(kBlue);
    gMCKrah->SetMarkerStyle(21);
@@ -654,7 +664,10 @@ void findMLP(Float_t phantomSize = 200, Float_t rotation = -1, Float_t spotsize 
    gMLPKrah->SetMarkerSize(0.3);
    gMCKrah->Draw("AP");
    gMLPKrah->Draw("P");
-   gMCKrah->SetTitle("X_{0}^{opt} = Bayesian MLP;Depth [mm];X position [mm]");
+   gMCKrah->GetXaxis()->SetRangeUser(-30, phantomSize+30);
+   gMCKrah->GetXaxis()->SetNdivisions(509);
+   gMCKrah->GetYaxis()->SetRangeUser(-11, 7);
+   gMCKrah->SetTitle("Bayesian Most Likely Path;Depth [mm];X position [mm]");
    /*
    pad3->cd(2);
    TGraph *gMCKrahy = new TGraph(aIdxMC, aPosMCz, aPosMCy);
@@ -669,9 +682,9 @@ void findMLP(Float_t phantomSize = 200, Float_t rotation = -1, Float_t spotsize 
    gMLPKrahy->Draw("P");
    gMCKrahy->SetTitle("X_{0}^{opt} = Bayesian MLP;Depth [mm];Y position [mm]");
 */
-   pad4->cd();
-   TGraph *gMCest = new TGraph(aIdxMC, aPosMCz, aPosMCx);
-   TGraph *gMLPest = new TGraph(aIdxMLP, aPosMLPz, aPosMLPestx);
+   pad2->cd(2);
+   TGraph *gMCest = new TGraph(aIdxMC, aPosMCz, aPosMCy);
+   TGraph *gMLPest = new TGraph(aIdxMLP, aPosMLPz, aPosMLPesty);
    gMLPest->SetMarkerStyle(21);
    gMLPest->SetMarkerColor(kBlue);
    gMCest->SetMarkerStyle(21);
@@ -680,7 +693,10 @@ void findMLP(Float_t phantomSize = 200, Float_t rotation = -1, Float_t spotsize 
    gMLPest->SetMarkerSize(0.3);
    gMCest->Draw("AP");
    gMLPest->Draw("P");
-   gMCest->SetTitle("X_{0}^{opt} = Linear Projection Model + Cubic Spline;Depth [mm];X position [mm]");
+   gMCest->GetXaxis()->SetRangeUser(-30, phantomSize+30);
+   gMCest->GetXaxis()->SetNdivisions(509);
+   gMCest->GetYaxis()->SetRangeUser(-11, 7);
+   gMCest->SetTitle(" Linear Projection Model + CSP;Depth [mm];X position [mm]");
 
    /*
    pad4->cd(2);

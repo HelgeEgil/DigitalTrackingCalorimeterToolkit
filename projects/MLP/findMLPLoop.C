@@ -124,13 +124,13 @@ void findMLPLoop(Float_t phantomSize, Int_t eventsToUse, Float_t spotSize, Int_t
 
    if (!tree) exit(0);
 
-   Float_t  AXlow = 0;
-   Float_t  AXhigh = 0.5;
+   Float_t  AXlow = 0.9;
+   Float_t  AXhigh = 1;
    Float_t  APlow = 0;
-   Float_t  APhigh = 0.3;
+   Float_t  APhigh = 1;
    
-   Float_t  AXdelta = 0.0051;
-   Float_t  APdelta = 0.0031;
+   Float_t  AXdelta = 0.001;
+   Float_t  APdelta = 0.01;
 
    Int_t    AXbins = (AXhigh - AXlow) / AXdelta;
    Int_t    APbins = (APhigh - APlow) / APdelta;
@@ -189,7 +189,7 @@ void findMLPLoop(Float_t phantomSize, Int_t eventsToUse, Float_t spotSize, Int_t
             // INNER MINIMIZATION LOOP
             for (Float_t AX = AXlow; AX <= AXhigh; AX += AXdelta) {
                for (Float_t AP = APlow; AP <= APhigh; AP += APdelta) {
-                  X0est = X2 * AX/(spos+AX) - phantomSize * AP/(spos+AX) * P2;
+                  X0est = X2 * AX - phantomSize * AP * P2;
                   diff_x = fabs(X0.X() - X0est.X());
                   diff_y = fabs(X0.Y() - X0est.Y());
                   hErrorMatrix->Fill(AX, AP, sqrt(pow(diff_x, 2) + pow(diff_y, 2)));

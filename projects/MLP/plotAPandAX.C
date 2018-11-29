@@ -307,11 +307,11 @@ void plotAPandAX() {
    gStyle->SetLabelFont(22, "Y");
    gStyle->SetTitleFont(22, "Y");
    gStyle->SetTitleYOffset(1);
-   gStyle->SetLabelSize(0.045);
-   gStyle->SetLabelSize(0.045, "Y");
-   gStyle->SetTitleSize(0.045);
-   gStyle->SetTitleSize(0.045, "Y");
-   gStyle->SetTextSize(0.045);
+   gStyle->SetLabelSize(0.06);
+   gStyle->SetLabelSize(0.06, "Y");
+   gStyle->SetTitleSize(0.06);
+   gStyle->SetTitleSize(0.06, "Y");
+   gStyle->SetTextSize(0.06);
 
    Float_t  phantomSize_, error_, AX_, AP_, residualEnergy_; 
 
@@ -733,9 +733,9 @@ void plotAPandAX() {
    c1b->Divide(2,1,1e-4,1e-4);
 
    TCanvas *c1 = new TCanvas("c1", "Fit results", 1500, 600);
-   c1->Divide(2,1,1e-4,1e-4);
+   c1->Divide(2,2,1e-4,1e-4);
    
-   float spos = pow(3.15, -2);
+   float spos = pow(3.15, -2) + pow(2000 * 0.002, -2);
    bool makeLog = false;
    for (int i=0; i<arrayIdxAdipose230; i++) {
       // AX = a / (spos^-2 + a); AP = b / (spos^-2 + a)
@@ -849,14 +849,14 @@ void plotAPandAX() {
    gAX200->SetMarkerColor(kRed);
    gAP200->SetMarkerColor(kRed);
    
-   /*
+   
    c1->cd(3);
    gAXall->Draw("AP");
 //   gAX200->Draw("AP");
    c1->cd(4);  
    gAPall->Draw("AP");
 //   gAP200->Draw("AP");
-*/
+
    gAXB100230->SetMarkerColor(kRed);
    gAPB100230->SetMarkerColor(kRed);
    gAPB100230->SetMarkerStyle(21);
@@ -885,16 +885,14 @@ void plotAPandAX() {
 
    c1->cd(1);
    gAX230->Draw("AP");
-//   gAXA150230->Draw("P");
-//   gAXB100230->Draw("P");
-//   gAXCorticalBone230->Draw("P");
-//   gAXAdipose230->Draw("P");
+   gAXA150230->Draw("P");
+   gAXB100230->Draw("P");
+   gAXCorticalBone230->Draw("P");
+   gAXAdipose230->Draw("P");
 
-//   TF1 *fitExpAX = new TF1("fitExpAX", "[0] * exp([1] + x*[2]) / (0.1 + [0] * exp([1] + x*[2]))");
-//   TF1 *fitExpAX = new TF1("fitExpAX", "[0] * exp([1] + x*[2] + [3]*x**2)/(0.1+[0]*exp([1]+x*[2]+[3]*x**2))");
-   TF1 *fitExpAX = new TF1("fitExpAX", "[0] * exp([1] + x*[2] + [3]*x**2)");
-//   fitExpAX->SetParameters(0.406, 3.295, -5.849);
-   fitExpAX->SetParameters(0.959, 2.452, -6.861, 0.763);
+//   TF1 *fitExpAX = new TF1("fitExpAX", Form("[0] * exp([1] + x*[2] + [3]*x**2+[4]*pow(x,3))/(%.5f+[0]*exp([1]+x*[2]+[3]*x**2+[4]*pow(x,3)))", spos));
+   TF1 *fitExpAX = new TF1("fitExpAX", "[0] * exp([1] + x*[2] + [3]*x**2 + [4]*x**3)");
+   fitExpAX->SetParameters(1, 2.9143, -5.5691, -1.4734, 1.2822);
    fitExpAX->SetLineColor(kBlack);
    fitExpAX->SetLineWidth(4);
 //   fitExpAX->SetLineStyle(9);
@@ -918,18 +916,15 @@ void plotAPandAX() {
    legX->Draw();
    
    c1->cd(2);
-   gAP230->Draw("AP"); /*
+   gAP230->Draw("AP"); 
    gAPA150230->Draw("P");
    gAPB100230->Draw("P");
    gAPCorticalBone230->Draw("P");
    gAPAdipose230->Draw("P");
-   */
    
-//   TF1 *fitExpAP = new TF1("fitExpAP", "[0] * exp([1] + x*[2] + pow(x,2)*[3]) / (0.1 + 0.406 * exp(3.295 - 5.849*x))");
-//   TF1 *fitExpAP = new TF1("fitExpAP", "[0] * exp([1] + x*[2] + pow(x,2)*[3])/(0.1 + 0.959 * exp(2.452 - 6.861*x + 0.763*x**2))");
-   TF1 *fitExpAP = new TF1("fitExpAP", "[0] * exp([1] + x*[2] + pow(x,2)*[3])");
-//   fitExpAP->SetParameters(1.032, 1.765, -5.779, -0.968);
-   fitExpAP->SetParameters(1.032, 1.759, -6.451, -0.53);
+//   TF1 *fitExpAP = new TF1("fitExpAP", Form("[0] * exp([1] + x*[2] + pow(x,2)*[3] + pow(x,3)*[4])/( %.5f + 1.0239 * exp(3.1540 - 7.7855*x + 1.7764*x**2 - pow(x,3)*0.2711))", spos));
+   TF1 *fitExpAP = new TF1("fitExpAP", "[0] * exp([1] + x*[2] + pow(x,2)*[3] + pow(x,3)*[4])");
+   fitExpAP->SetParameters(1, 2.4946, -8.0676, 4.2200, -3.2835);
    fitExpAP->SetLineColor(kBlack);
    fitExpAP->SetLineWidth(4);
 //   fitExpAP->SetLineStyle(9);
@@ -953,23 +948,21 @@ void plotAPandAX() {
 //   leg->Draw(); 
 
    c1b->cd(1);
-   gAXtheory->SetTitle(";WET/WEPL;A_{X}/(#sigma^{-2} + A_{X})");
-   gAPtheory->SetTitle(";WET/WEPL;A_{P}/(#sigma^{-2} + A_{X})");
+   gAXtheory->SetTitle(";WET/WEPL;A_{X} #left(#left(#Sigma^{-1}_{in}#right)_{1,1} + A_{X}#right)^{-1}");
+   gAPtheory->SetTitle(";WET/WEPL;A_{P} #left(#left(#Sigma^{-1}_{in}#right)_{1,1} + A_{X}#right)^{-1}");
 
    gAXtheory->Draw("AL");
    fitExpAX->Draw("same");
    
    TLegend *leg1b = new TLegend(.3, .66, .64, .8655);
-   leg1b->AddEntry(fitExpAX, "Best fit (water only)", "L");
-   leg1b->AddEntry(gAXtheory, "Theoretical prediction", "L");
+   leg1b->AddEntry(fitExpAX, "LPM fit (water)", "L");
+   leg1b->AddEntry(gAXtheory, "Bayesian prediction", "L");
    leg1b->SetTextFont(22);
    leg1b->Draw();
 
    c1b->cd(2);
    gAPtheory->Draw("AL");
    fitExpAP->Draw("same");
-
-
 
    TCanvas *c3 = new TCanvas("c3", "Error vs divergence", 1200, 400);
    c3->Divide(3,1,1e-3,1e-3);

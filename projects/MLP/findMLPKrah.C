@@ -297,34 +297,12 @@ void findMLP(Float_t phantomSize = 200, Float_t rotation = -1, Float_t spotsize 
          Float_t w = wet / wepl;
          Float_t w2 = pow(wet / wepl, 2);
   
-//       Best fit         
-//         AX = 1 - 0.30 * w + 1.53 * w2 - 4.25 * pow(w,3) + 2.30 * pow(w,4);
-//         AP = -0.659 + 2.072* w - 8.66 * w2 + 18.14 * pow(w,3) - 16.27 * pow(w,4) + 5.34 * pow(w,5);
-
-         // Theory fit
-//         AX = .999 - .00453*w + .4169*w2 - 3.447*w*w2 + 2.235*w2*w2;
-//         AP = -.499 + .0708*w - .0111*w2 + 1.385*w*w2 - 1.0004*w2*w2;
-         
-         /*
-         if (initialEnergy == 200) {
-            AX = 1.0019 - 0.297 * w + 1.427 * w2 - 3.63 * w2*w + 1.787 * w2*w2;
-            AP = -0.652 + 2.028 * w - 8.349*w2 + 17.021*w*w2 - 14.923*w2*w2 + 4.843*w2*w2*w;
-         }
-         */
-
          // NEW VERSION OF LPM !!!!!
-         AX = 0.406 * exp(3.295 - 5.849*w);
-         AP = 1.032 * exp(1.765 - 5.779*w - 0.968*w2);
+         AX = exp(2.9143 - 5.5692 * w - 1.4734 * w2 + 1.2822 * w*w2);
+         AP = exp(2.4946 - 8.0676 * w + 4.2200 * w2 - 3.2835 * w*w2);
          float aa = AX/(pow(spotSizeAtX0,-2) + AX);
          float bb = AP/(pow(spotSizeAtX0,-2) + AX);
          
-         /*
-         if (spotsize >= 0) {
-            AX =  -3.984e-2 + 5.928e-1 * spotsize - 1.436e-1 * pow(spotsize,2) + 1.699e-2 * pow(spotsize,3) - 9.634e-4 * pow(spotsize,4) + 2.093e-5 * pow(spotsize,5);
-            AP = 1.789e-2 - 2.604e-1 * spotsize + 6.261e-2  * pow(spotsize,2) - 7.354e-3 * pow(spotsize,3) + 4.145e-4 * pow(spotsize,4) - 8.953e-6 * pow(spotsize,5);
-         }
-         */
-
          if (printed++ < 5) {
             printf("OPTIM: w = %2f -> AX = %.2f, AP = %.2f (a = %.2f, b = %.2f)\n", w, AX, AP, aa, bb);
          }
