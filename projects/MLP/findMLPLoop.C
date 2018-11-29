@@ -47,7 +47,7 @@ XYZVector SplineMLP(Double_t t, XYZVector X0, XYZVector X2, XYZVector P0, XYZVec
 }
 
 void findMLPLoop(Float_t phantomSize, Int_t eventsToUse, Float_t spotSize, Int_t material) {
-   Float_t     initialEnergy = 230;
+   Float_t     initialEnergy = 917;
    Float_t     differenceArrayDZ = 3;
    Float_t     x, y, z, edep, sum_edep = 0, residualEnergy = 0;
    Int_t       eventID, parentID, lastEID = -1;
@@ -106,7 +106,7 @@ void findMLPLoop(Float_t phantomSize, Int_t eventsToUse, Float_t spotSize, Int_t
    TFile *f;
 
    if (spotSize <0) {
-      f = new TFile(Form("MC/Output/simpleScanner_energy%.0fMeV_%s_phantom%03.0fmm.root", initialEnergy, sMaterial, phantomSize)); 
+      f = new TFile(Form("MC/Output/simpleScanner_energy%.0fMeV_%s_phantom%03.0fmm_Helium.root", initialEnergy, sMaterial, phantomSize)); 
    }
    else {
       //f = new TFile(Form("MC/Output/simpleScanner_energy%.0fMeV_%s_phantom%03.0fmm_spotsize%04.1fmm.root", initialEnergy, sMaterial, phantomSize, spotSize)); 
@@ -126,11 +126,11 @@ void findMLPLoop(Float_t phantomSize, Int_t eventsToUse, Float_t spotSize, Int_t
 
    Float_t  AXlow = 0.9;
    Float_t  AXhigh = 1;
-   Float_t  APlow = 0;
-   Float_t  APhigh = 1;
+   Float_t  APlow = 0.35;
+   Float_t  APhigh = 0.45;
    
    Float_t  AXdelta = 0.001;
-   Float_t  APdelta = 0.01;
+   Float_t  APdelta = 0.001;
 
    Int_t    AXbins = (AXhigh - AXlow) / AXdelta;
    Int_t    APbins = (APhigh - APlow) / APdelta;

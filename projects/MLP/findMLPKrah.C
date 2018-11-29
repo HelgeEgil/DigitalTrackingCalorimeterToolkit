@@ -340,7 +340,6 @@ void findMLP(Float_t phantomSize = 200, Float_t rotation = -1, Float_t spotsize 
                s_scat_out = 0;   
             }
 
-      
             T_out[0] = 0;
             T_out[1] = 0;
             T_out[2] = -1/d_Tcm;
