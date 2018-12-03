@@ -56,7 +56,7 @@
 /gate/calorimeter/placement/setTranslation 0 0 {zcalorimeter} mm # dz/2 + 30
 /gate/calorimeter/setMaterial Tungsten
 
-/gate/phantom/attachCrystalSD
+#/gate/phantom/attachCrystalSD
 /gate/fronttracker/attachCrystalSD
 /gate/backtracker/attachCrystalSD
 /gate/calorimeter/attachCrystalSD
@@ -76,9 +76,9 @@
 #/process/inactivate protonInelastic
 
 /gate/source/addSource PBS PencilBeam
-#/gate/source/PBS/setParticleType proton
-/gate/source/PBS/setParticleType GenericIon
-/gate/source/PBS/setIonProperties 2 4 2 0
+/gate/source/PBS/setParticleType proton
+#/gate/source/PBS/setParticleType GenericIon
+#/gate/source/PBS/setIonProperties 2 4 2 0
 /gate/source/PBS/setEnergy {energy} MeV
 /gate/source/PBS/setSigmaEnergy 0. MeV
 /gate/source/PBS/setPosition 0 0 {zbeam} mm
@@ -93,11 +93,12 @@
 /gate/source/PBS/setEllipseYPhiEmittance {emittance} mm*mrad # was 15
 /gate/source/PBS/setEllipseYPhiRotationNorm negative
 /gate/application/setTotalNumberOfPrimaries 10000
+#/gate/source/PBS/setTestFlag true
 
 /gate/output/root/enable
 /gate/output/root/setRootSinglesFlag 0
 /gate/output/root/setRootHitFlag 1
-/gate/output/root/setFileName Output/simpleScanner_energy{energy}MeV_{material}_phantom{dz}mm_Helium
+/gate/output/root/setFileName Output/simpleScanner_energy{energy}MeV_{material}_phantom{dz}mm_parallel
 
 /gate/random/setEngineName MersenneTwister
 /gate/random/setEngineSeed auto

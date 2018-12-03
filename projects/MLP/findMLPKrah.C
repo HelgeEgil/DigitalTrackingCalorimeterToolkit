@@ -214,6 +214,9 @@ void findMLP(Float_t phantomSize = 200, Float_t rotation = -1, Float_t spotsize 
    if (spotsize < 0) spotSizeAtX0 = 3.14; // undefined, 3 mm at source
    else              spotSizeAtX0 = 0.9869 * spotsize + 0.1985; // correct for scattering in air + divergence from source to X0 plane
 
+   Float_t spos = pow(spotSizeAtX0, -2);
+   Float_t sposCM = pow(spotSizeAtX0/10, -2);
+
    TTree *tree = (TTree*) f->Get("Hits");
 
    if (!tree) exit(0);
@@ -298,8 +301,13 @@ void findMLP(Float_t phantomSize = 200, Float_t rotation = -1, Float_t spotsize 
          Float_t w2 = pow(wet / wepl, 2);
   
          // NEW VERSION OF LPM !!!!!
-         AX = exp(2.9143 - 5.5692 * w - 1.4734 * w2 + 1.2822 * w*w2);
-         AP = exp(2.4946 - 8.0676 * w + 4.2200 * w2 - 3.2835 * w*w2);
+         float ax1, ax2, ax3, ax4, ap1, ap2, ap3, ap4;
+         ax1 = 2.5073; ax2 = -6.3858; ax3 =  0.4913;
+         ap1 = 1.8175; ap2 = -5.9708; ap3 = -0.8158;
+
+         AX = exp(ax1 + ax2 * w + ax3 * w2);
+         AP = exp(ap1 + ap2 * w + ap3 * w2);
+
          float aa = AX/(pow(spotSizeAtX0,-2) + AX);
          float bb = AP/(pow(spotSizeAtX0,-2) + AX);
          
@@ -506,7 +514,7 @@ void findMLP(Float_t phantomSize = 200, Float_t rotation = -1, Float_t spotsize 
 
             X2prime = X2 - X0tps - phantomSize * P0tps;
 
-            X0est = X2prime * AX/(pow(spotSizeAtX0,-2)+AX) - P2prime * AP/(pow(spotSizeAtX0,-2)+AX) * phantomSize; // LPM
+            X0est = X2prime * AX/(spos+AX) - P2prime * AP/(spos+AX) * phantomSize; // LPM
 
             X0est += X0tps;
             X0est.SetZ(0);

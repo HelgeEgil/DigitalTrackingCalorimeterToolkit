@@ -47,7 +47,7 @@ XYZVector SplineMLP(Double_t t, XYZVector X0, XYZVector X2, XYZVector P0, XYZVec
 }
 
 void findMLPLoop(Float_t phantomSize, Int_t eventsToUse, Float_t spotSize, Int_t material) {
-   Float_t     initialEnergy = 917;
+   Float_t     initialEnergy = 230;
    Float_t     differenceArrayDZ = 3;
    Float_t     x, y, z, edep, sum_edep = 0, residualEnergy = 0;
    Int_t       eventID, parentID, lastEID = -1;
@@ -106,11 +106,10 @@ void findMLPLoop(Float_t phantomSize, Int_t eventsToUse, Float_t spotSize, Int_t
    TFile *f;
 
    if (spotSize <0) {
-      f = new TFile(Form("MC/Output/simpleScanner_energy%.0fMeV_%s_phantom%03.0fmm_Helium.root", initialEnergy, sMaterial, phantomSize)); 
+      f = new TFile(Form("MC/Output/simpleScanner_energy%.0fMeV_%s_phantom%03.0fmm_parallel.root", initialEnergy, sMaterial, phantomSize)); 
    }
    else {
-      //f = new TFile(Form("MC/Output/simpleScanner_energy%.0fMeV_%s_phantom%03.0fmm_spotsize%04.1fmm.root", initialEnergy, sMaterial, phantomSize, spotSize)); 
-      f = new TFile(Form("MC/Output/simpleScanner_energy%.0fMeV_%s_phantom%03.0fmm_spotsize%01.0fmm.root", initialEnergy, sMaterial, phantomSize, spotSize)); 
+      f = new TFile(Form("MC/Output/simpleScanner_energy%.0fMeV_%s_phantom%03.0fmm_spotsize%04.1fmm_parallel.root", initialEnergy, sMaterial, phantomSize, spotSize)); 
    }
 
    if (spotSize < 0) { spotSize = 3; }
@@ -124,13 +123,13 @@ void findMLPLoop(Float_t phantomSize, Int_t eventsToUse, Float_t spotSize, Int_t
 
    if (!tree) exit(0);
 
-   Float_t  AXlow = 0.9;
-   Float_t  AXhigh = 1;
-   Float_t  APlow = 0.35;
-   Float_t  APhigh = 0.45;
+   Float_t  AXlow = 0.99;
+   Float_t  AXhigh = 1.02;
+   Float_t  APlow = .4;
+   Float_t  APhigh = .6;
    
-   Float_t  AXdelta = 0.001;
-   Float_t  APdelta = 0.001;
+   Float_t  AXdelta = 0.0001;
+   Float_t  APdelta = 0.005;
 
    Int_t    AXbins = (AXhigh - AXlow) / AXdelta;
    Int_t    APbins = (APhigh - APlow) / APdelta;
@@ -250,17 +249,6 @@ void findMLPLoop(Float_t phantomSize, Int_t eventsToUse, Float_t spotSize, Int_t
    Float_t minZvalue = hErrorMatrix->GetZaxis()->GetBinCenter(binz);
    printf("The bin with the minimum nonzero content is %.4f. AX = %.3f and AP = %.3f.\n", mincont, minXvalue, minYvalue);
 
-
-   /*
-   for (Int_t i=0; i<nbins; i++) {
-      cont = hErrorMatrix->GetBinContent(i);
-      if (cont == mincont) {
-         hErrorMatrix->SetBinContent(i, -10);
-      }
-   }
-   */
-
-
    TCanvas *c2 = new TCanvas("c2", "param values", 1500, 1200);
    hErrorMatrix->GetZaxis()->SetLabelFont(22);
    hErrorMatrix->GetZaxis()->SetTitleFont(22);
@@ -279,7 +267,7 @@ void findMLPLoop(Float_t phantomSize, Int_t eventsToUse, Float_t spotSize, Int_t
    c2->SaveAs(Form("Output/accuracy_energy%.0fMeV_%.0fmm_%s.pdf", initialEnergy, phantomSize, sMaterial));
 
    // Phantom size, error , AX , AP
-   ofstream file(Form("Output/accuracy_energy%.0fMeV_%s_phantom.csv", initialEnergy, sMaterial), ofstream::out | ofstream::app); 
+   ofstream file(Form("Output/accuracy_energy%.0fMeV_%s_phantom_parallel.csv", initialEnergy, sMaterial), ofstream::out | ofstream::app); 
    file << phantomSize << " " << mincont << " " << minXvalue << " " << minYvalue << " " <<  hResidualEnergy->GetMean() << endl;
    file.close();
 }
