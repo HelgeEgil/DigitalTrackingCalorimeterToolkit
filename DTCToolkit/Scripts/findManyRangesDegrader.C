@@ -34,7 +34,7 @@ void findManyRanges(Int_t degraderFrom, Int_t degraderIncrement, Int_t degraderT
    gROOT->ProcessLine(".L findRange.C+");
    for (Int_t degrader=degraderFrom; degrader<=degraderTo; degrader += degraderIncrement) {
       for (Int_t mm=mmFrom; mm<=mmTo; mm += mmIncrement) {
-      	findRange f(250, mm, degrader);
+      	findRange f(230, mm, degrader);
          resultVector = f.Run();
          if (resultVector.size() > 1) {
             Float_t expectedRange = resultVector.at(0);

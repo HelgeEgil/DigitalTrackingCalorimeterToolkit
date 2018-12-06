@@ -58,7 +58,6 @@ vector<Float_t> findRange::Run(Double_t energy, Double_t sigma_mev)
    cout << "Run energy = " << run_energy << endl;
 
    TCanvas *c2 = new TCanvas("c2", "Ranges and energies", 500, 500);
-//   c2->Divide(2, 1, 0.001, 0.001);i
 
    Int_t nbinsx = 500;
    // 2 mm: 0.0096, 1.784
@@ -67,7 +66,6 @@ vector<Float_t> findRange::Run(Double_t energy, Double_t sigma_mev)
    // Focal: 0.0004461, 1.6677
    // H20:  0.0239, 1.7548
 
-   //Float_t a = 0.004461, p = 1.6677;
    Float_t  a = 0.0098, p = 1.7806;
    Float_t aw = 0.0239, pw = 1.7548;
 
@@ -87,12 +85,7 @@ vector<Float_t> findRange::Run(Double_t energy, Double_t sigma_mev)
 
    printf("RUNNING WITH ENERGY %.2f.\n", run_energy);
 
-   TH1F *hZ = new TH1F("hZ", "Z profile", nbinsx/3, xfrom + x_compensate, xto + x_compensate);
    TH1F *hRange = new TH1F("hRange", "Projected range in DTC", nbinsx, xfrom + x_compensate, xto + x_compensate);
-   TH1F *hRangeWEPL = new TH1F("hRangeWEPL", "Primary ranges in WEPL", nbinsx, xfrom*1.9 + x_compensate, xto*2.5 + x_compensate);
-   TH1F *hTracklength = new TH1F("hTracklength", "Beam range straggling", nbinsx, -20 , 20);
-   TH1F *hActualTracklength = new TH1F("hActualTracklength", "Ranges in DTC deconvoluted from beam energy straggling", nbinsx, xfrom + x_compensate, xto + x_compensate);
-   TH1F *hStepLength = new TH1F("hStepLength", "Steplenghths", 1000, 0, 1);
    TH1F *hEnergyAtInterface = new TH1F("hEnergyAtInterface", "Remaining energy after degrader;Energy [MeV];Entries", 150, energyFrom, energyTo);
 
    gStyle->SetOptStat(0);
@@ -143,13 +136,10 @@ vector<Float_t> findRange::Run(Double_t energy, Double_t sigma_mev)
 
       if (parentID == 0) {
       
-//         hStepLength->Fill(stepLength);
-
          Float_t z = posZ;
          Float_t y = posY;
          Float_t x = posX;
       
-//         hZ->Fill(z + x_compensate);
          n++;
 
          if (useDegrader) {
@@ -158,7 +148,7 @@ vector<Float_t> findRange::Run(Double_t energy, Double_t sigma_mev)
             }
 
             else if (dE > 0) {
-               thisEnergy = 250 - dE;
+               thisEnergy = energy - dE;
                thisRange = aw * pow(run_energy, pw) - aw * pow(thisEnergy, pw);
                hEnergyAtInterface->Fill(thisEnergy);
                dE = 0;
@@ -173,9 +163,6 @@ vector<Float_t> findRange::Run(Double_t energy, Double_t sigma_mev)
             hRange->Fill(lastRange);
             Float_t weplRange = aw / a * pow(lastRange / aw, 1 - pw/p) * lastRange;
             Float_t dtcRange = degraderThickness - thisRange + weplRange;
-            hActualTracklength->Fill(dtcRange);
-            hRangeWEPL->Fill(weplRange);
-            hTracklength->Fill(degraderThickness - thisRange);
             if (lastProcessName[0] == 'P') { lastP++; }
 
             firstX = posX;
@@ -259,68 +246,31 @@ vector<Float_t> findRange::Run(Double_t energy, Double_t sigma_mev)
    returnValues.push_back(fRemainingEnergy->GetParameter(1));
    returnValues.push_back(fRemainingEnergy->GetParameter(2));
 
-/*
-   c1->cd();
-      hZ->SetXTitle("Z [mm]");
-      hZ->SetYTitle("Edep [MeV]");
-      hZ->SetFillColor(kBlue-7);
-      hZ->SetLineColor(kBlack);
-      hZ->Draw();
-*/
-
+   
    c2->cd(1);
-      hRange->SetXTitle("Range [mm]");
-      hRange->SetYTitle("Number of primaries");
-      hRange->SetFillColor(kBlue-7);
-      hRange->SetLineColor(kBlack);
-      hRange->Draw();
-      gPad->Update();
-      TLine *l = new TLine(cutoff, 0, cutoff, gPad->GetUymax());
-      TLine *l2 = new TLine(cutoffHigh, 0, cutoffHigh, gPad->GetUymax());
-      l->SetLineWidth(2);
-      l->SetLineStyle(9);
-      l->Draw("same");
-      l2->SetLineWidth(2);
-      l2->SetLineStyle(9);
-      l2->Draw("same");
+   hRange->SetXTitle("Range [mm]");
+   hRange->SetYTitle("Number of primaries");
+   hRange->SetFillColor(kBlue-7);
+   hRange->SetLineColor(kBlack);
+   hRange->Draw();
+   gPad->Update();
+   TLine *l = new TLine(cutoff, 0, cutoff, gPad->GetUymax());
+   TLine *l2 = new TLine(cutoffHigh, 0, cutoffHigh, gPad->GetUymax());
+   l->SetLineWidth(2);
+   l->SetLineStyle(9);
+   l->Draw("same");
+   l2->SetLineWidth(2);
+   l2->SetLineStyle(9);
+   l2->Draw("same");
+
+   c2->SaveAs(Form("../OutputFiles/straggling/straggling_%.0f_mm_degrader.png", degraderThickness));
+
+   delete c2;
+   delete hRange;
+   delete fRemainingEnergy;
+   delete phaseSpaceSpline;
+   delete hEnergyAtInterface;
 
 
-/*
-   c7->cd();
-      hRangeWEPL->SetXTitle("Range WEPL [mm]");
-      hRangeWEPL->SetYTitle("Number of primaries");
-      hRangeWEPL->SetFillColor(kBlue-7);
-      hRangeWEPL->SetLineColor(kBlack);
-      hRangeWEPL->Draw();
-
-   c3->cd();
-      hTracklength->SetXTitle("Range [mm]");
-      hTracklength->SetYTitle("Number of primaries");
-      hTracklength->SetFillColor(kBlue-7);
-      hTracklength->SetLineColor(kBlack);
-      hTracklength->Draw();
-      
-   c4->cd();
-      hActualTracklength->SetXTitle("Range [mm]");
-      hActualTracklength->SetYTitle("Number of primaries");
-      hActualTracklength->SetFillColor(kBlue-7);
-      hActualTracklength->SetLineColor(kBlack);
-      hActualTracklength->Draw();
-
-      
-   c5->cd();
-      hStepLength->SetXTitle("Steplength [mm]");
-      hStepLength->SetYTitle("Number of steps");
-      hStepLength->SetFillColor(kBlue-7);
-      hStepLength->SetLineColor(kBlack);
-      hStepLength->Draw();
-
-   c2->cd(2);
-      hEnergyAtInterface->SetFillColor(kBlue-7);
-      hEnergyAtInterface->SetLineColor(kBlack);
-      hEnergyAtInterface->Draw();
-*/
-
-      c2->SaveAs(Form("../OutputFiles/straggling/straggling_%.0f_mm_degrader.png", degraderThickness));
    return returnValues;
 }

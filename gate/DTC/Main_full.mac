@@ -8,7 +8,7 @@
 #/vis/viewer/update /vis/viewer/refresh 
 
 /gate/geometry/setMaterialDatabase GateMaterials.db
-/control/execute Module.mac
+/control/execute Module_{absorberthickness}.mac
 
 /gate/systems/scanner_1/level1/attach FM_Layer
 /gate/systems/scanner_1/level2/attach FirstModule
@@ -33,24 +33,23 @@
 #/process/inactivate hadElastic
 #/process/inactivate protonInelastic
 
-#/geometry/test/recursive_test
-/geometry/test/run
-
 #=======================#
 # ADD PROTON BEAM	      #
 #=======================#
 
-/gate/source/addSource uniformBeam gps
-/gate/source/uniformBeam/gps/particle proton
-/gate/source/uniformBeam/gps/ene/type Gauss
-/gate/source/uniformBeam/gps/ene/mono {energy} MeV
-/gate/source/uniformBeam/gps/ene/sigma 0 MeV
-/gate/source/uniformBeam/gps/type Plane
-/gate/source/uniformBeam/gps/shape Square
-/gate/source/uniformBeam/gps/direction 0 0 1
-/gate/source/uniformBeam/gps/halfx 0. mm
-/gate/source/uniformBeam/gps/halfy 0. mm
-/gate/source/uniformBeam/gps/centre 0. 0. {beampos} mm
+/gate/source/addSource PBS PencilBeam
+/gate/source/PBS/setParticleType proton
+/gate/source/PBS/setEnergy {energy} MeV
+/gate/source/PBS/setSigmaEnergy 0. MeV
+/gate/source/PBS/setPosition 0. 0. {beampos} mm
+/gate/source/PBS/setSigmaX 3 mm
+/gate/source/PBS/setSigmaY 3 mm
+/gate/source/PBS/setSigmaTheta 2 mrad
+/gate/source/PBS/setSigmaPhi 2 mrad
+/gate/source/PBS/setEllipseXThetaEmittance 15 mm*mrad
+/gate/source/PBS/setEllipseXThetaRotationNorm negative
+/gate/source/PBS/setEllipseYPhiEmittance 15 mm*mrad
+/gate/source/PBS/setEllipseYPhiRotationNorm negative
 
 /gate/output/root/enable
 /gate/output/root/setRootSinglesFlag 0
@@ -62,5 +61,5 @@
 
 /gate/random/setEngineName MersenneTwister
 /gate/random/setEngineSeed auto
-/gate/application/setTotalNumberOfPrimaries 10000
+/gate/application/setTotalNumberOfPrimaries 1000
 /gate/application/start
