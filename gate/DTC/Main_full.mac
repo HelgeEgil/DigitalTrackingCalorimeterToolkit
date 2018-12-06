@@ -25,7 +25,7 @@
 /gate/geometry/setIonisationPotential Water 75 eV
 /gate/physics/addPhysicsList QGSP_BIC_EMY
 
-/gate/physics/SetMaxStepSizeInRegion world 0.2 mm
+/gate/physics/SetMaxStepSizeInRegion world 2 mm
 /gate/physics/ActivateStepLimiter proton
 
 /gate/run/initialize

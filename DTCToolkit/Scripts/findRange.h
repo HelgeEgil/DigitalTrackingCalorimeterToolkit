@@ -140,8 +140,8 @@ findRange::findRange(Float_t energy, Int_t thickness, Float_t degraderThickness,
          chain->Add(Form("../Data/MonteCarlo/DTC_Full_Aluminium_%.0fMeV_%dmm.root/Hits", energy, thickness));
       }
       else { // degrader is used, then energy -> degrader thickness and init energy = 230 MeV
-         printf("Opening file  ../Data/MonteCarlo/DTC_Full_Aluminium_Absorber%dmm_Degrader%.0fmm_%.0fMeV.root/Hits\n", thickness, degraderThickness, energy);
-         chain->Add(Form("../Data/MonteCarlo/DTC_Full_Aluminium_Absorber%dmm_Degrader%.0fmm_%.0fMeV.root/Hits", thickness, degraderThickness, energy));
+         printf("Opening file  ../Data/MonteCarlo/DTC_Full_Aluminium_Absorber%dmm_Degrader%3.0fmm_%.0fMeV.root/Hits\n", thickness, degraderThickness, energy);
+         chain->Add(Form("../Data/MonteCarlo/DTC_Full_Aluminium_Absorber%dmm_Degrader%3.0fmm_%.0fMeV.root/Hits", thickness, degraderThickness, energy));
       }
 
       tree = chain;

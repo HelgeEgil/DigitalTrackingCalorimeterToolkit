@@ -87,7 +87,7 @@ void findMLP(Float_t phantomSize = 200, Float_t rotation = -1, Float_t spotsize 
    gStyle->SetTitleYOffset(1);
    gStyle->SetLabelSize(0.045);
    gStyle->SetLabelSize(0.045, "Y");
-   gStyle->SetTitleSize(0.045);
+   gStyoe->SetTitleSize(0.045);
    gStyle->SetTitleSize(0.045, "Y");
    gStyle->SetTextSize(0.045);
 
