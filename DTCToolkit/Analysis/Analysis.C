@@ -823,12 +823,13 @@ void findTracksRangeAccuracy(Int_t Runs, Int_t dataType, Bool_t recreate, Float_
    }
 
    Int_t nTracks = 0;
+   printf("ntracks = %d\n", tracks->GetEntriesFast());
    for (Int_t j=0; j<tracks->GetEntriesFast(); j++) {
       Track *thisTrack = tracks->At(j);
       if (!thisTrack) continue;
 
       outputGraph = (TGraphErrors*) thisTrack->doTrackFit(false, false); // (bool isScaleVariable, bool useTrackLength (~ CSDA))
-      if (!outputGraph) continue;
+      if (!outputGraph) continue; 
       delete outputGraph;
       
       nTracks++;
@@ -836,7 +837,7 @@ void findTracksRangeAccuracy(Int_t Runs, Int_t dataType, Bool_t recreate, Float_
 
       fitRange = thisTrack->getFitParameterRange();
       hFitResults->Fill(getUnitFromTL(fitRange));
-
+      
       if (nTracks % eventsPerRun == 0) { // DO ANALYSIS
          TF1 *gauss = doSimpleGaussianFit(hFitResults, means, sigmas, outputFileIdx);
          delete gauss;

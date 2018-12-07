@@ -64,7 +64,7 @@ DataInterface::DataInterface(TTree *tree) : fChain(0) {
       }
       else {
          printf("Opening file with degrader thickness %.0f mm, material is %s and abs. thickness %.0f mm...", run_degraderThickness, materialChar, readoutAbsorber);
-         chain->Add(Form("Data/MonteCarlo/DTC_%s_Absorber%.0fmm_Degrader%.0fmm_250MeV.root/Hits", materialChar, readoutAbsorber, run_degraderThickness)); // Fix if original run_energy is != 250
+         chain->Add(Form("Data/MonteCarlo/DTC_%s_Absorber%.0fmm_Degrader%.0fmm_230MeV.root/Hits", materialChar, readoutAbsorber, run_degraderThickness)); // Fix if original run_energy is != 250
          printf("OK!\n");
       }
       tree = chain;
@@ -472,7 +472,7 @@ void  DataInterface::getMCClusters(Int_t runNo, Clusters *clusters) {
       }
 
       layer = level1ID + baseID - 1;
-      cout << "Layer = level1ID " << level1ID << "+ baseID " << baseID << "-1 = " << layer << endl;
+//       cout << "Layer = level1ID " << level1ID << "+ baseID " << baseID << "-1 = " << layer << endl;
       if (kFilterNuclearInteractions == true && parentID != 0) {
          lastEventID = -1;
          continue;

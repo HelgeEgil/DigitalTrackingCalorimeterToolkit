@@ -1,6 +1,6 @@
 #!/bin/bash
 
-NCORES=8
+NCORES=40
 IDX=1
 
 echo "Usage: ./batchRunTracksRangeHistogram.sh <degraderThicknessFrom> <degraderThicknessStep> <degraderThicknessTo> <eventsPerRun> <runs>"
@@ -16,7 +16,7 @@ if [ $# -eq 5 ]; then
    for i in `seq $1 $2 $3`;
    do
       echo "Making plots at $i mm degrader with idx $IDX."
-      root -l -q 'Scripts/drawTracksRangeHistogramScript.C('$5', 0, 1, 250, '$i', '$4', '$IDX', false, true, false)' > OutputFiles/BPFitOutput_$IDX.txt &
+      root -l -b -q 'Scripts/drawTracksRangeHistogramScript.C('$5', 0, 1, 230, '$i', '$4', '$IDX', false, true, false, 0)' > OutputFiles/BPFitOutput_$IDX.txt &
       PIDLIST="$PIDLIST $!"
 
       if (( $IDX % $NCORES == 0 || $i == $3)); then
