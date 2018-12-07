@@ -118,15 +118,29 @@ void  createSplines() {
 
    Float_t readoutAbsorber = (roundf(kAbsorberThickness) == kAbsorberThickness) ? kAbsorberThickness : kAbsorberThickness*10;
 
-   if       (kMaterial == kTungsten) {
-      in.open(Form("Data/Ranges/%.0fmm_W.csv", readoutAbsorber));
+   if (kEnergy == 250) {
+      if       (kMaterial == kTungsten) {
+         in.open(Form("Data/Ranges/%.0fmm_W.csv", readoutAbsorber));
+      }
+      else if  (kMaterial == kAluminum) {
+         in.open(Form("Data/Ranges/%.0fmm_Al.csv", readoutAbsorber));
+      }
+      else if  (kMaterial == kCarbon) {
+         in.open(Form("Data/Ranges/%.0fmm_C.csv", readoutAbsorber));
+      }
    }
-   else if  (kMaterial == kAluminum) {
-      in.open(Form("Data/Ranges/%.0fmm_Al.csv", readoutAbsorber));
+   else if (kEnergy == 230) {
+      if       (kMaterial == kTungsten) {
+         in.open(Form("Data/Ranges/%.0fmm_W_230MeV.csv", readoutAbsorber));
+      }
+      else if  (kMaterial == kAluminum) {
+         in.open(Form("Data/Ranges/%.0fmm_Al_230MeV.csv", readoutAbsorber));
+      }
+      else if  (kMaterial == kCarbon) {
+         in.open(Form("Data/Ranges/%.0fmm_C_230MeV.csv", readoutAbsorber));
+      }
    }
-   else if  (kMaterial == kCarbon) {
-      in.open(Form("Data/Ranges/%.0fmm_C.csv", readoutAbsorber));
-   }
+
 
    while (1) {
       in >> energy >> range;
