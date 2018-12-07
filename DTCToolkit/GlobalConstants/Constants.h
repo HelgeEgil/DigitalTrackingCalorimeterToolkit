@@ -48,6 +48,7 @@ Bool_t   kUseEmpiricalMCS = true;
 Bool_t   kFilterNuclearInteractions = false; // Move to argument list
 Int_t    kEventsPerRun = 50;
 Int_t    kSkipTracks = 0;
+Int_t    kEnergy = 230;
 
 #ifdef USEALPIDE
 Bool_t   kUseDegrader = true;
