@@ -98,8 +98,6 @@ TGraphErrors * Track::doTrackFit(Bool_t isScaleVariable, Bool_t useTrackLength) 
 
    delete func;
    
-   cout << gROOT->GetListOfFunctions() << endl;
-
    return graph;
 }
 

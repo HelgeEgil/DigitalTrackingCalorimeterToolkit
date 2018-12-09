@@ -736,7 +736,7 @@ void drawTracksRangeHistogram(Int_t Runs, Int_t dataType, Bool_t recreate, Float
       
       if       (kOutputUnit == kPhysical) hFitResults->SetXTitle("Physical range [mm]");
       else if  (kOutputUnit == kWEPL)     hFitResults->SetXTitle("Range in Water Equivalent Path Length [mm]");
-      else if  (kOutputUnit == kEnergy)   hFitResults->SetXTitle("Energy [MeV]");
+      else if  (kOutputUnit == kUnitEnergy)   hFitResults->SetXTitle("Energy [MeV]");
 
       hFitResults->SetYTitle("Number of protons");
       hFitResults->GetXaxis()->SetTitleFont(22);
@@ -790,6 +790,7 @@ void findTracksRangeAccuracy(Int_t Runs, Int_t dataType, Bool_t recreate, Float_
    }
 
    printf("Using water degrader of thickness %.0f mm, the initial energy of %.0f MeV is reduced to %.1f MeV.\n", degraderThickness, energy, run_energy);
+   printf("-> The expected range is %.2f mm.\n", getTLFromEnergy(run_energy));
 
    kDataType = dataType;
    Bool_t         removeHighAngleTracks = true;
@@ -849,6 +850,10 @@ void findTracksRangeAccuracy(Int_t Runs, Int_t dataType, Bool_t recreate, Float_
          if (!isnan(empiricalMean)) {
             listOfErrorValues[idxOfErrorValues++] = empiricalMean - expectedMean;
          }
+         TCanvas *c = new TCanvas();
+         hFitResults->Draw();
+         c->SaveAs("tcanvas.png");
+         delete c;
          hFitResults->Reset();
       }
    }
@@ -870,7 +875,7 @@ void findTracksRangeAccuracy(Int_t Runs, Int_t dataType, Bool_t recreate, Float_
    }
 
    if (idxOfErrorValues == 1) sigmaError = 1e5;
-   else sigmaError = sqrt(sigmaError / (idxOfErrorValues-1));
+   else sigmaError = sqrt(sigmaError / (idxOfErrorValues));
 
    printf("Mean error from %d runs is %.2f mm +- %.2f mm. Expected error is %.2f.\n", Runs, meanError, sigmaError, expectedStraggling / sqrt(eventsPerRun));
    ofstream file("OutputFiles/tracksRangeAccuracy.csv", ofstream::out | ofstream::app);

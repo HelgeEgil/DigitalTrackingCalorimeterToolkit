@@ -91,7 +91,7 @@ Int_t energies[nEnergies] = {122, 140, 150, 170, 180, 188};
 enum eFrameType {kCalorimeter, kTracker};
 enum eDataType {kMC, kData};
 enum eMaterial {kTungsten, kAluminum, kPMMA, kWater, kCarbon};
-enum eOutputUnit {kPhysical, kWEPL, kEnergy};
+enum eOutputUnit {kPhysical, kWEPL, kUnitEnergy};
 
 #ifdef USEALPIDE
 const Int_t kMaterial = kAluminum;
