@@ -27,10 +27,10 @@
 using namespace std;
 
 // IF FLOAT VALUES OF ABSORBER THICKNESS: USE *10 VALUES (3.5 -> 35)
-Int_t absorberThickness = 6;
+Int_t absorberThickness = 4;
 Bool_t kFilterData = false;
 Bool_t kUseCarbon = false;
-Int_t filterSize = 1;
+Int_t filterSize = 7;
 const Int_t arraySize = 3500;
 const Int_t xFrom = 20;
 const Int_t xTo = 370;
@@ -116,7 +116,7 @@ void plotRangesAndStraggling() {
    Float_t a_dtc = 0, p_dtc = 0;
    ifstream in;
    if (!kUseCarbon) {
-      in.open(Form("../../Data/Ranges/%dmm_Al.csv", absorberThickness));
+      in.open(Form("../../Data/Ranges/%dmm_Al_230MeV.csv", absorberThickness));
    }
    else {
       in.open(Form("../../Data/Ranges/%dmm_C.csv", absorberThickness));
@@ -165,7 +165,7 @@ void plotRangesAndStraggling() {
    splineDTCInv = new TSpline3("splineDTCInv", dtcRanges, dtcEnergies, dtcIdx);
 
    if (!kUseCarbon) {
-      in.open("../../OutputFiles/findManyRangesDegrader.csv");
+      in.open("../../OutputFiles/findManyRangesDegrader_230MeV.csv");
    }
    else {
       in.open("../../OutputFiles/findManyRangesDegraderCarbon.csv");
@@ -175,13 +175,13 @@ void plotRangesAndStraggling() {
    Float_t a_wtr = 0.02387;
    Float_t p_wtr = 1.7547;
 
-   Float_t wepl_ratio = splineWater->Eval(249) / splineDTC->Eval(249);
-   Float_t wepl_ratio0 = a_wtr / a_dtc * pow(249 / a_wtr, 1 - p_dtc / p_wtr);
+   Float_t wepl_ratio = splineWater->Eval(225) / splineDTC->Eval(225);
+   Float_t wepl_ratio0 = a_wtr / a_dtc * pow(225 / a_wtr, 1 - p_dtc / p_wtr);
 
    cout << "WEPL ratio (spline) = " << wepl_ratio << endl;
    cout << "WEPL ratio (BK) = " << wepl_ratio0 << endl;
    
-   Float_t wtr_range = splineWater->Eval(250); // GATE
+   Float_t wtr_range = splineWater->Eval(225); // GATE
 
    while (1) {
       in >>  waterphantomthickness_ >> thickness_ >> nomrange_ >> nomsigma_ >> dummy0 >> energy >> dummy0;

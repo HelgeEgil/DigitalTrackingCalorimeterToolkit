@@ -56,7 +56,7 @@ void plotEnergyVsRange() {
    TPad *graphPad = new TPad("Graphs", "Graphs", 0.05, 0.1, 0.95, 0.95);
    graphPad->Draw();
    graphPad->cd();
-   graphPad->Divide(1,6,0.00001,0.00001);
+   graphPad->Divide(1,5,0.00001,0.00001);
 
 
    Float_t  arrayE2[arraySize] = {0}; // energy MC
@@ -75,7 +75,8 @@ void plotEnergyVsRange() {
    Double_t energies[arraySize] = {0};
    Double_t thicknesses[arraySize] = {0};
 
-   Float_t correction_2 = -0.132, correction_3 = 0.271, correction_35 = 0.813, correction_4 = 0.734, correction_5 = 1.292, correction_6 = 1.879;
+//   Float_t correction_2 = -0.132, correction_3 = 0.271, correction_35 = 0.813, correction_4 = 0.734, correction_5 = 1.292, correction_6 = 1.879; // 250 MeV
+   Float_t correction_2 = 0.4, correction_3 = 0.98, correction_35 = 0.813, correction_4 = 1.37, correction_5 = 1.97 , correction_6 = 2.54;
    if (!kUseDCCorrection) {
       correction_2 = 0;
       correction_3 = 0;
@@ -92,7 +93,7 @@ void plotEnergyVsRange() {
    Float_t estimatedStraggling;
 
    ifstream in1;
-   in1.open("../../Data/Ranges/EnergyAfterDegraderPSTAR.csv");
+   in1.open("../../Data/Ranges/EnergyAfterDegrader230MeV.csv");
    Int_t thick, n=0;
    Double_t energy;
    while (1) {
@@ -102,7 +103,7 @@ void plotEnergyVsRange() {
       energies[n++] = energy;
    }
    in1.close();
-   printf("Found %d lines in EnergyAfterDegraderG4.csv\n", n);
+   printf("Found %d lines in EnergyAfterDegrader230MeV.csv\n", n);
 
    TSpline3 *energySpline = new TSpline3("energySpline", thicknesses, energies, n);
 
@@ -204,11 +205,11 @@ void plotEnergyVsRange() {
    hMC5->SetLineWidth(3);
    hMC6->SetLineWidth(3);
 
-   Float_t yfrom = -1;
-   Float_t yto = 1;
+   Float_t yfrom = -3.5;
+   Float_t yto = 3.5;
 
    Float_t xfrom = 5;
-   Float_t xto = 380;
+   Float_t xto = 320;
 
    hMC2->GetXaxis()->SetRangeUser(xfrom, xto);
    hMC3->GetXaxis()->SetRangeUser(xfrom, xto);
@@ -229,8 +230,8 @@ void plotEnergyVsRange() {
    hMC5->GetYaxis()->SetNdivisions(404);
    hMC6->GetYaxis()->SetNdivisions(404);
 
-   Float_t textX = 10.5;
-   Float_t textY = 1.1;
+   Float_t textX = 7.22;
+   Float_t textY = 3.11;
 
    graphPad->cd(1);
    gPad->SetGridy();
@@ -244,23 +245,23 @@ void plotEnergyVsRange() {
    gPad->SetGridy();
    hMC3->Draw("LA");
    t2->DrawText(textX, textY, "3 mm Al absorber");
-   
+   /*
    graphPad->cd(3);
    gPad->SetGridy();
    hMC35->Draw("LA");
    t2->DrawText(textX, textY, "3.5 mm Al absorber");
-
-   graphPad->cd(4);
+*/
+   graphPad->cd(3);
    gPad->SetGridy();
    hMC4->Draw("LA");
    t2->DrawText(textX, textY, "4 mm Al absorber");
    
-   graphPad->cd(5);
+   graphPad->cd(4);
    gPad->SetGridy();
    hMC5->Draw("LA");
    t2->DrawText(textX, textY, "5 mm Al absorber");
    
-   graphPad->cd(6);
+   graphPad->cd(5);
    gPad->SetGridy();
    hMC6->Draw("LA");
    t2->DrawText(textX, textY, "6 mm Al absorber");
