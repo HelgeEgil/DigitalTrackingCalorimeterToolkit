@@ -488,6 +488,7 @@ void  Tracks::removeHighAngleTracks(Float_t mradLimit) {
 
       a = thisTrack->At(0);
       b = thisTrack->At(1);
+      if (!a || !b) continue;
       incomingAngle = getDotProductAngle(a, a, b);
       if (incomingAngle > mradLimit / 1000.) {
          removeTrackAt(i);

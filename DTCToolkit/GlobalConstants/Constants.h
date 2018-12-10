@@ -48,7 +48,7 @@ Bool_t   kUseEmpiricalMCS = true;
 Bool_t   kFilterNuclearInteractions = false; // Move to argument list
 Int_t    kEventsPerRun = 50;
 Int_t    kSkipTracks = 0;
-Int_t    kEnergy = 230;
+const Int_t    kEnergy = 230;
 
 #ifdef USEALPIDE
 Bool_t   kUseDegrader = true;
@@ -74,7 +74,7 @@ const Int_t ny = NY;
 const Int_t nTrackers = 4;
 
 #ifdef USEALPIDE
-const Float_t kAbsorberThickness = 2; // ALPIDE, CHANGE TO FIT MC DATA GEOMETRY
+const Float_t kAbsorberThickness = 3; // ALPIDE, CHANGE TO FIT MC DATA GEOMETRY
 #else
 const Float_t kAbsorberThickness = 3.3; // FOCAL EXPERIMENTAL DATA, DON'T CHANGE
 #endif

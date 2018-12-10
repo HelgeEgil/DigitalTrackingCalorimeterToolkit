@@ -99,7 +99,7 @@ void  createSplines() {
    // store them in .h
 
    ifstream in;
-   Float_t  energy;
+   Double_t  energy;
    Int_t    idxDTC = 0;
    Int_t    idxWater = 0;
    Int_t    idxPureAl = 0;

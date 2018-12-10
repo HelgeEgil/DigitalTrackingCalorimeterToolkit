@@ -16,6 +16,7 @@
 using namespace std;
 
 Float_t getTLFromEnergy(Float_t energy, TSpline3 *spline) {
+   printf("In spline: range = %.2f\n", spline->Eval(energy));
    return spline->Eval(energy);
 }
 
@@ -64,15 +65,19 @@ Float_t getEnergyAtTLFromPureAluminum(Float_t E0, Float_t depth) {
 //////////////////////////
 
 Float_t getTLFromEnergy(Float_t energy) {
+   printf("getTLFromEnergy... energy = %.2f MeV, ", energy);
    if (energy == 0) return 0;
 
    else if (energy < splineMaterial->GetXmin()) {
+      printf("energy < spline\n");
       return getBKTLLow(energy);
    }
 
    else if (energy > splineMaterial->GetXmax()) {
+      printf("energy > spline\n");
       return getBKTLHigh(energy);
    }
+   printf("energy in spline\n");
 
    return getTLFromEnergy(energy, splineMaterial);
 }
@@ -359,7 +364,8 @@ Float_t getEnergyFromDegraderThickness(Double_t degraderThickness) {
 
    Double_t phaseSpaceDegraderthickness[500];
    Double_t phaseSpaceEnergy[500];
-   Double_t dt, e, es;
+   Double_t e, es;
+   Int_t    dt;
    Int_t idx = 0;
    ifstream in;
    if (kEnergy == 250) {
@@ -372,7 +378,7 @@ Float_t getEnergyFromDegraderThickness(Double_t degraderThickness) {
    while (1) {
       in >> dt >> e;
       if (!in.good()) break;
-      phaseSpaceDegraderthickness[idx] = dt;
+      phaseSpaceDegraderthickness[idx] = double(dt);
       phaseSpaceEnergy[idx++] = e;
    }
 

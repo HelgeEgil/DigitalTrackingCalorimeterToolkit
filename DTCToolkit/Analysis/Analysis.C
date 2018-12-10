@@ -671,7 +671,8 @@ void drawTracksRangeHistogram(Int_t Runs, Int_t dataType, Bool_t recreate, Float
    }
 
    Float_t lowHistogramLimit = getUnitFromEnergy(0);
-   Float_t highHistogramLimit = getUnitFromEnergy(run_energy)*1.4 + 10;
+   Float_t highHistogramLimit = getUnitFromEnergy(run_energy)*1.2 + 10;
+   if (isnan(highHistogramLimit)) highHistogramLimit = getUnitFromEnergy(run_energy) + 30;
    TH1F * hFitResults = new TH1F("fitResult", hTitle, fmax(nEnergyBins,100), lowHistogramLimit, highHistogramLimit);
  
    printf("Using material: %s\n", sMaterial);
