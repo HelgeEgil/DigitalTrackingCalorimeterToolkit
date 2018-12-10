@@ -472,7 +472,7 @@ void  DataInterface::getMCClusters(Int_t runNo, Clusters *clusters) {
       }
 
       layer = level1ID + baseID - 1;
-//       cout << "Layer = level1ID " << level1ID << "+ baseID " << baseID << "-1 = " << layer << endl;
+      // cout << "Layer = level1ID " << level1ID << " + baseID " << baseID << "-1 = " << layer << " ( z = " << posZ << ")" << endl;
       if (kFilterNuclearInteractions == true && parentID != 0) {
          lastEventID = -1;
          continue;

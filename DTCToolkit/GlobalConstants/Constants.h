@@ -22,7 +22,8 @@
 #define DX 0.030
 #define DY 0.030
 #define NY 4500
-#define DZ 0.435
+// #define DZ 0.435
+#define DZ 0.620
 #else // exp. data
 #define NX 1280
 #define NY 1280

@@ -141,7 +141,6 @@ void  createSplines() {
       }
    }
 
-
    while (1) {
       in >> energy >> range;
       if (!in.good()) break;
@@ -199,7 +198,7 @@ void  createSplines() {
    splineWaterInv = new TSpline3("splineWaterInv", rangesWater, energiesWater, idxWater);
    splinePureAlInv = new TSpline3("splineWaterInv", rangesPureAl, energiesPureAl, idxPureAl);
    splineWInv = new TSpline3("splineWInv", rangesW, energiesW, idxW);
-  
+
    // FIND BRAGG-KLEEMAN PARAMETERS
    TGraph * range_energy = new TGraph(idxDTC, energiesDTC, rangesDTC);
    TF1    * range_energy_fit = new TF1("range_energy_fit", "[0] * pow(x, [1])");

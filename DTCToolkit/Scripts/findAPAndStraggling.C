@@ -72,7 +72,7 @@ void findAPAndStraggling(Int_t absorberthickness) {
    inWater.close();
 
    if (useDegrader) {
-      inMaterial.open("../OutputFiles/findManyRangesDegrader.csv");
+      inMaterial.open("../OutputFiles/findManyRangesDegrader_230MeV.csv");
    }
    else {
       inMaterial.open("../OutputFiles/findManyRanges.csv");

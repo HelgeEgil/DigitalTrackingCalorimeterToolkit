@@ -674,6 +674,7 @@ void drawTracksRangeHistogram(Int_t Runs, Int_t dataType, Bool_t recreate, Float
    Float_t highHistogramLimit = getUnitFromEnergy(run_energy)*1.2 + 10;
    if (isnan(highHistogramLimit)) highHistogramLimit = getUnitFromEnergy(run_energy) + 30;
    TH1F * hFitResults = new TH1F("fitResult", hTitle, fmax(nEnergyBins,100), lowHistogramLimit, highHistogramLimit);
+   TH1F * hLastLayer = new TH1F("hLastLayer", "Last Layer;Layer;Entries", 50, 0, 50);
  
    printf("Using material: %s\n", sMaterial);
    printf("Histogram limits: %.2f to %.2f.\n", lowHistogramLimit, highHistogramLimit);
@@ -709,6 +710,7 @@ void drawTracksRangeHistogram(Int_t Runs, Int_t dataType, Bool_t recreate, Float
 
       fitRange = thisTrack->getFitParameterRange();
       hFitResults->Fill(getUnitFromTL(fitRange));
+      hLastLayer->Fill(thisTrack->Last()->getLayer());
    }
   
    // Draw expected gaussian distribution of results from initial energy
@@ -772,6 +774,9 @@ void drawTracksRangeHistogram(Int_t Runs, Int_t dataType, Bool_t recreate, Float
       ps->AddText(Form("Calculated WEPL = %.2f #pm %.2f", empiricalMean, empiricalSigma));
       ps->AddText(Form("WEPL deviation = %.2f #pm %.2f", empiricalMean - expectedMean, sqrt(pow(empiricalSigma, 2) - pow(expectedStraggling, 2))));
       cFitResults->Modified();
+
+      TCanvas *c2 = new TCanvas();
+      hLastLayer->Draw();
    }
 
    delete tracks;
