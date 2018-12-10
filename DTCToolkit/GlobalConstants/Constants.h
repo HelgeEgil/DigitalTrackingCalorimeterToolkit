@@ -100,7 +100,7 @@ const Int_t kMaterial = kAluminum;
 const Int_t kMaterial = kTungsten;
 #endif
 
-Int_t kOutputUnit = kPhysical;
+Int_t kOutputUnit = kWEPL;
 
 // Use refined clustering model -- empirical model with updated parameters
 const Bool_t kUseRefinedClustering = true;

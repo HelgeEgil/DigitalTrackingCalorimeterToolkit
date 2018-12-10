@@ -3,4 +3,6 @@
 *.d
 *.swp
 *.png
+*.pcm
+*.cxx*
 DTCToolkit/Data/MonteCarlo/*
