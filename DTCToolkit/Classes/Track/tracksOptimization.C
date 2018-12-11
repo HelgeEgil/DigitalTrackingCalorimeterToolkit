@@ -363,6 +363,7 @@ void Tracks::removeNuclearInteractions() {
    Track  * thisTrack = nullptr;
    Int_t    nRemoved = 0;
    Int_t    nTotal = GetEntriesFast();
+   Int_t    nTotalStart = GetEntries();
 
    for (Int_t i=0; i<nTotal; i++) {
       thisTrack = At(i);
@@ -373,8 +374,49 @@ void Tracks::removeNuclearInteractions() {
       }
    }
 
-   Float_t fraction = nTotal ? nRemoved : 0;
-   cout << "Tracks::removeNuclearInteractions() removed " << nRemoved << " of " << nTotal << "(" << fraction * 100 << "%) tracks.\n";
+   Float_t fraction = nTotal ? nRemoved/float(nTotalStart) : 0;
+   cout << "Tracks::removeNuclearInteractions() removed " << nRemoved << " of " << nTotalStart << "(" << fraction * 100 << "%) tracks.\n";
 }
 
+void Tracks::removeThreeSigmaShortTracks() {
+   Track  * thisTrack = nullptr;
+   Int_t    nRemoved = 0;
+   Int_t    nTotal = GetEntriesFast();
+   Int_t    nTotalStart = GetEntries();
+
+   Float_t  muRange = 0, sigmaRange = 0, cutRange;
+   Int_t    nInSum = 0;
+
+   for (Int_t i=0; i<=nTotal; i++) {
+      thisTrack = At(i);
+      if (!At(i)) continue;
+      muRange += thisTrack->getRangemm();
+      nInSum++;
+   }
+
+   muRange /= nInSum;
+
+   for (Int_t i=0; i<=nTotal; i++) {
+      thisTrack = At(i);
+      if (!At(i)) continue;
+      sigmaRange += pow(muRange - thisTrack->getRangemm(), 2);
+   }
+   sigmaRange = sqrt(sigmaRange / nInSum);
+
+   cutRange = muRange - 3 * sigmaRange;
+   printf("muRange = %.3f mm, sigmaRange = %.3f mm, cutRange = %.3f mm.\n", muRange, sigmaRange, cutRange);
+
+   for (Int_t i=0; i<=nTotal; i++) {
+      thisTrack = At(i);
+      if (!At(i)) continue;
+      if (thisTrack->getRangemm() < cutRange) {
+         removeTrack(thisTrack);
+         nRemoved++;
+      }
+   }
+
+   Float_t fraction = nTotal ? nRemoved/float(nTotalStart) : 0;
+   cout << "Tracks::removeThreeSigmaShortTracks() removed " << nRemoved << " of " << nTotalStart << "(" << fraction * 100 << "%) tracks.\n";
+}
+      
 #endif

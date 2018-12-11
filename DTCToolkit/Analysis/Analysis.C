@@ -293,7 +293,9 @@ void getTracksReconstructionEfficiency(Int_t dataType, Float_t energy, Float_t d
 
       Tracks * tracks = loadOrCreateTracks(1, totalNumberOfRuns, dataType, energy);
 
-      tracks->removeHighAngleTracks(100);
+      tracks->removeHighAngleTracks(75);
+      tracks->removeThreeSigmaShortTracks();
+      tracks->removeNuclearInteractions();
 
       char * sDataType = getDataTypeChar(dataType);
       TCanvas *c1 = new TCanvas("c1", "c1", 1200, 800);
@@ -1437,7 +1439,11 @@ void drawTracks3D(Int_t Runs, Int_t dataType, Bool_t recreate, Int_t switchLayer
 
    Tracks * tracks = loadOrCreateTracks(recreate, Runs, dataType, energy);
 
-//   tracks->removeHighAngleTracks(100); // mrad
+   printf("Found %d tracks before filtering.\n", tracks->GetEntries());
+
+   tracks->removeHighAngleTracks(75); // mrad
+   tracks->removeThreeSigmaShortTracks();
+   tracks->removeNuclearInteractions();
 
    Bool_t   kDraw = true;
 
@@ -1536,7 +1542,6 @@ void drawTracks3D(Int_t Runs, Int_t dataType, Bool_t recreate, Int_t switchLayer
       if ((thisTrack->isFirstAndLastEventIDEqual() || thisTrack->Last()->getEventID() < 0) && nMissingEID == 0) {
          nOKTracksAllClustersOK2nd++;
       }
-
 
       if (thisTrack->isFirstAndLastEventIDEqual()) nOKTracks++;
 

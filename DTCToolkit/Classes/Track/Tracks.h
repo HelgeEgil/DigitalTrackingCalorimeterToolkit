@@ -91,6 +91,7 @@ class Tracks : public TObject {
       void              retrogradeTrackImprovement(Clusters * clusters);
       void              removeTracksEndingInBadChannels();
       void              removeNuclearInteractions();
+      void              removeThreeSigmaShortTracks();
 
    ClassDef(Tracks,2)
 };

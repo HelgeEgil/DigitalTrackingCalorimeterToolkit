@@ -53,10 +53,10 @@ Int_t Track::getIdxFromLayer(Int_t layer) {
 Bool_t Track::doesTrackEndAbruptly() {
 //   This is limit has been found through MC truths
 //   See full information in PhD thesis (to come...)
-   Bool_t   endsAbruptly = (Last()->getDepositedEnergy() < 2.5);
+   Bool_t   endsAbruptly = (Last()->getDepositedEnergy() < 2);
    if (kDataType == kData) endsAbruptly = (Last()->getDepositedEnergy() < 4);
 
-   return endsAbruptly;   
+   return endsAbruptly; 
 }
 
 Float_t Track::getRiseFactor() {

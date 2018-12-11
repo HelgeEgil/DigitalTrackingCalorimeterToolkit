@@ -27,7 +27,7 @@ Tracks * Clusters::findTracksWithRecursiveWeighting() {
    vector<Int_t> * nextClusters = new vector<Int_t>;
    vector<Int_t> * seeds = new vector<Int_t>;
   
-   Int_t       spotSize = 33;
+   Int_t       spotSize = 44;
    // for pencil beams.
    // 22 = 2x2 mm, 33 = 3x3 mm etc.
    // See WoC publication for description of functions below
