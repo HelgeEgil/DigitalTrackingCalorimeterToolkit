@@ -1251,7 +1251,7 @@ void plotAPandAX() {
    g330Est->SetMarkerColor(kGreen+2);
    g330Est->SetMarkerStyle(21);
    g330Est->SetMarkerSize(1.5);
-   g330Krah->SetMarkerColor(kGreen-2);
+   g330Krah->SetMarkerColor(kGreen);
    g330Krah->SetMarkerStyle(21);
    g330Krah->SetMarkerSize(1);
 
