@@ -65,7 +65,7 @@
 /gate/geometry/setIonisationPotential Water 78 eV
 
 /gate/physics/SetMaxStepSizeInRegion phantom 2 mm
-/gate/physics/SetMinKineticEnergyInRegion calorimeter 300 MeV
+/gate/physics/SetMinKineticEnergyInRegion calorimeter 400 MeV
 /gate/physics/ActivateSpecialCuts proton
 
 /gate/run/initialize

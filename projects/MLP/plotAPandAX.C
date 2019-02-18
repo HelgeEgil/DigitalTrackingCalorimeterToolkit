@@ -174,6 +174,12 @@ void plotAPandAX() {
    Float_t  array230Est[arraySize];
    Float_t  array230Krah[arraySize];
 
+   Float_t  array330wetwepl[arraySize];
+   Float_t  array330Phantomsize[arraySize];
+   Float_t  array330NoTrk[arraySize];
+   Float_t  array330Est[arraySize];
+   Float_t  array330Krah[arraySize];
+
    Double_t rangesWater[arraySize] = {};
    Double_t energiesWater[arraySize] = {};
    Double_t rangesB100[arraySize] = {};
@@ -193,6 +199,7 @@ void plotAPandAX() {
    Int_t    idx23010mrad = 0;
    Int_t    idx23010mrad66um = 0;
    Int_t    idx230 = 0;
+   Int_t    idx330 = 0;
    Int_t    idxB100 = 0;
    Int_t    idxWater = 0;
    Int_t    idxAdipose = 0;
@@ -530,6 +537,24 @@ void plotAPandAX() {
    }
    in.close();
    
+   wepl = splineWater->Eval(330);
+   in.open("Output/MLPerror_energy330MeV_Water_krah.csv");
+   while (1) {
+      in >> phantomSize_ >> mlpStartNoTrk_ >> mlpMidNoTrk_ >> mlpStartEst_ >> mlpMidEst_ >> mlpStartKrah_ >> mlpMidKrah_ >> residualEnergy_ >> fdummy;
+
+      if (!in.good()) break;
+         
+      wet = wepl - splineWater->Eval(residualEnergy_);
+      array330wetwepl[idx330] = wet/wepl;
+      array330Phantomsize[idx330] = phantomSize_;
+      array330NoTrk[idx330] = mlpMidNoTrk_;
+      array330Est[idx330] = mlpStartEst_;
+      array330Krah[idx330++] = mlpStartKrah_;
+   }
+   in.close();
+   
+
+   wepl = splineWater->Eval(230);
    in.open("Output/MLPerror_energy230MeV_Water_krah.csv");
    while (1) {
       in >> phantomSize_ >> mlpStartNoTrk_ >> mlpMidNoTrk_ >> mlpStartEst_ >> mlpMidEst_ >> mlpStartKrah_ >> mlpMidKrah_ >> residualEnergy_ >> fdummy;
@@ -1205,9 +1230,11 @@ void plotAPandAX() {
 
    TGraph *g200NoTrk = new TGraph(idx230, array230Phantomsize, array230NoTrk);
    TGraph *g200Est = new TGraph(idx200, array200Phantomsize, array200Est);
-   TGraph *g230Est = new TGraph(idx230, array230Phantomsize, array230Est);
    TGraph *g200Krah = new TGraph(idx200, array200Phantomsize, array200Krah);
+   TGraph *g230Est = new TGraph(idx230, array230Phantomsize, array230Est);
    TGraph *g230Krah = new TGraph(idx230, array230Phantomsize, array230Krah);
+   TGraph *g330Est = new TGraph(idx330, array330Phantomsize, array330Est);
+   TGraph *g330Krah = new TGraph(idx330, array330Phantomsize, array330Krah);
 
    g200Est->SetMarkerColor(kBlue);
    g200Est->SetMarkerStyle(21);
@@ -1221,13 +1248,21 @@ void plotAPandAX() {
    g230Krah->SetMarkerColor(kRed-9);
    g230Krah->SetMarkerStyle(21);
    g230Krah->SetMarkerSize(1);
+   g330Est->SetMarkerColor(kGreen+2);
+   g330Est->SetMarkerStyle(21);
+   g330Est->SetMarkerSize(1.5);
+   g330Krah->SetMarkerColor(kGreen-2);
+   g330Krah->SetMarkerStyle(21);
+   g330Krah->SetMarkerSize(1);
 
-   g230Est->SetTitle(";Phantom size [mm];Error |X_{0}^{MC} - X_{0}^{opt}| [mm]");
+   g330Est->SetTitle(";Phantom size [mm];Error |X_{0}^{MC} - X_{0}^{opt}| [mm]");
 
-   g230Est->Draw("AP");
-   g230Krah->Draw("P");
+   g330Est->Draw("AP");
+   g330Krah->Draw("P");
    g200Est->Draw("P");
    g200Krah->Draw("P");
+   g230Est->Draw("P");
+   g230Krah->Draw("P");
 
 //   g200NoTrk->GetYaxis()->SetRangeUser(0, 6);
 
@@ -1236,6 +1271,8 @@ void plotAPandAX() {
    leg4->AddEntry(g200Est, "LPM 200 MeV", "P");
    leg4->AddEntry(g230Krah, "MLP 230 MeV", "P");
    leg4->AddEntry(g230Est, "LPM 230 MeV", "P");
+   leg4->AddEntry(g330Krah, "MLP 330 MeV", "P");
+   leg4->AddEntry(g330Est, "LPM 330 MeV", "P");
    leg4->Draw();
    leg4->SetTextFont(22);
    leg4->SetMargin(0.2);

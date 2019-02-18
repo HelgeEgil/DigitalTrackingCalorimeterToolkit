@@ -14,6 +14,7 @@
 #include <TRandom3.h>
 
 // #define USEHIGHENERGY
+#define USEVERYHIGHENERGY
 
 #ifdef  USEHIGHENERGY
 #define azero  5.77619e-6
@@ -29,6 +30,21 @@
 #define athree  1.301e-8
 #define afour   (-9.228e-10)
 #define afive   2.687e-11
+#endif
+
+#ifdef USEVERYHIGHENERGY
+#undef azero 
+#undef aone 
+#undef atwo 
+#undef three 
+#undef afour 
+#undef afive 
+#define azero 3.1102e-6
+#define aone 1.28825e-8
+#define atwo (-1.21869e-10)
+#define three 1.09025e-12
+#define afour (-3.84051e-15)
+#define afive 5.21314e-18
 #endif
 
 #define X_0 36.1
