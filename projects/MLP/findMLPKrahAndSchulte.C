@@ -105,6 +105,7 @@ void findMLP(Double_t phantomSize = 200, Double_t rotation = -1, Double_t spotsi
    Double_t    differenceArrayDiff[10000] = {};
    Double_t    differenceArrayDiffSchulte[10000] = {};
    Double_t    differenceArrayDiffKrah[10000] = {};
+   Double_t    differenceArrayKrahSchulte[10000] = {};
    Double_t     sourceToX0dist = 100;
    Double_t     d_entry = 10;
    Double_t     d_exit = 10;
@@ -488,14 +489,6 @@ void findMLP(Double_t phantomSize = 200, Double_t rotation = -1, Double_t spotsi
                theta_Y_mlp = first[1] + second[1];
                Y_mlp_sigma = C12_inverse[2] * C2[1] + C12_inverse[3] * C2[3];
                
-               if (firstPass) {
-                  Y_mlp_start = Y_mlp - step_length * atan(theta_X_mlp);
-                  X_mlp_start = X_mlp - step_length * atan(theta_Y_mlp);
-                  theta_Y_mlp_start = theta_Y_mlp;
-                  theta_X_mlp_start = theta_X_mlp;
-                  firstPass = false;
-               }
-
                arMLPKrahz[idxMLPKrah] = posz*10;
                arMLPKrahx[idxMLPKrah] = X_mlp*10;
                arMLPKrahy[idxMLPKrah++] = Y_mlp*10;
@@ -506,6 +499,130 @@ void findMLP(Double_t phantomSize = 200, Double_t rotation = -1, Double_t spotsi
                   aPosMLPKrahy[aIdxMLPKrah++] = Y_mlp*10;
                }
             } /// End loop over KRAH phantom
+
+            // CALCULATED OPTIMIZED VALUES
+            double posz = X0cm.Z();
+
+            sz2 = Sigmaz2(X2cm.Z() - X0cm.Z(), posz - X0cm.Z());
+            stz2 = Sigmatz2(X2cm.Z() - X0cm.Z(), posz - X0cm.Z());
+            st2 = Sigmat2(X2cm.Z() - X0cm.Z(), posz - X0cm.Z());
+
+            R_0[0] = 1;
+            R_0[1] = posz - X0cm.Z();
+            R_0[2] = 0;
+            R_0[3] = 1;
+
+            R_0_transpose[0] = 1;
+            R_0_transpose[1] = 0;
+            R_0_transpose[2] = posz - X0cm.Z();
+            R_0_transpose[3] = 1;
+
+            R_1_inverse[0] = 1;
+            R_1_inverse[1] = -(X2cm.Z() - posz); // ok
+            R_1_inverse[2] = 0;
+            R_1_inverse[3] = 1;
+
+            R_1_inverse_transpose[0] = 1;
+            R_1_inverse_transpose[1] = 0;
+            R_1_inverse_transpose[2] = -(X2cm.Z() - posz);
+            R_1_inverse_transpose[3] = 1;
+      
+            scatter_2[0] = sz2;
+            scatter_2[1] = stz2;
+            scatter_2[2] = stz2;
+            scatter_2[3] = st2;
+
+            // pre-factors C1 + C2 as in Krah et al. (2018)
+            C1_1[0] = (sigma_beam[0] * R_0_transpose[0]) + (sigma_beam[1] * R_0_transpose[2]);
+            C1_1[1] = (sigma_beam[0] * R_0_transpose[1]) + (sigma_beam[1] * R_0_transpose[3]);
+            C1_1[2] = (sigma_beam[2] * R_0_transpose[0]) + (sigma_beam[3] * R_0_transpose[2]);
+            C1_1[3] = (sigma_beam[2] * R_0_transpose[1]) + (sigma_beam[3] * R_0_transpose[3]);
+
+            C1_2[0] = (R_0[0] * C1_1[0]) + (R_0[1] * C1_1[2]);
+            C1_2[1] = (R_0[0] * C1_1[1]) + (R_0[1] * C1_1[3]);
+            C1_2[2] = (R_0[2] * C1_1[0]) + (R_0[3] * C1_1[2]);
+            C1_2[3] = (R_0[2] * C1_1[1]) + (R_0[3] * C1_1[3]);
+
+            for (a=0; a<4; a++) C1[a] = C1_2[a];
+
+            C2_1[0] = (track_uncert[0] * R_1_inverse_transpose[0]) + (track_uncert[1] * R_1_inverse_transpose[2]);
+            C2_1[1] = (track_uncert[0] * R_1_inverse_transpose[1]) + (track_uncert[1] * R_1_inverse_transpose[3]);
+            C2_1[2] = (track_uncert[2] * R_1_inverse_transpose[0]) + (track_uncert[3] * R_1_inverse_transpose[2]);
+            C2_1[3] = (track_uncert[2] * R_1_inverse_transpose[1]) + (track_uncert[3] * R_1_inverse_transpose[3]);
+
+            C2_2[0] = (scatter_2[0] * R_1_inverse_transpose[0]) + (scatter_2[1] * R_1_inverse_transpose[2]);
+            C2_2[1] = (scatter_2[0] * R_1_inverse_transpose[1]) + (scatter_2[1] * R_1_inverse_transpose[3]);
+            C2_2[2] = (scatter_2[2] * R_1_inverse_transpose[0]) + (scatter_2[3] * R_1_inverse_transpose[2]);
+            C2_2[3] = (scatter_2[2] * R_1_inverse_transpose[1]) + (scatter_2[3] * R_1_inverse_transpose[3]);
+        
+            C2[0] = (R_1_inverse[0] * C2_1[0]) + (R_1_inverse[1] * C2_1[2]) + (R_1_inverse[0] * C2_2[0]) + (R_1_inverse[1] * C2_2[2]);
+            C2[1] = (R_1_inverse[0] * C2_1[1]) + (R_1_inverse[1] * C2_1[3]) + (R_1_inverse[0] * C2_2[1]) + (R_1_inverse[1] * C2_2[3]);
+            C2[2] = (R_1_inverse[2] * C2_1[0]) + (R_1_inverse[3] * C2_1[2]) + (R_1_inverse[2] * C2_2[0]) + (R_1_inverse[3] * C2_2[2]);
+            C2[3] = (R_1_inverse[2] * C2_1[1]) + (R_1_inverse[3] * C2_1[3]) + (R_1_inverse[2] * C2_2[1]) + (R_1_inverse[3] * C2_2[3]);
+
+            for (a=0; a<4; a++) C12[a] = C1[a] + C2[a];
+
+            // invert to get the complete prefactor (C1 + C2)^-1
+            determinant_C12 = (C12[0] * C12[3]) - (C12[1] * C12[2]);
+            C12_inverse[0] =  C12[3] / determinant_C12;
+            C12_inverse[1] = -C12[1] / determinant_C12;
+            C12_inverse[2] = -C12[2] / determinant_C12;
+            C12_inverse[3] =  C12[0] / determinant_C12;
+
+            first_first[0] = (C2[0] * C12_inverse[0]) + (C2[1] * C12_inverse[2]);
+            first_first[1] = (C2[0] * C12_inverse[1]) + (C2[1] * C12_inverse[3]);
+            first_first[2] = (C2[2] * C12_inverse[0]) + (C2[3] * C12_inverse[2]);
+            first_first[3] = (C2[2] * C12_inverse[1]) + (C2[3] * C12_inverse[3]);
+
+            second_first[0] = (C1[0] * C12_inverse[0]) + (C1[1] * C12_inverse[2]);
+            second_first[1] = (C1[0] * C12_inverse[1]) + (C1[1] * C12_inverse[3]);
+            second_first[2] = (C1[2] * C12_inverse[0]) + (C1[3] * C12_inverse[2]);
+            second_first[3] = (C1[2] * C12_inverse[1]) + (C1[3] * C12_inverse[3]);
+
+            y_0[0] = X0cm.X();
+            y_0[1] = tan(P0tps.X());
+            y_2[0] = X2cm.X();
+            y_2[1] = tan(P2.X());
+   
+            first_second[0] = (R_0[0] * y_0[0]) + (R_0[1] * y_0[1]);
+            first_second[1] = (R_0[2] * y_0[0]) + (R_0[3] * y_0[1]);
+            second_second[0] = (R_1_inverse[0] * y_2[0]) + (R_1_inverse[1] * y_2[1]);
+            second_second[1] = (R_1_inverse[2] * y_2[0]) + (R_1_inverse[3] * y_2[1]);
+
+            first[0] = (first_first[0] * first_second[0]) + (first_first[1] * first_second[1]);
+            first[1] = (first_first[2] * first_second[0]) + (first_first[3] * first_second[1]);
+            second[0] = (second_first[0] * second_second[0]) + (second_first[1] * second_second[1]);
+            second[1] = (second_first[2] * second_second[0]) + (second_first[3] * second_second[1]);
+
+            X_mlp = first[0] + second[0];
+            theta_X_mlp = (first[1] + second[1]);
+
+            // now do the y value
+            y_0[0] = X0cm.Y();
+            y_0[1] = tan(P0tps.Y());
+            y_2[0] = X2cm.Y();
+            y_2[1] = tan(P2.Y());
+            
+            first_second[0] = (R_0[0] * y_0[0]) + (R_0[1] * y_0[1]);
+            first_second[1] = (R_0[2] * y_0[0]) + (R_0[3] * y_0[1]);
+
+            second_second[0] = (R_1_inverse[0] * y_2[0]) + (R_1_inverse[1] * y_2[1]);
+            second_second[1] = (R_1_inverse[2] * y_2[0]) + (R_1_inverse[3] * y_2[1]);
+
+            first[0] = (first_first[0] * first_second[0]) + (first_first[1] * first_second[1]);
+            first[1] = (first_first[2] * first_second[0]) + (first_first[3] * first_second[1]);
+
+            second[0] = (second_first[0] * second_second[0]) + (second_first[1] * second_second[1]);
+            second[1] = (second_first[2] * second_second[0]) + (second_first[3] * second_second[1]);
+
+            Y_mlp = first[0] + second[0];
+            theta_Y_mlp = first[1] + second[1];
+            Y_mlp_sigma = C12_inverse[2] * C2[1] + C12_inverse[3] * C2[3];
+            
+            Y_mlp_start = Y_mlp;
+            X_mlp_start = X_mlp;
+            theta_Y_mlp_start = theta_Y_mlp;
+            theta_X_mlp_start = theta_X_mlp;
 
             // Now loop over Schulte's version
             for (double posz = X0cm.Z() + step_length; posz < X2cm.Z(); posz += step_length) { 
@@ -841,12 +958,14 @@ void findMLP(Double_t phantomSize = 200, Double_t rotation = -1, Double_t spotsi
       differenceArrayDiff[i] /= nInDifferenceArray;
       differenceArrayDiffSchulte[i]  /= nInDifferenceArray;
       differenceArrayDiffKrah[i]  /= nInDifferenceArray;
+      differenceArrayKrahSchulte[i] = 1000*fabs(differenceArrayDiffSchulte[i] - differenceArrayDiffKrah[i]);
    }
 
    TCanvas *c2 = new TCanvas("c2", "MC vs MLP difference", 600, 600);
 //   TGraph *gDifferencePerfect = new TGraph(idxDifferenceArray, differenceArrayZ, differenceArrayDiff);
    TGraph *gDifferenceSchulte = new TGraph(idxDifferenceArray, differenceArrayZ, differenceArrayDiffSchulte);
    TGraph *gDifferenceKrah = new TGraph(idxDifferenceArray, differenceArrayZ, differenceArrayDiffKrah);
+   TGraph *gDifferenceKrahSchulte = new TGraph(idxDifferenceArray, differenceArrayZ, differenceArrayKrahSchulte);
 
    gDifferenceSchulte->SetTitle(";Depth in phantom [mm];Error | X_{1}^{opt} - X_{1}^{MC} | [mm]");
 //   gDifferencePerfect->SetLineColor(kRed);
@@ -859,6 +978,10 @@ void findMLP(Double_t phantomSize = 200, Double_t rotation = -1, Double_t spotsi
    gDifferenceSchulte->Draw("AL");
    gDifferenceKrah->Draw("L");
    gDifferenceSchulte->GetYaxis()->SetRangeUser(0,4.5);
+
+   TCanvas *c3 = new TCanvas();
+   gDifferenceKrahSchulte->SetTitle(";Depth in phantom [mm];Difference krah vs krah+schulte [um]");
+   gDifferenceKrahSchulte->Draw("AL");
 
    TLegend *l = new TLegend(.6, .64, .85, .84);
 //   l->AddEntry(gDifferencePerfect, "Measure X_{0}", "L");
