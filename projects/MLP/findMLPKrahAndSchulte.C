@@ -106,14 +106,18 @@ void findMLP(Double_t phantomSize = 200, Double_t rotation = -1, Double_t spotsi
    Double_t    differenceArrayDiffSchulte[10000] = {};
    Double_t    differenceArrayDiffKrah[10000] = {};
    Double_t    differenceArrayKrahSchulte[10000] = {};
-   Double_t     sourceToX0dist = 100;
-   Double_t     d_entry = 10;
-   Double_t     d_exit = 10;
-   Double_t     d_T = 10; // mm between trackers
-   Double_t     d_Tcm = d_T/10; // mm between trackers
-   Double_t     d_entry_cm = 1;
-   Double_t     d_exit_cm = 1;
+   Double_t    rawDifferenceArray[1000] = {};
+   Double_t    rawDifferenceArrayZ[1000] = {};
+   Double_t    sourceToX0dist = 100;
+   Double_t    d_entry = 10;
+   Double_t    d_exit = 10;
+   Double_t    d_T = 10; // mm between trackers
+   Double_t    d_Tcm = d_T/10; // mm between trackers
+   Double_t    d_entry_cm = 1;
+   Double_t    d_exit_cm = 1;
    Int_t       nInDifferenceArray = 0;
+   Int_t       idxArrayKrah = 0;
+   Int_t       idxArraySchulte = 0;
    Int_t       idxDifferenceArray = 0;
    Int_t       idxWater = 0;
    Double_t    energiesWater[500], rangesWater[500];
@@ -136,6 +140,7 @@ void findMLP(Double_t phantomSize = 200, Double_t rotation = -1, Double_t spotsi
    Int_t       f10xN = 0;
    Int_t       f10yN = 0;
    Int_t       maxAcc = 10;
+   Int_t       nDifferenceArray = 0;
    Int_t       firstMCidx = 0;
    char      * sMaterial;
    
@@ -500,7 +505,7 @@ void findMLP(Double_t phantomSize = 200, Double_t rotation = -1, Double_t spotsi
                }
             } /// End loop over KRAH phantom
 
-            // CALCULATED OPTIMIZED VALUES
+            // CALCULATE OPTIMIZED VALUES
             double posz = X0cm.Z();
 
             sz2 = Sigmaz2(X2cm.Z() - X0cm.Z(), posz - X0cm.Z());
@@ -739,7 +744,7 @@ void findMLP(Double_t phantomSize = 200, Double_t rotation = -1, Double_t spotsi
                Y_mlp = first[0] + second[0];
                theta_Y_mlp = first[1] + second[1];
                Y_mlp_sigma = C12_inverse[2] * C2[1] + C12_inverse[3] * C2[3];
-               
+
                arMLPSchultez[idxMLPSchulte] = posz*10;
                arMLPSchultex[idxMLPSchulte] = X_mlp*10;
                arMLPSchultey[idxMLPSchulte++] = Y_mlp*10;
@@ -750,6 +755,12 @@ void findMLP(Double_t phantomSize = 200, Double_t rotation = -1, Double_t spotsi
                   aPosMLPSchultey[aIdxMLPSchulte++] = Y_mlp*10;
                }
             } /// End loop over phantom (SCHULTE)
+
+            for (int l=0; l<idxMLPSchulte; l++) {
+               rawDifferenceArray[l] += sqrt(pow(arMLPSchultex[l] - arMLPKrahx[l], 2) + pow(arMLPSchultey[l] - arMLPKrahy[l], 2));
+               rawDifferenceArrayZ[l] = arMLPSchultez[l];
+            }
+            nInDifferenceArray++;
 
             XYZVector X0Krah(X_mlp*10, Y_mlp*10, 0);
             XYZVector P0Krah(atan(theta_X_mlp), atan(theta_Y_mlp), 1);
@@ -864,6 +875,9 @@ void findMLP(Double_t phantomSize = 200, Double_t rotation = -1, Double_t spotsi
    TPad *pad2 = new TPad("pad2", "pad2", .005, 0, 0.5235, .995);
    TPad *pad3 = new TPad("pad3", "pad3", .5245, 0, 0.995, .995);
 
+   for (int i=0; i<512; i++) {
+      rawDifferenceArray[i] *= 1000. / nInDifferenceArray;
+   }
 
 //   pad1->Divide(1, 2, 1e-5, 1e-5);
    pad2->Divide(1, 2, 1e-5, 1e-5);
@@ -966,6 +980,7 @@ void findMLP(Double_t phantomSize = 200, Double_t rotation = -1, Double_t spotsi
    TGraph *gDifferenceSchulte = new TGraph(idxDifferenceArray, differenceArrayZ, differenceArrayDiffSchulte);
    TGraph *gDifferenceKrah = new TGraph(idxDifferenceArray, differenceArrayZ, differenceArrayDiffKrah);
    TGraph *gDifferenceKrahSchulte = new TGraph(idxDifferenceArray, differenceArrayZ, differenceArrayKrahSchulte);
+   TGraph *gDifferenceKrahSchulte2 = new TGraph(512, rawDifferenceArrayZ, rawDifferenceArray);
 
    gDifferenceSchulte->SetTitle(";Depth in phantom [mm];Error | X_{1}^{opt} - X_{1}^{MC} | [mm]");
 //   gDifferencePerfect->SetLineColor(kRed);
@@ -988,12 +1003,24 @@ void findMLP(Double_t phantomSize = 200, Double_t rotation = -1, Double_t spotsi
    l->AddEntry(gDifferenceSchulte, "X_{0} Krah + Schulte MLP", "L");
    l->AddEntry(gDifferenceKrah, "Krah MLP", "L");
    l->Draw();
+   
+   TCanvas *c4 = new TCanvas();
+   gDifferenceKrahSchulte2->SetTitle(";Depth in phantom [mm];RAW Difference krah vs krah+schulte [um]");
+   gDifferenceKrahSchulte2->Draw("AL");
+
+   TLegend *l2 = new TLegend(.6, .64, .85, .84);
+//   l->AddEntry(gDifferencePerfect, "Measure X_{0}", "L");
+   l2->AddEntry(gDifferenceSchulte, "X_{0} Krah + Schulte MLP", "L");
+   l2->AddEntry(gDifferenceKrah, "Krah MLP", "L");
+   l2->Draw();
 
    char *sIsModel = (char*) "";
    if (!kModelUncertainties) sIsModel = (char*) "no";
 
    char *sModelType = (char*) "ll";
    if (kModelType == kUiB) sModelType = (char*) "uib";
+
+
 
 /*
    ofstream file(Form("Output/MLPerror_energy%.0fMeV_%s_Krah.csv", initialEnergy, sMaterial), ofstream::out | ofstream::app);
