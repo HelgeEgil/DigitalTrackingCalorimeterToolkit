@@ -60,7 +60,8 @@ DataInterface::DataInterface(TTree *tree) : fChain(0) {
      //
       TChain * chain = new TChain("Hits","");
       if (!kUseDegrader) {
-         chain->Add(Form("Data/MonteCarlo/DTC_%s_%.0fMeV_%.0fmm.root/Hits", materialChar, run_energy, kAbsorberThickness));
+//         chain->Add(Form("Data/MonteCarlo/DTC_%s_%.0fMeV_%.0fmm.root/Hits", materialChar, run_energy, kAbsorberThickness));
+         chain->Add(Form("Data/MonteCarlo/phantom_%.0fMeV.root/Hits", run_energy));
       }
       else {
          printf("Opening file with degrader thickness %.0f mm, material is %s and abs. thickness %.0f mm...", run_degraderThickness, materialChar, readoutAbsorber);

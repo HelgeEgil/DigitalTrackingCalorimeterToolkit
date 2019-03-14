@@ -10,6 +10,8 @@ class TF1;
 
 using namespace DTC;
 
+void        drawRadiograph(Int_t nparticles, Float_t energy);
+void        getRangeFromRawBeam(Float_t energy);
 void        drawTracksDeltaTheta(Int_t Runs, Int_t dataType, Bool_t recreate, Float_t energy, Float_t degraderThickness);
 void        drawTracksDeltaThetaEachLayer(Int_t Runs, Int_t dataType, Bool_t recreate, Float_t energy, Float_t degraderThickness);
 void			getTracksReconstructionEfficiency(Int_t dataType, Float_t energy = 250, Float_t degraderThickness = 0);

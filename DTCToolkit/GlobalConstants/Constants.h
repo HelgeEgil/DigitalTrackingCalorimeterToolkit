@@ -43,7 +43,7 @@
 
 Bool_t   kIsAluminumPlate = false;
 Bool_t   kIsScintillator = false;
-Bool_t   kIsFirstLayerAir = true;
+Bool_t   kIsFirstLayerAir = false;
 Bool_t   kDoTracking = true; // Move to argument list
 Bool_t   kUseEmpiricalMCS = true;
 Bool_t   kFilterNuclearInteractions = false; // Move to argument list
@@ -52,7 +52,7 @@ Int_t    kSkipTracks = 0;
 const Int_t    kEnergy = 250;
 
 #ifdef USEALPIDE
-Bool_t   kUseDegrader = true;
+Bool_t   kUseDegrader = false; // SHOULD BE TRUE !! 
 Bool_t   kUseAlpide = true;
 #else
 Bool_t   kUseAlpide = false;

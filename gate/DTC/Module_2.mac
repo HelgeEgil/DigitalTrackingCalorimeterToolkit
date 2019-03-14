@@ -9,15 +9,15 @@
 /gate/world/daughters/insert box
 /gate/phantom/geometry/setXLength 1650.0 mm
 /gate/phantom/geometry/setYLength 1650.0 mm
-/gate/phantom/geometry/setZLength {degraderthickness} mm
-/gate/phantom/placement/setTranslation 0 0 {halfdegraderthickness} mm
+/gate/phantom/geometry/setZLength 100. mm
+/gate/phantom/placement/setTranslation 0 0 -52 mm
 /gate/phantom/vis/setVisible false
 
 /gate/phantom/daughters/name degrader
 /gate/phantom/daughters/insert box
 /gate/degrader/geometry/setXLength 1500.0 mm
 /gate/degrader/geometry/setYLength 1500.0 mm
-/gate/degrader/geometry/setZLength {degraderthickness} mm
+/gate/degrader/geometry/setZLength 100. mm
 /gate/degrader/placement/setTranslation 0 0 0 mm
 /gate/degrader/setMaterial Water
 /gate/degrader/vis/setVisible false

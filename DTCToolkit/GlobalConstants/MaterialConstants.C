@@ -206,6 +206,8 @@ void  createSplines() {
    range_energy->Fit("range_energy_fit", "Q,M");
    alpha_aluminum = range_energy_fit->GetParameter(0);
    p_aluminum = range_energy_fit->GetParameter(1);
+
+   printf("alpha = %.4f, p = %.4f.\n", alpha_aluminum, p_aluminum);
    
    // FIND BRAGG-KLEEMAN PARAMETERS
    TGraph * range_energyW = new TGraph(idxW, energiesW, rangesW);

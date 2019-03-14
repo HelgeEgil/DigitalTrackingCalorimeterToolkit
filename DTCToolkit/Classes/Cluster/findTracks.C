@@ -27,7 +27,7 @@ Tracks * Clusters::findTracksWithRecursiveWeighting() {
    vector<Int_t> * nextClusters = new vector<Int_t>;
    vector<Int_t> * seeds = new vector<Int_t>;
   
-   Int_t       spotSize = 44;
+   Int_t       spotSize = 55;
    // for pencil beams.
    // 22 = 2x2 mm, 33 = 3x3 mm etc.
    // See WoC publication for description of functions below
@@ -45,6 +45,8 @@ Tracks * Clusters::findTracksWithRecursiveWeighting() {
    // kMaxTrackScore = 0.382 * pow(kEventsPerRun, -0.151); // No nuclear scattering
    // kMaxTrackScore = 0.200 * pow(kEventsPerRun, -0.05); // no scattering
    
+   kMaxTrackScore = 0.15;
+
    // A constant allowance of 50 mrad per layer is always allowed
    // If that's unwanted uncomment the line below (or see Constants.h)
    // kMaxTrackAngle = 0;

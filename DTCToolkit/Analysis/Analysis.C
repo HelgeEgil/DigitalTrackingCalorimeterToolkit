@@ -152,7 +152,7 @@ void drawTracksDeltaTheta(Int_t Runs, Int_t dataType, Bool_t recreate, Float_t e
 
 }
    
-   void drawTracksDeltaThetaEachLayer(Int_t Runs, Int_t dataType, Bool_t recreate, Float_t energy, Float_t degraderThickness) {
+void drawTracksDeltaThetaEachLayer(Int_t Runs, Int_t dataType, Bool_t recreate, Float_t energy, Float_t degraderThickness) {
    // Make one histogram for each layer (starting at layer 1)
 
    Int_t layers = 50;
@@ -264,6 +264,171 @@ void drawTracksDeltaTheta(Int_t Runs, Int_t dataType, Bool_t recreate, Float_t e
 
       delete fit;
    }
+}
+
+void drawRadiograph(Int_t nparticles, Float_t energy) {
+   run_energy = energy;
+   run_degraderThickness = 0;
+   Float_t X0, Y0, Xplane, Yplane, P0x, P0y, WEPL;
+   Track * thisTrack = nullptr;
+   TGraphErrors *tge = nullptr;
+   Float_t resolution = 0.5; // mm
+   TH2F * radiograph = new TH2F("radiograph", "27x13.5 cm^2 radiograph of 16 cm ball;X position [mm];Y position[mm];WEPL", 270/resolution, -135, 135, 135/resolution, -67.5, 67.5);
+   TH2I * radiographNorm = new TH2I("radiographNorm", "27x13.5 cm^2 radiograph of 16 cm ball;X position [mm];Y position[mm];WEPL", 270/resolution, -135, 135, 135/resolution, -67.5, 67.5);
+   
+   Tracks * tracks = loadOrCreateTracks(1, int(nparticles/50), kMC, energy);
+
+   printf("Found %d tracks.\n", tracks->GetEntriesFast());
+   tracks->removeHighAngleTracks(75);
+   tracks->removeThreeSigmaShortTracks();
+   tracks->removeNuclearInteractions();
+   tracks->Compress();
+
+   Float_t d_plane = 150;
+
+   for (int i=0; i<=tracks->GetEntriesFast(); i++) {
+      thisTrack = tracks->At(i);
+      if (!thisTrack) continue;
+      if (!thisTrack->At(0) || !thisTrack->At(1)) continue;
+
+      tge = (TGraphErrors*) thisTrack->doTrackFit(false, false);
+      WEPL = getWEPLFromTL(thisTrack->getFitParameterRange());
+
+
+      X0 = thisTrack->getXmm(0);
+      Y0 = thisTrack->getYmm(0);
+      P0x = (thisTrack->getXmm(1) - thisTrack->getXmm(0)) / dz;
+      P0y = (thisTrack->getYmm(1) - thisTrack->getYmm(1)) / dz;
+
+      Xplane = X0 - P0x * d_plane;
+      Yplane = Y0 - P0y * d_plane;
+
+      radiograph->Fill(Xplane, Yplane, getWEPLFromEnergy(energy) - WEPL);
+      radiographNorm->Fill(Xplane, Yplane);
+   }
+
+   radiograph->Divide(radiographNorm);
+
+   radiograph->Draw("COLZ");
+   gStyle->SetOptStat(0);
+}
+
+void getRangeFromRawBeam(Float_t energy) {
+   run_energy = energy;
+   run_degraderThickness = 0;
+   Float_t  ranges[1000];
+   Float_t  rangesBootstrap[5000];
+   Float_t  errorsBootstrap[5000];
+   Float_t  newRanges[1000];
+   Int_t    nTracks;
+   Track   *thisTrack = nullptr;
+   Float_t  fitRange;
+   Float_t  sum = 0;
+   Float_t  sum2 = 0;
+   Float_t  mean = 0;
+   Float_t  x;
+   TGraphErrors *tge = nullptr;
+
+   Tracks * tracks = loadOrCreateTracks(1, 5, kMC, energy);
+   printf("Found %d tracks.\n", tracks->GetEntriesFast());
+   tracks->removeHighAngleTracks(75);
+   tracks->removeThreeSigmaShortTracks();
+   tracks->removeNuclearInteractions();
+   tracks->Compress();
+
+   nTracks = tracks->GetEntries();
+   Int_t nTracksSeen = 0;
+   for (int i=0; i<=nTracks; i++) {
+      thisTrack = tracks->At(i);
+      if (!thisTrack) {
+         printf("!thisTrack %d\n", i);
+         continue;
+      }
+
+      tge = (TGraphErrors*) thisTrack->doTrackFit(false, false); // (bool isScaleVariable, bool useTrackLength (~ CSDA))
+      fitRange = getWEPLFromTL(thisTrack->getFitParameterRange());
+      ranges[i] = fitRange;
+      sum += fitRange;
+      nTracksSeen++;
+   }
+   
+   mean = sum/nTracksSeen;
+
+   TH1I    *hBootstrap  = new TH1I("hBootstrap", "Bootstrap mean; Ranges [mm WEPL];Frequency", 300, mean-50, mean+50);
+   TH1I    *hBootstrapStdDev  = new TH1I("hBootstrapStdDev", "Bootstrap standard deviation; Ranges [mm WEPL]", 300, 0, 50);
+   TH1I    *hRanges     = new TH1I("hRanges", "Original range histogram; Ranges [mm WEPL];Frequency", 300, mean-50, mean+50);
+
+   for (int i=0; i<=nTracks; i++) {
+      hRanges->Fill(ranges[i]);
+   }
+
+   TRandom3 *gRand = new TRandom3(0);
+   Int_t nextIdx, num_tracks_in_list;
+   Float_t bs_mean, bs_mean2, bs_error, bs_stddev, bs_stddeverror;
+   for (int i=0; i<5000; i++) {
+      sum = 0; sum2 = 0;
+      num_tracks_in_list = 0;
+
+      while (num_tracks_in_list < nTracksSeen) { // make bootstrapped sample
+         nextIdx = gRand->Integer(nTracksSeen);
+         newRanges[num_tracks_in_list] = ranges[nextIdx];
+         num_tracks_in_list++;
+      }
+
+      for (int i=0; i<nTracksSeen; i++) { // calculate statistics from bootstrapped sample
+         x = newRanges[i];
+         sum += x;
+         sum2 += x*x;
+      }
+
+      bs_mean = sum/nTracksSeen;
+      bs_mean2 = sum2/nTracksSeen;
+      bs_error = sqrt((bs_mean2 - pow(bs_mean,2)));
+
+      rangesBootstrap[i] = bs_mean;
+      errorsBootstrap[i] = bs_error;
+
+      hBootstrap->Fill(bs_mean);
+      hBootstrapStdDev->Fill(bs_error);
+   }
+
+   TCanvas *c = new TCanvas();
+   hBootstrap->Draw();
+
+   TCanvas *c2 = new TCanvas();
+   hRanges->Draw();
+
+   Float_t bootstrapStdDev = hBootstrap->GetStdDev();
+   Float_t bootstrapMean = hBootstrap->GetMean();
+   printf("Mean range is %.2f +- %.2f mm.\n", mean, bootstrapStdDev);
+
+   // 2x sample median - bootstrap mean
+   Double_t sampleMedian;
+   Double_t quantile = 0.5;
+   hRanges->GetQuantiles(1, &sampleMedian, &quantile); // WHAT a bothersome method to get the median
+   printf("The sample median is %.2f mm.\n", sampleMedian);
+   printf("The corrected mean range is %.2f +- %.2f mm.\n", 2*sampleMedian - hBootstrap->GetMean(), bootstrapStdDev);
+/*
+   for (int i=0; i<=5000; i++) {
+      int num_tracks_in_list = 0;
+      sum = 0;
+      while (num_tracks_in_list++ < nTracks) {
+         nextIdx = gRand->Integer(nTracks);
+         sum += pow(ranges[nextIdx] - bootstrapMean, 2);
+      }
+      sum /= nTracksSeen;
+      hBootstrapStdDev->Fill(sqrt(sum));
+   }
+*/
+   TCanvas *c3 = new TCanvas();
+   hBootstrapStdDev->Draw();
+
+   hBootstrapStdDev->Fill(sqrt(sum));
+   Float_t bootstrapStdDevMean = hBootstrapStdDev->GetMean();
+   Float_t bootstrapStdDevStdDev = hBootstrapStdDev->GetStdDev();
+   printf("The bootstrapped range uncertainty is %.2f +- %.2f mm.\n", bootstrapStdDevMean, bootstrapStdDevStdDev);
+   printf("The corrected range uncertanity is %.2f +- %.2f mm.\n", 2*hRanges->GetStdDev() - bootstrapStdDevMean, bootstrapStdDevStdDev);
+
 }
 
 void getTracksReconstructionEfficiency(Int_t dataType, Float_t energy, Float_t degraderThickness) {

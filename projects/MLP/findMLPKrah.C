@@ -86,13 +86,13 @@ XYZVector SplineMLP(Double_t t, XYZVector X0, XYZVector X2, XYZVector P0, XYZVec
 void findMLP(Float_t phantomSize = 200, Float_t rotation = -1, Float_t spotsize = -1, Float_t initialEnergy = 230, Int_t material = kWater, Int_t kModelType = kUiB, Bool_t kModelUncertainties = false) {
    printf("---------\nRunning with phantomSize = %.0f, rotation = %.0f, spotsize = %.1f, energy = %.0f and material =%d\n-----------\n", phantomSize, rotation, spotsize, initialEnergy, material);
    Int_t      printed = 0;
-   const Int_t eventsToUse = 100000;
+   const Int_t eventsToUse = 10;
    Float_t     sigmaTheta = 0; // scattering between last two tracker layers, rad
    Float_t     sigmaPos = 0; // Position unc. in tracking layers, mm
    Bool_t      kDeleteGraphics = false; // batch mode
    Float_t     x, y, z, edep, sum_edep = 0, residualEnergy = 0, AP, AX;
    Int_t       eventID, parentID, lastEID = -1;
-   XYZVector   Xp0, Xp1, Xp2, Xp2prime, Xp3, Xp3prime, X0, X2, X0est, X0err, X0tps, P0, P0tps, P2, S, P2gaus, P2prime, X2prime, scat, scatXp2, scatXp3; // Xp are the plane coordinates, X are the tracker coordinates (X2 = (Xp1 + Xp2) / 2)
+   XYZVector   Xp0, Xp1, Xp2, Xp2prime, Xp3, Xp3prime, X0, X2, X0est, X0err, X0tps, X0tpsOrig, P0, P0tps, P2, S, P2gaus, P2prime, X2prime, scat, scatXp2, scatXp3; // Xp are the plane coordinates, X are the tracker coordinates (X2 = (Xp1 + Xp2) / 2)
    XYZVector   X0errNaive, X0errKrah, X2cm, X0cm;
    Float_t     theta_x_gaus, theta_y_gaus;
    Float_t     wepl, wet, Lambda0, Lambda2;
@@ -101,15 +101,15 @@ void findMLP(Float_t phantomSize = 200, Float_t rotation = -1, Float_t spotsize 
    TSpline3  * splineMCx, * splineMCy, * splineMLPx, * splineMLPy;
    TSpline3  * splineMLPKrahx, * splineMLPKrahy, * splineMLPestx, * splineMLPesty;
    TSpline3  * splineMLPNoTrkx, * splineMLPNoTrky; 
-   Double_t    arSplineMCx[1000], arSplineMCy[1000], arSplineMCz[1000], arSplineMLPx[1000], arSplineMLPy[1000], arSplineMLPz[1000];
-   Double_t    arSplineMLPNoTrkx[1000], arSplineMLPNoTrky[1000], arSplineMLPestx[1000], arSplineMLPesty[1000];
-   Double_t    arSplineMLPKrahx[1000], arSplineMLPKrahy[1000]; 
+   Double_t    arSplineMCx[10000], arSplineMCy[1000], arSplineMCz[1000], arSplineMLPx[1000], arSplineMLPy[1000], arSplineMLPz[1000];
+   Double_t    arSplineMLPNoTrkx[10000], arSplineMLPNoTrky[1000], arSplineMLPestx[1000], arSplineMLPesty[1000];
+   Double_t    arSplineMLPKrahx[10000], arSplineMLPKrahy[1000]; 
    Int_t       idxSplineMC = 0, idxSplineMLP = 0;
-   Double_t    differenceArrayZ[1000];
-   Double_t    differenceArrayDiff[1000] = {};
-   Double_t    differenceArrayDiffNoTrk[1000] = {};
-   Double_t    differenceArrayDiffKrah[1000] = {};
-   Double_t    differenceArrayDiffest[1000] = {};
+   Double_t    differenceArrayZ[10000];
+   Double_t    differenceArrayDiff[10000] = {};
+   Double_t    differenceArrayDiffNoTrk[10000] = {};
+   Double_t    differenceArrayDiffKrah[10000] = {};
+   Double_t    differenceArrayDiffest[10000] = {};
    Float_t     sourceToX0dist = 100;
    Float_t     d_entry = 10;
    Float_t     d_exit = 10;
@@ -124,11 +124,11 @@ void findMLP(Float_t phantomSize = 200, Float_t rotation = -1, Float_t spotsize 
    Float_t     energy, range;
    Float_t     energyFilter = 0; // 128.47;
    Float_t     sigmaFilter = 1e5;
-   Double_t    aPosMCx[1000], aPosMCy[1000], aPosMCz[1000];
-   Double_t    aPosMLPx[1000], aPosMLPy[1000], aPosMLPz[1000];
-   Double_t    aPosMLPNoTrkx[1000], aPosMLPNoTrky[1000];
-   Double_t    aPosMLPKrahx[1000], aPosMLPKrahy[1000];
-   Double_t    aPosMLPestx[1000], aPosMLPesty[1000];
+   Double_t    aPosMCx[10000], aPosMCy[1000], aPosMCz[1000];
+   Double_t    aPosMLPx[10000], aPosMLPy[1000], aPosMLPz[1000];
+   Double_t    aPosMLPNoTrkx[10000], aPosMLPNoTrky[1000];
+   Double_t    aPosMLPKrahx[10000], aPosMLPKrahy[1000];
+   Double_t    aPosMLPestx[10000], aPosMLPesty[1000];
    Int_t       volumeID[10];
    TBranch   * b_volumeID;
    Int_t       aIdxMC = 0;
@@ -140,7 +140,7 @@ void findMLP(Float_t phantomSize = 200, Float_t rotation = -1, Float_t spotsize 
    Float_t     spotSizeAtX0 = 0;
    Int_t       f10xN = 0;
    Int_t       f10yN = 0;
-   Int_t       maxAcc = 5;
+   Int_t       maxAcc = 10;
    Int_t       firstMCidx = 0;
    char      * sMaterial;
    
@@ -212,6 +212,7 @@ void findMLP(Float_t phantomSize = 200, Float_t rotation = -1, Float_t spotsize 
    gStyle->SetPadGridY(kTRUE);
 
    TFile *f = nullptr;
+   TFile *f2 = nullptr;
 
    if (rotation >= 0) {
       f = new TFile(Form("MC/Output/simpleScanner_energy%.0fMeV_%s_phantom%03.0fmm_rotation%02.0fmrad.root", initialEnergy, sMaterial, phantomSize, rotation));
@@ -259,7 +260,7 @@ void findMLP(Float_t phantomSize = 200, Float_t rotation = -1, Float_t spotsize 
    tree->SetBranchAddress("eventID", &eventID);
    tree->SetBranchAddress("parentID", &parentID);
    tree->SetBranchAddress("volumeID", volumeID, &b_volumeID);
-  
+
    if (rotation >= 0) { // defined, use actual number (mrad rotated about X)
       tps_theta_x_0 = 0;
       tps_theta_y_0 = -rotation / 1000;
@@ -271,6 +272,10 @@ void findMLP(Float_t phantomSize = 200, Float_t rotation = -1, Float_t spotsize 
    
    P0tps.SetCoordinates(atan(tps_theta_x_0), atan(tps_theta_y_0), 1);
    X0tps.SetCoordinates(P0tps.X() * (sourceToX0dist + d_entry), P0tps.Y() * (sourceToX0dist + d_entry), 0);
+   X0tpsOrig.SetCoordinates(P0tps.X() * (sourceToX0dist + d_entry), P0tps.Y() * (sourceToX0dist + d_entry), 0);
+   XYZVector shiftInY(0, 3, 0);
+
+   X0tps = X0tpsOrig - shiftInY;
 
    for (Int_t i=0; i<tree->GetEntries(); ++i) {
       tree->GetEntry(i);
@@ -534,6 +539,8 @@ void findMLP(Float_t phantomSize = 200, Float_t rotation = -1, Float_t spotsize 
 
             X0est += X0tps;
             X0est.SetZ(0);
+            
+            cout << "X0tps = " << X0tps << "X0 = " << X0 << ", X0est = " << X0est << endl;
 
             X0err = X0est - X0;
             X0errNaive = X0tps - X0;
@@ -555,7 +562,7 @@ void findMLP(Float_t phantomSize = 200, Float_t rotation = -1, Float_t spotsize 
             Lambda0 = 1.01 + 0.43 * w2;
             Lambda2 = 0.99 - 0.46 * w2;
 
-            for (Float_t t=0; t<1; t += 0.5) {
+            for (Float_t t=0; t<1; t += 0.01) {
                S = SplineMLP(t, X0, X2, P0, P2, Lambda0, Lambda2); // perfect info
                if (lastEID < maxAcc) {
                   aPosMLPx[aIdxMLP] = S.X();
@@ -614,7 +621,7 @@ void findMLP(Float_t phantomSize = 200, Float_t rotation = -1, Float_t spotsize 
                Double_t diff_x, diff_y;
                idxDifferenceArray = 0; // Sweep each time
                nInDifferenceArray++; // To average at end
-               for (Double_t zSweep = 0; zSweep <= phantomSize; zSweep += 50) { // Keep Sweep increment high to speed up!
+               for (Double_t zSweep = 0; zSweep < phantomSize; zSweep += 0.5) { // Keep Sweep increment high to speed up!
                   differenceArrayZ[idxDifferenceArray] = zSweep;
                   diff_x = fabs(splineMCx->Eval(zSweep) - splineMLPx->Eval(zSweep));
                   diff_y = fabs(splineMCy->Eval(zSweep) - splineMLPy->Eval(zSweep));
@@ -645,12 +652,6 @@ void findMLP(Float_t phantomSize = 200, Float_t rotation = -1, Float_t spotsize 
             delete splineMLPestx;
             delete splineMLPesty;
          }
-         /*
-         else {
-            aIdxMC = firstMCidx; // rewrite last MC curve for visualization
-            maxAcc++;
-         }
-         */
          
          if (stop) break;
 
@@ -668,12 +669,6 @@ void findMLP(Float_t phantomSize = 200, Float_t rotation = -1, Float_t spotsize 
       }
 
       if (parentID == 0) {
-         /*
-         if (volumeID[2] == 0 && firstMCidx != aIdxMC) { // new particle
-            firstMCidx = aIdxMC;
-         }
-         */
-
          if  (volumeID[2] < 5) {
             arSplineMCx[idxSplineMC] = x;
             arSplineMCy[idxSplineMC] = y;

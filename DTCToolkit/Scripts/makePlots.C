@@ -320,14 +320,22 @@ void makePlots() {
    Int_t nlinesF = 0, nlinesF2 = 0, nlinesF3 = 0, nlinesF4 = 0, nlinesF5 = 0, nlinesF6 = 0, nlinesF35 = 0;
    Int_t nlinesUniform = 0;
    
-   Float_t lastIsFirstAllTracks;
+   Float_t lastIsFirstAllTracks, lastIsFirst2ndOK;
+
+   Int_t dropIdx = 0;
 
    while (1) {
-      in2 >> mmAbsorber_ >> np >> correctWhole >> lastIsFirst >> lastIsAlmostFirst >> lastIsFirstAllTracks;
+      in2 >> mmAbsorber_ >> np >> correctWhole >> lastIsFirst >> lastIsAlmostFirst >> lastIsFirst2ndOK >> lastIsFirstAllTracks;
+
+      cout << mmAbsorber_ << ", " << np << ", " << lastIsFirstAllTracks << endl;
+      
+      if (np < 50) {
+         if (dropIdx++ % 5 != 0) continue;
+      }
 
       if (!in2.good()) break;
      
-      if (mmAbsorber_ == 22) { 
+      if (mmAbsorber_ == 2) { 
          arrayFractionX[nlinesF] = np;
          arrayFractionY[nlinesF] = correctWhole * 100;
          arrayFractionY2[nlinesF] = lastIsFirst * 100;
@@ -337,12 +345,12 @@ void makePlots() {
          arrayFraction2mmY[nlinesF2++] = lastIsFirstAllTracks * 100;
       }
 
-      if (mmAbsorber_ == 33) {
+      if (mmAbsorber_ == 3) {
          arrayFraction3mmX[nlinesF3] = np;
          arrayFraction3mmY[nlinesF3++] = lastIsFirstAllTracks * 100;
       }
 
-      if (mmAbsorber_ == 55) {
+      if (mmAbsorber_ == 4) {
          arrayFraction4mmX[nlinesF4] = np;
          arrayFraction4mmY[nlinesF4++] = lastIsFirstAllTracks * 100;
       }
@@ -630,10 +638,6 @@ void makePlots() {
    hMC->Draw("P");
    hData->Draw("P");
 
-   gPad->Update();
-   TPaveText *title = (TPaveText*) gPad->GetPrimitive("title");
-   title->SetTextFont(22);
-   gPad->Modified();
 
    TLegend *leg = new TLegend(0.15, 0.68, 0.40, 0.85);
    leg->SetTextSize(0.03);
@@ -690,13 +694,6 @@ void makePlots() {
 
    hMCD->SetTitle("Reconstructed ranges #LT#hat{R_{0}}#GT of proton tracks;WET error [mm];Projected range [mm]");
    hMCD->Draw("P");
-
-   gPad->Update();
-   title = (TPaveText*) gPad->GetPrimitive("title");
-   title->SetTextFont(22);
-   title->SetTextSize(0.08);
-   gPad->Modified();
-   pad2->Update();
 
    c6->cd(1);
    TGraph *gResolution = new TGraph(MC2Data, arrayMC, arrayEMC);
@@ -778,7 +775,7 @@ void makePlots() {
    TGraph *gFraction = new TGraph(nlinesF, arrayFractionX, arrayFractionY);
    TGraph *gFraction2 = new TGraph(nlinesF, arrayFractionX, arrayFractionY2);
    TGraph *gFraction3 = new TGraph(nlinesF, arrayFractionX, arrayFractionY3);
-   gFraction->GetXaxis()->SetRangeUser(10, 6000);
+   gFraction->GetXaxis()->SetRangeUser(5, 1200);
    gFraction->SetMaximum(100);
    gFraction->SetMinimum(0);
    gFraction->GetXaxis()->SetTitleSize(0.045);
@@ -813,13 +810,9 @@ void makePlots() {
       t->DrawText(-0.42, i*20, Form("%d%%", i*20));
    }
 
+
    gPad->SetLogx();
    gFraction->GetXaxis()->SetNoExponent();
-
-   gPad->Update();
-   title = (TPaveText*) gPad->GetPrimitive("title");
-   title->SetTextFont(22);
-   gPad->Modified();
    
    TLegend * leg2 = new TLegend(0.67, 0.76, 0.97, 0.93);
    leg2->SetTextSize(0.04);
@@ -838,25 +831,25 @@ void makePlots() {
    TGraph *gFraction3mm = new TGraph(nlinesF3, arrayFraction3mmX, arrayFraction3mmY);
 //   TGraph *gFraction35mm = new TGraph(nlinesF35, arrayFraction35mmX, arrayFraction35mmY);
    TGraph *gFraction4mm = new TGraph(nlinesF4, arrayFraction4mmX, arrayFraction4mmY);
-//   TGraph *gFraction5mm = new TGraph(nlinesF5, arrayFraction5mmX, arrayFraction5mmY);
-//   TGraph *gFraction6mm = new TGraph(nlinesF6, arrayFraction6mmX, arrayFraction6mmY);
+   TGraph *gFraction5mm = new TGraph(nlinesF5, arrayFraction5mmX, arrayFraction5mmY);
+   TGraph *gFraction6mm = new TGraph(nlinesF6, arrayFraction6mmX, arrayFraction6mmY);
 
 
    printf("Some values in arrayFraction2mmXY: (%.2f, %.2f), (%.2f, %.2f)\n", arrayFraction2mmX[0], arrayFraction2mmY[0], arrayFraction3mmY[1], arrayFraction4mmY[1]);
    printf("nlinesF2,F3,F4 = %d, %d, %d.\n", nlinesF2, nlinesF3, nlinesF4);
-   c22->SetLogx();
+//   c22->SetLogx();
    c22->SetGridy();
    c22->SetGridx();
    gFraction2mm->SetTitle(";Protons/cm^{2}/frame;Fraction of correctly reconstructed tracks");
-   gFraction2mm->GetXaxis()->SetRangeUser(0, 2000);
+   gFraction2mm->GetXaxis()->SetRangeUser(1, 1020);
    gFraction2mm->SetMaximum(100);
    gFraction2mm->SetMinimum(20);
-   gFraction2mm->GetXaxis()->SetTitleSize(0.045);
-   gFraction2mm->GetYaxis()->SetTitleSize(0.045);
-   gFraction2mm->GetXaxis()->SetLabelSize(0.045);
+   gFraction2mm->GetXaxis()->SetTitleSize(0.05);
+   gFraction2mm->GetYaxis()->SetTitleSize(0.05);
+   gFraction2mm->GetXaxis()->SetLabelSize(0.05);
    gFraction2mm->GetXaxis()->SetNdivisions(16);
-   gFraction2mm->GetYaxis()->SetLabelSize(0.045);
-   gFraction2mm->GetXaxis()->SetLabelSize(0.045);
+   gFraction2mm->GetYaxis()->SetLabelSize(0.05);
+   gFraction2mm->GetXaxis()->SetLabelSize(0.05);
    gFraction2mm->GetXaxis()->SetTitleFont(22);
    gFraction2mm->GetYaxis()->SetTitleFont(22);
    gFraction2mm->GetXaxis()->SetTitleOffset(1);
@@ -866,45 +859,55 @@ void makePlots() {
    gFraction2mm->GetXaxis()->SetNoExponent();
    gFraction2mm->GetXaxis()->SetMoreLogLabels();
    gFraction2mm->GetYaxis()->SetLabelFont(22);
-   gFraction2mm->SetLineWidth(3);
-   gFraction3mm->SetLineWidth(3);
-//   gFraction35mm->SetLineWidth(3);
-   gFraction4mm->SetLineWidth(3);
-//   gFraction5mm->SetLineWidth(3);
-//   gFraction6mm->SetLineWidth(3);
+   gFraction2mm->SetLineWidth(4);
+   gFraction3mm->SetLineWidth(4);
+//   gFraction35mm->SetLineWidth(4);
+   gFraction4mm->SetLineWidth(4);
+   gFraction5mm->SetLineWidth(4);
+   gFraction6mm->SetLineWidth(4);
 
-   gFraction2mm->SetLineColor(kRed-7);
-   gFraction3mm->SetLineColor(kRed-2);
+   gFraction2mm->SetLineColor(kRed-4);
+   gFraction3mm->SetLineColor(kRed);
 //   gFraction35mm->SetLineColor(kRed+2);
-   gFraction4mm->SetLineColor(kBlack);
-//   gFraction5mm->SetLineColor(kRed+0);
-//   gFraction6mm->SetLineColor(kRed-7);
+   gFraction4mm->SetLineColor(kRed+1);
+   gFraction5mm->SetLineColor(kRed+2);
+   gFraction6mm->SetLineColor(kRed+3);
 
    gFraction2mm->Draw("LA");
    gFraction3mm->Draw("L");
 //   gFraction35mm->Draw("L");
    gFraction4mm->Draw("L");
-//   gFraction5mm->Draw("L");
-//   gFraction6mm->Draw("L");
+   gFraction5mm->Draw("L");
+   gFraction6mm->Draw("L");
    
    TText *tt = new TText();   
    tt->SetTextAlign(32);
    tt->SetTextSize(0.045);
    tt->SetTextFont(22);
-   for (Int_t i=0; i<11;i++) {
+   for (Int_t i=2; i<11;i++) {
       cout << "Drawing text at " << -0.42 << ", " << i*10 << endl;
       tt->DrawText(-0.0052, i*10, Form("%d%%", i*10));
    }
    
+   gPad->Update();
+   TGaxis *axis = new TGaxis(gPad->GetUxmin(), gPad->GetUymax(), gPad->GetUxmax(), gPad->GetUymax(), 0.1, 102, 510, "-L");
+   axis->Draw("same");
+   axis->SetTitleFont(22);
+   axis->SetLabelFont(22);
+   axis->SetTitleSize(0.05);
+   axis->SetLabelSize(0.05);
+//   axis->SetTitleOffset(0.95);
+   axis->SetTitle("Million protons/s");
+   
    TText *curveLabel = new TText();
    curveLabel->SetTextFont(22);
    curveLabel->SetTextSize(0.045);
-   curveLabel->DrawText(25.50, gFraction2mm->Eval(25.00)*0.98, "2 mm");
-   curveLabel->DrawText(25.50, gFraction3mm->Eval(25.00)*0.98, "3 mm");
+   curveLabel->DrawText(25.50, gFraction2mm->Eval(25.00)*0.98, "2 mm Al");
+   curveLabel->DrawText(25.50, gFraction3mm->Eval(25.00)*0.98, "3 mm Al");
 //   curveLabel->DrawText(25.50, gFraction35mm->Eval(25.00)*0.98, "5x5 mm^{2}");
-   curveLabel->DrawText(25.50, gFraction4mm->Eval(25.00)*0.98, "5 mm");
-//   curveLabel->DrawText(25.50, gFraction5mm->Eval(25.00)*0.98, "5 mm Al");
-//   curveLabel->DrawText(25.50, gFraction6mm->Eval(25.00)*0.98, "6 mm Al");
+   curveLabel->DrawText(25.50, gFraction4mm->Eval(25.00)*0.98, "5 mm Al");
+   curveLabel->DrawText(25.50, gFraction5mm->Eval(25.00)*0.98, "5 mm Al");
+   curveLabel->DrawText(25.50, gFraction6mm->Eval(25.00)*0.98, "6 mm Al");
 
 
    /*
@@ -1006,11 +1009,6 @@ void makePlots() {
    gAlignmentXMine->Draw("AP");
    gAlignmentXOrig->Draw("P");
    
-   gPad->Update();
-   title = (TPaveText*) gPad->GetPrimitive("title");
-   title->SetTextFont(22);
-   gPad->Modified();
-
    gAlignmentXMine->GetYaxis()->SetRangeUser(-1000, 1000);
    gAlignmentXMine->GetXaxis()->SetRangeUser(0, 27.5);
 
@@ -1110,11 +1108,6 @@ void makePlots() {
          thisCalibration /= thisNumber;
       cout << Form("Calibration factor for chip %d is %.3f, based on %d hits.\n", i, thisCalibration, thisNumber);
    }
-   
-   gPad->Update();
-   title = (TPaveText*) gPad->GetPrimitive("title");
-   title->SetTextFont(22);
-   gPad->Modified();
    
    TLegend * leg4 = new TLegend(0.15, 0.65, 0.28, 0.88);
    leg4->SetTextSize(0.035);
