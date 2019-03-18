@@ -4,6 +4,7 @@
 #include <cstring>
 #include <vector>
 #include <TObject.h>
+#include <TMath.h>
 
 // Set these compiler directives to adjust the logic flow of this file
 
@@ -22,8 +23,7 @@
 #define DX 0.030
 #define DY 0.030
 #define NY 4500
-// #define DZ 0.435
-#define DZ 0.620
+#define DZ 0.435
 #else // exp. data
 #define NX 1280
 #define NY 1280
@@ -43,7 +43,7 @@
 
 Bool_t   kIsAluminumPlate = false;
 Bool_t   kIsScintillator = false;
-Bool_t   kIsFirstLayerAir = false;
+Bool_t   kIsFirstLayerAir = true;
 Bool_t   kDoTracking = true; // Move to argument list
 Bool_t   kUseEmpiricalMCS = true;
 Bool_t   kFilterNuclearInteractions = false; // Move to argument list
@@ -52,7 +52,7 @@ Int_t    kSkipTracks = 0;
 const Int_t    kEnergy = 250;
 
 #ifdef USEALPIDE
-Bool_t   kUseDegrader = false; // SHOULD BE TRUE !! 
+Bool_t   kUseDegrader = true; // SHOULD BE TRUE !! 
 Bool_t   kUseAlpide = true;
 #else
 Bool_t   kUseAlpide = false;
@@ -75,7 +75,7 @@ const Int_t ny = NY;
 const Int_t nTrackers = 4;
 
 #ifdef USEALPIDE
-const Float_t kAbsorberThickness = 3.5; // ALPIDE, CHANGE TO FIT MC DATA GEOMETRY
+const Float_t kAbsorberThickness = 3; // ALPIDE, CHANGE TO FIT MC DATA GEOMETRY
 #else
 const Float_t kAbsorberThickness = 3.3; // FOCAL EXPERIMENTAL DATA, DON'T CHANGE
 #endif

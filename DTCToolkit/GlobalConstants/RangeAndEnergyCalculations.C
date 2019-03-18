@@ -365,16 +365,21 @@ Float_t getEnergyFromDegraderThickness(Double_t degraderThickness) {
    ifstream in;
    if (kEnergy == 250) {
       in.open("Data/Ranges/EnergyAfterDegraderPSTAR.csv");
+      while (1) {
+         in >> dt >> e >> es;
+         if (!in.good()) break;
+         phaseSpaceDegraderthickness[idx] = double(dt);
+         phaseSpaceEnergy[idx++] = e;
+      }
    }
    else if (kEnergy == 230) {
+      while (1) {
+         in >> dt >> e;
+         if (!in.good()) break;
+         phaseSpaceDegraderthickness[idx] = double(dt);
+         phaseSpaceEnergy[idx++] = e;
+      }
       in.open("Data/Ranges/EnergyAfterDegrader230MeV.csv");
-   }
-
-   while (1) {
-      in >> dt >> e;
-      if (!in.good()) break;
-      phaseSpaceDegraderthickness[idx] = double(dt);
-      phaseSpaceEnergy[idx++] = e;
    }
 
    in.close();

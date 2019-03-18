@@ -46,6 +46,13 @@ void Tracks::Clear(Option_t *option) {
    clustersWithoutTrack_.Clear(option);
 }
 
+void Tracks::sortTracks() {
+   for (Int_t i=0; i<GetEntriesFast(); i++) {
+      if (!At(i)) continue;
+      At(i)->sortTrack();
+   }
+}
+
 void Tracks::appendTrack(Track *copyTrack, Int_t startOffset /* default 0 */) {
    Int_t    newIdx = tracks_.GetEntriesFast();
    Track  * track = (Track*) tracks_.ConstructedAt(newIdx);
@@ -475,12 +482,23 @@ Track * Tracks::getTrackWithEID(Int_t eid) {
    return At(trackIdx);
 }
   
+void Tracks::propagateSecondaryStatus() {
+   Track   *thisTrack = nullptr;
+   for (Int_t i=0; i<GetEntriesFast(); i++) {
+      thisTrack = At(i);
+      if (!At(i)) continue;
+      At(i)->propagateSecondaryStatus();
+   }
+}
+
+
 void  Tracks::removeHighAngleTracks(Float_t mradLimit) {
    Cluster *a = nullptr;
    Cluster *b = nullptr;
    Track   *thisTrack = nullptr;
    Float_t  incomingAngle;
    Int_t    nRemoved = 0;
+   Int_t    nRemovedNuclear = 0;
 
    for (Int_t i=0; i<GetEntriesFast(); i++) {
       thisTrack = At(i);
@@ -491,13 +509,25 @@ void  Tracks::removeHighAngleTracks(Float_t mradLimit) {
       if (!a || !b) continue;
       incomingAngle = getDotProductAngle(a, a, b);
       if (incomingAngle > mradLimit / 1000.) {
+         if (thisTrack->Last()->getEventID() < 0) nRemovedNuclear++;
          removeTrackAt(i);
          nRemoved++;
       }
    }
-   printf("Removed %d tracks with higher than %.0f mrad incoming angle.\n", nRemoved, mradLimit);
+   printf("Removed %d tracks with higher than %.0f mrad incoming angle (%.2f%% secondaries).\n", nRemoved, mradLimit, 100*float(nRemovedNuclear)/nRemoved);
 
    Compress();
+}
+
+void Tracks::removeNANs() {
+   Track * thisTrack = nullptr;
+
+   for (Int_t i=0; i<GetEntriesFast(); i++) {
+      thisTrack = At(i);
+      if (!thisTrack) continue;
+
+      thisTrack->removeNANs();
+   }
 }
 
 #endif

@@ -22,11 +22,12 @@ class Tracks : public TObject {
    private:
       TClonesArray tracks_;
       TClonesArray clustersWithoutTrack_;
-      Int_t        EIDindex_[100000];
+      Int_t        EIDindex_[1000000];
 
    public:
       Tracks() : tracks_("DTC::Track", 1000), clustersWithoutTrack_("DTC::Cluster", 5000) { tracks_.SetOwner(kTRUE); clustersWithoutTrack_.SetOwner(kTRUE); }
-      Tracks(Int_t nTracks) : tracks_("DTC::Track", nTracks), clustersWithoutTrack_("DTC::Cluster", nTracks*5) { if (nTracks > 20000) cout << "Remember to increase size of EIDindex array!!!! (now = 100 000)\n"; tracks_.SetOwner(kTRUE); clustersWithoutTrack_.SetOwner(kTRUE); }
+//      Tracks(Int_t nTracks) : tracks_("DTC::Track", nTracks), clustersWithoutTrack_("DTC::Cluster", nTracks*5) { if (nTracks > 200000) cout << "Remember to increase size of EIDindex array!!!! (now = 100 000)\n"; tracks_.SetOwner(kTRUE); clustersWithoutTrack_.SetOwner(kTRUE); }
+      Tracks(Int_t nTracks) : tracks_("DTC::Track", nTracks), clustersWithoutTrack_("DTC::Cluster", nTracks*5) { tracks_.SetOwner(kTRUE); clustersWithoutTrack_.SetOwner(kTRUE); }
       virtual ~Tracks(); 
 
       // ROOT & I/O     
@@ -43,6 +44,7 @@ class Tracks : public TObject {
       virtual void      CompressCWT()           { clustersWithoutTrack_.Compress(); }
       virtual void      CompressClusters();
       virtual void      Clear(Option_t * option = "");
+      virtual void      sortTracks();
 
       // Add and remove tracks
       virtual void      removeTrack(Track *t)   { tracks_.Remove((TObject*) t); }
@@ -65,6 +67,8 @@ class Tracks : public TObject {
       virtual Int_t     getNumberOfConflictClusters(Int_t i)   { return At(i)->getNumberOfConflictClusters(); }
       virtual void      extrapolateToLayer0();
       virtual void      doTrackFit();
+      void              removeNANs();
+      void              propagateSecondaryStatus();
 
       // Search for clusters
       Int_t             getClosestCluster(vector<trackCluster> clusters, Cluster* interpolatedCluster);
@@ -81,7 +85,6 @@ class Tracks : public TObject {
       Bool_t            isLastEventIDCloseToFirst(Int_t trackIdx);
       void              createEIDSortList();
       Track           * getTrackWithEID(Int_t eid);
-      
       
       // Optimization of the tracking function
       // tracksOptimization.C

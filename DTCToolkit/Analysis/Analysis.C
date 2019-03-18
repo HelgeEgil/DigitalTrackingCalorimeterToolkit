@@ -854,7 +854,7 @@ void drawTracksRangeHistogram(Int_t Runs, Int_t dataType, Bool_t recreate, Float
 
    Tracks * tracks = loadOrCreateTracks(recreate, Runs, dataType, run_energy);
    if (removeHighAngleTracks) {
-      tracks->removeHighAngleTracks(100);
+      tracks->removeHighAngleTracks(75);
    }
    if (removeNuclearInteractions) {
       tracks->removeNuclearInteractions();
@@ -870,7 +870,7 @@ void drawTracksRangeHistogram(Int_t Runs, Int_t dataType, Bool_t recreate, Float
       }
 
       // Do track fit, extract all parameters for this track
-      outputGraph = (TGraphErrors*) thisTrack->doTrackFit(false, false); // (bool isScaleVariable, bool useTrackLength (~ CSDA))
+      outputGraph = (TGraphErrors*) thisTrack->doTrackFit(false, true); // (bool isScaleVariable, bool useTrackLength (~ CSDA))
       if (!outputGraph) continue;
    
       delete outputGraph;
@@ -1595,20 +1595,146 @@ void compareChargeDiffusionModels(Int_t Runs, Bool_t recreate, Float_t energy) {
    hEnergyVSCSUncal->Draw("COLZ");
 
 }
-   
-void drawTracks3D(Int_t Runs, Int_t dataType, Bool_t recreate, Int_t switchLayer, Float_t energy, Float_t degraderThickness, Int_t tracksperrun, Bool_t doTracking) {
+
+void secondaryAnalysis(Int_t Runs, Int_t dataType, Bool_t recreate, Int_t switchLayer, Float_t energy, Float_t degraderThickness, Int_t tracksperrun, Bool_t doTracking) {
    run_energy = energy;
    run_degraderThickness = degraderThickness;
    kEventsPerRun = tracksperrun;
    kDoTracking = doTracking;
 
+   Track  * thisTrack = nullptr;
+   Tracks * tracks = loadOrCreateTracks(recreate, Runs, dataType, energy);
+   Int_t    nTracks = tracks->GetEntries();
+   Int_t    nTracksNuclear =0;
+   Int_t    nTracksNuclearAfterAngle = 0;
+   Int_t    nTracksNuclearAfterAngleAndEdep = 0;
+   Int_t    nTracksNuclearAfterAngleAndEdepAndRange = 0;
+   Float_t  angle;
+
+   Cluster *a;
+   Cluster *b;
+
+   tracks->doTrackFit();
+
+   TH1F   * hAngleAnalysisP = new TH1F("hAngleAnalysisP", "Angular distribution of incoming tracks (primary);Incoming angle [mrad];Frequency", 100, 0, 500);
+   TH1F   * hAngleAnalysisS = new TH1F("hAngleAnalysisS", "Angular distribution of incoming tracks (scndary);Incoming angle [mrad];Frequency", 100, 0, 500);
+   TH1F   * hAngleAnalysisAfter = new TH1F("hAngleAnalysisAfter", "Angular distribution of incoming tracks (After);Incoming angle [mrad];Frequency", 100, 0, 500);
+   TH1F   * hRangeAnalysisP = new TH1F("hRangeAnalysisP", "Range distribution of tracks (primary);Range [mm WEPL];Frequency", 100, 0, 300);
+   TH1F   * hRangeAnalysisS = new TH1F("hRangeAnalysisS", "Range distribution of tracks (scndary);Range [mm WEPL];Frequency", 100, 0, 300);
+   TH1F   * hRangeAnalysisAfter = new TH1F("hRangeAnalysisAfter", "Range distribution of tracks (after);Range [mm WEPL];Frequency", 100, 0, 300);
+
+   for (Int_t i=0; i<tracks->GetEntriesFast(); i++) {
+      thisTrack = tracks->At(i);
+      if (!thisTrack) {
+         printf("!thisTrack\n");
+         continue;
+      }
+
+      a = thisTrack->At(0);
+      b = thisTrack->At(1);
+      if (!a || !b) continue;
+
+      angle = getDotProductAngle(a,a,b);
+
+      if (thisTrack->Last()->getEventID() < 0) {
+         hRangeAnalysisS->Fill(thisTrack->getFitParameterRange());
+         hAngleAnalysisS->Fill(angle*1000);
+      }
+      else {
+         hRangeAnalysisP->Fill(thisTrack->getFitParameterRange());
+         hAngleAnalysisP->Fill(angle*1000);
+      }
+   }
+
+   for (Int_t i=0; i<tracks->GetEntriesFast(); i++) {
+      thisTrack = tracks->At(i);
+      if (!thisTrack) {
+         printf("!thisTrack\n");
+         continue;
+      }
+
+      if (thisTrack->Last()->getEventID() < 0) nTracksNuclear++;
+   }
+
+   printf("There are %d tracks in total. %d of them are secondary tracks (%.2f%%).\n", nTracks, nTracksNuclear, 100*float(nTracksNuclear)/nTracks);
+
+   tracks->removeHighAngleTracks(75);
+   nTracks = tracks->GetEntries();
+   for (Int_t i=0; i<tracks->GetEntriesFast(); i++) {
+      thisTrack = tracks->At(i);
+      if (!thisTrack) continue;
+      if (thisTrack->Last()->getEventID() < 0) nTracksNuclearAfterAngle++;
+   }
+
+   printf("After ANGLE cut: There are %d tracks in total. %d of them are secondary tracks (%.2f%%).\n", nTracks, nTracksNuclearAfterAngle, 100*float(nTracksNuclearAfterAngle)/nTracks);
+   
+   tracks->removeNuclearInteractions();
+   nTracks = tracks->GetEntries();
+   for (Int_t i=0; i<tracks->GetEntriesFast(); i++) {
+      thisTrack = tracks->At(i);
+      if (!thisTrack) continue;
+      if (thisTrack->Last()->getEventID() < 0) nTracksNuclearAfterAngleAndEdep++;
+   }
+
+   printf("After EDEP cut: There are %d tracks in total. %d of them are secondary tracks (%.2f%%).\n", nTracks, nTracksNuclearAfterAngleAndEdep, 100*float(nTracksNuclearAfterAngleAndEdep)/nTracks);
+
+   tracks->removeThreeSigmaShortTracks();
+   nTracks = tracks->GetEntries();
+   for (Int_t i=0; i<tracks->GetEntriesFast(); i++) {
+      thisTrack = tracks->At(i);
+      if (!thisTrack) continue;
+      if (thisTrack->Last()->getEventID() < 0) nTracksNuclearAfterAngleAndEdepAndRange++;
+
+      a = thisTrack->At(0);
+      b = thisTrack->At(1);
+      if (!a || !b) continue;
+      angle = getDotProductAngle(a,a,b);
+      hRangeAnalysisAfter->Fill(thisTrack->getFitParameterRange());
+      hAngleAnalysisAfter->Fill(angle*1000);
+   }
+
+   
+
+   printf("After RANGE cut: There are %d tracks in total. %d of them are secondary tracks (%.2f%%).\n", nTracks, nTracksNuclearAfterAngleAndEdepAndRange, 100*float(nTracksNuclearAfterAngleAndEdepAndRange)/nTracks);
+
+   TCanvas *c1 = new TCanvas();
+   hAngleAnalysisP->SetLineColor(kRed);
+   hAngleAnalysisS->SetLineColor(kGreen-3);
+   hAngleAnalysisAfter->SetLineColor(kBlack);
+   hAngleAnalysisP->SetLineWidth(3);
+   hAngleAnalysisS->SetLineWidth(3);
+   hAngleAnalysisAfter->SetLineWidth(3);
+   hAngleAnalysisP->Draw();
+   hAngleAnalysisS->Draw("same");
+   hAngleAnalysisAfter->Draw("same");
+
+   TCanvas *c2 = new TCanvas();
+   hRangeAnalysisP->SetLineColor(kRed);
+   hRangeAnalysisS->SetLineColor(kGreen-3);
+   hRangeAnalysisAfter->SetLineColor(kBlack);
+   hRangeAnalysisP->SetLineWidth(3);
+   hRangeAnalysisS->SetLineWidth(3);
+   hRangeAnalysisAfter->SetLineWidth(3);
+   hRangeAnalysisP->Draw();
+   hRangeAnalysisS->Draw("same");
+   hRangeAnalysisAfter->Draw("same");
+
+}
+
+
+void drawTracks3D(Int_t Runs, Int_t dataType, Bool_t recreate, Int_t switchLayer, Float_t energy, Float_t degraderThickness, Int_t tracksperrun, Bool_t doTracking) {
+   run_energy = energy;
+   run_degraderThickness = degraderThickness;
+   kEventsPerRun = tracksperrun;
+   kDoTracking = doTracking;
+   
    Tracks * tracks = loadOrCreateTracks(recreate, Runs, dataType, energy);
 
    printf("Found %d tracks before filtering.\n", tracks->GetEntries());
 
-   tracks->removeHighAngleTracks(75); // mrad
-   tracks->removeThreeSigmaShortTracks();
-   tracks->removeNuclearInteractions();
+//   tracks->removeHighAngleTracks(75); // mrad
+//   tracks->removeThreeSigmaShortTracks();
+//   tracks->removeNuclearInteractions();
 
    Bool_t   kDraw = true;
 
@@ -1757,7 +1883,6 @@ void drawTracks3D(Int_t Runs, Int_t dataType, Bool_t recreate, Int_t switchLayer
    cout << nOKMinusTracks << " of total " << numberOfTracks << " tracks has a close match (0.5 mm, 1 degree) on first / last cluster (" << factorEIDOKMinus << "%)\n";
    cout << nOKLastLayers << " of total " << numberOfTracks << " tracks has a close match (0.5 mm, 1 degree) or is a very short track (" << factorLastLayers << "%)\n";
 
-
    Int_t badSecondary = 0;
    Int_t badPrimary = 0;
 
@@ -1836,7 +1961,7 @@ void drawTracks3D(Int_t Runs, Int_t dataType, Bool_t recreate, Int_t switchLayer
        if (l->GetLineColor() == kRed)   badPrimary++;
       
       trackPoints->Draw();
-//    EIDMarker->Draw();
+//      EIDMarker->Draw();
       conflictMarker->Draw();
    }
 

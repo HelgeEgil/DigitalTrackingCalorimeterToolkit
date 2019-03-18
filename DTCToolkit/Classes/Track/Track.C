@@ -120,6 +120,30 @@ Int_t Track::getModeEventID() {
    return eventIDs[maxIdx];
 }
 
+Bool_t Track::isOneEventID() { // Alba's version
+   Int_t eid;
+   Int_t last_pos = GetEntriesFast()-1;
+
+    if (!At(last_pos)) {
+      if (!At(last_pos-1)) return false;
+      eid = getEventID(last_pos-1);
+    }
+
+   else { 
+      eid = getEventID(last_pos);
+      if (eid < 0 && At(last_pos-1)) { eid = getEventID(last_pos-1); }
+      if (eid < 0) return false;
+   }
+
+   for (Int_t i=0; i<GetEntriesFast(); i++) {
+      if (!At(i)) continue;
+      if (eid != getEventID(i) && getEventID(i) > 0) return false;
+   }
+
+   return true;
+}
+
+/*
 Bool_t Track::isOneEventID() {
    Int_t eid;
 
@@ -141,6 +165,7 @@ Bool_t Track::isOneEventID() {
 
    return true;
 }
+*/
 
 Bool_t Track::isFirstAndLastEventIDEqual() {
    if (!At(0)) return false;
@@ -148,7 +173,39 @@ Bool_t Track::isFirstAndLastEventIDEqual() {
    Int_t first = getEventID(0);
    Int_t last = Last()->getEventID();
 
-   return (first == last); // || last < 0);
+   return (first == last || last < 0);
+}
+
+void  Track::propagateSecondaryStatus() {
+   Bool_t isSecondary = false;
+
+   for (Int_t c=0; c<GetEntriesFast(); c++) {
+      if (!At(c)) continue;
+//      cout << At(c)->getEventID() << ", ";
+      if (At(c)->getEventID() < 0) {
+         isSecondary = true;
+         break;
+      }
+   }
+//   cout << endl;
+   if (isSecondary) {
+      for (Int_t c=0; c<GetEntriesFast(); c++) {
+         if (!At(c)) continue;
+         At(c)->setEventID(-1);
+      }
+   }
+}
+
+void Track::removeNANs() {
+   Cluster *c = nullptr;
+
+   for (Int_t i=0; i<=GetEntriesFast(); i++) {
+      c = At(i);
+      if (!c) continue;
+      if (std::isnan(c->getX()) || std::isnan(c->getY())) {
+         removeCluster(c);
+      }
+   }
 }
 
 ostream& operator<< (ostream &os, Track& t) {

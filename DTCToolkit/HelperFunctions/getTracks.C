@@ -213,6 +213,10 @@ Tracks * getTracksFromClusters(Int_t Runs, Int_t dataType, Int_t frameType, Floa
          tracks = clusters->findCalorimeterTracksWithMCTruth();
       }
       t2.Stop();
+    
+      showDebug("propagateSecondaryStatus..."); 
+      tracks->propagateSecondaryStatus();
+      showDebug("ok!\n");
 
       if (tracks->GetEntriesFast() == 0) breakSignal = true; // to stop running
 
@@ -221,9 +225,13 @@ Tracks * getTracksFromClusters(Int_t Runs, Int_t dataType, Int_t frameType, Floa
       // Track improvements
       Int_t nTracksBefore = 0, nTracksAfter = 0;
       Int_t nIsInelastic = 0, nIsNotInelastic = 0;
+      showDebug("removeNANs...");
+      tracks->removeNANs();
+      showDebug("ok!\nsortTracks...");
+      tracks->sortTracks(); // reverse order from retrograde reconstruction
       
       t3.Start(false);
-      showDebug("Removing tracks leaving detector...");
+      showDebug("ok!\nRemoving tracks leaving detector...");
       tracks->removeTracksLeavingDetector();
       showDebug("ok\ncompress tracks and clusters...");      
       t3.Stop();

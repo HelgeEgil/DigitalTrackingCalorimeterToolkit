@@ -52,8 +52,8 @@ Int_t Track::getIdxFromLayer(Int_t layer) {
 
 Bool_t Track::doesTrackEndAbruptly() {
 //   This is limit has been found through MC truths
-//   See full information in PhD thesis (to come...)
-   Bool_t   endsAbruptly = (Last()->getDepositedEnergy() < 2);
+//   See full information in PhD thesis 
+   Bool_t   endsAbruptly = (Last()->getDepositedEnergy() < 1.5);
    if (kDataType == kData) endsAbruptly = (Last()->getDepositedEnergy() < 4);
 
    return endsAbruptly; 

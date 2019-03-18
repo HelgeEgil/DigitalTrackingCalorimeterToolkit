@@ -10,6 +10,7 @@ class TF1;
 
 using namespace DTC;
 
+void        secondaryAnalysis(Int_t Runs, Int_t dataType = kMC, Bool_t recreate = false, Int_t switchLayer = 0, Float_t energy = 250, Float_t degraderThickness = 0, Int_t tracksperrun = kEventsPerRun, Bool_t doTracking = kDoTracking);
 void        drawRadiograph(Int_t nparticles, Float_t energy);
 void        getRangeFromRawBeam(Float_t energy);
 void        drawTracksDeltaTheta(Int_t Runs, Int_t dataType, Bool_t recreate, Float_t energy, Float_t degraderThickness);

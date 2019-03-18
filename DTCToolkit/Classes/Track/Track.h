@@ -38,6 +38,7 @@ class Track : public TObject {
       virtual Int_t     GetEntries()                     { return track_.GetEntries(); }
       virtual void      Compress()                       { track_.Compress(); }
       virtual void      Clear(Option_t * option = "")    { track_.Clear(option); }
+      void              sortTrack()                      { track_.Sort(); }
    
       // Add and remove clusters
       virtual TObject * removeClusterAt(Int_t i)         { return track_.RemoveAt(i); }
@@ -45,6 +46,7 @@ class Track : public TObject {
       virtual void      setTrack(Track *copyTrack, Int_t startOffset = 0); // copy whole track
       virtual void      appendCluster(Cluster *copyCluster, Int_t startOffset = 0); // copy cluster
       virtual void      appendPoint(Float_t x, Float_t y, Int_t layer, Int_t size = -1, Int_t eventID = -1);
+      void              removeNANs();
 
       // Getters and setters
       virtual Float_t   getX(Int_t i)                    { return At(i)->getX(); }
@@ -74,6 +76,7 @@ class Track : public TObject {
       Bool_t            doesTrackEndAbruptly();
       Float_t           getRiseFactor();
       Int_t             getNMissingLayers();
+      void              propagateSecondaryStatus();
 
       // TRACK PROPERTIES - Ranges and energies
       // trackRangeCalculations.C

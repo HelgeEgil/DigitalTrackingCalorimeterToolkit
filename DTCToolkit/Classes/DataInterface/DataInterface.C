@@ -443,19 +443,20 @@ void  DataInterface::getMCClusters(Int_t runNo, Clusters *clusters) {
    if (runNo == 0) lastJentry_ = 0;
    
    Float_t  sum_edep = 0;
-   Int_t    lastEventID = -1, lastParentID = -1;
+   Int_t    lastEventID = -1, lastParentID = -1, lastTrackID = -1;
    Int_t    lastLayer = 0;
    Float_t  lastZ = 0;
    Int_t    layer = 0;
    Int_t    n = 0;
    Float_t  sumX = 0, sumY = 0;
    Float_t  x,y;
-   Bool_t   isInElastic;
+   Bool_t   isInElastic, isSecondary;
+   Char_t   lastProcessName[15];
 
    Long64_t nentries = fChain->GetEntriesFast();
    Long64_t nbytes = 0, nb = 0;
 
-   for (Long64_t jentry=lastJentry_; jentry<nentries; jentry++) {
+   for (Long64_t jentry=lastJentry_; jentry<nentries; jentry++) { // new interaction
       Long64_t ientry = LoadTree(jentry);
       if (ientry<0) break;
       nb = fChain->GetEntry(jentry);
@@ -463,28 +464,36 @@ void  DataInterface::getMCClusters(Int_t runNo, Clusters *clusters) {
 
       if (lastEventID < 0) {
          lastZ = posZ;
-         lastEventID = eventID;
-         lastParentID = parentID;
          lastLayer = layer;
+         lastParentID = parentID;
+         lastTrackID = trackID;
+         strcpy(lastProcessName, processName);
          sumX = 0;
          sumY = 0;
          sum_edep = 0;
          n = 0;
+         isSecondary = false;
       }
 
       layer = level1ID + baseID - 1;
-      // cout << "Layer = level1ID " << level1ID << " + baseID " << baseID << "-1 = " << layer << " ( z = " << posZ << ")" << endl;
       if (kFilterNuclearInteractions == true && parentID != 0) {
          lastEventID = -1;
          continue;
       }
 
-      if (lastEventID != eventID || lastLayer != layer || lastParentID != parentID) {
+      if (lastEventID == eventID && trackID > 1) {
+//         cout << "2nd, ";
+         isSecondary = true;
+      }
+
+
+      if (lastEventID != eventID || lastLayer != layer) { // new layer -- store summed information from LAST layer now 
          x = sumX/n / dx + nx/2;
          y = sumY/n / dy + ny/2;
+//         cout << lastEventID << ":" << lastLayer << ":" << lastParentID << ":" << lastTrackID << ", ";
 
          if (lastLayer < nLayers) {
-            if (lastParentID != 0) {
+            if (isSecondary) {
                clusters->appendClusterEdep(x, y, lastLayer, sum_edep/14, -1);
             }
             else {
@@ -497,18 +506,21 @@ void  DataInterface::getMCClusters(Int_t runNo, Clusters *clusters) {
          sumX = 0;
          n = 0;
       }
-      
 
       if (eventID < eventIdFrom) {
-//         printf("eventID (%d) < eventIdFrom (%d), continuing.\n", eventID, eventIdFrom);
          continue;
       }
       
       else if (eventID >= eventIdTo) {
-//         printf("eventID (%d) >= eventIdTo (%d), breaking.\n", eventID, eventIdTo);
          lastJentry_ = jentry;
          break;
       }
+
+      if (eventID != lastEventID) { // new track
+//         cout << "\n1st, ";
+         isSecondary = false;
+      }
+
 
       sum_edep += edep*1000;
       sumX += posX;
@@ -516,15 +528,17 @@ void  DataInterface::getMCClusters(Int_t runNo, Clusters *clusters) {
       lastZ = posZ;
       lastEventID = eventID;
       lastParentID = parentID;
+      lastTrackID = trackID;
       lastLayer = layer;
+      strcpy(lastProcessName, processName);
       n++;
    }
    
    if (lastEventID != eventID || lastLayer != layer || lastParentID != parentID) {
       x = sumX/n / dx + nx/2;
       y = sumY/n / dy + ny/2;
-      
-      if (lastLayer < nLayers) {
+
+      if (lastLayer < nLayers && !std::isnan(x+y)) {
          if (lastParentID != 0) {
             clusters->appendClusterEdep(x, y, lastLayer, sum_edep/14, -1);
          }

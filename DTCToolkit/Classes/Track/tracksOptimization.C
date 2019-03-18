@@ -362,6 +362,7 @@ void Tracks::removeTracksEndingInBadChannels() {
 void Tracks::removeNuclearInteractions() {
    Track  * thisTrack = nullptr;
    Int_t    nRemoved = 0;
+   Int_t    nRemovedNuclear = 0;
    Int_t    nTotal = GetEntriesFast();
    Int_t    nTotalStart = GetEntries();
 
@@ -369,18 +370,22 @@ void Tracks::removeNuclearInteractions() {
       thisTrack = At(i);
       if (!At(i)) continue;
       if (thisTrack->doesTrackEndAbruptly()) {
+         if (thisTrack->Last()->getEventID() < 0) nRemovedNuclear++;
          removeTrack(thisTrack);
          nRemoved++;
       }
    }
 
+   Compress();
+
    Float_t fraction = nTotal ? nRemoved/float(nTotalStart) : 0;
-   cout << "Tracks::removeNuclearInteractions() removed " << nRemoved << " of " << nTotalStart << "(" << fraction * 100 << "%) tracks.\n";
+   cout << "Tracks::removeNuclearInteractions() removed " << nRemoved << " of " << nTotalStart << " (" << fraction * 100 << "%) tracks (" << 100*float(nRemovedNuclear)/nRemoved << "% secondaries).\n";
 }
 
 void Tracks::removeThreeSigmaShortTracks() {
    Track  * thisTrack = nullptr;
    Int_t    nRemoved = 0;
+   Int_t    nRemovedNuclear = 0;
    Int_t    nTotal = GetEntriesFast();
    Int_t    nTotalStart = GetEntries();
 
@@ -403,6 +408,8 @@ void Tracks::removeThreeSigmaShortTracks() {
    }
    sigmaRange = sqrt(sigmaRange / nInSum);
 
+   sigmaRange = 10;
+
    cutRange = muRange - 3 * sigmaRange;
    printf("muRange = %.3f mm, sigmaRange = %.3f mm, cutRange = %.3f mm.\n", muRange, sigmaRange, cutRange);
 
@@ -410,13 +417,16 @@ void Tracks::removeThreeSigmaShortTracks() {
       thisTrack = At(i);
       if (!At(i)) continue;
       if (thisTrack->getRangemm() < cutRange) {
+         if (thisTrack->Last()->getEventID() < 0) nRemovedNuclear++;
          removeTrack(thisTrack);
          nRemoved++;
       }
    }
 
+   Compress();
+
    Float_t fraction = nTotal ? nRemoved/float(nTotalStart) : 0;
-   cout << "Tracks::removeThreeSigmaShortTracks() removed " << nRemoved << " of " << nTotalStart << "(" << fraction * 100 << "%) tracks.\n";
+   cout << "Tracks::removeThreeSigmaShortTracks() removed " << nRemoved << " of " << nTotalStart << " (" << fraction * 100 << "%) tracks (" << 100*float(nRemovedNuclear)/nRemoved << "% secondaries).\n";
 }
       
 #endif

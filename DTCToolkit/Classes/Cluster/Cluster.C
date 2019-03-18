@@ -129,7 +129,6 @@ Float_t Cluster::getCalibratedSize() {
    return n_corrected;
 }
 
-
 Float_t Cluster::getDepositedEnergyError(Bool_t correctSensitivity) {
    // sigma_E = sigma_N (dE / dN)
    // TODO: FIX THIS

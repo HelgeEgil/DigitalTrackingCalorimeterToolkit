@@ -353,8 +353,6 @@ void Clusters::matchWithEventIDs(Hits * eventIDs) {
       if (!At(c)) continue;
       if (getEventID(c) < 0) cWithoutEventID++;
    }
-
-// cout << "Number of clusters without eventID: " << cWithoutEventID << " (" << (float) cWithoutEventID / nClusters * 100 << "%)" << endl;
 }
 
 Int_t Clusters::getClustersForEventID(Int_t eventID) {

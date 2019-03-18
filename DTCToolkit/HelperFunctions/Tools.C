@@ -349,8 +349,13 @@ Float_t getDotProductAngle(Cluster *a, Cluster *b, Cluster *c) {
    // If a == b, b is usually the first layer, but we want to parallel propagate the vector to calculate the change from ||
    // If not, the distance between the layers might be > dz, so calculate it.
 
-   Double_t in[3]  = {b->getXmm() - a->getXmm(), b->getYmm() - a->getYmm(), (a==b) ? dz : b->getLayermm() - a->getLayermm()};
+//   Double_t in[3]  = {b->getXmm() - a->getXmm(), b->getYmm() - a->getYmm(), (a==b) ? dz : b->getLayermm() - a->getLayermm()};
+//   Double_t out[3] = {c->getXmm() - b->getXmm(), c->getYmm() - b->getYmm(), c->getLayermm() - b->getLayermm()};
+
+   Double_t in[3]  = {b->getXmm() - a->getXmm(), b->getYmm() - a->getYmm(), b->getLayermm() - a->getLayermm()};
    Double_t out[3] = {c->getXmm() - b->getXmm(), c->getYmm() - b->getYmm(), c->getLayermm() - b->getLayermm()};
+   if (a == b) in[2] = out[2];
+   if (b == c) out[2] = in[2];
 
    Double_t dot    = in[0] * out[0] + in[1] * out[1] + in[2] * out[2];
    Double_t scalar = sqrt(pow(out[0],2) + pow(out[1],2) + pow(out[2],2)) * sqrt(pow(in[0],2) + pow(in[1],2) + pow(in[2],2));
