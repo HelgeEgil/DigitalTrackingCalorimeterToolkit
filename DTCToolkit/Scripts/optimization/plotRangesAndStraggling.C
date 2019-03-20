@@ -27,7 +27,7 @@
 using namespace std;
 
 // IF FLOAT VALUES OF ABSORBER THICKNESS: USE *10 VALUES (3.5 -> 35)
-Int_t absorberThickness = 4;
+Int_t absorberThickness = 3;
 Bool_t kFilterData = false;
 Bool_t kUseCarbon = false;
 Int_t filterSize = 7;

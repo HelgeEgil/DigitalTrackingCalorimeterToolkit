@@ -1732,9 +1732,10 @@ void drawTracks3D(Int_t Runs, Int_t dataType, Bool_t recreate, Int_t switchLayer
 
    printf("Found %d tracks before filtering.\n", tracks->GetEntries());
 
-//   tracks->removeHighAngleTracks(75); // mrad
-//   tracks->removeThreeSigmaShortTracks();
+   tracks->removeHighAngleTracks(75); // mrad
+   tracks->removeThreeSigmaShortTracks();
 //   tracks->removeNuclearInteractions();
+   tracks->fillOutIncompleteTracks();
 
    Bool_t   kDraw = true;
 
@@ -1758,7 +1759,7 @@ void drawTracks3D(Int_t Runs, Int_t dataType, Bool_t recreate, Int_t switchLayer
    tox = nx/2 + zoom*2;
    toy = ny/2 + zoom*2;
 
-   view->SetRange(fromx, 0, fromy, tox, 30, toy);
+   view->SetRange(fromx, 0, fromy, tox, 40, toy);
    Int_t iret;
    Float_t theta = 280;
    Float_t phi = 80;
@@ -1825,7 +1826,7 @@ void drawTracks3D(Int_t Runs, Int_t dataType, Bool_t recreate, Int_t switchLayer
          medianEventID = thisTrack->getModeEventID();
       }
       
-      nMissingEID = tracks->getNMissingClustersWithEventID(thisTrack->getEventID(0), thisTrack->Last()->getLayer()); // only count missing tracks after layer ''getLayer''
+      nMissingEID = tracks->getNMissingClustersWithEventID(thisTrack->getEventID(0), thisTrack->Last()->getLayer(), i); // only count missing tracks after layer ''getLayer''
       if (thisTrack->isFirstAndLastEventIDEqual() && nMissingEID == 0) {
          nOKTracksAllClusters++;
       }
@@ -1870,16 +1871,15 @@ void drawTracks3D(Int_t Runs, Int_t dataType, Bool_t recreate, Int_t switchLayer
 
    Int_t numberOfTracks = tracks->GetEntries();
 
-   Float_t factorEID = 100 * ((float) nTrueTracks / numberOfTracks);
    Float_t factorEIDOK = 100 * ((float) nOKTracks / numberOfTracks);
    Float_t factorEIDOKAllClusters = 100 * ((float) nOKTracksAllClusters / numberOfTracks);
    Float_t factorEIDOKAllClustersOK2nd = 100 * ((float) nOKTracksAllClustersOK2nd / numberOfTracks);
    Float_t factorEIDOKMinus = 100 * ((float) nOKMinusTracks / numberOfTracks);
    Float_t factorLastLayers = 100 * ((float) nOKLastLayers / numberOfTracks);
 
-   cout << nTrueTracks << " of total " << numberOfTracks << " tracks has the same first/last ID (" << factorEIDOK << "%)\n";
-   cout << nOKTracks << " of total " << numberOfTracks << " tracks has the same first/last event ID + no missing clusters(" << factorEIDOKAllClusters << "%)\n";
-   cout << nOKTracksAllClusters << " of total " << numberOfTracks << " track has first/last event ID + no missing clusters, but following secondaries is OK (" << factorEIDOKAllClustersOK2nd << "%)\n";
+   cout << nOKTracks << " of total " << numberOfTracks << " tracks has the same first/last ID (" << factorEIDOK << "%)\n";
+   cout << nOKTracksAllClusters << " of total " << numberOfTracks << " tracks has the same first/last event ID + no missing clusters(" << factorEIDOKAllClusters << "%)\n";
+   cout << nOKTracksAllClustersOK2nd << " of total " << numberOfTracks << " track has first/last event ID + no missing clusters, but following secondaries is OK (" << factorEIDOKAllClustersOK2nd << "%)\n";
    cout << nOKMinusTracks << " of total " << numberOfTracks << " tracks has a close match (0.5 mm, 1 degree) on first / last cluster (" << factorEIDOKMinus << "%)\n";
    cout << nOKLastLayers << " of total " << numberOfTracks << " tracks has a close match (0.5 mm, 1 degree) or is a very short track (" << factorLastLayers << "%)\n";
 
@@ -1916,7 +1916,7 @@ void drawTracks3D(Int_t Runs, Int_t dataType, Bool_t recreate, Int_t switchLayer
          Float_t deltaphi = fabs(phi0 - phi1);
       }
 
-      nMissingEID = tracks->getNMissingClustersWithEventID(thisTrack->getEventID(0), thisTrack->Last()->getLayer());
+      nMissingEID = tracks->getNMissingClustersWithEventID(thisTrack->getEventID(0), thisTrack->Last()->getLayer(), i);
       if (!thisTrack->isFirstAndLastEventIDEqual() || nMissingEID > 0) {
          l->SetLineColor(kRed);
       }

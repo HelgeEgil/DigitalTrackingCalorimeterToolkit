@@ -49,6 +49,7 @@ class Tracks : public TObject {
       // Add and remove tracks
       virtual void      removeTrack(Track *t)   { tracks_.Remove((TObject*) t); }
       virtual TObject*  removeTrackAt(Int_t i)  { return tracks_.RemoveAt(i); }
+      virtual TObject*  removeCWTAt(Int_t i)    { return clustersWithoutTrack_.RemoveAt(i); }
       void              appendTrack(Track *copyTrack, Int_t startOffset = 0);
       void              appendClustersWithoutTrack(TClonesArray *clustersWithoutTrack);
       void              removeHighAngleTracks(Float_t mradLimit);
@@ -76,7 +77,7 @@ class Tracks : public TObject {
       Int_t             getTrackIdxFromFirstLayerEID(Int_t eventID);
       Int_t             getTrackIdxFromLastLayerEID(Int_t eventID);
       Int_t             getTrackIdxFromCluster(Cluster * cluster);
-      Int_t             getNMissingClustersWithEventID(Int_t eventID, Int_t afterLayer = -1);
+      Int_t             getNMissingClustersWithEventID(Int_t eventID, Int_t afterLayer = -1, Int_t trackID = -1);
 
       // Calculations on involving all tracks
       void              matchWithEventIDs(Hits *eventIDs);
@@ -95,6 +96,7 @@ class Tracks : public TObject {
       void              removeTracksEndingInBadChannels();
       void              removeNuclearInteractions();
       void              removeThreeSigmaShortTracks();
+      void              fillOutIncompleteTracks();
 
    ClassDef(Tracks,2)
 };

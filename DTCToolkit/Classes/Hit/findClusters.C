@@ -24,8 +24,7 @@ Clusters * Hits::findClustersFromHits() {
       layerIdxTo = getLastIndexOfLayer(layer);
 
       if (layerIdxFrom<0) continue;
-
-      makeVerticalIndexOnLayer(layer); // optimization
+      // makeVerticalIndexOnLayer(layer); // optimization
 
       checkedIndices = new vector<Int_t>;
       checkedIndices->reserve(layerIdxTo - layerIdxFrom);
@@ -61,8 +60,10 @@ vector<Int_t> * Hits::findNeighbours(Int_t index) {
    vector<Int_t>   * neighbours = new vector<Int_t>;
    Int_t             yGoal = getY(index);
    Int_t             layer = getLayer(index);
-   Int_t             idxFrom = getFirstIndexBeforeY(yGoal);
-   Int_t             idxTo = getLastIndexAfterY(yGoal);
+//   Int_t             idxFrom = getFirstIndexBeforeY(yGoal);
+//   Int_t             idxTo = getLastIndexAfterY(yGoal);
+   Int_t             idxFrom = getFirstIndexOfLayer(layer);
+   Int_t             idxTo = getLastIndexOfLayer(layer);
   
    neighbours->reserve(8);
 
@@ -70,7 +71,10 @@ vector<Int_t> * Hits::findNeighbours(Int_t index) {
       if (index == j) continue;
       if (neighbours->size() == 8) break;
 
-      if (abs(getX(index) - getX(j)) <= 1 && abs(yGoal - getY(j)) <= 1) {
+      Int_t dx = abs(getX(index) - getX(j));
+      Int_t dy = abs(yGoal - getY(j));
+      if (dx + dy <= 1) { // only diagonal neighbors
+//       if (abs(getX(index) - getX(j)) <= 1 && abs(yGoal - getY(j)) <= 1) {
          neighbours->push_back(j);
       }
    }
@@ -120,7 +124,7 @@ void Hits::appendNeighboursToClusters(vector<Int_t> *expandedCluster, Clusters *
       sumX += getX(idx) - 0.5; // -0.5  to get
       sumY += getY(idx) - 0.5; // pixel center
    }
-   clusters->appendCluster(sumX / cSize, sumY / cSize, layerNo, cSize);
+   clusters->appendCluster(sumX / cSize, sumY / cSize, layerNo, cSize, getEventID(expandedCluster->at(0)));
 }
 
 void Hits::checkAndAppendAllNextCandidates(vector<Int_t> * nextCandidates, vector<Int_t> *checkedIndices,

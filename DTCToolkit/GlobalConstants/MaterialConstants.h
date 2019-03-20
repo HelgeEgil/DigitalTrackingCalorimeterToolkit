@@ -1,8 +1,13 @@
 #ifndef MaterialConstants_h
 #define MaterialConstants_h
 
+#include <list>
+#include <TTree.h>
+#include <TTreeIndex.h>
+
 #include <TObject.h>
 #include <TSpline.h>
+#include <TBranch.h>
 
 namespace DTC {
 class Cluster;
@@ -39,6 +44,15 @@ Float_t mcs_radius_per_layer[100]; // change if max(nLayers) > 100
 Float_t mcs_radius_per_layer_empirical[100];
 
 Double_t firstUpperLayerZ, firstLowerLayerZ;
+
+TTree        * CDB_treeCluster;
+list<Int_t>  * CDB_hit_array = 0;
+TBranch      * CDB_b_hit_array;
+TTreeIndex   * CDB_index;
+Int_t          CDB_clusterSize;
+Double_t       CDB_x_mean, CDB_y_mean;
+Int_t          CDB_sortIndex[50];
+TFile        * CDB_fCluster; 
 
 void     createSplines();
 Double_t getLayerPositionmm(Int_t i);

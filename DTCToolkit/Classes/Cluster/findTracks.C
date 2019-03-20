@@ -52,7 +52,6 @@ using namespace DTC;
 Tracks * Clusters::findTracksWithRecursiveWeighting() {
 
    Track     * track = nullptr;
-   //Tracks    * tracks = new Tracks(kEventsPerRun * 200);
    Tracks    * tracks = new Tracks(50 * 200 *kEventsPerRun);
   
    Int_t       spotSize = 33;
@@ -70,6 +69,11 @@ Tracks * Clusters::findTracksWithRecursiveWeighting() {
    showDebug("ok!\nfillMSCradiusList...");
    showDebug("ok!\n");
    kMCSFactor = 25;
+   for (Int_t i=0; i<GetEntriesFast(); i++) {
+      if (!At(i)) continue;
+      appendClusterWithoutTrack(At(i));
+   }
+
     Int_t FirstLayer = 60;
     Int_t LastLayer = 0;
  
@@ -96,7 +100,6 @@ Tracks * Clusters::findTracksWithRecursiveWeighting() {
         findNearestClustersInNextLayer(seed, nextClusters);
     
         seedNode = new Node(nullptr, seed, 0); //   Node(Node *parent, Cluster *connectedCluster, Float_t score);
-    
         
         showDebug("Found " << nextClusters->size() << " nextClusters first time.\n");
        // cout<< "size next clusters: "<< nextClusters->size() << endl;
@@ -126,6 +129,11 @@ Tracks * Clusters::findTracksWithRecursiveWeighting() {
         if ((track->GetEntries() >= (s+1)) && (track->GetEntries() >1)){
             //cout << "value of s is: " << s <<endl;
             //cout << " size track: " << track->GetEntries() <<endl;
+            if (track->Last()->getLayer() != 0) {
+               printf("Track without last layer...\n");
+               cout << *track << endl;
+            }
+            track->sortTrack();
             tracks->appendTrack(track);
             removeTrackFromClustersWithoutTrack(track);
             markUsedClusters(track);
@@ -134,7 +142,6 @@ Tracks * Clusters::findTracksWithRecursiveWeighting() {
         seedNode->deleteNodeTree();
         delete seedNode;
         delete endNodes;
-    
     }
     delete seeds;
     delete nextClusters;
@@ -156,14 +163,9 @@ void Clusters::doRecursiveWeightedTracking(Node * seedNode, vector<Node*> * endN
    for (UInt_t i=0; i<endNodes->size(); i++) { // All identified endpoints to the tree so far
       thisNode = endNodes->at(i);
       thisNode->markExplored();
-      // cout<< "endNode size: " <<endNodes->size()<< endl;
-      // Optimization
       Int_t searchLayer = thisNode->getCluster()->getLayer() - 1;  // +1 because you are studying the next layer
-      
       Int_t idxFrom = getFirstIndexOfLayer(searchLayer); //Only clusters in this layer-first cluster. Clusters contains all the cluster of the detector and depending on the index, these clusters corresponds to one layer or another.
-     
       Int_t idxTo = getLastIndexOfLayer(searchLayer);// only clusters in this layer-last cluster
-     
       if (idxFrom < 0) continue; // no more clusters in deeper layers
 
       for (Int_t j=idxFrom; j<idxTo; j++) { // Loop through possible additions to the track
@@ -174,7 +176,6 @@ void Clusters::doRecursiveWeightedTracking(Node * seedNode, vector<Node*> * endN
          nextAngle = thisNode->getNodeAngle(nextCluster);
 
           if ((nextScore < kMaxTrackScore ) ){// || (nextAngle < kMaxTrackAngle)) {
-             
               thisNode->addChild(new Node(thisNode, nextCluster, nextScore)); // it is either appended to the tree or deleted if thisNode is full
           }
       }

@@ -6,12 +6,16 @@
 #include <fstream>
 #include <vector>
 #include <algorithm>
+#include <list>
 
 #include <TRandom3.h>
 #include <TStyle.h>
 #include <TStopwatch.h>
 #include <TView.h>
 #include <TLeaf.h>
+#include <TTree.h>
+#include <TTreeIndex.h>
+#include <TFile.h>
 
 #include "GlobalConstants/Constants.h"
 #include "GlobalConstants/MaterialConstants.h"
@@ -174,6 +178,51 @@ Clusters * getClusters(Int_t Runs, Int_t dataType, Int_t frameType, Float_t ener
    return allClusters;
 }
 
+Hits * diffuseHits(TRandom3 *gRandom, Hits * hits) {
+   Int_t          nHits = hits->GetEntriesFast();
+   Hits         * hitsOut = new Hits();
+   Int_t          x, y, outX, outY, layer, cs, eventID, idx_x, binPos;
+   Float_t        edep;
+   Int_t          randomClusterIdx;
+
+
+   showDebug("Diffusing hits (ALPIDE-Heidelberg). Number of hits = " << nHits << endl);
+   cout << "Diffusing hits (ALPIDE-Heidelberg). Number of hits = " << nHits << endl;
+
+   for (Int_t h=0; h<nHits; h++) {
+      x = hits->getX(h);
+      y = hits->getY(h);
+      layer = hits->getLayer(h);
+      edep = hits->getEdep(h);
+      eventID = hits->getEventID(h);
+      cs = getCSFromEdep(edep);
+    
+      if (cs<4) cs=4;
+      if (cs>=27) cs=26;
+
+      randomClusterIdx = gRandom->Integer(CDB_sortIndex[cs+1] - CDB_sortIndex[cs]) + CDB_sortIndex[cs];
+      CDB_treeCluster->GetEntry(CDB_treeCluster->LoadTree(CDB_index->GetIndex()[randomClusterIdx]));
+
+      if (CDB_clusterSize != cs) { 
+         printf("Cluster size from database (%d) does not match the one supplied (%d)!\n", CDB_clusterSize, cs);
+      }
+
+      idx_x = 0;
+      for (Int_t n : *CDB_hit_array) {
+         for (Int_t binPosPow = 0; binPosPow < 10; binPosPow++) {
+            binPos = pow(2, binPosPow);
+            if (binPos & n) {
+               outX = x + (idx_x - CDB_x_mean) + 0.5;
+               outY = y + (binPosPow - CDB_y_mean) + 0.5;
+               hitsOut->appendPoint(outX, outY, layer, eventID, edep);
+            }
+         }
+      idx_x++;
+      }
+   }
+   return hitsOut;
+}
+
 Tracks * getTracksFromClusters(Int_t Runs, Int_t dataType, Int_t frameType, Float_t energy) {
    DataInterface   * di = new DataInterface();
    Int_t             nClusters = kEventsPerRun * 5 * nLayers;
@@ -182,6 +231,7 @@ Tracks * getTracksFromClusters(Int_t Runs, Int_t dataType, Int_t frameType, Floa
    Clusters        * clusters = nullptr;
    Tracks          * tracks = nullptr;
    Tracks          * allTracks = new Tracks(nTracks * Runs);
+   TRandom3        * gRandom = new TRandom3(0);
 
    allTracks->SetOwner(kTRUE);
 
@@ -197,8 +247,23 @@ Tracks * getTracksFromClusters(Int_t Runs, Int_t dataType, Int_t frameType, Floa
       clusters = new Clusters(nClusters);
       showDebug("Start getMCClusters\n");
       t1.Start(false);
-      di->getMCClusters(i, clusters);
+      if (kDoDiffusion) {
+         Hits * hits = new Hits();
+         Hits * diffusedHits = new Hits();
+         di->getMCClusters(i, nullptr, hits);
+         hits->sortHits(); 
+         diffusedHits = diffuseHits(gRandom, hits);
+         diffusedHits->makeLayerIndex();
+         printf("There are %d hits in diffusedHits.\n", diffusedHits->GetEntriesFast());
+         clusters = diffusedHits->findClustersFromHits();
+         delete hits;
+         delete diffusedHits;
+      }
+      else {
+         di->getMCClusters(i, clusters);
+      }
       t1.Stop();
+
 
       showDebug("Finding calorimeter tracks\n");
       t2.Start(false);

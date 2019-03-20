@@ -453,12 +453,18 @@ Bool_t Tracks::isLastEventIDCloseToFirst(Int_t trackIdx) {
    return false;
 }
 
-Int_t Tracks::getNMissingClustersWithEventID(Int_t eventID, Int_t afterLayer) {
+Int_t Tracks::getNMissingClustersWithEventID(Int_t eventID, Int_t afterLayer, Int_t trackID) {
    Int_t n = 0;
 
    for (Int_t i=0; i<GetEntriesFastCWT(); i++) {
       if (!AtCWT(i)) continue;
-      if (AtCWT(i)->getEventID() == eventID && AtCWT(i)->getLayer() == afterLayer+1) {
+      Bool_t missingClusterWithEventID = (AtCWT(i)->getEventID() == eventID && eventID>0);
+      Bool_t missingInLastLayers = (AtCWT(i)->getLayer() > afterLayer);
+      Bool_t missingInFirstLayers = (AtCWT(i)->getLayer() < At(trackID)->At(0)->getLayer());
+//      if (AtCWT(i)->getEventID() == eventID && (AtCWT(i)->getLayer() > afterLayer) || (AtCWT(i)->getLayer() == 0)) {
+      if (missingClusterWithEventID && (missingInLastLayers || missingInFirstLayers)) {
+         Int_t n = At(trackID)->GetEntriesFast();
+         Float_t angle = getDotProductAngle(At(trackID)->At(n-2), At(trackID)->At(n-1), AtCWT(i))*1000;
          n++;
       }
    }
@@ -495,20 +501,30 @@ void Tracks::propagateSecondaryStatus() {
 void  Tracks::removeHighAngleTracks(Float_t mradLimit) {
    Cluster *a = nullptr;
    Cluster *b = nullptr;
+   Cluster *a2 = nullptr;
+   Cluster *b2 = nullptr;
    Track   *thisTrack = nullptr;
-   Float_t  incomingAngle;
+   Float_t  incomingAngle, outgoingAngle;
    Int_t    nRemoved = 0;
    Int_t    nRemovedNuclear = 0;
+   Int_t    last;
 
    for (Int_t i=0; i<GetEntriesFast(); i++) {
       thisTrack = At(i);
       if (!At(i)) continue;
 
+      last = thisTrack->GetEntriesFast() - 1;
+
       a = thisTrack->At(0);
       b = thisTrack->At(1);
+
+      a2 = thisTrack->At(last);
+      b2 = thisTrack->At(last-1);
+
       if (!a || !b) continue;
       incomingAngle = getDotProductAngle(a, a, b);
-      if (incomingAngle > mradLimit / 1000.) {
+      outgoingAngle = getDotProductAngle(b2, b2, a2);
+      if (incomingAngle > mradLimit / 1000. || outgoingAngle > mradLimit / 100.) {
          if (thisTrack->Last()->getEventID() < 0) nRemovedNuclear++;
          removeTrackAt(i);
          nRemoved++;

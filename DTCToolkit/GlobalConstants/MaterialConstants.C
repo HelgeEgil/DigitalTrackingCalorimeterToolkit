@@ -5,9 +5,13 @@
 #include <vector>
 #include <iostream>
 #include <fstream>
+#include <list>
+
 #include <TGraph.h>
 #include <TF1.h>
-
+#include <TFile.h>
+#include <TTree.h>
+#include <TTreeIndex.h>
 #include <TObject.h>
 
 #include "GlobalConstants/MaterialConstants.h"
@@ -250,6 +254,32 @@ void  createSplines() {
    delete range_energy_fit;
    delete range_energyW;
    delete range_energyW_fit;
+
+   if (kDoDiffusion) {
+      Int_t lastClusterSize = -1;
+      CDB_fCluster = new TFile("Data/ClusterSizes/ALPIDE/database_combined_clusters_filter.root", "READ");
+      CDB_treeCluster = (TTree*) CDB_fCluster->Get("database");
+      CDB_treeCluster->SetBranchAddress("size", &CDB_clusterSize);
+      CDB_treeCluster->SetBranchAddress("x_mean", &CDB_x_mean);
+      CDB_treeCluster->SetBranchAddress("y_mean", &CDB_y_mean);
+      CDB_treeCluster->SetBranchAddress("hit_array", &CDB_hit_array, &CDB_b_hit_array);
+
+      // Sort clusters based on cluster size
+      for (int i=0; i<50; i++) CDB_sortIndex[i] = -1;
+
+      cout << "Building index... " << CDB_treeCluster->GetEntriesFast() << " entries in treeCluster...";
+      CDB_treeCluster->BuildIndex("size");
+      CDB_index = (TTreeIndex*) CDB_treeCluster->GetTreeIndex();
+      for (int i=0; i<CDB_index->GetN()-1; i++) {
+         Long64_t local = CDB_treeCluster->LoadTree(CDB_index->GetIndex()[i]);
+         CDB_treeCluster->GetEntry(local);
+         if (lastClusterSize < 0 || lastClusterSize != CDB_clusterSize) {
+            CDB_sortIndex[CDB_clusterSize] = i;
+            lastClusterSize = CDB_clusterSize;
+         }
+      }
+      cout << "Done.\n";
+   }
 }
 
 Double_t getLayerPositionmm(Int_t i) {

@@ -33,6 +33,8 @@ class Hit : public TObject {
       void     set(Int_t x, Int_t y, Int_t layerNo = -1, Int_t eventNo = -1, Float_t edep = 0);
       void     set(Hit* hit);
       void     Clear(Option_t *);
+      Int_t    Compare(const TObject *obj) const;
+      Bool_t   IsSortable() const { return kTRUE; }
 
       ClassDef(Hit,2)
 };

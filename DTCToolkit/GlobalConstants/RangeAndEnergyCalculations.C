@@ -386,7 +386,7 @@ Float_t getEnergyFromDegraderThickness(Double_t degraderThickness) {
 
    TSpline3 *phaseSpaceSpline = new TSpline3("phaseSpaceSpline", phaseSpaceDegraderthickness, phaseSpaceEnergy, idx);
 
-   cout << "Degraderthickness is " << degraderThickness << ". From EnergyAfterDegrader: dt = " << phaseSpaceDegraderthickness[int(degraderThickness)] << ", e = " << phaseSpaceEnergy[int(degraderThickness)] << " and spline = " << phaseSpaceSpline->Eval(degraderThickness) << endl;
+   cout << "Degraderthickness is " << degraderThickness << ". Remaining energy is " << phaseSpaceSpline->Eval(degraderThickness) << endl;
 
    Double_t result = phaseSpaceSpline->Eval(degraderThickness);
 

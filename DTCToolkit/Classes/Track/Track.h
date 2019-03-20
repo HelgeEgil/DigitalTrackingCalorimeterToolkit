@@ -13,7 +13,7 @@ class TGraphErrors;
 namespace DTC {
 class Clusters;
 
-const Int_t MaxTrackLength = 40;
+const Int_t MaxTrackLength = 70;
 
 class Track : public TObject {
 

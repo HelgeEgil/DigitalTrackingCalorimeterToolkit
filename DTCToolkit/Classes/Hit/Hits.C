@@ -40,6 +40,14 @@ void Hits::appendHits(Hits *hits) {
   }
 }
 
+void Hits::appendHit(Hit *hit) {
+   Int_t i = GetEntriesFast();
+
+   Hit *newHit = (Hit*) hits_.ConstructedAt(i);
+   newHit->set(hit);
+}
+
+
 Int_t Hits::getI(Int_t x, Int_t y) {
    for (Int_t i=0; i<GetEntriesFast(); i++) {
       if (x == getX(i) && y == getY(i))

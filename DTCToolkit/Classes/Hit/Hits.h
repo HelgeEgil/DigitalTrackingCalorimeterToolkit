@@ -30,11 +30,13 @@ public:
    virtual Int_t     GetEntries()         { return hits_.GetEntries(); }
    virtual void      clearHits()          { hits_.Clear("C"); }
    virtual void      Clear(Option_t * = "");
+   void              sortHits()           { hits_.Sort(); }
    
    // Add and remove hits
    TObject         * removeHitAt(Int_t i) { return hits_.RemoveAt(i); }
    void              appendPoint(Int_t x, Int_t y, Int_t layer = -1, Int_t event = -1, Float_t edep = 0);
    void              appendHits(Hits *hits);
+   void              appendHit(Hit *hit);
 
    // Getters and setters
    virtual Int_t     getX(Int_t i)        { return At(i)->getX(); }

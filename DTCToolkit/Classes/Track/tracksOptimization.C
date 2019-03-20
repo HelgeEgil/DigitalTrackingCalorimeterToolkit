@@ -214,6 +214,72 @@ void Tracks::removeTrackCollisions() {
    cout << "Tracks::removeTrackCollisions removed " << nRemoved << " collisions, and removed " << nShortRemoved << " too short tracks.\n";
 }
 
+void Tracks::fillOutIncompleteTracks() {
+   Track     * thisTrack = nullptr;
+   Int_t       lastLayer, nInTrack;
+   Float_t     angle, minAngle, minIdx;
+   Cluster   * lastCluster;
+   Cluster   * nextToLastCluster;
+   Cluster   * clusterWithoutTrack;
+   Bool_t      continueSearch;
+
+   for (Int_t i=0; i<GetEntriesFast(); i++) {
+      thisTrack = At(i);
+      if (!thisTrack) continue;
+      
+      nInTrack = thisTrack->GetEntriesFast();
+      nextToLastCluster = thisTrack->At(nInTrack-2);
+      lastCluster = thisTrack->At(nInTrack-1);
+      if (!nextToLastCluster || !lastCluster) continue;
+      lastLayer = lastCluster->getLayer();
+
+      // check CWT if a nearby track exists
+      continueSearch = true;
+      while (continueSearch) {
+         continueSearch = false;
+
+         minAngle = 1e5;
+         minIdx = -1;
+         for (Int_t j=0; j<GetEntriesFastCWT(); j++) {
+            clusterWithoutTrack = AtCWT(j);
+            if (!clusterWithoutTrack) continue;
+
+            if (clusterWithoutTrack->getLayer() == lastLayer+1) {
+               angle = getDotProductAngle(nextToLastCluster, lastCluster, clusterWithoutTrack);
+               if (angle < minAngle) {
+                  minAngle = angle;
+                  minIdx = j;
+               }
+            }
+         }
+         
+         if (minIdx>=0) {
+            if (minAngle <= 0.15) {
+               thisTrack->appendCluster(AtCWT(minIdx));
+               removeCWTAt(minIdx);
+               continueSearch = true;
+               
+               nInTrack = thisTrack->GetEntriesFast();
+               nextToLastCluster = thisTrack->At(nInTrack-2);
+               lastCluster = thisTrack->At(nInTrack-1);
+               if (!nextToLastCluster || !lastCluster) continue;
+               lastLayer = lastCluster->getLayer();
+            }
+            else {
+               continueSearch = true;
+               
+               nInTrack = thisTrack->GetEntriesFast();
+               nextToLastCluster = thisTrack->At(nInTrack-2);
+               lastCluster = thisTrack->At(nInTrack-1);
+               if (!nextToLastCluster || !lastCluster) continue;
+               lastLayer++;
+               if (lastLayer == lastCluster->getLayer() + 3) continueSearch = false;
+            }
+         }
+      }
+   }
+}
+
 void Tracks::retrogradeTrackImprovement(Clusters * clusters) {
    Track * thisTrack = nullptr;
    Cluster * estimatedRetrogradeCluster = nullptr;

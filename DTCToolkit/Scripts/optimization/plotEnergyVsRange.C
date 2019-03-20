@@ -26,7 +26,7 @@
 using namespace std;
 
 Bool_t kUseCarbon = false;
-Bool_t kUseDCCorrection = true;
+Bool_t kUseDCCorrection = false;
 const Int_t arraySize = 1500;
 const Int_t xFrom = 40;
 

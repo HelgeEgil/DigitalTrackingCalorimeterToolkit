@@ -35,6 +35,14 @@ Hit::Hit(Hit* hit) {
 Hit::~Hit() {
 }
 
+Int_t Hit::Compare(const TObject *obj) const {
+   if       (layerNo_ == ((Hit*) obj)->getLayer() && y_ == ((Hit*) obj)->getY()) return 0;
+   else if  (layerNo_ == ((Hit*) obj)->getLayer() && y_ >  ((Hit*) obj)->getY()) return -1;
+   else if  (layerNo_ == ((Hit*) obj)->getLayer() && y_ <  ((Hit*) obj)->getY()) return 1;
+   else if  (layerNo_ <  ((Hit*) obj)->getLayer()) return -1;
+   else     return 1;
+}
+
 void Hit::Clear(Option_t *) {
    x_ = -1;
    y_ = 1;
@@ -76,7 +84,7 @@ void Hit::set(Hit* hit) {
 }
 
 ostream &operator<< (ostream &os, Hit &h) {
-   os << "(" << h.getX() << "," << h.getY() << "," << h.getLayer() << ")";
+   os << "(" << h.getX() << "," << h.getY() << "," << h.getLayer() << "," << h.getEventID() << "," << h.getEdep() << ")";
    return os;
 }
 

@@ -72,8 +72,7 @@ TGraphErrors * Track::doTrackFit(Bool_t isScaleVariable, Bool_t useTrackLength) 
    scaleParameter = 0.73 / (p * pow(alpha, 1/p)); // Found from fits to all tracks
 
    if (kDataType == kData) {
-      if (kUseRefinedClustering) scaleParameter = 3.42;
-      else                       scaleParameter = 5.22;
+      scaleParameter = 3.42;
    }
 
    // scaleParameter *= 1.2; // Empirical tests to reduce range bias

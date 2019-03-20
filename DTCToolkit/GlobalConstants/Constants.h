@@ -47,6 +47,7 @@ Bool_t   kIsFirstLayerAir = true;
 Bool_t   kDoTracking = true; // Move to argument list
 Bool_t   kUseEmpiricalMCS = true;
 Bool_t   kFilterNuclearInteractions = false; // Move to argument list
+Bool_t   kDoDiffusion = true;
 Int_t    kEventsPerRun = 50;
 Int_t    kSkipTracks = 0;
 const Int_t    kEnergy = 250;
@@ -102,7 +103,9 @@ const Int_t kMaterial = kTungsten;
 
 Int_t kOutputUnit = kWEPL;
 
-// Use refined clustering model -- empirical model with updated parameters
+// Use experimental ALPIDE data clustering model -- empirical model with updated parameters
+// Otherwise use "old" gaussian model from FOCAL data
+const Bool_t kUseExperimentalClustering = true;
 const Bool_t kUseRefinedClustering = true;
 
 // Tracking parameters

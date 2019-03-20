@@ -65,7 +65,7 @@ DataInterface::DataInterface(TTree *tree) : fChain(0) {
       }
       else {
          printf("Opening file with degrader thickness %.0f mm, material is %s and abs. thickness %.0f mm...", run_degraderThickness, materialChar, readoutAbsorber);
-         chain->Add(Form("Data/MonteCarlo/DTC_%s_Absorber%.0fmm_Degrader%03.0fmm_%dMeV.root/Hits", materialChar, readoutAbsorber, run_degraderThickness, kEnergy)); // Fix if original run_energy is != 250
+         chain->Add(Form("Data/MonteCarlo/DTC_%s_Absorber%.0fmm_Degrader%.0fmm_%dMeV.root/Hits", materialChar, readoutAbsorber, run_degraderThickness, kEnergy)); // Fix if original run_energy is != 250
          printf("OK!\n");
       }
       tree = chain;
@@ -434,7 +434,7 @@ void DataInterface::getDataHits(Int_t runNo, Hits * hits, Int_t energy) {
    delete f;
 }
 
-void  DataInterface::getMCClusters(Int_t runNo, Clusters *clusters) {
+void  DataInterface::getMCClusters(Int_t runNo, Clusters *clusters, Hits * hits) {
    Int_t eventIdFrom = runNo * kEventsPerRun + kSkipTracks;
    Int_t eventIdTo = eventIdFrom + kEventsPerRun + kSkipTracks;
 
@@ -450,7 +450,7 @@ void  DataInterface::getMCClusters(Int_t runNo, Clusters *clusters) {
    Int_t    n = 0;
    Float_t  sumX = 0, sumY = 0;
    Float_t  x,y;
-   Bool_t   isInElastic, isSecondary;
+   Bool_t   isInElastic, isSecondary = false;
    Char_t   lastProcessName[15];
 
    Long64_t nentries = fChain->GetEntriesFast();
@@ -472,7 +472,6 @@ void  DataInterface::getMCClusters(Int_t runNo, Clusters *clusters) {
          sumY = 0;
          sum_edep = 0;
          n = 0;
-         isSecondary = false;
       }
 
       layer = level1ID + baseID - 1;
@@ -494,10 +493,12 @@ void  DataInterface::getMCClusters(Int_t runNo, Clusters *clusters) {
 
          if (lastLayer < nLayers) {
             if (isSecondary) {
-               clusters->appendClusterEdep(x, y, lastLayer, sum_edep/14, -1);
+               if (hits)      hits->appendPoint(x, y, lastLayer, -1, sum_edep/14);
+               if (clusters)  clusters->appendClusterEdep(x, y, lastLayer, sum_edep/14, -1);
             }
             else {
-               clusters->appendClusterEdep(x, y, lastLayer, sum_edep/14, lastEventID);
+               if (hits)      hits->appendPoint(x, y, lastLayer, lastEventID, sum_edep/14);
+               if (clusters)  clusters->appendClusterEdep(x, y, lastLayer, sum_edep/14, lastEventID);
             }
          }
 
@@ -539,11 +540,13 @@ void  DataInterface::getMCClusters(Int_t runNo, Clusters *clusters) {
       y = sumY/n / dy + ny/2;
 
       if (lastLayer < nLayers && !std::isnan(x+y)) {
-         if (lastParentID != 0) {
-            clusters->appendClusterEdep(x, y, lastLayer, sum_edep/14, -1);
+         if (isSecondary) {
+            if (hits)      hits->appendPoint(x, y, lastLayer, sum_edep/14, -1);
+            if (clusters)  clusters->appendClusterEdep(x, y, lastLayer, sum_edep/14, -1);
          }
          else {
-            clusters->appendClusterEdep(x, y, lastLayer, sum_edep/14, lastEventID);
+            if (hits)      hits->appendPoint(x, y, lastLayer, sum_edep/14, lastEventID);
+            if (clusters)  clusters->appendClusterEdep(x, y, lastLayer, sum_edep/14, lastEventID);
          }
       }
 
