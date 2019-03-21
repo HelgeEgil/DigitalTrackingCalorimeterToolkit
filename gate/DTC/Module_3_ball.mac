@@ -9,26 +9,29 @@
 /gate/world/daughters/insert box
 /gate/phantom/geometry/setXLength 1650.0 mm
 /gate/phantom/geometry/setYLength 1650.0 mm
-/gate/phantom/geometry/setZLength {degraderthickness} mm
-/gate/phantom/placement/setTranslation 0 0 {halfdegraderthickness} mm
+/gate/phantom/geometry/setZLength 100. mm
+/gate/phantom/placement/setTranslation 0 0 -200. mm
 /gate/phantom/vis/setVisible false
 
 /gate/phantom/daughters/name degrader
-/gate/phantom/daughters/insert box
-/gate/degrader/geometry/setXLength 1500.0 mm
-/gate/degrader/geometry/setYLength 1500.0 mm
-/gate/degrader/geometry/setZLength {degraderthickness} mm
+/gate/phantom/daughters/insert sphere
+/gate/degrader/geometry/setRmin 0 mm
+/gate/degrader/geometry/setRmax 80 mm
+/gate/degrader/geometry/setPhiStart 0 rad
+/gate/degrader/geometry/setDeltaPhi 6.283184 rad
+/gate/degrader/geometry/setThetaStart 0 rad
+/gate/degrader/geometry/setDeltaTheta 6.283184 rad
 /gate/degrader/placement/setTranslation 0 0 0 mm
 /gate/degrader/setMaterial Water
-/gate/degrader/vis/setVisible false
+/gate/degrader/vis/setVisible true
 
 /gate/world/daughters/name scanner_1
 /gate/world/daughters/systemType scanner
 /gate/world/daughters/insert box
 /gate/scanner_1/geometry/setXLength 270.0 mm
 /gate/scanner_1/geometry/setYLength 135.0 mm
-/gate/scanner_1/geometry/setZLength 3.435 mm
-/gate/scanner_1/placement/setTranslation 0 0 1.7175 mm
+/gate/scanner_1/geometry/setZLength 3.624 mm
+/gate/scanner_1/placement/setTranslation 0 0 1.812 mm
 /gate/scanner_1/vis/setVisible false
 
 /gate/world/daughters/name scanner_2
@@ -36,15 +39,15 @@
 /gate/world/daughters/insert box
 /gate/scanner_2/geometry/setXLength 270.0 mm
 /gate/scanner_2/geometry/setYLength 135.0 mm
-/gate/scanner_2/geometry/setZLength 687.0 mm
-/gate/scanner_2/placement/setTranslation 0 0 346.935 mm
+/gate/scanner_2/geometry/setZLength 1087.2 mm
+/gate/scanner_2/placement/setTranslation 0 0 547.224 mm
 /gate/scanner_2/vis/setVisible false
 
 /gate/scanner_1/daughters/name FM_Layer
 /gate/scanner_1/daughters/insert box
 /gate/FM_Layer/geometry/setXLength 270.0 mm
 /gate/FM_Layer/geometry/setYLength 135.0 mm
-/gate/FM_Layer/geometry/setZLength 3.435 mm
+/gate/FM_Layer/geometry/setZLength 3.624 mm
 /gate/FM_Layer/placement/setTranslation 0 0 0 mm
 /gate/FM_Layer/vis/setVisible false
 
@@ -52,70 +55,70 @@
 /gate/FM_Layer/daughters/insert box
 /gate/FirstModule/geometry/setXLength 270.0 mm
 /gate/FirstModule/geometry/setYLength 135.0 mm
-/gate/FirstModule/geometry/setZLength 0.35995 mm
-/gate/FirstModule/placement/setTranslation 0 0 -1.5375 mm
+/gate/FirstModule/geometry/setZLength 0.37395 mm
+/gate/FirstModule/placement/setTranslation 0 0 -1.625 mm
 /gate/FirstModule/vis/setVisible false
-
-/gate/FirstModule/daughters/name FM_Alcable
-/gate/FirstModule/daughters/insert box
-/gate/FM_Alcable/geometry/setXLength 270.0 mm
-/gate/FM_Alcable/geometry/setYLength 135.0 mm
-/gate/FM_Alcable/geometry/setZLength 0.1059 mm
-/gate/FM_Alcable/placement/setTranslation 0 0 -0.127 mm
-/gate/FM_Alcable/setMaterial Silicon
-/gate/FM_Alcable/vis/setColor blue
-
-/gate/FirstModule/daughters/name FM_Kapton
-/gate/FirstModule/daughters/insert box
-/gate/FM_Kapton/geometry/setXLength 270.0 mm
-/gate/FM_Kapton/geometry/setYLength 135.0 mm
-/gate/FM_Kapton/geometry/setZLength 0.1599 mm
-/gate/FM_Kapton/placement/setTranslation 0 0 0.006 mm
-/gate/FM_Kapton/setMaterial Kapton
-/gate/FM_Kapton/vis/setColor green
-
-/gate/FirstModule/daughters/name FM_KaptonGlue
-/gate/FirstModule/daughters/insert box
-/gate/FM_KaptonGlue/geometry/setXLength 270.0 mm
-/gate/FM_KaptonGlue/geometry/setYLength 135.0 mm
-/gate/FM_KaptonGlue/geometry/setZLength 0.0399 mm
-/gate/FM_KaptonGlue/placement/setTranslation 0 0 0.106 mm
-/gate/FM_KaptonGlue/setMaterial Glue
-/gate/FM_KaptonGlue/vis/setColor yellow
 
 /gate/FirstModule/daughters/name FM_ActiveChip
 /gate/FirstModule/daughters/insert box
 /gate/FM_ActiveChip/geometry/setXLength 270.0 mm
 /gate/FM_ActiveChip/geometry/setYLength 135.0 mm
 /gate/FM_ActiveChip/geometry/setZLength 0.0139 mm
-/gate/FM_ActiveChip/placement/setTranslation 0 0 0.133 mm
+/gate/FM_ActiveChip/placement/setTranslation 0 0 -0.18 mm
 /gate/FM_ActiveChip/setMaterial Silicon
 /gate/FM_ActiveChip/vis/setColor red
+
+/gate/FirstModule/daughters/name FM_Kapton
+/gate/FirstModule/daughters/insert box
+/gate/FM_Kapton/geometry/setXLength 270.0 mm
+/gate/FM_Kapton/geometry/setYLength 135.0 mm
+/gate/FM_Kapton/geometry/setZLength 0.1399 mm
+/gate/FM_Kapton/placement/setTranslation 0 0 -0.103 mm
+/gate/FM_Kapton/setMaterial Kapton
+/gate/FM_Kapton/vis/setColor red
+
+/gate/FirstModule/daughters/name FM_AlCable
+/gate/FirstModule/daughters/insert box
+/gate/FM_AlCable/geometry/setXLength 270.0 mm
+/gate/FM_AlCable/geometry/setYLength 135.0 mm
+/gate/FM_AlCable/geometry/setZLength 0.1499 mm
+/gate/FM_AlCable/placement/setTranslation 0 0 0.042 mm
+/gate/FM_AlCable/setMaterial Silicon
+/gate/FM_AlCable/vis/setColor red
+
+/gate/FirstModule/daughters/name FM_KaptonGlue
+/gate/FirstModule/daughters/insert box
+/gate/FM_KaptonGlue/geometry/setXLength 270.0 mm
+/gate/FM_KaptonGlue/geometry/setYLength 135.0 mm
+/gate/FM_KaptonGlue/geometry/setZLength 0.0349 mm
+/gate/FM_KaptonGlue/placement/setTranslation 0 0 0.1345 mm
+/gate/FM_KaptonGlue/setMaterial Glue
+/gate/FM_KaptonGlue/vis/setColor red
 
 /gate/FirstModule/daughters/name FM_ChipGlue
 /gate/FirstModule/daughters/insert box
 /gate/FM_ChipGlue/geometry/setXLength 270.0 mm
 /gate/FM_ChipGlue/geometry/setYLength 135.0 mm
-/gate/FM_ChipGlue/geometry/setZLength 0.0399 mm
-/gate/FM_ChipGlue/placement/setTranslation 0 0 0.16 mm
+/gate/FM_ChipGlue/geometry/setZLength 0.0349 mm
+/gate/FM_ChipGlue/placement/setTranslation 0 0 0.1695 mm
 /gate/FM_ChipGlue/setMaterial Glue
-/gate/FM_ChipGlue/vis/setColor yellow
+/gate/FM_ChipGlue/vis/setColor red
 
 /gate/FM_Layer/daughters/name FM_Absorber1
 /gate/FM_Layer/daughters/insert box
 /gate/FM_Absorber1/geometry/setXLength 270.0 mm
 /gate/FM_Absorber1/geometry/setYLength 135.0 mm
 /gate/FM_Absorber1/geometry/setZLength 2.9999 mm
-/gate/FM_Absorber1/placement/setTranslation 0 0 0.1425 mm
+/gate/FM_Absorber1/placement/setTranslation 0 0 0.062 mm
 /gate/FM_Absorber1/setMaterial Air
-/gate/FM_Absorber1/vis/setColor grey
+/gate/FM_Absorber1/vis/setVisible false
 
 /gate/FM_Layer/daughters/name FM_AbsorberAirGap
 /gate/FM_Layer/daughters/insert box
 /gate/FM_AbsorberAirGap/geometry/setXLength 270.0 mm
 /gate/FM_AbsorberAirGap/geometry/setYLength 135.0 mm
-/gate/FM_AbsorberAirGap/geometry/setZLength 0.0749 mm
-/gate/FM_AbsorberAirGap/placement/setTranslation 0 0 1.68 mm
+/gate/FM_AbsorberAirGap/geometry/setZLength 0.2499 mm
+/gate/FM_AbsorberAirGap/placement/setTranslation 0 0 1.687 mm
 /gate/FM_AbsorberAirGap/setMaterial Air
 /gate/FM_AbsorberAirGap/vis/setVisible false
 
@@ -123,69 +126,69 @@
 /gate/scanner_2/daughters/insert box
 /gate/Layer/geometry/setXLength 270.0 mm
 /gate/Layer/geometry/setYLength 135.0 mm
-/gate/Layer/geometry/setZLength 3.435 mm
-/gate/Layer/placement/setTranslation 0 0 -341.7825 mm
+/gate/Layer/geometry/setZLength 3.624 mm
+/gate/Layer/placement/setTranslation 0 0 -541.788 mm
 /gate/Layer/vis/setVisible false
 
 /gate/Layer/daughters/name Module
 /gate/Layer/daughters/insert box
 /gate/Module/geometry/setXLength 270.0 mm
 /gate/Module/geometry/setYLength 135.0 mm
-/gate/Module/geometry/setZLength 0.35995 mm
-/gate/Module/placement/setTranslation 0 0 -1.5375 mm
+/gate/Module/geometry/setZLength 0.37395 mm
+/gate/Module/placement/setTranslation 0 0 -1.625 mm
 /gate/Module/vis/setVisible false
-
-/gate/Module/daughters/name Alcable
-/gate/Module/daughters/insert box
-/gate/Alcable/geometry/setXLength 270.0 mm
-/gate/Alcable/geometry/setYLength 135.0 mm
-/gate/Alcable/geometry/setZLength 0.1059 mm
-/gate/Alcable/placement/setTranslation 0 0 -0.127 mm
-/gate/Alcable/setMaterial Silicon
-/gate/Alcable/vis/setColor blue
-
-/gate/Module/daughters/name Kapton
-/gate/Module/daughters/insert box
-/gate/Kapton/geometry/setXLength 270.0 mm
-/gate/Kapton/geometry/setYLength 135.0 mm
-/gate/Kapton/geometry/setZLength 0.1599 mm
-/gate/Kapton/placement/setTranslation 0 0 0.006 mm
-/gate/Kapton/setMaterial Kapton
-/gate/Kapton/vis/setColor green
-
-/gate/Module/daughters/name KaptonGlue
-/gate/Module/daughters/insert box
-/gate/KaptonGlue/geometry/setXLength 270.0 mm
-/gate/KaptonGlue/geometry/setYLength 135.0 mm
-/gate/KaptonGlue/geometry/setZLength 0.0399 mm
-/gate/KaptonGlue/placement/setTranslation 0 0 0.106 mm
-/gate/KaptonGlue/setMaterial Glue
-/gate/KaptonGlue/vis/setColor yellow
 
 /gate/Module/daughters/name ActiveChip
 /gate/Module/daughters/insert box
 /gate/ActiveChip/geometry/setXLength 270.0 mm
 /gate/ActiveChip/geometry/setYLength 135.0 mm
 /gate/ActiveChip/geometry/setZLength 0.0139 mm
-/gate/ActiveChip/placement/setTranslation 0 0 0.133 mm
+/gate/ActiveChip/placement/setTranslation 0 0 -0.18 mm
 /gate/ActiveChip/setMaterial Silicon
 /gate/ActiveChip/vis/setColor red
+
+/gate/Module/daughters/name Kapton
+/gate/Module/daughters/insert box
+/gate/Kapton/geometry/setXLength 270.0 mm
+/gate/Kapton/geometry/setYLength 135.0 mm
+/gate/Kapton/geometry/setZLength 0.1399 mm
+/gate/Kapton/placement/setTranslation 0 0 -0.103 mm
+/gate/Kapton/setMaterial Kapton
+/gate/Kapton/vis/setColor red
+
+/gate/Module/daughters/name AlCable
+/gate/Module/daughters/insert box
+/gate/AlCable/geometry/setXLength 270.0 mm
+/gate/AlCable/geometry/setYLength 135.0 mm
+/gate/AlCable/geometry/setZLength 0.1499 mm
+/gate/AlCable/placement/setTranslation 0 0 0.042 mm
+/gate/AlCable/setMaterial Silicon
+/gate/AlCable/vis/setColor red
+
+/gate/Module/daughters/name KaptonGlue
+/gate/Module/daughters/insert box
+/gate/KaptonGlue/geometry/setXLength 270.0 mm
+/gate/KaptonGlue/geometry/setYLength 135.0 mm
+/gate/KaptonGlue/geometry/setZLength 0.0349 mm
+/gate/KaptonGlue/placement/setTranslation 0 0 0.1345 mm
+/gate/KaptonGlue/setMaterial Glue
+/gate/KaptonGlue/vis/setColor red
 
 /gate/Module/daughters/name ChipGlue
 /gate/Module/daughters/insert box
 /gate/ChipGlue/geometry/setXLength 270.0 mm
 /gate/ChipGlue/geometry/setYLength 135.0 mm
-/gate/ChipGlue/geometry/setZLength 0.0399 mm
-/gate/ChipGlue/placement/setTranslation 0 0 0.16 mm
+/gate/ChipGlue/geometry/setZLength 0.0349 mm
+/gate/ChipGlue/placement/setTranslation 0 0 0.1695 mm
 /gate/ChipGlue/setMaterial Glue
-/gate/ChipGlue/vis/setColor yellow
+/gate/ChipGlue/vis/setColor red
 
 /gate/Layer/daughters/name Absorber1
 /gate/Layer/daughters/insert box
 /gate/Absorber1/geometry/setXLength 270.0 mm
 /gate/Absorber1/geometry/setYLength 135.0 mm
 /gate/Absorber1/geometry/setZLength 2.9999 mm
-/gate/Absorber1/placement/setTranslation 0 0 0.1425 mm
+/gate/Absorber1/placement/setTranslation 0 0 0.062 mm
 /gate/Absorber1/setMaterial Aluminium
 /gate/Absorber1/vis/setColor grey
 
@@ -193,13 +196,13 @@
 /gate/Layer/daughters/insert box
 /gate/AbsorberAirGap/geometry/setXLength 270.0 mm
 /gate/AbsorberAirGap/geometry/setYLength 135.0 mm
-/gate/AbsorberAirGap/geometry/setZLength 0.0749 mm
-/gate/AbsorberAirGap/placement/setTranslation 0 0 1.68 mm
+/gate/AbsorberAirGap/geometry/setZLength 0.2499 mm
+/gate/AbsorberAirGap/placement/setTranslation 0 0 1.687 mm
 /gate/AbsorberAirGap/setMaterial Air
 /gate/AbsorberAirGap/vis/setVisible false
 
 /gate/Layer/repeaters/insert linear
 /gate/Layer/linear/autoCenter false
-/gate/Layer/linear/setRepeatNumber 100
-/gate/Layer/linear/setRepeatVector 0 0 3.435 mm
+/gate/Layer/linear/setRepeatNumber 41
+/gate/Layer/linear/setRepeatVector 0 0 3.624 mm
 

@@ -451,7 +451,7 @@ void  DataInterface::getMCClusters(Int_t runNo, Clusters *clusters, Hits * hits)
    Float_t  sumX = 0, sumY = 0;
    Float_t  x,y;
    Bool_t   isInElastic, isSecondary = false;
-   Char_t   lastProcessName[15];
+   Char_t   lastProcessName[25];
 
    Long64_t nentries = fChain->GetEntriesFast();
    Long64_t nbytes = 0, nb = 0;
