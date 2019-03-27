@@ -90,8 +90,8 @@ vector<Int_t> * Hits::getAllNeighboursFromCluster(Int_t i, vector<Int_t> *checke
    vector<Int_t>   * nextCandidates = nullptr;
    Int_t             currentCandidate = 0;
    
-   expandedCluster->reserve(60);
-   toCheck->reserve(60);
+   expandedCluster->reserve(100);
+   toCheck->reserve(100);
 
    expandedCluster->push_back(i);
    toCheck->push_back(i);

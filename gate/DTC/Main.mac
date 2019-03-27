@@ -1,11 +1,11 @@
-/vis/open DAWNFILE
-/vis/viewer/reset
-/vis/viewer/set/viewpointThetaPhi 30 0
-/vis/viewer/zoom 1.5
-/vis/drawVolume
-/tracking/storeTrajectory 1
-/vis/scene/endOfEventAction accumulate
-/vis/viewer/update /vis/viewer/refresh 
+#/vis/open DAWNFILE
+#/vis/viewer/reset
+#/vis/viewer/set/viewpointThetaPhi 30 0
+#/vis/viewer/zoom 1.5
+#/vis/drawVolume
+#/tracking/storeTrajectory 1
+#/vis/scene/endOfEventAction accumulate
+#/vis/viewer/update /vis/viewer/refresh 
 
 /gate/geometry/setMaterialDatabase GateMaterials.db
 /control/execute Module_{absorberthickness}.mac
@@ -24,7 +24,7 @@
 
 /gate/geometry/setIonisationPotential Water 75 eV
 /gate/physics/addPhysicsList QGSP_BIC_EMZ
-/gate/physics/SetMaxStepSizeInRegion degrader 2 mm
+/gate/physics/SetMaxStepSizeInRegion world 0.5 mm
 /gate/physics/ActivateStepLimiter proton
 
 /gate/run/initialize
@@ -77,5 +77,5 @@
 
 /gate/random/setEngineName MersenneTwister
 /gate/random/setEngineSeed auto
-/gate/application/setTotalNumberOfPrimaries 10000
+/gate/application/setTotalNumberOfPrimaries 1000000
 /gate/application/start

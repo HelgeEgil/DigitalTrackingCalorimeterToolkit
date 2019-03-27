@@ -197,7 +197,7 @@ Hits * diffuseHits(TRandom3 *gRandom, Hits * hits) {
       eventID = hits->getEventID(h);
       cs = getCSFromEdep(edep);
     
-      if (cs<4) cs=4;
+      if (cs<2) cs=2;
       if (cs>=27) cs=26;
 
       randomClusterIdx = gRandom->Integer(CDB_sortIndex[cs+1] - CDB_sortIndex[cs]) + CDB_sortIndex[cs];
@@ -214,7 +214,15 @@ Hits * diffuseHits(TRandom3 *gRandom, Hits * hits) {
             if (binPos & n) {
                outX = x + (idx_x - CDB_x_mean) + 0.5;
                outY = y + (binPosPow - CDB_y_mean) + 0.5;
-               hitsOut->appendPoint(outX, outY, layer, eventID, edep);
+               bool hitExists = false;
+               for (int i=0; i<hitsOut->GetEntriesFast(); i++) {
+                  if (hitsOut->getX(i) == outX && hitsOut->getY(i) == outY && hitsOut->getLayer(i) == layer) {
+                     hitExists = true;
+                     break;
+                  }
+               }
+
+               if (!hitExists) hitsOut->appendPoint(outX, outY, layer, eventID, edep); 
             }
          }
       idx_x++;
@@ -316,7 +324,7 @@ Tracks * getTracksFromClusters(Int_t Runs, Int_t dataType, Int_t frameType, Floa
       allTracks->appendClustersWithoutTrack(clusters->getClustersWithoutTrack());
       t4.Stop();
       showDebug("ok\n");
-   
+
       delete clusters;
       delete tracks;
 

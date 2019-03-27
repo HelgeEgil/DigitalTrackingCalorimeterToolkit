@@ -461,12 +461,7 @@ Int_t Tracks::getNMissingClustersWithEventID(Int_t eventID, Int_t afterLayer, In
       Bool_t missingClusterWithEventID = (AtCWT(i)->getEventID() == eventID && eventID>0);
       Bool_t missingInLastLayers = (AtCWT(i)->getLayer() > afterLayer);
       Bool_t missingInFirstLayers = (AtCWT(i)->getLayer() < At(trackID)->At(0)->getLayer());
-//      if (AtCWT(i)->getEventID() == eventID && (AtCWT(i)->getLayer() > afterLayer) || (AtCWT(i)->getLayer() == 0)) {
-      if (missingClusterWithEventID && (missingInLastLayers || missingInFirstLayers)) {
-         Int_t n = At(trackID)->GetEntriesFast();
-         Float_t angle = getDotProductAngle(At(trackID)->At(n-2), At(trackID)->At(n-1), AtCWT(i))*1000;
-         n++;
-      }
+      if (missingClusterWithEventID && (missingInLastLayers || missingInFirstLayers)) n++;
    }
 
    return n;

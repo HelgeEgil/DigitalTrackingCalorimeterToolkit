@@ -124,7 +124,7 @@ void Clusters::removeTrackFromClustersWithoutTrack(Track *track) {
       x = track->getX(i);
       y = track->getY(i);
       
-      for (Int_t j=lastIndex; j<GetEntriesFastCWT(); j++) {
+      for (Int_t j=0; j<GetEntriesFastCWT(); j++) { // j = lastIndex -> 0
          Cluster *cluster = (Cluster *) clustersWithoutTrack_.At(j);
 
          if (!cluster)

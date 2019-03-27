@@ -205,11 +205,11 @@ void plotEnergyVsRange() {
    hMC5->SetLineWidth(3);
    hMC6->SetLineWidth(3);
 
-   Float_t yfrom = -3.5;
-   Float_t yto = 3.5;
+   Float_t yfrom = -2.5;
+   Float_t yto = 2.5;
 
    Float_t xfrom = 5;
-   Float_t xto = 320;
+   Float_t xto = 370;
 
    hMC2->GetXaxis()->SetRangeUser(xfrom, xto);
    hMC3->GetXaxis()->SetRangeUser(xfrom, xto);

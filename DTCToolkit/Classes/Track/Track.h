@@ -13,7 +13,7 @@ class TGraphErrors;
 namespace DTC {
 class Clusters;
 
-const Int_t MaxTrackLength = 70;
+const Int_t MaxTrackLength = 150;
 
 class Track : public TObject {
 
@@ -138,7 +138,7 @@ class Track : public TObject {
 
       // TRACK PROPERTIES - Track fitting, scoring
       // trackFitting.C
-      TGraphErrors    * doTrackFit(Bool_t isScaleVariable = false, Bool_t useTrackLength = false);
+      TGraphErrors    * doTrackFit(Bool_t isScaleVariable = false, Bool_t useTrackLength = true);
 //      TGraphErrors    * doRangeFit(Bool_t isScaleVariable = false);
       Float_t           getFitParameterRange();
       Float_t           getFitParameterScale();

@@ -53,7 +53,7 @@ Int_t    kSkipTracks = 0;
 const Int_t    kEnergy = 250;
 
 #ifdef USEALPIDE
-Bool_t   kUseDegrader = true; // SHOULD BE TRUE !! 
+Bool_t   kUseDegrader = true; 
 Bool_t   kUseAlpide = true;
 #else
 Bool_t   kUseAlpide = false;

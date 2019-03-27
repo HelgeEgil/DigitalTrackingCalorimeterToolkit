@@ -96,7 +96,7 @@ class Tracks : public TObject {
       void              removeTracksEndingInBadChannels();
       void              removeNuclearInteractions();
       void              removeThreeSigmaShortTracks();
-      void              fillOutIncompleteTracks();
+      void              fillOutIncompleteTracks(float angleLimit = 0.1);
 
    ClassDef(Tracks,2)
 };

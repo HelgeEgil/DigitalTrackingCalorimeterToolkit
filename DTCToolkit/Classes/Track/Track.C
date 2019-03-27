@@ -173,7 +173,7 @@ Bool_t Track::isFirstAndLastEventIDEqual() {
    Int_t first = getEventID(0);
    Int_t last = Last()->getEventID();
 
-   return (first == last || last < 0);
+   return (first == last);// || last < 0);
 }
 
 void  Track::propagateSecondaryStatus() {
@@ -181,13 +181,11 @@ void  Track::propagateSecondaryStatus() {
 
    for (Int_t c=0; c<GetEntriesFast(); c++) {
       if (!At(c)) continue;
-//      cout << At(c)->getEventID() << ", ";
       if (At(c)->getEventID() < 0) {
          isSecondary = true;
          break;
       }
    }
-//   cout << endl;
    if (isSecondary) {
       for (Int_t c=0; c<GetEntriesFast(); c++) {
          if (!At(c)) continue;

@@ -1,13 +1,13 @@
 #!/bin/bash
 
-NCORES=4
+NCORES=8
 IDX=1
 
-for j in `seq -w 35 1 35`; do
-   for i in `seq -w 210 1 210`; do
+for j in `seq -w 3 1 3`; do
+   for i in `seq -w 160 1 160`; do
       hdt=`echo "scale=3; -$i/2-2" | bc`
       beampos=`echo "scale=3; -$i-5" | bc`
-      Gate -a "'[absorberthickness,$j] [energy,250] [degraderthickness,$i] [halfdegraderthickness,$hdt] [beampos,$beampos]'" Main.mac > terminal_output.txt &
+      cpulimit -l 70 Gate -a "'[absorberthickness,$j] [energy,250] [degraderthickness,$i] [halfdegraderthickness,$hdt] [beampos,$beampos]'" Main.mac > terminal_output.txt &
       PIDLIST="$PIDLIST $!"
       echo "Running: Absorber thickness = $j mm; degrader thickness = $i mm"
 

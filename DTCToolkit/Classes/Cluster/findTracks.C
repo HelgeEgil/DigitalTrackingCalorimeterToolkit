@@ -52,7 +52,7 @@ using namespace DTC;
 Tracks * Clusters::findTracksWithRecursiveWeighting() {
 
    Track     * track = nullptr;
-   Tracks    * tracks = new Tracks(50 * 200 *kEventsPerRun);
+   Tracks    * tracks = new Tracks(50 * 200 * kEventsPerRun);
   
    Int_t       spotSize = 33;
    // for pencil beams.
@@ -74,7 +74,7 @@ Tracks * Clusters::findTracksWithRecursiveWeighting() {
       appendClusterWithoutTrack(At(i));
    }
 
-    Int_t FirstLayer = 60;
+    Int_t FirstLayer = nLayers-1;
     Int_t LastLayer = 0;
  
     for (Int_t s=FirstLayer; s>=LastLayer; s--) {
@@ -84,7 +84,7 @@ Tracks * Clusters::findTracksWithRecursiveWeighting() {
     Node      * seedNode = nullptr;
     vector<Int_t> * nextClusters = new vector<Int_t>;
     vector<Int_t> * seeds = new vector<Int_t>;
-    nextClusters->reserve(50);
+    nextClusters->reserve(100);
    
     showDebug("findSeeds from " << GetEntriesFast() << " clusters." << endl);
     findSeeds(seeds, s, false); // starts in s, false-> does not use a cluster if it has already been used
@@ -231,8 +231,11 @@ Tracks * Clusters::findCalorimeterTracksWithMCTruth() {
 }
 
 void Clusters::findSeeds(vector<Int_t> * seeds, Int_t layer, Bool_t kUsedClustersInSeeds) {
+   showDebug("finding layerIdxFrom...");
    Int_t layerIdxFrom = getFirstIndexOfLayer(layer);
+   showDebug("to...");
    Int_t layerIdxTo = getLastIndexOfLayer(layer);
+   showDebug("ok!\n");
 
    showDebug("findSeeds: layerIdxFrom = " << layerIdxFrom << ", layerIdxTO = " << layerIdxTo << endl);
 

@@ -227,7 +227,7 @@ void Tracks::fillOutIncompleteTracks(float angleLimit) {
       thisTrack = At(i);
       if (!thisTrack) continue;
 
-      if (thisTrack->Last()->getDepositedEnergy() > 2.5) continue;
+      if (thisTrack->Last()->getDepositedEnergy() > 3) continue;
       
       nInTrack = thisTrack->GetEntriesFast();
       nextToLastCluster = thisTrack->At(nInTrack-2);
@@ -257,7 +257,10 @@ void Tracks::fillOutIncompleteTracks(float angleLimit) {
          
          if (minIdx>=0) {
             if (minAngle <= angleLimit) {
-               printf("Found CWT @ layer %d - angle = %.1f mrad (OK? %d)\n", AtCWT(minIdx)->getLayer(), minAngle*1000, thisTrack->Last()->getEventID() == AtCWT(minIdx)->getEventID());
+               int eid1 = thisTrack->Last()->getEventID();
+               int eid2 = AtCWT(minIdx)->getEventID();
+
+               printf("Found CWT @ layer %d - angle = %.1f mrad (OK? %d)\n", AtCWT(minIdx)->getLayer(), minAngle*1000, (eid1 == eid2 || eid1*eid2 < 0));
                thisTrack->appendCluster(AtCWT(minIdx));
                removeCWTAt(minIdx);
                continueSearch = true;

@@ -63,7 +63,9 @@ void MaterialConstants() {
    }
 
    else if (kMaterial == kAluminum) {
-      nLayers = 70;
+      if (kAbsorberThickness == 3) nLayers = 90;
+      if (kAbsorberThickness == 2) nLayers = 100;
+      else { nLayers = 70; };
       p = p_aluminum;
       alpha = alpha_aluminum;
       alpha_prime = alpha_prime_aluminum;
@@ -223,7 +225,7 @@ void  createSplines() {
 
    // FIND BRAGG-KLEEMAN PARAMETERS HIGH / LOW
    if (kMaterial == kAluminum) {
-      range_energy->Fit("range_energy_fit", "Q,M,N", "", 0, 40); // fit 0 - 40 MeV
+      range_energy->Fit("range_energy_fit", "Q,M,N", "", 0, 50); // fit 0 - 40 MeV
       alpha_material_low = range_energy_fit->GetParameter(0);
       p_material_low = range_energy_fit->GetParameter(1);
 
@@ -257,7 +259,7 @@ void  createSplines() {
 
    if (kDoDiffusion) {
       Int_t lastClusterSize = -1;
-      CDB_fCluster = new TFile("Data/ClusterSizes/ALPIDE/database_combined_clusters_filter.root", "READ");
+      CDB_fCluster = new TFile("Data/ClusterSizes/ALPIDE/database_final.root", "READ");
       CDB_treeCluster = (TTree*) CDB_fCluster->Get("database");
       CDB_treeCluster->SetBranchAddress("size", &CDB_clusterSize);
       CDB_treeCluster->SetBranchAddress("x_mean", &CDB_x_mean);

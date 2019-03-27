@@ -482,9 +482,9 @@ void  DataInterface::getMCClusters(Int_t runNo, Clusters *clusters, Hits * hits)
 
       if (lastEventID == eventID && trackID > 1) {
 //         cout << "2nd, ";
+//         if (!isSecondary) cout << "2nd due to " << lastProcessName << "/" << processName << " with tid " << trackID << ", parid " << parentID << " and PID " << PDGEncoding << endl;
          isSecondary = true;
       }
-
 
       if (lastEventID != eventID || lastLayer != layer) { // new layer -- store summed information from LAST layer now 
          x = sumX/n / dx + nx/2;
@@ -541,11 +541,11 @@ void  DataInterface::getMCClusters(Int_t runNo, Clusters *clusters, Hits * hits)
 
       if (lastLayer < nLayers && !std::isnan(x+y)) {
          if (isSecondary) {
-            if (hits)      hits->appendPoint(x, y, lastLayer, sum_edep/14, -1);
+            if (hits)      hits->appendPoint(x, y, lastLayer, -1, sum_edep/14);
             if (clusters)  clusters->appendClusterEdep(x, y, lastLayer, sum_edep/14, -1);
          }
          else {
-            if (hits)      hits->appendPoint(x, y, lastLayer, sum_edep/14, lastEventID);
+            if (hits)      hits->appendPoint(x, y, lastLayer, lastEventID, sum_edep/14);
             if (clusters)  clusters->appendClusterEdep(x, y, lastLayer, sum_edep/14, lastEventID);
          }
       }

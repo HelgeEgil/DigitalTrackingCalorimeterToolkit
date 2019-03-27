@@ -36,8 +36,8 @@
 /gate/world/daughters/insert box
 /gate/scanner_2/geometry/setXLength 270.0 mm
 /gate/scanner_2/geometry/setYLength 135.0 mm
-/gate/scanner_2/geometry/setZLength 730.5 mm
-/gate/scanner_2/placement/setTranslation 0 0 367.685 mm
+/gate/scanner_2/geometry/setZLength 974.0 mm
+/gate/scanner_2/placement/setTranslation 0 0 489.435 mm
 /gate/scanner_2/vis/setVisible false
 
 /gate/scanner_1/daughters/name FM_Layer
@@ -124,7 +124,7 @@
 /gate/Layer/geometry/setXLength 270.0 mm
 /gate/Layer/geometry/setYLength 135.0 mm
 /gate/Layer/geometry/setZLength 2.435 mm
-/gate/Layer/placement/setTranslation 0 0 -364.0325 mm
+/gate/Layer/placement/setTranslation 0 0 -485.7825 mm
 /gate/Layer/vis/setVisible false
 
 /gate/Layer/daughters/name Module
@@ -200,6 +200,6 @@
 
 /gate/Layer/repeaters/insert linear
 /gate/Layer/linear/autoCenter false
-/gate/Layer/linear/setRepeatNumber 150
+/gate/Layer/linear/setRepeatNumber 200
 /gate/Layer/linear/setRepeatVector 0 0 2.435 mm
 
