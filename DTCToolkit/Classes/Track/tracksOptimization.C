@@ -214,7 +214,7 @@ void Tracks::removeTrackCollisions() {
    cout << "Tracks::removeTrackCollisions removed " << nRemoved << " collisions, and removed " << nShortRemoved << " too short tracks.\n";
 }
 
-void Tracks::fillOutIncompleteTracks() {
+void Tracks::fillOutIncompleteTracks(float angleLimit) {
    Track     * thisTrack = nullptr;
    Int_t       lastLayer, nInTrack;
    Float_t     angle, minAngle, minIdx;
@@ -226,6 +226,8 @@ void Tracks::fillOutIncompleteTracks() {
    for (Int_t i=0; i<GetEntriesFast(); i++) {
       thisTrack = At(i);
       if (!thisTrack) continue;
+
+      if (thisTrack->Last()->getDepositedEnergy() > 2.5) continue;
       
       nInTrack = thisTrack->GetEntriesFast();
       nextToLastCluster = thisTrack->At(nInTrack-2);
@@ -254,7 +256,8 @@ void Tracks::fillOutIncompleteTracks() {
          }
          
          if (minIdx>=0) {
-            if (minAngle <= 0.15) {
+            if (minAngle <= angleLimit) {
+               printf("Found CWT @ layer %d - angle = %.1f mrad (OK? %d)\n", AtCWT(minIdx)->getLayer(), minAngle*1000, thisTrack->Last()->getEventID() == AtCWT(minIdx)->getEventID());
                thisTrack->appendCluster(AtCWT(minIdx));
                removeCWTAt(minIdx);
                continueSearch = true;
