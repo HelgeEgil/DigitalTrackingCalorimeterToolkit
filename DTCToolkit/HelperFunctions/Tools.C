@@ -488,8 +488,8 @@ Float_t getEdepFromCS(Int_t cs) {
 Int_t getCSFromEdep(Float_t edep) {
    Int_t cs;
 
-   if (kUseExperimentalClustering)  cs = 4.2267 * pow(edep, 0.6500);
-   else                             cs = 6.6177 * pow(edep, 0.9383);
+   if (kUseExperimentalClustering)  cs = 4.2267 * pow(edep, 0.6500) + 0.5;
+   else                             cs = 6.6177 * pow(edep, 0.9383 + 0.5);
 
    return cs;
 }

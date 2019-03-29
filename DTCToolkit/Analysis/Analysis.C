@@ -1739,12 +1739,12 @@ void drawTracks3D(Int_t Runs, Int_t dataType, Bool_t recreate, Int_t switchLayer
    cout << "Number of primaries = " << numberOfPrimaries << ", number of secondaries = " << numberOfSecondaries << endl;
    tracks->removeHighAngleTracks(75); // mrad
    tracks->removeThreeSigmaShortTracks();
-   tracks->removeNuclearInteractions();
+//   tracks->removeNuclearInteractions();
    // tracks->fillOutIncompleteTracks(0.02);
 
    tracks->doTrackFit();
 
-   Bool_t   kDraw = false;
+   Bool_t   kDraw = true;
 
    TH1I  *hWEPLCorrect = new TH1I("hWEPLCorrect", ";Range in detector [mm WEPL];Frequency", 400, 0, 250);
    TH1I  *hWEPLSecondary = new TH1I("hWEPLSecondary", "", 400, 0, 250);

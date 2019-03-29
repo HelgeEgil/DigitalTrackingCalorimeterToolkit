@@ -69,6 +69,9 @@ Tracks * Clusters::findTracksWithRecursiveWeighting() {
    showDebug("ok!\nfillMSCradiusList...");
    showDebug("ok!\n");
    kMCSFactor = 25;
+
+   if (kAbsorberThickness == 2) kMaxTrackScore *= 1.2;
+
    for (Int_t i=0; i<GetEntriesFast(); i++) {
       if (!At(i)) continue;
       appendClusterWithoutTrack(At(i));

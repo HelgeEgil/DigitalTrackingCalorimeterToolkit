@@ -63,8 +63,8 @@ void MaterialConstants() {
    }
 
    else if (kMaterial == kAluminum) {
-      if (kAbsorberThickness == 3) nLayers = 90;
-      if (kAbsorberThickness == 2) nLayers = 100;
+      if (kAbsorberThickness == 3) nLayers = 60;
+      if (kAbsorberThickness == 2) nLayers = 75;
       else { nLayers = 70; };
       p = p_aluminum;
       alpha = alpha_aluminum;

@@ -5,6 +5,7 @@
 #include <algorithm>
 
 #include <TStopwatch.h>
+#include <TH1F.h>
 
 #include "Classes/Hit/Hits.h"
 #include "Classes/Cluster/Clusters.h"
@@ -13,7 +14,7 @@
 #include "HelperFunctions/Tools.h"
 
 Clusters * Hits::findClustersFromHits() {
-   Clusters        * clusters = new Clusters(kEventsPerRun * 20);
+   Clusters        * clusters = new Clusters(kEventsPerRun * nLayers * 100);
    vector<Int_t>   * expandedCluster = nullptr;
    vector<Int_t>   * checkedIndices = nullptr;
    vector<Int_t>   * firstHits = nullptr;
@@ -24,7 +25,7 @@ Clusters * Hits::findClustersFromHits() {
       layerIdxTo = getLastIndexOfLayer(layer);
 
       if (layerIdxFrom<0) continue;
-      // makeVerticalIndexOnLayer(layer); // optimization
+//      makeVerticalIndexOnLayer(layer); // optimization
 
       checkedIndices = new vector<Int_t>;
       checkedIndices->reserve(layerIdxTo - layerIdxFrom);
@@ -74,7 +75,7 @@ vector<Int_t> * Hits::findNeighbours(Int_t index) {
       Int_t dx = abs(getX(index) - getX(j));
       Int_t dy = abs(yGoal - getY(j));
       if (dx + dy <= 1) { // only diagonal neighbors
-//       if (abs(getX(index) - getX(j)) <= 1 && abs(yGoal - getY(j)) <= 1) {
+//      if (abs(getX(index) - getX(j)) <= 1 && abs(yGoal - getY(j)) <= 1) {
          neighbours->push_back(j);
       }
    }
