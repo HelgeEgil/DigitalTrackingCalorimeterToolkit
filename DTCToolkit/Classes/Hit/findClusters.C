@@ -14,7 +14,7 @@
 #include "HelperFunctions/Tools.h"
 
 Clusters * Hits::findClustersFromHits() {
-   Clusters        * clusters = new Clusters(kEventsPerRun * nLayers * 100);
+   Clusters        * clusters = new Clusters(kEventsPerRun * nLayers * 10);
    vector<Int_t>   * expandedCluster = nullptr;
    vector<Int_t>   * checkedIndices = nullptr;
    vector<Int_t>   * firstHits = nullptr;

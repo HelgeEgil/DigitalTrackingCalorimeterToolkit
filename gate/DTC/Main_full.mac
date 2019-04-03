@@ -14,7 +14,7 @@
 /gate/systems/scanner_1/level2/attach FirstModule
 /gate/systems/scanner_2/level1/attach Layer
 /gate/systems/scanner_2/level2/attach Module
-/gate/systems/phantom/level1/attach degrader
+# /gate/systems/phantom/level1/attach degrader
 
 /control/execute readout_full.mac
 

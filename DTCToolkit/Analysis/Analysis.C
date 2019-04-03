@@ -291,7 +291,7 @@ void drawRadiograph(Int_t nparticles, Float_t energy) {
       if (!thisTrack) continue;
       if (!thisTrack->At(0) || !thisTrack->At(1)) continue;
 
-      tge = (TGraphErrors*) thisTrack->doTrackFit(false, false);
+      tge = (TGraphErrors*) thisTrack->doTrackFit(false, kUseCSDA);
       WEPL = getWEPLFromTL(thisTrack->getFitParameterRange());
 
 
@@ -345,7 +345,7 @@ void getRangeFromRawBeam(Float_t energy) {
          continue;
       }
 
-      tge = (TGraphErrors*) thisTrack->doTrackFit(false, false); // (bool isScaleVariable, bool useTrackLength (~ CSDA))
+      tge = (TGraphErrors*) thisTrack->doTrackFit(false, kUseCSDA); // (bool isScaleVariable, bool useTrackLength (~ CSDA))
       fitRange = getWEPLFromTL(thisTrack->getFitParameterRange());
       ranges[i] = fitRange;
       sum += fitRange;
@@ -721,7 +721,7 @@ void drawFitScale(Int_t Runs, Int_t dataType, Bool_t recreate, Float_t energy) {
       if (!thisTrack) continue;
       if (thisTrack->doesTrackEndAbruptly()) continue;
 
-      outputGraph = (TGraphErrors*) thisTrack->doTrackFit(true, false);
+      outputGraph = (TGraphErrors*) thisTrack->doTrackFit(true, kUseCSDA);
       if (!outputGraph) continue;
       
       Float_t fitScale = thisTrack->getFitParameterScale();
@@ -785,7 +785,7 @@ void drawTracksDepthDose(Int_t Runs, Int_t dataType, Bool_t recreate, Float_t en
       if (!thisTrack) continue;
 
       // Do track fit, extract all parameters for this track
-      outputGraph = (TGraphErrors*) thisTrack->doTrackFit(false, false); // (bool isScaleVariable, bool useTrackLength (~ CSDA))
+      outputGraph = (TGraphErrors*) thisTrack->doTrackFit(false, kUseCSDA); // (bool isScaleVariable, bool useTrackLength (~ CSDA))
       if (!outputGraph) continue;
 
       fitRange = thisTrack->getFitParameterRange();
@@ -939,6 +939,8 @@ void drawTracksRangeHistogram(Int_t Runs, Int_t dataType, Bool_t recreate, Float
       ps->AddText(Form("WEPL deviation = %.2f #pm %.2f", empiricalMean - expectedMean, sqrt(pow(empiricalSigma, 2) - pow(expectedStraggling, 2))));
       cFitResults->Modified();
 
+      cFitResults->SaveAs(Form("OutputFiles/RangeHistogram/%.0f_%.0f.png", kAbsorberThickness, degraderThickness));
+
       TCanvas *c2 = new TCanvas();
       hLastLayer->Draw();
    }
@@ -999,7 +1001,7 @@ void findTracksRangeAccuracy(Int_t Runs, Int_t dataType, Bool_t recreate, Float_
       Track *thisTrack = tracks->At(j);
       if (!thisTrack) continue;
 
-      outputGraph = (TGraphErrors*) thisTrack->doTrackFit(false, false); // (bool isScaleVariable, bool useTrackLength (~ CSDA))
+      outputGraph = (TGraphErrors*) thisTrack->doTrackFit(false, kUseCSDA); // (bool isScaleVariable, bool useTrackLength (~ CSDA))
       if (!outputGraph) continue; 
       delete outputGraph;
       
@@ -1379,7 +1381,7 @@ void compareChargeDiffusionModels(Int_t Runs, Bool_t recreate, Float_t energy) {
       for (Int_t k=0; k<tracks->GetEntriesFast(); k++) {
          if (!tracks->At(k)) continue;
 
-         TGraphErrors * graph = (TGraphErrors*) tracks->At(k)->doTrackFit(false, false);
+         TGraphErrors * graph = (TGraphErrors*) tracks->At(k)->doTrackFit(false, kUseCSDA);
          if (!graph) continue;
 
          range = tracks->At(k)->getFitParameterRange();

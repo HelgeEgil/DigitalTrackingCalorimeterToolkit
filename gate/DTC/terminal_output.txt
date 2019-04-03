@@ -1,3 +1,4 @@
+<<<<<<< HEAD
 [G4] 
 [G4] **************************************************************
 [G4]  Geant4 version Name: geant4-10-04-patch-02    (25-May-2018)
@@ -893,3 +894,6 @@ WARNING: command "/vis/viewer/update" could not be applied: no current viewer.
 [Core-0] End of macro Main.mac
 Graphics systems deleted.
 Visualization Manager deleting...
+=======
+1849
+>>>>>>> e6474c273c82158c24b25f1d53bd13c58faba147

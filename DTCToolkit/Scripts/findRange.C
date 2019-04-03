@@ -24,7 +24,7 @@
 
 using namespace std;
 
-vector<Float_t> findRange::Run(Double_t energy, Double_t sigma_mev)
+vector<Float_t> findRange::Run(Double_t energy, Double_t sigma_mev, Int_t mm, Int_t degrader, Int_t fileIdx)
 {
    vector<Float_t> returnValues;
    returnValues.reserve(100);
@@ -37,12 +37,12 @@ vector<Float_t> findRange::Run(Double_t energy, Double_t sigma_mev)
    Bool_t useDegrader = (degraderThickness > 0) ? true : false;
 
    // Load phase space spline
-   Double_t phaseSpaceDegraderthickness[300];
-   Double_t phaseSpaceEnergy[300];
+   Double_t phaseSpaceDegraderthickness[500];
+   Double_t phaseSpaceEnergy[500];
    Double_t dt, e, es;
    Int_t idx = 0;
    ifstream in;
-   in.open("../Data/Ranges/EnergyAfterDegraderPSTAR.csv");
+   in.open("Data/Ranges/EnergyAfterDegraderPSTAR.csv");
 
    while (1) {
       in >> dt >> e >> es;
@@ -160,7 +160,9 @@ vector<Float_t> findRange::Run(Double_t energy, Double_t sigma_mev)
             
             Float_t diff = sqrt( pow(firstX - lastX, 2) + pow(firstY - lastY, 2) + pow(0 - lastZ, 2));
 
-            hRange->Fill(lastRange);
+//            hRange->Fill(lastRange);
+         if (tl>0) hRange->Fill(tl);
+//            hRange->Fill(sqrt(pow(firstX - lastX, 2) + pow(firstY - lastY, 2) + pow(firstZ - lastZ, 2)));
             Float_t weplRange = aw / a * pow(lastRange / aw, 1 - pw/p) * lastRange;
             Float_t dtcRange = degraderThickness - thisRange + weplRange;
             if (lastProcessName[0] == 'P') { lastP++; }
@@ -171,7 +173,7 @@ vector<Float_t> findRange::Run(Double_t energy, Double_t sigma_mev)
             tl = 0;
          }
 
-         else if (jentry>0) {
+         if (jentry>0 && baseID != 0 && lastZ>0) {
             Float_t diff = sqrt( pow(x - lastX, 2) + pow(y - lastY, 2) + pow(z - lastZ, 2));
             tl += diff;
          }
@@ -246,7 +248,6 @@ vector<Float_t> findRange::Run(Double_t energy, Double_t sigma_mev)
    returnValues.push_back(fRemainingEnergy->GetParameter(1));
    returnValues.push_back(fRemainingEnergy->GetParameter(2));
 
-   
    c2->cd(1);
    hRange->SetXTitle("Range [mm]");
    hRange->SetYTitle("Number of primaries");
@@ -263,14 +264,22 @@ vector<Float_t> findRange::Run(Double_t energy, Double_t sigma_mev)
    l2->SetLineStyle(9);
    l2->Draw("same");
 
-   c2->SaveAs(Form("../OutputFiles/straggling/straggling_%.0f_mm_degrader.png", degraderThickness));
+   Float_t expectedEnergy = phaseSpaceSpline->Eval(degrader);
+   Float_t expectedEnergySpread = 6.11e-14*pow(mm,6) - 5.59e-11*pow(mm,5) + 1.90e-8*pow(mm,4) - 2.84e-6*pow(mm,3) + 1.57e-4*pow(mm,2) + 6.88e-3*mm + 2.23e-1;
+     
+   c2->SaveAs(Form("OutputFiles/straggling/straggling_absorber%dmm_degrader%.0fmm.png", mm, degraderThickness));
 
+   Float_t attenuationH   = returnValues.at(2);
+   
+   std::ofstream filename(Form("OutputFiles/findManyRangesDegrader_idx%d.csv", fileIdx));// , std::ofstream::out | std::ofstream::app);
+   filename << degrader << " " << mm << " " << fR << " " << fRS << " " << attenuationH << " " <<  expectedEnergy << " " << expectedEnergySpread  << endl;
+   
    delete c2;
    delete hRange;
    delete fRemainingEnergy;
    delete phaseSpaceSpline;
    delete hEnergyAtInterface;
 
-
    return returnValues;
+   
 }

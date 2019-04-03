@@ -102,6 +102,7 @@ const Int_t kMaterial = kTungsten;
 #endif
 
 Int_t kOutputUnit = kWEPL;
+Bool_t kUseCSDA = false; // Use CSDA for range calculations and MC truth input
 
 // Use experimental ALPIDE data clustering model -- empirical model with updated parameters
 // Otherwise use "old" gaussian model from FOCAL data

@@ -232,15 +232,6 @@ Tracks * getTracksFromClusters(Int_t Runs, Int_t dataType, Int_t frameType, Floa
    Tracks          * allTracks = new Tracks(nTracks * Runs);
    TRandom3        * gRandom = new TRandom3(0);
 
-   TH1I            * hLayerHits = new TH1I("hLayerHits", ";Layer;Frequency", 100, 0, 100);
-   TH1I            * hLayerSortedHits = new TH1I("hLayerSortedHits", ";Layer;Frequency", 100, 0, 100);
-   TH1I            * hLayerDiffusedHits = new TH1I("hLayerDiffusedHits", ";Layer;Frequency", 100, 0, 100);
-   TH1I            * hLayerClusters = new TH1I("hLayerClusters", ";Layer;Frequency", 100, 0, 100);
-
-   TH1F            * hLayerEdepHits = new TH1F("hLayerEdepHits", ";LayerEdep;Frequency", 100, 0, 100);
-   TH1F            * hLayerEdepDiffusedHits = new TH1F("hLayerEdepDiffusedHits", ";LayerEdep;Frequency", 100, 0, 100);
-   TH1F            * hLayerEdepClusters = new TH1F("hLayerEdepClusters", ";LayerEdep;Frequency", 100, 0, 100);
-
    allTracks->SetOwner(kTRUE);
 
    TStopwatch t1, t2, t3, t4, t5, t6;
@@ -259,19 +250,12 @@ Tracks * getTracksFromClusters(Int_t Runs, Int_t dataType, Int_t frameType, Floa
          Hits * hits = new Hits();
          Hits * diffusedHits = nullptr;
          di->getMCClusters(i, nullptr, hits);
-         for (int j=0; j<hits->GetEntriesFast(); j++) hLayerHits->Fill(hits->At(j)->getLayer());
-         for (int j=0; j<hits->GetEntriesFast(); j++) hLayerEdepHits->Fill(hits->At(j)->getLayer(), hits->At(j)->getEdep());
          hits->sortHits(); 
-         for (int j=0; j<hits->GetEntriesFast(); j++) hLayerSortedHits->Fill(hits->At(j)->getLayer());
          diffusedHits = diffuseHits(gRandom, hits);
-         for (int j=0; j<diffusedHits->GetEntriesFast(); j++) hLayerDiffusedHits->Fill(diffusedHits->At(j)->getLayer());
-         for (int j=0; j<diffusedHits->GetEntriesFast(); j++) hLayerEdepDiffusedHits->Fill(diffusedHits->At(j)->getLayer(), diffusedHits->At(j)->getEdep());
          diffusedHits->sortHits();
          diffusedHits->makeLayerIndex();
          printf("There are %d hits in diffusedHits.\n", diffusedHits->GetEntriesFast());
          clusters = diffusedHits->findClustersFromHits();
-         for (int j=0; j<clusters->GetEntriesFast(); j++) hLayerClusters->Fill(clusters->At(j)->getLayer());
-         for (int j=0; j<clusters->GetEntriesFast(); j++) hLayerEdepClusters->Fill(clusters->At(j)->getLayer(), clusters->At(j)->getDepositedEnergy());
          delete hits;
          delete diffusedHits;
       }
@@ -338,27 +322,6 @@ Tracks * getTracksFromClusters(Int_t Runs, Int_t dataType, Int_t frameType, Floa
 
       if (breakSignal) break;
    }
-
-   TCanvas *c = new TCanvas();
-   c->Divide(2,1,1e-5,1e-5);
-   c->cd(1);
-   hLayerHits->SetLineColor(kRed);
-   hLayerSortedHits->SetLineColor(kBlue);
-   hLayerDiffusedHits->SetLineColor(kGreen);
-   hLayerClusters->SetLineColor(kBlack);
-   hLayerHits->Draw();
-   hLayerSortedHits->Draw("same");
-   hLayerDiffusedHits->Draw("same");
-   hLayerClusters->Draw("same");
-   hLayerHits->GetYaxis()->SetRangeUser(0, 800);
-
-   c->cd(2);
-   hLayerEdepHits->SetLineColor(kRed);
-   hLayerEdepClusters->SetLineColor(kBlack);
-   hLayerEdepDiffusedHits->SetLineColor(kGreen);
-   hLayerEdepHits->Draw();
-   hLayerEdepClusters->Draw("same");
-   hLayerEdepDiffusedHits->Draw("same");
 
    printf("Timing: Cluster retrieval: %.3f s. Tracking: %.3f s. Track improvements: %.3f s. Logistics: %.3f s. Sort TCA by layer: %.3f s\n", t1.CpuTime(), t2.CpuTime(), t3.CpuTime(), t4.CpuTime(), t6.CpuTime());
 

@@ -20,13 +20,13 @@ if [ $# -eq 8 ]; then
          IDX=$(( IDX+1 ))
          echo "Starting the $i mm degrader run with idx $IDX and absorber thickness $k."
          # Runs, dataType, recreate, energy, degraderthickness, eventsPerRun, outputFileIdx, drawFitResults, doTracking, excludeNuclearReactions, skipTracks
-         root -l -b -q 'Scripts/drawTracksRangeHistogramScript.C('$5', 0, 1, 230, '$i', '$4', '$IDX', false, false, false, 0)' > OutputFiles/BPFitOutput_$IDX.txt &
+         tsp root -l -b -q 'Scripts/drawTracksRangeHistogramScript.C('$5', 0, 1, 250, '$i', '$4', '$IDX', true, true, false, 0)' # > OutputFiles/BPFitOutput_$IDX.txt
       done
       
       # Be sure that all jobs have completed, please tell me if there is a better way .... (tsp -w waits for the last job added to be completed, but not for the last job finished)
-#      for i in `seq $1 $2 $3`; do
-#         tsp -w
-#      done
+      for i in `seq $1 $2 $3`; do
+         tsp -w
+      done
 
       for j in `seq 1 1 $IDX`;
       do
