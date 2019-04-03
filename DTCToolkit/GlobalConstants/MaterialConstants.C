@@ -63,7 +63,7 @@ void MaterialConstants() {
    }
 
    else if (kMaterial == kAluminum) {
-      if (kAbsorberThickness == 3) nLayers = 60;
+      if (kAbsorberThickness == 3) nLayers = 75;
       if (kAbsorberThickness == 2) nLayers = 75;
       else { nLayers = 70; };
       p = p_aluminum;
@@ -124,26 +124,52 @@ void  createSplines() {
 
    Float_t readoutAbsorber = (roundf(kAbsorberThickness) == kAbsorberThickness) ? kAbsorberThickness : kAbsorberThickness*10;
 
-   if (kEnergy == 250) {
-      if       (kMaterial == kTungsten) {
-         in.open(Form("Data/Ranges/%.0fmm_W.csv", readoutAbsorber));
+   if (kUseCSDA) {
+      if (kEnergy == 250) {
+         if       (kMaterial == kTungsten) {
+            in.open(Form("Data/Ranges/%.0fmm_W_csda.csv", readoutAbsorber));
+         }
+         else if  (kMaterial == kAluminum) {
+            in.open(Form("Data/Ranges/%.0fmm_Al_csda.csv", readoutAbsorber));
+         }
+         else if  (kMaterial == kCarbon) {
+            in.open(Form("Data/Ranges/%.0fmm_C_csda.csv", readoutAbsorber));
+         }
       }
-      else if  (kMaterial == kAluminum) {
-         in.open(Form("Data/Ranges/%.0fmm_Al.csv", readoutAbsorber));
-      }
-      else if  (kMaterial == kCarbon) {
-         in.open(Form("Data/Ranges/%.0fmm_C.csv", readoutAbsorber));
+      else if (kEnergy == 230) {
+         if       (kMaterial == kTungsten) {
+            in.open(Form("Data/Ranges/%.0fmm_W_csda_230MeV.csv", readoutAbsorber));
+         }
+         else if  (kMaterial == kAluminum) {
+            in.open(Form("Data/Ranges/%.0fmm_Al_csda_230MeV.csv", readoutAbsorber));
+         }
+         else if  (kMaterial == kCarbon) {
+            in.open(Form("Data/Ranges/%.0fmm_C_csda_230MeV.csv", readoutAbsorber));
+         }
       }
    }
-   else if (kEnergy == 230) {
-      if       (kMaterial == kTungsten) {
-         in.open(Form("Data/Ranges/%.0fmm_W_230MeV.csv", readoutAbsorber));
+   else {
+      if (kEnergy == 250) {
+         if       (kMaterial == kTungsten) {
+            in.open(Form("Data/Ranges/%.0fmm_W.csv", readoutAbsorber));
+         }
+         else if  (kMaterial == kAluminum) {
+            in.open(Form("Data/Ranges/%.0fmm_Al.csv", readoutAbsorber));
+         }
+         else if  (kMaterial == kCarbon) {
+            in.open(Form("Data/Ranges/%.0fmm_C.csv", readoutAbsorber));
+         }
       }
-      else if  (kMaterial == kAluminum) {
-         in.open(Form("Data/Ranges/%.0fmm_Al_230MeV.csv", readoutAbsorber));
-      }
-      else if  (kMaterial == kCarbon) {
-         in.open(Form("Data/Ranges/%.0fmm_C_230MeV.csv", readoutAbsorber));
+      else if (kEnergy == 230) {
+         if       (kMaterial == kTungsten) {
+            in.open(Form("Data/Ranges/%.0fmm_W_230MeV.csv", readoutAbsorber));
+         }
+         else if  (kMaterial == kAluminum) {
+            in.open(Form("Data/Ranges/%.0fmm_Al_230MeV.csv", readoutAbsorber));
+         }
+         else if  (kMaterial == kCarbon) {
+            in.open(Form("Data/Ranges/%.0fmm_C_230MeV.csv", readoutAbsorber));
+         }
       }
    }
 

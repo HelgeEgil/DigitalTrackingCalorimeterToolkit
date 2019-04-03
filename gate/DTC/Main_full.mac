@@ -14,7 +14,7 @@
 /gate/systems/scanner_1/level2/attach FirstModule
 /gate/systems/scanner_2/level1/attach Layer
 /gate/systems/scanner_2/level2/attach Module
-/gate/systems/phantom/level1/attach degrader
+# /gate/systems/phantom/level1/attach degrader
 
 /control/execute readout_full.mac
 
@@ -25,7 +25,7 @@
 /gate/geometry/setIonisationPotential Water 75 eV
 /gate/physics/addPhysicsList QGSP_BIC_EMY
 
-/gate/physics/SetMaxStepSizeInRegion world 2 mm
+/gate/physics/SetMaxStepSizeInRegion world 0.5 mm
 /gate/physics/ActivateStepLimiter proton
 
 /gate/run/initialize
@@ -61,5 +61,5 @@
 
 /gate/random/setEngineName MersenneTwister
 /gate/random/setEngineSeed auto
-/gate/application/setTotalNumberOfPrimaries 1000
+/gate/application/setTotalNumberOfPrimaries 10000
 /gate/application/start

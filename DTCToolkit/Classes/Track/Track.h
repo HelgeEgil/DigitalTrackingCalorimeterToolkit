@@ -138,7 +138,7 @@ class Track : public TObject {
 
       // TRACK PROPERTIES - Track fitting, scoring
       // trackFitting.C
-      TGraphErrors    * doTrackFit(Bool_t isScaleVariable = false, Bool_t useTrackLength = true);
+      TGraphErrors    * doTrackFit(Bool_t isScaleVariable = false, Bool_t useTrackLength = kUseCSDA);
 //      TGraphErrors    * doRangeFit(Bool_t isScaleVariable = false);
       Float_t           getFitParameterRange();
       Float_t           getFitParameterScale();

@@ -76,7 +76,7 @@ const Int_t ny = NY;
 const Int_t nTrackers = 4;
 
 #ifdef USEALPIDE
-const Float_t kAbsorberThickness = 2; // ALPIDE, CHANGE TO FIT MC DATA GEOMETRY
+const Float_t kAbsorberThickness = 3; // ALPIDE, CHANGE TO FIT MC DATA GEOMETRY
 #else
 const Float_t kAbsorberThickness = 3.3; // FOCAL EXPERIMENTAL DATA, DON'T CHANGE
 #endif
@@ -102,6 +102,7 @@ const Int_t kMaterial = kTungsten;
 #endif
 
 Int_t kOutputUnit = kWEPL;
+Bool_t kUseCSDA = false; // Use CSDA for range calculations and MC truth input
 
 // Use experimental ALPIDE data clustering model -- empirical model with updated parameters
 // Otherwise use "old" gaussian model from FOCAL data
