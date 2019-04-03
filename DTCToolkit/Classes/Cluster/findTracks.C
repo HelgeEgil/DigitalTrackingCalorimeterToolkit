@@ -70,7 +70,7 @@ Tracks * Clusters::findTracksWithRecursiveWeighting() {
    showDebug("ok!\n");
    kMCSFactor = 25;
 
-   if (kAbsorberThickness == 2) kMaxTrackScore *= 1.2;
+   if (kAbsorberThickness == 2) kMaxTrackScore *= 1.3;
    if (kAbsorberThickness == 3) kMaxTrackScore *= 1.1;
 
    for (Int_t i=0; i<GetEntriesFast(); i++) {
