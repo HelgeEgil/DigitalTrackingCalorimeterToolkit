@@ -18,6 +18,7 @@ Cluster::Cluster() {
    clusterSize_ = -1;
    eventID_ = -1;
    isUsed_ = false;
+   isSecondary_ = false;
 }
 
 Cluster::Cluster(Cluster* cluster) {
@@ -27,15 +28,17 @@ Cluster::Cluster(Cluster* cluster) {
    clusterSize_ = cluster->getSize();
    eventID_ = cluster->getEventID();
    isUsed_ = cluster->isUsed();
+   isSecondary_ = cluster->isSecondary();
 }
 
-Cluster::Cluster(Float_t x, Float_t y, Int_t layer, Int_t size, Int_t eventID) {
+Cluster::Cluster(Float_t x, Float_t y, Int_t layer, Int_t size, Int_t eventID, Bool_t isSecondary) {
    x_ = x;
    y_ = y;
    layerNo_ = layer;
    clusterSize_ = size;
    eventID_ = eventID;
    isUsed_ = false;
+   isSecondary_ = false;
 }
 
 Cluster::~Cluster() {
@@ -152,20 +155,23 @@ void Cluster::set(Cluster* copyCluster) {
    layerNo_ = copyCluster->getLayer();
    clusterSize_ = copyCluster->getSize();
    eventID_ = copyCluster->getEventID();
-   isUsed_ = copyCluster->isUsed(); 
+   isUsed_ = copyCluster->isUsed();
+   isSecondary_ = copyCluster->isSecondary(); 
 }
 
-void Cluster::set(Float_t x, Float_t y, Int_t layer, Int_t size, Int_t eventID) {
+void Cluster::set(Float_t x, Float_t y, Int_t layer, Int_t size, Int_t eventID, Bool_t isSecondary) {
    x_ = x;
    y_ = y;
    if (layer>=0) layerNo_ = layer;
    if(size>=0) clusterSize_ = size;
    if (eventID>=0) eventID_ = eventID;
+   isSecondary_ = isSecondary;
+
 }
 
 ostream& operator<< (ostream &os, Cluster& c) {
 //   os << "(" << c.getXmm() << ", " << c.getYmm() << ", " << c.getLayermm() << ", EID " << c.getEventID() << ", CS " << c.getSize() << ")";
-   os << "(" << c.getX() << ", " << c.getY() << ", " << c.getLayer() << ", EID " << c.getEventID() << ", CS " << c.getSize() << ")";
+   os << "(" << c.getX() << ", " << c.getY() << ", " << c.getLayer() << ", EID " << c.getEventID() << ", CS " << c.getSize() << ", is2nd " << c.isSecondary() << ")";
    return os;
 }
 

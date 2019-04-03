@@ -257,7 +257,7 @@ void DataInterface::getEventIDs(Int_t runNo, Hits * hits) {
          // new layer
          xAvg = xS / n;
          yAvg = yS / n;
-         hits->appendPoint(xAvg, yAvg, lastZ, lastEventID, edepS/14);
+         hits->appendPoint(xAvg, yAvg, lastZ, edepS/14, lastEventID);
 //       cout << "Saving old layer: x = " << xS << "/" << n << " = " << xAvg << ", y = " << yAvg << ", edep = " << edepS << ", z = " << lastZ << ", eventID = " << lastEventID << endl;
 
          xS = x;
@@ -272,7 +272,7 @@ void DataInterface::getEventIDs(Int_t runNo, Hits * hits) {
    // last layer
    xAvg = xS / n;
    yAvg = yS / n;
-   hits->appendPoint(xAvg, yAvg, lastZ, lastEventID, edepS/14);
+   hits->appendPoint(xAvg, yAvg, lastZ, edepS/14, lastEventID);
 // cout << "Saving last layer: x = " << xS << "/" << n << " = " << xAvg << ", y = " << yAvg << ", edep = " << edepS << ", z = " << lastZ << ", eventID = " << lastEventID << endl;
 
 }
@@ -476,7 +476,8 @@ void  DataInterface::getMCClusters(Int_t runNo, Clusters *clusters, Hits * hits)
 
       layer = level1ID + baseID - 1;
       if (kFilterNuclearInteractions == true && parentID != 0) {
-         lastEventID = -1;
+//         lastEventID = -1;
+         isSecondary = true;
          continue;
       }
 
@@ -493,12 +494,12 @@ void  DataInterface::getMCClusters(Int_t runNo, Clusters *clusters, Hits * hits)
 
          if (lastLayer < nLayers) {
             if (isSecondary) {
-               if (hits)      hits->appendPoint(x, y, lastLayer, -1, sum_edep/14);
-               if (clusters)  clusters->appendClusterEdep(x, y, lastLayer, sum_edep/14, -1);
+               if (hits)      hits->appendPoint(x, y, lastLayer, sum_edep/14, lastEventID, true);
+               if (clusters)  clusters->appendClusterEdep(x, y, lastLayer, sum_edep/14, lastEventID, true);
             }
             else {
-               if (hits)      hits->appendPoint(x, y, lastLayer, lastEventID, sum_edep/14);
-               if (clusters)  clusters->appendClusterEdep(x, y, lastLayer, sum_edep/14, lastEventID);
+               if (hits)      hits->appendPoint(x, y, lastLayer, sum_edep/14, lastEventID, false);
+               if (clusters)  clusters->appendClusterEdep(x, y, lastLayer, sum_edep/14, lastEventID, false);
             }
          }
 
@@ -541,12 +542,12 @@ void  DataInterface::getMCClusters(Int_t runNo, Clusters *clusters, Hits * hits)
 
       if (lastLayer < nLayers && !std::isnan(x+y)) {
          if (isSecondary) {
-            if (hits)      hits->appendPoint(x, y, lastLayer, -1, sum_edep/14);
-            if (clusters)  clusters->appendClusterEdep(x, y, lastLayer, sum_edep/14, -1);
+            if (hits)      hits->appendPoint(x, y, lastLayer, sum_edep/14, lastEventID, true);
+            if (clusters)  clusters->appendClusterEdep(x, y, lastLayer, sum_edep/14, lastEventID, true);
          }
          else {
-            if (hits)      hits->appendPoint(x, y, lastLayer, lastEventID, sum_edep/14);
-            if (clusters)  clusters->appendClusterEdep(x, y, lastLayer, sum_edep/14, lastEventID);
+            if (hits)      hits->appendPoint(x, y, lastLayer, sum_edep/14, lastEventID, false);
+            if (clusters)  clusters->appendClusterEdep(x, y, lastLayer, sum_edep/14, lastEventID, false);
          }
       }
 

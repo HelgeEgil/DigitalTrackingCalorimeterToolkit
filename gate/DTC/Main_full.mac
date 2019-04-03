@@ -27,6 +27,7 @@
 
 /gate/physics/SetMaxStepSizeInRegion world 0.5 mm
 /gate/physics/ActivateStepLimiter proton
+#/gate/physics/Proton/SetCutInRegion world 0.05 mm
 
 /gate/run/initialize
 
@@ -53,7 +54,7 @@
 
 /gate/output/root/enable
 /gate/output/root/setRootSinglesFlag 0
-/gate/output/root/setFileName ../../DTCToolkit/Data/MonteCarlo/DTC_Full_Aluminium_Absorber{absorberthickness}mm_Degrader{degraderthickness}mm_{energy}MeV
+/gate/output/root/setFileName ../../DTCToolkit/Data/MonteCarlo/DTC_Full_Aluminium_Absorber{absorberthickness}mm_Degrader{degraderthickness}mm_{energy}MeV_myacc
 
 #===============#
 # START BEAMS	#

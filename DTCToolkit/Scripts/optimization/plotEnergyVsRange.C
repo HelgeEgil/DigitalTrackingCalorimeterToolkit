@@ -93,7 +93,7 @@ void plotEnergyVsRange() {
    Float_t estimatedStraggling;
 
    ifstream in1;
-   in1.open("../../Data/Ranges/EnergyAfterDegrader230MeV.csv");
+   in1.open("../../Data/Ranges/EnergyAfterDegraderPSTAR.csv");
    Int_t thick, n=0;
    Double_t energy;
    while (1) {
@@ -103,13 +103,13 @@ void plotEnergyVsRange() {
       energies[n++] = energy;
    }
    in1.close();
-   printf("Found %d lines in EnergyAfterDegrader230MeV.csv\n", n);
+   printf("Found %d lines in EnergyAfterDegraderPSTAR.csv\n", n);
 
    TSpline3 *energySpline = new TSpline3("energySpline", thicknesses, energies, n);
 
    ifstream in;
    if (!kUseCarbon) {
-      in.open("../../OutputFiles/result_makebraggpeakfit.csv");
+      in.open("../../OutputFiles/result_makebraggpeakfit_csda.csv");
    }
    else {
       in.open("../../OutputFiles/result_makebraggpeakfitCarbon.csv");

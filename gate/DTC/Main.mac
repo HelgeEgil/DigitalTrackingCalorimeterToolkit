@@ -24,8 +24,9 @@
 
 /gate/geometry/setIonisationPotential Water 75 eV
 /gate/physics/addPhysicsList QGSP_BIC_EMZ
-/gate/physics/SetMaxStepSizeInRegion world 0.1 mm
+/gate/physics/SetMaxStepSizeInRegion world 0.5 mm
 /gate/physics/ActivateStepLimiter proton
+#/gate/physics/Proton/SetCutInRegion world 0.05 mm
 
 /gate/run/initialize
 
@@ -69,7 +70,7 @@
 
 /gate/output/root/enable
 /gate/output/root/setRootSinglesFlag 0
-/gate/output/root/setFileName ../../DTCToolkit/Data/MonteCarlo/DTC_Aluminium_Absorber{absorberthickness}mm_Degrader{degraderthickness}mm_{energy}MeV
+/gate/output/root/setFileName ../../DTCToolkit/Data/MonteCarlo/DTC_Aluminium_Absorber{absorberthickness}mm_Degrader{degraderthickness}mm_{energy}MeV_myacc
 
 #===============#
 # START BEAMS	#
@@ -77,5 +78,5 @@
 
 /gate/random/setEngineName MersenneTwister
 /gate/random/setEngineSeed auto
-/gate/application/setTotalNumberOfPrimaries 1000
+/gate/application/setTotalNumberOfPrimaries 10000
 /gate/application/start

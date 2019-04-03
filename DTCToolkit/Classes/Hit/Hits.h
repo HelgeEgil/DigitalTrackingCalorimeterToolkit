@@ -34,7 +34,7 @@ public:
    
    // Add and remove hits
    TObject         * removeHitAt(Int_t i) { return hits_.RemoveAt(i); }
-   void              appendPoint(Int_t x, Int_t y, Int_t layer = -1, Int_t event = -1, Float_t edep = 0);
+   void              appendPoint(Int_t x, Int_t y, Int_t layer = -1, Float_t edep = 0, Int_t event = -1, Bool_t isSecondary = false);
    void              appendHits(Hits *hits);
    void              appendHit(Hit *hit);
 
@@ -44,6 +44,7 @@ public:
    virtual Int_t     getLayer(Int_t i)    { return At(i)->getLayer(); }
    virtual Int_t     getEventID(Int_t i)  { return At(i)->getEventID(); }
    virtual Float_t   getEdep(Int_t i)     { return At(i)->getEdep(); }
+   virtual Bool_t    isSecondary(Int_t i) { return At(i)->isSecondary(); }
    virtual Int_t     getI(Int_t x, Int_t y);
    
    // Layer indexing - optimizstion
@@ -68,7 +69,7 @@ public:
    vector<Hits*>   * findClustersHitMap();
    void              appendExpandedClusterToClusterHitMap(vector<Int_t> *expandedCluster, vector<Hits*> *clusterHitMap);
 
-   ClassDef(Hits,2)
+   ClassDef(Hits,3)
 };
 }
 #endif

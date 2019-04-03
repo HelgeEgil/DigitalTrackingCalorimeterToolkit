@@ -183,6 +183,7 @@ Hits * diffuseHits(TRandom3 *gRandom, Hits * hits) {
    Hits         * hitsOut = new Hits();
    Int_t          x, y, outX, outY, layer, cs, eventID, idx_x, binPos;
    Float_t        edep;
+   Bool_t         isSecondary;
    Int_t          randomClusterIdx;
    Int_t          nBefore, nAfter;
 
@@ -194,6 +195,7 @@ Hits * diffuseHits(TRandom3 *gRandom, Hits * hits) {
       layer = hits->getLayer(h);
       edep = hits->getEdep(h);
       eventID = hits->getEventID(h);
+      isSecondary = hits->isSecondary(h);
       cs = getCSFromEdep(edep);
     
       if (cs<2) cs=2;
@@ -210,7 +212,7 @@ Hits * diffuseHits(TRandom3 *gRandom, Hits * hits) {
             if (binPos & n) {
                outX = x + (idx_x - CDB_x_mean) + 0.5;
                outY = y + (binPosPow - CDB_y_mean) + 0.5;
-               hitsOut->appendPoint(outX, outY, layer, eventID, edep/CDB_clusterSize); 
+               hitsOut->appendPoint(outX, outY, layer, edep/CDB_clusterSize, eventID, isSecondary); 
             }
          }
       idx_x++;

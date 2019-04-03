@@ -61,11 +61,12 @@ void Track::appendCluster(Cluster *copyCluster, Int_t startOffset /* default 0 *
    c->set(copyCluster); 
 }
 
-void Track::appendPoint(Float_t x, Float_t y, Int_t layer, Int_t size, Int_t eventID) {
+void Track::appendPoint(Float_t x, Float_t y, Int_t layer, Int_t size, Int_t eventID, Bool_t isSecondary) {
    Int_t i = GetEntriesFast();
    Cluster *c = (Cluster*) track_.ConstructedAt(i);
    c->set(x,y,layer,size);
    c->setEventID(eventID);
+   c->setSecondary(isSecondary);
 }
 
 Int_t Track::getModeEventID() {

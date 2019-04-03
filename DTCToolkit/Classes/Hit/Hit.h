@@ -8,14 +8,15 @@
 namespace DTC {
 class Hit : public TObject {
   private:
-      Int_t x_, y_;
-      Float_t edep_;
-      Int_t layerNo_;
-      Int_t eventID_;
+      Int_t    x_, y_;
+      Float_t  edep_;
+      Int_t    layerNo_;
+      Int_t    eventID_;
+      Bool_t   isSecondary_;
 
   public:
       Hit();
-      Hit(Int_t x, Int_t y, Int_t layer = -1, Int_t event = -1, Float_t edep_ = 0);
+      Hit(Int_t x, Int_t y, Int_t layer = -1, Float_t edep_ = 0, Int_t eventID = 0, Bool_t isSecondary_ = false);
       Hit(Hit* hit);
       virtual ~Hit(); 
 
@@ -26,17 +27,19 @@ class Hit : public TObject {
       Int_t    getLayer()     { return layerNo_; }
       Int_t    getEventID()   { return eventID_; }
       Float_t  getEdep()      { return edep_; }
+      Bool_t   isSecondary()  { return isSecondary_; }
       Int_t    getChip();
 
-      void     setEventID(Int_t event) { eventID_ = event; }
-      void     setEdep(Float_t edep)      { edep_ = edep; }
-      void     set(Int_t x, Int_t y, Int_t layerNo = -1, Int_t eventNo = -1, Float_t edep = 0);
+      void     setEventID(Int_t event)          { eventID_ = event; }
+      void     setEdep(Float_t edep)            { edep_ = edep; }
+      void     setSecondary(Bool_t isSecondary) { isSecondary_ = isSecondary; }
+      void     set(Int_t x, Int_t y, Int_t layerNo = -1, Float_t edep = 0, Int_t eventID = -1, Bool_t isSecondary = false);
       void     set(Hit* hit);
       void     Clear(Option_t *);
       Int_t    Compare(const TObject *obj) const;
       Bool_t   IsSortable() const { return kTRUE; }
 
-      ClassDef(Hit,2)
+      ClassDef(Hit,3)
 };
 }
 

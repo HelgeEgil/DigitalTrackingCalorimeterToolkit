@@ -503,7 +503,7 @@ void getTracksReconstructionEfficiency(Int_t dataType, Float_t energy, Float_t d
          nFirstAndLast += (int) thisTrack->isFirstAndLastEventIDEqual();
          nLastCloseToFirst += (Int_t) tracks->isLastEventIDCloseToFirst(j);
          nFirstAndLastAllTracks += (int) (thisTrack->isFirstAndLastEventIDEqual() && tracks->getNMissingClustersWithEventID(thisTrack->getEventID(0), thisTrack->Last()->getLayer()) == 0);
-         nFirstAndLastAllTracksOK2nd += (int) ((thisTrack->isFirstAndLastEventIDEqual() || thisTrack->Last()->getEventID() < 0) && tracks->getNMissingClustersWithEventID(thisTrack->getEventID(0), thisTrack->Last()->getLayer()) == 0);
+         nFirstAndLastAllTracksOK2nd += (int) ((thisTrack->isFirstAndLastEventIDEqual() || thisTrack->Last()->isSecondary()) && tracks->getNMissingClustersWithEventID(thisTrack->getEventID(0), thisTrack->Last()->getLayer()) == 0);
       
          for (Int_t k=1; k<thisTrack->GetEntriesFast(); k++) {
             if (!thisTrack->At(k)) continue;
@@ -1635,7 +1635,7 @@ void secondaryAnalysis(Int_t Runs, Int_t dataType, Bool_t recreate, Int_t switch
 
       angle = getDotProductAngle(a,a,b);
 
-      if (thisTrack->Last()->getEventID() < 0) {
+      if (thisTrack->Last()->isSecondary()) {
          hRangeAnalysisS->Fill(thisTrack->getFitParameterRange());
          hAngleAnalysisS->Fill(angle*1000);
       }
@@ -1652,7 +1652,7 @@ void secondaryAnalysis(Int_t Runs, Int_t dataType, Bool_t recreate, Int_t switch
          continue;
       }
 
-      if (thisTrack->Last()->getEventID() < 0) nTracksNuclear++;
+      if (thisTrack->Last()->isSecondary()) nTracksNuclear++;
    }
 
    printf("There are %d tracks in total. %d of them are secondary tracks (%.2f%%).\n", nTracks, nTracksNuclear, 100*float(nTracksNuclear)/nTracks);
@@ -1662,7 +1662,7 @@ void secondaryAnalysis(Int_t Runs, Int_t dataType, Bool_t recreate, Int_t switch
    for (Int_t i=0; i<tracks->GetEntriesFast(); i++) {
       thisTrack = tracks->At(i);
       if (!thisTrack) continue;
-      if (thisTrack->Last()->getEventID() < 0) nTracksNuclearAfterAngle++;
+      if (thisTrack->Last()->isSecondary()) nTracksNuclearAfterAngle++;
    }
 
    printf("After ANGLE cut: There are %d tracks in total. %d of them are secondary tracks (%.2f%%).\n", nTracks, nTracksNuclearAfterAngle, 100*float(nTracksNuclearAfterAngle)/nTracks);
@@ -1672,7 +1672,7 @@ void secondaryAnalysis(Int_t Runs, Int_t dataType, Bool_t recreate, Int_t switch
    for (Int_t i=0; i<tracks->GetEntriesFast(); i++) {
       thisTrack = tracks->At(i);
       if (!thisTrack) continue;
-      if (thisTrack->Last()->getEventID() < 0) nTracksNuclearAfterAngleAndEdep++;
+      if (thisTrack->Last()->isSecondary()) nTracksNuclearAfterAngleAndEdep++;
    }
 
    printf("After EDEP cut: There are %d tracks in total. %d of them are secondary tracks (%.2f%%).\n", nTracks, nTracksNuclearAfterAngleAndEdep, 100*float(nTracksNuclearAfterAngleAndEdep)/nTracks);
@@ -1682,7 +1682,7 @@ void secondaryAnalysis(Int_t Runs, Int_t dataType, Bool_t recreate, Int_t switch
    for (Int_t i=0; i<tracks->GetEntriesFast(); i++) {
       thisTrack = tracks->At(i);
       if (!thisTrack) continue;
-      if (thisTrack->Last()->getEventID() < 0) nTracksNuclearAfterAngleAndEdepAndRange++;
+      if (thisTrack->Last()->isSecondary()) nTracksNuclearAfterAngleAndEdepAndRange++;
 
       a = thisTrack->At(0);
       b = thisTrack->At(1);
@@ -1735,18 +1735,18 @@ void drawTracks3D(Int_t Runs, Int_t dataType, Bool_t recreate, Int_t switchLayer
    Int_t numberOfSecondaries = 0;
    for (int i=0; i<tracks->GetEntriesFast(); i++) {
       if (!tracks->At(i)) continue;
-      if (tracks->At(i)->Last()->getEventID() >= 0) numberOfPrimaries++;
+      if (!tracks->At(i)->Last()->isSecondary()) numberOfPrimaries++;
       else numberOfSecondaries++;
    }
    cout << "Number of primaries = " << numberOfPrimaries << ", number of secondaries = " << numberOfSecondaries << endl;
    tracks->removeHighAngleTracks(75); // mrad
    tracks->removeThreeSigmaShortTracks();
-//   tracks->removeNuclearInteractions();
+   tracks->removeNuclearInteractions();
    // tracks->fillOutIncompleteTracks(0.02);
 
    tracks->doTrackFit();
 
-   Bool_t   kDraw = true;
+   Bool_t   kDraw = false;
 
    TH1I  *hWEPLCorrect = new TH1I("hWEPLCorrect", ";Range in detector [mm WEPL];Frequency", 400, 0, 250);
    TH1I  *hWEPLSecondary = new TH1I("hWEPLSecondary", "", 400, 0, 250);
@@ -1816,7 +1816,7 @@ void drawTracks3D(Int_t Runs, Int_t dataType, Bool_t recreate, Int_t switchLayer
       Float_t z = thisCluster->getY();
       Float_t y = thisCluster->getLayer();
    
-      if (thisCluster->getEventID() < 0) {
+      if (thisCluster->isSecondary()) {
          EIDMarker->SetPoint(i,x,y,z);
       }
       else {
@@ -1866,7 +1866,7 @@ void drawTracks3D(Int_t Runs, Int_t dataType, Bool_t recreate, Int_t switchLayer
       if (!thisTrack) continue;
       nMissingEID = tracks->getNMissingClustersWithEventID(thisTrack->getEventID(0), thisTrack->Last()->getLayer(), i); 
 
-      if (thisTrack->Last()->getEventID() >= 0 && thisTrack->At(0)->getEventID() >= 0) { // primary
+      if (!thisTrack->Last()->isSecondary() && !thisTrack->isSecondary(0)) { // primary
          numberOfPrimaries++;
 
          if (thisTrack->isFirstAndLastEventIDEqual()) { // No confused tracks
@@ -1931,7 +1931,8 @@ void drawTracks3D(Int_t Runs, Int_t dataType, Bool_t recreate, Int_t switchLayer
       else {
          if (!thisTrack->Last()) continue;
          Int_t lastEID = thisTrack->Last()->getEventID();   
-         if (lastEID < 0) continue;
+         Bool_t lastSecondary = thisTrack->Last()->isSecondary();
+         if (lastSecondary) continue;
 
          Int_t trackID = tracks->getTrackIdxFromFirstLayerEID(lastEID);
 
@@ -2002,7 +2003,7 @@ void drawTracks3D(Int_t Runs, Int_t dataType, Bool_t recreate, Int_t switchLayer
          l->SetLineColor(kGray);
       }
      
-      if (thisTrack->getEventID(0) == -1 || thisTrack->Last()->getEventID() == -1) {
+      if (thisTrack->isSecondary(0) || thisTrack->Last()->isSecondary()) {
          l->SetLineColor(kGreen);
       }
 
