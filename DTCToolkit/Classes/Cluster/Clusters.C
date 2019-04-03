@@ -162,21 +162,20 @@ void Clusters::removeAllClustersAfterLayer(Int_t afterLayer) {
    }
 }
 
-void Clusters::appendCluster(Float_t x, Float_t y, Int_t layer, Int_t size, Int_t eventID) {
+void Clusters::appendCluster(Float_t x, Float_t y, Int_t layer, Int_t size, Int_t eventID, Bool_t isSecondary) {
    Int_t i = GetEntriesFast();
    Cluster *c = (Cluster*) clusters_.ConstructedAt(i);
-   c->set(x,y,layer,size, eventID);
+   c->set(x,y,layer,size, eventID, isSecondary);
 }
 
-void Clusters::appendClusterEdep(Float_t x, Float_t y, Int_t layer, Float_t edep, Int_t eventID) {
+void Clusters::appendClusterEdep(Float_t x, Float_t y, Int_t layer, Float_t edep, Int_t eventID, Bool_t isSecondary) {
    Int_t i = GetEntriesFast();
    Cluster *c = (Cluster*) clusters_.ConstructedAt(i);
    
    // calculate size from edep
-   
    Int_t size = getCSFromEdep(edep);
 
-   c->set(x,y,layer,size, eventID);
+   c->set(x,y,layer,size, eventID, isSecondary);
 }
 
 void Clusters::appendCluster(Cluster *cluster) {
@@ -186,6 +185,7 @@ void Clusters::appendCluster(Cluster *cluster) {
 
    if (cluster->isUsed()) { c->markUsed(); }
    c->setEventID(cluster->getEventID());
+   c->setSecondary(cluster->isSecondary());
 }
 
 void Clusters::appendClusterWithoutTrack(Cluster *cluster) {
@@ -193,6 +193,7 @@ void Clusters::appendClusterWithoutTrack(Cluster *cluster) {
    Cluster *c = (Cluster*) clustersWithoutTrack_.ConstructedAt(i);
    c->set(cluster->getX(), cluster->getY(), cluster->getLayer(), cluster->getSize());
    c->setEventID(cluster->getEventID());
+   c->setSecondary(cluster->isSecondary());
 }
 
 void Clusters::markUsedClusters(Track *track) {

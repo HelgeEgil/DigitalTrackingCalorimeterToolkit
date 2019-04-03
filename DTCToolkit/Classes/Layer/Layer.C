@@ -108,7 +108,7 @@ Bool_t DTC::Layer::findHits(Hits* hits) {
 
       if (edep) {
          frame2D_.GetBinXYZ(i,x,y,z);
-         hits->appendPoint(x,y,layerNo_, dummyEventID, edep);
+         hits->appendPoint(x,y,layerNo_, edep, dummyEventID);
          isHits = true;
       }
    }

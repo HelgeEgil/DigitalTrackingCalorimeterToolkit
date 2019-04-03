@@ -24,11 +24,11 @@ void Hits::Clear(Option_t *option) {
    hits_.Clear(option);
 }
 
-void Hits::appendPoint(Int_t x, Int_t y, Int_t layer, Int_t event, Float_t edep) {
+void Hits::appendPoint(Int_t x, Int_t y, Int_t layer,  Float_t edep, Int_t eventID, Bool_t isSecondary) {
    Int_t i = GetEntriesFast();
 
    Hit *hit = (Hit*) hits_.ConstructedAt(i);
-   hit->set(x,y,layer,event, edep);
+   hit->set(x,y,layer,edep,eventID, isSecondary);
 }
 
 void Hits::appendHits(Hits *hits) {

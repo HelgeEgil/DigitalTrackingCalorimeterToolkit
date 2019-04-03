@@ -59,8 +59,8 @@ public:
    void              removeTrackFromClustersWithoutTrack(Track *track);
    void              removeSmallClusters(Int_t size);
    void              removeAllClustersAfterLayer(Int_t afterLayer);
-   virtual void      appendCluster(Float_t x, Float_t y, Int_t layer = -1, Int_t size = -1, Int_t eventID = -1);
-   virtual void      appendClusterEdep(Float_t x, Float_t y, Int_t layer = -1, Float_t edep = -1, Int_t eventID = -1);
+   virtual void      appendCluster(Float_t x, Float_t y, Int_t layer = -1, Int_t size = -1, Int_t eventID = -1, Bool_t isSecondary = false);
+   virtual void      appendClusterEdep(Float_t x, Float_t y, Int_t layer = -1, Float_t edep = -1, Int_t eventID = -1, Bool_t isSecondary = false);
    virtual void      appendCluster(Cluster *cluster);
    virtual void      appendClusterWithoutTrack(Cluster *cluster);
 
@@ -75,6 +75,7 @@ public:
    virtual Int_t     getSize(Int_t i)     { return At(i)->getSize(); }
    virtual Int_t     getEventID(Int_t i)  { return At(i)->getEventID(); }
    virtual Int_t     getFrameType()       { return frameType_; }
+   virtual Bool_t    isSecondary(Int_t i) { return At(i)->isSecondary(); }
    virtual Bool_t    isUsed(Int_t i)      { return At(i)->isUsed(); }
    virtual void      markUsed(Int_t i)    { At(i)->markUsed(); }
    virtual void      markUnused(Int_t i)  { At(i)->markUnused(); }
@@ -112,7 +113,7 @@ public:
 //    void        findTracksFromLayer(Tracks *tracks, Int_t layer, Bool_t kUsedClustersInSeeds = true); // find function in pre-2018-08 version on GH
 //    Track     * trackPropagation(Cluster *seed); // find function in pre-2018-08 version on GH
 
-   ClassDef(Clusters,5)
+   ClassDef(Clusters,6)
 };
 }
 #endif

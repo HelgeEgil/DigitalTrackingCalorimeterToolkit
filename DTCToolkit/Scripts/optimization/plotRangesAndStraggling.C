@@ -165,7 +165,7 @@ void plotRangesAndStraggling() {
    splineDTCInv = new TSpline3("splineDTCInv", dtcRanges, dtcEnergies, dtcIdx);
 
    if (!kUseCarbon) {
-      in.open("../../OutputFiles/findManyRangesDegrader_230MeV.csv");
+      in.open("../../OutputFiles/findManyRangesDegrader_csda.csv");
    }
    else {
       in.open("../../OutputFiles/findManyRangesDegraderCarbon.csv");
@@ -207,7 +207,7 @@ void plotRangesAndStraggling() {
    in.close();
 
    if (!kUseCarbon) {
-      in.open("../../OutputFiles/result_makebraggpeakfit.csv");
+      in.open("../../OutputFiles/result_makebraggpeakfit_csda.csv");
    }
    else {
       in.open("../../OutputFiles/result_makebraggpeakfitCarbon.csv");

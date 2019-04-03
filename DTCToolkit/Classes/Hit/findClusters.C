@@ -118,14 +118,15 @@ void Hits::appendNeighboursToClusters(vector<Int_t> *expandedCluster, Clusters *
    Float_t  sumY = 0;
    Int_t    idx = 0;
    Int_t    cSize = expandedCluster->size();
-   Int_t    layerNo = getLayer(expandedCluster->at(0));
+   Hit *    firstHit = At(expandedCluster->at(0));
+   Int_t    layerNo = firstHit->getLayer();
 
    for (Int_t j=0; j<cSize; j++) {
       idx = expandedCluster->at(j);
       sumX += getX(idx) - 0.5; // -0.5  to get
       sumY += getY(idx) - 0.5; // pixel center
    }
-   clusters->appendCluster(sumX / cSize, sumY / cSize, layerNo, cSize, getEventID(expandedCluster->at(0)));
+   clusters->appendCluster(sumX / cSize, sumY / cSize, layerNo, cSize, firstHit->getEventID(), firstHit->isSecondary());
 }
 
 void Hits::checkAndAppendAllNextCandidates(vector<Int_t> * nextCandidates, vector<Int_t> *checkedIndices,

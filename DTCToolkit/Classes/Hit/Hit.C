@@ -16,12 +16,13 @@ Hit::Hit() {
 }
 
 
-Hit::Hit(Int_t x, Int_t y, Int_t layerNo, Int_t eventID, Float_t edep) {
+Hit::Hit(Int_t x, Int_t y, Int_t layerNo, Float_t edep, Int_t eventID, Bool_t isSecondary) {
    x_ = x;
    y_ = y;
    layerNo_ = layerNo;
    eventID_ = eventID;
    edep_ = edep;
+   isSecondary_ = isSecondary;
 }
 
 Hit::Hit(Hit* hit) {
@@ -30,6 +31,7 @@ Hit::Hit(Hit* hit) {
    layerNo_ = hit->getLayer();
    eventID_ = hit->getEventID();
    edep_ = hit->getEdep();
+   isSecondary_ = hit->isSecondary();
 }
 
 Hit::~Hit() {
@@ -49,6 +51,7 @@ void Hit::Clear(Option_t *) {
    layerNo_ = -1;
    eventID_ = -1;
    edep_ = 0;
+   isSecondary_ = false;
 }
 
 Int_t Hit::getChip() {
@@ -67,12 +70,14 @@ Int_t Hit::getChip() {
    return chipIdx;
 }
 
-void Hit::set(Int_t x, Int_t y, Int_t layerNo, Int_t eventID, Float_t edep) {
+void Hit::set(Int_t x, Int_t y, Int_t layerNo, Float_t edep, Int_t eventID, Bool_t isSecondary) {
    x_ = x;
    y_ = y;
    layerNo_ = layerNo;
    eventID_ = eventID;
    edep_ = edep;
+   isSecondary_ = isSecondary;
+
 }
 
 void Hit::set(Hit* hit) {
@@ -81,10 +86,11 @@ void Hit::set(Hit* hit) {
    layerNo_ = hit->getLayer();
    eventID_ = hit->getEventID();
    edep_ = hit->getEdep();
+   isSecondary_ = hit->isSecondary();
 }
 
 ostream &operator<< (ostream &os, Hit &h) {
-   os << "(" << h.getX() << "," << h.getY() << "," << h.getLayer() << "," << h.getEventID() << "," << h.getEdep() << ")";
+   os << "(" << h.getX() << "," << h.getY() << "," << h.getLayer() << "," << h.getEdep() << ", " << h.getEventID() << "," << h.isSecondary() << ")";
    return os;
 }
 

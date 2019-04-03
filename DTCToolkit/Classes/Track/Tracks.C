@@ -520,7 +520,7 @@ void  Tracks::removeHighAngleTracks(Float_t mradLimit) {
       incomingAngle = getDotProductAngle(a, a, b);
       outgoingAngle = getDotProductAngle(b2, b2, a2);
       if (incomingAngle > mradLimit / 1000. || outgoingAngle > mradLimit / 100.) {
-         if (thisTrack->Last()->getEventID() < 0) nRemovedNuclear++;
+         if (thisTrack->Last()->isSecondary()) nRemovedNuclear++;
          removeTrackAt(i);
          nRemoved++;
       }

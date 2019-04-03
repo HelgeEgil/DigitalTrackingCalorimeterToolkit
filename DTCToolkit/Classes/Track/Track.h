@@ -45,7 +45,7 @@ class Track : public TObject {
       virtual void      removeCluster(Cluster *c)        { track_.Remove((TObject*) c); }
       virtual void      setTrack(Track *copyTrack, Int_t startOffset = 0); // copy whole track
       virtual void      appendCluster(Cluster *copyCluster, Int_t startOffset = 0); // copy cluster
-      virtual void      appendPoint(Float_t x, Float_t y, Int_t layer, Int_t size = -1, Int_t eventID = -1);
+      virtual void      appendPoint(Float_t x, Float_t y, Int_t layer, Int_t size = -1, Int_t eventID = -1, Bool_t isSecondary = false);
       void              removeNANs();
 
       // Getters and setters
@@ -61,6 +61,7 @@ class Track : public TObject {
       virtual Float_t   getDepositedEnergy(Int_t i, Bool_t c = false)      { return At(i)->getDepositedEnergy(c); }
       virtual Float_t   getDepositedEnergyError(Int_t i, Bool_t c = false) { return At(i)->getDepositedEnergyError(c); }
       Bool_t            isUsed(Int_t i)                  { return At(i)->isUsed(); }
+      Bool_t            isSecondary(Int_t i)             { return At(i)->isSecondary(); }
       
       // TRACK PROPERTIES - Event IDs
       Int_t             getModeEventID(); // (vs. median)

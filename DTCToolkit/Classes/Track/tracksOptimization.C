@@ -442,7 +442,7 @@ void Tracks::removeNuclearInteractions() {
       thisTrack = At(i);
       if (!At(i)) continue;
       if (thisTrack->doesTrackEndAbruptly()) {
-         if (thisTrack->Last()->getEventID() < 0) nRemovedNuclear++;
+         if (thisTrack->Last()->isSecondary()) nRemovedNuclear++;
          removeTrack(thisTrack);
          nRemoved++;
       }
@@ -489,7 +489,7 @@ void Tracks::removeThreeSigmaShortTracks() {
       thisTrack = At(i);
       if (!At(i)) continue;
       if (thisTrack->getRangemm() < cutRange) {
-         if (thisTrack->Last()->getEventID() < 0) nRemovedNuclear++;
+         if (thisTrack->Last()->isSecondary()) nRemovedNuclear++;
          removeTrack(thisTrack);
          nRemoved++;
       }
