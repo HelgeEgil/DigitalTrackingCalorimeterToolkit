@@ -438,7 +438,7 @@ void  DataInterface::getMCClusters(Int_t runNo, Clusters *clusters, Hits * hits)
    Int_t eventIdFrom = runNo * kEventsPerRun + kSkipTracks;
    Int_t eventIdTo = eventIdFrom + kEventsPerRun + kSkipTracks;
 
-//   printf("eventIdFrom = %d, eventIdTo = %d.\n", eventIdFrom, eventIdTo);
+   printf("eventIdFrom = %d, eventIdTo = %d.\n", eventIdFrom, eventIdTo);
 
    if (runNo == 0) lastJentry_ = 0;
    
@@ -456,10 +456,7 @@ void  DataInterface::getMCClusters(Int_t runNo, Clusters *clusters, Hits * hits)
    Long64_t nentries = fChain->GetEntriesFast();
    Long64_t nbytes = 0, nb = 0;
 
-   Bool_t   hasRun = false;
-
    for (Long64_t jentry=lastJentry_; jentry<nentries; jentry++) { // new interaction
-      hasRun = true;
       Long64_t ientry = LoadTree(jentry);
       if (ientry<0) {
          lastJentry_ = jentry;
@@ -516,7 +513,7 @@ void  DataInterface::getMCClusters(Int_t runNo, Clusters *clusters, Hits * hits)
          continue;
       }
       
-      else if (eventID == eventIdTo || jentry == nentries-1) { // LAST ENTRY, EXIT AND APPEND THIS
+      else if (eventID >= eventIdTo || jentry == nentries-1) { // LAST ENTRY, EXIT AND APPEND THIS
          lastJentry_ = jentry;
          break;
       }
