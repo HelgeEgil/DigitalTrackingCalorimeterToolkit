@@ -48,9 +48,10 @@ Bool_t   kDoTracking = true; // Move to argument list
 Bool_t   kUseEmpiricalMCS = true;
 Bool_t   kFilterNuclearInteractions = false; // Move to argument list
 Bool_t   kDoDiffusion = true;
-Int_t    kEventsPerRun = 50;
+Int_t    kEventsPerRun = 100;
 Int_t    kSkipTracks = 0;
 const Int_t    kEnergy = 250;
+Float_t  kMultiplyTrackingByThis = 1;
 
 #ifdef USEALPIDE
 Bool_t   kUseDegrader = true; 

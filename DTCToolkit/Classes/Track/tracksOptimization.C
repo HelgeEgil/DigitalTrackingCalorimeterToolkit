@@ -480,7 +480,7 @@ void Tracks::removeThreeSigmaShortTracks() {
    }
    sigmaRange = sqrt(sigmaRange / nInSum);
 
-   sigmaRange = 10;
+   sigmaRange = 5;
 
    cutRange = muRange - 3 * sigmaRange;
    printf("muRange = %.3f mm, sigmaRange = %.3f mm, cutRange = %.3f mm.\n", muRange, sigmaRange, cutRange);

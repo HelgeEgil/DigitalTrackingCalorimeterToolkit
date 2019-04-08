@@ -27,11 +27,15 @@ using namespace std;
 
 Bool_t kUseCarbon = false;
 Bool_t kUseDCCorrection = false;
+Bool_t kUseNominalValuesFromRMBPF = true;
+Bool_t kUseWEPL = false;
+
 const Int_t arraySize = 1500;
 const Int_t xFrom = 40;
 
 void plotEnergyVsRange() {
    TCanvas *c1 = new TCanvas("c1", "Range accuracy", 1100, 800);
+   
    
    TPaveLabel *Ytitle = new TPaveLabel(0.01, 0.05, 0.03, 0.9, "Range deviation [mm WEPL]");
    Ytitle->SetBorderSize(0);
@@ -58,7 +62,6 @@ void plotEnergyVsRange() {
    graphPad->cd();
    graphPad->Divide(1,5,0.00001,0.00001);
 
-
    Float_t  arrayE2[arraySize] = {0}; // energy MC
    Float_t  arrayE3[arraySize] = {0}; // energy MC
    Float_t  arrayE35[arraySize] = {0}; // energy MC
@@ -71,31 +74,53 @@ void plotEnergyVsRange() {
    Float_t  arrayMC4[arraySize] = {0}; // range MC
    Float_t  arrayMC5[arraySize] = {0}; // range MC
    Float_t  arrayMC6[arraySize] = {0}; // range MC
+   Double_t  arrayR2[arraySize] = {0}; // truth range MC
+   Double_t  arrayR3[arraySize] = {0}; // truth range MC
+   Double_t  arrayR4[arraySize] = {0}; // truth range MC
+   Double_t  arrayR5[arraySize] = {0}; // truth range MC
+   Double_t  arrayR6[arraySize] = {0}; // truth range MC
+   Double_t  arrayRD2[arraySize] = {0}; // truth range MC
+   Double_t  arrayRD3[arraySize] = {0}; // truth range MC
+   Double_t  arrayRD4[arraySize] = {0}; // truth range MC
+   Double_t  arrayRD5[arraySize] = {0}; // truth range MC
+   Double_t  arrayRD6[arraySize] = {0}; // truth range MC
+   Double_t  arrayRE2[arraySize] = {0}; // truth range MC
+   Double_t  arrayRE3[arraySize] = {0}; // truth range MC
+   Double_t  arrayRE4[arraySize] = {0}; // truth range MC
+   Double_t  arrayRE5[arraySize] = {0}; // truth range MC
+   Double_t  arrayRE6[arraySize] = {0}; // truth range MC
 
    Double_t energies[arraySize] = {0};
    Double_t thicknesses[arraySize] = {0};
+   Double_t energiesWater[arraySize] = {0};
+   Double_t rangesWater[arraySize] = {0};
 
-//   Float_t correction_2 = -0.132, correction_3 = 0.271, correction_35 = 0.813, correction_4 = 0.734, correction_5 = 1.292, correction_6 = 1.879; // 250 MeV
-   Float_t correction_2 = 0.4, correction_3 = 0.98, correction_35 = 0.813, correction_4 = 1.37, correction_5 = 1.97 , correction_6 = 2.54;
-   if (!kUseDCCorrection) {
-      correction_2 = 0;
-      correction_3 = 0;
-      correction_35 = 0;
-      correction_4 = 0;
-      correction_5 = 0;
-      correction_6 = 0;
-   }
+   Float_t correction_2 = 0.02, correction_3 = 0.425, correction_35 = 0.74, correction_4 = 0.74, correction_5 = 1.39 , correction_6 = 2.04;
 
    gStyle->SetOptStat(0);
 
    Float_t nomrange_, estrange_, sigmaRange_, lastRange_, nomsigma_, waterphantomthickness_, dummy0;
-   Int_t energy_, thickness_;
+   Int_t energy_, thickness_, degrader_;
    Float_t estimatedStraggling;
+
+   ifstream in0;
+   Double_t energy, range;
+   Int_t idxWater = 0;
+   in0.open("../../Data/Ranges/Water.csv");
+   while (1) {
+      in0 >> energy >> range;
+      if (!in0.good()) break;
+
+      energiesWater[idxWater] = energy;
+      rangesWater[idxWater++] = range;
+   }
+
+   TSpline3 * waterSpline = new TSpline3("waterSpline", energiesWater, rangesWater, idxWater); // get WEPL from ENERGY
+
 
    ifstream in1;
    in1.open("../../Data/Ranges/EnergyAfterDegraderPSTAR.csv");
    Int_t thick, n=0;
-   Double_t energy;
    while (1) {
       in1 >> thick >> energy;
       if (!in1.good()) break;   
@@ -107,9 +132,88 @@ void plotEnergyVsRange() {
 
    TSpline3 *energySpline = new TSpline3("energySpline", thicknesses, energies, n);
 
+   Int_t nlinesR6 = 0, nlinesR2 = 0, nlinesR3 = 0, nlinesR4 = 0, nlinesR5 = 0;
+   Float_t dummy, floatenergy_;
+   ifstream in2;
+   in2.open("../../OutputFiles/findManyRangesDegrader.csv");
+   while (1) {
+      in2 >> degrader_ >> thickness_ >> nomrange_ >> dummy >> dummy >> floatenergy_ >> dummy;
+
+      if (!in2.good()) break;
+
+      if (thickness_ == 2) {
+         arrayR2[nlinesR2] = nomrange_;
+         arrayRE2[nlinesR2] = floatenergy_;
+         arrayRD2[nlinesR2++] = degrader_;
+      }
+      else if (thickness_ == 3) {
+         arrayR3[nlinesR3] = nomrange_;
+         arrayRE3[nlinesR3] = floatenergy_;
+         arrayRD3[nlinesR3++] = degrader_;
+      }
+      else if (thickness_ == 4) {
+         arrayR4[nlinesR4] = nomrange_;
+         arrayRE4[nlinesR4] = floatenergy_;
+         arrayRD4[nlinesR4++] = degrader_;
+      }
+      else if (thickness_ == 5) {
+         arrayR5[nlinesR5] = nomrange_;
+         arrayRE5[nlinesR5] = floatenergy_;
+         arrayRD5[nlinesR5++] = degrader_;
+      }
+      else if (thickness_ == 6) {
+         arrayR6[nlinesR6] = nomrange_;
+         arrayRE6[nlinesR6] = floatenergy_;
+         arrayRD6[nlinesR6++] = degrader_;
+      }
+   }
+   in2.close();
+
+   Double_t arrayR2reverse[arraySize] = {};
+   Double_t arrayR3reverse[arraySize] = {};
+   Double_t arrayR4reverse[arraySize] = {};
+   Double_t arrayR5reverse[arraySize] = {};
+   Double_t arrayR6reverse[arraySize] = {};
+   Double_t arrayRE2reverse[arraySize] = {};
+   Double_t arrayRE3reverse[arraySize] = {};
+   Double_t arrayRE4reverse[arraySize] = {};
+   Double_t arrayRE5reverse[arraySize] = {};
+   Double_t arrayRE6reverse[arraySize] = {};
+   for (int i=0; i<nlinesR2; i++) arrayR2reverse[i] = arrayR2[nlinesR2-1-i];
+   for (int i=0; i<nlinesR2; i++) arrayR3reverse[i] = arrayR2[nlinesR3-1-i];
+   for (int i=0; i<nlinesR2; i++) arrayR4reverse[i] = arrayR2[nlinesR4-1-i];
+   for (int i=0; i<nlinesR2; i++) arrayR5reverse[i] = arrayR2[nlinesR5-1-i];
+   for (int i=0; i<nlinesR2; i++) arrayR6reverse[i] = arrayR2[nlinesR6-1-i];
+   for (int i=0; i<nlinesR2; i++) arrayRE2reverse[i] = arrayRE2[nlinesR2-1-i];
+   for (int i=0; i<nlinesR2; i++) arrayRE3reverse[i] = arrayRE2[nlinesR3-1-i];
+   for (int i=0; i<nlinesR2; i++) arrayRE4reverse[i] = arrayRE2[nlinesR4-1-i];
+   for (int i=0; i<nlinesR2; i++) arrayRE5reverse[i] = arrayRE2[nlinesR5-1-i];
+   for (int i=0; i<nlinesR2; i++) arrayRE6reverse[i] = arrayRE2[nlinesR6-1-i];
+
+   TSpline3 * energySpline2 = new TSpline3("energySpline2", arrayR2reverse, arrayRE2reverse, nlinesR2); // get ENERGY from RANGE
+   TSpline3 * energySpline3 = new TSpline3("energySpline3", arrayR3reverse, arrayRE3reverse, nlinesR3); // get ENERGY from RANGE
+   TSpline3 * energySpline4 = new TSpline3("energySpline4", arrayR4reverse, arrayRE4reverse, nlinesR4); // get ENERGY from RANGE
+   TSpline3 * energySpline5 = new TSpline3("energySpline5", arrayR5reverse, arrayRE5reverse, nlinesR5); // get ENERGY from RANGE
+   TSpline3 * energySpline6 = new TSpline3("energySpline6", arrayR6reverse, arrayRE6reverse, nlinesR6); // get ENERGY from RANGE
+
+   printf("linesR2 = %d, R3 = %d, R4 = %d, R5 = %d, R6 = %d.\n", nlinesR2, nlinesR3, nlinesR4, nlinesR5, nlinesR6);
+
+   std::unordered_map<int, int> lookup2;
+   std::unordered_map<int, int> lookup3;
+   std::unordered_map<int, int> lookup4;
+   std::unordered_map<int, int> lookup5;
+   std::unordered_map<int, int> lookup6;
+   for (int index = 0; index < nlinesR2; index++) {
+      lookup2[arrayRD2[index]] = index;
+   }
+   for (int index = 0; index < nlinesR3; index++) lookup3[arrayRD3[index]] = index;
+   for (int index = 0; index < nlinesR4; index++) lookup4[arrayRD4[index]] = index;
+   for (int index = 0; index < nlinesR5; index++) lookup5[arrayRD5[index]] = index;
+   for (int index = 0; index < nlinesR6; index++) lookup6[arrayRD6[index]] = index;
+   
    ifstream in;
    if (!kUseCarbon) {
-      in.open("../../OutputFiles/result_makebraggpeakfit_csda.csv");
+      in.open("../../OutputFiles/result_makebraggpeakfit_proj.csv");
    }
    else {
       in.open("../../OutputFiles/result_makebraggpeakfitCarbon.csv");
@@ -117,8 +221,10 @@ void plotEnergyVsRange() {
 
    Int_t nlines6 = 0, nlines2 = 0, nlines3 = 0, nlines35 = 0, nlines4 = 0, nlines5 = 0;
    
+
    while (1) {
       in >> thickness_ >> energy_ >> nomrange_ >> estrange_ >> nomsigma_ >> sigmaRange_;
+      // energy_ here is actually degraderthickness
 
       if (!in.good()) {
          break;
@@ -126,19 +232,64 @@ void plotEnergyVsRange() {
 
       energy = energySpline->Eval(energy_);
 
-      if (thickness_ == 2) arrayE2[nlines2] = nomrange_;
-      if (thickness_ == 3) arrayE3[nlines3] = nomrange_;
-      if (thickness_ == 35) arrayE35[nlines35] = nomrange_;
-      if (thickness_ == 4) arrayE4[nlines4] = nomrange_;
-      if (thickness_ == 5) arrayE5[nlines5] = nomrange_;
-      if (thickness_ == 6) arrayE6[nlines6] = nomrange_;
+      if (kUseNominalValuesFromRMBPF) {
+         if (thickness_ == 2) arrayE2[nlines2] = nomrange_;
+         if (thickness_ == 3) arrayE3[nlines3] = nomrange_;
+         if (thickness_ == 35) arrayE35[nlines35] = nomrange_;
+         if (thickness_ == 4) arrayE4[nlines4] = nomrange_;
+         if (thickness_ == 5) arrayE5[nlines5] = nomrange_;
+         if (thickness_ == 6) arrayE6[nlines6] = nomrange_;
 
-      if (thickness_ == 2) arrayMC2[nlines2++] = -nomrange_ + estrange_ + correction_2;
-      if (thickness_ == 3) arrayMC3[nlines3++] = estrange_ - nomrange_ + correction_3;
-      if (thickness_ == 35) arrayMC35[nlines35++] = estrange_ - nomrange_ + correction_35;
-      if (thickness_ == 4) arrayMC4[nlines4++] = -nomrange_ + estrange_ + correction_4;
-      if (thickness_ == 5) arrayMC5[nlines5++] = estrange_ - nomrange_ + correction_5;
-      if (thickness_ == 6) arrayMC6[nlines6++] = -nomrange_ + estrange_ + correction_6;
+         if (thickness_ == 2) arrayMC2[nlines2++] = -nomrange_ + estrange_ + correction_2 * kUseDCCorrection;
+         if (thickness_ == 3) arrayMC3[nlines3++] = estrange_ - nomrange_ + correction_3 * kUseDCCorrection;
+         if (thickness_ == 35) arrayMC35[nlines35++] = estrange_ - nomrange_ + correction_35 * kUseDCCorrection;
+         if (thickness_ == 4) arrayMC4[nlines4++] = -nomrange_ + estrange_ + correction_4 * kUseDCCorrection;
+         if (thickness_ == 5) arrayMC5[nlines5++] = estrange_ - nomrange_ + correction_5 * kUseDCCorrection;
+         if (thickness_ == 6) arrayMC6[nlines6++] = -nomrange_ + estrange_ + correction_6 * kUseDCCorrection;
+      }
+      else {
+         if (thickness_ == 2) {
+            int index = lookup2[energy_];
+            float tl = arrayR2[index];
+            double e = energySpline2->Eval(tl);
+            double wepl = (kUseWEPL) ? waterSpline->Eval(e) : tl;
+            printf("tl = %.2f mm; energy = %.2f MeV; wepl = %.2f mm.\n", tl, e, wepl);
+            arrayE2[nlines2] = wepl;
+            arrayMC2[nlines2++] = estrange_ - wepl + correction_2 * kUseDCCorrection;
+         }
+         else if (thickness_ == 3) {
+            int index = lookup3[energy_];
+            float tl = arrayR3[index];
+            double e = energySpline3->Eval(tl);
+            double wepl = (kUseWEPL) ? waterSpline->Eval(e) : tl;
+            arrayE3[nlines3] = wepl;
+            arrayMC3[nlines3++] = estrange_ - wepl + correction_3 * kUseDCCorrection;
+         }
+         else if (thickness_ == 4) {
+            int index = lookup4[energy_];
+            float tl = arrayR4[index];
+            double e = energySpline4->Eval(tl);
+            double wepl = (kUseWEPL) ? waterSpline->Eval(e) : tl;
+            arrayE4[nlines4] = wepl;
+            arrayMC4[nlines4++] = estrange_ - wepl + correction_4 * kUseDCCorrection;
+         }
+         else if (thickness_ == 5) {
+            int index = lookup5[energy_];
+            float tl = arrayR5[index];
+            double e = energySpline5->Eval(tl);
+            double wepl = (kUseWEPL) ? waterSpline->Eval(e) : tl;
+            arrayE5[nlines5] = wepl;
+            arrayMC5[nlines5++] = estrange_ - wepl + correction_5 * kUseDCCorrection;
+         }
+         else if (thickness_ == 6) {
+            int index = lookup6[energy_];
+            float tl = arrayR6[index];
+            double e = energySpline6->Eval(tl);
+            double wepl = (kUseWEPL) ? waterSpline->Eval(e) : tl;
+            arrayE6[nlines6] = wepl;
+            arrayMC6[nlines6++] = estrange_ - wepl + correction_6 * kUseDCCorrection;
+         }
+      }
    }
    
    in.close();
@@ -208,8 +359,8 @@ void plotEnergyVsRange() {
    Float_t yfrom = -2.5;
    Float_t yto = 2.5;
 
-   Float_t xfrom = 5;
-   Float_t xto = 370;
+   Float_t xfrom = 0;
+   Float_t xto = 380;
 
    hMC2->GetXaxis()->SetRangeUser(xfrom, xto);
    hMC3->GetXaxis()->SetRangeUser(xfrom, xto);
@@ -230,6 +381,15 @@ void plotEnergyVsRange() {
    hMC5->GetYaxis()->SetNdivisions(404);
    hMC6->GetYaxis()->SetNdivisions(404);
 
+   if (!kUseDCCorrection) {
+      hMC2->GetYaxis()->SetRangeUser(yfrom - correction_2, yto - correction_2);
+      hMC3->GetYaxis()->SetRangeUser(yfrom - correction_3, yto - correction_3);
+      hMC35->GetYaxis()->SetRangeUser(yfrom - correction_35, yto - correction_35);
+      hMC4->GetYaxis()->SetRangeUser(yfrom - correction_4, yto - correction_4);
+      hMC5->GetYaxis()->SetRangeUser(yfrom - correction_5, yto - correction_5);
+      hMC6->GetYaxis()->SetRangeUser(yfrom - correction_6, yto - correction_6);
+   }
+
    Float_t textX = 7.22;
    Float_t textY = 3.11;
 
@@ -239,12 +399,12 @@ void plotEnergyVsRange() {
    TText *t2 = new TText();
    t2->SetTextSize(0.2);
    t2->SetTextFont(22);
-   t2->DrawText(textX, textY, "2 mm Al absorber"); 
+   t2->DrawText(textX, textY - correction_2, "2 mm Al absorber"); 
 
    graphPad->cd(2);
    gPad->SetGridy();
    hMC3->Draw("LA");
-   t2->DrawText(textX, textY, "3 mm Al absorber");
+   t2->DrawText(textX, textY - correction_3, "3 mm Al absorber");
    /*
    graphPad->cd(3);
    gPad->SetGridy();
@@ -254,17 +414,17 @@ void plotEnergyVsRange() {
    graphPad->cd(3);
    gPad->SetGridy();
    hMC4->Draw("LA");
-   t2->DrawText(textX, textY, "4 mm Al absorber");
+   t2->DrawText(textX, textY - correction_4, "4 mm Al absorber");
    
    graphPad->cd(4);
    gPad->SetGridy();
    hMC5->Draw("LA");
-   t2->DrawText(textX, textY, "5 mm Al absorber");
+   t2->DrawText(textX, textY - correction_5, "5 mm Al absorber");
    
    graphPad->cd(5);
    gPad->SetGridy();
    hMC6->Draw("LA");
-   t2->DrawText(textX, textY, "6 mm Al absorber");
+   t2->DrawText(textX, textY - correction_6, "6 mm Al absorber");
 
 
 }

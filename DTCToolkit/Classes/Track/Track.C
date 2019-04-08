@@ -182,7 +182,7 @@ void  Track::propagateSecondaryStatus() {
 
    for (Int_t c=0; c<GetEntriesFast(); c++) {
       if (!At(c)) continue;
-      if (At(c)->getEventID() < 0) {
+      if (At(c)->isSecondary()) {
          isSecondary = true;
          break;
       }
@@ -190,7 +190,7 @@ void  Track::propagateSecondaryStatus() {
    if (isSecondary) {
       for (Int_t c=0; c<GetEntriesFast(); c++) {
          if (!At(c)) continue;
-         At(c)->setEventID(-1);
+         At(c)->setSecondary(true);
       }
    }
 }

@@ -70,8 +70,7 @@ Tracks * Clusters::findTracksWithRecursiveWeighting() {
    showDebug("ok!\n");
    kMCSFactor = 25;
 
-   if (kAbsorberThickness == 2) kMaxTrackScore *= 1.3;
-   if (kAbsorberThickness == 3) kMaxTrackScore *= 1.1;
+   if (kAbsorberThickness == 2) kMaxTrackScore *= 2; // phenomenological factor ..? 
 
    for (Int_t i=0; i<GetEntriesFast(); i++) {
       if (!At(i)) continue;
@@ -179,7 +178,7 @@ void Clusters::doRecursiveWeightedTracking(Node * seedNode, vector<Node*> * endN
          nextScore = thisNode->getNextScore(nextCluster);
          nextAngle = thisNode->getNodeAngle(nextCluster);
 
-          if ((nextScore < kMaxTrackScore ) ){// || (nextAngle < kMaxTrackAngle)) {
+          if ((nextScore < kMaxTrackScore || (nextAngle < 0.03)) ){// || (nextAngle < kMaxTrackAngle)) {
               thisNode->addChild(new Node(thisNode, nextCluster, nextScore)); // it is either appended to the tree or deleted if thisNode is full
           }
       }

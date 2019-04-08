@@ -441,12 +441,9 @@ void getTracksReconstructionEfficiency(Int_t dataType, Float_t energy, Float_t d
       run_energy = getEnergyAtWEPL(energy, degraderThickness);
    }
 
-//   Int_t nRunArray[8] = {19,32,64,108,215,512,1024,2048};
-//   Int_t nRunArray[7] = {10,25,50,100,150,250,500};
    Int_t nRunArray[12] = {3,4,5,8,16,32,64,128,181,256,512,1024};
 
-   for (Int_t i=0; i<12; i++) { // 1 -> 30
-//      nRuns = pow(2, 1 + 0.4 * i) + 0.5;
+   for (Int_t i=1; i<12; i++) { // 1 -> 30
       nRuns = nRunArray[i];
 
       kEventsPerRun = nRuns;
@@ -457,84 +454,34 @@ void getTracksReconstructionEfficiency(Int_t dataType, Float_t energy, Float_t d
       if (totalNumberOfRuns > 3000) totalNumberOfRuns = 3000;
 
       Tracks * tracks = loadOrCreateTracks(1, totalNumberOfRuns, dataType, energy);
-
       tracks->removeHighAngleTracks(75);
       tracks->removeThreeSigmaShortTracks();
       tracks->removeNuclearInteractions();
-
-      char * sDataType = getDataTypeChar(dataType);
-      TCanvas *c1 = new TCanvas("c1", "c1", 1200, 800);
-      TH1F *hAngles = new TH1F("hAngles", Form("Proton angle plot with %d protons in frame (%s)", nRuns, sDataType), 500, 0, 30);
-      TCanvas *c2 = new TCanvas("c2", "Number of correct proton tracks with depth", 1200, 800);
-      TH1F *hCorrectTracks = new TH1F("hCorrectTracks", "Number of correct proton tracks with depth", 10, 0, 10);
-      TH1F *normCorrectTracks = new TH1F("normCorrectTracks", "Normalisation histogram", 10,0,10);
-
-      hAngles->SetXTitle("Protons angle from initial measurement to layer 2");
-      hAngles->SetYTitle("Number of protons");
-      hAngles->SetFillColor(kCyan-8);
-      hAngles->SetLineColor(kBlack);
-      gStyle->SetOptStat(0);
-
-      hCorrectTracks->SetTitle(Form("Tracks with same eventID using %d protons/run", kEventsPerRun));
-      hCorrectTracks->SetXTitle("Layer number");
-      hCorrectTracks->SetYTitle("Number of protons");
-      hCorrectTracks->SetFillColor(kBlue-7);
-      hCorrectTracks->SetLineColor(kBlack);
+      tracks->extrapolateToLayer0();
 
       Track *thisTrack;
       Int_t EID, thisEID;
-      Int_t nTotal = tracks->GetEntries();
-      Int_t nTotal2 = 0;
-      Int_t nFirstAndLast = 0;
+      Int_t nTotal = 0;
       Int_t nFirstAndLastAllTracks = 0;
-      Int_t nFirstAndLastAllTracksOK2nd = 0;
-      Int_t nLastCloseToFirst = 0;
-      Int_t nCorrect = 0;
 
       for (Int_t j=0; j<tracks->GetEntriesFast(); j++) {
          thisTrack = tracks->At(j);
          if (!thisTrack) continue;
-         hAngles->Fill(thisTrack->getSlopeAngleChangeBetweenLayers(2));
+         nTotal++;
 
-         EID = thisTrack->getEventID(0);
-         if (EID > -1) { hCorrectTracks->Fill(0); }
-         normCorrectTracks->Fill(0);
-         nCorrect += (int) thisTrack->isOneEventID();
-         nFirstAndLast += (int) thisTrack->isFirstAndLastEventIDEqual();
-         nLastCloseToFirst += (Int_t) tracks->isLastEventIDCloseToFirst(j);
-         nFirstAndLastAllTracks += (int) (thisTrack->isFirstAndLastEventIDEqual() && tracks->getNMissingClustersWithEventID(thisTrack->getEventID(0), thisTrack->Last()->getLayer()) == 0);
-         nFirstAndLastAllTracksOK2nd += (int) ((thisTrack->isFirstAndLastEventIDEqual() || thisTrack->Last()->isSecondary()) && tracks->getNMissingClustersWithEventID(thisTrack->getEventID(0), thisTrack->Last()->getLayer()) == 0);
-      
-         for (Int_t k=1; k<thisTrack->GetEntriesFast(); k++) {
-            if (!thisTrack->At(k)) continue;
-            normCorrectTracks->Fill(thisTrack->getLayer(k));
-            thisEID = thisTrack->getEventID(k);
-            if (thisEID == EID || EID == -1) {
-               hCorrectTracks->Fill(thisTrack->getLayer(k));
-            }
+         if (thisTrack->isFirstAndLastEventIDEqual() && tracks->getNMissingClustersWithEventID(thisTrack->getEventID(0), thisTrack->Last()->getLayer(), 1) == 0) {
+            nFirstAndLastAllTracks++;
          }
       }
 
-      Float_t ratioCorrect = (float) nCorrect / nTotal;
-      Float_t ratioFirstAndLast = (float) nFirstAndLast / nTotal;
       Float_t ratioFirstAndLastAllTracks = (float) nFirstAndLastAllTracks / nTotal;
-      Float_t ratioFirstAndLastAllTracksOK2nd = (float) nFirstAndLastAllTracksOK2nd / nTotal;
-      Float_t ratioLastCloseToFirst = (float) nLastCloseToFirst / nTotal;
-
-      hCorrectTracks->Divide(normCorrectTracks);
-      
       Float_t readoutAbsorber = (roundf(kAbsorberThickness) == kAbsorberThickness) ? kAbsorberThickness : kAbsorberThickness*10;
 
       ofstream file2("OutputFiles/lastLayerCorrect_different_nRuns.csv", ofstream::out | ofstream::app);
-      file2 << readoutAbsorber << " " << nRuns << " " << ratioCorrect << " " << ratioFirstAndLast << " " << ratioFirstAndLastAllTracksOK2nd  << " " << ratioFirstAndLastAllTracks << endl;
+      file2 << readoutAbsorber << " " << nRuns << " " << " " << ratioFirstAndLastAllTracks << endl;
       file2.close();
       
       delete tracks;
-      delete hAngles;
-      delete hCorrectTracks;
-      delete normCorrectTracks;
-      delete c1;
-      delete c2;
    }
 }
 
@@ -867,7 +814,7 @@ void drawTracksRangeHistogram(Int_t Runs, Int_t dataType, Bool_t recreate, Float
       }
 
       // Do track fit, extract all parameters for this track
-      outputGraph = (TGraphErrors*) thisTrack->doTrackFit(false, true); // (bool isScaleVariable, bool useTrackLength (~ CSDA))
+      outputGraph = (TGraphErrors*) thisTrack->doTrackFit(false, kUseCSDA); // (bool isScaleVariable, bool useTrackLength (~ CSDA))
       if (!outputGraph) continue;
    
       delete outputGraph;
@@ -1742,7 +1689,7 @@ void drawTracks3D(Int_t Runs, Int_t dataType, Bool_t recreate, Int_t switchLayer
    tracks->removeHighAngleTracks(75); // mrad
    tracks->removeThreeSigmaShortTracks();
    tracks->removeNuclearInteractions();
-   // tracks->fillOutIncompleteTracks(0.02);
+   tracks->fillOutIncompleteTracks(0.05);
 
    tracks->doTrackFit();
 
@@ -1846,6 +1793,10 @@ void drawTracks3D(Int_t Runs, Int_t dataType, Bool_t recreate, Int_t switchLayer
    Int_t nPrimaryIncomplete = 0;
    Int_t nPrimaryConfused = 0;
    Int_t nPrimaryConfusedIncomplete = 0;
+   Int_t nOkSecondary = 0;
+   Int_t nSecondaryIncomplete = 0;
+   Int_t nSecondaryConfused = 0;
+   Int_t nSecondaryConfusedIncomplete = 0;
    numberOfPrimaries = 0;
    numberOfSecondaries = 0;
    Float_t correctPosx;
@@ -1922,6 +1873,25 @@ void drawTracks3D(Int_t Runs, Int_t dataType, Bool_t recreate, Int_t switchLayer
       else { // secondary
          numberOfSecondaries++;
          hWEPLSecondary->Fill(getUnitFromTL(thisTrack->getFitParameterRange()));
+
+         if (thisTrack->isFirstAndLastEventIDEqual()) { // No confused tracks
+            if (nMissingEID == 0) { // No missing clusters
+               nOkSecondary++;
+            }
+
+            else { // Missing clusters
+               nSecondaryIncomplete++;
+            }
+         }
+
+         else { // Confused tracks
+            if (nMissingEID == 0) { // No missing clusters
+               nSecondaryConfused++;
+            }
+            else { // Confused AND Missing clusters
+               nSecondaryConfusedIncomplete++;
+            }
+         }
       }
 
       if (thisTrack->isOneEventID()) nTrueTracks++;
@@ -1963,10 +1933,29 @@ void drawTracks3D(Int_t Runs, Int_t dataType, Bool_t recreate, Int_t switchLayer
 
    cout << "Total number of tracks = " << numberOfPrimaries + numberOfSecondaries << endl;
    cout << "Number of primaries = " << numberOfPrimaries << ", number of secondaries = " << numberOfSecondaries << endl;
-   cout << "Number of primaries tracked correctly = " << nOkPrimary << " (" << 100 * (float) nOkPrimary / numberOfPrimaries << ")\n";
-   cout << "Number of primaries confused = " << nPrimaryConfused << " (" << 100 * (float) nPrimaryConfused / numberOfPrimaries << ")\n";
-   cout << "Number of primaries incompletely tracked = " << nPrimaryIncomplete << " (" << 100 * (float) nPrimaryIncomplete / numberOfPrimaries << ")\n";
-   cout << "Number of primaries confused + incompletely tracked = " << nPrimaryConfusedIncomplete << " (" << 100 * (float) nPrimaryConfusedIncomplete / numberOfPrimaries << ")\n";
+   cout << "Number of primaries tracked correctly = " << nOkPrimary << " (" << 100 * (float) nOkPrimary / numberOfPrimaries << "%)\n";
+   cout << "Number of primaries confused = " << nPrimaryConfused << " (" << 100 * (float) nPrimaryConfused / numberOfPrimaries << "%)\n";
+   cout << "Number of primaries incompletely tracked = " << nPrimaryIncomplete << " (" << 100 * (float) nPrimaryIncomplete / numberOfPrimaries << "%)\n";
+   cout << "Number of primaries confused + incompletely tracked = " << nPrimaryConfusedIncomplete << " (" << 100 * (float) nPrimaryConfusedIncomplete / numberOfPrimaries << "%)\n";
+   
+   cout << endl << endl;
+   cout << "Total number of primaries = " << numberOfPrimaries << endl;
+   cout << "Primaries tracked correctly = " << nOkPrimary << " (" << 100 * (float) nOkPrimary / numberOfPrimaries;
+   cout << "%),  Secondaries tracked correctly = " << nOkSecondary << " (" << 100 * (float) nOkSecondary / numberOfSecondaries << "%)\n";
+
+   cout << endl << endl;
+   cout << "Total number of tracks = " << numberOfPrimaries + numberOfSecondaries << endl;
+   cout << "Tracks tracked correctly = " << nOkPrimary + nOkSecondary << " (" << 100 * (float) ( nOkPrimary + nOkSecondary) / (numberOfPrimaries + numberOfSecondaries) << "%), of which " << nOkPrimary << " (" << 100 * (float) nOkPrimary / (nOkPrimary + nOkSecondary);
+   cout << "%) are primaries, and " << nOkSecondary << " (" << 100 * (float) nOkSecondary / (nOkSecondary + nOkPrimary) << "%) are secondaries.\n";
+   cout << "Tracks confused = " << nPrimaryConfused + nSecondaryConfused << " (" << 100 * (float) (nPrimaryConfused + nSecondaryConfused) / (numberOfPrimaries + numberOfSecondaries) << "%), of which " << nPrimaryConfused << " (" << 100 * (float) nPrimaryConfused / (nPrimaryConfused + nSecondaryConfused);
+   cout << "%) are primaries and " << nSecondaryConfused << " (" << 100 * (float) nSecondaryConfused / (nPrimaryConfused + nSecondaryConfused);
+   cout << "%) are secondaries.\n";
+   cout << "Tracks incompletely tracked = " << nPrimaryIncomplete + nSecondaryIncomplete << " (" << 100 * (float) (nPrimaryIncomplete + nSecondaryIncomplete) / (numberOfPrimaries + numberOfSecondaries) << "%), of which " << nPrimaryIncomplete << " (" << 100 * (float) nPrimaryIncomplete / (nPrimaryIncomplete + nSecondaryIncomplete);
+   cout << "%) are primaries and " << nSecondaryIncomplete << " (" << 100 * (float) nSecondaryIncomplete/ (nPrimaryIncomplete+ nSecondaryIncomplete);
+   cout << "%) are secondaries.\n";
+   cout << "Tracks confused and incompletely tracked = " << nPrimaryConfusedIncomplete + nSecondaryConfusedIncomplete << " (" << 100 * (float) (nPrimaryConfusedIncomplete + nSecondaryConfusedIncomplete) / (numberOfPrimaries + numberOfSecondaries) << "%), of which " << nPrimaryConfusedIncomplete << " (" << 100 * (float) nPrimaryConfusedIncomplete / (nPrimaryConfusedIncomplete + nSecondaryConfusedIncomplete);
+   cout << "%) are primaries and " << nSecondaryConfusedIncomplete << " (" << 100 * (float) nSecondaryConfusedIncomplete/ (nPrimaryConfusedIncomplete+ nSecondaryConfusedIncomplete);
+   cout << "%) are secondaries.\n";
 
    Float_t factorEIDOK = 100 * ((float) nOKTracks / numberOfTracks);
    Float_t factorEIDOKAllClusters = 100 * ((float) nOKTracksAllClusters / numberOfTracks);
@@ -1974,6 +1963,7 @@ void drawTracks3D(Int_t Runs, Int_t dataType, Bool_t recreate, Int_t switchLayer
    Float_t factorEIDOKMinus = 100 * ((float) nOKMinusTracks / numberOfTracks);
    Float_t factorLastLayers = 100 * ((float) nOKLastLayers / numberOfTracks);
 
+   cout << endl << endl;
    cout << nOKTracks << " of total " << numberOfTracks << " tracks has the same first/last ID (" << factorEIDOK << "%)\n";
    cout << nOKTracksAllClustersOK2nd << " of total " << numberOfTracks << " track has first/last event ID + no missing clusters (" << factorEIDOKAllClustersOK2nd << "%)\n";
    cout << nOKMinusTracks << " of total " << numberOfTracks << " tracks has a close match (0.5 mm, 1 degree) on first / last cluster (" << factorEIDOKMinus << "%)\n";
@@ -1985,82 +1975,77 @@ void drawTracks3D(Int_t Runs, Int_t dataType, Bool_t recreate, Int_t switchLayer
    Int_t badShort = 0;
    Int_t incompletePrimary = 0;
 
-   for (Int_t i=0; i<ntracks; i++) {
-      Track *thisTrack = tracks->At(i);
-      if (!thisTrack) continue;
-
-      Int_t n = thisTrack->GetEntriesFast();
-
-      TPolyLine3D *l = new TPolyLine3D(n);
-      l->SetLineWidth(2);
-      TPolyMarker3D *trackPoints = new TPolyMarker3D(nClusters, 7);
-      nMissingEID = tracks->getNMissingClustersWithEventID(thisTrack->getEventID(0), thisTrack->Last()->getLayer(), i);
-      if (!thisTrack->isFirstAndLastEventIDEqual()) {
-         l->SetLineColor(kRed);
-      }
-
-      else if (nMissingEID>0) {
-         l->SetLineColor(kGray);
-      }
-     
-      if (thisTrack->isSecondary(0) || thisTrack->Last()->isSecondary()) {
-         l->SetLineColor(kGreen);
-      }
-
-      Int_t lineElementNumber = 0;
-      Int_t pointNumber = 0;
-      for (Int_t j=0; j<n; j++) {
-         if (!thisTrack->At(j)) continue;
-
-         Float_t x = thisTrack->getX(j);
-         Float_t z = thisTrack->getY(j);
-         Float_t y = thisTrack->getLayer(j);
-         
-         if (thisTrack->getLayer(j) < switchLayer) {
-            l->SetPoint(lineElementNumber++,x,y,z);
-         }
-         else {
-            trackPoints->SetPoint(pointNumber++, x, y, z);
-         }
-      }
-
-      conflictClusters = (Clusters*) thisTrack->getConflictClusters();
-      for (Int_t j=0; j<conflictClusters->GetEntriesFast(); j++) {
-         if (!conflictClusters->At(j)) continue;
-         
-         Float_t x = conflictClusters->getX(j);
-         Float_t z = conflictClusters->getY(j);
-         Float_t y = conflictClusters->getLayer(j);
-         
-         conflictMarker->SetPoint(conflictIdx++, x,y,z);
-      }
-      if (kDraw) {
-//       l->SetLineColor(kBlack);
-         l->SetLineWidth(3);
-         if (l->GetLineColor() == kRed) l->Draw();
-         if (l->GetLineColor() == kGreen) l->Draw();
-         if (l->GetLineColor() == kGray) l->Draw();
-         l->Draw();
-      }
-
-      if (l->GetLineColor() == kGreen) badSecondary++;
-      if (l->GetLineColor() == kRed)   badPrimary++;
-      else if (l->GetLineColor() == kGray) incompletePrimary++;
-      else okPrimary++;
-      
-      if (kDraw) {
-         trackPoints->Draw();
-         EIDMarker->Draw();
-//      conflictMarker->Draw();
-      }
-   }
-
-   Int_t badTotal = badPrimary + badSecondary;
-   printf("Of %d bad tracks, %d (%.2f %%) are primaries and %d (%.2f %%) are secondaries.\n", badTotal, badPrimary, 100 * float(badPrimary) / badTotal, badSecondary, 100 * float(badSecondary) / badTotal);
-   printf("okPrimary = %d\n", okPrimary);
-   printf("Incomplete primary = %d\n", incompletePrimary);
-
    if (kDraw) {
+      for (Int_t i=0; i<ntracks; i++) {
+         Track *thisTrack = tracks->At(i);
+         if (!thisTrack) continue;
+
+         Int_t n = thisTrack->GetEntriesFast();
+
+         TPolyLine3D *l = new TPolyLine3D(n);
+         l->SetLineWidth(2);
+         TPolyMarker3D *trackPoints = new TPolyMarker3D(nClusters, 7);
+         nMissingEID = tracks->getNMissingClustersWithEventID(thisTrack->getEventID(0), thisTrack->Last()->getLayer(), i);
+         if (!thisTrack->isFirstAndLastEventIDEqual()) {
+            l->SetLineColor(kRed);
+         }
+
+         else if (nMissingEID>0) {
+            l->SetLineColor(kGray);
+         }
+        
+         if (thisTrack->isSecondary(0) || thisTrack->Last()->isSecondary()) {
+            l->SetLineColor(kGreen);
+         }
+
+         Int_t lineElementNumber = 0;
+         Int_t pointNumber = 0;
+         for (Int_t j=0; j<n; j++) {
+            if (!thisTrack->At(j)) continue;
+
+            Float_t x = thisTrack->getX(j);
+            Float_t z = thisTrack->getY(j);
+            Float_t y = thisTrack->getLayer(j);
+            
+            if (thisTrack->getLayer(j) < switchLayer) {
+               l->SetPoint(lineElementNumber++,x,y,z);
+            }
+            else {
+               trackPoints->SetPoint(pointNumber++, x, y, z);
+            }
+         }
+
+         conflictClusters = (Clusters*) thisTrack->getConflictClusters();
+         for (Int_t j=0; j<conflictClusters->GetEntriesFast(); j++) {
+            if (!conflictClusters->At(j)) continue;
+            
+            Float_t x = conflictClusters->getX(j);
+            Float_t z = conflictClusters->getY(j);
+            Float_t y = conflictClusters->getLayer(j);
+            
+            conflictMarker->SetPoint(conflictIdx++, x,y,z);
+         }
+         if (kDraw) {
+   //       l->SetLineColor(kBlack);
+            l->SetLineWidth(3);
+            if (l->GetLineColor() == kRed) l->Draw();
+            if (l->GetLineColor() == kGreen) l->Draw();
+            if (l->GetLineColor() == kGray) l->Draw();
+            l->Draw();
+         }
+
+         if (l->GetLineColor() == kGreen) badSecondary++;
+         if (l->GetLineColor() == kRed)   badPrimary++;
+         else if (l->GetLineColor() == kGray) incompletePrimary++;
+         else okPrimary++;
+         
+         if (kDraw) {
+            trackPoints->Draw();
+            EIDMarker->Draw();
+   //      conflictMarker->Draw();
+         }
+      }
+      
       view->ShowAxis(); // comment for pure display
       c1->Update();
 
@@ -2073,8 +2058,29 @@ void drawTracks3D(Int_t Runs, Int_t dataType, Bool_t recreate, Int_t switchLayer
       axis->SetZTitle("Pixels in Y");
       axis->SetLabelSize(0.025);
       axis->SetTitleOffset(2);
+
    }
-   
+
+   TCanvas *c2 = new TCanvas();
+   TH1I *changeEID = new TH1I("changeEID", "Change EID;Layer;EID changes", 100, 0, 100);
+   for (int i=0; i<tracks->GetEntriesFast(); i++) {
+      Track * thisTrack = tracks->At(i);
+      if (!thisTrack) continue;
+      int firstEID = thisTrack->getEventID(0);
+      for (int j=0; j<thisTrack->GetEntriesFast(); j++) {
+         if (thisTrack->getEventID(j) != firstEID) {
+            changeEID->Fill(thisTrack->getLayer(j));
+            break;
+         }
+      }
+   }
+   changeEID->Draw();
+
+   Int_t badTotal = badPrimary + badSecondary;
+   printf("Of %d bad tracks, %d (%.2f %%) are primaries and %d (%.2f %%) are secondaries.\n", badTotal, badPrimary, 100 * float(badPrimary) / badTotal, badSecondary, 100 * float(badSecondary) / badTotal);
+   printf("okPrimary = %d\n", okPrimary);
+   printf("Incomplete primary = %d\n", incompletePrimary);
+
    /*
    vector<Int_t> * conflictTracks = tracks->getTracksWithConflictClusters();
    vector<Int_t> * oneConflictPair = nullptr;

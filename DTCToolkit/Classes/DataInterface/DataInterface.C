@@ -456,9 +456,16 @@ void  DataInterface::getMCClusters(Int_t runNo, Clusters *clusters, Hits * hits)
    Long64_t nentries = fChain->GetEntriesFast();
    Long64_t nbytes = 0, nb = 0;
 
+   Bool_t   hasRun = false;
+
    for (Long64_t jentry=lastJentry_; jentry<nentries; jentry++) { // new interaction
+      hasRun = true;
       Long64_t ientry = LoadTree(jentry);
-      if (ientry<0) break;
+      if (ientry<0) {
+         lastJentry_ = jentry;
+         break;
+      }
+
       nb = fChain->GetEntry(jentry);
       nbytes += nb;
 
@@ -476,30 +483,26 @@ void  DataInterface::getMCClusters(Int_t runNo, Clusters *clusters, Hits * hits)
 
       layer = level1ID + baseID - 1;
       if (kFilterNuclearInteractions == true && parentID != 0) {
-//         lastEventID = -1;
          isSecondary = true;
          continue;
       }
 
       if (lastEventID == eventID && trackID > 1) {
-//         cout << "2nd, ";
-//         if (!isSecondary) cout << "2nd due to " << lastProcessName << "/" << processName << " with tid " << trackID << ", parid " << parentID << " and PID " << PDGEncoding << endl;
          isSecondary = true;
       }
 
       if (lastEventID != eventID || lastLayer != layer) { // new layer -- store summed information from LAST layer now 
          x = sumX/n / dx + nx/2;
          y = sumY/n / dy + ny/2;
-//         cout << lastEventID << ":" << lastLayer << ":" << lastParentID << ":" << lastTrackID << ", ";
 
          if (lastLayer < nLayers) {
             if (isSecondary) {
                if (hits)      hits->appendPoint(x, y, lastLayer, sum_edep/14, lastEventID, true);
-               if (clusters)  clusters->appendClusterEdep(x, y, lastLayer, sum_edep/14, lastEventID, true);
+               if (clusters)  clusters->appendClusterEdep(sumX/n, sumY/n, lastLayer, sum_edep/14, lastEventID, true);
             }
             else {
                if (hits)      hits->appendPoint(x, y, lastLayer, sum_edep/14, lastEventID, false);
-               if (clusters)  clusters->appendClusterEdep(x, y, lastLayer, sum_edep/14, lastEventID, false);
+               if (clusters)  clusters->appendClusterEdep(x,y, lastLayer, sum_edep/14, lastEventID, false);
             }
          }
 
@@ -513,16 +516,14 @@ void  DataInterface::getMCClusters(Int_t runNo, Clusters *clusters, Hits * hits)
          continue;
       }
       
-      else if (eventID >= eventIdTo) {
+      else if (eventID == eventIdTo || jentry == nentries-1) { // LAST ENTRY, EXIT AND APPEND THIS
          lastJentry_ = jentry;
          break;
       }
 
       if (eventID != lastEventID) { // new track
-//         cout << "\n1st, ";
          isSecondary = false;
       }
-
 
       sum_edep += edep*1000;
       sumX += posX;
@@ -536,7 +537,8 @@ void  DataInterface::getMCClusters(Int_t runNo, Clusters *clusters, Hits * hits)
       n++;
    }
    
-   if (lastEventID != eventID || lastLayer != layer || lastParentID != parentID) {
+   if ((lastJentry_ == nentries-1) && (lastEventID != eventID || lastLayer != layer || lastParentID != parentID)) {
+      fChain->GetEntry(lastJentry_);
       x = sumX/n / dx + nx/2;
       y = sumY/n / dy + ny/2;
 
@@ -547,7 +549,7 @@ void  DataInterface::getMCClusters(Int_t runNo, Clusters *clusters, Hits * hits)
          }
          else {
             if (hits)      hits->appendPoint(x, y, lastLayer, sum_edep/14, lastEventID, false);
-            if (clusters)  clusters->appendClusterEdep(x, y, lastLayer, sum_edep/14, lastEventID, false);
+            if (clusters)  clusters->appendClusterEdep(x,y, lastLayer, sum_edep/14, lastEventID, false);
          }
       }
 

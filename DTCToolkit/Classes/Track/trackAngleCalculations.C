@@ -53,6 +53,8 @@ Float_t Track::getSlopeAngleBetweenLayers(Int_t i) {
    Float_t xyDist, angle;
 
    a = At(i-1); b = At(i);
+
+   if (!a || !b) return -1;
    
    diffx = b->getXmm() - a->getXmm();
    diffy = b->getYmm() - a->getYmm();

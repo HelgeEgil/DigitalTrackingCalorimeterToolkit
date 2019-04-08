@@ -458,11 +458,33 @@ Int_t Tracks::getNMissingClustersWithEventID(Int_t eventID, Int_t afterLayer, In
 
    for (Int_t i=0; i<GetEntriesFastCWT(); i++) {
       if (!AtCWT(i)) continue;
-      Bool_t missingClusterWithEventID = (AtCWT(i)->getEventID() == eventID && eventID>0);
+      if (!At(trackID)) continue;
+      if (AtCWT(i)->isSecondary()) continue;
+
+      Bool_t missingClusterWithEventID = (AtCWT(i)->getEventID() == eventID);
       Bool_t missingInLastLayers = (AtCWT(i)->getLayer() > afterLayer);
-      Bool_t missingInFirstLayers = (AtCWT(i)->getLayer() < At(trackID)->At(0)->getLayer());
+      Bool_t missingInFirstLayers = (AtCWT(i)->getLayer() < At(trackID)->getLayer(0));
       if (missingClusterWithEventID && (missingInLastLayers || missingInFirstLayers)) n++;
    }
+
+   /*
+   if (n>0) {
+      printf("The following track misses %d clusters: ", n);
+      cout << *At(trackID) << endl;
+      printf("The missing clusters are: \n");
+      for (Int_t i=0; i<GetEntriesFastCWT(); i++) {
+         if (!AtCWT(i)) continue;
+         if (!At(trackID)) continue;
+         Bool_t missingClusterWithEventID = (AtCWT(i)->getEventID() == eventID);
+         Bool_t missingInLastLayers = (AtCWT(i)->getLayer() > afterLayer);
+         Bool_t missingInFirstLayers = (AtCWT(i)->getLayer() < At(trackID)->getLayer(0));
+         if (missingClusterWithEventID && (missingInLastLayers || missingInFirstLayers)) {
+            cout << *AtCWT(i) << ", with angle " << getDotProductAngle(At(trackID)->At(GetEntriesFast(trackID)-2), At(trackID)->Last(), AtCWT(i)) * 1000 << " mrad.\n";
+         }
+      }
+      cout << endl;
+   }
+   */
 
    return n;
 }
