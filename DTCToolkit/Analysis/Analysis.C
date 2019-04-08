@@ -443,15 +443,15 @@ void getTracksReconstructionEfficiency(Int_t dataType, Float_t energy, Float_t d
 
    Int_t nRunArray[12] = {3,4,5,8,16,32,64,128,181,256,512,1024};
 
-   for (Int_t i=1; i<12; i++) { // 1 -> 30
+   for (Int_t i=0; i<12; i++) { // 1 -> 30
       nRuns = nRunArray[i];
 
       kEventsPerRun = nRuns;
       Float_t factor = 2;
 
-      Int_t totalNumberOfRuns = 5000 / kEventsPerRun;
+      Int_t totalNumberOfRuns = 10000 / kEventsPerRun;
       if (totalNumberOfRuns < 1) totalNumberOfRuns = 1;
-      if (totalNumberOfRuns > 3000) totalNumberOfRuns = 3000;
+      if (totalNumberOfRuns > 10000) totalNumberOfRuns = 10000;
 
       Tracks * tracks = loadOrCreateTracks(1, totalNumberOfRuns, dataType, energy);
       tracks->removeHighAngleTracks(75);
@@ -477,7 +477,7 @@ void getTracksReconstructionEfficiency(Int_t dataType, Float_t energy, Float_t d
       Float_t ratioFirstAndLastAllTracks = (float) nFirstAndLastAllTracks / nTotal;
       Float_t readoutAbsorber = (roundf(kAbsorberThickness) == kAbsorberThickness) ? kAbsorberThickness : kAbsorberThickness*10;
 
-      ofstream file2("OutputFiles/lastLayerCorrect_different_nRuns.csv", ofstream::out | ofstream::app);
+      ofstream file2(Form("OutputFiles/lastLayerCorrect_different_nRuns_%.0f.csv", kAbsorberThickness), ofstream::out | ofstream::app);
       file2 << readoutAbsorber << " " << nRuns << " " << " " << ratioFirstAndLastAllTracks << endl;
       file2.close();
       

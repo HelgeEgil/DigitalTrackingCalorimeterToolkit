@@ -438,8 +438,6 @@ void  DataInterface::getMCClusters(Int_t runNo, Clusters *clusters, Hits * hits)
    Int_t eventIdFrom = runNo * kEventsPerRun + kSkipTracks;
    Int_t eventIdTo = eventIdFrom + kEventsPerRun + kSkipTracks;
 
-   printf("eventIdFrom = %d, eventIdTo = %d.\n", eventIdFrom, eventIdTo);
-
    if (runNo == 0) lastJentry_ = 0;
    
    Float_t  sum_edep = 0;

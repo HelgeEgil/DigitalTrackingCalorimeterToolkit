@@ -231,10 +231,6 @@ Tracks * getTracksFromClusters(Int_t Runs, Int_t dataType, Int_t frameType, Floa
    Tracks          * allTracks = new Tracks(nTracks * Runs);
    TRandom3        * gRandom = new TRandom3(0);
 
-   TH2C            * hHits = new TH2C("hHits", "", 500, 4250, 4750, 500, 2000, 2500);
-   TH2C            * hDiffusedHits = new TH2C("hDiffusedHits", "", 500, 4250, 4750, 500, 2000, 2500);
-   TH2C            * hClusters = new TH2C("hClusters", "", 500, 4250, 4750, 500, 2000, 2500);
-
    allTracks->SetOwner(kTRUE);
 
    TStopwatch t1, t2, t3, t4, t5, t6;
@@ -259,25 +255,6 @@ Tracks * getTracksFromClusters(Int_t Runs, Int_t dataType, Int_t frameType, Floa
          diffusedHits->makeLayerIndex();
          clusters = diffusedHits->findClustersFromHits();
 
-         for (int j=0; j<hits->GetEntriesFast(); j++) {
-            if (hits->getLayer(j) == 7) {
-               cout << *hits->At(j) << endl;
-               hHits->Fill(hits->getX(j), hits->getY(j));
-            }
-         }
-         
-         for (int j=0; j<diffusedHits->GetEntriesFast(); j++) {
-            if (diffusedHits->getLayer(j) == 7) {
-               hDiffusedHits->Fill(diffusedHits->getX(j), diffusedHits->getY(j));
-            }
-         }
-         
-         for (int j=0; j<clusters->GetEntriesFast(); j++) {
-            if (clusters->getLayer(j) == 7) {
-               hClusters->Fill(clusters->getX(j), clusters->getY(j));
-            }
-         }
-
          delete hits;
          delete diffusedHits;
       }
@@ -294,7 +271,7 @@ Tracks * getTracksFromClusters(Int_t Runs, Int_t dataType, Int_t frameType, Floa
          clusters->sortClusters();
          showDebug("ok!\n Start tracking (kWeightedRecursive)\n");
          tracks = clusters->findTracksWithRecursiveWeighting();
-         if (i%10 == 0)    printf("Found %d tracks from %d Clusters in run %.2f-%d.\n", tracks->GetEntriesFast(), clusters->GetEntriesFast(), run_energy, i);
+         if (i%10 == 0) printf("Found %d tracks from %d Clusters in run %.2f-%d.\n", tracks->GetEntriesFast(), clusters->GetEntriesFast(), run_energy, i);
       }
       else {
          tracks = clusters->findCalorimeterTracksWithMCTruth();
@@ -344,31 +321,6 @@ Tracks * getTracksFromClusters(Int_t Runs, Int_t dataType, Int_t frameType, Floa
 
       if (breakSignal) break;
    }
-
-   TCanvas *c = new TCanvas;
-   gStyle->SetPalette(56);
-   gStyle->SetOptStat(0);
-
-   c->Divide(3,1,1e-5,1e-5);
-   c->cd(1);
-   int yfrom = 2180;
-   int yto = 2280;
-   int xfrom = 4400;
-   int xto = 4500;
-   hHits->SetTitle("Monte Carlo pixel hits;X position [# of pixels];Y position [# of pixels]");
-   hHits->GetXaxis()->SetRangeUser(xfrom, xto);
-   hHits->GetYaxis()->SetRangeUser(yfrom, yto);
-   hHits->Draw("col");
-   hDiffusedHits->SetTitle("Diffused pixel hits;X position [# of pixels];Y position [# of pixels]");
-   hDiffusedHits->GetXaxis()->SetRangeUser(xfrom, xto);
-   hDiffusedHits->GetYaxis()->SetRangeUser(yfrom, yto);
-   c->cd(2);
-   hDiffusedHits->Draw("col");
-   c->cd(3);
-   hClusters->SetTitle("Identified cluster positions;X position [# of pixels];Y position [# of pixels]");
-   hClusters->GetXaxis()->SetRangeUser(xfrom, xto);
-   hClusters->GetYaxis()->SetRangeUser(yfrom, yto);
-   hClusters->Draw("col");
 
    printf("Timing: Cluster retrieval: %.3f s. Tracking: %.3f s. Track improvements: %.3f s. Logistics: %.3f s. Sort TCA by layer: %.3f s\n", t1.CpuTime(), t2.CpuTime(), t3.CpuTime(), t4.CpuTime(), t6.CpuTime());
 

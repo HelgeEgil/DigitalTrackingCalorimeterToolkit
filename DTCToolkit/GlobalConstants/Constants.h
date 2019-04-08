@@ -47,7 +47,7 @@ Bool_t   kIsFirstLayerAir = true;
 Bool_t   kDoTracking = true; // Move to argument list
 Bool_t   kUseEmpiricalMCS = true;
 Bool_t   kFilterNuclearInteractions = false; // Move to argument list
-Bool_t   kDoDiffusion = true;
+Bool_t   kDoDiffusion = false;
 Int_t    kEventsPerRun = 100;
 Int_t    kSkipTracks = 0;
 const Int_t    kEnergy = 250;
@@ -77,7 +77,7 @@ const Int_t ny = NY;
 const Int_t nTrackers = 4;
 
 #ifdef USEALPIDE
-const Float_t kAbsorberThickness = 2; // ALPIDE, CHANGE TO FIT MC DATA GEOMETRY
+const Float_t kAbsorberThickness = 3; // ALPIDE, CHANGE TO FIT MC DATA GEOMETRY
 #else
 const Float_t kAbsorberThickness = 3.3; // FOCAL EXPERIMENTAL DATA, DON'T CHANGE
 #endif
@@ -103,7 +103,7 @@ const Int_t kMaterial = kTungsten;
 #endif
 
 Int_t kOutputUnit = kWEPL;
-Bool_t kUseCSDA = true; // Use CSDA for range calculations and MC truth input
+Bool_t kUseCSDA = false; // Use CSDA for range calculations and MC truth input
 
 // Use experimental ALPIDE data clustering model -- empirical model with updated parameters
 // Otherwise use "old" gaussian model from FOCAL data
