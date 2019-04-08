@@ -70,11 +70,13 @@ vector<Float_t> findRange::Run(Double_t energy, Double_t sigma_mev, Int_t mm, In
    Float_t aw = 0.0239, pw = 1.7548;
 
    Float_t expectedRange = a * pow(run_energy, p);
-   Float_t xfrom = expectedRange - 15; // 15 for Al case
-   if (xfrom < 0) xfrom = 0;
-   Float_t xto = expectedRange + 15; // 15 for Al case
+   expectedRange = -0.4636 * run_degraderThickness + 178.81; // it's linear here dummy !!! 
 
+   Float_t xfrom = expectedRange - 8; // 15 for Al case
+   if (xfrom < 0) xfrom = 0;
+   Float_t xto = expectedRange + 8; // 15 for Al case
    Float_t x_compensate = 0;
+   
 
    Int_t energyFrom = run_energy - 15;
    Int_t energyTo = run_energy + 15;
