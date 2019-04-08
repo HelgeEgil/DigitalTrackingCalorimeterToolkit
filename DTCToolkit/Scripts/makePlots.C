@@ -293,7 +293,7 @@ void makePlots() {
    ifstream in2;
    ifstream in2uni;
 //   in2.open("OutputFiles/lastLayerCorrect_different_nRuns_elastic_noinelastic.csv");
-   in2.open("OutputFiles/lastLayerCorrect_different_nRuns.csv");
+   in2.open("OutputFiles/lastLayerCorrect_different_nRuns_diffusion.csv");
    in2uni.open("OutputFiles/lastLayerCorrect_different_nRuns_uniform.csv");
    Float_t np, correctLast, correctWhole, lastIsFirst, lastIsAlmostFirst;
    Int_t   mmAbsorber_;
@@ -314,10 +314,23 @@ void makePlots() {
    Float_t arrayFraction5mmY[200] = {0};
    Float_t arrayFraction6mmX[200] = {0};
    Float_t arrayFraction6mmY[200] = {0};
+   Float_t arrayFraction2mmNoDiffusionX[200] = {0};
+   Float_t arrayFraction2mmNoDiffusionY[200] = {0};
+   Float_t arrayFraction3mmNoDiffusionX[200] = {0};
+   Float_t arrayFraction3mmNoDiffusionY[200] = {0};
+   Float_t arrayFraction35mmNoDiffusionX[200] = {0};
+   Float_t arrayFraction35mmNoDiffusionY[200] = {0};
+   Float_t arrayFraction4mmNoDiffusionX[200] = {0};
+   Float_t arrayFraction4mmNoDiffusionY[200] = {0};
+   Float_t arrayFraction5mmNoDiffusionX[200] = {0};
+   Float_t arrayFraction5mmNoDiffusionY[200] = {0};
+   Float_t arrayFraction6mmNoDiffusionX[200] = {0};
+   Float_t arrayFraction6mmNoDiffusionY[200] = {0};
    Float_t arrayFractionUniformX[200] = {0};
    Float_t arrayFractionUniformY[200] = {0};
 
    Int_t nlinesF = 0, nlinesF2 = 0, nlinesF3 = 0, nlinesF4 = 0, nlinesF5 = 0, nlinesF6 = 0, nlinesF35 = 0;
+   Int_t nlinesNoDiffusionF = 0, nlinesNoDiffusionF2 = 0, nlinesNoDiffusionF3 = 0, nlinesNoDiffusionF4 = 0, nlinesNoDiffusionF5 = 0, nlinesNoDiffusionF6 = 0, nlinesNoDiffusionF35 = 0;
    Int_t nlinesUniform = 0;
    
    Float_t lastIsFirstAllTracks, lastIsFirst2ndOK;
@@ -325,22 +338,17 @@ void makePlots() {
    Int_t dropIdx = 0;
 
    while (1) {
-      in2 >> mmAbsorber_ >> np >> correctWhole >> lastIsFirst >> lastIsAlmostFirst >> lastIsFirst2ndOK >> lastIsFirstAllTracks;
+      in2 >> mmAbsorber_ >> np >> lastIsFirstAllTracks;
 
-      cout << mmAbsorber_ << ", " << np << ", " << lastIsFirstAllTracks << endl;
-      
+      /*
       if (np < 50) {
          if (dropIdx++ % 5 != 0) continue;
       }
+      */
 
       if (!in2.good()) break;
      
       if (mmAbsorber_ == 2) { 
-         arrayFractionX[nlinesF] = np;
-         arrayFractionY[nlinesF] = correctWhole * 100;
-         arrayFractionY2[nlinesF] = lastIsFirst * 100;
-         arrayFractionY3[nlinesF++] = lastIsAlmostFirst * 100;
-         
          arrayFraction2mmX[nlinesF2] = np;
          arrayFraction2mmY[nlinesF2++] = lastIsFirstAllTracks * 100;
       }
@@ -372,6 +380,52 @@ void makePlots() {
    }
 
    in2.close();
+   
+   in2.open("OutputFiles/lastLayerCorrect_different_nRuns_nodiffusion.csv");
+   while (1) {
+      in2 >> mmAbsorber_ >> np >> lastIsFirstAllTracks;
+
+      /*
+      if (np < 50) {
+         if (dropIdx++ % 5 != 0) continue;
+      }
+      */
+
+      if (!in2.good()) break;
+     
+      if (mmAbsorber_ == 2) { 
+         arrayFraction2mmNoDiffusionX[nlinesNoDiffusionF2] = np;
+         arrayFraction2mmNoDiffusionY[nlinesNoDiffusionF2++] = lastIsFirstAllTracks * 100;
+      }
+
+      if (mmAbsorber_ == 3) {
+         arrayFraction3mmNoDiffusionX[nlinesNoDiffusionF3] = np;
+         arrayFraction3mmNoDiffusionY[nlinesNoDiffusionF3++] = lastIsFirstAllTracks * 100;
+      }
+
+      if (mmAbsorber_ == 4) {
+         arrayFraction4mmNoDiffusionX[nlinesNoDiffusionF4] = np;
+         arrayFraction4mmNoDiffusionY[nlinesNoDiffusionF4++] = lastIsFirstAllTracks * 100;
+      }
+
+      if (mmAbsorber_ == 5) {
+         arrayFraction5mmNoDiffusionX[nlinesNoDiffusionF5] = np;
+         arrayFraction5mmNoDiffusionY[nlinesNoDiffusionF5++] = lastIsFirstAllTracks * 100;
+      }
+
+      if (mmAbsorber_ == 6) {
+         arrayFraction6mmNoDiffusionX[nlinesNoDiffusionF6] = np;
+         arrayFraction6mmNoDiffusionY[nlinesNoDiffusionF6++] = lastIsFirstAllTracks * 100;
+      }
+      
+      if (mmAbsorber_ == 35) {
+         arrayFraction35mmX[nlinesNoDiffusionF35] = np;
+         arrayFraction35mmY[nlinesNoDiffusionF35++] = lastIsFirstAllTracks * 100;
+      }
+   }
+
+   in2.close();
+
    
    while (1) {
       in2uni >> mmAbsorber_ >> np >> correctWhole >> lastIsFirst >> lastIsAlmostFirst >> lastIsFirstAllTracks;
@@ -826,7 +880,9 @@ void makePlots() {
 
    printf("BEFORE\n");
 
-   c22->cd();
+   c22->Divide(2,1,1e-5,1e-5);
+
+   c22->cd(2);
    TGraph *gFraction2mm = new TGraph(nlinesF2, arrayFraction2mmX, arrayFraction2mmY);
    TGraph *gFraction3mm = new TGraph(nlinesF3, arrayFraction3mmX, arrayFraction3mmY);
 //   TGraph *gFraction35mm = new TGraph(nlinesF35, arrayFraction35mmX, arrayFraction35mmY);
@@ -838,22 +894,22 @@ void makePlots() {
    printf("Some values in arrayFraction2mmXY: (%.2f, %.2f), (%.2f, %.2f)\n", arrayFraction2mmX[0], arrayFraction2mmY[0], arrayFraction3mmY[1], arrayFraction4mmY[1]);
    printf("nlinesF2,F3,F4 = %d, %d, %d.\n", nlinesF2, nlinesF3, nlinesF4);
 //   c22->SetLogx();
-   c22->SetGridy();
-   c22->SetGridx();
-   gFraction2mm->SetTitle(";Protons/cm^{2}/frame;Fraction of correctly reconstructed tracks");
-   gFraction2mm->GetXaxis()->SetRangeUser(1, 1020);
+   gPad->SetGridy();
+   gPad->SetGridx();
+   gFraction2mm->SetTitle(";Protons / readout frame;Fraction of correctly reconstructed tracks");
+   gFraction2mm->GetXaxis()->SetRangeUser(1, 520);
    gFraction2mm->SetMaximum(100);
    gFraction2mm->SetMinimum(20);
    gFraction2mm->GetXaxis()->SetTitleSize(0.05);
    gFraction2mm->GetYaxis()->SetTitleSize(0.05);
    gFraction2mm->GetXaxis()->SetLabelSize(0.05);
-   gFraction2mm->GetXaxis()->SetNdivisions(16);
+   gFraction2mm->GetXaxis()->SetNdivisions(9);
    gFraction2mm->GetYaxis()->SetLabelSize(0.05);
    gFraction2mm->GetXaxis()->SetLabelSize(0.05);
    gFraction2mm->GetXaxis()->SetTitleFont(22);
    gFraction2mm->GetYaxis()->SetTitleFont(22);
    gFraction2mm->GetXaxis()->SetTitleOffset(1);
-   gFraction2mm->GetYaxis()->SetTitleOffset(1.2);
+   gFraction2mm->GetYaxis()->SetTitleOffset(1.6);
    gFraction2mm->GetYaxis()->SetLabelOffset(5);
    gFraction2mm->GetXaxis()->SetLabelFont(22);
    gFraction2mm->GetXaxis()->SetNoExponent();
@@ -890,7 +946,7 @@ void makePlots() {
    }
    
    gPad->Update();
-   TGaxis *axis = new TGaxis(gPad->GetUxmin(), gPad->GetUymax(), gPad->GetUxmax(), gPad->GetUymax(), 0.1, 102, 510, "-L");
+   TGaxis *axis = new TGaxis(gPad->GetUxmin(), gPad->GetUymax(), gPad->GetUxmax(), gPad->GetUymax(), 0.1, 52, 510, "-L");
    axis->Draw("same");
    axis->SetTitleFont(22);
    axis->SetLabelFont(22);
@@ -902,13 +958,88 @@ void makePlots() {
    TText *curveLabel = new TText();
    curveLabel->SetTextFont(22);
    curveLabel->SetTextSize(0.045);
-   curveLabel->DrawText(25.50, gFraction2mm->Eval(25.00)*0.98, "2 mm Al");
-   curveLabel->DrawText(25.50, gFraction3mm->Eval(25.00)*0.98, "3 mm Al");
-//   curveLabel->DrawText(25.50, gFraction35mm->Eval(25.00)*0.98, "5x5 mm^{2}");
-   curveLabel->DrawText(25.50, gFraction4mm->Eval(25.00)*0.98, "5 mm Al");
-   curveLabel->DrawText(25.50, gFraction5mm->Eval(25.00)*0.98, "5 mm Al");
-   curveLabel->DrawText(25.50, gFraction6mm->Eval(25.00)*0.98, "6 mm Al");
+   curveLabel->DrawText(535, gFraction2mm->Eval(535)*0.98, "2 mm");
+   curveLabel->DrawText(535, gFraction3mm->Eval(535)*0.98, "3, 4 mm");
+//   curveLabel->DrawText(535, gFraction35mm->Eval(535)*0.98, "5x5 mm^{2}");
+//   curveLabel->DrawText(535, gFraction4mm->Eval(535)*0.98, "4 mm");
+   curveLabel->DrawText(535, gFraction5mm->Eval(535)*0.98, "5 mm");
+   curveLabel->DrawText(535, gFraction6mm->Eval(535)*0.98, "6 mm");
+   curveLabel->DrawText(220, 91, "Pixel Diffusion Model");
 
+   c22->cd(1);
+   TGraph *gFraction2mmNoDiffusion = new TGraph(nlinesNoDiffusionF2, arrayFraction2mmNoDiffusionX, arrayFraction2mmNoDiffusionY);
+   TGraph *gFraction3mmNoDiffusion = new TGraph(nlinesNoDiffusionF3, arrayFraction3mmNoDiffusionX, arrayFraction3mmNoDiffusionY);
+   TGraph *gFraction4mmNoDiffusion = new TGraph(nlinesNoDiffusionF4, arrayFraction4mmNoDiffusionX, arrayFraction4mmNoDiffusionY);
+   TGraph *gFraction5mmNoDiffusion = new TGraph(nlinesNoDiffusionF5, arrayFraction5mmNoDiffusionX, arrayFraction5mmNoDiffusionY);
+   TGraph *gFraction6mmNoDiffusion = new TGraph(nlinesNoDiffusionF6, arrayFraction6mmNoDiffusionX, arrayFraction6mmNoDiffusionY);
+
+   gPad->SetGridy();
+   gPad->SetGridx();
+   gFraction2mmNoDiffusion->SetTitle(";Protons / readout frame;Fraction of correctly reconstructed tracks");
+   gFraction2mmNoDiffusion->GetXaxis()->SetRangeUser(1, 520);
+   gFraction2mmNoDiffusion->SetMaximum(100);
+   gFraction2mmNoDiffusion->SetMinimum(20);
+   gFraction2mmNoDiffusion->GetXaxis()->SetTitleSize(0.05);
+   gFraction2mmNoDiffusion->GetYaxis()->SetTitleSize(0.05);
+   gFraction2mmNoDiffusion->GetXaxis()->SetLabelSize(0.05);
+   gFraction2mmNoDiffusion->GetXaxis()->SetNdivisions(9);
+   gFraction2mmNoDiffusion->GetYaxis()->SetLabelSize(0.05);
+   gFraction2mmNoDiffusion->GetXaxis()->SetLabelSize(0.05);
+   gFraction2mmNoDiffusion->GetXaxis()->SetTitleFont(22);
+   gFraction2mmNoDiffusion->GetYaxis()->SetTitleFont(22);
+   gFraction2mmNoDiffusion->GetXaxis()->SetTitleOffset(1);
+   gFraction2mmNoDiffusion->GetYaxis()->SetTitleOffset(1.6);
+   gFraction2mmNoDiffusion->GetYaxis()->SetLabelOffset(5);
+   gFraction2mmNoDiffusion->GetXaxis()->SetLabelFont(22);
+   gFraction2mmNoDiffusion->GetXaxis()->SetNoExponent();
+   gFraction2mmNoDiffusion->GetXaxis()->SetMoreLogLabels();
+   gFraction2mmNoDiffusion->GetYaxis()->SetLabelFont(22);
+   gFraction2mmNoDiffusion->SetLineWidth(4);
+   gFraction3mmNoDiffusion->SetLineWidth(4);
+   gFraction4mmNoDiffusion->SetLineWidth(4);
+   gFraction5mmNoDiffusion->SetLineWidth(4);
+   gFraction6mmNoDiffusion->SetLineWidth(4);
+
+   gFraction2mmNoDiffusion->SetLineColor(kRed-4);
+   gFraction3mmNoDiffusion->SetLineColor(kRed);
+   gFraction4mmNoDiffusion->SetLineColor(kRed+1);
+   gFraction5mmNoDiffusion->SetLineColor(kRed+2);
+   gFraction6mmNoDiffusion->SetLineColor(kRed+3);
+
+   gFraction2mmNoDiffusion->Draw("LA");
+   gFraction3mmNoDiffusion->Draw("L");
+   gFraction4mmNoDiffusion->Draw("L");
+   gFraction5mmNoDiffusion->Draw("L");
+   gFraction6mmNoDiffusion->Draw("L");
+   
+   TText *tt2 = new TText();   
+   tt2->SetTextAlign(32);
+   tt2->SetTextSize(0.045);
+   tt2->SetTextFont(22);
+   for (Int_t i=2; i<11;i++) {
+      cout << "Drawing text at " << -0.42 << ", " << i*10 << endl;
+      tt2->DrawText(-0.0052, i*10, Form("%d%%", i*10));
+   }
+   
+   gPad->Update();
+   TGaxis *axis2 = new TGaxis(gPad->GetUxmin(), gPad->GetUymax(), gPad->GetUxmax(), gPad->GetUymax(), 0.1, 52, 510, "-L");
+   axis2->Draw("same");
+   axis2->SetTitleFont(22);
+   axis2->SetLabelFont(22);
+   axis2->SetTitleSize(0.05);
+   axis2->SetLabelSize(0.05);
+//   axis->SetTitleOffset(0.95);
+   axis2->SetTitle("Million protons/s");
+   
+   TText *curveLabel2 = new TText();
+   curveLabel2->SetTextFont(22);
+   curveLabel2->SetTextSize(0.045);
+   curveLabel2->DrawText(535, gFraction2mmNoDiffusion->Eval(535)*0.98, "2 mm");
+   curveLabel2->DrawText(535, gFraction3mmNoDiffusion->Eval(535)*0.98, "3 mm");
+   curveLabel2->DrawText(535, gFraction4mmNoDiffusion->Eval(535)*0.98, "4 mm");
+   curveLabel2->DrawText(535, gFraction5mmNoDiffusion->Eval(535)*0.98, "5 mm");
+   curveLabel2->DrawText(535, gFraction6mmNoDiffusion->Eval(535)*0.98, "6 mm");
+   curveLabel2->DrawText(260, 91, "No Diffusion Model");
 
    /*
    TLegend *leg22 = new TLegend(0.21, 0.20, 0.50, 0.51);
