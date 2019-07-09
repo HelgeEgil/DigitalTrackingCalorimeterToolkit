@@ -66,7 +66,6 @@ G4PhysListFactory::GetReferencePhysList <QGSP_BIC_EMZ>  EMoption= 4
 
 <<< Reference Physics List QGSP_BIC_EMZ is built
 
-G4VUserPhysicsList::SetDefaultCutValue: negative cut values  :-1[mm]
 ### G4EmStandard_opt4 Construct Processes 
 ### Adding tracking cuts for neutron  TimeCut(ns)= 10000  KinEnergyCut(MeV)= 0
 [Core-0] Initialization of actors

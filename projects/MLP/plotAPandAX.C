@@ -1215,13 +1215,13 @@ void plotAPandAX() {
    gSpotsizeErrorKrah->SetMarkerSize(1.2);
 
 //   gSpotsizeError->Draw("PA");
-   gSpotsizeErrorNoOpt->Draw("AP");
-   gSpotsizeErrorKrah->Draw("P");
+//   gSpotsizeErrorNoOpt->Draw("AP");
+   gSpotsizeErrorKrah->Draw("PA");
 //   gSpotsizeError->GetYaxis()->SetTitleOffset(1.2);
 
    TLegend *legss = new TLegend(.3, .66, .64, .8655);
 //   legss->AddEntry(gSpotsizeError, "Spotsize-optimized LPM", "P");
-   legss->AddEntry(gSpotsizeErrorNoOpt, "Linear Projection Model", "P");
+//   legss->AddEntry(gSpotsizeErrorNoOpt, "Linear Projection Model", "P");
    legss->AddEntry(gSpotsizeErrorKrah, "Bayesian Most Likely Path", "P");
    legss->Draw();
    legss->SetTextFont(22);

@@ -695,12 +695,13 @@ void drawTracksDepthDose(Int_t Runs, Int_t dataType, Bool_t recreate, Float_t en
    }
    
    Bool_t         removeHighAngleTracks = true;
-   Bool_t         removeNuclearInteractions = false;
+   Bool_t         removeNuclearInteractions = true;
+   Bool_t         removeShortTracks = true;
    Float_t        fitRange, fitScale, fitError;
    Int_t          nCutDueToTrackEndingAbruptly = 0;
-   Int_t          nPlotX = 4, nPlotY = 4;
-   Int_t          fitIdx = 0, plotSize = nPlotX*nPlotY;
+   Int_t          nPlotX = 1, nPlotY = 1;
    Int_t          skipPlot = 20;
+   Int_t          fitIdx = 0, plotSize = nPlotX*nPlotY;
    TGraphErrors * outputGraph;
    char         * sDataType = getDataTypeChar(dataType);
    char         * sMaterial = getMaterialChar();
@@ -723,7 +724,10 @@ void drawTracksDepthDose(Int_t Runs, Int_t dataType, Bool_t recreate, Float_t en
    if (removeNuclearInteractions) {
       tracks->removeNuclearInteractions();
    }
-
+   
+   if (removeShortTracks) {
+      tracks->removeThreeSigmaShortTracks();
+   }
 
    for (Int_t j=0; j<tracks->GetEntriesFast(); j++) {
       if (j < skipPlot) continue;
