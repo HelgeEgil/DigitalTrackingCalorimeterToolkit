@@ -915,12 +915,17 @@ void makePlots() {
    gFraction2mm->GetXaxis()->SetNoExponent();
    gFraction2mm->GetXaxis()->SetMoreLogLabels();
    gFraction2mm->GetYaxis()->SetLabelFont(22);
-   gFraction2mm->SetLineWidth(4);
-   gFraction3mm->SetLineWidth(4);
-//   gFraction35mm->SetLineWidth(4);
-   gFraction4mm->SetLineWidth(4);
-   gFraction5mm->SetLineWidth(4);
-   gFraction6mm->SetLineWidth(4);
+   gFraction2mm->SetLineWidth(3);
+   gFraction3mm->SetLineWidth(3);
+//   gFraction35mm->SetLineWidth(3);
+   gFraction4mm->SetLineWidth(3);
+   gFraction5mm->SetLineWidth(3);
+   gFraction6mm->SetLineWidth(3);
+   gFraction2mm->SetMarkerStyle(21);
+   gFraction3mm->SetMarkerStyle(21);
+   gFraction4mm->SetMarkerStyle(21);
+   gFraction5mm->SetMarkerStyle(21);
+   gFraction6mm->SetMarkerStyle(21);
 
    gFraction2mm->SetLineColor(kRed-4);
    gFraction3mm->SetLineColor(kRed);
@@ -929,12 +934,12 @@ void makePlots() {
    gFraction5mm->SetLineColor(kRed+2);
    gFraction6mm->SetLineColor(kRed+3);
 
-   gFraction2mm->Draw("LA");
-   gFraction3mm->Draw("L");
+   gFraction2mm->Draw("LPA");
+   gFraction3mm->Draw("LP");
 //   gFraction35mm->Draw("L");
-   gFraction4mm->Draw("L");
-   gFraction5mm->Draw("L");
-   gFraction6mm->Draw("L");
+   gFraction4mm->Draw("LP");
+   gFraction5mm->Draw("LP");
+   gFraction6mm->Draw("LP");
    
    TText *tt = new TText();   
    tt->SetTextAlign(32);
@@ -994,11 +999,16 @@ void makePlots() {
    gFraction2mmNoDiffusion->GetXaxis()->SetNoExponent();
    gFraction2mmNoDiffusion->GetXaxis()->SetMoreLogLabels();
    gFraction2mmNoDiffusion->GetYaxis()->SetLabelFont(22);
-   gFraction2mmNoDiffusion->SetLineWidth(4);
-   gFraction3mmNoDiffusion->SetLineWidth(4);
-   gFraction4mmNoDiffusion->SetLineWidth(4);
-   gFraction5mmNoDiffusion->SetLineWidth(4);
-   gFraction6mmNoDiffusion->SetLineWidth(4);
+   gFraction2mmNoDiffusion->SetLineWidth(3);
+   gFraction3mmNoDiffusion->SetLineWidth(3);
+   gFraction4mmNoDiffusion->SetLineWidth(3);
+   gFraction5mmNoDiffusion->SetLineWidth(3);
+   gFraction6mmNoDiffusion->SetLineWidth(3);
+   gFraction2mmNoDiffusion->SetMarkerStyle(21);
+   gFraction3mmNoDiffusion->SetMarkerStyle(21);
+   gFraction4mmNoDiffusion->SetMarkerStyle(21);
+   gFraction5mmNoDiffusion->SetMarkerStyle(21);
+   gFraction6mmNoDiffusion->SetMarkerStyle(21);
 
    gFraction2mmNoDiffusion->SetLineColor(kRed-4);
    gFraction3mmNoDiffusion->SetLineColor(kRed);
@@ -1006,11 +1016,11 @@ void makePlots() {
    gFraction5mmNoDiffusion->SetLineColor(kRed+2);
    gFraction6mmNoDiffusion->SetLineColor(kRed+3);
 
-   gFraction2mmNoDiffusion->Draw("LA");
-   gFraction3mmNoDiffusion->Draw("L");
-   gFraction4mmNoDiffusion->Draw("L");
-   gFraction5mmNoDiffusion->Draw("L");
-   gFraction6mmNoDiffusion->Draw("L");
+   gFraction2mmNoDiffusion->Draw("LPA");
+   gFraction3mmNoDiffusion->Draw("LP");
+   gFraction4mmNoDiffusion->Draw("LP");
+   gFraction5mmNoDiffusion->Draw("LP");
+   gFraction6mmNoDiffusion->Draw("LP");
    
    TText *tt2 = new TText();   
    tt2->SetTextAlign(32);

@@ -26,7 +26,7 @@
 using namespace std;
 
 Bool_t kUseCarbon = false;
-Bool_t kUseDCCorrection = false;
+Bool_t kUseDCCorrection = true;
 Bool_t kUseNominalValuesFromRMBPF = true;
 Bool_t kUseWEPL = false;
 
@@ -95,7 +95,7 @@ void plotEnergyVsRange() {
    Double_t energiesWater[arraySize] = {0};
    Double_t rangesWater[arraySize] = {0};
 
-   Float_t correction_2 = 0.02, correction_3 = 0.425, correction_35 = 0.74, correction_4 = 0.74, correction_5 = 1.39 , correction_6 = 2.04;
+   Float_t correction_2 = 0.02, correction_3 = 0.415, correction_35 = 0.74, correction_4 = 0.74, correction_5 = 1.39 , correction_6 = 2.04;
 
    gStyle->SetOptStat(0);
 
@@ -168,7 +168,7 @@ void plotEnergyVsRange() {
       }
    }
    in2.close();
-
+/*
    Double_t arrayR2reverse[arraySize] = {};
    Double_t arrayR3reverse[arraySize] = {};
    Double_t arrayR4reverse[arraySize] = {};
@@ -210,7 +210,8 @@ void plotEnergyVsRange() {
    for (int index = 0; index < nlinesR4; index++) lookup4[arrayRD4[index]] = index;
    for (int index = 0; index < nlinesR5; index++) lookup5[arrayRD5[index]] = index;
    for (int index = 0; index < nlinesR6; index++) lookup6[arrayRD6[index]] = index;
-   
+  */
+
    ifstream in;
    if (!kUseCarbon) {
       in.open("../../OutputFiles/result_makebraggpeakfit_proj.csv");
@@ -248,6 +249,8 @@ void plotEnergyVsRange() {
          if (thickness_ == 6) arrayMC6[nlines6++] = -nomrange_ + estrange_ + correction_6 * kUseDCCorrection;
       }
       else {
+         pass;
+         /*
          if (thickness_ == 2) {
             int index = lookup2[energy_];
             float tl = arrayR2[index];
@@ -289,6 +292,7 @@ void plotEnergyVsRange() {
             arrayE6[nlines6] = wepl;
             arrayMC6[nlines6++] = estrange_ - wepl + correction_6 * kUseDCCorrection;
          }
+      */
       }
    }
    
@@ -391,20 +395,20 @@ void plotEnergyVsRange() {
    }
 
    Float_t textX = 7.22;
-   Float_t textY = 3.11;
+   Float_t textY = 3;
 
    graphPad->cd(1);
    gPad->SetGridy();
    hMC2->Draw("LA");
    TText *t2 = new TText();
-   t2->SetTextSize(0.2);
+   t2->SetTextSize(0.15);
    t2->SetTextFont(22);
-   t2->DrawText(textX, textY - correction_2, "2 mm Al absorber"); 
+   t2->DrawText(textX, textY - correction_2 * (!kUseDCCorrection), Form("2 mm Al absorber (calibration constant = +%.1f mm)", correction_2)); 
 
    graphPad->cd(2);
    gPad->SetGridy();
    hMC3->Draw("LA");
-   t2->DrawText(textX, textY - correction_3, "3 mm Al absorber");
+   t2->DrawText(textX, textY - correction_3 * (!kUseDCCorrection), Form("3 mm Al absorber (calibration constant = +%.1f mm)", correction_3));
    /*
    graphPad->cd(3);
    gPad->SetGridy();
@@ -414,17 +418,17 @@ void plotEnergyVsRange() {
    graphPad->cd(3);
    gPad->SetGridy();
    hMC4->Draw("LA");
-   t2->DrawText(textX, textY - correction_4, "4 mm Al absorber");
+   t2->DrawText(textX, textY - correction_4 * (!kUseDCCorrection), Form("4 mm Al absorber (calibration constant = +%.1f mm)", correction_4));
    
    graphPad->cd(4);
    gPad->SetGridy();
    hMC5->Draw("LA");
-   t2->DrawText(textX, textY - correction_5, "5 mm Al absorber");
+   t2->DrawText(textX, textY - correction_5 * (!kUseDCCorrection), Form("5 mm Al absorber (calibration constant = +%.1f mm)", correction_5));
    
    graphPad->cd(5);
    gPad->SetGridy();
    hMC6->Draw("LA");
-   t2->DrawText(textX, textY - correction_6, "6 mm Al absorber");
+   t2->DrawText(textX, textY - correction_6 * (!kUseDCCorrection), Form("6 mm Al absorber (calibration constant = +%.1f mm)", correction_6));
 
 
 }

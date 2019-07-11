@@ -22,42 +22,12 @@
 [Core-0] *************************************************
 [Core-0] 
 [Core-0] You are using Geant4 version 10.4.2
-/control/alias absorberthickness 3
+/control/alias absorberthickness 6
 /control/alias energy 250
-/control/alias degraderthickness 160
-/control/alias halfdegraderthickness -82.000
-/control/alias beampos -165
+/control/alias degraderthickness 100
+/control/alias halfdegraderthickness -52.000
+/control/alias beampos -105
 [Core-0] Starting macro Main.mac
-0: RINDEX
-1e-06   1.33
-5e-06   1.33
-6e-06   1.33
-7e-06   1.33
-9: GROUPVEL
-1e-06   225.408
-3e-06   225.408
-5.5e-06   225.408
-7e-06   225.408
-10: MIEHG
-1e-06   2.3
-5e-06   1.3
-6e-06   3.2
-7e-06   6.7
-5: MIEHG_FORWARD
-0.6
-6: MIEHG_BACKWARD
-0.6
-7: MIEHG_FORWARD_RATIO
-1
-0: RINDEX
-1.84e-06   1.00028
-4.08e-06   1.00028
-9: GROUPVEL
-1.84e-06   299.709
-4.08e-06   299.709
-14: ABSLENGTH
-1.84e-06   50000
-4.08e-06   50000
 [Physic-0] The following Geant4's physic-list is enabled :QGSP_BIC_EMZ
 [Core-0] Initialization of geometry
 [Core-0] Initialization of physics
