@@ -27,8 +27,31 @@ void Hits::Clear(Option_t *option) {
 void Hits::appendPoint(Int_t x, Int_t y, Int_t layer,  Float_t edep, Int_t eventID, Bool_t isSecondary) {
    Int_t i = GetEntriesFast();
 
-   Hit *hit = (Hit*) hits_.ConstructedAt(i);
-   hit->set(x,y,layer,edep,eventID, isSecondary);
+   if (kConcatenateHits) {
+      Bool_t added = false;
+
+      // search through hits
+      for (int j=0; j<i; j++) {
+         if (getX(j) == x && getY(j) == y && getLayer(j) && layer) {
+            // Hit found at same position, ADD to edep instead
+            if (getEdep(j) < edep) {
+               At(j)->setEventID(eventID);
+            }
+            At(j)->setEdep(getEdep(j) + edep);
+            added = true;
+            break;
+         }
+      }
+      if (!added) {
+         Hit *hit = (Hit*) hits_.ConstructedAt(i);
+         hit->set(x,y,layer,edep,eventID, isSecondary);
+      }
+   }
+
+   else { 
+      Hit *hit = (Hit*) hits_.ConstructedAt(i);
+      hit->set(x,y,layer,edep,eventID, isSecondary);
+   }
 }
 
 void Hits::appendHits(Hits *hits) {
