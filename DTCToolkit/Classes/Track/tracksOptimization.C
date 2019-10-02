@@ -139,6 +139,7 @@ void Tracks::removeTracksLeavingDetector() {
       lastLayer = lastCluster->getLayer();
       if (lastLayer == 0) continue;
 
+      showDebug("Tracks::removeTracksLeavingDetector(): lastLayer = " << lastLayer << endl);
       nextPoint = getTrackExtrapolationToLayer(At(i), lastLayer + 1);
       if (!nextPoint) continue;
       
@@ -260,7 +261,7 @@ void Tracks::fillOutIncompleteTracks(float angleLimit) {
                int eid1 = thisTrack->Last()->getEventID();
                int eid2 = AtCWT(minIdx)->getEventID();
 
-               printf("Found CWT @ layer %d - angle = %.1f mrad (OK? %d)\n", AtCWT(minIdx)->getLayer(), minAngle*1000, (eid1 == eid2 || eid1*eid2 < 0));
+//               printf("Found CWT @ layer %d - angle = %.1f mrad (OK? %d)\n", AtCWT(minIdx)->getLayer(), minAngle*1000, (eid1 == eid2 || eid1*eid2 < 0));
                thisTrack->appendCluster(AtCWT(minIdx));
                removeCWTAt(minIdx);
                continueSearch = true;
@@ -429,6 +430,35 @@ void Tracks::removeTracksEndingInBadChannels() {
       }
       delete extrapolatedCluster;
    }
+
+   removeEmptyTracks();
+   Compress();
+}
+
+void Tracks::removeHighChiSquare() {
+   Track  * thisTrack = nullptr;
+   Int_t    nRemoved = 0;
+   Int_t    nRemovedNuclear = 0;
+   Float_t  chi2;
+   Int_t    nTotal = GetEntriesFast();
+   Int_t    nTotalStart = GetEntries();
+
+   for (Int_t i=0; i<nTotal; i++) {
+      thisTrack = At(i);
+      if (!At(i)) continue;
+      chi2 = thisTrack->getFitParameterChiSquare();
+      if (chi2>210) {
+         if (thisTrack->Last()->isSecondary()) nRemovedNuclear++;
+         removeTrack(thisTrack);
+         nRemoved++;
+      }
+   }
+
+   removeEmptyTracks();
+   Compress();
+
+   Float_t fraction = nTotal ? nRemoved/float(nTotalStart) : 0;
+   cout << "Tracks::removeHighChiSquare() removed " << nRemoved << " of " << nTotalStart << " (" << fraction * 100 << "%) tracks (" << 100*float(nRemovedNuclear)/nRemoved << "% secondaries).\n";
 }
 
 void Tracks::removeNuclearInteractions() {
@@ -448,6 +478,7 @@ void Tracks::removeNuclearInteractions() {
       }
    }
 
+   removeEmptyTracks();
    Compress();
 
    Float_t fraction = nTotal ? nRemoved/float(nTotalStart) : 0;
@@ -495,10 +526,22 @@ void Tracks::removeThreeSigmaShortTracks() {
       }
    }
 
+   removeEmptyTracks();
    Compress();
 
    Float_t fraction = nTotal ? nRemoved/float(nTotalStart) : 0;
    cout << "Tracks::removeThreeSigmaShortTracks() removed " << nRemoved << " of " << nTotalStart << " (" << fraction * 100 << "%) tracks (" << 100*float(nRemovedNuclear)/nRemoved << "% secondaries).\n";
 }
-      
+
+void Tracks::removeEmptyTracks() {
+   Track * thisTrack = nullptr;
+   for (int i=0; i<GetEntriesFast(); i++) {
+      if (!At(i)) continue;
+      if (!GetEntriesFast(i)) {
+         removeTrackAt(i);
+      }
+   }
+   Compress();
+}   
+
 #endif

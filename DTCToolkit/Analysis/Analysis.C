@@ -699,8 +699,8 @@ void drawTracksDepthDose(Int_t Runs, Int_t dataType, Bool_t recreate, Float_t en
    Bool_t         removeShortTracks = true;
    Float_t        fitRange, fitScale, fitError;
    Int_t          nCutDueToTrackEndingAbruptly = 0;
-   Int_t          nPlotX = 1, nPlotY = 1;
-   Int_t          skipPlot = 20;
+   Int_t          nPlotX = 3, nPlotY = 3;
+   Int_t          skipPlot = 0;
    Int_t          fitIdx = 0, plotSize = nPlotX*nPlotY;
    TGraphErrors * outputGraph;
    char         * sDataType = getDataTypeChar(dataType);
@@ -716,6 +716,7 @@ void drawTracksDepthDose(Int_t Runs, Int_t dataType, Bool_t recreate, Float_t en
    gPad->SetLeftMargin(0.15);
 
    Tracks * tracks = loadOrCreateTracks(recreate, Runs, dataType, run_energy);
+   tracks->removeEmptyTracks();
 
    if (removeHighAngleTracks) {
       tracks->removeHighAngleTracks(100);
@@ -745,6 +746,12 @@ void drawTracksDepthDose(Int_t Runs, Int_t dataType, Bool_t recreate, Float_t en
 
       if (fitIdx < plotSize) {
          drawIndividualGraphs(cGraph, outputGraph, fitRange, fitScale, fitError, fitIdx++);
+         if (thisTrack->Last()->isSecondary()) {
+            outputGraph->SetTitle("Secondary track");
+         }
+         else {
+            outputGraph->SetTitle("Primary track");
+         }
          printf("Drawing plot number %d.\n", fitIdx);
       }
    
@@ -1608,7 +1615,7 @@ void secondaryAnalysis(Int_t Runs, Int_t dataType, Bool_t recreate, Int_t switch
 
    printf("There are %d tracks in total. %d of them are secondary tracks (%.2f%%).\n", nTracks, nTracksNuclear, 100*float(nTracksNuclear)/nTracks);
 
-   tracks->removeHighAngleTracks(75);
+   tracks->removeHighAngleTracks(20); // 75 in protons
    nTracks = tracks->GetEntries();
    for (Int_t i=0; i<tracks->GetEntriesFast(); i++) {
       thisTrack = tracks->At(i);
@@ -1672,6 +1679,151 @@ void secondaryAnalysis(Int_t Runs, Int_t dataType, Bool_t recreate, Int_t switch
 }
 
 
+void drawEdep(Int_t Runs, Int_t dataType, Bool_t recreate, Int_t switchLayer, Float_t energy, Float_t degraderThickness, Int_t tracksperrun, Bool_t doTracking) {
+   run_energy = energy;
+   run_degraderThickness = degraderThickness;
+   kEventsPerRun = tracksperrun;
+   kDoTracking = doTracking;
+   
+   Tracks * tracks = loadOrCreateTracks(recreate, Runs, dataType, energy);
+   tracks->removeEmptyTracks();
+
+   Track *thisTrack = nullptr;
+
+   TH1F * edepP = new TH1F("edepP", "primary;edep;freq;", 400, 0, 200);
+   TH1F * edepS = new TH1F("edepS", "secondary;edep;freq;", 400, 0, 200);
+
+   for (int i=0; i<=tracks->GetEntriesFast(); i++) {
+      thisTrack = tracks->At(i);
+      if (!thisTrack) continue;
+
+      if (thisTrack->Last()->isSecondary()) {
+         edepP->Fill(thisTrack->Last()->getDepositedEnergy());
+      }
+      else {
+         edepS->Fill(thisTrack->Last()->getDepositedEnergy());
+      }
+
+   }
+
+   edepP->Draw("COLZ");
+   edepS->Draw("COLZ same");
+
+}
+
+void analyseHelium(Int_t Runs, Int_t dataType, Bool_t recreate, Int_t switchLayer, Float_t energy, Float_t degraderThickness, Int_t tracksperrun, Bool_t doTracking) {
+   run_energy = energy;
+   run_degraderThickness = degraderThickness;
+   kEventsPerRun = tracksperrun;
+   kDoTracking = doTracking;
+   
+   Tracks * tracks = loadOrCreateTracks(recreate, Runs, dataType, energy);
+   tracks->removeEmptyTracks();
+
+
+   tracks->removeHighAngleTracks(20); // mrad
+   tracks->removeThreeSigmaShortTracks();
+   tracks->removeNuclearInteractions();
+   tracks->removeEmptyTracks();
+
+   tracks->fillOutIncompleteTracks(0.05);
+
+   tracks->doTrackFit();
+
+   tracks->removeHighChiSquare();
+   tracks->removeEmptyTracks();
+
+   Track *thisTrack = nullptr;
+   Cluster *a, *b;
+   Float_t angle, range, edep, bragg;
+
+   TCanvas *cEdep = new TCanvas();
+   cEdep->Divide(2,1);
+   TH1F * edepP = new TH1F("edepP", "primary;edep;freq;", 400, 0, 200);
+   TH1F * edepS = new TH1F("edepS", "secondary;edep;freq;", 400, 0, 200);
+   
+   TCanvas *cAngle = new TCanvas();
+   cAngle->Divide(2,1);
+   TH1F * angleP = new TH1F("angleP", "primary;angle [mrad];freq;", 400, 0, 200);
+   TH1F * angleS = new TH1F("angleS", "secondary;angle [mrad];freq;", 400, 0, 200);
+   
+   TCanvas *cRange = new TCanvas();
+   cRange->Divide(2,1);
+   TH1F * rangeP = new TH1F("rangeP", "primary;range;freq;", 400, 0, 300);
+   TH1F * rangeS = new TH1F("rangeS", "secondary;range;freq;", 400, 0, 300);
+
+   TCanvas *cBragg = new TCanvas();
+   cBragg->Divide(2,1);
+   TH1F * braggP = new TH1F("rangeP", "primary;log_{10} #chi^{2};freq;", 400, 1, 2000);
+   TH1F * braggS = new TH1F("rangeS", "secondary;log_{10} #chi^{2};freq;", 400, 0, 2000);
+   
+   TCanvas *cSecondary = new TCanvas();
+   TH1F *hSec = new TH1F("hSec", "Secondary conversion;layer;freq", 50, 0, 50);
+   TH1F *hPrim = new TH1F("hPrim", "Primary beam;layer;freq", 50, 0, 50);
+
+   for (int i=0; i<tracks->GetEntriesFast(); i++) {
+      thisTrack = tracks->At(i);
+      if (!thisTrack) continue;
+   
+      bool was = false;
+      for (int j=0; j<thisTrack->GetEntriesFast(); j++) {
+         if (!was) {
+            if (thisTrack->At(j)->isSecondary()) {
+               hSec->Fill(thisTrack->getLayer(j));
+               was = true;
+            }
+         }
+      }
+      
+      Cluster *a = thisTrack->At(0);
+      Cluster *b = thisTrack->At(1);
+      if (!a || !b) continue;
+      angle = getDotProductAngle(a, a, b) * 1000;
+      range = getUnitFromTL(thisTrack->getFitParameterRange());
+      bragg = thisTrack->getFitParameterChiSquare();
+      if (thisTrack->GetEntriesFast() > 3) {
+         Int_t last = thisTrack->GetEntriesFast() - 1;
+         edep = thisTrack->getDepositedEnergy(last) + thisTrack->getDepositedEnergy(last-1);
+      }
+      if (!thisTrack->Last()->isSecondary()) {
+         edepP->Fill(edep);
+         angleP->Fill(angle);
+         rangeP->Fill(range);
+         braggP->Fill(bragg);
+      }
+      else {
+         edepS->Fill(edep);
+         angleS->Fill(angle);
+         rangeS->Fill(range);
+         braggS->Fill(bragg);
+      }
+   }
+   
+   cEdep->cd(1);
+   edepP->Draw();
+   cEdep->cd(2);
+   edepS->Draw();
+
+   cAngle->cd(1);
+   angleP->Draw();
+   cAngle->cd(2);
+   angleS->Draw();
+
+   cRange->cd(1);
+   rangeP->Draw();
+   cRange->cd(2);
+   rangeS->Draw();
+
+   cBragg->cd(1);
+   braggP->Draw();
+   cBragg->cd(2);
+   braggS->Draw();
+
+   cSecondary->cd();
+//   hPrim->Draw();
+   hSec->Draw();
+}
+
 void drawTracks3D(Int_t Runs, Int_t dataType, Bool_t recreate, Int_t switchLayer, Float_t energy, Float_t degraderThickness, Int_t tracksperrun, Bool_t doTracking) {
    run_energy = energy;
    run_degraderThickness = degraderThickness;
@@ -1679,6 +1831,7 @@ void drawTracks3D(Int_t Runs, Int_t dataType, Bool_t recreate, Int_t switchLayer
    kDoTracking = doTracking;
    
    Tracks * tracks = loadOrCreateTracks(recreate, Runs, dataType, energy);
+   tracks->removeEmptyTracks();
 
    printf("Found %d tracks before filtering.\n", tracks->GetEntries());
 
@@ -1690,14 +1843,19 @@ void drawTracks3D(Int_t Runs, Int_t dataType, Bool_t recreate, Int_t switchLayer
       else numberOfSecondaries++;
    }
    cout << "Number of primaries = " << numberOfPrimaries << ", number of secondaries = " << numberOfSecondaries << endl;
-   tracks->removeHighAngleTracks(75); // mrad
+ 
+   tracks->removeHighAngleTracks(20); // mrad
    tracks->removeThreeSigmaShortTracks();
    tracks->removeNuclearInteractions();
-   tracks->fillOutIncompleteTracks(0.05);
+   tracks->removeEmptyTracks();
 
+   tracks->fillOutIncompleteTracks(0.05);
    tracks->doTrackFit();
 
-   Bool_t   kDraw = false;
+   tracks->removeHighChiSquare();
+   tracks->removeEmptyTracks();
+
+   Bool_t   kDraw = true;
 
    TH1I  *hWEPLCorrect = new TH1I("hWEPLCorrect", ";Range in detector [mm WEPL];Frequency", 400, 0, 250);
    TH1I  *hWEPLSecondary = new TH1I("hWEPLSecondary", "", 400, 0, 250);
@@ -2045,7 +2203,7 @@ void drawTracks3D(Int_t Runs, Int_t dataType, Bool_t recreate, Int_t switchLayer
          
          if (kDraw) {
             trackPoints->Draw();
-            EIDMarker->Draw();
+   //         EIDMarker->Draw();
    //      conflictMarker->Draw();
          }
       }

@@ -13,7 +13,7 @@ class TGraphErrors;
 namespace DTC {
 class Clusters;
 
-const Int_t MaxTrackLength = 150;
+const Int_t MaxTrackLength = 250;
 
 class Track : public TObject {
 
@@ -23,6 +23,7 @@ class Track : public TObject {
       Float_t  fitRange_;
       Float_t  fitScale_;
       Float_t  fitError_;
+      Float_t  fitChi2_;
       Float_t  precomputeFactor;
 
    public:
@@ -144,6 +145,7 @@ class Track : public TObject {
       Float_t           getFitParameterRange();
       Float_t           getFitParameterScale();
       Float_t           getFitParameterError();
+      Float_t           getFitParameterChiSquare();
       Float_t           getTrackScore();
 
       ClassDef(Track,5)

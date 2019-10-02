@@ -372,14 +372,14 @@ Float_t getEnergyFromDegraderThickness(Double_t degraderThickness) {
          phaseSpaceEnergy[idx++] = e;
       }
    }
-   else if (kEnergy == 230) {
+   else if (kEnergy == 230 || kHelium == true) {
+      in.open("Data/Ranges/EnergyAfterDegrader230MeV.csv");
       while (1) {
          in >> dt >> e;
          if (!in.good()) break;
          phaseSpaceDegraderthickness[idx] = double(dt);
-         phaseSpaceEnergy[idx++] = e;
+         phaseSpaceEnergy[idx++] = e * kHeliumEnergyFactor;
       }
-      in.open("Data/Ranges/EnergyAfterDegrader230MeV.csv");
    }
 
    in.close();

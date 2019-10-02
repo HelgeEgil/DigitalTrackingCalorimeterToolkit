@@ -75,6 +75,8 @@ TGraphErrors * Track::doTrackFit(Bool_t isScaleVariable, Bool_t useTrackLength) 
       scaleParameter = 3.42;
    }
 
+   if (kHelium) scaleParameter = 26;
+
    // scaleParameter *= 1.2; // Empirical tests to reduce range bias
 
    TF1 * func = new TF1("fit_BP", fitfunc_DBP, 0, maxRange, 2);
@@ -94,6 +96,7 @@ TGraphErrors * Track::doTrackFit(Bool_t isScaleVariable, Bool_t useTrackLength) 
    fitRange_ = func->GetParameter(0);
    fitScale_ = func->GetParameter(1);
    fitError_ = func->GetParError(0);
+   fitChi2_  = func->GetChisquare();
 
    delete func;
    
@@ -135,6 +138,18 @@ Float_t Track::getFitParameterError() {
       }
    }
    return fitError_;
+}
+
+Float_t Track::getFitParameterChiSquare() {
+   if (!fitChi2_) {
+      if (!run_energy) {
+         return 0;
+      }
+      else {
+         doTrackFit();
+      }
+   }
+   return fitChi2_;
 }
 
 Float_t Track::getTrackScore() {

@@ -13,7 +13,7 @@
 #include <Math/Vector3D.h>
 #include <TRandom3.h>
 
-#include "Math/GSLMinimizer.h"
+// #include "Math/GSLMinimizer.h"
 #include "Math/GSLSimAnMinimizer.h"
 #include "Math/Functor.h"
 
@@ -648,8 +648,8 @@ double findMLP(const double *aa) {
             Lambda2 = 0.99 - 0.46 * w2;
 
             // CSP optimization
-            Lambda0 *= Lambdaa;
-            Lambda2 *= Lambdab;
+            Lambda0 *= 1/(Lambdaa * spotSizeAtX0);
+//            Lambda2 *= 1/(Lambdab * spotSizeAtX0);
 
             for (Double_t t=0; t<1; t += 0.01) {
                S = SplineMLP(t, X0Krah, X2, P0Krah, P2, Lambda0, Lambda2); // niels'
@@ -811,19 +811,20 @@ int NumericalMinimization() {
    min.SetMaxIterations(1000);
    min.SetTolerance(0.001);
 
-   ROOT::Math::Functor f(&findMLP,2);
-   double step[2] = {0.01, 0.01};
-   double variable[2] = {1, -0.3};
+   ROOT::Math::Functor f(&findMLP,1);
+   double step[1] = {0.01};//, 0.01};
+   double variable[1] = {1};//, -0.3};
 
    min.SetFunction(f);
 
    min.SetVariable(0, "x", variable[0], step[0]);
-   min.SetVariable(1, "y", variable[1], step[1]);
+//   min.SetVariable(1, "y", variable[1], step[1]);
 
    min.Minimize();
 
    const double *xs = min.X();
-   cout << "Minimum: f(" << xs[0] << ", "<< xs[1] << "): " << findMLP(xs) << endl;
+//   cout << "Minimum: f(" << xs[0] << ", "<< xs[1] << "): " << findMLP(xs) << endl;
+   cout << "Minimum: f(" << xs[0] << "): " << findMLP(xs) << endl;
 
    return 0;
 }

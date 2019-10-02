@@ -136,7 +136,7 @@ void  createSplines() {
             in.open(Form("Data/Ranges/%.0fmm_C_csda.csv", readoutAbsorber));
          }
       }
-      else if (kEnergy == 230) {
+      else if (kEnergy == 230 || kHelium == true) {
          if       (kMaterial == kTungsten) {
             in.open(Form("Data/Ranges/%.0fmm_W_csda_230MeV.csv", readoutAbsorber));
          }
@@ -160,7 +160,7 @@ void  createSplines() {
             in.open(Form("Data/Ranges/%.0fmm_C.csv", readoutAbsorber));
          }
       }
-      else if (kEnergy == 230) {
+      else if (kEnergy == 230 || kHelium == true) {
          if       (kMaterial == kTungsten) {
             in.open(Form("Data/Ranges/%.0fmm_W_230MeV.csv", readoutAbsorber));
          }
@@ -176,6 +176,7 @@ void  createSplines() {
    while (1) {
       in >> energy >> range;
       if (!in.good()) break;
+      if (kHelium) energy *= kHeliumEnergyFactor;
 
       rangesDTC[idxDTC] = range;
       energiesDTC[idxDTC++] = energy;
@@ -187,6 +188,8 @@ void  createSplines() {
    while (1) {
       in >> energy >> range;
       if (!in.good()) break;
+      
+      if (kHelium) energy *= kHeliumEnergyFactor;
 
       rangesWater[idxWater] = range*10;
       energiesWater[idxWater++] = energy;
@@ -197,6 +200,8 @@ void  createSplines() {
    while (1) {
       in >> energy >> range;
       if (!in.good()) break;
+      
+      if (kHelium) energy *= kHeliumEnergyFactor;
 
       rangesPureAl[idxPureAl] = range*10; // cm to mm
       energiesPureAl[idxPureAl++] = energy;
@@ -208,6 +213,8 @@ void  createSplines() {
    while (1) {
       in >> energy >> range;
       if (!in.good()) break;
+      
+      if (kHelium) energy *= kHeliumEnergyFactor;
 
       rangesW[idxW] = range;
       energiesW[idxW++] = energy;
@@ -222,6 +229,8 @@ void  createSplines() {
       mcs_radius_per_layer_empirical[layer] = mu + 3 * sigma;
    }
 
+   printf("TEST\n");
+
    splineDTC = new TSpline3("splineDTC", energiesDTC, rangesDTC, idxDTC);
    splineWater = new TSpline3("splineWater", energiesWater, rangesWater, idxWater);
    splinePureAl = new TSpline3("splinePureAl", energiesPureAl, rangesPureAl, idxPureAl);
@@ -230,6 +239,8 @@ void  createSplines() {
    splineWaterInv = new TSpline3("splineWaterInv", rangesWater, energiesWater, idxWater);
    splinePureAlInv = new TSpline3("splineWaterInv", rangesPureAl, energiesPureAl, idxPureAl);
    splineWInv = new TSpline3("splineWInv", rangesW, energiesW, idxW);
+   
+   printf("TEST\n");
 
    // FIND BRAGG-KLEEMAN PARAMETERS
    TGraph * range_energy = new TGraph(idxDTC, energiesDTC, rangesDTC);

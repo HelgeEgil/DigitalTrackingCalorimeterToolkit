@@ -279,7 +279,7 @@ Tracks * getTracksFromClusters(Int_t Runs, Int_t dataType, Int_t frameType, Floa
       t2.Stop();
     
       showDebug("propagateSecondaryStatus..."); 
-      tracks->propagateSecondaryStatus();
+//      tracks->propagateSecondaryStatus();
       showDebug("ok!\n");
 
       if (tracks->GetEntriesFast() == 0) breakSignal = true; // to stop running
@@ -293,6 +293,8 @@ Tracks * getTracksFromClusters(Int_t Runs, Int_t dataType, Int_t frameType, Floa
       tracks->removeNANs();
       showDebug("ok!\nsortTracks...");
       tracks->sortTracks(); // reverse order from retrograde reconstruction
+
+      tracks->removeEmptyTracks();
       
       t3.Start(false);
       showDebug("ok!\nRemoving tracks leaving detector...");

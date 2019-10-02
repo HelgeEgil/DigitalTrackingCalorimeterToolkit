@@ -64,9 +64,16 @@ DataInterface::DataInterface(TTree *tree) : fChain(0) {
          chain->Add(Form("Data/MonteCarlo/phantom_%.0fMeV_highacc3.root/Hits", run_energy));
       }
       else {
-         printf("Opening file with degrader thickness %.0f mm, material is %s and abs. thickness %.0f mm...", run_degraderThickness, materialChar, readoutAbsorber);
-         chain->Add(Form("Data/MonteCarlo/DTC_%s_Absorber%.0fmm_Degrader%03.0fmm_%dMeV.root/Hits", materialChar, readoutAbsorber, run_degraderThickness, kEnergy)); // Fix if original run_energy is != 250
-         printf("OK!\n");
+         if (!kHelium) {
+            printf("Opening PROTON file with degrader thickness %.0f mm, material is %s and abs. thickness %.0f mm...", run_degraderThickness, materialChar, readoutAbsorber);
+            chain->Add(Form("Data/MonteCarlo/DTC_%s_Absorber%.0fmm_Degrader%03.0fmm_%dMeV.root/Hits", materialChar, readoutAbsorber, run_degraderThickness, kEnergy)); // Fix if original run_energy is != 250
+            printf("OK!\n");
+         }
+         else {
+            printf("Opening HELIUM file with degrader thickness %.0f mm, material is %s and abs. thickness %.0f mm...", run_degraderThickness, materialChar, readoutAbsorber);
+            chain->Add(Form("Data/MonteCarlo/DTC_%s_CarbonHelium_Absorber%.0fmm_Degrader%03.0fmm_%dMeV.root/Hits", materialChar, readoutAbsorber, run_degraderThickness, kEnergy)); // Fix if original run_energy is != 250
+            printf("OK!\n");
+         }
       }
       tree = chain;
 #endif // SINGLE_TREE
@@ -117,39 +124,39 @@ void DataInterface::Init(TTree *tree) {
    fChain->SetBranchAddress("PDGEncoding", &PDGEncoding, &b_PDGEncoding);
    fChain->SetBranchAddress("trackID", &trackID, &b_trackID);
    fChain->SetBranchAddress("parentID", &parentID, &b_parentID);
-   fChain->SetBranchAddress("time", &time, &b_time);
+//   fChain->SetBranchAddress("time", &time, &b_time);
    fChain->SetBranchAddress("edep", &edep, &b_edep);
-   fChain->SetBranchAddress("stepLength", &stepLength, &b_stepLength);
+//   fChain->SetBranchAddress("stepLength", &stepLength, &b_stepLength);
    fChain->SetBranchAddress("posX", &posX, &b_posX);
    fChain->SetBranchAddress("posY", &posY, &b_posY);
    fChain->SetBranchAddress("posZ", &posZ, &b_posZ);
-   fChain->SetBranchAddress("localPosX", &localPosX, &b_localPosX);
-   fChain->SetBranchAddress("localPosY", &localPosY, &b_localPosY);
-   fChain->SetBranchAddress("localPosZ", &localPosZ, &b_localPosZ);
-   fChain->SetBranchAddress("baseID", &baseID, &b_baseID);
-   fChain->SetBranchAddress("level1ID", &level1ID, &b_level1ID);
-   fChain->SetBranchAddress("level2ID", &level2ID, &b_level2ID);
-   fChain->SetBranchAddress("level3ID", &level3ID, &b_level3ID);
-   fChain->SetBranchAddress("level4ID", &level4ID, &b_level4ID);
-   fChain->SetBranchAddress("layerID", &layerID, &b_layerID);
-   fChain->SetBranchAddress("photonID", &photonID, &b_photonID);
-   fChain->SetBranchAddress("nPhantomCompton", &nPhantomCompton, &b_nPhantomCompton);
-   fChain->SetBranchAddress("nCrystalCompton", &nCrystalCompton, &b_nCrystalCompton);
-   fChain->SetBranchAddress("nPhantomRayleigh", &nPhantomRayleigh, &b_nPhantomRayleigh);
-   fChain->SetBranchAddress("nCrystalRayleigh", &nCrystalRayleigh, &b_nCrystalRayleigh);
-   fChain->SetBranchAddress("primaryID", &primaryID, &b_primaryID);
-   fChain->SetBranchAddress("sourcePosX", &sourcePosX, &b_sourcePosX);
-   fChain->SetBranchAddress("sourcePosY", &sourcePosY, &b_sourcePosY);
-   fChain->SetBranchAddress("sourcePosZ", &sourcePosZ, &b_sourcePosZ);
-   fChain->SetBranchAddress("sourceID", &sourceID, &b_sourceID);
+//   fChain->SetBranchAddress("localPosX", &localPosX, &b_localPosX);
+//   fChain->SetBranchAddress("localPosY", &localPosY, &b_localPosY);
+//   fChain->SetBranchAddress("localPosZ", &localPosZ, &b_localPosZ);
+//   fChain->SetBranchAddress("baseID", &baseID, &b_baseID);
+//   fChain->SetBranchAddress("level1ID", &level1ID, &b_level1ID);
+//   fChain->SetBranchAddress("level2ID", &level2ID, &b_level2ID);
+//   fChain->SetBranchAddress("level3ID", &level3ID, &b_level3ID);
+//   fChain->SetBranchAddress("level4ID", &level4ID, &b_level4ID);
+//   fChain->SetBranchAddress("layerID", &layerID, &b_layerID);
+//   fChain->SetBranchAddress("photonID", &photonID, &b_photonID);
+//   fChain->SetBranchAddress("nPhantomCompton", &nPhantomCompton, &b_nPhantomCompton);
+//   fChain->SetBranchAddress("nCrystalCompton", &nCrystalCompton, &b_nCrystalCompton);
+//   fChain->SetBranchAddress("nPhantomRayleigh", &nPhantomRayleigh, &b_nPhantomRayleigh);
+//   fChain->SetBranchAddress("nCrystalRayleigh", &nCrystalRayleigh, &b_nCrystalRayleigh);
+//   fChain->SetBranchAddress("primaryID", &primaryID, &b_primaryID);
+//   fChain->SetBranchAddress("sourcePosX", &sourcePosX, &b_sourcePosX);
+//   fChain->SetBranchAddress("sourcePosY", &sourcePosY, &b_sourcePosY);
+//   fChain->SetBranchAddress("sourcePosZ", &sourcePosZ, &b_sourcePosZ);
+//   fChain->SetBranchAddress("sourceID", &sourceID, &b_sourceID);
    fChain->SetBranchAddress("eventID", &eventID, &b_eventID);
-   fChain->SetBranchAddress("runID", &runID, &b_runID);
-   fChain->SetBranchAddress("axialPos", &axialPos, &b_axialPos);
-   fChain->SetBranchAddress("rotationAngle", &rotationAngle, &b_rotationAngle);
-   fChain->SetBranchAddress("volumeID", volumeID, &b_volumeID);
-   fChain->SetBranchAddress("processName", processName, &b_processName);
-   fChain->SetBranchAddress("comptVolName", comptVolName, &b_comptVolName);
-   fChain->SetBranchAddress("RayleighVolName", RayleighVolName, &b_RayleighVolName);
+//   fChain->SetBranchAddress("runID", &runID, &b_runID);
+//   fChain->SetBranchAddress("axialPos", &axialPos, &b_axialPos);
+//   fChain->SetBranchAddress("rotationAngle", &rotationAngle, &b_rotationAngle);
+//   fChain->SetBranchAddress("volumeID", volumeID, &b_volumeID);
+//   fChain->SetBranchAddress("processName", processName, &b_processName);
+//   fChain->SetBranchAddress("comptVolName", comptVolName, &b_comptVolName);
+//   fChain->SetBranchAddress("RayleighVolName", RayleighVolName, &b_RayleighVolName);
    Notify();
 }
 
@@ -493,7 +500,7 @@ void  DataInterface::getMCClusters(Int_t runNo, Clusters *clusters, Hits * hits)
          if (lastLayer < nLayers) {
             if (isSecondary) {
                if (hits)      hits->appendPoint(x, y, lastLayer, sum_edep/14, lastEventID, true);
-               if (clusters)  clusters->appendClusterEdep(sumX/n, sumY/n, lastLayer, sum_edep/14, lastEventID, true);
+               if (clusters)  clusters->appendClusterEdep(x,y, lastLayer, sum_edep/14, lastEventID, true);
             }
             else {
                if (hits)      hits->appendPoint(x, y, lastLayer, sum_edep/14, lastEventID, false);

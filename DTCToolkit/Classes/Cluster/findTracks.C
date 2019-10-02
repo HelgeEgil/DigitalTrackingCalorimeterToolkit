@@ -226,10 +226,12 @@ Tracks * Clusters::findCalorimeterTracksWithMCTruth() {
    }
 
    // Store last track
-   tracks->appendTrack(track);
+   if (track->GetEntriesFast()) {
+      tracks->appendTrack(track);
+   }
 
    delete track;
-    
+
    return tracks;
 }
 

@@ -532,6 +532,8 @@ void  Tracks::removeHighAngleTracks(Float_t mradLimit) {
 
       last = thisTrack->GetEntriesFast() - 1;
 
+      if (last<1) continue;
+
       a = thisTrack->At(0);
       b = thisTrack->At(1);
 
@@ -549,6 +551,7 @@ void  Tracks::removeHighAngleTracks(Float_t mradLimit) {
    }
    printf("Removed %d tracks with higher than %.0f mrad incoming angle (%.2f%% secondaries).\n", nRemoved, mradLimit, 100*float(nRemovedNuclear)/nRemoved);
 
+   removeEmptyTracks();
    Compress();
 }
 
@@ -561,6 +564,7 @@ void Tracks::removeNANs() {
 
       thisTrack->removeNANs();
    }
+   removeEmptyTracks();
 }
 
 #endif
