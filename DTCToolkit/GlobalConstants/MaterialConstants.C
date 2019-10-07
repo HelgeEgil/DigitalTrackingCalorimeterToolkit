@@ -229,8 +229,6 @@ void  createSplines() {
       mcs_radius_per_layer_empirical[layer] = mu + 3 * sigma;
    }
 
-   printf("TEST\n");
-
    splineDTC = new TSpline3("splineDTC", energiesDTC, rangesDTC, idxDTC);
    splineWater = new TSpline3("splineWater", energiesWater, rangesWater, idxWater);
    splinePureAl = new TSpline3("splinePureAl", energiesPureAl, rangesPureAl, idxPureAl);
@@ -239,8 +237,6 @@ void  createSplines() {
    splineWaterInv = new TSpline3("splineWaterInv", rangesWater, energiesWater, idxWater);
    splinePureAlInv = new TSpline3("splineWaterInv", rangesPureAl, energiesPureAl, idxPureAl);
    splineWInv = new TSpline3("splineWInv", rangesW, energiesW, idxW);
-   
-   printf("TEST\n");
 
    // FIND BRAGG-KLEEMAN PARAMETERS
    TGraph * range_energy = new TGraph(idxDTC, energiesDTC, rangesDTC);

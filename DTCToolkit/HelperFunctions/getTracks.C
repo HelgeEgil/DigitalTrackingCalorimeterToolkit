@@ -92,18 +92,18 @@ Tracks * loadTracks(Int_t Runs, Int_t dataType, Float_t energy) {
    return tracks;
 }
 
-Tracks * loadOrCreateTracks(Bool_t recreate, Int_t Runs, Int_t dataType, Float_t energy) {
+Tracks * loadOrCreateTracks(Bool_t recreate, Int_t Runs, Int_t dataType, Float_t energy, Float_t spotx, Float_t spoty) {
    Tracks * tracks = nullptr;
    
    if (recreate) {
-      tracks = getTracksFromClusters(Runs, dataType, kCalorimeter, energy);
+      tracks = getTracksFromClusters(Runs, dataType, kCalorimeter, energy, spotx, spoty);
    }
 
    else {
       tracks = loadTracks(Runs, dataType, energy);
       if (!tracks) {
          cout << "!tracks, creating new file\n";
-         tracks = getTracksFromClusters(Runs, dataType, kCalorimeter, energy);
+         tracks = getTracksFromClusters(Runs, dataType, kCalorimeter, energy, spotx, spoty);
          saveTracks(tracks, dataType, energy);
       }
    }
@@ -221,7 +221,7 @@ Hits * diffuseHits(TRandom3 *gRandom, Hits * hits) {
    return hitsOut;
 }
 
-Tracks * getTracksFromClusters(Int_t Runs, Int_t dataType, Int_t frameType, Float_t energy) {
+Tracks * getTracksFromClusters(Int_t Runs, Int_t dataType, Int_t frameType, Float_t energy, Float_t spotx, Float_t spoty) {
    DataInterface   * di = new DataInterface();
    Int_t             nClusters = kEventsPerRun * 5 * nLayers;
    Int_t             nTracks = kEventsPerRun * 2;
@@ -248,7 +248,7 @@ Tracks * getTracksFromClusters(Int_t Runs, Int_t dataType, Int_t frameType, Floa
       if (kDoDiffusion) {
          Hits * hits = new Hits();
          Hits * diffusedHits = nullptr;
-         di->getMCClusters(i, nullptr, hits);
+         di->getMCClusters(i, nullptr, hits, spotx, spoty);
          hits->sortHits(); 
          diffusedHits = diffuseHits(gRandom, hits);
          diffusedHits->sortHits();
@@ -259,8 +259,11 @@ Tracks * getTracksFromClusters(Int_t Runs, Int_t dataType, Int_t frameType, Floa
          delete diffusedHits;
       }
       else {
-         di->getMCClusters(i, clusters);
+         di->getMCClusters(i, clusters, nullptr, spotx, spoty);
       }
+
+      printf("Found %d clusters...\n", clusters->GetEntriesFast());
+      if (!clusters->GetEntriesFast()) continue;
 
       t1.Stop();
    

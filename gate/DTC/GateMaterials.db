@@ -38,6 +38,7 @@ Tin:        S= Sn  ; Z= 50. ; A= 118.71  g/mole
 Tellurium:  S= Te  ; Z= 52. ; A= 127.6   g/mole
 Iodine:     S= I   ; Z= 53. ; A= 126.90  g/mole
 Cesium:     S= Cs  ; Z= 55. ; A= 132.905 g/mole
+Barium:     S= Ba  ; Z= 56. ; A= 137.237 g/mole
 Gadolinium: S= Gd  ; Z= 64. ; A= 157.25  g/mole
 Lutetium:   S= Lu  ; Z= 71. ; A= 174.97  g/mole
 Tungsten:   S= W   ; Z= 74. ; A= 183.84  g/mole
@@ -547,4 +548,72 @@ Kapton: d=1.39 g/cm3; n=3; state=Solid
 Epoxy: d=1.2 g/cm3; n=2;   state=Solid
        +el: name=Hydrogen    ; n=2
        +el: name=Carbon      ; n=2
+
+headSoftTissue: d=1.055 g/cm3; n=6; state=Solid
+        +el: name=Hydrogen   ; f=0.0848
+        +el: name=Carbon     ; f=0.5745
+        +el: name=Nitrogen   ; f=0.0165
+        +el: name=Oxygen     ; f=0.2460
+        +el: name=Magnesium  ; f=0.0762
+        +el: name=Chlorine   ; f=0.0019
+
+headBrainTissue: d=1.07 g/cm3; n=6; state=Solid
+        +el: name=Hydrogen   ; f=0.0817
+        +el: name=Carbon     ; f=0.5362
+        +el: name=Nitrogen   ; f=0.0153
+        +el: name=Oxygen     ; f=0.2651
+        +el: name=Magnesium  ; f=0.0998
+        +el: name=Chlorine   ; f=0.0019
+
+headSpinalDisk: d=1.10 g/cm3; n=7; state=Solid
+        +el: name=Hydrogen   ; f=0.0707
+        +el: name=Carbon     ; f=0.5246
+        +el: name=Nitrogen   ; f=0.0211
+        +el: name=Oxygen     ; f=0.2760
+        +el: name=Magnesium  ; f=0.0955
+        +el: name=Chlorine   ; f=0.0021
+        +el: name=Calcium    ; f=0.0098
+
+
+headTrabecularBone: d=1.13 g/cm3; n=8; state=Solid
+        +el: name=Hydrogen   ; f=0.0839
+        +el: name=Carbon     ; f=0.5965
+        +el: name=Nitrogen   ; f=0.0155
+        +el: name=Oxygen     ; f=0.2142
+        +el: name=Magnesium  ; f=0.0146
+        +el: name=Chlorine   ; f=0.0012
+        +el: name=Calcium    ; f=0.0503
+        +el: name=Phosphor   ; f=0.0233
+
+headCorticalBone: d=1.75 g/cm3; n=8; state=Solid
+        +el: name=Hydrogen   ; f=0.0413
+        +el: name=Carbon     ; f=0.2970
+        +el: name=Nitrogen   ; f=0.0085
+        +el: name=Oxygen     ; f=0.3412
+        +el: name=Magnesium  ; f=0.0311
+        +el: name=Chlorine   ; f=0.0004
+        +el: name=Calcium    ; f=0.2048
+        +el: name=Phosphor   ; f=0.0757
+
+headToothDentine: d=1.66 g/cm3; n=9; state=Solid
+        +el: name=Hydrogen   ; f=0.0451
+        +el: name=Carbon     ; f=0.3535
+        +el: name=Nitrogen   ; f=0.0123
+        +el: name=Oxygen     ; f=0.2941
+        +el: name=Chlorine   ; f=0.0004
+        +el: name=Calcium    ; f=0.1984
+        +el: name=Phosphor   ; f=0.0920
+        +el: name=Sulfur     ; f=0.0008
+        +el: name=Barium     ; f=0.0033
+
+headToothEnamel: d=2.04 g/cm3; n=9; state=Solid
+        +el: name=Hydrogen   ; f=0.0277
+        +el: name=Carbon     ; f=0.2181
+        +el: name=Nitrogen   ; f=0.0082
+        +el: name=Oxygen     ; f=0.3402
+        +el: name=Chlorine   ; f=0.0003
+        +el: name=Calcium    ; f=0.2660
+        +el: name=Phosphor   ; f=0.1233
+        +el: name=Sulfur     ; f=0.0031
+        +el: name=Barium     ; f=0.0131
 

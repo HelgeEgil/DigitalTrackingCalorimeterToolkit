@@ -1,0 +1,86 @@
+#/vis/open DAWNFILE
+#/vis/open OGL
+#/vis/viewer/reset
+#/vis/viewer/set/viewpointThetaPhi 100 15
+#/vis/viewer/zoom 0.8
+#/vis/viewer/set/style surface
+#/vis/drawVolume
+#/tracking/storeTrajectory 1
+#/vis/scene/add/trajectories
+#/vis/scene/endOfEventAction accumulate
+#/vis/viewer/update
+#/vis/viewer/refresh 
+
+/gate/geometry/setMaterialDatabase GateMaterials.db
+/control/execute Module_phantom.mac
+
+/gate/systems/scanner_1/level1/attach FM_Layer
+/gate/systems/scanner_1/level2/attach FirstModule
+/gate/systems/scanner_2/level1/attach Layer
+/gate/systems/scanner_2/level2/attach Module
+/gate/systems/phantom/level1/attach degrader
+
+/control/execute readout.mac
+
+#=================#
+# Physics			#
+#=================#
+
+/gate/geometry/setIonisationPotential Water 75 eV
+/gate/physics/addPhysicsList QGSP_BIC_EMZ
+# /gate/physics/SetMaxStepSizeInRegion degrader 2 mm
+/gate/physics/ActivateStepLimiter proton
+
+/gate/run/initialize
+
+#/process/inactivate hadElastic
+#/process/inactivate protonInelastic
+#/process/inactivate msc
+
+#=======================#
+# ADD PROTON BEAM	      #
+#=======================#
+
+
+#/gate/source/addSource PBS PencilBeam
+#/gate/source/PBS/setParticleType proton
+#/gate/source/PBS/setEnergy 230 MeV
+#/gate/source/PBS/setSigmaEnergy 0. MeV
+#/gate/source/PBS/setPosition 0. 0. -10. mm
+#/gate/source/PBS/setSigmaX 50 mm
+#/gate/source/PBS/setSigmaY 50 mm
+#/gate/source/PBS/setSigmaTheta 2 mrad
+#/gate/source/PBS/setSigmaPhi 2 mrad
+#/gate/source/PBS/setEllipseXThetaEmittance 15 mm*mrad
+#/gate/source/PBS/setEllipseXThetaRotationNorm negative
+#/gate/source/PBS/setEllipseYPhiEmittance 15 mm*mrad
+#/gate/source/PBS/setEllipseYPhiRotationNorm negative
+
+/gate/source/addSource uniformBeam gps
+/gate/source/uniformBeam/gps/particle proton
+/gate/source/uniformBeam/gps/ene/type Gauss
+/gate/source/uniformBeam/gps/ene/mono 230 MeV
+/gate/source/uniformBeam/gps/ene/sigma 0 MeV
+/gate/source/uniformBeam/gps/type Plane
+/gate/source/uniformBeam/gps/shape Square
+#/gate/source/uniformBeam/gps/shape Circle
+/gate/source/uniformBeam/gps/direction 0 0 1
+#/gate/source/uniformBeam/gps/radius 80 mm
+/gate/source/uniformBeam/gps/halfx 135 mm
+/gate/source/uniformBeam/gps/halfy 67.5 mm
+#/gate/source/uniformBeam/gps/halfx 0 mm
+#/gate/source/uniformBeam/gps/halfy 0 mm
+/gate/source/uniformBeam/gps/centre 0. 0. -400 mm
+
+/gate/output/root/enable
+/gate/output/root/setRootSinglesFlag 0
+/gate/output/root/setFileName phantom_230MeV
+
+#===============#
+# START BEAMS	#
+#===============#
+
+/gate/random/setEngineName MersenneTwister
+/gate/random/setEngineSeed auto
+/gate/application/setTotalNumberOfPrimaries 1000000
+/gate/application/start

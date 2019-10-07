@@ -71,7 +71,14 @@ DataInterface::DataInterface(TTree *tree) : fChain(0) {
          }
          else {
             printf("Opening HELIUM file with degrader thickness %.0f mm, material is %s and abs. thickness %.0f mm...", run_degraderThickness, materialChar, readoutAbsorber);
-            chain->Add(Form("Data/MonteCarlo/DTC_%s_CarbonHelium_Absorber%.0fmm_Degrader%03.0fmm_%dMeV.root/Hits", materialChar, readoutAbsorber, run_degraderThickness, kEnergy)); // Fix if original run_energy is != 250
+            if (!kSpotScanning) {
+               chain->Add(Form("Data/MonteCarlo/DTC_%s_CarbonHelium_Absorber%.0fmm_Degrader%03.0fmm_%dMeV.root/Hits", materialChar, readoutAbsorber, run_degraderThickness, kEnergy));
+            }
+            else { // Load phantom (used with spot scanning)
+               chain->Add(Form("Data/MonteCarlo/DTC_%s_CarbonHelium_Absorber%.0fmm_Headphantom_%dMeV.root/Hits", materialChar, readoutAbsorber, kEnergy));
+               primariesInSpot_ = 0;
+            }
+
             printf("OK!\n");
          }
       }
@@ -133,8 +140,8 @@ void DataInterface::Init(TTree *tree) {
 //   fChain->SetBranchAddress("localPosX", &localPosX, &b_localPosX);
 //   fChain->SetBranchAddress("localPosY", &localPosY, &b_localPosY);
 //   fChain->SetBranchAddress("localPosZ", &localPosZ, &b_localPosZ);
-//   fChain->SetBranchAddress("baseID", &baseID, &b_baseID);
-//   fChain->SetBranchAddress("level1ID", &level1ID, &b_level1ID);
+   fChain->SetBranchAddress("baseID", &baseID, &b_baseID);
+   fChain->SetBranchAddress("level1ID", &level1ID, &b_level1ID);
 //   fChain->SetBranchAddress("level2ID", &level2ID, &b_level2ID);
 //   fChain->SetBranchAddress("level3ID", &level3ID, &b_level3ID);
 //   fChain->SetBranchAddress("level4ID", &level4ID, &b_level4ID);
@@ -150,6 +157,11 @@ void DataInterface::Init(TTree *tree) {
 //   fChain->SetBranchAddress("sourcePosZ", &sourcePosZ, &b_sourcePosZ);
 //   fChain->SetBranchAddress("sourceID", &sourceID, &b_sourceID);
    fChain->SetBranchAddress("eventID", &eventID, &b_eventID);
+   if (kSpotScanning) {
+      fChain->SetBranchAddress("spotPosX", &spotPosX, &b_spotPosX);
+      fChain->SetBranchAddress("spotPosY", &spotPosY, &b_spotPosY);
+   }
+
 //   fChain->SetBranchAddress("runID", &runID, &b_runID);
 //   fChain->SetBranchAddress("axialPos", &axialPos, &b_axialPos);
 //   fChain->SetBranchAddress("rotationAngle", &rotationAngle, &b_rotationAngle);
@@ -441,18 +453,22 @@ void DataInterface::getDataHits(Int_t runNo, Hits * hits, Int_t energy) {
    delete f;
 }
 
-void  DataInterface::getMCClusters(Int_t runNo, Clusters *clusters, Hits * hits) {
+void  DataInterface::getMCClusters(Int_t runNo, Clusters *clusters, Hits * hits, Float_t useSpotX, Float_t useSpotY) {
    Int_t eventIdFrom = runNo * kEventsPerRun + kSkipTracks;
    Int_t eventIdTo = eventIdFrom + kEventsPerRun + kSkipTracks;
 
-   if (runNo == 0) lastJentry_ = 0;
-   
+   if (runNo == 0 && !kSpotScanning) lastJentry_ = 0;
+  
+   if (kSpotScanning) {
+      printf("New run... Searching for (%.0f,%.0f), starting with jentry = %lld\n", useSpotX, useSpotY, lastJentry_);
+   }
+
    Float_t  sum_edep = 0;
    Int_t    lastEventID = -1, lastParentID = -1, lastTrackID = -1;
    Int_t    lastLayer = 0;
    Float_t  lastZ = 0;
    Int_t    layer = 0;
-   Int_t    n = 0;
+   Int_t    n = 0, nAdded = 0;
    Float_t  sumX = 0, sumY = 0;
    Float_t  x,y;
    Bool_t   isInElastic, isSecondary = false;
@@ -470,6 +486,27 @@ void  DataInterface::getMCClusters(Int_t runNo, Clusters *clusters, Hits * hits)
 
       nb = fChain->GetEntry(jentry);
       nbytes += nb;
+      
+      if (kSpotScanning) {
+         if (useSpotX > spotPosX || useSpotY > spotPosY) {
+//            if (jentry%1000==0) printf("jentry = %lld\n", jentry)   
+            lastEventID = -1;
+            continue;
+         }
+         else if (useSpotX < spotPosX || useSpotY < spotPosY || jentry == nentries-1) { // new spot in data -> Store & exit
+            primariesInSpot_ = 0;
+            lastJentry_ = jentry;
+            break;
+         }
+         else {
+            if (primariesInSpot_ >= kEventsPerRun) { // same spot, new Run
+               printf("Finished run\n");
+               primariesInSpot_ = 0;
+               lastJentry_ = jentry;
+               break;
+            }
+         }
+      }
 
       if (lastEventID < 0) {
          lastZ = posZ;
@@ -483,7 +520,7 @@ void  DataInterface::getMCClusters(Int_t runNo, Clusters *clusters, Hits * hits)
          n = 0;
       }
 
-      layer = level1ID + baseID - 1;
+      layer = level1ID + baseID;// - 1;
       if (kFilterNuclearInteractions == true && parentID != 0) {
          isSecondary = true;
          continue;
@@ -498,14 +535,8 @@ void  DataInterface::getMCClusters(Int_t runNo, Clusters *clusters, Hits * hits)
          y = sumY/n / dy + ny/2;
 
          if (lastLayer < nLayers) {
-            if (isSecondary) {
-               if (hits)      hits->appendPoint(x, y, lastLayer, sum_edep/14, lastEventID, true);
-               if (clusters)  clusters->appendClusterEdep(x,y, lastLayer, sum_edep/14, lastEventID, true);
-            }
-            else {
-               if (hits)      hits->appendPoint(x, y, lastLayer, sum_edep/14, lastEventID, false);
-               if (clusters)  clusters->appendClusterEdep(x,y, lastLayer, sum_edep/14, lastEventID, false);
-            }
+            if (hits)      hits->appendPoint(x, y, lastLayer, sum_edep/14, lastEventID, isSecondary);
+            if (clusters)  clusters->appendClusterEdep(x,y, lastLayer, sum_edep/14, lastEventID, isSecondary);
          }
 
          sum_edep = 0;
@@ -514,16 +545,20 @@ void  DataInterface::getMCClusters(Int_t runNo, Clusters *clusters, Hits * hits)
          n = 0;
       }
 
-      if (eventID < eventIdFrom) {
-         continue;
-      }
-      
-      else if (eventID >= eventIdTo || jentry == nentries-1) { // LAST ENTRY, EXIT AND APPEND THIS
-         lastJentry_ = jentry;
-         break;
+
+      if (!kSpotScanning) {
+         if (eventID < eventIdFrom) {
+            continue;
+         }
+         
+         else if (eventID >= eventIdTo || jentry == nentries-1) { // LAST ENTRY, EXIT AND APPEND THIS
+            lastJentry_ = jentry;
+            break;
+         }
       }
 
       if (eventID != lastEventID) { // new track
+         primariesInSpot_++;
          isSecondary = false;
       }
 
@@ -539,20 +574,15 @@ void  DataInterface::getMCClusters(Int_t runNo, Clusters *clusters, Hits * hits)
       n++;
    }
    
-   if ((lastJentry_ == nentries-1) && (lastEventID != eventID || lastLayer != layer || lastParentID != parentID)) {
+   if ((lastJentry_ == nentries-1) && (lastEventID != eventID || lastLayer != layer || lastParentID != parentID)) { // append last FIX THIS 
+      printf("APPEND LAST!\n");
       fChain->GetEntry(lastJentry_);
       x = sumX/n / dx + nx/2;
       y = sumY/n / dy + ny/2;
 
       if (lastLayer < nLayers && !std::isnan(x+y)) {
-         if (isSecondary) {
-            if (hits)      hits->appendPoint(x, y, lastLayer, sum_edep/14, lastEventID, true);
-            if (clusters)  clusters->appendClusterEdep(x, y, lastLayer, sum_edep/14, lastEventID, true);
-         }
-         else {
-            if (hits)      hits->appendPoint(x, y, lastLayer, sum_edep/14, lastEventID, false);
-            if (clusters)  clusters->appendClusterEdep(x,y, lastLayer, sum_edep/14, lastEventID, false);
-         }
+         if (hits)      hits->appendPoint(x, y, lastLayer, sum_edep/14, lastEventID, isSecondary);
+         if (clusters)  clusters->appendClusterEdep(x, y, lastLayer, sum_edep/14, lastEventID, isSecondary);
       }
 
       sum_edep = 0;

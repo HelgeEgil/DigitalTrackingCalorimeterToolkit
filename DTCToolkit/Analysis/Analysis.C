@@ -1781,6 +1781,7 @@ void analyseHelium(Int_t Runs, Int_t dataType, Bool_t recreate, Int_t switchLaye
       angle = getDotProductAngle(a, a, b) * 1000;
       range = getUnitFromTL(thisTrack->getFitParameterRange());
       bragg = thisTrack->getFitParameterChiSquare();
+      edep = 0;
       if (thisTrack->GetEntriesFast() > 3) {
          Int_t last = thisTrack->GetEntriesFast() - 1;
          edep = thisTrack->getDepositedEnergy(last) + thisTrack->getDepositedEnergy(last-1);
@@ -1824,6 +1825,91 @@ void analyseHelium(Int_t Runs, Int_t dataType, Bool_t recreate, Int_t switchLaye
    hSec->Draw();
 }
 
+void makeOutputFileForImageReconstruction(Int_t Runs, Int_t tracksperrun) {
+   run_energy = 600;
+   run_degraderThickness = 180; // This number is useless I hope
+   kEventsPerRun = tracksperrun;
+   kDoTracking = true;
+
+   Bool_t  kDraw = true;
+   Float_t spotXFrom = -15;
+   Float_t spotXTo = 15;
+   Float_t spotXSpacing = 5;
+   Float_t spotYFrom = -15;
+   Float_t spotYTo = 15;
+   Float_t spotYSpacing = 5;
+
+
+   TH2F *hSimpleImage = nullptr;
+   TH2F *hSimpleImageNorm = nullptr;
+
+   if (kDraw) {
+      hSimpleImage = new TH2F("hSimpleImage", "Simple Image;X [mm];Y [mm]", 100, spotXFrom*1.5, spotXTo*1.5, 100, spotYFrom*1.5, spotYTo*1.5);
+      hSimpleImageNorm = new TH2F("hSimpleImageNorm", "Simple Image;X [mm];Y [mm]", 100, spotXFrom*1.5, spotXTo*1.5, 100, spotYFrom*1.5, spotYTo*1.5);
+   }
+
+   Float_t outSpotX, outSpotY, outWEPL, outX2x, outX2y, outP2x, outP2y, residualRange;
+   Track * thisTrack = nullptr;
+
+   TFile *fOut = new TFile("OutputFiles/PedHeadCarbonHelium.root", "recreate");
+   TTree *tOut = new TTree("WEPLData", "Carbon+Helium beam");
+
+   tOut->Branch("spotX", &outSpotX, "spotX/F");
+   tOut->Branch("spotY", &outSpotY, "spotY/F");
+   tOut->Branch("WEPL", &outWEPL, "WEPL/F");
+   tOut->Branch("X2x", &outX2x, "X2x/F");
+   tOut->Branch("X2y", &outX2y, "X2y/F");
+   tOut->Branch("P2x", &outP2x, "P2x/F");
+   tOut->Branch("P2y", &outP2y, "P2y/F");
+
+   Int_t nruns = 0;
+
+   for (float spotX = spotXFrom; spotX <= spotXTo; spotX += spotXSpacing) {
+      for (float spotY = spotYFrom; spotY <= spotYTo; spotY += spotYSpacing) {
+         Tracks * tracks = loadOrCreateTracks(true, Runs, false, run_energy, spotX, spotY);
+         tracks->removeEmptyTracks();
+
+         tracks->removeHighAngleTracks(30);
+         tracks->removeNuclearInteractions();
+         tracks->fillOutIncompleteTracks();
+         tracks->doTrackFit();
+         tracks->removeThreeSigmaShortTracks();
+         tracks->removeEmptyTracks();
+
+         for (Int_t i=0; i<=tracks->GetEntriesFast(); i++) {
+            thisTrack = tracks->At(i);
+            if (!thisTrack) continue;
+
+            outSpotX = spotX;
+            outSpotY = spotY;
+            residualRange = getWEPLFromTL(thisTrack->getFitParameterRange());
+            outWEPL = 158.6 - residualRange; // 150 MeV/u Helium
+            outX2x = thisTrack->At(0)->getXmm();
+            outX2y = thisTrack->At(0)->getYmm();
+            outP2x = (thisTrack->At(1)->getXmm() - outX2x) / dz;
+            outP2y = (thisTrack->At(1)->getYmm() - outX2y) / dz;
+
+            tOut->Fill();
+
+            if (kDraw) {
+               hSimpleImage->Fill(outX2x, outX2y, outWEPL);
+               hSimpleImageNorm->Fill(outX2x, outX2y);
+            }
+         }
+         nruns++;
+      }
+      if (nruns > 3) break;
+   }
+   
+   fOut->Write();
+   printf("Image Reconstruction Input data written to Output/PedHeadCarbonHelium.root.\n");
+   
+   if (kDraw) {
+      hSimpleImage->Divide(hSimpleImageNorm);
+      hSimpleImage->Draw("COLZ");
+   }
+}
+
 void drawTracks3D(Int_t Runs, Int_t dataType, Bool_t recreate, Int_t switchLayer, Float_t energy, Float_t degraderThickness, Int_t tracksperrun, Bool_t doTracking) {
    run_energy = energy;
    run_degraderThickness = degraderThickness;
@@ -1844,15 +1930,15 @@ void drawTracks3D(Int_t Runs, Int_t dataType, Bool_t recreate, Int_t switchLayer
    }
    cout << "Number of primaries = " << numberOfPrimaries << ", number of secondaries = " << numberOfSecondaries << endl;
  
-   tracks->removeHighAngleTracks(20); // mrad
-   tracks->removeThreeSigmaShortTracks();
+   tracks->removeHighAngleTracks(30); // mrad
    tracks->removeNuclearInteractions();
-   tracks->removeEmptyTracks();
+//   tracks->removeEmptyTracks();
 
    tracks->fillOutIncompleteTracks(0.05);
    tracks->doTrackFit();
-
+//
    tracks->removeHighChiSquare();
+   tracks->removeThreeSigmaShortTracks();
    tracks->removeEmptyTracks();
 
    Bool_t   kDraw = true;
@@ -1883,7 +1969,7 @@ void drawTracks3D(Int_t Runs, Int_t dataType, Bool_t recreate, Int_t switchLayer
    fromx = 0, tox = nx;
    */
 
-   Int_t zoom = 500; // 750
+   Int_t zoom = 750; // 750
 
    fromx = nx/2 - zoom*2;
    fromy = ny/2 - zoom*2;
@@ -1891,11 +1977,11 @@ void drawTracks3D(Int_t Runs, Int_t dataType, Bool_t recreate, Int_t switchLayer
    toy = ny/2 + zoom*2;
 
    Int_t iret;
-   Float_t theta = 280;
-   Float_t phi = 80;
+   Float_t theta = -20;
+   Float_t phi = 70;
 
    if (kDraw) {
-      view->SetRange(fromx, 0, fromy, tox, 60, toy);
+      view->SetRange(fromx, 0, fromy, tox, 35, toy);
       view->SetView(theta, phi, 0, iret);
    }
 
@@ -2191,7 +2277,10 @@ void drawTracks3D(Int_t Runs, Int_t dataType, Bool_t recreate, Int_t switchLayer
    //       l->SetLineColor(kBlack);
             l->SetLineWidth(3);
             if (l->GetLineColor() == kRed) l->Draw();
-            if (l->GetLineColor() == kGreen) l->Draw();
+            if (l->GetLineColor() == kGreen) {
+               l->SetLineWidth(2);
+               l->Draw();
+            }
             if (l->GetLineColor() == kGray) l->Draw();
             l->Draw();
          }

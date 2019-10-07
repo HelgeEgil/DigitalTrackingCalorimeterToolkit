@@ -23,32 +23,10 @@
 [Core-0] 
 [Core-0] You are using Geant4 version 10.4.2
 /control/alias absorberthickness 3
-/control/alias energy 2751
-/control/alias degraderthickness 100
-/control/alias halfdegraderthickness -52.000
-/control/alias beampos -105
-[Core-0] Starting macro Main.mac
-0: RINDEX
-1e-06   1.33
-5e-06   1.33
-6e-06   1.33
-7e-06   1.33
-9: GROUPVEL
-1e-06   225.408
-3e-06   225.408
-5.5e-06   225.408
-7e-06   225.408
-10: MIEHG
-1e-06   2.3
-5e-06   1.3
-6e-06   3.2
-7e-06   6.7
-5: MIEHG_FORWARD
-0.6
-6: MIEHG_BACKWARD
-0.6
-7: MIEHG_FORWARD_RATIO
-1
+/control/alias energy 1800
+/control/alias spotx 15
+/control/alias spoty 15
+[Core-0] Starting macro Main_Head.mac
 0: RINDEX
 1.84e-06   1.00028
 4.08e-06   1.00028
@@ -79,10 +57,18 @@ G4VUserPhysicsList::SetDefaultCutValue: negative cut values  :-1[mm]
 [Acquisition-0] Simulation will have  = 1 run(s)
 [Acquisition-0] Slice 0 from 0 to 1 s [slice=1 s]
 
-### ===  Deexcitation model UAtomDeexcitation is activated for 23 regions:
+### ===  Deexcitation model UAtomDeexcitation is activated for 31 regions:
           DefaultRegionForTheWorld  1  1  1
-          phantom  1  1  1
-          degrader  1  1  1
+          patient  1  1  1
+          patientworldDefaultAir  1  1  1
+          patientAir  1  1  1
+          patientheadSoftTissue  1  1  1
+          patientheadCorticalBone  1  1  1
+          patientheadTrabecularBone  1  1  1
+          patientheadToothDentine  1  1  1
+          patientheadToothEnamel  1  1  1
+          patientheadSpinalDisk  1  1  1
+          patientheadBrainTissue  1  1  1
           scanner_1  1  1  1
           FM_Layer  1  1  1
           FirstModule  1  1  1
@@ -863,10 +849,18 @@ Max 2J for sampling of angular correlations         10
 WARNING: Scene "none" not found.
   /vis/scene/list to see scenes.
 
-### ===  Deexcitation model UAtomDeexcitation is activated for 23 regions:
+### ===  Deexcitation model UAtomDeexcitation is activated for 31 regions:
           DefaultRegionForTheWorld  1  1  1
-          phantom  1  1  1
-          degrader  1  1  1
+          patient  1  1  1
+          patientworldDefaultAir  1  1  1
+          patientAir  1  1  1
+          patientheadSoftTissue  1  1  1
+          patientheadCorticalBone  1  1  1
+          patientheadTrabecularBone  1  1  1
+          patientheadToothDentine  1  1  1
+          patientheadToothEnamel  1  1  1
+          patientheadSpinalDisk  1  1  1
+          patientheadBrainTissue  1  1  1
           scanner_1  1  1  1
           FM_Layer  1  1  1
           FirstModule  1  1  1
@@ -889,3 +883,7 @@ WARNING: Scene "none" not found.
           AbsorberAirGap  1  1  1
 ### ===  Auger cascade flag: 1
 ### ===  Ignore cuts flag:   0
+WARNING: command "/vis/viewer/update" could not be applied: no current viewer.
+[Core-0] End of macro Main_Head.mac
+Graphics systems deleted.
+Visualization Manager deleting...

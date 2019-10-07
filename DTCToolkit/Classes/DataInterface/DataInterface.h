@@ -66,6 +66,8 @@ public :
    Float_t         sourcePosX;
    Float_t         sourcePosY;
    Float_t         sourcePosZ;
+   Float_t         spotPosX;
+   Float_t         spotPosY;
    Int_t           sourceID;
    Int_t           eventID;
    Int_t           runID;
@@ -108,13 +110,15 @@ public :
    TBranch        *b_eventID;   //!
    TBranch        *b_runID;   //!
    TBranch        *b_axialPos;   //!
+   TBranch        *b_spotPosX;
+   TBranch        *b_spotPosY;
    TBranch        *b_rotationAngle;   //!
    TBranch        *b_volumeID;   //!
    TBranch        *b_processName;   //!
    TBranch        *b_comptVolName;   //!
    TBranch        *b_RayleighVolName;   //!
 
-   Long64_t lastJentry_;
+   Long64_t primariesInSpot_;
 
    DataInterface(TTree *tree=0);
    virtual ~DataInterface();
@@ -130,7 +134,7 @@ public :
    // My own functions in DataInterface.C
    virtual Int_t     getMCFrame(Int_t runNo, CalorimeterFrame *cf);
    virtual Int_t     getMCFrame(Int_t runNo, Layer *l);
-   virtual void      getMCClusters(Int_t runNo, Clusters *clusters = nullptr, Hits * hits = nullptr);
+   virtual void      getMCClusters(Int_t runNo, Clusters *clusters = nullptr, Hits * hits = nullptr, Float_t spotPosX = 0, Float_t spotPosY = 0);
    virtual void      getDataFrame(Int_t runNo, CalorimeterFrame *cf, Int_t energy = 188);
    virtual void      getDataFrame(Int_t runNo, Layer *l, Int_t energy = 188);
    virtual void      getDataHits(Int_t runNo, Hits * hits, Int_t energy = 188);

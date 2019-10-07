@@ -492,13 +492,14 @@ void Tracks::removeThreeSigmaShortTracks() {
    Int_t    nTotal = GetEntriesFast();
    Int_t    nTotalStart = GetEntries();
 
-   Float_t  muRange = 0, sigmaRange = 0, cutRange;
+   Float_t  muRange = 0, sigmaRange = 0, cutRangeLow, cutRangeHigh;
    Int_t    nInSum = 0;
 
    for (Int_t i=0; i<=nTotal; i++) {
       thisTrack = At(i);
       if (!At(i)) continue;
-      muRange += thisTrack->getRangemm();
+//      muRange += thisTrack->getRangemm();
+      muRange += thisTrack->getFitParameterRange();
       nInSum++;
    }
 
@@ -507,19 +508,21 @@ void Tracks::removeThreeSigmaShortTracks() {
    for (Int_t i=0; i<=nTotal; i++) {
       thisTrack = At(i);
       if (!At(i)) continue;
-      sigmaRange += pow(muRange - thisTrack->getRangemm(), 2);
+      sigmaRange += pow(muRange - thisTrack->getFitParameterRange(), 2);
    }
    sigmaRange = sqrt(sigmaRange / nInSum);
 
+   printf("SigmaRange before resetting: %.2f mm\n", sigmaRange);
    sigmaRange = 5;
 
-   cutRange = muRange - 3 * sigmaRange;
-   printf("muRange = %.3f mm, sigmaRange = %.3f mm, cutRange = %.3f mm.\n", muRange, sigmaRange, cutRange);
+   cutRangeLow = muRange - 3 * sigmaRange;
+   cutRangeHigh = muRange + 3 * sigmaRange;
+   printf("muRange = %.3f mm, sigmaRange = %.3f mm, cutRangeLow = %.3f mm, cutRangeHigh = %.3f mm\n", muRange, sigmaRange, cutRangeLow, cutRangeHigh);
 
    for (Int_t i=0; i<=nTotal; i++) {
       thisTrack = At(i);
       if (!At(i)) continue;
-      if (thisTrack->getRangemm() < cutRange) {
+      if (thisTrack->getFitParameterRange() < cutRangeLow || thisTrack->getFitParameterRange() > cutRangeHigh) {
          if (thisTrack->Last()->isSecondary()) nRemovedNuclear++;
          removeTrack(thisTrack);
          nRemoved++;

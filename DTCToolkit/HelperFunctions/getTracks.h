@@ -5,9 +5,9 @@
 #include "Classes/Hit/Hits.h"
 
 // Tracks    * getTracksFOCAL(Int_t Runs, Int_t dataType = kMC, Int_t frameType = kCalorimeter, Float_t energy = 188); // See pre-2018-08 version on GH for FOCAL reconstruction methods 
-Tracks    * getTracksFromClusters(Int_t Runs, Int_t dataType = kMC, Int_t frameType = kCalorimeter, Float_t energy = 188);
-Clusters  * getClusters(Int_t Runs, Int_t dataType = kMC, Int_t frameType = kCalorimeter, Float_t energy = 188);
+Tracks    * getTracksFromClusters(Int_t Runs, Int_t dataType = kMC, Int_t frameType = kCalorimeter, Float_t energy = 188, Float_t spotx = 0, Float_t spoty = 0);
+Clusters  * getClusters(Int_t Runs, Int_t dataType = kMC, Int_t frameType = kCalorimeter, Float_t energy = 188, Float_t spotx = 0, Float_t spoty = 0);
 void        saveTracks(Tracks* tracks, Int_t dataType, Float_t energy);
 Tracks    * loadTracks(Int_t Runs, Int_t dataType, Float_t energy);
-Tracks    * loadOrCreateTracks(Bool_t recreate, Int_t Runs, Int_t dataType, Float_t energy);
+Tracks    * loadOrCreateTracks(Bool_t recreate, Int_t Runs, Int_t dataType, Float_t energy, Float_t spotx = 0, Float_t spoty = 0);
 #endif

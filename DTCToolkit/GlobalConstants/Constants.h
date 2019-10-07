@@ -45,6 +45,8 @@ Bool_t   kIsAluminumPlate = false;
 Bool_t   kIsScintillator = false;
 Bool_t   kIsFirstLayerAir = true;
 Bool_t   kHelium = true;
+Bool_t   kSpotScanning = true;
+Bool_t   kPhantom = true;
 Bool_t   kDoTracking = false; 
 Bool_t   kUseEmpiricalMCS = true;
 Bool_t   kFilterNuclearInteractions = false; 
@@ -52,7 +54,7 @@ Bool_t   kDoDiffusion = false;
 Int_t    kEventsPerRun = 100;
 Int_t    kSkipTracks = 0;
 Float_t  kMultiplyTrackingByThis = 1;
-const Int_t    kEnergy = 917; // 917 MeV_Helium ~= 230 MeV_proton
+const Int_t    kEnergy = 600; // 917 MeV_Helium ~= 230 MeV_proton
 
 #ifdef USEALPIDE
 Bool_t   kUseDegrader = true; 
@@ -131,4 +133,6 @@ Int_t    GlobalLayerID = 0;
 Float_t  run_energy = 0;
 Float_t  run_degraderThickness = 0;
 Int_t    kDataType = kMC;
+Long64_t lastJentry_ = 0;
+
 #endif
