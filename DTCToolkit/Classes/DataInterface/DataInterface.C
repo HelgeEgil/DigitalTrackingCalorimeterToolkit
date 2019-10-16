@@ -453,15 +453,99 @@ void DataInterface::getDataHits(Int_t runNo, Hits * hits, Int_t energy) {
    delete f;
 }
 
+void  DataInterface::getMCClustersThreshold(Int_t runNo, Clusters *clusters, Hits *hits, Float_t useSpotX, Float_t useSpotY) {
+   Int_t eventIdFrom = runNo * kEventsPerRun + kSkipTracks;
+   Int_t eventIdTo = eventIdFrom + kEventsPerRun + kSkipTracks;
+
+   Float_t threshold = 3e-3; // 1 keV
+   Int_t particlesBelowThreshold = 0;
+
+   if (runNo == 0 && !kSpotScanning) lastJentry_ = 0;
+   
+   Int_t    layer = 0, lastEventID=-1;
+   Float_t  x,y;
+   Bool_t   isSecondary = false;
+   Long64_t nentries = fChain->GetEntriesFast();
+
+   for (Long64_t jentry=lastJentry_; jentry<nentries; jentry++) { // new interaction
+      Long64_t ientry = LoadTree(jentry);
+      if (ientry<0) {
+         lastJentry_ = jentry;
+         break;
+      }
+
+      fChain->GetEntry(jentry);
+      if (lastEventID != eventID) primariesInSpot_++;
+      
+      if (!kSpotScanning) {
+         if (eventID < eventIdFrom) {
+            continue;
+         }
+         
+         else if (eventID >= eventIdTo || jentry == nentries-1) { // LAST ENTRY, EXIT AND APPEND THIS
+            lastJentry_ = jentry;
+            break;
+         }
+      }
+      else {
+         if (useSpotX > spotPosX || useSpotY > spotPosY) {
+            continue;
+         }
+
+         else if (useSpotX < spotPosX || useSpotY < spotPosY || jentry == nentries-1) { // new spot in data -> Store & exit
+            lastJentry_ = jentry;
+            break;
+         }
+         else {
+            if (primariesInSpot_ >= kEventsPerRun) { // same spot, new Run
+               primariesInSpot_ = 0;
+               lastJentry_ = jentry;
+               break;
+            }
+         }
+      }
+      
+      layer = level1ID + baseID - 1;
+      if (kHelium) layer++;
+
+      if (parentID != 0 || trackID > 1) {
+         isSecondary = true;
+      }
+      else {
+         isSecondary = false;
+      }
+
+      if (edep < threshold) {
+         particlesBelowThreshold++;
+         continue;
+      } 
+    
+
+      x = posX / dx + nx/2;
+      y = posY / dy + ny/2;
+
+      if (layer < nLayers) {
+         if (hits)      hits->appendPoint(x,y,layer,edep*1000/14,eventID,isSecondary);
+         if (clusters)  clusters->appendClusterEdep(x,y,layer,edep*1000/14,eventID,isSecondary);
+      }
+
+      lastEventID = eventID;
+
+   }
+//   printf("Events below threshold: %d\n", particlesBelowThreshold);
+}
+
 void  DataInterface::getMCClusters(Int_t runNo, Clusters *clusters, Hits * hits, Float_t useSpotX, Float_t useSpotY) {
    Int_t eventIdFrom = runNo * kEventsPerRun + kSkipTracks;
    Int_t eventIdTo = eventIdFrom + kEventsPerRun + kSkipTracks;
 
    if (runNo == 0 && !kSpotScanning) lastJentry_ = 0;
-  
+
+   /* 
    if (kSpotScanning) {
       printf("New run... Searching for (%.0f,%.0f), starting with jentry = %lld\n", useSpotX, useSpotY, lastJentry_);
    }
+   */
 
    Float_t  sum_edep = 0;
    Int_t    lastEventID = -1, lastParentID = -1, lastTrackID = -1;
@@ -500,7 +584,6 @@ void  DataInterface::getMCClusters(Int_t runNo, Clusters *clusters, Hits * hits,
          }
          else {
             if (primariesInSpot_ >= kEventsPerRun) { // same spot, new Run
-               printf("Finished run\n");
                primariesInSpot_ = 0;
                lastJentry_ = jentry;
                break;
@@ -520,13 +603,26 @@ void  DataInterface::getMCClusters(Int_t runNo, Clusters *clusters, Hits * hits,
          n = 0;
       }
 
-      layer = level1ID + baseID;// - 1;
-      if (kFilterNuclearInteractions == true && parentID != 0) {
+      layer = level1ID + baseID - 1;
+      if (kHelium) layer++;
+
+      if (kFilterNuclearInteractions == true && parentID != 0 && PDGEncoding != 11) {
          isSecondary = true;
          continue;
       }
 
-      if (lastEventID == eventID && trackID > 1) {
+      // Q: Is there both primary and secondary in layer that gets merged?
+      if (lastEventID == eventID) {
+         if (parentID == 0) {
+            printf("Primary PDG %d (eid%d) at layer %d\n", PDGEncoding, eventID, layer);
+         }
+         else {
+            printf("Secondary PDG %d (eid%d:tid%d:pid%d) at layer %d\n", PDGEncoding, eventID, trackID, parentID, layer);
+         }
+      }
+
+
+      if (lastEventID == eventID && trackID > 1 && PDGEncoding != 100002004) {
          isSecondary = true;
       }
 
@@ -575,7 +671,6 @@ void  DataInterface::getMCClusters(Int_t runNo, Clusters *clusters, Hits * hits,
    }
    
    if ((lastJentry_ == nentries-1) && (lastEventID != eventID || lastLayer != layer || lastParentID != parentID)) { // append last FIX THIS 
-      printf("APPEND LAST!\n");
       fChain->GetEntry(lastJentry_);
       x = sumX/n / dx + nx/2;
       y = sumY/n / dy + ny/2;

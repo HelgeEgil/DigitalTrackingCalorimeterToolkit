@@ -387,4 +387,33 @@ void Clusters::findNumberOfClustersForEachEventID() {
    printf("...In total %d clusters.\n", sumEID);
 }
 
+Float_t Clusters::removeClustersInGap(Float_t gapSizemm, Float_t gapPosmm) {
+   // Remove all clusters inside Y gap area
+
+   Float_t  nClustersRemoved = 0;
+   Float_t  nClustersTotal = GetEntries();
+   Cluster *thisCluster = nullptr;
+   Float_t  yFrom = gapPosmm - gapSizemm/2;
+   Float_t  yTo = gapPosmm + gapSizemm/2;
+   Float_t  y;
+
+   for (Int_t i=0; i<GetEntriesFast(); i++) {
+      thisCluster = At(i);
+      if (!thisCluster) continue;
+
+      y = thisCluster->getYmm();
+
+      if (y > yFrom && y < yTo) {
+         // INSIDE GAP AREA
+         removeClusterAt(i);
+         nClustersRemoved++;
+         continue;
+      }
+   }
+
+   Compress();
+   return nClustersRemoved;
+}
+
+
 #endif

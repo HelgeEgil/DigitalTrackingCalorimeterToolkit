@@ -435,7 +435,38 @@ void Tracks::removeTracksEndingInBadChannels() {
    Compress();
 }
 
-void Tracks::removeHighChiSquare() {
+void Tracks::removeTracksEndingInGapRegion() {
+   Track     * thisTrack = nullptr;
+   Cluster   * extrapolatedCluster = nullptr;
+   Int_t       lastLayer, removedTracks = 0;
+   Float_t     y;
+
+   // FIX IN FINAL DETECTOR !!!
+   Float_t     gapYfrom = -0.5;
+   Float_t     gapYto = 0.5;
+
+   for (Int_t i=0; i<GetEntriesFast(); i++) {
+      thisTrack = At(i);
+      if (!thisTrack) continue;
+      lastLayer = thisTrack->Last()->getLayer();
+      
+      extrapolatedCluster = getTrackExtrapolationToLayer(thisTrack, lastLayer + 1);
+      y = extrapolatedCluster->getYmm();
+
+      if (gapYfrom < y && y < gapYto) {
+         removeTrack(thisTrack);
+         removedTracks++;
+         continue;
+      }
+   }
+
+   removeEmptyTracks();
+   Compress();
+
+   printf("Removed %d tracks ending in gap region\n", removedTracks);
+}
+
+void Tracks::removeHighChiSquare(Float_t chi2limit) {
    Track  * thisTrack = nullptr;
    Int_t    nRemoved = 0;
    Int_t    nRemovedNuclear = 0;
@@ -447,7 +478,7 @@ void Tracks::removeHighChiSquare() {
       thisTrack = At(i);
       if (!At(i)) continue;
       chi2 = thisTrack->getFitParameterChiSquare();
-      if (chi2>210) {
+      if (chi2>chi2limit) {
          if (thisTrack->Last()->isSecondary()) nRemovedNuclear++;
          removeTrack(thisTrack);
          nRemoved++;
@@ -495,11 +526,15 @@ void Tracks::removeThreeSigmaShortTracks() {
    Float_t  muRange = 0, sigmaRange = 0, cutRangeLow, cutRangeHigh;
    Int_t    nInSum = 0;
 
+   Float_t fpm;
+
    for (Int_t i=0; i<=nTotal; i++) {
       thisTrack = At(i);
       if (!At(i)) continue;
 //      muRange += thisTrack->getRangemm();
-      muRange += thisTrack->getFitParameterRange();
+      fpm = thisTrack->getFitParameterRange();
+      if (isnan(fpm)) continue;
+      muRange += fpm;
       nInSum++;
    }
 
@@ -508,7 +543,9 @@ void Tracks::removeThreeSigmaShortTracks() {
    for (Int_t i=0; i<=nTotal; i++) {
       thisTrack = At(i);
       if (!At(i)) continue;
-      sigmaRange += pow(muRange - thisTrack->getFitParameterRange(), 2);
+      fpm = thisTrack->getFitParameterRange();
+      if (isnan(fpm)) continue;
+      sigmaRange += pow(muRange - fpm, 2);
    }
    sigmaRange = sqrt(sigmaRange / nInSum);
 

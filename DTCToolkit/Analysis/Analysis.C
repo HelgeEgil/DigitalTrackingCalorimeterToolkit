@@ -268,23 +268,29 @@ void drawTracksDeltaThetaEachLayer(Int_t Runs, Int_t dataType, Bool_t recreate, 
 
 void drawRadiograph(Int_t nparticles, Float_t energy) {
    run_energy = energy;
-   run_degraderThickness = 0;
+   run_degraderThickness = 160;
    Float_t X0, Y0, Xplane, Yplane, P0x, P0y, WEPL;
    Track * thisTrack = nullptr;
    TGraphErrors *tge = nullptr;
-   Float_t resolution = 0.5; // mm
-   TH2F * radiograph = new TH2F("radiograph", "27x13.5 cm^2 radiograph of 16 cm ball;X position [mm];Y position[mm];WEPL", 270/resolution, -135, 135, 135/resolution, -67.5, 67.5);
-   TH2I * radiographNorm = new TH2I("radiographNorm", "27x13.5 cm^2 radiograph of 16 cm ball;X position [mm];Y position[mm];WEPL", 270/resolution, -135, 135, 135/resolution, -67.5, 67.5);
+   Float_t resolution = 0.25; // mm
+//   TH2F * radiograph = new TH2F("radiograph", "27x13.5 cm^2 radiograph of 16 cm ball;X position [mm];Y position[mm];WEPL", 270/resolution, -135, 135, 135/resolution, -67.5, 67.5);
+//   TH2I * radiographNorm = new TH2I("radiographNorm", "27x13.5 cm^2 radiograph of 16 cm ball;X position [mm];Y position[mm];WEPL", 270/resolution, -135, 135, 135/resolution, -67.5, 67.5);
+   TH2F * radiograph = new TH2F("radiograph", "16 cm water - #sigma=3 mm - projected on hull;X position [mm];Y position[mm];WEPL", 30/resolution, -15, 15, 30/resolution, -15, 15);
+   TH2I * radiographNorm = new TH2I("radiographNorm", "27x13.5 cm^2 radiograph of 16 cm ball;X position [mm];Y position[mm];WEPL", 30/resolution, -15, 15, 30/resolution, -15, 15);
+
+   TH1F * oneDradiograph = new TH1F("1D_radiograph", "16 cm water - 3 mm sigma beam - projected on hull;Y position [mm]", 30/resolution, -15, 15);
+   TH1F * oneDradiographNorm = new TH1F("1D_radiographNorm", "title;Y position [mm]", 30/resolution, -15, 15);
    
    Tracks * tracks = loadOrCreateTracks(1, int(nparticles/50), kMC, energy);
 
    printf("Found %d tracks.\n", tracks->GetEntriesFast());
+//   tracks->removeTracksEndingInGapRegion();
    tracks->removeHighAngleTracks(75);
-   tracks->removeThreeSigmaShortTracks();
-   tracks->removeNuclearInteractions();
+//   tracks->removeThreeSigmaShortTracks();
+//   tracks->removeNuclearInteractions();
    tracks->Compress();
 
-   Float_t d_plane = 150;
+   Float_t d_plane = 20;
 
    for (int i=0; i<=tracks->GetEntriesFast(); i++) {
       thisTrack = tracks->At(i);
@@ -305,12 +311,19 @@ void drawRadiograph(Int_t nparticles, Float_t energy) {
 
       radiograph->Fill(Xplane, Yplane, getWEPLFromEnergy(energy) - WEPL);
       radiographNorm->Fill(Xplane, Yplane);
+
+      oneDradiograph->Fill(Yplane, getWEPLFromEnergy(energy) - WEPL);
+      oneDradiographNorm->Fill(Yplane);
    }
 
    radiograph->Divide(radiographNorm);
+   oneDradiograph->Divide(oneDradiographNorm);
 
    radiograph->Draw("COLZ");
    gStyle->SetOptStat(0);
+
+   TCanvas *c2 = new TCanvas();
+   oneDradiograph->Draw();
 }
 
 void getRangeFromRawBeam(Float_t energy) {
@@ -695,8 +708,8 @@ void drawTracksDepthDose(Int_t Runs, Int_t dataType, Bool_t recreate, Float_t en
    }
    
    Bool_t         removeHighAngleTracks = true;
-   Bool_t         removeNuclearInteractions = true;
-   Bool_t         removeShortTracks = true;
+   Bool_t         removeNuclearInteractions = false;
+   Bool_t         removeShortTracks = false;
    Float_t        fitRange, fitScale, fitError;
    Int_t          nCutDueToTrackEndingAbruptly = 0;
    Int_t          nPlotX = 3, nPlotY = 3;
@@ -715,7 +728,7 @@ void drawTracksDepthDose(Int_t Runs, Int_t dataType, Bool_t recreate, Float_t en
    gPad->SetBottomMargin(0.05);
    gPad->SetLeftMargin(0.15);
 
-   Tracks * tracks = loadOrCreateTracks(recreate, Runs, dataType, run_energy);
+   Tracks * tracks = loadOrCreateTracks(recreate, Runs, dataType, run_energy,15,15);
    tracks->removeEmptyTracks();
 
    if (removeHighAngleTracks) {
@@ -1717,9 +1730,8 @@ void analyseHelium(Int_t Runs, Int_t dataType, Bool_t recreate, Int_t switchLaye
    kEventsPerRun = tracksperrun;
    kDoTracking = doTracking;
    
-   Tracks * tracks = loadOrCreateTracks(recreate, Runs, dataType, energy);
+   Tracks * tracks = loadOrCreateTracks(recreate, Runs, dataType, energy,-15,-15);
    tracks->removeEmptyTracks();
-
 
    tracks->removeHighAngleTracks(20); // mrad
    tracks->removeThreeSigmaShortTracks();
@@ -1730,8 +1742,8 @@ void analyseHelium(Int_t Runs, Int_t dataType, Bool_t recreate, Int_t switchLaye
 
    tracks->doTrackFit();
 
-   tracks->removeHighChiSquare();
-   tracks->removeEmptyTracks();
+//   tracks->removeHighChiSquare();
+//   tracks->removeEmptyTracks();
 
    Track *thisTrack = nullptr;
    Cluster *a, *b;
@@ -1741,6 +1753,11 @@ void analyseHelium(Int_t Runs, Int_t dataType, Bool_t recreate, Int_t switchLaye
    cEdep->Divide(2,1);
    TH1F * edepP = new TH1F("edepP", "primary;edep;freq;", 400, 0, 200);
    TH1F * edepS = new TH1F("edepS", "secondary;edep;freq;", 400, 0, 200);
+
+   TCanvas *cAllEdep = new TCanvas();
+   cAllEdep->Divide(2,1);
+   TH1F * cAllEdepP = new TH1F("allEdepP", "primary;edep [MeV];freq",400,0,5);
+   TH1F * cAllEdepS = new TH1F("allEdepS", "secondary;edep [MeV];freq",400,0,5);
    
    TCanvas *cAngle = new TCanvas();
    cAngle->Divide(2,1);
@@ -1767,6 +1784,15 @@ void analyseHelium(Int_t Runs, Int_t dataType, Bool_t recreate, Int_t switchLaye
    
       bool was = false;
       for (int j=0; j<thisTrack->GetEntriesFast(); j++) {
+         if (!thisTrack->At(j)->isSecondary()) {
+            cAllEdepP->Fill(thisTrack->getDepositedEnergy(j)*14/1000);
+         }
+         else {
+            cAllEdepS->Fill(thisTrack->getDepositedEnergy(j)*14/1000);
+         }
+
+
+         cAllEdepP->Fill(thisTrack->getDepositedEnergy(j));
          if (!was) {
             if (thisTrack->At(j)->isSecondary()) {
                hSec->Fill(thisTrack->getLayer(j));
@@ -1820,6 +1846,11 @@ void analyseHelium(Int_t Runs, Int_t dataType, Bool_t recreate, Int_t switchLaye
    cBragg->cd(2);
    braggS->Draw();
 
+   cAllEdep->cd(1);
+   cAllEdepP->Draw();
+   cAllEdep->cd(2);
+   cAllEdepS->Draw();
+
    cSecondary->cd();
 //   hPrim->Draw();
    hSec->Draw();
@@ -1866,6 +1897,7 @@ void makeOutputFileForImageReconstruction(Int_t Runs, Int_t tracksperrun) {
 
    for (float spotX = spotXFrom; spotX <= spotXTo; spotX += spotXSpacing) {
       for (float spotY = spotYFrom; spotY <= spotYTo; spotY += spotYSpacing) {
+         printf("Spot (%.0f,%.0f)\n", spotX, spotY);
          Tracks * tracks = loadOrCreateTracks(true, Runs, false, run_energy, spotX, spotY);
          tracks->removeEmptyTracks();
 
@@ -1883,7 +1915,9 @@ void makeOutputFileForImageReconstruction(Int_t Runs, Int_t tracksperrun) {
             outSpotX = spotX;
             outSpotY = spotY;
             residualRange = getWEPLFromTL(thisTrack->getFitParameterRange());
-            outWEPL = 158.6 - residualRange; // 150 MeV/u Helium
+            if (isnan(residualRange)) continue;
+
+            outWEPL = 238.8 - residualRange; // 190 MeV/u Helium
             outX2x = thisTrack->At(0)->getXmm();
             outX2y = thisTrack->At(0)->getYmm();
             outP2x = (thisTrack->At(1)->getXmm() - outX2x) / dz;
@@ -1898,7 +1932,6 @@ void makeOutputFileForImageReconstruction(Int_t Runs, Int_t tracksperrun) {
          }
          nruns++;
       }
-      if (nruns > 3) break;
    }
    
    fOut->Write();
@@ -1916,7 +1949,7 @@ void drawTracks3D(Int_t Runs, Int_t dataType, Bool_t recreate, Int_t switchLayer
    kEventsPerRun = tracksperrun;
    kDoTracking = doTracking;
    
-   Tracks * tracks = loadOrCreateTracks(recreate, Runs, dataType, energy);
+   Tracks * tracks = loadOrCreateTracks(recreate, Runs, dataType, energy, -15, -15);
    tracks->removeEmptyTracks();
 
    printf("Found %d tracks before filtering.\n", tracks->GetEntries());
@@ -1930,14 +1963,14 @@ void drawTracks3D(Int_t Runs, Int_t dataType, Bool_t recreate, Int_t switchLayer
    }
    cout << "Number of primaries = " << numberOfPrimaries << ", number of secondaries = " << numberOfSecondaries << endl;
  
-   tracks->removeHighAngleTracks(30); // mrad
-   tracks->removeNuclearInteractions();
-//   tracks->removeEmptyTracks();
+   tracks->removeHighAngleTracks(30); // mrad -> 30 He
+//   tracks->removeNuclearInteractions();
+   tracks->removeEmptyTracks();
 
    tracks->fillOutIncompleteTracks(0.05);
    tracks->doTrackFit();
-//
-   tracks->removeHighChiSquare();
+
+//   tracks->removeHighChiSquare(2500);
    tracks->removeThreeSigmaShortTracks();
    tracks->removeEmptyTracks();
 
@@ -1977,8 +2010,8 @@ void drawTracks3D(Int_t Runs, Int_t dataType, Bool_t recreate, Int_t switchLayer
    toy = ny/2 + zoom*2;
 
    Int_t iret;
-   Float_t theta = -20;
-   Float_t phi = 70;
+   Float_t theta = -3.5;
+   Float_t phi = 89.5;
 
    if (kDraw) {
       view->SetRange(fromx, 0, fromy, tox, 35, toy);
@@ -2063,6 +2096,8 @@ void drawTracks3D(Int_t Runs, Int_t dataType, Bool_t recreate, Int_t switchLayer
    for (Int_t i=0; i<tracks->GetEntriesFast(); i++) {
       thisTrack = tracks->At(i);
       if (!thisTrack) continue;
+      if (isnan(thisTrack->getFitParameterRange())) continue;
+
       nMissingEID = tracks->getNMissingClustersWithEventID(thisTrack->getEventID(0), thisTrack->Last()->getLayer(), i); 
 
       if (!thisTrack->Last()->isSecondary() && !thisTrack->isSecondary(0)) { // primary
@@ -2179,7 +2214,7 @@ void drawTracks3D(Int_t Runs, Int_t dataType, Bool_t recreate, Int_t switchLayer
 
    Int_t numberOfTracks = tracks->GetEntries();
 
-   cout << "Total number of tracks = " << numberOfPrimaries + numberOfSecondaries << endl;
+   cout << endl << "Total number of tracks = " << numberOfPrimaries + numberOfSecondaries << endl;
    cout << "Number of primaries = " << numberOfPrimaries << ", number of secondaries = " << numberOfSecondaries << endl;
    cout << "Number of primaries tracked correctly = " << nOkPrimary << " (" << 100 * (float) nOkPrimary / numberOfPrimaries << "%)\n";
    cout << "Number of primaries confused = " << nPrimaryConfused << " (" << 100 * (float) nPrimaryConfused / numberOfPrimaries << "%)\n";
@@ -2191,6 +2226,7 @@ void drawTracks3D(Int_t Runs, Int_t dataType, Bool_t recreate, Int_t switchLayer
    cout << "Primaries tracked correctly = " << nOkPrimary << " (" << 100 * (float) nOkPrimary / numberOfPrimaries;
    cout << "%),  Secondaries tracked correctly = " << nOkSecondary << " (" << 100 * (float) nOkSecondary / numberOfSecondaries << "%)\n";
 
+   /*
    cout << endl << endl;
    cout << "Total number of tracks = " << numberOfPrimaries + numberOfSecondaries << endl;
    cout << "Tracks tracked correctly = " << nOkPrimary + nOkSecondary << " (" << 100 * (float) ( nOkPrimary + nOkSecondary) / (numberOfPrimaries + numberOfSecondaries) << "%), of which " << nOkPrimary << " (" << 100 * (float) nOkPrimary / (nOkPrimary + nOkSecondary);
@@ -2216,6 +2252,7 @@ void drawTracks3D(Int_t Runs, Int_t dataType, Bool_t recreate, Int_t switchLayer
    cout << nOKTracksAllClustersOK2nd << " of total " << numberOfTracks << " track has first/last event ID + no missing clusters (" << factorEIDOKAllClustersOK2nd << "%)\n";
    cout << nOKMinusTracks << " of total " << numberOfTracks << " tracks has a close match (0.5 mm, 1 degree) on first / last cluster (" << factorEIDOKMinus << "%)\n";
    cout << nOKLastLayers << " of total " << numberOfTracks << " tracks has a close match (0.5 mm, 1 degree) or is a very short track (" << factorLastLayers << "%)\n";
+   */
 
    Int_t badSecondary = 0;
    Int_t badPrimary = 0;

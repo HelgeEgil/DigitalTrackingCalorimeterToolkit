@@ -63,6 +63,7 @@ public:
    virtual void      appendClusterEdep(Float_t x, Float_t y, Int_t layer = -1, Float_t edep = -1, Int_t eventID = -1, Bool_t isSecondary = false);
    virtual void      appendCluster(Cluster *cluster);
    virtual void      appendClusterWithoutTrack(Cluster *cluster);
+   Float_t           removeClustersInGap(Float_t gapSizemm, Float_t gapPosmm);
 
    // Event ID operations
    Int_t             getClustersForEventID(Int_t eventID);

@@ -8,11 +8,13 @@
 /gate/world/daughters/insert ImageRegionalizedVolume
 /gate/patient/geometry/setImage imageDump.mhd
 /gate/patient/geometry/setHUToMaterialFile AttenuationRange.dat
-/gate/patient/placement/setRotationAxis 1 0 0
-/gate/patient/placement/setRotationAngle 90 deg
-/gate/patient/placement/setTranslation -105. -50. -190. mm
 /gate/patient/geometry/distanceMap dmap.mhd
-#/gate/patient/geometry/TranslateTheImageAtThisIsoCenter 0 0 0 mm
+/gate/patient/geometry/TranslateTheImageAtThisIsoCenter 0 0 95. mm
+#/gate/patient/placement/setTranslation -105. -50. -190. mm
+#/gate/patient/placement/setTranslation -105 -50 -190 mm
+#/gate/patient/placement/setRotationAxis 0 1 0
+#/gate/patient/placement/setRotationAngle 0 deg
+/gate/patient/placement/alignToX
 
 /gate/world/daughters/name scanner_1
 /gate/world/daughters/systemType scanner

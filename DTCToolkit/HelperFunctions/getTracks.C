@@ -254,15 +254,17 @@ Tracks * getTracksFromClusters(Int_t Runs, Int_t dataType, Int_t frameType, Floa
          diffusedHits->sortHits();
          diffusedHits->makeLayerIndex();
          clusters = diffusedHits->findClustersFromHits();
+//         Int_t nRem = clusters->removeClustersInGap(1, 0);
 
          delete hits;
          delete diffusedHits;
       }
       else {
-         di->getMCClusters(i, clusters, nullptr, spotx, spoty);
+         di->getMCClustersThreshold(i, clusters, nullptr, spotx, spoty);
+//         Int_t nRem = clusters->removeClustersInGap(1, 0);
       }
 
-      printf("Found %d clusters...\n", clusters->GetEntriesFast());
+//      printf("Found %d clusters...\n", clusters->GetEntriesFast());
       if (!clusters->GetEntriesFast()) continue;
 
       t1.Stop();

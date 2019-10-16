@@ -135,6 +135,7 @@ public :
    virtual Int_t     getMCFrame(Int_t runNo, CalorimeterFrame *cf);
    virtual Int_t     getMCFrame(Int_t runNo, Layer *l);
    virtual void      getMCClusters(Int_t runNo, Clusters *clusters = nullptr, Hits * hits = nullptr, Float_t spotPosX = 0, Float_t spotPosY = 0);
+   virtual void      getMCClustersThreshold(Int_t runNo, Clusters *clusters = nullptr, Hits * hits = nullptr, Float_t spotPosX = 0, Float_t spotPosY = 0);
    virtual void      getDataFrame(Int_t runNo, CalorimeterFrame *cf, Int_t energy = 188);
    virtual void      getDataFrame(Int_t runNo, Layer *l, Int_t energy = 188);
    virtual void      getDataHits(Int_t runNo, Hits * hits, Int_t energy = 188);
