@@ -1,0 +1,62 @@
+/gate/geometry/setMaterialDatabase GateMaterials.db
+
+/control/execute Module_3_Head.mac
+
+/gate/systems/scanner_1/level1/attach FM_Layer
+/gate/systems/scanner_1/level2/attach FirstModule
+/gate/systems/scanner_2/level1/attach Layer
+/gate/systems/scanner_2/level2/attach Module
+#/gate/systems/phantom/level1/attach patient
+
+/control/execute readout.mac
+
+#=================#
+# Physics			#
+#=================#
+
+/gate/geometry/setIonisationPotential Water 75 eV
+/gate/physics/addPhysicsList QGSP_BIC_EMZ
+/gate/physics/SetMaxStepSizeInRegion world 0.5 mm
+#/gate/physics/ActivateStepLimiter proton
+#/gate/physics/ActivateStepLimiter GenericIon
+
+/gate/run/initialize
+
+#/process/inactivate hadElastic
+#/process/inactivate protonInelastic
+#/process/inactivate msc
+
+#=======================#
+# ADD PROTON BEAM	      #
+#=======================#
+
+
+/gate/source/addSource PBS PencilBeam
+#/gate/source/PBS/setParticleType proton
+/gate/source/PBS/setParticleType GenericIon
+/gate/source/PBS/setIonProperties 2 4 2 0
+#/gate/source/PBS/setIonProperties 6 12 6 0
+/gate/source/PBS/setEnergy {energy} MeV
+/gate/source/PBS/setSigmaEnergy 0. MeV
+/gate/source/PBS/setPosition {spotx} {spoty} -380. mm
+/gate/source/PBS/setSigmaX 3 mm
+/gate/source/PBS/setSigmaY 3 mm
+/gate/source/PBS/setSigmaTheta 2 mrad
+/gate/source/PBS/setSigmaPhi 2 mrad
+/gate/source/PBS/setEllipseXThetaEmittance 15 mm*mrad
+/gate/source/PBS/setEllipseXThetaRotationNorm negative
+/gate/source/PBS/setEllipseYPhiEmittance 15 mm*mrad
+/gate/source/PBS/setEllipseYPhiRotationNorm negative
+
+/gate/output/root/enable
+/gate/output/root/setRootSinglesFlag 0
+/gate/output/root/setFileName ../../DTCToolkit/Data/MonteCarlo/DTC_Aluminium_Helium_Absorber3mm_Headphantom_spotsxy_{spotx}_{spoty}_{energy}MeV
+
+#===============#
+# START BEAMS	#
+#===============#
+
+/gate/random/setEngineName MersenneTwister
+/gate/random/setEngineSeed auto
+/gate/application/setTotalNumberOfPrimaries 4000
+/gate/application/start
