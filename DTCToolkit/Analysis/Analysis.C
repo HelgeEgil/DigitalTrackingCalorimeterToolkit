@@ -1881,7 +1881,7 @@ void makeOutputFileForImageReconstruction(Int_t Runs, Int_t tracksperrun, Int_t 
    Float_t outSpotX, outSpotY, outWEPL, outX2x, outX2y, outP2x, outP2y, residualRange;
    Track * thisTrack = nullptr;
 
-   TFile *fOut = new TFile("OutputFiles/PedHeadCarbonHelium_spotsy_%03d.root", "recreate");
+   TFile *fOut = new TFile(Form("OutputFiles/PedHeadCarbonHelium_spotsy_%03d.root", spotPosY), "recreate");
    TTree *tOut = new TTree("WEPLData", "Carbon+Helium beam");
 
    tOut->Branch("spotX", &outSpotX, "spotX/F");
@@ -1912,7 +1912,7 @@ void makeOutputFileForImageReconstruction(Int_t Runs, Int_t tracksperrun, Int_t 
          if (!thisTrack) continue;
 
          outSpotX = spotX;
-         outSpotY = spotY;
+         outSpotY = spotPosY;
          residualRange = getWEPLFromTL(thisTrack->getFitParameterRange());
          if (isnan(residualRange)) continue;
 

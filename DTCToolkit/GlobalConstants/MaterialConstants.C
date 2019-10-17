@@ -125,7 +125,7 @@ void  createSplines() {
    Float_t readoutAbsorber = (roundf(kAbsorberThickness) == kAbsorberThickness) ? kAbsorberThickness : kAbsorberThickness*10;
 
    if (kUseCSDA) {
-      if (kEnergy == 250) {
+      if (kEnergy == 250 || kHelium == true) {
          if       (kMaterial == kTungsten) {
             in.open(Form("Data/Ranges/%.0fmm_W_csda.csv", readoutAbsorber));
          }
@@ -136,7 +136,7 @@ void  createSplines() {
             in.open(Form("Data/Ranges/%.0fmm_C_csda.csv", readoutAbsorber));
          }
       }
-      else if (kEnergy == 230 || kHelium == true) {
+      else if (kEnergy == 230) {
          if       (kMaterial == kTungsten) {
             in.open(Form("Data/Ranges/%.0fmm_W_csda_230MeV.csv", readoutAbsorber));
          }
@@ -149,7 +149,7 @@ void  createSplines() {
       }
    }
    else {
-      if (kEnergy == 250) {
+      if (kEnergy == 250 || kHelium == true) { // the energy is off anywho
          if       (kMaterial == kTungsten) {
             in.open(Form("Data/Ranges/%.0fmm_W.csv", readoutAbsorber));
          }
@@ -160,7 +160,7 @@ void  createSplines() {
             in.open(Form("Data/Ranges/%.0fmm_C.csv", readoutAbsorber));
          }
       }
-      else if (kEnergy == 230 || kHelium == true) {
+      else if (kEnergy == 230) {
          if       (kMaterial == kTungsten) {
             in.open(Form("Data/Ranges/%.0fmm_W_230MeV.csv", readoutAbsorber));
          }
