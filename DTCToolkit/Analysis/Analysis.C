@@ -1862,7 +1862,7 @@ void makeOutputFileForImageReconstruction(Int_t Runs, Int_t tracksperrun, Int_t 
    kEventsPerRun = tracksperrun;
    kDoTracking = true;
 
-   Bool_t  kDraw = false;
+   Bool_t  kDraw = true;
    Float_t spotXFrom = -75;
    Float_t spotXTo = 75;
    Float_t spotXSpacing = 5;
@@ -1874,8 +1874,8 @@ void makeOutputFileForImageReconstruction(Int_t Runs, Int_t tracksperrun, Int_t 
    TH2F *hSimpleImageNorm = nullptr;
 
    if (kDraw) {
-      hSimpleImage = new TH2F("hSimpleImage", "Simple Image;X [mm];Y [mm]", 100, spotXFrom*1.5, spotXTo*1.5, 100, spotYFrom*1.5, spotYTo*1.5);
-      hSimpleImageNorm = new TH2F("hSimpleImageNorm", "Simple Image;X [mm];Y [mm]", 100, spotXFrom*1.5, spotXTo*1.5, 100, spotYFrom*1.5, spotYTo*1.5);
+      hSimpleImage = new TH2F("hSimpleImage", "Simple Image;X [mm];Y [mm]", 150, -75, 75, 150, -75,75);
+      hSimpleImageNorm = new TH2F("hSimpleImageNorm", "Simple Image;X [mm];Y [mm]", 150, -75, 75, 150, -75,75);
    }
 
    Float_t outSpotX, outSpotY, outWEPL, outX2x, outX2y, outP2x, outP2y, residualRange;
@@ -1948,7 +1948,7 @@ void drawTracks3D(Int_t Runs, Int_t dataType, Bool_t recreate, Int_t switchLayer
    kEventsPerRun = tracksperrun;
    kDoTracking = doTracking;
    
-   Tracks * tracks = loadOrCreateTracks(recreate, Runs, dataType, energy, -15, -15);
+   Tracks * tracks = loadOrCreateTracks(recreate, Runs, dataType, energy, 0, 0);
    tracks->removeEmptyTracks();
 
    printf("Found %d tracks before filtering.\n", tracks->GetEntries());
@@ -1963,7 +1963,7 @@ void drawTracks3D(Int_t Runs, Int_t dataType, Bool_t recreate, Int_t switchLayer
    cout << "Number of primaries = " << numberOfPrimaries << ", number of secondaries = " << numberOfSecondaries << endl;
  
    tracks->removeHighAngleTracks(30); // mrad -> 30 He
-//   tracks->removeNuclearInteractions();
+   tracks->removeNuclearInteractions();
    tracks->removeEmptyTracks();
 
    tracks->fillOutIncompleteTracks(0.05);

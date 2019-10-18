@@ -15,7 +15,7 @@ void makeCarbonHeliumBeamSpots() {
    TFile         *fSimulationInCarbon = nullptr;
 
 
-   TFile         *fSimulationOut = new TFile("/home/rttn/workspaceKDevelop/focal/focal/DTCToolkit/Data/MonteCarlo/DTC_Aluminium_CarbonHelium_Absorber3mm_Headphantom_760MeV.root", "recreate");
+   TFile         *fSimulationOut = new TFile("/home/rttn/workspaceKDevelop/focal/focal/DTCToolkit/Data/MonteCarlo/DTC_Aluminium_CarbonHelium_Absorber35mm_Headphantom_760MeV.root", "recreate");
    TTree         *treeSimulationInHelium = nullptr;
    TTree         *treeSimulationInCarbon = nullptr;
    TTree         *treeSimulationOut = new TTree("Hits", "CarbonHelium beam");
@@ -40,15 +40,15 @@ void makeCarbonHeliumBeamSpots() {
    treeSimulationOut->Branch("spotPosX", &spotPosX, "spotPosX/F");
    treeSimulationOut->Branch("spotPosY", &spotPosY, "spotPosY/F");
    
-   for (int spotX = -72; spotX <= -30; spotX += 6) {
-      for (int spotY = -72; spotY <= 72; spotY += 6) {
+   for (int spotX = 0; spotX <= 0; spotX += 6) {
+      for (int spotY = 0; spotY <= 0; spotY += 6) {
 
          lastEventIDCarbon = -1;
          lastEventIDHelium = -1;
 
          printf("Running @ spot (%03d, %03d)\n", spotX, spotY);
-         fSimulationInHelium = new TFile(Form("/home/rttn/workspaceKDevelop/focal/focal/DTCToolkit/Data/MonteCarlo/DTC_Aluminium_Helium_Absorber3mm_Headphantom_spotsxy_%03d_%03d_760MeV.root", spotX, spotY), "READ");
-         fSimulationInCarbon = new TFile(Form("/home/rttn/workspaceKDevelop/focal/focal/DTCToolkit/Data/MonteCarlo/DTC_Aluminium_Carbon_Absorber3mm_Headphantom_spotsxy_%03d_%03d_2280MeV.root", spotX, spotY), "READ");
+         fSimulationInHelium = new TFile(Form("/home/rttn/workspaceKDevelop/focal/focal/DTCToolkit/Data/MonteCarlo/DTC_Aluminium_Helium_Absorber35mm_Headphantom_spotsxy_%01d_%01d_760MeV.root", spotX, spotY), "READ");
+         fSimulationInCarbon = new TFile(Form("/home/rttn/workspaceKDevelop/focal/focal/DTCToolkit/Data/MonteCarlo/DTC_Aluminium_Carbon_Absorber35mm_Headphantom_spotsxy_%01d_%01d_2280MeV.root", spotX, spotY), "READ");
 
          treeSimulationInHelium = (TTree*) fSimulationInHelium->Get("Hits");
          treeSimulationInCarbon = (TTree*) fSimulationInCarbon->Get("Hits");
@@ -115,7 +115,7 @@ void makeCarbonHeliumBeamSpots() {
                if (lastEventIDCarbon != eventID) {
                   totalRunningTally++;
                   
-                  if (eventID > lastEventIDHelium*5) { // was *10
+                  if (eventID > lastEventIDHelium*10) { // was *10
                      isHelium = true;
                      treeSimulationInHelium->GetEntry(idxHelium++);
                      lastEventIDHelium = eventID;
