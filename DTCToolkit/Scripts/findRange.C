@@ -73,8 +73,8 @@ vector<Float_t> findRange::Run(Double_t energy, Double_t sigma_mev, Int_t mm, In
    expectedRange = -0.4636 * run_degraderThickness + 178.81; // it's linear here dummy !!! 
 
    // HELIUM
-   run_energy = -4e-6*pow(run_energy,6) + 2e-4*pow(run_energy,5) - 5.4e-3*pow(run_energy,4) + 2.24e-2*pow(run_energy,3) + 0.4057*pow(run_energy,2) - 20.898*run_energy+917;
-   expectedRange = -5.41*pow(run_energy,3) + 2.25e-5*pow(run_energy,2) + 1.04e-3*run_energy;
+   run_energy = -4e-6*pow(run_degraderThickness/10,6) + 2e-4*pow(run_degraderThickness/10,5) - 5.4e-3*pow(run_degraderThickness/10,4) + 2.24e-2*pow(run_degraderThickness/10,3) + 0.4057*pow(run_degraderThickness/10,2) - 20.898*run_degraderThickness/10 + 917;
+   expectedRange = 10 * (-5.41e-9*pow(run_energy,3) + 2.25e-5*pow(run_energy,2) + 1.04e-3*run_energy);
    
    Float_t xfrom = expectedRange - 10; // 15 for Al case
    if (xfrom < 0) xfrom = 0;
@@ -165,8 +165,8 @@ vector<Float_t> findRange::Run(Double_t energy, Double_t sigma_mev, Int_t mm, In
             
             Float_t diff = sqrt( pow(firstX - lastX, 2) + pow(firstY - lastY, 2) + pow(0 - lastZ, 2));
 
-//            hRange->Fill(lastRange);
-         if (tl>0) hRange->Fill(tl);
+            hRange->Fill(lastRange);
+//         if (tl>0) hRange->Fill(tl);
 //            hRange->Fill(sqrt(pow(firstX - lastX, 2) + pow(firstY - lastY, 2) + pow(firstZ - lastZ, 2)));
             Float_t weplRange = aw / a * pow(lastRange / aw, 1 - pw/p) * lastRange;
             Float_t dtcRange = degraderThickness - thisRange + weplRange;

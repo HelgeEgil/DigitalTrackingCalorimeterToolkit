@@ -35,7 +35,7 @@ void findManyRanges(Int_t degraderFrom, Int_t degraderIncrement, Int_t degraderT
    TSpline3 *phaseSpaceSpline = new TSpline3("phaseSpaceSpline", phaseSpaceDegraderthickness, phaseSpaceEnergy, idx);
 
    vector<Float_t> resultVector;
-   std::ofstream filename("../OutputFiles/findManyRangesDegrader.csv");// , std::ofstream::out | std::ofstream::app);
+   std::ofstream filename("../OutputFiles/findManyRangesDegraderHelium.csv");// , std::ofstream::out | std::ofstream::app);
 
    printf("c\n");
 //   gROOT->ProcessLine(".L findRange.C+");
