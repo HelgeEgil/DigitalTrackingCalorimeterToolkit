@@ -42,7 +42,7 @@ vector<Float_t> findRange::Run(Double_t energy, Double_t sigma_mev, Int_t mm, In
    Double_t dt, e, es;
    Int_t idx = 0;
    ifstream in;
-   in.open("Data/Ranges/EnergyAfterDegraderPSTAR.csv");
+   in.open("../Data/Ranges/EnergyAfterDegraderPSTAR.csv");
 
    while (1) {
       in >> dt >> e >> es;
@@ -72,15 +72,18 @@ vector<Float_t> findRange::Run(Double_t energy, Double_t sigma_mev, Int_t mm, In
    Float_t expectedRange = a * pow(run_energy, p);
    expectedRange = -0.4636 * run_degraderThickness + 178.81; // it's linear here dummy !!! 
 
-   Float_t xfrom = expectedRange - 8; // 15 for Al case
-   if (xfrom < 0) xfrom = 0;
-   Float_t xto = expectedRange + 8; // 15 for Al case
-   Float_t x_compensate = 0;
+   // HELIUM
+   run_energy = -4e-6*pow(run_energy,6) + 2e-4*pow(run_energy,5) - 5.4e-3*pow(run_energy,4) + 2.24e-2*pow(run_energy,3) + 0.4057*pow(run_energy,2) - 20.898*run_energy+917;
+   expectedRange = -5.41*pow(run_energy,3) + 2.25e-5*pow(run_energy,2) + 1.04e-3*run_energy;
    
+   Float_t xfrom = expectedRange - 10; // 15 for Al case
+   if (xfrom < 0) xfrom = 0;
+   Float_t xto = expectedRange + 10; // 15 for Al case
+   Float_t x_compensate = 0;
 
-   Int_t energyFrom = run_energy - 15;
-   Int_t energyTo = run_energy + 15;
-   if (run_energy > 70) {
+   Int_t energyFrom = run_energy - 50;
+   Int_t energyTo = run_energy + 50;
+   if (run_energy > 70 && false) {
       energyFrom = run_energy - 15;
       energyTo = run_energy + 25;
    }
@@ -269,11 +272,11 @@ vector<Float_t> findRange::Run(Double_t energy, Double_t sigma_mev, Int_t mm, In
    Float_t expectedEnergy = phaseSpaceSpline->Eval(degrader);
    Float_t expectedEnergySpread = 6.11e-14*pow(mm,6) - 5.59e-11*pow(mm,5) + 1.90e-8*pow(mm,4) - 2.84e-6*pow(mm,3) + 1.57e-4*pow(mm,2) + 6.88e-3*mm + 2.23e-1;
      
-   c2->SaveAs(Form("OutputFiles/straggling/straggling_absorber%dmm_degrader%.0fmm.png", mm, degraderThickness));
+   c2->SaveAs(Form("../OutputFiles/straggling/straggling_absorber%dmm_degrader%.0fmm_Helium.png", mm, degraderThickness));
 
    Float_t attenuationH   = returnValues.at(2);
    
-   std::ofstream filename(Form("OutputFiles/findManyRangesDegrader_idx%d.csv", fileIdx));// , std::ofstream::out | std::ofstream::app);
+   std::ofstream filename(Form("../OutputFiles/findManyRangesDegraderHelium_idx%d.csv", fileIdx));// , std::ofstream::out | std::ofstream::app);
    filename << degrader << " " << mm << " " << fR << " " << fRS << " " << attenuationH << " " <<  expectedEnergy << " " << expectedEnergySpread  << endl;
    
    delete c2;

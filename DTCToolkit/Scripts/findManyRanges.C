@@ -5,7 +5,7 @@ using namespace std;
 
 void findManyRanges(Int_t energyFrom, Int_t energyIncrement, Int_t energyTo, Int_t mmFrom, Int_t mmIncrement, Int_t mmTo) {
    vector<Float_t> resultVector;
-   ofstream file("../OutputFiles/findManyRanges.csv", ofstream::out || ofstream:app);
+   ofstream file("../OutputFiles/findManyRangesHelium.csv", ofstream::out || ofstream:app);
 
    gROOT->ProcessLine(".L findRange.C");
    for (Int_t energy=energyFrom; energy<=energyTo; energy += energyIncrement) {
