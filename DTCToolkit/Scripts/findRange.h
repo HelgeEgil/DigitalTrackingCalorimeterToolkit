@@ -107,7 +107,7 @@ public :
    virtual Int_t     GetEntry(Long64_t entry);
    virtual Long64_t  LoadTree(Long64_t entry);
    virtual void      Init(TTree *tree);
-   virtual vector<Float_t> Run(Double_t energy = 100, Double_t sigma_mev = 0, Int_t mm =0, Int_t degrader=0, Int_t fileIdx = 0);
+   virtual vector<Float_t> Run(Double_t run_energy = 917, Double_t sigma_mev = 0, Int_t mm =0, Int_t degrader=0, Int_t fileIdx = 0);
    virtual Bool_t    Notify();
    virtual void      Show(Long64_t entry = -1);
    
@@ -137,20 +137,14 @@ findRange::findRange(Float_t energy, Int_t thickness, Float_t degraderThickness,
       // of trees.
       TChain * chain = new TChain("Hits","");
       if (degraderThickness == 0) {
-         chain->Add(Form("../Data/MonteCarlo/DTC_Full_Aluminium_%.0fMeV_%dmm.root/Hits", energy, thickness));
+         chain->Add(Form("/Data/MonteCarlo/DTC_Full_Aluminium_%.0fMeV_%dmm.root/Hits", energy, thickness));
       }
       else { // degrader is used, then energy -> degrader thickness and init energy = 230 MeV
-         printf("Opening file  ../Data/MonteCarlo/DTC_Full_Aluminium_Absorber%dmm_Degrader%03.0fmm_%.0fMeV.root/Hits\n", thickness, degraderThickness, energy);
-         chain->Add(Form("Data/MonteCarlo/DTC_Full_Aluminium_Absorber%dmm_Degrader%03.0fmm_%.0fMeV.root/Hits", thickness, degraderThickness, energy));
+         printf("Opening file  ../Data/MonteCarlo/DTC_Full_Aluminium_Helium_Absorber%dmm_Degrader%03.0fmm_%.0fMeV.root/Hits\n", thickness, degraderThickness, energy);
+         chain->Add(Form("../Data/MonteCarlo/DTC_Full_Aluminium_Helium_Absorber%dmm_Degrader%03.0fmm_%.0fMeV.root/Hits", thickness, degraderThickness, energy));
       }
 
       tree = chain;
-      if (degraderThickness == 0) {
-         run_degraderThickness = degraderThickness;
-      }
-      else {
-         run_degraderThickness = degraderThickness;
-      }
 #endif // SINGLE_TREE
 
    }

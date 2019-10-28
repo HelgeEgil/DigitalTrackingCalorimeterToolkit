@@ -31,259 +31,118 @@ vector<Float_t> findRange::Run(Double_t energy, Double_t sigma_mev, Int_t mm, In
    if (fChain == 0) return returnValues;
    if (fChain->GetEntries() == 0) return returnValues;
 
-   Float_t degraderThickness = run_degraderThickness;
    Long64_t nentries = fChain->GetEntriesFast();
-   Long64_t nbytes = 0, nb = 0;
-   Bool_t useDegrader = (degraderThickness > 0) ? true : false;
-
-   // Load phase space spline
-   Double_t phaseSpaceDegraderthickness[500];
-   Double_t phaseSpaceEnergy[500];
-   Double_t dt, e, es;
-   Int_t idx = 0;
-   ifstream in;
-   in.open("../Data/Ranges/EnergyAfterDegraderPSTAR.csv");
-
-   while (1) {
-      in >> dt >> e >> es;
-      if (!in.good()) break;
-      phaseSpaceDegraderthickness[idx] = dt;
-      phaseSpaceEnergy[idx++] = e;
-   }
-   in.close();
-   
-   TSpline3 *phaseSpaceSpline = new TSpline3("phaseSpaceSpline", phaseSpaceDegraderthickness, phaseSpaceEnergy, idx);
-
-   run_energy = phaseSpaceSpline->Eval(run_degraderThickness);
-   cout << "Run energy = " << run_energy << endl;
+   Bool_t useDegrader = true; 
 
    TCanvas *c2 = new TCanvas("c2", "Ranges and energies", 500, 500);
-
-   Int_t nbinsx = 500;
-   // 2 mm: 0.0096, 1.784
-   // 3 mm: 0.0097, 1.7825
-   // 4 mm: 0.0098, 1.7806
-   // Focal: 0.0004461, 1.6677
-   // H20:  0.0239, 1.7548
-
-   Float_t  a = 0.0098, p = 1.7806;
-   Float_t aw = 0.0239, pw = 1.7548;
-
-   Float_t expectedRange = a * pow(run_energy, p);
-   expectedRange = -0.4636 * run_degraderThickness + 178.81; // it's linear here dummy !!! 
-
-   // HELIUM
-   run_energy = -4e-6*pow(run_degraderThickness/10,6) + 2e-4*pow(run_degraderThickness/10,5) - 5.4e-3*pow(run_degraderThickness/10,4) + 2.24e-2*pow(run_degraderThickness/10,3) + 0.4057*pow(run_degraderThickness/10,2) - 20.898*run_degraderThickness/10 + 917;
-   expectedRange = 10 * (-5.41e-9*pow(run_energy,3) + 2.25e-5*pow(run_energy,2) + 1.04e-3*run_energy);
-   
-   Float_t xfrom = expectedRange - 10; // 15 for Al case
-   if (xfrom < 0) xfrom = 0;
-   Float_t xto = expectedRange + 10; // 15 for Al case
-   Float_t x_compensate = 0;
-
-   Int_t energyFrom = run_energy - 50;
-   Int_t energyTo = run_energy + 50;
-   if (run_energy > 70 && false) {
-      energyFrom = run_energy - 15;
-      energyTo = run_energy + 25;
-   }
-
-   printf("RUNNING WITH ENERGY %.2f.\n", run_energy);
-
-   TH1F *hRange = new TH1F("hRange", "Projected range in DTC", nbinsx, xfrom + x_compensate, xto + x_compensate);
-   TH1F *hEnergyAtInterface = new TH1F("hEnergyAtInterface", "Remaining energy after degrader;Energy [MeV];Entries", 150, energyFrom, energyTo);
-
+   c2->Divide(2,1);
    gStyle->SetOptStat(0);
 
-   Int_t lastEvent = -1;
+   Int_t    lastEvent = -1;
+   Float_t  lastRange = 0;
+   Int_t    lastID = -1;
+   Float_t  dE = 0;
 
-   Float_t lastRange = 0;
-   Int_t lastID = -1;
-   Float_t lastX = 0;
-   Float_t lastY = 0;
-   Float_t lastZ = 0;
-   Float_t firstX, firstY, firstZ;
-   Float_t dE = 0;
-   Float_t dTL = 0;
-   Float_t dE_random = 0;
-   Float_t thisEnergy = 0;
-   Float_t thisRange = 0;
-   Int_t ignoreID = -5;
+   TH1F *hFirstRange = new TH1F("firstRange", "firstRange", 1000, 0, 400);
+   TH1F *hFirstEnergy = new TH1F("firstEnergy", "firstEnergy", 1000, 0, 1000);
 
-   Float_t tl = 0;
-   Int_t n = 0;
-   Char_t lastProcessName[17];
-   
-   TRandom3 *gRandom = new TRandom3();
+   Float_t allRanges[50000];
+   Float_t allEnergies[50000];
+   Int_t rangeIdx = 0, energyIdx = 0;
 
    Long64_t ientry = LoadTree(0);
    fChain->GetEntry(0);
-   
-   firstX = posX;
-   firstY = posY;
-   firstZ = posZ;
-
-   Int_t lastP = 0;
-   
    if (nentries == 0) return returnValues;
 
    for (Long64_t jentry=0; jentry<nentries;jentry++) {
       Long64_t ientry = LoadTree(jentry);
+      fChain->GetEntry(jentry);
       
       if (ientry < 0) {
          cout << "Aborting run at jentry = " << jentry << endl;
          break;
       }
 
-      nb = fChain->GetEntry(jentry);   nbytes += nb;
-
       if (lastID < 0) lastID = eventID;
-
       if (parentID == 0) {
-      
-         Float_t z = posZ;
-         Float_t y = posY;
-         Float_t x = posX;
-      
-         n++;
+         if (baseID == 0) { // inside degrader
+            dE += edep;
+         }
 
-         if (useDegrader) {
-            if (baseID == 0) { // inside degrader
-               dE += edep;
-            }
-
-            else if (dE > 0) {
-               thisEnergy = energy - dE;
-               thisRange = aw * pow(run_energy, pw) - aw * pow(thisEnergy, pw);
-               hEnergyAtInterface->Fill(thisEnergy);
-               dE = 0;
-            }
+         else if (dE > 0) {
+            hFirstEnergy->Fill(energy-dE);
+            allEnergies[energyIdx++] = energy - dE;
+            dE = 0;
          }
 
          if (eventID != lastID) {
-            n = 0;
-            
-            Float_t diff = sqrt( pow(firstX - lastX, 2) + pow(firstY - lastY, 2) + pow(0 - lastZ, 2));
-
-            hRange->Fill(lastRange);
-//         if (tl>0) hRange->Fill(tl);
-//            hRange->Fill(sqrt(pow(firstX - lastX, 2) + pow(firstY - lastY, 2) + pow(firstZ - lastZ, 2)));
-            Float_t weplRange = aw / a * pow(lastRange / aw, 1 - pw/p) * lastRange;
-            Float_t dtcRange = degraderThickness - thisRange + weplRange;
-            if (lastProcessName[0] == 'P') { lastP++; }
-
-            firstX = posX;
-            firstY = posY;
-            firstZ = posZ;
-            tl = 0;
-         }
-
-         if (jentry>0 && baseID != 0 && lastZ>0) {
-            Float_t diff = sqrt( pow(x - lastX, 2) + pow(y - lastY, 2) + pow(z - lastZ, 2));
-            tl += diff;
+            hFirstRange->Fill(lastRange);
+            allRanges[rangeIdx++] = lastRange;
          }
 
          lastRange = posZ;
-         lastX = posX;
          lastID = eventID;
-         lastY = posY;
-         lastZ = posZ;
-
-         for (Int_t j=0; j<17; j++) {
-            lastProcessName[j] = processName[j];
-         }
       }
    }
+
+   float firstRange = hFirstRange->GetBinCenter(hFirstRange->GetMaximumBin());
+   float firstEnergy = hFirstEnergy->GetBinCenter(hFirstEnergy->GetMaximumBin());
+
    printf("Found %d proton histories in file.\n", lastID);
+   printf("From first search, range = %.2f mm and energy = %.2f MeV\n", firstRange, firstEnergy);
    
+   Float_t xfrom = firstRange - 5, xto = firstRange + 5;
+   TH1F *hRange = new TH1F("hRange", "Projected range in DTC;Range [mm];Entries", 500, xfrom,xto);
+   for (Int_t i=0; i<rangeIdx; i++) hRange->Fill(allRanges[i]);
+
+   Float_t energyfrom = firstEnergy - 15, energyto = firstEnergy + 15;
+   TH1F *hEnergyAtInterface = new TH1F("hEnergyAtInterface", "Remaining energy after degrader;Energy [MeV];Entries", 500, energyfrom, energyto);
+   for (Int_t i=0; i<energyIdx; i++) hEnergyAtInterface->Fill(allEnergies[i]);
+
    c2->cd(1);
-  
    // The fitting parameters below
    TF1 *fRange = new TF1("fit_range", "gaus", xfrom, xto);
    fRange->SetLineWidth(3);
-   fRange->SetParameters(hRange->GetMaximum(), expectedRange, 2);
-   hRange->Fit("fit_range");//, "M,W,B", "", xfrom, xto);
-
-   Float_t cutoff = fRange->GetParameter(1) - 6*fabs(fRange->GetParameter(2));
-   if (cutoff < 0) cutoff = 0;
-   Float_t cutoffHigh = fRange->GetParameter(1) + 6*fabs(fRange->GetParameter(2));
-   Int_t binLow = hRange->GetXaxis()->FindBin(cutoff);
-   Int_t binHigh = hRange->GetXaxis()->FindBin(cutoffHigh);
-   Float_t total = hRange->Integral();
-   Float_t attenuation = hRange->Integral(0, binLow);
-   Float_t totalUnderCurve = 0;
-
-   Float_t sumRangeWeight = 0;
-   Float_t sigmaRangeWeight = 0;
-   for (Int_t j=binLow; j<=binHigh; j++) {
-      sumRangeWeight += hRange->GetXaxis()->GetBinCenter(j) * hRange->GetBinContent(j);
-      totalUnderCurve += hRange->GetBinContent(j);
-   }
-   sumRangeWeight /= totalUnderCurve;
-
-   for (Int_t j=binLow; j<binHigh; j++) {
-      sigmaRangeWeight += hRange->GetBinContent(j) * pow(hRange->GetXaxis()->GetBinCenter(j) - sumRangeWeight, 2);
-   }
-
-   sigmaRangeWeight /= totalUnderCurve-1;
-   sigmaRangeWeight = sqrt(sigmaRangeWeight);
-
-   printf("Expecting mean range = %.2f mm. Searching from %.2f mm to %.2f mm.\n", expectedRange, cutoff, cutoffHigh);
-
-   cout << "Mean = " << fRange->GetParameter(1) << endl;
-   cout << "3 sigma = " << cutoff << " to " << cutoffHigh << endl;
-   cout << "Number of protons attenuated (more than 4 sigma below) = \033[1m" << 100 * attenuation / total << " %\033[0m.\n";
-   printf("Estimated range from histogram weighing = %.3f +- %.3f\n",sumRangeWeight, sigmaRangeWeight);
-   printf("Estimated range from Gaussian fitting = %.3f +- %.3f\n", fRange->GetParameter(1), fabs(fRange->GetParameter(2)));
-   
-   TF1 *fRemainingEnergy = new TF1("fRemainingEnergy", "gaus");
-   fRemainingEnergy->SetLineWidth(3);
-   hEnergyAtInterface->Fit("fRemainingEnergy", "Q");
-//   printf("Estimated remaining energy: %.2f MeV.\n", phaseSpaceSpline->Eval(run_degraderThickness),);
-
-   printf("Total range and straggling: %.2f +- %.2f mm.\n", run_degraderThickness + aw * pow(fRemainingEnergy->GetParameter(1), pw), sqrt(pow(fRange->GetParameter(2), 2) + pow(fRemainingEnergy->GetParameter(2) * a * p * pow(fRemainingEnergy->GetParameter(1), p-1), 2)));
-   printf("Total WEPL straggling: %.2f mm.\n", sqrt(pow(fRemainingEnergy->GetParameter(2) * aw * pw * pow(fRemainingEnergy->GetParameter(1), p-1), 2) + pow(aw/a * pow(fRange->GetParameter(1) / aw, 1-pw/p) * fRange->GetParameter(2), 2)));
-
+   fRange->SetParameters(hRange->GetMaximum(), firstRange, 1);
+   hRange->Fit("fit_range", "B");//, "M,W,B", "", xfrom, xto);
    Float_t fR = fRange->GetParameter(1);
    Float_t fRS = fRange->GetParameter(2);
-
-   returnValues.push_back(fR);
-   returnValues.push_back(fRS);
-   returnValues.push_back(100 * attenuation / total);
-   returnValues.push_back(fRemainingEnergy->GetParameter(1));
-   returnValues.push_back(fRemainingEnergy->GetParameter(2));
-
+   printf("Estimated range from Gaussian fitting = %.3f +- %.3f\n", fR, fRS); 
+   
    c2->cd(1);
-   hRange->SetXTitle("Range [mm]");
-   hRange->SetYTitle("Number of primaries");
    hRange->SetFillColor(kBlue-7);
    hRange->SetLineColor(kBlack);
    hRange->Draw();
-   gPad->Update();
-   TLine *l = new TLine(cutoff, 0, cutoff, gPad->GetUymax());
-   TLine *l2 = new TLine(cutoffHigh, 0, cutoffHigh, gPad->GetUymax());
-   l->SetLineWidth(2);
-   l->SetLineStyle(9);
-   l->Draw("same");
-   l2->SetLineWidth(2);
-   l2->SetLineStyle(9);
-   l2->Draw("same");
+  
+   c2->cd(2); 
+   TF1 *fRemainingEnergy = new TF1("fRemainingEnergy", "gaus");
+   fRemainingEnergy->SetLineWidth(3);
+   fRemainingEnergy->SetParameters(hEnergyAtInterface->GetMaximum(), firstEnergy, 3);
+   hEnergyAtInterface->Fit("fRemainingEnergy", "B");
+   Float_t fE = fRemainingEnergy->GetParameter(1);
+   Float_t fES = fRemainingEnergy->GetParameter(2);
 
-   Float_t expectedEnergy = phaseSpaceSpline->Eval(degrader);
-   Float_t expectedEnergySpread = 6.11e-14*pow(mm,6) - 5.59e-11*pow(mm,5) + 1.90e-8*pow(mm,4) - 2.84e-6*pow(mm,3) + 1.57e-4*pow(mm,2) + 6.88e-3*mm + 2.23e-1;
-     
-   c2->SaveAs(Form("../OutputFiles/straggling/straggling_absorber%dmm_degrader%.0fmm_Helium.png", mm, degraderThickness));
+   printf("Estimated remaining energy from Gaussian fitting: %.2f +- %.2f MeV.\n", fE, fES);
 
-   Float_t attenuationH   = returnValues.at(2);
-   
+   returnValues.push_back(fR);
+   returnValues.push_back(fRS);
+   returnValues.push_back(fE);
+   returnValues.push_back(fES);
+
+   c2->SaveAs(Form("../OutputFiles/straggling/straggling_absorber%dmm_degrader%.0fmm_Helium.png", mm, run_degraderThickness));
+
+   c2->cd(2);
+   hEnergyAtInterface->SetFillColor(kBlue-7);
+   hEnergyAtInterface->Draw();
+
    std::ofstream filename(Form("../OutputFiles/findManyRangesDegraderHelium_idx%d.csv", fileIdx));// , std::ofstream::out | std::ofstream::app);
-   filename << degrader << " " << mm << " " << fR << " " << fRS << " " << attenuationH << " " <<  expectedEnergy << " " << expectedEnergySpread  << endl;
+   filename << degrader << " " << mm << " " << fR << " " << fRS << " " << fE << " " << fES << endl; 
    
-   delete c2;
-   delete hRange;
-   delete fRemainingEnergy;
-   delete phaseSpaceSpline;
-   delete hEnergyAtInterface;
+//   delete c2;
+//   delete hRange;
+//   delete fRemainingEnergy;
+//   delete fRange;
+//   delete hEnergyAtInterface;
 
    return returnValues;
    
