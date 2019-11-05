@@ -46,7 +46,7 @@ class Track : public TObject {
       virtual void      removeCluster(Cluster *c)        { track_.Remove((TObject*) c); }
       virtual void      setTrack(Track *copyTrack, Int_t startOffset = 0); // copy whole track
       virtual void      appendCluster(Cluster *copyCluster, Int_t startOffset = 0); // copy cluster
-      virtual void      appendPoint(Float_t x, Float_t y, Int_t layer, Int_t size = -1, Int_t eventID = -1, Bool_t isSecondary = false);
+      virtual void      appendPoint(Float_t x, Float_t y, Int_t layer, Int_t size = -1, Int_t eventID = -1, Bool_t isSecondary = false, Int_t PDG = 0);
       void              removeNANs();
 
       // Getters and setters
@@ -79,6 +79,7 @@ class Track : public TObject {
       Float_t           getRiseFactor();
       Int_t             getNMissingLayers();
       void              propagateSecondaryStatus();
+      Float_t           getAverageDepositedEnergy(Int_t fromIdx, Int_t toIdxExclusive);
 
       // TRACK PROPERTIES - Ranges and energies
       // trackRangeCalculations.C

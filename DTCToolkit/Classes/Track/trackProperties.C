@@ -57,7 +57,7 @@ Bool_t Track::doesTrackEndAbruptly() {
 
    Bool_t   endsAbruptly = (Last()->getDepositedEnergy() < 2.5);
    if (kDataType == kData) endsAbruptly = (Last()->getDepositedEnergy() < 4);
-   if (kHelium) endsAbruptly = (Last()->getDepositedEnergy() + At(GetEntriesFast()-2)->getDepositedEnergy() < 15);
+   if (kHelium) endsAbruptly = (Last()->getDepositedEnergy() < 10);
 
    return endsAbruptly; 
 }
@@ -97,6 +97,26 @@ Float_t Track::getRiseFactor() {
    else return 0;
 
    return riseFactor;
+}
+
+Float_t Track::getAverageDepositedEnergy(Int_t fromIdx, Int_t toIdxExclusive) { // exclusive
+   Int_t nClusters = 0;
+   Float_t averageEdep = 0;
+   Cluster * thisCluster = nullptr;
+
+   if (fromIdx < 0) fromIdx = 0;
+   if (toIdxExclusive > GetEntriesFast()) toIdxExclusive = GetEntriesFast();
+
+   for (Int_t i=fromIdx; i<toIdxExclusive; i++) {
+      if (At(i)) {
+         averageEdep += At(i)->getDepositedEnergy();
+         nClusters++;
+      }
+   }
+
+   averageEdep /= nClusters;
+
+   return averageEdep;
 }
 
 

@@ -23,10 +23,10 @@
 [Core-0] 
 [Core-0] You are using Geant4 version 10.5.1
 /control/alias absorberthickness 35
-/control/alias energy 760
-/control/alias degraderthickness 220
-/control/alias halfdegraderthickness -112.000
-/control/alias beampos -225
+/control/alias energy 917
+/control/alias degraderthickness 100
+/control/alias halfdegraderthickness -52.000
+/control/alias beampos -105
 [Core-0] Starting macro Main.mac
 [Physic-0] The following Geant4's physic-list is enabled :QGSP_BIC_EMZ
 [Core-0] Initialization of geometry

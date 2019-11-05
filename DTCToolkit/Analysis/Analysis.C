@@ -1724,75 +1724,188 @@ void drawEdep(Int_t Runs, Int_t dataType, Bool_t recreate, Int_t switchLayer, Fl
 
 }
 
+void analyseSecondaryFilters(Int_t Runs, Int_t tracksPerRun, Float_t degraderThickness, Bool_t doTracking) {
+   Float_t energy = 917;
+   Float_t recreate = 1;
+   Float_t dataType = 0;
+
+   run_energy = energy;
+   run_degraderThickness = degraderThickness;
+   kEventsPerRun = tracksPerRun;
+   kDoTracking = doTracking;
+
+   Tracks * tracks = loadOrCreateTracks(recreate, Runs, dataType, energy);
+   tracks->removeHighAngleTracks(30);
+   tracks->removeNuclearInteractions();
+   tracks->fillOutIncompleteTracks();
+   tracks->doTrackFit();
+   tracks->removeThreeSigmaShortTracks();
+   tracks->removeEmptyTracks();
+   
+   Track        * thisTrack = nullptr;
+   Cluster      * thisCluster = nullptr;
+   TGraphErrors * outputGraph = nullptr;
+   TGraph       * outputGraphTest = nullptr;
+   Int_t          nGraph = 1;
+   TCanvas      * c = new TCanvas("analyseSecondaryFilters", "analyseSecondaryFilters", 800,600);
+   c->Divide(6,2);
+
+   Int_t used = 0;
+   for (Int_t j=0; j<tracks->GetEntriesFast(); j++) {
+      Track *thisTrack = tracks->At(j);
+      if (!thisTrack) continue;
+      if (nGraph>=6) break;
+      if (j<10) continue;
+
+      // Do track fit, extract all parameters for this track
+      outputGraph = (TGraphErrors*) thisTrack->doTrackFit(false, kUseCSDA); // (bool isScaleVariable, bool useTrackLength (~ CSDA))
+      if (!outputGraph) continue;
+
+      c->cd(nGraph);
+      outputGraph->SetTitle(Form("%d isSecondary: %d", j, thisTrack->Last()->isSecondary()));
+      outputGraph->Draw("AP");
+
+      c->cd(nGraph+6);
+      Float_t x[50] = {};
+      Float_t y[50] = {};
+      Int_t idx = 0, n = thisTrack->GetEntriesFast();
+      Float_t lastTwo, nextTwo;
+      for (Int_t i=1; i<n-1; i++) {
+         if (!thisTrack->At(i)) continue;
+
+         lastTwo = thisTrack->getAverageDepositedEnergy(i-2,i);
+         nextTwo = thisTrack->getAverageDepositedEnergy(i,i+2);
+
+         x[idx] = thisTrack->At(i)->getLayer();
+         y[idx++] = lastTwo - nextTwo;
+      }
+      outputGraphTest = new TGraph(idx,x,y);
+      outputGraphTest->SetTitle(Form("%d;Layer;lastTwo-nextTwo",j));
+      outputGraphTest->SetMarkerStyle(7);
+      outputGraphTest->Draw("AP");
+
+      nGraph++;
+   }
+}
+
 void analyseHelium(Int_t Runs, Int_t dataType, Bool_t recreate, Int_t switchLayer, Float_t energy, Float_t degraderThickness, Int_t tracksperrun, Bool_t doTracking) {
    run_energy = energy;
    run_degraderThickness = degraderThickness;
    kEventsPerRun = tracksperrun;
    kDoTracking = doTracking;
    
-   Tracks * tracks = loadOrCreateTracks(recreate, Runs, dataType, energy,-15,-15);
+   Clusters * savedClusters = new Clusters();
+
+   Tracks * tracks = loadOrCreateTracks(recreate, Runs, dataType, energy,0,0, savedClusters);
    tracks->removeEmptyTracks();
 
-   tracks->removeHighAngleTracks(20); // mrad
-   tracks->removeThreeSigmaShortTracks();
-   tracks->removeNuclearInteractions();
-   tracks->removeEmptyTracks();
+   Int_t nSecondariesEnd = 0, nPrimariesEnd = 0, nTotal = 0;
+   for (Int_t i=0; i<tracks->GetEntriesFast(); i++) {
+      nSecondariesEnd += tracks->At(i)->Last()->isSecondary();
+      nPrimariesEnd += (!tracks->At(i)->Last()->isSecondary());
+   }
+   nTotal = tracks->GetEntries();
 
+   // From a no-halo filter run
+   nTotal = 126881;
+   nPrimariesEnd = 50265;
+   nSecondariesEnd = 76616;
+
+   Float_t  cutHalo = 12;
+   Float_t  cutMaxAngle = 60;
+   Float_t  cutAngle = 40;
+   Float_t  cutEdep = 10;
+
+   printf("Found in total %d tracks. %d primaries, %d secondaries\n", nTotal, nPrimariesEnd, nSecondariesEnd);
+
+
+// Don't use
+//   track->removeHighChiSquare(210);
+
+// Use
+//   tracks->removeHighAngleTracks(cutAngle); // mrad
+//   tracks->removeHighAngularChangeTracks(cutMaxAngle); // mrad
+//   tracks->doTrackFit();
+//   tracks->removeNuclearInteractions();
+//   tracks->removeThreeSigmaShortTracks();
+   
+   Int_t nfSecondariesEnd = 0, nfPrimariesEnd = 0, nfTotal = 0;
+   for (Int_t i=0; i<tracks->GetEntriesFast(); i++) {
+      nfSecondariesEnd += tracks->At(i)->Last()->isSecondary();
+      nfPrimariesEnd += (!tracks->At(i)->Last()->isSecondary());
+   }
+   nfTotal = tracks->GetEntries();
+
+   printf("After filtering: %d tracks. %d primaries, %d secondaries\n", nfTotal, nfPrimariesEnd, nfSecondariesEnd);
+
+   printf("True positives (filtered secondaries): %.1f %%\n", float(nSecondariesEnd-nfSecondariesEnd)/nTotal*100);
+   printf("False positives (filtered primaries): %.1f %%\n", float(nPrimariesEnd-nfPrimariesEnd)/nTotal*100);
+   printf("True negatives (unfiltered primaries): %.1f %%\n", (nfPrimariesEnd)/float(nTotal) * 100);
+   printf("False negatives (unfiltered secondaries): %.1f %%\n", (nfSecondariesEnd)/float(nTotal) * 100);
+
+   /*
+   tracks->removeEmptyTracks();
    tracks->fillOutIncompleteTracks(0.05);
-
-   tracks->doTrackFit();
-
-//   tracks->removeHighChiSquare();
-//   tracks->removeEmptyTracks();
+   */
 
    Track *thisTrack = nullptr;
    Cluster *a, *b;
    Float_t angle, range, edep, bragg;
 
-   TCanvas *cEdep = new TCanvas();
+   TCanvas *cEdep = new TCanvas("cEdep","cEdep",1200,600);
    cEdep->Divide(2,1);
-   TH1F * edepP = new TH1F("edepP", "primary;edep;freq;", 400, 0, 200);
-   TH1F * edepS = new TH1F("edepS", "secondary;edep;freq;", 400, 0, 200);
+   TH1F * edepP = new TH1F("edepP", "Primary at end;E_{dep} last layer [kev/#mum];Entries", 100, 0, 100);
+   TH1F * edepS = new TH1F("edepS", "Secondary at end;E_{dep} last layer [kev/#mum];Entries", 100, 0, 100);
 
-   TCanvas *cAllEdep = new TCanvas();
+   TCanvas *cEdep2D = new TCanvas("cEdep2D","cEdep2D",1200,600);
+   cEdep2D->Divide(2,1);
+   TH2F *edep2DP = new TH2F("edep2DP", "Primary at end;Edep last layer [kev/#mum];Edep next-to-last layer", 60, 0, 60, 60, 0, 1000);
+   TH2F *edep2DS = new TH2F("edep2DS", "Secondary at end;#Delta E detector mid [kev/#mum]; residual energy after mid [MeV]", 60, 0, 60,60, 0, 1000);
+
+   TCanvas *cAllEdep = new TCanvas("cAllEdep","cAllEdep",1200,600);
    cAllEdep->Divide(2,1);
-   TH1F * cAllEdepP = new TH1F("allEdepP", "primary;edep [MeV];freq",400,0,5);
-   TH1F * cAllEdepS = new TH1F("allEdepS", "secondary;edep [MeV];freq",400,0,5);
+   TH1F * cAllEdepP = new TH1F("allEdepP", "Primary at end;E_{dep} all layers [keV/#mum];Entries",100,0,100);
+   TH1F * cAllEdepS = new TH1F("allEdepS", "Secondary at end;E_{dep} all layers [kev/#mum];Entries",100,0,100);
    
-   TCanvas *cAngle = new TCanvas();
+   TCanvas *cAngle = new TCanvas("cAngle","cAngle",1200,600);
    cAngle->Divide(2,1);
-   TH1F * angleP = new TH1F("angleP", "primary;angle [mrad];freq;", 400, 0, 200);
-   TH1F * angleS = new TH1F("angleS", "secondary;angle [mrad];freq;", 400, 0, 200);
+   TH1F * angleP = new TH1F("angleP", "Primary at end;Incoming angle [mrad];Entries;", 100, 0, 200);
+   TH1F * angleS = new TH1F("angleS", "Secondary at end;Incoming angle [mrad];Entries;", 100, 0, 200);
    
-   TCanvas *cRange = new TCanvas();
+   TCanvas *cRange = new TCanvas("cRange","cRange",1200,600);
    cRange->Divide(2,1);
-   TH1F * rangeP = new TH1F("rangeP", "primary;range;freq;", 400, 0, 300);
-   TH1F * rangeS = new TH1F("rangeS", "secondary;range;freq;", 400, 0, 300);
+   TH1F * rangeP = new TH1F("rangeP", "Primary at end;Residual range [WEPL mm];Entries;", 100, 0, 300);
+   TH1F * rangeS = new TH1F("rangeS", "Secondary at end;Residual range [WEPL mm];Entries;", 100, 0, 300);
 
-   TCanvas *cBragg = new TCanvas();
+   TCanvas *cRange2 = new TCanvas("cRange2", "cRange", 800, 600);
+   TH1F * rangePS = new TH1F("rangePS", "All;Residual range [WEPL mm];Entries;", 100, 0, 300);
+
+   TCanvas *cBragg = new TCanvas("cBragg","cBragg",1200,600);
    cBragg->Divide(2,1);
-   TH1F * braggP = new TH1F("rangeP", "primary;log_{10} #chi^{2};freq;", 400, 1, 2000);
-   TH1F * braggS = new TH1F("rangeS", "secondary;log_{10} #chi^{2};freq;", 400, 0, 2000);
+   TH1F * braggP = new TH1F("rangeP", "Primary at end;Depth-dose fit log_{10} #chi^{2};Entries;", 100, 1, 2000);
+   TH1F * braggS = new TH1F("rangeS", "Secondary at end;Depth-dose fit log_{10} #chi^{2};Entries;", 100, 0, 2000);
    
    TCanvas *cSecondary = new TCanvas();
-   TH1F *hSec = new TH1F("hSec", "Secondary conversion;layer;freq", 50, 0, 50);
+   TH1F *hSec = new TH1F("hSec", "Secondary prouction depth;Detector layer;Entries", 46, -0.5, 45.5);
    TH1F *hPrim = new TH1F("hPrim", "Primary beam;layer;freq", 50, 0, 50);
+
+   TCanvas *cMaxDeltaTheta = new TCanvas("cMaxDeltaTheta","cMaxDeltaTheta", 1200,600);
+   cMaxDeltaTheta->Divide(2,1);
+   TH1F *hMaxDeltaThetaP = new TH1F("hMaxDeltaThetaP", "Primary at end;Max layer-wise angular change [mrad];Entries",100,0,300);
+   TH1F *hMaxDeltaThetaS = new TH1F("hMaxDeltaThetaS", "Secondary at end;Max layer-wise angular change [mrad];Entries",100,0,300);
+
+   TCanvas *cHits = new TCanvas("cHits", "cHits", 1200,600);
+   cHits->Divide(2,1);
+   TH1F *cHitsP = new TH1F("cHitsP", "Primary at end;Beam profile at entrance layer #sqrt{x^{2}+y^{2}} [mm];Entries", 100, 0, 100);
+   TH1F *cHitsS = new TH1F("cHitsS", "Secondary at end;Beam profile at entrance layer #sqrt{x^{2}+y^{2}} [mm];Entries", 100, 0, 100);
 
    for (int i=0; i<tracks->GetEntriesFast(); i++) {
       thisTrack = tracks->At(i);
       if (!thisTrack) continue;
    
       bool was = false;
+      float biggestChange = 0;
       for (int j=0; j<thisTrack->GetEntriesFast(); j++) {
-         if (!thisTrack->At(j)->isSecondary()) {
-            cAllEdepP->Fill(thisTrack->getDepositedEnergy(j)*14/1000);
-         }
-         else {
-            cAllEdepS->Fill(thisTrack->getDepositedEnergy(j)*14/1000);
-         }
-
-
-         cAllEdepP->Fill(thisTrack->getDepositedEnergy(j));
          if (!was) {
             if (thisTrack->At(j)->isSecondary()) {
                hSec->Fill(thisTrack->getLayer(j));
@@ -1800,60 +1913,624 @@ void analyseHelium(Int_t Runs, Int_t dataType, Bool_t recreate, Int_t switchLaye
             }
          }
       }
+      int last = thisTrack->GetEntriesFast() - 1;
+      if (last>=3) {
+         float edeplast = thisTrack->Last()->getDepositedEnergy();
+         float edepnlast = thisTrack->At(last-1)->getDepositedEnergy();
+         float edepnnlast = thisTrack->At(last-2)->getDepositedEnergy();
+         float edepnnnlast = thisTrack->At(last-3)->getDepositedEnergy();
+         if (!thisTrack->Last()->isSecondary()) {
+               cAllEdepP->Fill(edeplast+edepnlast);
+         }
+         else {
+               cAllEdepS->Fill(edeplast+edepnlast);
+         }
+      }
       
       Cluster *a = thisTrack->At(0);
       Cluster *b = thisTrack->At(1);
       if (!a || !b) continue;
       angle = getDotProductAngle(a, a, b) * 1000;
-      range = getUnitFromTL(thisTrack->getFitParameterRange());
+      if (isnan(thisTrack->getFitParameterRange())) continue;
+
+//      range = getUnitFromTL(thisTrack->getFitParameterRange());
+      range = getUnitFromTL(thisTrack->getRangemm());
       bragg = thisTrack->getFitParameterChiSquare();
       edep = 0;
+      last = thisTrack->GetEntriesFast() - 1;
       if (thisTrack->GetEntriesFast() > 3) {
-         Int_t last = thisTrack->GetEntriesFast() - 1;
-         edep = thisTrack->getDepositedEnergy(last) + thisTrack->getDepositedEnergy(last-1);
+//         edep = thisTrack->getDepositedEnergy(last) + thisTrack->getDepositedEnergy(last-1);
+         edep = thisTrack->getDepositedEnergy(last);
       }
+
+      rangePS->Fill(range);
       if (!thisTrack->Last()->isSecondary()) {
          edepP->Fill(edep);
          angleP->Fill(angle);
          rangeP->Fill(range);
          braggP->Fill(bragg);
+
+         if (last>5) { // thisTrack->At(last-5) && thisTrack->At(last-4)) {
+            float edep_mid = thisTrack->getDepositedEnergy(last-5);
+            float residual_energy = getEnergyAtWEPL(917,thisTrack->getRangeWEPLAt(last-4));
+            edep2DP->Fill(edep_mid, residual_energy);
+         }
+
+
+         hMaxDeltaThetaP->Fill(thisTrack->getMaximumSlopeAngleChange() * 3.1415 / 180 * 1000);
       }
       else {
          edepS->Fill(edep);
          angleS->Fill(angle);
          rangeS->Fill(range);
          braggS->Fill(bragg);
+         hMaxDeltaThetaS->Fill(thisTrack->getMaximumSlopeAngleChange() * 3.1415 / 180 * 1000);
+         if (last>5) {
+            float edep_mid = thisTrack->getDepositedEnergy(last-5);
+            float residual_energy = getEnergyAtWEPL(917,thisTrack->getRangeWEPLAt(last-4));
+            edep2DS->Fill(edep_mid, residual_energy);
+         }
       }
    }
-   
+
+   float x,y,z;
+   Cluster * cl;
+   int sgn;
+   for (Int_t i=0; i<=savedClusters->GetEntriesFast(); i++) {
+      sgn = 1;
+      cl = savedClusters->At(i);
+      if (!cl) continue;
+      x = cl->getXmm();
+      y = cl->getYmm();
+      z = cl->getLayer();
+      
+      if (y<0) sgn = -1;
+
+      if (cl->isSecondary()) {
+        cHitsS->Fill(sgn*sqrt(x*x+y*y));
+      }
+      else {
+         cHitsP->Fill(sgn*sqrt(x*x+y*y));
+      }
+   }
+   delete savedClusters;
+
+   rangePS->SetFillColor(kRed);
+   edepP->SetFillColor(kGray);
+   edepS->SetFillColor(kGreen-3);
+   angleP->SetFillColor(kGray);
+   angleS->SetFillColor(kGreen-3);
+   rangeP->SetFillColor(kGray);
+   rangeS->SetFillColor(kGreen-3);
+   braggP->SetFillColor(kGray);
+   braggS->SetFillColor(kGreen-3);
+   cAllEdepP->SetFillColor(kGray);
+   cAllEdepS->SetFillColor(kGreen-3);
+   hSec->SetFillColor(kGreen-3);
+   hMaxDeltaThetaP->SetFillColor(kGray);
+   hMaxDeltaThetaS->SetFillColor(kGreen-3);
+   cHitsP->SetFillColor(kGray);
+   cHitsS->SetFillColor(kGreen-3);
+
+   // Please tell me how to do this properly with gStyle
+   rangePS->SetLineColor(kBlack);
+   edepP->SetLineColor(kBlack);
+   edepS->SetLineColor(kBlack);
+   angleP->SetLineColor(kBlack);
+   angleS->SetLineColor(kBlack);
+   rangeP->SetLineColor(kBlack);
+   rangeS->SetLineColor(kBlack);
+   braggP->SetLineColor(kBlack);
+   braggS->SetLineColor(kBlack);
+   cAllEdepP->SetLineColor(kBlack);
+   cAllEdepS->SetLineColor(kBlack);
+   hSec->SetLineColor(kBlack);
+   hMaxDeltaThetaP->SetLineColor(kBlack);
+   hMaxDeltaThetaS->SetLineColor(kBlack);
+   cHitsP->SetLineColor(kBlack);
+   cHitsS->SetLineColor(kBlack);
+
+   TLine *l1, *l2;
+
    cEdep->cd(1);
    edepP->Draw();
+   l1 = new TLine(cutEdep, 0, cutEdep, edepP->GetMaximum()*1.05);
+   l1->SetLineStyle(7);
+   l1->SetLineColor(kBlack);
+   l1->Draw();
    cEdep->cd(2);
    edepS->Draw();
+   l1 = new TLine(cutEdep, 0, cutEdep, edepS->GetMaximum()*1.05);
+   l1->SetLineStyle(7);
+   l1->SetLineColor(kBlack);
+   l1->Draw();
 
    cAngle->cd(1);
    angleP->Draw();
+   l1 = new TLine(cutAngle, 0, cutAngle, angleP->GetMaximum()*1.05);
+   l1->SetLineStyle(7);
+   l1->SetLineColor(kBlack);
+   l1->Draw();
    cAngle->cd(2);
    angleS->Draw();
+   l1 = new TLine(cutAngle, 0, cutAngle, angleS->GetMaximum()*1.05);
+   l1->SetLineStyle(7);
+   l1->SetLineColor(kBlack);
+   l1->Draw();
+
+   Float_t mu = rangePS->GetXaxis()->GetBinCenter(rangePS->GetMaximumBin());
+   Float_t sigma = 10; // as expected from ~homogenous area // WEPL 
 
    cRange->cd(1);
    rangeP->Draw();
+   l1 = new TLine(mu-3*sigma, 0, mu-3*sigma, rangeP->GetMaximum()*1.05);
+   l1->SetLineStyle(7);
+   l1->SetLineColor(kBlack);
+   l1->Draw();
+   l2 = new TLine(mu+1.5*sigma, 0, mu+1.5*sigma, rangeP->GetMaximum()*1.05);
+   l2->SetLineStyle(7);
+   l2->SetLineColor(kBlack);
+   l2->Draw();
+
    cRange->cd(2);
    rangeS->Draw();
+   l1 = new TLine(mu-3*sigma, 0, mu-3*sigma, rangeS->GetMaximum()*1.05);
+   l1->SetLineStyle(7);
+   l1->SetLineColor(kBlack);
+   l1->Draw();
+   l2 = new TLine(mu+1.5*sigma, 0, mu+1.5*sigma, rangeS->GetMaximum()*1.05);
+   l2->SetLineStyle(7);
+   l2->SetLineColor(kBlack);
+   l2->Draw();
+
+   cRange2->cd();
+   rangePS->Draw();
+   l1 = new TLine(mu-3*sigma, 0, mu-3*sigma, rangePS->GetMaximum()*1.05);
+   l1->SetLineStyle(7);
+   l1->SetLineColor(kBlack);
+   l1->Draw();
+   l2 = new TLine(mu+1.5*sigma, 0, mu+1.5*sigma, rangePS->GetMaximum()*1.05);
+   l2->SetLineStyle(7);
+   l2->SetLineColor(kBlack);
+   l2->Draw();
 
    cBragg->cd(1);
    braggP->Draw();
+   l1 = new TLine(450, 0, 450, braggP->GetMaximum()*1.05);
+   l1->SetLineStyle(7);
+   l1->SetLineColor(kBlack);
+   l1->Draw();
    cBragg->cd(2);
    braggS->Draw();
+   l1 = new TLine(450, 0, 450, braggS->GetMaximum()*1.05);
+   l1->SetLineStyle(7);
+   l1->SetLineColor(kBlack);
+   l1->Draw();
 
    cAllEdep->cd(1);
    cAllEdepP->Draw();
    cAllEdep->cd(2);
    cAllEdepS->Draw();
 
+   cEdep2D->cd(1);
+   edep2DP->Draw("colz");
+   cEdep2D->cd(2);
+   edep2DS->Draw("colz");
+
+   cHits->cd(1);
+   cHitsP->Draw();
+   l1 = new TLine(12, 0, 12, cHitsP->GetMaximum()*1.05);
+   l1->SetLineStyle(7);
+   l1->SetLineColor(kBlack);
+   l1->Draw();
+   cHits->cd(2);
+   cHitsS->Draw();
+   l1 = new TLine(12, 0, 12, cHitsS->GetMaximum()*1.05);
+   l1->SetLineStyle(7);
+   l1->SetLineColor(kBlack);
+   l1->Draw();
+
+   // True positive: Secondaries removed by filter
+   // True negative: Primaries not removed filter
+   // False positive: Primaries removed by filter
+   // False negative: Secondaries not removed by filter
+   // Normalize by the total number of particles
+
+   int bmin, bmax;
+   int ntracks = tracks->GetEntries();
+
+   bmin = cHitsP->GetXaxis()->FindBin(12);
+   int totalHalo = cHitsS->Integral() + cHitsP->Integral();
+   int removedByHalo = cHitsS->Integral(bmin,100) + cHitsP->Integral(bmin,100);
+   int removedByHalo2nd = cHitsS->Integral(bmin,100);
+   
+   float haloTP = cHitsS->Integral(bmin,100) / float(totalHalo);
+   float haloTN = (cHitsP->Integral() - cHitsP->Integral(bmin,100)) / float(totalHalo);
+   float haloFP = cHitsP->Integral(bmin,100) / float(totalHalo);
+   float haloFN = (cHitsS->Integral() - cHitsS->Integral(bmin,100)) / float(totalHalo);
+
+   bmin = angleS->GetXaxis()->FindBin(40);
+   int removedByAngle = angleS->Integral(bmin,100) + angleP->Integral(bmin,100);
+   int removedByAngle2nd = angleS->Integral(bmin,100);
+   
+   float angleTP = angleS->Integral(bmin,100) / float(ntracks);
+   float angleTN = (angleP->Integral() - angleP->Integral(bmin,100)) / float(ntracks);
+   float angleFP = angleP->Integral(bmin,100) / float(ntracks);
+   float angleFN = (angleS->Integral() - angleS->Integral(bmin,100)) / float(ntracks);
+
+   bmin = hMaxDeltaThetaS->GetXaxis()->FindBin(50);
+   int removedByMaxAngle = hMaxDeltaThetaS->Integral(bmin,100) + hMaxDeltaThetaP->Integral(bmin,100);
+   int removedByMaxAngle2nd = hMaxDeltaThetaS->Integral(bmin,100);
+   
+   float maxAngleTP = hMaxDeltaThetaS->Integral(bmin,100) / float(ntracks);
+   float maxAngleTN = (hMaxDeltaThetaP->Integral() - hMaxDeltaThetaP->Integral(bmin,100)) / float(ntracks);
+   float maxAngleFP = hMaxDeltaThetaP->Integral(bmin,100) / float(ntracks);
+   float maxAngleFN = (hMaxDeltaThetaS->Integral() - hMaxDeltaThetaS->Integral(bmin,100)) / float(ntracks);
+
+   bmin = rangeS->GetXaxis()->FindBin(mu-3*sigma);
+   bmax = rangeS->GetXaxis()->FindBin(mu+3*sigma);
+   int removedByR = rangeS->Integral(0,bmin-1) + rangeS->Integral(bmax+1,100) + rangeP->Integral(0,bmin-1) + rangeP->Integral(bmax+1,100);
+   int removedByR2nd = rangeS->Integral(0,bmin-1) + rangeS->Integral(bmax+1,100);
+   
+   float rangeTP = (rangeS->Integral() - rangeS->Integral(bmin-1,bmax+1)) / float(ntracks);
+   float rangeTN = (rangeP->Integral(bmin,bmax)) / float(ntracks);
+   float rangeFP = (rangeP->Integral() - rangeP->Integral(bmin-1,bmax+1)) / float(ntracks);
+   float rangeFN = (rangeS->Integral(bmin,bmax)) / float(ntracks);
+
+   bmin = edepP->GetXaxis()->FindBin(10);
+   int removedByED = edepS->Integral(0,bmin) + edepP->Integral(0,bmin);
+   int removedByED2nd = edepS->Integral(0,bmin);
+   
+   float edepTP = edepS->Integral(bmin,100) / float(ntracks);
+   float edepTN = (edepP->Integral() - edepP->Integral(bmin,100)) / float(ntracks);
+   float edepFP = edepP->Integral(bmin,100) / float(ntracks);
+   float edepFN = (edepS->Integral() - edepS->Integral(bmin,100)) / float(ntracks);
+
+   bmin = braggP->GetXaxis()->FindBin(450);
+   int removedByChi2 = braggS->Integral(bmin,100) + braggP->Integral(bmin,100);
+   int removedByChi22nd = braggS->Integral(bmin,100);
+   
+   float chi2TP = braggS->Integral(bmin,100) / float(ntracks);
+   float chi2TN = (braggP->Integral() - braggP->Integral(bmin,100)) / float(ntracks);
+   float chi2FP = braggP->Integral(bmin,100) / float(ntracks);
+   float chi2FN = (braggS->Integral() - braggS->Integral(bmin,100)) / float(ntracks);
+
+   bmin = cAllEdepP->GetXaxis()->FindBin(20);
+   int removedByAllEdep = cAllEdepS->Integral(0,bmin) + cAllEdepP->Integral(bmin,100);
+   int removedByAllEdep2nd = cAllEdepS->Integral(0,bmin);
+   
+   float allEdepTP = cAllEdepS->Integral(bmin,100) / float(ntracks);
+   float allEdepTN = (cAllEdepP->Integral() - cAllEdepP->Integral(bmin,100)) / float(ntracks);
+   float allEdepFP = cAllEdepP->Integral(bmin,100) / float(ntracks);
+   float allEdepFN = (cAllEdepS->Integral() - cAllEdepS->Integral(bmin,100)) / float(ntracks);
+      
+   printf("Total number of tracks = %d\n", ntracks);
+   printf("Tracks removed by Halo: %d (%d secondaries) (%.1f%% purity) (%.1f%% removed)\n", removedByHalo, removedByHalo2nd, 100.*removedByHalo2nd/removedByHalo, 100.*removedByHalo/totalHalo);
+   printf("Tracks removed by Angle: %d (%d secondaries) (%.1f%% purity) (%.1f%% removed)\n", removedByAngle, removedByAngle2nd, 100.*removedByAngle2nd/removedByAngle, 100.*removedByAngle/ntracks);
+   printf("Tracks removed by MaxAngle: %d (%d secondaries) (%.1f%% purity) (%.1f%% removed)\n", removedByMaxAngle, removedByMaxAngle2nd, 100.*removedByMaxAngle2nd/removedByMaxAngle, 100.*removedByMaxAngle/ntracks);
+   printf("Tracks removed by R: %d (%d secondaries) (%.1f%% purity) (%.1f%% removed)\n", removedByR, removedByR2nd, 100.*removedByR2nd/removedByR, 100.*removedByR/ntracks);
+   printf("Tracks removed by last ED: %d (%d secondaries) (%.1f%% purity) (%.1f%% removed)\n", removedByED, removedByED2nd, 100.*removedByED2nd/removedByED, 100.*removedByED/ntracks);
+   printf("Tracks removed by last2 ED: %d (%d secondaries) (%.1f%% purity) (%.1f%% removed)\n", removedByAllEdep, removedByAllEdep2nd, 100.*removedByAllEdep2nd/removedByAllEdep, 100.*removedByAllEdep/ntracks);
+   printf("Tracks removed by Chi2: %d (%d secondaries) (%.1f%% purity) (%.1f%% removed)\n", removedByChi2, removedByChi22nd, 100.*removedByChi22nd/removedByChi2, 100.*removedByChi2/ntracks);
+
+   printf("True/False Positive/Negative: \n\n");
+   printf("Halo: TP = %.1f, FP = %.1f, TN = %.1f, FN = %.1f\n", haloTP*100, haloFP*100, haloTN*100, haloFN*100);
+   printf("Angle: TP = %.1f, FP = %.1f, TN = %.1f, FN = %.1f\n", angleTP*100, angleFP*100, angleTN*100, angleFN*100);
+   printf("MaxAngle: TP = %.1f, FP = %.1f, TN = %.1f, FN = %.1f\n", maxAngleTP*100, maxAngleFP*100, maxAngleTN*100, maxAngleFN*100);
+   printf("Range: TP = %.1f, FP = %.1f, TN = %.1f, FN = %.1f\n", rangeTP*100, rangeFP*100, rangeTN*100, rangeFN*100);
+   printf("Edep: TP = %.1f, FP = %.1f, TN = %.1f, FN = %.1f\n", edepTP*100, edepFP*100, edepTN*100, edepFN*100);
+   printf("Chi2: TP = %.1f, FP = %.1f, TN = %.1f, FN = %.1f\n", chi2TP*100, chi2FP*100, chi2TN*100, chi2FN*100);
+   printf("AllEdep: TP = %.1f, FP = %.1f, TN = %.1f, FN = %.1f\n", allEdepTP*100, allEdepFP*100, allEdepTN*100, allEdepFN*100);
+
    cSecondary->cd();
 //   hPrim->Draw();
    hSec->Draw();
+
+   cMaxDeltaTheta->cd(1);
+   hMaxDeltaThetaP->Draw();
+   l1 = new TLine(cutMaxAngle, 0, cutMaxAngle, hMaxDeltaThetaP->GetMaximum()*1.05);
+   l1->SetLineStyle(7);
+   l1->SetLineColor(kBlack);
+   l1->Draw();
+   cMaxDeltaTheta->cd(2);
+   hMaxDeltaThetaS->Draw();
+   l1 = new TLine(cutMaxAngle, 0, cutMaxAngle, hMaxDeltaThetaS->GetMaximum()*1.05);
+   l1->SetLineStyle(7);
+   l1->SetLineColor(kBlack);
+   l1->Draw();
+
+   Int_t particleListIndex[100] = {};
+   Int_t particleListSort[100] = {};
+   Int_t particleList[100] = {};
+   Int_t idxPDG = 0, pdg;
+   Bool_t inList = false;
+
+   // last particle
+   Cluster * c = nullptr;
+   for (Int_t i=0; i<=tracks->GetEntriesFast(); i++) {
+      Track *thisTrack = tracks->At(i);
+      if (!thisTrack) continue;
+
+      c = thisTrack->Last();
+      if (!c) continue;
+      pdg = c->getPDG();
+      if (!c->isSecondary()) continue;
+      
+      inList = false;
+      for (int j=0; j<idxPDG; j++) {
+         if (particleListIndex[j] == pdg) {
+            inList = true;
+            particleList[j]++;
+            break;
+         }
+      }
+      if (!inList) {
+         particleListIndex[idxPDG] = pdg;
+         particleList[idxPDG++] = 1;
+      }
+   }
+
+   // Make indexed sorting list
+   Int_t currentMax = 0;
+   Int_t maxIdx = 0;
+   Int_t sortIdx = 0;
+   while (sortIdx < idxPDG) {
+      currentMax = 0;
+      for (Int_t i=0; i<idxPDG; i++) {
+         if (particleList[i] >= currentMax) {
+            inList = false;
+            for (Int_t j=0; j<sortIdx; j++) inList += (particleListSort[j] == i);
+            if (inList) continue;
+
+            currentMax = particleList[i];
+            maxIdx = i;
+         }
+      }
+      particleListSort[sortIdx++] = maxIdx;
+   }
+
+   string name;
+   Int_t p;
+
+   printf("Secondary particle types: \n");
+   for (Int_t i=0; i<idxPDG; i++) {
+      p = particleListIndex[particleListSort[i]];
+      if (p == 11) name = "Electron";
+      else if (p == -11) name = "Positron";
+      else if (p == 2212) name = "Proton";
+      else if (p == 22) name = "Gamma";
+      else if (p == 1000030040) name = "Litium4"; 
+      else if (p == 1000030060) name = "Litium";
+      else if (p == 1000020040) name = "Helium";
+      else if (p == 1000020030) name = "Helium3";
+      else if (p == 1000010030) name = "Tritium";
+      else if (p == 1000010020) name = "Deuterium";
+      else if (p == 1000130270) name = "Aluminium";
+      else if (p == 1000140280) name = "Silicon";
+      else if (p == 1000140260) name = "Silicon26";
+      else if (p == 1000140299) name = "Silicon29";
+      else if (p == 1000120240) name = "Magnesium";
+      else name = Form("%d", p);
+
+      cout << name << ": " << particleList[particleListSort[i]] << " tracks\n";
+   }
+
+   TCanvas *cPDG = new TCanvas("cPDG", "PDG(z)");
+   cPDG->cd();
+   float xfrom = -0.5;
+   float xto = 50.5;
+   int xlen = 51;
+   
+   gStyle->SetOptStat(0);
+/*
+   gStyle->SetOptStat(0);
+   gStyle->SetTitleFont(22);
+   gStyle->SetLabelFont(22);
+   gStyle->SetTitleSize(0.05);
+   gStyle->SetLabelSize(0.05);
+   gStyle->SetTextFont(22);
+   gStyle->SetLabelFont(22, "Y");
+   gStyle->SetLabelSize(0.05, "Y");
+   gStyle->SetTitleFont(22, "Y");
+   gStyle->SetTitleSize(0.05, "Y");
+   gStyle->SetTitleOffset(0.92);
+   gStyle->SetTitleOffset(0.92, "Y");
+*/
+
+   TH1F *hPDGe = new TH1F("hPDGe", "Electrons", xlen, xfrom, xto);
+   TH1F *hPDGpos = new TH1F("hPDGpos", "Positrons", xlen, xfrom, xto);
+   TH1F *hPDGpro = new TH1F("hPDGpro", ";Depth in detector [layer number];Fraction of secondary particles", xlen, xfrom, xto);
+   TH1F *hPDGneu = new TH1F("hPDGneu", ";Depth in detector [layer number];Fraction of secondary particles", xlen, xfrom, xto);
+   TH1F *hPDGhe = new TH1F("hPDGhe", "Helium", xlen, xfrom, xto);
+   TH1F *hPDGhe3 = new TH1F("hPDGhe3", ";Depth in detector [layer number];Fraction of secondary particles", xlen, xfrom, xto);
+   TH1F *hPDGgam = new TH1F("hPDGgam", "Gamma", xlen, xfrom, xto);
+   TH1F *hPDGli = new TH1F("hPDGli", "Litium", xlen, xfrom, xto);
+   TH1F *hPDGdeu = new TH1F("hPDGdeu", "Deuterium", xlen, xfrom, xto);
+   TH1F *hPDGtri = new TH1F("hPDGtri", "Tritium", xlen, xfrom, xto);
+   TH1F *hPDGsi = new TH1F("hPDGsi", "Silicon", xlen, xfrom, xto);
+   TH1F *hPDGmg = new TH1F("hPDGmg", "Magnesium", xlen, xfrom, xto);
+   TH1F *hPDGal = new TH1F("hPDGal", "Aluminum", xlen, xfrom, xto);
+
+   Int_t l;
+   for (Int_t i=0; i<=tracks->GetEntriesFast(); i++) {
+      thisTrack = tracks->At(i);
+      if (!thisTrack) continue;
+      for (Int_t j=0; j<=thisTrack->GetEntriesFast(); j++) {
+         if (!thisTrack->At(j)) continue;
+         l = thisTrack->getLayer(j);
+         p = thisTrack->At(j)->getPDG();
+         if (!thisTrack->At(j)->isSecondary()) continue;
+
+         if (p == 11) hPDGe->Fill(l);
+         else if (p == -11) hPDGpos->Fill(l);
+         else if (p == 2212) hPDGpro->Fill(l);
+         else if (p == 2112) hPDGneu->Fill(l);
+         else if (p == 22) hPDGgam->Fill(l);
+         else if (p == 1000030040) hPDGli->Fill(l);
+         else if (p == 1000030060) hPDGli->Fill(l);
+         else if (p == 1000020040) hPDGhe->Fill(l);
+         else if (p == 1000020030) hPDGhe3->Fill(l);
+         else if (p == 1000010030) hPDGtri->Fill(l);
+         else if (p == 1000010020) hPDGdeu->Fill(l);
+         else if (p == 1000130270) hPDGal->Fill(l);
+         else if (p == 1000140280) hPDGsi->Fill(l);
+         else if (p == 1000140260) hPDGsi->Fill(l);
+         else if (p == 1000140299) hPDGsi->Fill(l);
+         else if (p == 1000120240) hPDGmg->Fill(l);
+      }
+   }
+
+   hPDGhe->SetLineColor(8); hPDGpro->SetLineColor(1); hPDGdeu->SetLineColor(2); hPDGhe3->SetLineColor(3);
+   hPDGtri->SetLineColor(4); hPDGe->SetLineColor(9); hPDGgam->SetLineColor(6); hPDGpos->SetLineColor(7);
+   hPDGal->SetLineColor(14); hPDGsi->SetLineColor(16); hPDGmg->SetLineColor(18); hPDGli->SetLineColor(12);
+   hPDGneu->SetLineColor(28); 
+
+   hPDGhe->SetLineWidth(2); hPDGpro->SetLineWidth(2); hPDGdeu->SetLineWidth(2); hPDGhe3->SetLineWidth(2);
+   hPDGtri->SetLineWidth(2); hPDGe->SetLineWidth(2); hPDGli->SetLineWidth(2); hPDGgam->SetLineWidth(2);
+   hPDGal->SetLineWidth(2); hPDGsi->SetLineWidth(2); hPDGmg->SetLineWidth(2); hPDGpos->SetLineWidth(2);
+   hPDGneu->SetLineWidth(2);
+
+   // NORMALIZE
+   Float_t totalParticles = tracks->GetEntries();
+
+   hPDGhe->Scale(100 / totalParticles);
+   hPDGpro->Scale(100 / totalParticles);
+   hPDGdeu->Scale(100 / totalParticles);
+   hPDGhe3->Scale(100 / totalParticles);
+   hPDGtri->Scale(100 / totalParticles);
+   hPDGe->Scale(100 / totalParticles);
+   hPDGgam->Scale(100 / totalParticles);
+   hPDGpos->Scale(100 / totalParticles);
+   hPDGal->Scale(100 / totalParticles);
+   hPDGsi->Scale(100 / totalParticles);
+   hPDGmg->Scale(100 / totalParticles);
+   hPDGli->Scale(100 / totalParticles);
+   hPDGneu->Scale(100 / totalParticles);
+
+   TLegend *leg = new TLegend(0.8,0.4,0.95,0.95);
+
+   hPDGpro->Draw("hist");
+   leg->AddEntry(hPDGpro, "Protons", "L");
+   hPDGhe3->Draw("same hist"); 
+   leg->AddEntry(hPDGhe3, "Helium3", "L");
+
+   hPDGpro->GetYaxis()->SetRangeUser(0, 1.2*max(hPDGhe->GetMaximum(), max(hPDGpro->GetMaximum(), hPDGhe3->GetMaximum())));
+
+   if (hPDGe->Integral()) {
+      hPDGe->Draw("same hist"); 
+      leg->AddEntry(hPDGe, "Electrons", "L");
+   }
+
+   if (hPDGneu->Integral()) {
+      hPDGneu->Draw("same hist");
+      leg->AddEntry(hPDGneu, "Neutrons", "L");
+   }
+
+   if (hPDGpos->Integral()) {
+      hPDGpos->Draw("same hist");
+      leg->AddEntry(hPDGpos, "Positrons", "L");
+   }
+
+
+   if (hPDGhe->Integral()) {
+      hPDGhe->Draw("same hist"); 
+      leg->AddEntry(hPDGhe, "Helium", "L"); 
+   }
+
+
+   if (hPDGgam->Integral()) { 
+      hPDGgam->Draw("same hist");
+      leg->AddEntry(hPDGgam, "Gamma", "L");
+   }
+
+   if (hPDGli->Integral()) { 
+      hPDGli->Draw("same hist"); 
+      leg->AddEntry(hPDGli, "Litium", "L");
+   }
+
+   if (hPDGdeu->Integral()) { 
+      hPDGdeu->Draw("same hist"); 
+      leg->AddEntry(hPDGdeu, "Deuterium", "L");
+   }
+
+   if (hPDGtri->Integral()) { 
+      hPDGtri->Draw("same hist"); 
+      leg->AddEntry(hPDGtri, "Tritium", "L");
+   }
+
+   if (hPDGsi->Integral()) { 
+      hPDGsi->Draw("same hist"); 
+      leg->AddEntry(hPDGsi, "Silicon", "L");
+   }
+
+   if (hPDGmg->Integral()) { 
+      hPDGmg->Draw("same hist"); 
+      leg->AddEntry(hPDGmg, "Magnesium", "L");
+   }
+
+   if (hPDGal->Integral()) { 
+      hPDGal->Draw("same hist"); 
+      leg->AddEntry(hPDGal, "Aluminum", "L");
+   }
+
+   leg->SetTextFont(22);
+   leg->SetTextSize(0.04);
+   leg->Draw();
+ 
+   // ADD % TO AXIS
+   TText *t = new TText();
+   hPDGpro->GetYaxis()->SetLabelOffset(5);
+   t->SetTextAlign(32);
+   t->SetTextSize(0.04);
+   t->SetTextFont(22);
+   Float_t at;
+   for (Int_t i=0; i<8;i++) {
+      // max > i*6
+      // i < max/6
+      
+      at = i/8. * 20; // max(hPDGhe->GetMaximum(), max(hPDGpro->GetMaximum(), hPDGhe3->GetMaximum()));
+      t->DrawText(-0.42, at, Form("%.1f%%", at));
+   }
+
+}
+
+void showOutputFileForImageReconstruction() {
+   TH2F * hSimpleImagePrim = new TH2F("hSimpleImagePrim", "CHeCT projection (only primaries);X [mm];Y [mm]", 150, -75, 75, 150, -75,75);
+   TH2F * hSimpleImageNormPrim = new TH2F("hSimpleImageNormPrim", "CHeCT projection (only primaries);X [mm];Y [mm]", 150, -75, 75, 150, -75,75);
+   TH2F * hSimpleImage = new TH2F("hSimpleImage", "CHeCT projection;X [mm];Y [mm]", 150, -75, 75, 150, -75,75);
+   TH2F * hSimpleImageNorm = new TH2F("hSimpleImageNorm", "CHeCT projection;X [mm];Y [mm]", 150, -75, 75, 150, -75,75);
+
+   TFile *fIn = new TFile("OutputFiles/CHeCT_PedHead_190MeVu_15x15cm2.root");
+   TTree *tIn = (TTree*) fIn->Get("WEPLData");
+
+   Float_t x2x, x2y, wepl;
+   Bool_t isSecondary;
+
+   tIn->SetBranchAddress("X2x", &x2x);
+   tIn->SetBranchAddress("X2y", &x2y);
+   tIn->SetBranchAddress("wepl", &wepl);
+   tIn->SetBranchAddress("isSecondary", &isSecondary);
+
+   for (Int_t i=0; i<tIn->GetEntriesFast(); i++) {
+      hSimpleImage->Fill(x2x, x2y, wepl);
+      hSimpleImageNorm->Fill(x2x, x2y);
+
+      if (!isSecondary) {
+         hSimpleImagePrim->Fill(x2x, x2y, wepl);
+         hSimpleImageNormPrim->Fill(x2x, x2y);
+      }
+   }
+
+   hSimpleImage->Divide(hSimpleImageNorm);
+   hSimpleImagePrim->Divide(hSimpleImageNormPrim);
+
+   TCanvas *c;
+   c->Divide(1,2,1e-5,1e-5);
+   c->cd(1);
+   hSimpleImage->Draw("COLZ");
+   c->cd(2);
+   hSimpleImagePrim->Draw("COLZ");
+
 }
 
 void makeOutputFileForImageReconstruction(Int_t Runs, Int_t tracksperrun, Int_t spotPosY) {

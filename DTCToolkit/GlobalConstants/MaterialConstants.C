@@ -113,19 +113,23 @@ void  createSplines() {
    Int_t    layer = 0;
    Double_t range;
    Double_t mu, sigma;
-   Double_t rangesDTC[500];
-   Double_t energiesDTC[500];
+   Double_t rangesDTC[1200];
+   Double_t energiesDTC[1200];
    Double_t rangesW[500];
    Double_t energiesW[500];
-   Double_t rangesWater[500];
-   Double_t energiesWater[500];
+   Double_t rangesWater[1200];
+   Double_t energiesWater[1200];
    Double_t rangesPureAl[500];
    Double_t energiesPureAl[500];
 
    Float_t readoutAbsorber = (roundf(kAbsorberThickness) == kAbsorberThickness) ? kAbsorberThickness : kAbsorberThickness*10;
 
    if (kUseCSDA) {
-      if (kEnergy == 250 || kHelium == true) {
+      if (kHelium) {
+         in.open("Data/Ranges/35mm_Al_Helium.csv");
+      }
+
+      else if (kEnergy == 250) {
          if       (kMaterial == kTungsten) {
             in.open(Form("Data/Ranges/%.0fmm_W_csda.csv", readoutAbsorber));
          }
@@ -149,7 +153,15 @@ void  createSplines() {
       }
    }
    else {
-      if (kEnergy == 250 || kHelium == true) { // the energy is off anywho
+      if (kHelium) {
+         in.open("Data/Ranges/35mm_Al_Helium.csv"); // for 917 MeV
+         if (readoutAbsorber != 35) {
+            printf("REMEMBER TO ADD CALIBRATION FOR THIS ABSORBER THICKNESS (using 3.5 mm)!!! (%.1f)\n", kAbsorberThickness);
+         }
+         if (kEnergy != 917) printf("SYSTEM NOT CALIBRATED FOR %d MeV!!\n", kEnergy);
+      }
+
+      else if (kEnergy == 250) { // the energy is off anywho
          if       (kMaterial == kTungsten) {
             in.open(Form("Data/Ranges/%.0fmm_W.csv", readoutAbsorber));
          }
@@ -176,7 +188,6 @@ void  createSplines() {
    while (1) {
       in >> energy >> range;
       if (!in.good()) break;
-      if (kHelium) energy *= kHeliumEnergyFactor;
 
       rangesDTC[idxDTC] = range;
       energiesDTC[idxDTC++] = energy;
@@ -184,25 +195,35 @@ void  createSplines() {
 
    in.close();
 
-   in.open("Data/Ranges/WaterPSTAR.csv");
-   while (1) {
-      in >> energy >> range;
-      if (!in.good()) break;
-      
-      if (kHelium) energy *= kHeliumEnergyFactor;
-
-      rangesWater[idxWater] = range*10;
-      energiesWater[idxWater++] = energy;
+   if (!kHelium) {
+      in.open("Data/Ranges/WaterPSTAR.csv");
+      while (1) {
+         in >> energy >> range;
+         if (!in.good()) break;
+         
+         rangesWater[idxWater] = range*10;
+         energiesWater[idxWater++] = energy;
+      }
+      in.close();
    }
-   in.close();
-   
+
+   else {
+      in.open("Data/Ranges/WaterASTAR.csv");
+      while (1) {
+         in >> energy >> range;
+         if (!in.good()) break;
+
+         rangesWater[idxWater] = range*10;
+         energiesWater[idxWater++] = energy;
+      }
+      in.close();
+   }
+
    in.open("Data/Ranges/PureAl.csv");
    while (1) {
       in >> energy >> range;
       if (!in.good()) break;
       
-      if (kHelium) energy *= kHeliumEnergyFactor;
-
       rangesPureAl[idxPureAl] = range*10; // cm to mm
       energiesPureAl[idxPureAl++] = energy;
    }
@@ -214,8 +235,6 @@ void  createSplines() {
       in >> energy >> range;
       if (!in.good()) break;
       
-      if (kHelium) energy *= kHeliumEnergyFactor;
-
       rangesW[idxW] = range;
       energiesW[idxW++] = energy;
    }

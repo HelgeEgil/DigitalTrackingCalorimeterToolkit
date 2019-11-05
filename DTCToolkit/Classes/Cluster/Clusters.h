@@ -59,8 +59,8 @@ public:
    void              removeTrackFromClustersWithoutTrack(Track *track);
    void              removeSmallClusters(Int_t size);
    void              removeAllClustersAfterLayer(Int_t afterLayer);
-   virtual void      appendCluster(Float_t x, Float_t y, Int_t layer = -1, Int_t size = -1, Int_t eventID = -1, Bool_t isSecondary = false);
-   virtual void      appendClusterEdep(Float_t x, Float_t y, Int_t layer = -1, Float_t edep = -1, Int_t eventID = -1, Bool_t isSecondary = false);
+   virtual void      appendCluster(Float_t x, Float_t y, Int_t layer = -1, Int_t size = -1, Int_t eventID = -1, Bool_t isSecondary = false, Int_t PDG = 0);
+   virtual void      appendClusterEdep(Float_t x, Float_t y, Int_t layer = -1, Float_t edep = -1, Int_t eventID = -1, Bool_t isSecondary = false, Int_t PDG = 0);
    virtual void      appendCluster(Cluster *cluster);
    virtual void      appendClusterWithoutTrack(Cluster *cluster);
    Float_t           removeClustersInGap(Float_t gapSizemm, Float_t gapPosmm);
@@ -68,6 +68,7 @@ public:
    // Event ID operations
    Int_t             getClustersForEventID(Int_t eventID);
    void              findNumberOfClustersForEachEventID();
+   void              propagateSecondaryStatusFromTop();
 
    // Getters and setters
    virtual Float_t   getX(Int_t i)        { return At(i)->getX(); }
@@ -89,12 +90,13 @@ public:
    // Longer functions in Clusters.C
    virtual void makeLayerIndex();
    virtual void matchWithEventIDs(Hits * eventIDs);
+   virtual void removeHaloAtSigma(Float_t sigma);
 
    // in file findTracks.C 
    // This is the tracking algo used in 2018 WoC paper
    Tracks    * findCalorimeterTracksWithMCTruth();
    Tracks    * findTracksWithRecursiveWeighting();
-   void        doRecursiveWeightedTracking(Node * seedNode, vector<Node*> * endNodes);
+   void        doRecursiveWeightedTracking(Node * seedNode, vector<Node*> * endNodes, Float_t thisMaxTrackScore);
    void        findSeeds(vector<Int_t> *seeds, Int_t layer, Bool_t kUsedClustersInSeeds = true);
    void        findNearestClustersInNextLayer(Cluster *seed, vector<Int_t> * nextClusters);
    void        findClustersFromSeedInLayer(Cluster *seed, Int_t nextLayer, vector<Int_t> * nextClusters);

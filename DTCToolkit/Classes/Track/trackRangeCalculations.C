@@ -68,10 +68,12 @@ Float_t Track::getRangemm() {
 }
 
 Float_t Track::getRangemmAt(Int_t i) {
+   // Changed this function, was Delta range at layer i!! Same as dz..?
+
    if (i==0) return 0;
    if (i>GetEntriesFast()) return 0;
 
-   return getLayermm(i-1) - getLayermm(i);
+   return getLayermm(i) - getLayermm(0);
 }
 
 Float_t Track::getWEPL() {

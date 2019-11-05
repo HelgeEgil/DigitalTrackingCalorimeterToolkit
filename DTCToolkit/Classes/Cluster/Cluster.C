@@ -19,6 +19,7 @@ Cluster::Cluster() {
    eventID_ = -1;
    isUsed_ = false;
    isSecondary_ = false;
+   PDG_ = 0;
 }
 
 Cluster::Cluster(Cluster* cluster) {
@@ -29,16 +30,18 @@ Cluster::Cluster(Cluster* cluster) {
    eventID_ = cluster->getEventID();
    isUsed_ = cluster->isUsed();
    isSecondary_ = cluster->isSecondary();
+   PDG_ = cluster->getPDG();
 }
 
-Cluster::Cluster(Float_t x, Float_t y, Int_t layer, Int_t size, Int_t eventID, Bool_t isSecondary) {
+Cluster::Cluster(Float_t x, Float_t y, Int_t layer, Int_t size, Int_t eventID, Bool_t isSecondary, Int_t PDG) {
    x_ = x;
    y_ = y;
    layerNo_ = layer;
    clusterSize_ = size;
    eventID_ = eventID;
    isUsed_ = false;
-   isSecondary_ = false;
+   isSecondary_ = isSecondary;
+   PDG_ = PDG;
 }
 
 Cluster::~Cluster() {
@@ -157,15 +160,17 @@ void Cluster::set(Cluster* copyCluster) {
    eventID_ = copyCluster->getEventID();
    isUsed_ = copyCluster->isUsed();
    isSecondary_ = copyCluster->isSecondary(); 
+   PDG_ = copyCluster->getPDG();
 }
 
-void Cluster::set(Float_t x, Float_t y, Int_t layer, Int_t size, Int_t eventID, Bool_t isSecondary) {
+void Cluster::set(Float_t x, Float_t y, Int_t layer, Int_t size, Int_t eventID, Bool_t isSecondary, Int_t PDG) {
    x_ = x;
    y_ = y;
    if (layer>=0) layerNo_ = layer;
    if(size>=0) clusterSize_ = size;
    if (eventID>=0) eventID_ = eventID;
    isSecondary_ = isSecondary;
+   PDG_ = PDG;
 
 }
 

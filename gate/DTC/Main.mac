@@ -16,20 +16,19 @@
 
 /gate/geometry/setIonisationPotential Water 75 eV
 /gate/physics/addPhysicsList QGSP_BIC_EMZ
-/gate/physics/SetMaxStepSizeInRegion world 0.5 mm
-/gate/physics/ActivateStepLimiter proton
+#/gate/physics/SetMaxStepSizeInRegion world 0.5 mm
+#/gate/physics/ActivateStepLimiter ion
 
 /gate/run/initialize
 
-/process/inactivate hadElastic
-/process/inactivate protonInelastic
-/process/inactivate ionInelastic
-/process/inactivate msc
+#/process/inactivate hadElastic
+#/process/inactivate protonInelastic
+#/process/inactivate ionInelastic
+#/process/inactivate msc
 
 #=======================#
 # ADD PROTON BEAM	      #
 #=======================#
-
 
 /gate/source/addSource PBS PencilBeam
 #/gate/source/PBS/setParticleType proton
@@ -58,5 +57,5 @@
 
 /gate/random/setEngineName MersenneTwister
 /gate/random/setEngineSeed auto
-/gate/application/setTotalNumberOfPrimaries 1000
+/gate/application/setTotalNumberOfPrimaries 100
 /gate/application/start

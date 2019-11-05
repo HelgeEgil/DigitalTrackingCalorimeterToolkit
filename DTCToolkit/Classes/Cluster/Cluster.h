@@ -17,11 +17,12 @@ private:
    Int_t    eventID_;
    Bool_t   isUsed_;
    Bool_t   isSecondary_;
+   Int_t    PDG_;
 
 public:
    Cluster(); 
    Cluster(Cluster *cluster);
-   Cluster(Float_t x, Float_t y, Int_t layer = -1, Int_t size = -1, Int_t eventID = -1, Bool_t isSecondary = false);
+   Cluster(Float_t x, Float_t y, Int_t layer = -1, Int_t size = -1, Int_t eventID = -1, Bool_t isSecondary = false, Int_t PDG = 0);
    virtual ~Cluster();
    
    // Sorting
@@ -35,6 +36,7 @@ public:
    Int_t    getSize()         { return clusterSize_; }
    Int_t    getEventID()      { return eventID_; }
    Int_t    getError()        { return sqrt(clusterSize_); }
+   Int_t    getPDG()          { return PDG_; }
    Double_t getXmm()          { return (x_ - nx/2) * dx; } // from -nx*dx/2 to nx*dx/2
    Double_t getYmm()          { return (y_ - ny/2) * dy; } // from -ny*dy to ny*dy
    Bool_t   isSecondary()     { return isSecondary_; }
@@ -46,6 +48,7 @@ public:
    void     setSize(Int_t size)  { clusterSize_ = size; }
    void     setEventID(Int_t id) { eventID_ = id; }
    void     setSecondary(Bool_t s){ isSecondary_ = s; }
+   void     setPDG(Int_t PDG)    { PDG_ = PDG; }
    void     setXmm(Float_t x)    { x_ = x / dx + nx/2; }
    void     setYmm(Float_t y)    { y_ = y / dy + ny/2; }
    void     markUsed()           { isUsed_ = true; }
@@ -58,7 +61,7 @@ public:
    Float_t  getRadiusmm(); // cluster size as circle radius [mm]
    Float_t  getDepositedEnergy(Bool_t checkResistivity = false);
    Float_t  getDepositedEnergyError(Bool_t checkResistivity = false);
-   void     set(Float_t x, Float_t y, Int_t layer = -1, Int_t size = -1, Int_t eventID = -1, Bool_t isSecondary = false);
+   void     set(Float_t x, Float_t y, Int_t layer = -1, Int_t size = -1, Int_t eventID = -1, Bool_t isSecondary = false, Int_t PDG = 0);
    void     set(Cluster *copyCluster); // copy properties, not pointer
 
    ClassDef(Cluster,5)

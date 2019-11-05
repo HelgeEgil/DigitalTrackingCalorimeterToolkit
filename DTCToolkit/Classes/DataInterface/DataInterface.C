@@ -72,7 +72,7 @@ DataInterface::DataInterface(TTree *tree) : fChain(0) {
          else {
             printf("Opening HELIUM file with degrader thickness %.0f mm, material is %s and abs. thickness %.0f mm...", run_degraderThickness, materialChar, readoutAbsorber);
             if (!kSpotScanning) {
-               chain->Add(Form("Data/MonteCarlo/DTC_%s_CarbonHelium_Absorber%.0fmm_Degrader%03.0fmm_%dMeV.root/Hits", materialChar, readoutAbsorber, run_degraderThickness, kEnergy));
+               chain->Add(Form("Data/MonteCarlo/DTC_%s_Helium_Absorber%.0fmm_Degrader%03.0fmm_%dMeV.root/Hits", materialChar, readoutAbsorber, run_degraderThickness, kEnergy));
             }
             else { // Load phantom (used with spot scanning)
                chain->Add(Form("Data/MonteCarlo/DTC_%s_CarbonHelium_Absorber%.0fmm_Headphantom_%dMeV.root/Hits", materialChar, readoutAbsorber, kEnergy));
@@ -165,8 +165,8 @@ void DataInterface::Init(TTree *tree) {
 //   fChain->SetBranchAddress("runID", &runID, &b_runID);
 //   fChain->SetBranchAddress("axialPos", &axialPos, &b_axialPos);
 //   fChain->SetBranchAddress("rotationAngle", &rotationAngle, &b_rotationAngle);
-//   fChain->SetBranchAddress("volumeID", volumeID, &b_volumeID);
-//   fChain->SetBranchAddress("processName", processName, &b_processName);
+   fChain->SetBranchAddress("volumeID", volumeID, &b_volumeID);
+   fChain->SetBranchAddress("processName", processName, &b_processName);
 //   fChain->SetBranchAddress("comptVolName", comptVolName, &b_comptVolName);
 //   fChain->SetBranchAddress("RayleighVolName", RayleighVolName, &b_RayleighVolName);
    Notify();
@@ -456,8 +456,13 @@ void DataInterface::getDataHits(Int_t runNo, Hits * hits, Int_t energy) {
 void  DataInterface::getMCClustersThreshold(Int_t runNo, Clusters *clusters, Hits *hits, Float_t useSpotX, Float_t useSpotY) {
    Int_t eventIdFrom = runNo * kEventsPerRun + kSkipTracks;
    Int_t eventIdTo = eventIdFrom + kEventsPerRun + kSkipTracks;
+   Int_t lastPropagated = -1;
 
-   Float_t threshold = 3e-3; // 1 keV
+   // let = (n/4.23)^1/0.65 [Pettersen et al. Phys Med 2019]
+   // n < 2 -> let < (2/4.23)^1/0.65 = 0.316 keV/um
+   // edep = let * 14 um = 0.316 kev/um * 14 um = 4.4e-3 MeV ~ 4e-3 Mev
+
+   Float_t threshold = 4e-3;
    Int_t particlesBelowThreshold = 0;
 
    if (runNo == 0 && !kSpotScanning) lastJentry_ = 0;
@@ -487,6 +492,7 @@ void  DataInterface::getMCClustersThreshold(Int_t runNo, Clusters *clusters, Hit
             break;
          }
       }
+
       else {
          if (useSpotX > spotPosX || useSpotY > spotPosY) {
             continue;
@@ -506,27 +512,39 @@ void  DataInterface::getMCClustersThreshold(Int_t runNo, Clusters *clusters, Hit
       }
       
       layer = level1ID + baseID - 1;
-      if (kHelium) layer++;
+      if (kPhantom) layer++;
 
-      if (parentID != 0 || trackID > 1) {
+      if (parentID != 0) { // Secondary track
          isSecondary = true;
+
+         // If secondary particle is not electron or gamma, propagate secondary status to eventID-particle
+         if (clusters && lastPropagated != eventID) {
+            if (clusters->Last()) { // This would give segfault sometimes
+               if (clusters->Last()->getEventID() == eventID && PDGEncoding > 1000) {
+//                  clusters->propagateSecondaryStatusFromTop(); // give all clusters with same eventID a secondary status
+                  clusters->Last()->setSecondary(true);
+                  lastPropagated = eventID;
+               }
+            }
+         }
       }
       else {
          isSecondary = false;
       }
-
+      
       if (edep < threshold) {
          particlesBelowThreshold++;
          continue;
       } 
-    
+
+//      printf("%d Particle type %d with EID %d , pID %d, tID %d at z=%.1f and edep=%.2f keV\n", isSecondary, PDGEncoding, eventID, parentID, trackID, posZ,edep*1000);
 
       x = posX / dx + nx/2;
       y = posY / dy + ny/2;
 
-      if (layer < nLayers) {
+      if (layer < nLayers) { // in CHIP
          if (hits)      hits->appendPoint(x,y,layer,edep*1000/14,eventID,isSecondary);
-         if (clusters)  clusters->appendClusterEdep(x,y,layer,edep*1000/14,eventID,isSecondary);
+         if (clusters)  clusters->appendClusterEdep(x,y,layer,edep*1000/14,eventID,isSecondary,PDGEncoding);
       }
 
       lastEventID = eventID;
@@ -557,6 +575,7 @@ void  DataInterface::getMCClusters(Int_t runNo, Clusters *clusters, Hits * hits,
    Float_t  x,y;
    Bool_t   isInElastic, isSecondary = false;
    Char_t   lastProcessName[25];
+   Int_t    lastPDG = 0;
 
    Long64_t nentries = fChain->GetEntriesFast();
    Long64_t nbytes = 0, nb = 0;
@@ -596,6 +615,7 @@ void  DataInterface::getMCClusters(Int_t runNo, Clusters *clusters, Hits * hits,
          lastLayer = layer;
          lastParentID = parentID;
          lastTrackID = trackID;
+         lastPDG = PDGEncoding;
          strcpy(lastProcessName, processName);
          sumX = 0;
          sumY = 0;
@@ -604,27 +624,22 @@ void  DataInterface::getMCClusters(Int_t runNo, Clusters *clusters, Hits * hits,
       }
 
       layer = level1ID + baseID - 1;
-      if (kHelium) layer++;
+      if (kPhantom) layer++;
 
       if (kFilterNuclearInteractions == true && parentID != 0 && PDGEncoding != 11) {
          isSecondary = true;
          continue;
       }
 
-      // Q: Is there both primary and secondary in layer that gets merged?
-      if (lastEventID == eventID) {
-         if (parentID == 0) {
-            printf("Primary PDG %d (eid%d) at layer %d\n", PDGEncoding, eventID, layer);
-         }
-         else {
-            printf("Secondary PDG %d (eid%d:tid%d:pid%d) at layer %d\n", PDGEncoding, eventID, trackID, parentID, layer);
-         }
+      if (lastEventID == eventID && trackID > 1) {// && PDGEncoding != 100002004) {
+         isSecondary = true;
+         cout << "Particle " << PDGEncoding << " generated from " << lastProcessName[0] << " at " << lastZ << endl;
       }
 
-
-      if (lastEventID == eventID && trackID > 1 && PDGEncoding != 100002004) {
+      if (TString(lastProcessName) == "alphaInelastic" || lastParentID > 0) {
          isSecondary = true;
       }
+
 
       if (lastEventID != eventID || lastLayer != layer) { // new layer -- store summed information from LAST layer now 
          x = sumX/n / dx + nx/2;
@@ -632,7 +647,7 @@ void  DataInterface::getMCClusters(Int_t runNo, Clusters *clusters, Hits * hits,
 
          if (lastLayer < nLayers) {
             if (hits)      hits->appendPoint(x, y, lastLayer, sum_edep/14, lastEventID, isSecondary);
-            if (clusters)  clusters->appendClusterEdep(x,y, lastLayer, sum_edep/14, lastEventID, isSecondary);
+            if (clusters)  clusters->appendClusterEdep(x,y, lastLayer, sum_edep/14, lastEventID, isSecondary, lastPDG);
          }
 
          sum_edep = 0;
@@ -666,6 +681,7 @@ void  DataInterface::getMCClusters(Int_t runNo, Clusters *clusters, Hits * hits,
       lastParentID = parentID;
       lastTrackID = trackID;
       lastLayer = layer;
+      lastPDG = PDGEncoding;
       strcpy(lastProcessName, processName);
       n++;
    }
@@ -677,7 +693,7 @@ void  DataInterface::getMCClusters(Int_t runNo, Clusters *clusters, Hits * hits,
 
       if (lastLayer < nLayers && !std::isnan(x+y)) {
          if (hits)      hits->appendPoint(x, y, lastLayer, sum_edep/14, lastEventID, isSecondary);
-         if (clusters)  clusters->appendClusterEdep(x, y, lastLayer, sum_edep/14, lastEventID, isSecondary);
+         if (clusters)  clusters->appendClusterEdep(x, y, lastLayer, sum_edep/14, lastEventID, isSecondary, lastPDG);
       }
 
       sum_edep = 0;

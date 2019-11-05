@@ -72,7 +72,7 @@ void findAPAndStraggling(Int_t absorberthickness) {
    inWater.close();
 
    if (useDegrader) {
-      inMaterial.open("../OutputFiles/findManyRangesDegrader.csv");
+      inMaterial.open("../OutputFiles/findManyRangesDegraderHelium.csv");
    }
    else {
       inMaterial.open("../OutputFiles/findManyRanges.csv");
@@ -83,12 +83,10 @@ void findAPAndStraggling(Int_t absorberthickness) {
          inMaterial >> energy >> thickness >> range >> straggling >> inelasticfraction;
       }
       else {
-         inMaterial >> degraderThickness >> thickness >> range >> straggling >> inelasticfraction >> energyFloat >> energyStraggling;
+         inMaterial >> degraderThickness >> thickness >> range >> straggling >> energyFloat >> energyStraggling;
       }
 
       if (!inMaterial.good()) {
-         printf("!inMaterial.good() in line %d.\n", nlinesMaterial);
-         printf("degraderThickness %d, thickness %d, range %.2f, straggling %.2f, inelasticfraction %.2f, energy %.2f, energyStraggling %.2f.\n", degraderThickness, thickness, range, straggling, inelasticfraction, energyFloat, energyStraggling);
          break;
       }
 
@@ -138,7 +136,7 @@ void findAPAndStraggling(Int_t absorberthickness) {
    gRange->Draw("AP");
    TF1 *BK = new TF1("BK", "[0] * pow(x, [1])");
    BK->SetParameters(0.01, 1.77);
-   gRange->Fit("BK", "B,Q,M", "", 15, 240);
+   gRange->Fit("BK", "B,Q,M", "", 15, 920);
 
 
    c1->cd(3);
@@ -155,22 +153,22 @@ void findAPAndStraggling(Int_t absorberthickness) {
    gStraggling2->Draw("P");
 
    c1->cd(4);
-   gWEStraggling->SetMarkerStyle(7);
-   gWEStraggling->SetMarkerColor(kBlue);
-   gWEStraggling->Draw("AP");
-//   TF1 *WEStraggling = new TF1("WEStraggling", "[0]*x + [1]*pow(x,2)");
-   TF1 *WEStraggling = new TF1("WEStraggling", "[0] + [1]*x", 0, 290);
-   gWEStraggling->GetYaxis()->SetRangeUser(0, 6);
-   gWEStraggling->Fit("WEStraggling", "Q,M,B", "", 0, 290);
+//   gWEStraggling->SetMarkerStyle(7);
+//   gWEStraggling->SetMarkerColor(kBlue);
+//   gWEStraggling->Draw("AP");
+////   TF1 *WEStraggling = new TF1("WEStraggling", "[0]*x + [1]*pow(x,2)");
+//   TF1 *WEStraggling = new TF1("WEStraggling", "[0] + [1]*x", 0, 290);
+//   gWEStraggling->GetYaxis()->SetRangeUser(0, 6);
+//   gWEStraggling->Fit("WEStraggling", "Q,M,B", "", 0, 330);
 
-   c1->cd(2);
-   /*
+   c1->cd(4);
    gEnergyStraggling->SetMarkerStyle(7);
    gEnergyStraggling->SetMarkerColor(kBlue);
    gEnergyStraggling->Draw("AP");
    TF1 *fLandau = new TF1("fLandau", "landau");
    gEnergyStraggling->Fit("fLandau", "Q,M");
-   */
+   
+   c1->cd(2);
    gEnergy->SetMarkerStyle(7);
    gEnergy->SetMarkerColor(kBlue);
    gEnergy->Draw("AP");
@@ -179,7 +177,6 @@ void findAPAndStraggling(Int_t absorberthickness) {
    printf("-----------------------------------\n");
    printf("Bragg-Kleeman parameters: R = %.6f E ^ %.6f\n", BK->GetParameter(0), BK->GetParameter(1));
    printf("Straggling = %.5f + %.6fR \n", Straggling->GetParameter(0), Straggling->GetParameter(1));
-   printf("WE Straggling = %.5f + %.6fR \n", WEStraggling->GetParameter(0));
 //   printf("Energy straggling  = Landau w/ constants %.1f,  MPV %.6f and sigma %.6f.\n", fLandau->GetParameter(0), fLandau->GetParameter(1), fLandau->GetParameter(2)); 
 
 }

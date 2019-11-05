@@ -6,6 +6,7 @@
 
 #include <TClonesArray.h>
 #include <TObject.h>
+#include <TCollection.h>
 #include <TCanvas.h>
 #include <TView.h>
 #include <TAttMarker.h>
@@ -15,7 +16,6 @@
 #include <TStopwatch.h>
 #include <TH1F.h>
 #include <TH2F.h>
-
 
 #include "Classes/Track/Tracks.h"
 #include "Classes/Hit/Hits.h"
@@ -44,6 +44,21 @@ void Tracks::CompressClusters() {
 void Tracks::Clear(Option_t *option) {
    tracks_.Clear(option);
    clustersWithoutTrack_.Clear(option);
+}
+
+Long64_t Tracks::Merge(TCollection *tlist) {
+   if (tlist) {
+      Tracks * otherTracks = nullptr;
+      TIter nOtherTracks(tlist);
+      while ((otherTracks = (Tracks*) nOtherTracks())) {
+         for (Int_t i=0; i<otherTracks->GetEntriesFast(); i++) {
+            if (otherTracks->At(i)) {
+               appendTrack(otherTracks->At(i));
+            }
+         }
+      }
+   }
+   return 1;
 }
 
 void Tracks::sortTracks() {
@@ -554,6 +569,32 @@ void  Tracks::removeHighAngleTracks(Float_t mradLimit) {
    removeEmptyTracks();
    Compress();
 }
+
+void  Tracks::removeHighAngularChangeTracks(Float_t mradLimit) {
+   Track   *thisTrack = nullptr;
+   Float_t  maxChange;
+   Int_t    nRemoved = 0;
+   Int_t    nRemovedNuclear = 0;
+
+   for (Int_t i=0; i<GetEntriesFast(); i++) {
+      thisTrack = At(i);
+      if (!At(i)) continue;
+
+      maxChange = thisTrack->getMaximumSlopeAngleChange() * 3.14159265 / 180 * 1000;
+
+      if (maxChange > mradLimit) {
+         if (thisTrack->Last()->isSecondary()) nRemovedNuclear++;
+         removeTrackAt(i);
+         nRemoved++;
+      }
+   }
+   printf("Removed %d tracks with higher than %.0f mrad max angular change (%.2f%% secondaries).\n", nRemoved, mradLimit, 100*float(nRemovedNuclear)/nRemoved);
+
+   removeEmptyTracks();
+   Compress();
+}
+
+
 
 void Tracks::removeNANs() {
    Track * thisTrack = nullptr;

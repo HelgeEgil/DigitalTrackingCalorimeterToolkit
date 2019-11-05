@@ -229,4 +229,23 @@ Int_t Hits::getLastIndexAfterY(Int_t y) {
    return idx;
 }
 
+void Hits::removeHaloAtSigma(Float_t sigmaNumber) {
+   Hit * hit = nullptr;
+   float x,y;
+   float cut = 12;
+
+   for (Int_t i=0; i<GetEntriesFast(); i++) {
+      hit = At(i);
+      x = hit->getXmm();
+      y = hit->getYmm();
+
+      if (sqrt(x*x+y*y) > cut) {
+         removeHitAt(i);
+      }
+   }
+   
+   Compress();
+}
+
+
 #endif

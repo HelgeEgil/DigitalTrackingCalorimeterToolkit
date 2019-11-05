@@ -45,16 +45,16 @@ Bool_t   kIsAluminumPlate = false;
 Bool_t   kIsScintillator = false;
 Bool_t   kIsFirstLayerAir = true;
 Bool_t   kHelium = true;
-Bool_t   kSpotScanning = true;
-Bool_t   kPhantom = true;
+Bool_t   kSpotScanning = false;
+Bool_t   kPhantom = false;
 Bool_t   kDoTracking = true; 
 Bool_t   kUseEmpiricalMCS = true;
 Bool_t   kFilterNuclearInteractions = false; 
-Bool_t   kDoDiffusion = false;
+Bool_t   kDoDiffusion = true;
 Int_t    kEventsPerRun = 50;
 Int_t    kSkipTracks = 0;
 Float_t  kMultiplyTrackingByThis = 1;
-const Int_t    kEnergy = 760; // 917 MeV_Helium ~= 230 MeV_proton // 600 HeC phantom
+const Int_t    kEnergy = 917; // 917 MeV_Helium ~= 230 MeV_proton // 600 HeC phantom
 
 #ifdef USEALPIDE
 Bool_t   kUseDegrader = true; 
@@ -66,7 +66,7 @@ Bool_t   kUseDegrader = false;
 
 const Int_t sizeOfEventID = 25;
 const Int_t nChildrenInNode = 2; // max concurrent track segments to follow
-Float_t     kMaxTrackScore = 0.3; // This number is a placeholder, optimized through MC scans in Classes/Clusters/findTracks.C
+const Float_t     kMaxTrackScore = 0.3; // This number is a placeholder, optimized through MC scans in Classes/Clusters/findTracks.C
 Float_t     kMaxTrackAngle = 0.05; // allow for consecutive 50 mrad changes
 Bool_t      kConcatenateHits = false;
 
@@ -95,7 +95,6 @@ const Float_t dz = DZ + kAbsorberThickness;
 const Int_t nEnergies = 6;
 Int_t energies[nEnergies] = {122, 140, 150, 170, 180, 188};
 
-const Float_t kHeliumEnergyFactor = 3.987;
 
 enum eFrameType {kCalorimeter, kTracker};
 enum eDataType {kMC, kData};

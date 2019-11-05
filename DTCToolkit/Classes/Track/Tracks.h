@@ -6,6 +6,7 @@
 #include <TClonesArray.h>
 
 #include "Classes/Track/Track.h"
+#include <TCollection.h>
 
 using namespace std;
 
@@ -25,7 +26,7 @@ class Tracks : public TObject {
       Int_t        EIDindex_[1000000];
 
    public:
-      Tracks() : tracks_("DTC::Track", 1000), clustersWithoutTrack_("DTC::Cluster", 5000) { tracks_.SetOwner(kTRUE); clustersWithoutTrack_.SetOwner(kTRUE); }
+      Tracks() : tracks_("DTC::Track", 2000), clustersWithoutTrack_("DTC::Cluster", 10000) { tracks_.SetOwner(kTRUE); clustersWithoutTrack_.SetOwner(kTRUE); }
 //      Tracks(Int_t nTracks) : tracks_("DTC::Track", nTracks), clustersWithoutTrack_("DTC::Cluster", nTracks*5) { if (nTracks > 200000) cout << "Remember to increase size of EIDindex array!!!! (now = 100 000)\n"; tracks_.SetOwner(kTRUE); clustersWithoutTrack_.SetOwner(kTRUE); }
       Tracks(Int_t nTracks) : tracks_("DTC::Track", nTracks), clustersWithoutTrack_("DTC::Cluster", nTracks*5) { tracks_.SetOwner(kTRUE); clustersWithoutTrack_.SetOwner(kTRUE); }
       virtual ~Tracks(); 
@@ -45,6 +46,7 @@ class Tracks : public TObject {
       virtual void      CompressClusters();
       virtual void      Clear(Option_t * option = "");
       virtual void      sortTracks();
+      virtual Long64_t  Merge(TCollection *tlist);
 
       // Add and remove tracks
       virtual void      removeTrack(Track *t)   { tracks_.Remove((TObject*) t); }
@@ -53,6 +55,7 @@ class Tracks : public TObject {
       void              appendTrack(Track *copyTrack, Int_t startOffset = 0);
       void              appendClustersWithoutTrack(TClonesArray *clustersWithoutTrack);
       void              removeHighAngleTracks(Float_t mradLimit);
+      void              removeHighAngularChangeTracks(Float_t mradLimit);
 
       // Retrieve tracks
       TClonesArray    * getClustersWithoutTrack() { return (TClonesArray*) &clustersWithoutTrack_; }

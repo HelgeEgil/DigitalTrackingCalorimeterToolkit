@@ -357,13 +357,24 @@ Float_t getEnergyLossErrorFromAluminumAbsorber() {
 Float_t getEnergyFromDegraderThickness(Double_t degraderThickness) {
    // THIS IS A ONE-TIME OPERATION, SO NO NEED TO WORRY ABOUT SPEED
 
-   Double_t phaseSpaceDegraderthickness[500];
-   Double_t phaseSpaceEnergy[500];
+   Double_t phaseSpaceDegraderthickness[1200];
+   Double_t phaseSpaceEnergy[1200];
    Double_t e, es;
    Int_t    dt;
    Int_t idx = 0;
    ifstream in;
-   if (kEnergy == 250) {
+   
+   if (kHelium) {
+      in.open("Data/Ranges/EnergyAfterDegraderHelium.csv");
+      while (1) {
+         in >> dt >> e >> es;
+         if (!in.good()) break;
+         phaseSpaceDegraderthickness[idx] = double(dt);
+         phaseSpaceEnergy[idx++] = e;
+      }
+   }
+
+   else if (kEnergy == 250) {
       in.open("Data/Ranges/EnergyAfterDegraderPSTAR.csv");
       while (1) {
          in >> dt >> e >> es;
@@ -372,13 +383,13 @@ Float_t getEnergyFromDegraderThickness(Double_t degraderThickness) {
          phaseSpaceEnergy[idx++] = e;
       }
    }
-   else if (kEnergy == 230 || kHelium == true) {
+   else if (kEnergy == 230) {
       in.open("Data/Ranges/EnergyAfterDegrader230MeV.csv");
       while (1) {
          in >> dt >> e;
          if (!in.good()) break;
          phaseSpaceDegraderthickness[idx] = double(dt);
-         phaseSpaceEnergy[idx++] = e * kHeliumEnergyFactor;
+         phaseSpaceEnergy[idx++] = e;
       }
    }
 

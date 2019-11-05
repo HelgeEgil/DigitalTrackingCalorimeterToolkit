@@ -30,6 +30,7 @@ public:
    virtual Int_t     GetEntries()         { return hits_.GetEntries(); }
    virtual void      clearHits()          { hits_.Clear("C"); }
    virtual void      Clear(Option_t * = "");
+   virtual void      Compress()           { hits_.Compress(); }
    void              sortHits()           { hits_.Sort(); }
    
    // Add and remove hits
@@ -37,10 +38,13 @@ public:
    void              appendPoint(Int_t x, Int_t y, Int_t layer = -1, Float_t edep = 0, Int_t event = -1, Bool_t isSecondary = false);
    void              appendHits(Hits *hits);
    void              appendHit(Hit *hit);
+   void              removeHaloAtSigma(Float_t sigmaNumber);
 
    // Getters and setters
    virtual Int_t     getX(Int_t i)        { return At(i)->getX(); }
    virtual Int_t     getY(Int_t i)        { return At(i)->getY(); }
+   virtual Float_t   getXmm(Int_t i)      { return At(i)->getXmm(); }
+   virtual Float_t   getYmm(Int_t i)      { return At(i)->getYmm(); }
    virtual Int_t     getLayer(Int_t i)    { return At(i)->getLayer(); }
    virtual Int_t     getEventID(Int_t i)  { return At(i)->getEventID(); }
    virtual Float_t   getEdep(Int_t i)     { return At(i)->getEdep(); }

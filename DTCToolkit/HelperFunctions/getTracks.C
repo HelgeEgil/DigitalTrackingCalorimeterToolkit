@@ -28,6 +28,12 @@
 #include "HelperFunctions/Tools.h"
 #include "HelperFunctions/getTracks.h"
 
+#include <ROOT/TThreadedObject.hxx>
+#include <ROOT/TTreeProcessorMT.hxx>
+#include <TTreeReader.h>
+#include <TTreeReaderValue.h>
+#include <TTreeReaderArray.h>
+
 using namespace std;
 using namespace DTC;
 
@@ -36,7 +42,7 @@ void makeTracks(Int_t Runs, Int_t dataType, Bool_t recreate, Float_t energy) {
    tracks->extrapolateToLayer0();
 }
 
-void saveTracks(Tracks *tracks, Int_t dataType, Float_t energy) {
+void saveTracks(Tracks *tracks, Clusters * clusters, Int_t dataType, Float_t energy) {
    TString sDataType = (dataType == 0) ? "_MC_" : "_data_";
 
    tracks->CompressCWT();
@@ -45,7 +51,7 @@ void saveTracks(Tracks *tracks, Int_t dataType, Float_t energy) {
 
    TString sEnergy = Form("_%.2fMeV", energy);
    TString fileName = "Data/Tracks/tracks";
-   TString sAbsThick = Form("_%.0fmm", readoutAbsorber);
+   TString sAbsThick = Form("_%.1fmm", readoutAbsorber);
    TString sMaterial = getMaterialChar();
    fileName.Append(sDataType);
    fileName.Append(sMaterial);
@@ -57,16 +63,17 @@ void saveTracks(Tracks *tracks, Int_t dataType, Float_t energy) {
    f.SetCompressionLevel(1);
    TTree T("T", "tracks");
    T.Branch("tracks", &tracks, 256000, 1);
+   T.Branch("clusters", &clusters, 256000, 1);
    T.Fill();
    T.Write();
    f.Close();
 }
 
-Tracks * loadTracks(Int_t Runs, Int_t dataType, Float_t energy) {
+Tracks * loadTracks(Int_t Runs, Int_t dataType, Float_t energy, Clusters * clusters) {
    Float_t readoutAbsorber = (kAbsorberThickness == roundf(kAbsorberThickness)) ? kAbsorberThickness : kAbsorberThickness*10;
 
    TString sDataType = (dataType == 0) ? "_MC_" : "_data_";
-   TString sAbsThick = Form("_%.0fmm", readoutAbsorber);
+   TString sAbsThick = Form("_%.1fmm", readoutAbsorber);
    TString sEnergy = Form("_%.2fMeV", energy);
    TString fileName = "Data/Tracks/tracks";
    TString sMaterial = getMaterialChar();
@@ -83,7 +90,7 @@ Tracks * loadTracks(Int_t Runs, Int_t dataType, Float_t energy) {
 
    T->GetBranch("tracks")->SetAutoDelete(kFALSE);
    T->SetBranchAddress("tracks",&tracks);
-
+   T->SetBranchAddress("clusters", &clusters);
 
    T->GetEntry(0);
    
@@ -92,19 +99,20 @@ Tracks * loadTracks(Int_t Runs, Int_t dataType, Float_t energy) {
    return tracks;
 }
 
-Tracks * loadOrCreateTracks(Bool_t recreate, Int_t Runs, Int_t dataType, Float_t energy, Float_t spotx, Float_t spoty) {
+Tracks * loadOrCreateTracks(Bool_t recreate, Int_t Runs, Int_t dataType, Float_t energy, Float_t spotx, Float_t spoty, Clusters * clusters) {
    Tracks * tracks = nullptr;
    
    if (recreate) {
-      tracks = getTracksFromClusters(Runs, dataType, kCalorimeter, energy, spotx, spoty);
+      tracks = getTracksFromClustersMT(Runs, dataType, kCalorimeter, energy, spotx, spoty, clusters);
+      saveTracks(tracks, clusters, dataType, energy);
    }
 
    else {
-      tracks = loadTracks(Runs, dataType, energy);
+      tracks = loadTracks(Runs, dataType, energy, clusters);
       if (!tracks) {
          cout << "!tracks, creating new file\n";
-         tracks = getTracksFromClusters(Runs, dataType, kCalorimeter, energy, spotx, spoty);
-         saveTracks(tracks, dataType, energy);
+         tracks = getTracksFromClustersMT(Runs, dataType, kCalorimeter, energy, spotx, spoty, clusters);
+         saveTracks(tracks, clusters, dataType, energy);
       }
    }
    return tracks;
@@ -181,7 +189,7 @@ Clusters * getClusters(Int_t Runs, Int_t dataType, Int_t frameType, Float_t ener
 Hits * diffuseHits(TRandom3 *gRandom, Hits * hits) {
    Int_t          nHits = hits->GetEntriesFast();
    Hits         * hitsOut = new Hits();
-   Int_t          x, y, outX, outY, layer, cs, eventID, idx_x, binPos;
+   Int_t          x, y, outX, outY, layer, cs, eventID, idx_x, binPos, PDG;
    Float_t        edep;
    Bool_t         isSecondary;
    Int_t          randomClusterIdx;
@@ -197,6 +205,8 @@ Hits * diffuseHits(TRandom3 *gRandom, Hits * hits) {
       eventID = hits->getEventID(h);
       isSecondary = hits->isSecondary(h);
       cs = getCSFromEdep(edep);
+//      PDG = hits->getPDG();
+
     
       if (cs<2) cs=2;
       if (cs>=27) cs=26;
@@ -211,7 +221,7 @@ Hits * diffuseHits(TRandom3 *gRandom, Hits * hits) {
             if (binPos & n) {
                outX = x + (idx_x - CDB_x_mean) + 0.5;
                outY = y + (binPosPow - CDB_y_mean) + 0.5;
-               hitsOut->appendPoint(outX, outY, layer, edep/CDB_clusterSize, eventID, isSecondary); 
+               hitsOut->appendPoint(outX, outY, layer, edep/CDB_clusterSize, eventID, isSecondary);
             }
          }
       idx_x++;
@@ -221,7 +231,7 @@ Hits * diffuseHits(TRandom3 *gRandom, Hits * hits) {
    return hitsOut;
 }
 
-Tracks * getTracksFromClusters(Int_t Runs, Int_t dataType, Int_t frameType, Float_t energy, Float_t spotx, Float_t spoty) {
+Tracks * getTracksFromClusters(Int_t Runs, Int_t dataType, Int_t frameType, Float_t energy, Float_t spotx, Float_t spoty, Clusters * saveClusters) {
    DataInterface   * di = new DataInterface();
    Int_t             nClusters = kEventsPerRun * 5 * nLayers;
    Int_t             nTracks = kEventsPerRun * 2;
@@ -249,6 +259,7 @@ Tracks * getTracksFromClusters(Int_t Runs, Int_t dataType, Int_t frameType, Floa
          Hits * hits = new Hits();
          Hits * diffusedHits = nullptr;
          di->getMCClusters(i, nullptr, hits, spotx, spoty);
+         hits->removeHaloAtSigma(6);
          hits->sortHits(); 
          diffusedHits = diffuseHits(gRandom, hits);
          diffusedHits->sortHits();
@@ -262,6 +273,13 @@ Tracks * getTracksFromClusters(Int_t Runs, Int_t dataType, Int_t frameType, Floa
       else {
          di->getMCClustersThreshold(i, clusters, nullptr, spotx, spoty);
 //         Int_t nRem = clusters->removeClustersInGap(1, 0);
+         
+         clusters->removeHaloAtSigma(6);
+         for (Int_t j=0; j<=clusters->GetEntriesFast(); j++) {
+            if (!clusters->At(j)) continue;
+            saveClusters->appendCluster(clusters->At(j));
+         }
+
       }
 
 //      printf("Found %d clusters...\n", clusters->GetEntriesFast());
@@ -336,4 +354,122 @@ Tracks * getTracksFromClusters(Int_t Runs, Int_t dataType, Int_t frameType, Floa
    return allTracks;
 }
 
+Tracks * getTracksFromClustersMT(Int_t Runs, Int_t dataType, Int_t frameType, Float_t energy, Float_t spotx, Float_t spoty, Clusters * saveClusters) {
+   DataInterface   * di = new DataInterface();
+   Int_t             nClusters = kEventsPerRun * 5 * nLayers;
+   Int_t             nTracks = kEventsPerRun * 10;
+   Bool_t            breakSignal = false;
+   Clusters        * clusters = nullptr;
+   TRandom3        * gRandom = new TRandom3(0);
+   Int_t             nThreads = 8; // Move to Constants.h
+   Int_t             runID = 0;
+
+   TStopwatch t1, t2;
+   t1.Reset(); 
+   t2.Reset(); 
+  
+   t1.Start(false); 
+   TFile clusterFile("OutputFiles/clusterFile.root", "recreate");
+   TTree clusterTree("Clusters", "clusters");
+   clusterTree.Branch("clusters", &clusters, 256000, 1);
+   clusterTree.Branch("runID", &runID, 256000, 1);
+
+   for (runID=0; runID<Runs; runID++) {
+      clusters = new Clusters(nClusters);
+      if (kDoDiffusion) {
+         Hits * hits = new Hits();
+         Hits * diffusedHits = nullptr;
+         di->getMCClustersThreshold(runID, nullptr, hits, spotx, spoty);
+         hits->removeHaloAtSigma(6);
+         hits->sortHits();
+         diffusedHits = diffuseHits(gRandom, hits);
+         diffusedHits->sortHits();
+         diffusedHits->makeLayerIndex();
+         clusters = diffusedHits->findClustersFromHits();
+
+         delete hits;
+         delete diffusedHits;
+      }
+
+      else {
+         di->getMCClustersThreshold(runID, clusters, nullptr, spotx, spoty);
+         clusters->removeHaloAtSigma(6);
+      }
+      
+      for (Int_t j=0; j<=clusters->GetEntriesFast(); j++) {
+         if (!clusters->At(j)) continue;
+         saveClusters->appendCluster(clusters->At(j));
+      }
+      
+      if (!clusters->GetEntriesFast()) continue;
+      clusters->sortClusters();
+
+      clusterTree.Fill();
+      delete clusters;
+   }
+   clusterTree.Write();
+   t1.Stop();
+
+   t2.Start(false);
+   ROOT::EnableImplicitMT(nThreads);
+   ROOT::TThreadedObject<Tracks> tracksTTO(nTracks);
+   ROOT::TTreeProcessorMT tp(clusterTree);
+   
+   auto trackingFunction = [&] ( TTreeReader &reader ) {
+      TTreeReaderValue<int> runIDRV(reader, "runID");
+      TTreeReaderValue<Clusters> clustersRV(reader, "clusters");
+      
+      auto tracksMT = tracksTTO.Get();
+
+      while (reader.Next()) {
+         auto clusterBatch = *clustersRV;
+         auto runID = *runIDRV;
+
+//         printf("Running MT with runID = %d and %d clusters\n", runID, clusterBatch.GetEntriesFast());
+         Tracks * localTracks = clusterBatch.findTracksWithRecursiveWeighting();
+
+         for (Int_t trackID=0; trackID<localTracks->GetEntriesFast(); trackID++) {
+            tracksMT->appendTrack(localTracks->At(trackID));
+         }
+         tracksMT->appendClustersWithoutTrack(clusterBatch.getClustersWithoutTrack());
+         delete localTracks;
+      }
+   };
+
+   tp.Process(trackingFunction);
+   ROOT::DisableImplicitMT();
+   
+   auto allTracksShared = tracksTTO.Merge();
+   auto allTracks = new Tracks();
+//   Tracks * allTracks = allTracksShared.get();
+   for (Int_t i=0; i<allTracksShared->GetEntriesFast(); i++) {
+      allTracks->appendTrack(allTracksShared->At(i));
+   }
+
+   allTracks->SetOwner(kTRUE);
+//   clusterFile.Close();
+
+   t2.Stop();
+
+   // DO THIS AFTER MT
+   //
+   // Track improvements
+   allTracks->removeNANs();
+   allTracks->sortTracks(); // reverse order from retrograde reconstruction
+   allTracks->removeTracksLeavingDetector();
+   
+   allTracks->Compress();
+   allTracks->CompressClusters();
+   allTracks->removeEmptyTracks();
+   
+//   allTracks->appendClustersWithoutTrack(clusters->getClustersWithoutTrack());
+
+   printf("Timing: Cluster retrieval: %.3f s. Tracking: %.3f s.\n", t1.CpuTime(), t2.CpuTime());
+
+   delete di;
+
+   printf("allTracks has %d tracks\n", allTracks->GetEntriesFast());
+
+   return allTracks;
+}
 #endif

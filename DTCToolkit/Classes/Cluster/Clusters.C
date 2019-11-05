@@ -5,6 +5,7 @@
 #include <vector>
 
 #include <TClonesArray.h>
+#include <TF1.h>
 
 #include "Classes/Cluster/Clusters.h"
 #include "Classes/Cluster/Cluster.h"
@@ -17,8 +18,8 @@
 using namespace std;
 using namespace DTC;
 
-Clusters::Clusters(Bool_t frameType) : clusters_("DTC::Cluster", kEventsPerRun*2),
-                                       clustersWithoutTrack_("DTC::Cluster", kEventsPerRun*2) {
+Clusters::Clusters(Bool_t frameType) : clusters_("DTC::Cluster", kEventsPerRun*10),
+                                       clustersWithoutTrack_("DTC::Cluster", kEventsPerRun*10) {
    frameType_ = frameType;
 
    clusters_.SetOwner(kTRUE);
@@ -162,20 +163,20 @@ void Clusters::removeAllClustersAfterLayer(Int_t afterLayer) {
    }
 }
 
-void Clusters::appendCluster(Float_t x, Float_t y, Int_t layer, Int_t size, Int_t eventID, Bool_t isSecondary) {
+void Clusters::appendCluster(Float_t x, Float_t y, Int_t layer, Int_t size, Int_t eventID, Bool_t isSecondary, Int_t PDG) {
    Int_t i = GetEntriesFast();
    Cluster *c = (Cluster*) clusters_.ConstructedAt(i);
-   c->set(x,y,layer,size, eventID, isSecondary);
+   c->set(x,y,layer,size, eventID, isSecondary, PDG);
 }
 
-void Clusters::appendClusterEdep(Float_t x, Float_t y, Int_t layer, Float_t edep, Int_t eventID, Bool_t isSecondary) {
+void Clusters::appendClusterEdep(Float_t x, Float_t y, Int_t layer, Float_t edep, Int_t eventID, Bool_t isSecondary, Int_t PDG) {
    Int_t i = GetEntriesFast();
    Cluster *c = (Cluster*) clusters_.ConstructedAt(i);
    
    // calculate size from edep
    Int_t size = getCSFromEdep(edep);
 
-   c->set(x,y,layer,size, eventID, isSecondary);
+   c->set(x,y,layer,size, eventID, isSecondary, PDG);
 }
 
 void Clusters::appendCluster(Cluster *cluster) {
@@ -186,6 +187,7 @@ void Clusters::appendCluster(Cluster *cluster) {
    if (cluster->isUsed()) { c->markUsed(); }
    c->setEventID(cluster->getEventID());
    c->setSecondary(cluster->isSecondary());
+   c->setPDG(cluster->getPDG());
 }
 
 void Clusters::appendClusterWithoutTrack(Cluster *cluster) {
@@ -194,6 +196,7 @@ void Clusters::appendClusterWithoutTrack(Cluster *cluster) {
    c->set(cluster->getX(), cluster->getY(), cluster->getLayer(), cluster->getSize());
    c->setEventID(cluster->getEventID());
    c->setSecondary(cluster->isSecondary());
+   c->setPDG(cluster->getPDG());
 }
 
 void Clusters::markUsedClusters(Track *track) {
@@ -413,6 +416,41 @@ Float_t Clusters::removeClustersInGap(Float_t gapSizemm, Float_t gapPosmm) {
 
    Compress();
    return nClustersRemoved;
+}
+
+
+void Clusters::propagateSecondaryStatusFromTop() {
+   Int_t eventID = Last()->getEventID();
+   Int_t n = 0;
+
+   for (Int_t i=GetEntriesFast()-1; i>0; i--) {
+      if (!At(i)) continue;
+
+      if (eventID == At(i)->getEventID()) {
+         At(i)->setSecondary(true);
+         n++;
+      }
+      else break;
+   }
+   printf("Back-converted %d particles with eventID %d as secondaries\n", n, eventID);
+}
+
+void Clusters::removeHaloAtSigma(Float_t sigmaNumber) {
+   Cluster * cluster = nullptr;
+   float x,y;
+   float cut = 12; // from histo ID
+
+   for (Int_t i=0; i<GetEntriesFast(); i++) {
+      cluster = At(i);
+      x = cluster->getXmm();
+      y = cluster->getYmm();
+
+      if (sqrt(x*x+y*y) > cut) {
+         removeClusterAt(i);
+      }
+   }
+
+   Compress();
 }
 
 

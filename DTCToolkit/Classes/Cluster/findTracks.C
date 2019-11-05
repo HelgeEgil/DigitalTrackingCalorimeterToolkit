@@ -58,19 +58,21 @@ Tracks * Clusters::findTracksWithRecursiveWeighting() {
    // for pencil beams.
    // 22 = 2x2 mm, 33 = 3x3 mm etc.
    // See WoC publication for description of functions below
+   
+   Float_t thisMaxTrackScore = kMaxTrackScore;
 
-   if      (spotSize == 22) kMaxTrackScore = 0.433 * pow(kEventsPerRun, -0.172);
-   else if (spotSize == 33) kMaxTrackScore = 0.469 * pow(kEventsPerRun, -0.176);
-   else if (spotSize == 42) kMaxTrackScore = 0.397 * pow(kEventsPerRun, -0.150);
-   else if (spotSize == 55) kMaxTrackScore = 0.455 * pow(kEventsPerRun, -0.162);
-   else if (spotSize == 44) kMaxTrackScore = 0.460 * pow(kEventsPerRun, -0.168);
+   if      (spotSize == 22) thisMaxTrackScore = 0.433 * pow(kEventsPerRun, -0.172);
+   else if (spotSize == 33) thisMaxTrackScore = 0.469 * pow(kEventsPerRun, -0.176);
+   else if (spotSize == 42) thisMaxTrackScore = 0.397 * pow(kEventsPerRun, -0.150);
+   else if (spotSize == 55) thisMaxTrackScore = 0.455 * pow(kEventsPerRun, -0.162);
+   else if (spotSize == 44) thisMaxTrackScore = 0.460 * pow(kEventsPerRun, -0.168);
    showDebug("makeLayerIndex...");
    makeLayerIndex();
    showDebug("ok!\nfillMSCradiusList...");
    showDebug("ok!\n");
    kMCSFactor = 25;
 
-   if (kAbsorberThickness == 2) kMaxTrackScore *= 2; // phenomenological factor ..? 
+   if (kAbsorberThickness == 2) thisMaxTrackScore *= 2; // phenomenological factor ..? 
 
    for (Int_t i=0; i<GetEntriesFast(); i++) {
       if (!At(i)) continue;
@@ -95,8 +97,6 @@ Tracks * Clusters::findTracksWithRecursiveWeighting() {
     showDebug("Found " << seeds->size() << " seeds in first go.\n");
 
     for (UInt_t i=0; i<seeds->size(); i++) {
-        
-       
         Cluster *seed = At(seeds->at(i)); //relates each seed to the cluster it belongs
         nextClusters->clear();
 
@@ -104,7 +104,7 @@ Tracks * Clusters::findTracksWithRecursiveWeighting() {
     
         seedNode = new Node(nullptr, seed, 0); //   Node(Node *parent, Cluster *connectedCluster, Float_t score);
         
-        showDebug("Found " << nextClusters->size() << " nextClusters first time.\n");
+//        showDebug("Found " << nextClusters->size() << " nextClusters first time.\n");
        // cout<< "size next clusters: "<< nextClusters->size() << endl;
        for (UInt_t j=0; j<nextClusters->size(); j++) {
            
@@ -113,10 +113,10 @@ Tracks * Clusters::findTracksWithRecursiveWeighting() {
             clusterScore /= 100;
             if (std::isnan(clusterScore)) cout << "clusterScore at " << *nextCluster << " isNan!\n";
             
-            if (clusterScore < kMaxTrackScore) {
+            if (clusterScore < thisMaxTrackScore) {
                 nextNode = new Node(seedNode, nextCluster, clusterScore); // initial vector is 10 % weighted
                 seedNode->addChild(nextNode);
-                showDebug("Adding nextNode\n");
+//                showDebug("Adding nextNode\n");
             }
         }
         seedNode->markExplored();
@@ -124,10 +124,8 @@ Tracks * Clusters::findTracksWithRecursiveWeighting() {
         //endNodes->reserve(kEventsPerRun * 5);
         endNodes->reserve(200* 50 * kEventsPerRun);
         seedNode->getUnexploredEndNodes(endNodes); //EndNodes=nodes you are studying
-        doRecursiveWeightedTracking(seedNode, endNodes); // all other layers, the first part is only done in the first layer
-        showDebug("..ok!\ngetBestTrack...");
+        doRecursiveWeightedTracking(seedNode, endNodes, thisMaxTrackScore); // all other layers, the first part is only done in the first layer
         track = seedNode->getBestTrack();
-        showDebug("ok!\n");
         
         if ((track->GetEntries() >= (s+1)) && (track->GetEntries() >1)){
             //cout << "value of s is: " << s <<endl;
@@ -146,13 +144,14 @@ Tracks * Clusters::findTracksWithRecursiveWeighting() {
         delete seedNode;
         delete endNodes;
     }
+    showDebug("Found " << tracks->GetEntries() << " tracks so far\n");
     delete seeds;
     delete nextClusters;
 }
     return tracks;
 }
 
-void Clusters::doRecursiveWeightedTracking(Node * seedNode, vector<Node*> * endNodes) {
+void Clusters::doRecursiveWeightedTracking(Node * seedNode, vector<Node*> * endNodes, Float_t thisMaxTrackScore) {
    // Input: vector of nodes
    // Find all the next potential nodes segments w/acceptable score
    // Output: Vector of nodes (new end nodes)
@@ -178,8 +177,9 @@ void Clusters::doRecursiveWeightedTracking(Node * seedNode, vector<Node*> * endN
          nextScore = thisNode->getNextScore(nextCluster);
          nextAngle = thisNode->getNodeAngle(nextCluster);
 
-          if ((nextScore < kMaxTrackScore || (nextAngle < 0.03)) ){// || (nextAngle < kMaxTrackAngle)) {
+          if ((nextScore < thisMaxTrackScore || (nextAngle < 0.03)) ){// || (nextAngle < kMaxTrackAngle)) {
               thisNode->addChild(new Node(thisNode, nextCluster, nextScore)); // it is either appended to the tree or deleted if thisNode is full
+              showDebug("Adding node in layer " << searchLayer << "...\n");
           }
       }
    }
@@ -188,7 +188,7 @@ void Clusters::doRecursiveWeightedTracking(Node * seedNode, vector<Node*> * endN
    endNodes->clear();
    seedNode->getUnexploredEndNodes(endNodes);
   if (endNodes->size() > 0){
-      doRecursiveWeightedTracking(seedNode, endNodes);
+      doRecursiveWeightedTracking(seedNode, endNodes, thisMaxTrackScore);
    }
 }
 

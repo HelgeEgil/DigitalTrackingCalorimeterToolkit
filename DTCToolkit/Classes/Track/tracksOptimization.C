@@ -528,38 +528,29 @@ void Tracks::removeThreeSigmaShortTracks() {
 
    Float_t fpm;
 
-   for (Int_t i=0; i<=nTotal; i++) {
-      thisTrack = At(i);
-      if (!At(i)) continue;
-//      muRange += thisTrack->getRangemm();
-      fpm = thisTrack->getFitParameterRange();
-      if (isnan(fpm)) continue;
-      muRange += fpm;
-      nInSum++;
-   }
-
-   muRange /= nInSum;
+   TH1I * h = new TH1I("h","h",100,0,330);
 
    for (Int_t i=0; i<=nTotal; i++) {
       thisTrack = At(i);
       if (!At(i)) continue;
-      fpm = thisTrack->getFitParameterRange();
-      if (isnan(fpm)) continue;
-      sigmaRange += pow(muRange - fpm, 2);
+//      fpm = thisTrack->getFitParameterRange();
+      fpm = getUnitFromTL(thisTrack->getRangemm());
+      if (!isnan(fpm)) h->Fill(fpm);
    }
-   sigmaRange = sqrt(sigmaRange / nInSum);
 
-   printf("SigmaRange before resetting: %.2f mm\n", sigmaRange);
-   sigmaRange = 5;
+   muRange = h->GetXaxis()->GetBinCenter(h->GetMaximumBin());
+   sigmaRange = 10;
+
+   delete h;
 
    cutRangeLow = muRange - 3 * sigmaRange;
-   cutRangeHigh = muRange + 3 * sigmaRange;
+   cutRangeHigh = muRange + 1.5 * sigmaRange;
    printf("muRange = %.3f mm, sigmaRange = %.3f mm, cutRangeLow = %.3f mm, cutRangeHigh = %.3f mm\n", muRange, sigmaRange, cutRangeLow, cutRangeHigh);
 
    for (Int_t i=0; i<=nTotal; i++) {
       thisTrack = At(i);
       if (!At(i)) continue;
-      if (thisTrack->getFitParameterRange() < cutRangeLow || thisTrack->getFitParameterRange() > cutRangeHigh) {
+      if (getUnitFromTL(thisTrack->getFitParameterRange()) < cutRangeLow || getUnitFromTL(thisTrack->getFitParameterRange()) > cutRangeHigh) {
          if (thisTrack->Last()->isSecondary()) nRemovedNuclear++;
          removeTrack(thisTrack);
          nRemoved++;

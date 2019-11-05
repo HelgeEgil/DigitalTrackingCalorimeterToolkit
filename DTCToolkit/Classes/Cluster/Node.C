@@ -286,7 +286,6 @@ Track* Node::getTrackFromBestNode(Node* bestNode) {
 
    Int_t n = 0;
    while (nextSegment && n<100) {
-      showDebug("PushBack n = " << n);
       reverseTrack.push_back(nextSegment);
       nextSegment = (Node*) nextSegment->getParent();
       n++;
