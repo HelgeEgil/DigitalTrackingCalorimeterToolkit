@@ -74,6 +74,8 @@ Tracks * Clusters::findTracksWithRecursiveWeighting() {
 
    if (kAbsorberThickness == 2) thisMaxTrackScore *= 2; // phenomenological factor ..? 
 
+   if (kHelium) thisMaxTrackScore = 0.175;
+
    for (Int_t i=0; i<GetEntriesFast(); i++) {
       if (!At(i)) continue;
       appendClusterWithoutTrack(At(i));
@@ -177,7 +179,10 @@ void Clusters::doRecursiveWeightedTracking(Node * seedNode, vector<Node*> * endN
          nextScore = thisNode->getNextScore(nextCluster);
          nextAngle = thisNode->getNodeAngle(nextCluster);
 
-          if ((nextScore < thisMaxTrackScore || (nextAngle < 0.03)) ){// || (nextAngle < kMaxTrackAngle)) {
+         float alwaysAllowAngle = 0.03;
+         if (kHelium) alwaysAllowAngle = 0.02;
+
+          if ((nextScore < thisMaxTrackScore || (nextAngle < alwaysAllowAngle)) ){// || (nextAngle < kMaxTrackAngle)) {
               thisNode->addChild(new Node(thisNode, nextCluster, nextScore)); // it is either appended to the tree or deleted if thisNode is full
               showDebug("Adding node in layer " << searchLayer << "...\n");
           }
@@ -268,29 +273,14 @@ void Clusters::findClustersFromSeedInLayer(Cluster *seed, Int_t nextLayer, vecto
    Int_t layerIdxTo = getLastIndexOfLayer(nextLayer);
    Float_t maxAngle, thisAngle;
 
-   if (kUseEmpiricalMCS) {
-      maxAngle = 3 * getEmpiricalMCSAngle(nextLayer - 1); // This function is only run once, to find seed candidates in the 2nd layer - here it's okay with a high angle
-      if (layerIdxFrom >= 0) {
-         for (Int_t i=layerIdxFrom; i<layerIdxTo; i++) {
-            if (!At(i)) { continue; }
-            thisAngle = getDotProductAngle(seed, seed, At(i));
-             if ((thisAngle < maxAngle)&& !isUsed(i)){
-               nextClusters->push_back(i);
-            }
+   maxAngle = 3 * getEmpiricalMCSAngle(nextLayer - 1); // This function is only run once, to find seed candidates in the 2nd layer - here it's okay with a high angle
+   if (layerIdxFrom >= 0) {
+      for (Int_t i=layerIdxFrom; i<layerIdxTo; i++) {
+         if (!At(i)) { continue; }
+         thisAngle = getDotProductAngle(seed, seed, At(i));
+          if ((thisAngle < maxAngle)&& !isUsed(i)){
+            nextClusters->push_back(i);
          }
-      }
-   }
-
-   else { // Use "old" MCS estimation method
-      maxAngle = 3 * getSearchRadiusForLayer(nextLayer) * 0.75 * MCSMultiplicationFactor;
-      if (layerIdxFrom >= 0) {
-         for (Int_t i=layerIdxFrom; i<layerIdxTo; i++) {
-            if (!At(i)) { continue; }
-            thisAngle = diffmmXY(seed, At(i));
-            if (thisAngle < maxAngle) {
-               nextClusters->push_back(i);
-            }
-         } 
       }
    }
 }
@@ -309,9 +299,7 @@ Cluster * Clusters::findNearestNeighbour(Track *track, Cluster *projectedPoint, 
    Int_t    layerIdxFrom = getFirstIndexOfLayer(searchLayer);
    Int_t    layerIdxTo = getLastIndexOfLayer(searchLayer);
 
-   if (kUseEmpiricalMCS && track)   maxAngle = getEmpiricalMCSAngle(searchLayer-1);
-   else                             maxAngle = getSearchRadiusForLayer(searchLayer) * MCSMultiplicationFactor;
-
+   maxAngle = getEmpiricalMCSAngle(searchLayer-1);
 
    if (layerIdxFrom < 0) return 0;
 
@@ -319,8 +307,7 @@ Cluster * Clusters::findNearestNeighbour(Track *track, Cluster *projectedPoint, 
       if (!At(i))
          continue;
 
-      if (kUseEmpiricalMCS && track)   thisAngle = getDotProductAngle(track->At(track->GetEntriesFast()-2), track->Last(), At(i));
-      else                             thisAngle = diffmmXY(projectedPoint, At(i));
+      thisAngle = getDotProductAngle(track->At(track->GetEntriesFast()-2), track->Last(), At(i));
 
       reject = (At(i)->isUsed() && rejectUsed);
 

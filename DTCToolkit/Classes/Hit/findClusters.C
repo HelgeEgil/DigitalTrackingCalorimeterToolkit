@@ -13,8 +13,8 @@
 #include "GlobalConstants/MaterialConstants.h"
 #include "HelperFunctions/Tools.h"
 
-Clusters * Hits::findClustersFromHits() {
-   Clusters        * clusters = new Clusters(kEventsPerRun * nLayers * 10);
+void Hits::findClustersFromHits(Clusters * clusters) {
+// Clusters        * clusters = new Clusters(kEventsPerRun * nLayers * 10);
    vector<Int_t>   * expandedCluster = nullptr;
    vector<Int_t>   * checkedIndices = nullptr;
    vector<Int_t>   * firstHits = nullptr;
@@ -45,14 +45,6 @@ Clusters * Hits::findClustersFromHits() {
       }
       delete checkedIndices;
    }
-
-   if (kEventsPerRun == 1) {
-      for (Int_t i=0; i<clusters->GetEntriesFast(); i++) {
-         clusters->At(i)->setEventID(getEventID(0));
-      }
-   }
-
-   return clusters;
 }
 
 vector<Int_t> * Hits::findNeighbours(Int_t index) {
@@ -126,7 +118,7 @@ void Hits::appendNeighboursToClusters(vector<Int_t> *expandedCluster, Clusters *
       sumX += getX(idx) - 0.5; // -0.5  to get
       sumY += getY(idx) - 0.5; // pixel center
    }
-   clusters->appendCluster(sumX / cSize, sumY / cSize, layerNo, cSize, firstHit->getEventID(), firstHit->isSecondary());
+   clusters->appendCluster(sumX / cSize, sumY / cSize, layerNo, cSize, firstHit->getEventID(), firstHit->isSecondary(), firstHit->getPDG());
 }
 
 void Hits::checkAndAppendAllNextCandidates(vector<Int_t> * nextCandidates, vector<Int_t> *checkedIndices,

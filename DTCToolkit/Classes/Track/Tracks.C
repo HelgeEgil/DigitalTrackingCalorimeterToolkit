@@ -56,6 +56,7 @@ Long64_t Tracks::Merge(TCollection *tlist) {
                appendTrack(otherTracks->At(i));
             }
          }
+         appendClustersWithoutTrack(otherTracks->getClustersWithoutTrack());
       }
    }
    return 1;

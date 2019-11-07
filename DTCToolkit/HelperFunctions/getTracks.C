@@ -52,11 +52,13 @@ void saveTracks(Tracks *tracks, Clusters * clusters, Int_t dataType, Float_t ene
    TString sEnergy = Form("_%.2fMeV", energy);
    TString fileName = "Data/Tracks/tracks";
    TString sAbsThick = Form("_%.1fmm", readoutAbsorber);
+   TString sDegThick = Form("_%.0fmm", run_degraderThickness);
    TString sMaterial = getMaterialChar();
    fileName.Append(sDataType);
    fileName.Append(sMaterial);
    fileName.Append(sAbsThick);
    fileName.Append(sEnergy);
+   fileName.Append(sDegThick);
    fileName.Append(".root");
    
    TFile f(fileName, "recreate");
@@ -75,12 +77,14 @@ Tracks * loadTracks(Int_t Runs, Int_t dataType, Float_t energy, Clusters * clust
    TString sDataType = (dataType == 0) ? "_MC_" : "_data_";
    TString sAbsThick = Form("_%.1fmm", readoutAbsorber);
    TString sEnergy = Form("_%.2fMeV", energy);
+   TString sDegThick = Form("_%.0fmm", run_degraderThickness);
    TString fileName = "Data/Tracks/tracks";
    TString sMaterial = getMaterialChar();
    fileName.Append(sDataType);
    fileName.Append(sMaterial);
    fileName.Append(sAbsThick);
    fileName.Append(sEnergy);
+   fileName.Append(sDegThick);
    fileName.Append(".root");
    
    TFile *f = new TFile(fileName);
@@ -118,119 +122,6 @@ Tracks * loadOrCreateTracks(Bool_t recreate, Int_t Runs, Int_t dataType, Float_t
    return tracks;
 }
 
-Clusters * getClusters(Int_t Runs, Int_t dataType, Int_t frameType, Float_t energy) {
-   DataInterface   * di = new DataInterface();
-   Int_t             nClusters = kEventsPerRun * 5 * nLayers;
-   Int_t             nHits = kEventsPerRun * 50;
-   Int_t             nTracks = kEventsPerRun * 2;
-   Bool_t            breakSignal = false;
-   CalorimeterFrame *cf = new CalorimeterFrame();
-   Clusters        * clusters = nullptr;
-   Clusters        * trackerClusters = new Clusters(nClusters);
-   Clusters        * allClusters = new Clusters(nClusters * Runs);
-   Hits            * hits = new Hits(nHits);
-   Hits            * eventIDs = new Hits(kEventsPerRun * sizeOfEventID);
-   Int_t             eventID = -1;
-   Hits            * trackerHits = new Hits(nHits);
-   TRandom3        * gRandom = new TRandom3(0);
-
-   for (Int_t i=0; i<Runs; i++) {
-
-      cout << "Finding clusters " << i*kEventsPerRun << "->" << (i+1)*kEventsPerRun << " of " << Runs * kEventsPerRun << endl;
-
-      if (dataType == kMC) {
-         eventID = di->getMCFrame(i, cf);
-         di->getEventIDs(i, eventIDs);
-         cf->diffuseFrame(gRandom);
-         hits = cf->findHits(eventID);
-         clusters = hits->findClustersFromHits(); // badly optimized
-         clusters->removeSmallClusters(2);
-
-         clusters->matchWithEventIDs(eventIDs);
-         eventIDs->Clear("C");
-      }
-      
-      else if (dataType == kData) {
-         di->getDataFrame(i, cf, energy);
-         hits = cf->findHits();
-         clusters = hits->findClustersFromHits();
-         clusters->removeSmallClusters(2);
-         clusters->removeAllClustersAfterLayer(8); // bad data in layer 10 and 11
-      }
-      
-      clusters->Compress();
-      
-      if (clusters->GetEntriesFast() == 0) breakSignal = kTRUE; // to stop running
-
-      for (Int_t j=0; j<clusters->GetEntriesFast(); j++) {
-         allClusters->appendCluster(clusters->At(j));
-      }
-
-      cf->Reset();
-      cf->Clear("C");
-      hits->Clear("C");
-      trackerHits->Clear("C");
-      delete clusters;
-      trackerClusters->Clear("C");
-      
-      if (breakSignal) break;
-   }
-
-
-   delete cf;
-   delete trackerClusters;
-   delete hits;
-   delete trackerHits;
-   delete di;
-
-   return allClusters;
-}
-
-Hits * diffuseHits(TRandom3 *gRandom, Hits * hits) {
-   Int_t          nHits = hits->GetEntriesFast();
-   Hits         * hitsOut = new Hits();
-   Int_t          x, y, outX, outY, layer, cs, eventID, idx_x, binPos, PDG;
-   Float_t        edep;
-   Bool_t         isSecondary;
-   Int_t          randomClusterIdx;
-   Int_t          nBefore, nAfter;
-
-   showDebug("Diffusing hits (ALPIDE-Heidelberg). Number of hits = " << nHits << endl);
-
-   for (Int_t h=0; h<nHits; h++) {
-      x = hits->getX(h);
-      y = hits->getY(h);
-      layer = hits->getLayer(h);
-      edep = hits->getEdep(h);
-      eventID = hits->getEventID(h);
-      isSecondary = hits->isSecondary(h);
-      cs = getCSFromEdep(edep);
-//      PDG = hits->getPDG();
-
-    
-      if (cs<2) cs=2;
-      if (cs>=27) cs=26;
-
-      randomClusterIdx = gRandom->Integer(CDB_sortIndex[cs+1] - CDB_sortIndex[cs]) + CDB_sortIndex[cs];
-      CDB_treeCluster->GetEntry(CDB_treeCluster->LoadTree(CDB_index->GetIndex()[randomClusterIdx]));
-
-      idx_x = 0;
-      for (Int_t n : *CDB_hit_array) {
-         for (Int_t binPosPow = 0; binPosPow < 10; binPosPow++) {
-            binPos = pow(2, binPosPow);
-            if (binPos & n) {
-               outX = x + (idx_x - CDB_x_mean) + 0.5;
-               outY = y + (binPosPow - CDB_y_mean) + 0.5;
-               hitsOut->appendPoint(outX, outY, layer, edep/CDB_clusterSize, eventID, isSecondary);
-            }
-         }
-      idx_x++;
-      }
-   }
-   
-   return hitsOut;
-}
-
 Tracks * getTracksFromClusters(Int_t Runs, Int_t dataType, Int_t frameType, Float_t energy, Float_t spotx, Float_t spoty, Clusters * saveClusters) {
    DataInterface   * di = new DataInterface();
    Int_t             nClusters = kEventsPerRun * 5 * nLayers;
@@ -240,6 +131,7 @@ Tracks * getTracksFromClusters(Int_t Runs, Int_t dataType, Int_t frameType, Floa
    Tracks          * tracks = nullptr;
    Tracks          * allTracks = new Tracks(nTracks * Runs);
    TRandom3        * gRandom = new TRandom3(0);
+
 
    allTracks->SetOwner(kTRUE);
 
@@ -259,12 +151,12 @@ Tracks * getTracksFromClusters(Int_t Runs, Int_t dataType, Int_t frameType, Floa
          Hits * hits = new Hits();
          Hits * diffusedHits = nullptr;
          di->getMCClusters(i, nullptr, hits, spotx, spoty);
-         hits->removeHaloAtSigma(6);
+//         hits->removeHaloAtSigma(6);
          hits->sortHits(); 
          diffusedHits = diffuseHits(gRandom, hits);
          diffusedHits->sortHits();
          diffusedHits->makeLayerIndex();
-         clusters = diffusedHits->findClustersFromHits();
+         diffusedHits->findClustersFromHits(clusters);
 //         Int_t nRem = clusters->removeClustersInGap(1, 0);
 
          delete hits;
@@ -279,7 +171,6 @@ Tracks * getTracksFromClusters(Int_t Runs, Int_t dataType, Int_t frameType, Floa
             if (!clusters->At(j)) continue;
             saveClusters->appendCluster(clusters->At(j));
          }
-
       }
 
 //      printf("Found %d clusters...\n", clusters->GetEntriesFast());
@@ -363,29 +254,61 @@ Tracks * getTracksFromClustersMT(Int_t Runs, Int_t dataType, Int_t frameType, Fl
    TRandom3        * gRandom = new TRandom3(0);
    Int_t             nThreads = 8; // Move to Constants.h
    Int_t             runID = 0;
+   
+   TH2I            * hOriginal = new TH2I("hOriginal", "Original", 201, 4399.5, 4600.5, 201, 2149.5, 2350.5);
+   TH2I            * hDiffused = new TH2I("hDiffused", "Diffused", 201, 4399.5, 4600.5, 201, 2149.5, 2350.5);
+   TH2I            * hReconstructed = new TH2I("hReconstructed", "Reconstructed",201, 4399.5, 4600.5, 201, 2149.5, 2350.5);
 
-   TStopwatch t1, t2;
+   TStopwatch t1, t2, t3, t4, t5;
    t1.Reset(); 
    t2.Reset(); 
+   t3.Reset();
+   t4.Reset();
+   t5.Reset();
   
    t1.Start(false); 
-   TFile clusterFile("OutputFiles/clusterFile.root", "recreate");
-   TTree clusterTree("Clusters", "clusters");
-   clusterTree.Branch("clusters", &clusters, 256000, 1);
-   clusterTree.Branch("runID", &runID, 256000, 1);
+   TFile clusterFile("OutputFiles/clusterFile2.root", "recreate");
+   TTree * clusterTree = new TTree("Clusters", "clusters");
+
+   clusterTree->Branch("clusters", &clusters, 256000, 0);
+   clusterTree->Branch("runID", &runID, 256000, 0);
 
    for (runID=0; runID<Runs; runID++) {
       clusters = new Clusters(nClusters);
       if (kDoDiffusion) {
          Hits * hits = new Hits();
          Hits * diffusedHits = nullptr;
+         t3.Start(false);
          di->getMCClustersThreshold(runID, nullptr, hits, spotx, spoty);
-         hits->removeHaloAtSigma(6);
+//         hits->removeHaloAtSigma(6);
          hits->sortHits();
-         diffusedHits = diffuseHits(gRandom, hits);
+         t3.Stop();
+         t4.Start(false);
+         diffusedHits = diffuseHitsMT(hits);
          diffusedHits->sortHits();
+         t4.Stop();
+         t5.Start(false);
          diffusedHits->makeLayerIndex();
-         clusters = diffusedHits->findClustersFromHits();
+         diffusedHits->findClustersFromHits(clusters);
+         t5.Stop();
+         if (runID%10 == 0) { 
+            printf("Run %d of %d: Found %d clusters from %d diffused Hits\n", runID, Runs, clusters->GetEntriesFast(), hits->GetEntriesFast());
+         }
+
+         Int_t bin;
+         for (Int_t i=0; i<hits->GetEntriesFast(); i++) {
+            bin = hOriginal->FindBin(hits->At(i)->getX(), hits->At(i)->getY());
+
+            if (hits->getLayer(i) == 20) hOriginal->SetBinContent(bin, 1);
+         }
+         for (Int_t i=0; i<diffusedHits->GetEntriesFast(); i++) {
+            bin = hDiffused->FindBin(diffusedHits->At(i)->getX(), diffusedHits->At(i)->getY());
+            if (diffusedHits->getLayer(i) == 20) hDiffused->SetBinContent(bin, 1);
+         }
+         for (Int_t i=0; i<clusters->GetEntriesFast(); i++) {
+            bin = hReconstructed->FindBin(clusters->At(i)->getX(), clusters->At(i)->getY());
+            if (clusters->getLayer(i) == 20) hReconstructed->SetBinContent(bin, 1);
+         }
 
          delete hits;
          delete diffusedHits;
@@ -396,24 +319,43 @@ Tracks * getTracksFromClustersMT(Int_t Runs, Int_t dataType, Int_t frameType, Fl
          clusters->removeHaloAtSigma(6);
       }
       
-      for (Int_t j=0; j<=clusters->GetEntriesFast(); j++) {
-         if (!clusters->At(j)) continue;
-         saveClusters->appendCluster(clusters->At(j));
+      if (saveClusters) {
+         for (Int_t j=0; j<=clusters->GetEntriesFast(); j++) {
+            if (!clusters->At(j)) continue;
+            saveClusters->appendCluster(clusters->At(j));
+         }
       }
       
       if (!clusters->GetEntriesFast()) continue;
       clusters->sortClusters();
 
-      clusterTree.Fill();
+//      printf("Filling %d clusters\n", clusters->GetEntriesFast());
+      clusterTree->Fill();
       delete clusters;
    }
-   clusterTree.Write();
+
+   TCanvas *cRecon = new TCanvas("cRecon", "cRecon", 1500, 800);
+   cRecon->Divide(3,1);
+
+   cRecon->cd(1);
+   hOriginal->Draw("colz");
+   cRecon->cd(2);
+   hDiffused->Draw("colz");
+   cRecon->cd(3);
+   hReconstructed->Draw("colz");
+
+   clusterFile.ReOpen("update"); // To bump the file to the top, otherwise the ...closed... tfile in diffuseHitsMT is used
+
+   clusterTree->Write();
+   clusterFile.Write();
    t1.Stop();
 
    t2.Start(false);
    ROOT::EnableImplicitMT(nThreads);
    ROOT::TThreadedObject<Tracks> tracksTTO(nTracks);
-   ROOT::TTreeProcessorMT tp(clusterTree);
+   ROOT::TTreeProcessorMT tp(*clusterTree);
+
+   tp.SetMaxTasksPerFilePerWorker(2);
    
    auto trackingFunction = [&] ( TTreeReader &reader ) {
       TTreeReaderValue<int> runIDRV(reader, "runID");
@@ -425,7 +367,7 @@ Tracks * getTracksFromClustersMT(Int_t Runs, Int_t dataType, Int_t frameType, Fl
          auto clusterBatch = *clustersRV;
          auto runID = *runIDRV;
 
-//         printf("Running MT with runID = %d and %d clusters\n", runID, clusterBatch.GetEntriesFast());
+         if (runID%10 == 0) printf("Running MT tracking with runID = %d\n", runID);
          Tracks * localTracks = clusterBatch.findTracksWithRecursiveWeighting();
 
          for (Int_t trackID=0; trackID<localTracks->GetEntriesFast(); trackID++) {
@@ -441,13 +383,13 @@ Tracks * getTracksFromClustersMT(Int_t Runs, Int_t dataType, Int_t frameType, Fl
    
    auto allTracksShared = tracksTTO.Merge();
    auto allTracks = new Tracks();
-//   Tracks * allTracks = allTracksShared.get();
    for (Int_t i=0; i<allTracksShared->GetEntriesFast(); i++) {
       allTracks->appendTrack(allTracksShared->At(i));
    }
+   allTracks->appendClustersWithoutTrack(allTracksShared->getClustersWithoutTrack());
 
    allTracks->SetOwner(kTRUE);
-//   clusterFile.Close();
+   clusterFile.Close();
 
    t2.Stop();
 
@@ -464,7 +406,7 @@ Tracks * getTracksFromClustersMT(Int_t Runs, Int_t dataType, Int_t frameType, Fl
    
 //   allTracks->appendClustersWithoutTrack(clusters->getClustersWithoutTrack());
 
-   printf("Timing: Cluster retrieval: %.3f s. Tracking: %.3f s.\n", t1.CpuTime(), t2.CpuTime());
+   printf("Timing: Cluster retrieval: %.3f s. Tracking: %.3f s. hits log %.3f s, diffusion %.3f s, findClusterFromHits %.3f s\n", t1.CpuTime(), t2.CpuTime(), t3.CpuTime(), t4.CpuTime(), t5.CpuTime());
 
    delete di;
 
@@ -472,4 +414,181 @@ Tracks * getTracksFromClustersMT(Int_t Runs, Int_t dataType, Int_t frameType, Fl
 
    return allTracks;
 }
+
+Hits * diffuseHits(TRandom3 *gRandom, Hits * hits) {
+   Int_t          nHits = hits->GetEntriesFast();
+   Hits         * hitsOut = new Hits();
+   Int_t          x, y, outX, outY, layer, cs, eventID, idx_x, binPos, PDG;
+   Float_t        edep;
+   Bool_t         isSecondary;
+   Int_t          randomClusterIdx;
+   Int_t          nBefore, nAfter;
+
+   showDebug("Diffusing hits (ALPIDE-Heidelberg). Number of hits = " << nHits << endl);
+
+   Int_t binPosLUT[12] = {};
+   for (Int_t i=0; i<12; i++) { binPosLUT[i] = pow(2, i); }
+   
+   int circleX[70] = {0,1,0,-1,0,1,-1,-1,1,0,-2,0,2,1,-2,-1,2,-1,-2,1,2,-2,-2,2,2,0,-3,0,3,-1,-3,1,3,1,-3,-1,3,0,-4,0,4,2,-3,-2,3,-8,-2,-3,2,4,-1,-4,1,4,1,7,-1,3,3,-3,-3,4,2,-4,-2,4,-2,2,5,0};
+
+   int circleY[70] = {0,0,-1,0,1,-1,-1,1,1,-2,0,2,0,-2,-1,2,1,-2,1,2,-1,-2,2,2,-2,-3,0,3,0,-3,1,3,-1,-3,-1,3,1,-4,0,4,0,-3,-2,3,2,15,-3,2,3,-1,-4,1,4,1,-4,-18,4,3,-3,-3,3,2,-4,-2,4,-2,-4,4,0,5};
+
+   for (Int_t h=0; h<nHits; h++) {
+      x = hits->getX(h);
+      y = hits->getY(h);
+      layer = hits->getLayer(h);
+      edep = hits->getEdep(h);
+      eventID = hits->getEventID(h);
+      isSecondary = hits->isSecondary(h);
+      cs = getCSFromEdep(edep);
+      PDG = hits->getPDG(h);
+       
+      randomClusterIdx = gRandom->Integer(CDB_sortIndex[cs+1] - CDB_sortIndex[cs]) + CDB_sortIndex[cs];
+      CDB_treeCluster->GetEntry(randomClusterIdx);
+
+      if (cs < 27 && cs > 1) {
+         idx_x = 0;
+         for (Int_t i=0; i<10; i++) {
+            for (Int_t binPosPow = 0; binPosPow < 10; binPosPow++) {
+               binPos = binPosLUT[binPosPow];
+               if (binPos & CDB_hit_array[i]) {
+                  outX = x + (idx_x - CDB_x_mean) + 0.5;
+                  outY = y + (binPosPow - CDB_y_mean) + 0.5;
+                  hitsOut->appendPoint(outX, outY, layer, edep/CDB_clusterSize, eventID, isSecondary, PDG);
+               }
+            }
+         idx_x++;
+         }
+      }
+      else {
+         int circleSize = min(cs, 70);
+         for (Int_t i=0; i<circleSize; i++) {
+            outX = x + circleX[i] + 0.5;
+            outY = y + circleY[i] + 0.5;
+            hitsOut->appendPoint(outX, outY, layer, edep/circleSize, eventID, isSecondary, PDG);
+         }
+      }
+   }
+   
+   return hitsOut;
+}
+
+Hits * diffuseHitsMT(Hits * hits) {
+   Int_t          nHits = hits->GetEntriesFast();
+   Hits         * hitsOut = new Hits();
+   Int_t          x, y, outX, outY, layer, cs, eventID, idx_x, binPos, PDG;
+   Float_t        edep;
+   Bool_t         isSecondary;
+   Int_t          randomClusterIdx;
+   Int_t          nBefore, nAfter;
+   Int_t          nThreads = 8;
+
+   showDebug("Diffusing hits (ALPIDE-Heidelberg). Number of hits = " << nHits << endl);
+
+   // Make TTree out of the Hits
+   TFile hitsFile("OutputFiles/hitsFile2.root", "recreate");
+   TTree * hitsTree = new TTree("Hits", "hits");
+   hitsTree->Branch("x", &x, 256000, 1);
+   hitsTree->Branch("y", &y, 256000, 1);
+   hitsTree->Branch("layer", &layer, 256000, 1);
+   hitsTree->Branch("edep", &edep, 256000, 1);
+   hitsTree->Branch("cs", &cs, 256000, 1);
+   hitsTree->Branch("eventID", &eventID, 256000, 1);
+   hitsTree->Branch("isSecondary", &isSecondary, 256000, 1);
+   hitsTree->Branch("PDG", &PDG, 256000, 1);
+
+   for (Int_t h=0; h<nHits; h++) {
+      x = hits->getX(h);
+      y = hits->getY(h);
+      layer = hits->getLayer(h);
+      eventID = hits->getEventID(h);
+      isSecondary = hits->isSecondary(h);
+      edep = hits->getEdep(h);
+      cs = getCSFromEdep(edep);
+      PDG = hits->getPDG(h);
+      if (cs<2) continue;
+//      if (cs>=27) cs=26;
+
+      hitsTree->Fill();
+   }
+   hitsTree->Write();
+   hitsFile.Write();
+
+   ROOT::EnableImplicitMT(nThreads);
+   ROOT::TThreadedObject<Hits> hitsTTO;
+   ROOT::TTreeProcessorMT tp(*hitsTree);
+
+   // manually drawn circle; starting from center growing spirally ca symmetrically
+   int circleX[70] = {0,1,0,-1,0,1,-1,-1,1,0,-2,0,2,1,-2,-1,2,-1,-2,1,2,-2,-2,2,2,0,-3,0,3,-1,-3,1,3,1,-3,-1,3,0,-4,0,4,2,-3,-2,3,-8,-2,-3,2,4,-1,-4,1,4,1,7,-1,3,3,-3,-3,4,2,-4,-2,4,-2,2,5,0};
+
+   int circleY[70] = {0,0,-1,0,1,-1,-1,1,1,-2,0,2,0,-2,-1,2,1,-2,1,2,-1,-2,2,2,-2,-3,0,3,0,-3,1,3,-1,-3,-1,3,1,-4,0,4,0,-3,-2,3,2,15,-3,2,3,-1,-4,1,4,1,-4,-18,4,3,-3,-3,3,2,-4,-2,4,-2,-4,4,0,5};
+   
+   auto diffuseFunction = [&] ( TTreeReader &reader ) {
+      TTreeReaderValue<int> xRV(reader, "x");
+      TTreeReaderValue<int> yRV(reader, "y");
+      TTreeReaderValue<int> layerRV(reader, "layer");
+      TTreeReaderValue<int> csRV(reader, "cs");
+      TTreeReaderValue<int> eventIDRV(reader, "eventID");
+      TTreeReaderValue<bool> isSecondaryRV(reader, "isSecondary");
+      TTreeReaderValue<float> edepRV(reader, "edep");
+      TTreeReaderValue<int> pdgRV(reader, "PDG");
+      
+      auto hitsMT = hitsTTO.Get();
+      TRandom3 *gRandomHere = new TRandom3(0);
+      
+      Int_t binPosLUT[12] = {};
+      for (Int_t i=0; i<12; i++) { binPosLUT[i] = pow(2, i); }
+
+      while (reader.Next()) {
+         auto thisX = *xRV;
+         auto thisY = *yRV;
+         auto thisLayer = *layerRV;
+         auto thisCS = *csRV;
+         auto thisEventID = *eventIDRV;
+         auto thisIsSecondary = *isSecondaryRV;
+         auto thisEdep = *edepRV;
+         auto thisPDG = *pdgRV;
+
+         if (thisCS < 27 && kUseExperimentalClusterPainting) {
+            randomClusterIdx = gRandomHere->Integer(CDB_sortIndex[thisCS+1] - CDB_sortIndex[thisCS]) + CDB_sortIndex[thisCS];
+            CDB_treeCluster->GetEntry(randomClusterIdx);
+
+            idx_x = 0;
+            for (Int_t i=0; i<10; i++) {
+               for (Int_t binPosPow = 0; binPosPow < 10; binPosPow++) {
+                  binPos = binPosLUT[binPosPow];
+                  if (binPos & CDB_hit_array[i]) {
+                     outX = thisX + (idx_x - CDB_x_mean) + 0.5;
+                     outY = thisY + (binPosPow - CDB_y_mean) + 0.5;
+                     hitsMT->appendPoint(outX, outY, thisLayer, thisEdep/CDB_clusterSize, thisEventID, thisIsSecondary, thisPDG);
+                  }
+               }
+            idx_x++;
+            }
+         }
+         else { // NO DATA EXISTS, MAKE CIRCLE
+            int circleSize = min(thisCS, 70);
+            for (Int_t i=0; i<circleSize; i++) {
+               outX = thisX + circleX[i] + 0.5;
+               outY = thisY + circleY[i] + 0.5;
+               hitsMT->appendPoint(outX, outY, thisLayer, thisEdep/circleSize, thisEventID, thisIsSecondary, thisPDG);
+            }
+         }
+      }
+   };
+
+   tp.Process(diffuseFunction);
+   ROOT::DisableImplicitMT();
+   
+   auto hitsShared = hitsTTO.Merge();
+   for (Int_t i=0; i<hitsShared->GetEntriesFast(); i++) {
+      hitsOut->appendHit(hitsShared->At(i));
+   }
+
+   hitsFile.Close(); 
+
+   return hitsOut;
+   
+}
+
 #endif

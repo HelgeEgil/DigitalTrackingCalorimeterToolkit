@@ -24,7 +24,18 @@ void Hits::Clear(Option_t *option) {
    hits_.Clear(option);
 }
 
-void Hits::appendPoint(Int_t x, Int_t y, Int_t layer,  Float_t edep, Int_t eventID, Bool_t isSecondary) {
+Long64_t Hits::Merge(TCollection *hlist) {
+   if (hlist) {
+      Hits * otherHits = nullptr;
+      TIter nOtherHits(hlist);
+      while ((otherHits = (Hits*) nOtherHits())) {
+         appendHits(otherHits);
+      }
+   }
+   return 1;
+}
+
+void Hits::appendPoint(Int_t x, Int_t y, Int_t layer,  Float_t edep, Int_t eventID, Bool_t isSecondary, Int_t PDGEncoding) {
    Int_t i = GetEntriesFast();
 
    if (kConcatenateHits) {
@@ -44,13 +55,13 @@ void Hits::appendPoint(Int_t x, Int_t y, Int_t layer,  Float_t edep, Int_t event
       }
       if (!added) {
          Hit *hit = (Hit*) hits_.ConstructedAt(i);
-         hit->set(x,y,layer,edep,eventID, isSecondary);
+         hit->set(x,y,layer,edep,eventID, isSecondary,PDGEncoding);
       }
    }
 
    else { 
       Hit *hit = (Hit*) hits_.ConstructedAt(i);
-      hit->set(x,y,layer,edep,eventID, isSecondary);
+      hit->set(x,y,layer,edep,eventID, isSecondary,PDGEncoding);
    }
 }
 

@@ -247,6 +247,7 @@ void  createSplines() {
       if (!in.good()) break;
       mcs_radius_per_layer_empirical[layer] = mu + 3 * sigma;
    }
+   in.close();
 
    splineDTC = new TSpline3("splineDTC", energiesDTC, rangesDTC, idxDTC);
    splineWater = new TSpline3("splineWater", energiesWater, rangesWater, idxWater);
@@ -311,19 +312,41 @@ void  createSplines() {
 
    if (kDoDiffusion) {
       Int_t lastClusterSize = -1;
-      CDB_fCluster = new TFile("Data/ClusterSizes/ALPIDE/database_final.root", "READ");
+      CDB_fCluster = new TFile("Data/ClusterSizes/ALPIDE/database_final_reduced.root", "READ");
       CDB_treeCluster = (TTree*) CDB_fCluster->Get("database");
       CDB_treeCluster->SetBranchAddress("size", &CDB_clusterSize);
       CDB_treeCluster->SetBranchAddress("x_mean", &CDB_x_mean);
       CDB_treeCluster->SetBranchAddress("y_mean", &CDB_y_mean);
       CDB_treeCluster->SetBranchAddress("hit_array", &CDB_hit_array, &CDB_b_hit_array);
+//      CDB_treeCluster->BuildIndex("size");
 
-      // Sort clusters based on cluster size
       for (int i=0; i<50; i++) CDB_sortIndex[i] = -1;
+      
+      // Load pre-sorted list 
+      in.open("Data/ClusterSizes/ALPIDE/sortIndex.csv");
+      Int_t clustersize_, index_;
+      while (1) {
+         in >> clustersize_ >> index_;
+         if (!in.good()) break;
+         CDB_sortIndex[clustersize_] = index_;
+      }
+      in.close();
 
-      cout << "Building index... " << CDB_treeCluster->GetEntriesFast() << " entries in treeCluster...";
-      CDB_treeCluster->BuildIndex("size");
-      CDB_index = (TTreeIndex*) CDB_treeCluster->GetTreeIndex();
+      /*
+      //      CDB_index = (TTreeIndex*) CDB_treeCluster->GetTreeIndex();
+
+      printf("Test... Should have correct CSs\n");
+      for (Int_t j=2; j<30; j++) {
+//         Long64_t local = CDB_treeCluster->LoadTree(CDB_index->GetIndex()[CDB_sortIndex[j]]);
+         CDB_treeCluster->GetEntry(CDB_sortIndex[j]);
+//         CDB_treeCluster->GetEntry(local);
+         printf("ClusterSize at j=%d is %d\n  hitarray: ", j, CDB_clusterSize);
+         for (int i=0; i<10; i++) { printf("%d ", CDB_hit_array[i]); }
+         cout << endl;
+      }
+          
+      // Sort clusters based on cluster size
+      
       for (int i=0; i<CDB_index->GetN()-1; i++) {
          Long64_t local = CDB_treeCluster->LoadTree(CDB_index->GetIndex()[i]);
          CDB_treeCluster->GetEntry(local);
@@ -332,7 +355,7 @@ void  createSplines() {
             lastClusterSize = CDB_clusterSize;
          }
       }
-      cout << "Done.\n";
+      */
    }
 }
 

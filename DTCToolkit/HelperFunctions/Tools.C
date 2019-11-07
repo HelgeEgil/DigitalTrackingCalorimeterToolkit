@@ -480,7 +480,7 @@ Bool_t isPointOutOfBounds(Cluster *point, Float_t padding) {
 Float_t getEdepFromCS(Int_t cs) {
    Float_t edep;
 
-   if (kUseExperimentalClustering)  edep = 0.10890 * pow(cs, 1.5384); // kev/u
+   if (kUseExperimentalClustering)  edep = 0.10890 * pow(cs, 1.5384); // kev/um
    else                             edep = 0.13345 * pow(cs, 1.06576);
 
    return edep;
@@ -489,7 +489,7 @@ Float_t getEdepFromCS(Int_t cs) {
 Int_t getCSFromEdep(Float_t edep) {
    Int_t cs;
 
-   if (kUseExperimentalClustering)  cs = 4.2267 * pow(edep, 0.6500) + 0.5;
+   if (kUseExperimentalClustering)  cs = 4.2267 * pow(edep, 0.6500) + 0.5; // kev/um
    else                             cs = 6.6177 * pow(edep, 0.9383 + 0.5);
 
    return cs;

@@ -4,6 +4,7 @@
 #include <vector>
 
 #include <TClonesArray.h>
+#include <TCollection.h>
 
 #include "Classes/Hit/Hit.h"
 #include "Classes/Cluster/Clusters.h"
@@ -32,10 +33,11 @@ public:
    virtual void      Clear(Option_t * = "");
    virtual void      Compress()           { hits_.Compress(); }
    void              sortHits()           { hits_.Sort(); }
+   Long64_t          Merge(TCollection *hlist);
    
    // Add and remove hits
    TObject         * removeHitAt(Int_t i) { return hits_.RemoveAt(i); }
-   void              appendPoint(Int_t x, Int_t y, Int_t layer = -1, Float_t edep = 0, Int_t event = -1, Bool_t isSecondary = false);
+   void              appendPoint(Int_t x, Int_t y, Int_t layer = -1, Float_t edep = 0, Int_t event = -1, Bool_t isSecondary = false, Int_t PDG = 0);
    void              appendHits(Hits *hits);
    void              appendHit(Hit *hit);
    void              removeHaloAtSigma(Float_t sigmaNumber);
@@ -49,6 +51,7 @@ public:
    virtual Int_t     getEventID(Int_t i)  { return At(i)->getEventID(); }
    virtual Float_t   getEdep(Int_t i)     { return At(i)->getEdep(); }
    virtual Bool_t    isSecondary(Int_t i) { return At(i)->isSecondary(); }
+   virtual Int_t     getPDG(Int_t i)      { return At(i)->getPDG(); }
    virtual Int_t     getI(Int_t x, Int_t y);
    
    // Layer indexing - optimizstion
@@ -62,7 +65,7 @@ public:
 
    // In file findClusters.C
    // Methods to find clusters from the hits
-   Clusters        * findClustersFromHits();
+   void              findClustersFromHits(Clusters * clusters);
    vector<Int_t>   * findNeighbours(Int_t index);
    vector<Int_t>   * getAllNeighboursFromCluster(Int_t i, vector<Int_t> *checkedIndices);
    void              appendNeighboursToClusters(vector<Int_t> *expandedCluster, Clusters *clusters);

@@ -13,10 +13,11 @@ class Hit : public TObject {
       Int_t    layerNo_;
       Int_t    eventID_;
       Bool_t   isSecondary_;
+      Int_t    pdg_;
 
   public:
       Hit();
-      Hit(Int_t x, Int_t y, Int_t layer = -1, Float_t edep_ = 0, Int_t eventID = 0, Bool_t isSecondary_ = false);
+      Hit(Int_t x, Int_t y, Int_t layer = -1, Float_t edep_ = 0, Int_t eventID = 0, Bool_t isSecondary_ = false, Int_t PDG = 0);
       Hit(Hit* hit);
       virtual ~Hit(); 
 
@@ -27,13 +28,15 @@ class Hit : public TObject {
       Int_t    getLayer()     { return layerNo_; }
       Int_t    getEventID()   { return eventID_; }
       Float_t  getEdep()      { return edep_; }
+      Int_t    getPDG()       { return pdg_; }
       Bool_t   isSecondary()  { return isSecondary_; }
       Int_t    getChip();
 
       void     setEventID(Int_t event)          { eventID_ = event; }
       void     setEdep(Float_t edep)            { edep_ = edep; }
       void     setSecondary(Bool_t isSecondary) { isSecondary_ = isSecondary; }
-      void     set(Int_t x, Int_t y, Int_t layerNo = -1, Float_t edep = 0, Int_t eventID = -1, Bool_t isSecondary = false);
+      void     setPDG(Int_t PDG)                { pdg_ = PDG; }
+      void     set(Int_t x, Int_t y, Int_t layerNo = -1, Float_t edep = 0, Int_t eventID = -1, Bool_t isSecondary = false, Int_t PDG = 0);
       void     set(Hit* hit);
       void     Clear(Option_t *);
       Int_t    Compare(const TObject *obj) const;

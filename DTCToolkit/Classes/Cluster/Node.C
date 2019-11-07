@@ -24,17 +24,6 @@ Node::Node(Node *parent, Cluster *connectedCluster, Float_t score) {
 }
 
 Node::~Node() {
-   // delete[] children_;
-   /*
-   if (getNChildren() > 0) {
-      for (Int_t i=0; i<nChildrenInNode; i++) { // max 5 children per node
-         if (getChild(i)) {
-            delete children_[i]; // illegal in 45 states
-            children_[i] = nullptr;
-         }
-      }
-   }
-   */
 }
 
 void  Node::deleteNodeTree() {

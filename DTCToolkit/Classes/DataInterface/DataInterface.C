@@ -521,7 +521,6 @@ void  DataInterface::getMCClustersThreshold(Int_t runNo, Clusters *clusters, Hit
          if (clusters && lastPropagated != eventID) {
             if (clusters->Last()) { // This would give segfault sometimes
                if (clusters->Last()->getEventID() == eventID && PDGEncoding > 1000) {
-//                  clusters->propagateSecondaryStatusFromTop(); // give all clusters with same eventID a secondary status
                   clusters->Last()->setSecondary(true);
                   lastPropagated = eventID;
                }
@@ -537,20 +536,15 @@ void  DataInterface::getMCClustersThreshold(Int_t runNo, Clusters *clusters, Hit
          continue;
       } 
 
-//      printf("%d Particle type %d with EID %d , pID %d, tID %d at z=%.1f and edep=%.2f keV\n", isSecondary, PDGEncoding, eventID, parentID, trackID, posZ,edep*1000);
-
       x = posX / dx + nx/2;
       y = posY / dy + ny/2;
 
-      if (layer < nLayers) { // in CHIP
-         if (hits)      hits->appendPoint(x,y,layer,edep*1000/14,eventID,isSecondary);
+      if (layer < nLayers) {
+         if (hits)      hits->appendPoint(x,y,layer,edep*1000/14,eventID,isSecondary,PDGEncoding);
          if (clusters)  clusters->appendClusterEdep(x,y,layer,edep*1000/14,eventID,isSecondary,PDGEncoding);
       }
-
       lastEventID = eventID;
-
    }
-//   printf("Events below threshold: %d\n", particlesBelowThreshold);
 }
 
 void  DataInterface::getMCClusters(Int_t runNo, Clusters *clusters, Hits * hits, Float_t useSpotX, Float_t useSpotY) {
@@ -646,7 +640,7 @@ void  DataInterface::getMCClusters(Int_t runNo, Clusters *clusters, Hits * hits,
          y = sumY/n / dy + ny/2;
 
          if (lastLayer < nLayers) {
-            if (hits)      hits->appendPoint(x, y, lastLayer, sum_edep/14, lastEventID, isSecondary);
+            if (hits)      hits->appendPoint(x, y, lastLayer, sum_edep/14, lastEventID, isSecondary, lastPDG);
             if (clusters)  clusters->appendClusterEdep(x,y, lastLayer, sum_edep/14, lastEventID, isSecondary, lastPDG);
          }
 
@@ -692,7 +686,7 @@ void  DataInterface::getMCClusters(Int_t runNo, Clusters *clusters, Hits * hits,
       y = sumY/n / dy + ny/2;
 
       if (lastLayer < nLayers && !std::isnan(x+y)) {
-         if (hits)      hits->appendPoint(x, y, lastLayer, sum_edep/14, lastEventID, isSecondary);
+         if (hits)      hits->appendPoint(x, y, lastLayer, sum_edep/14, lastEventID, isSecondary, lastPDG);
          if (clusters)  clusters->appendClusterEdep(x, y, lastLayer, sum_edep/14, lastEventID, isSecondary, lastPDG);
       }
 

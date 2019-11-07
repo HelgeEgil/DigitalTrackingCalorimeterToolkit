@@ -449,10 +449,6 @@ void getTracksReconstructionEfficiency(Int_t dataType, Float_t energy, Float_t d
 
    run_energy = energy;
    run_degraderThickness = degraderThickness;
-   
-   if (kUseDegrader) {
-      run_energy = getEnergyAtWEPL(energy, degraderThickness);
-   }
 
    Int_t nRunArray[12] = {3,4,5,8,16,32,64,128,181,256,512,1024};
 
@@ -467,10 +463,6 @@ void getTracksReconstructionEfficiency(Int_t dataType, Float_t energy, Float_t d
       if (totalNumberOfRuns > 10000) totalNumberOfRuns = 10000;
 
       Tracks * tracks = loadOrCreateTracks(1, totalNumberOfRuns, dataType, energy);
-      tracks->removeHighAngleTracks(75);
-      tracks->removeThreeSigmaShortTracks();
-      tracks->removeNuclearInteractions();
-      tracks->extrapolateToLayer0();
 
       Track *thisTrack;
       Int_t EID, thisEID;
@@ -489,9 +481,35 @@ void getTracksReconstructionEfficiency(Int_t dataType, Float_t energy, Float_t d
 
       Float_t ratioFirstAndLastAllTracks = (float) nFirstAndLastAllTracks / nTotal;
       Float_t readoutAbsorber = (roundf(kAbsorberThickness) == kAbsorberThickness) ? kAbsorberThickness : kAbsorberThickness*10;
+   
+      Float_t  cutHalo = 12;
+      Float_t  cutMaxAngle = 60;
+      Float_t  cutAngle = 40;
+      Float_t  cutEdep = 10;
+   
+      tracks->removeHighAngleTracks(cutAngle); // mrad
+      tracks->removeHighAngularChangeTracks(cutMaxAngle); // mrad
+      tracks->doTrackFit();
+      tracks->removeNuclearInteractions();
+      tracks->removeThreeSigmaShortTracks();
+      
+      Int_t nTotalAfterFilter = 0;
+      Int_t nFirstAndLastAllTracksAfterFilter = 0;
 
-      ofstream file2(Form("OutputFiles/lastLayerCorrect_different_nRuns_%.0f.csv", kAbsorberThickness), ofstream::out | ofstream::app);
-      file2 << readoutAbsorber << " " << nRuns << " " << " " << ratioFirstAndLastAllTracks << endl;
+      for (Int_t j=0; j<tracks->GetEntriesFast(); j++) {
+         thisTrack = tracks->At(j);
+         if (!thisTrack) continue;
+         nTotalAfterFilter++;
+
+         if (thisTrack->isFirstAndLastEventIDEqual() && tracks->getNMissingClustersWithEventID(thisTrack->getEventID(0), thisTrack->Last()->getLayer(), 1) == 0) {
+            nFirstAndLastAllTracksAfterFilter++;
+         }
+      }
+      
+      Float_t ratioFirstAndLastAllTracksAfterFilter = (float) nFirstAndLastAllTracksAfterFilter / nTotalAfterFilter;
+
+      ofstream file2(Form("OutputFiles/lastLayerCorrect_different_nodiff_nRuns_%.0f.csv", kAbsorberThickness), ofstream::out | ofstream::app);
+      file2 << readoutAbsorber << " " << nRuns << " " << " " << ratioFirstAndLastAllTracks << " " << ratioFirstAndLastAllTracksAfterFilter << endl;
       file2.close();
       
       delete tracks;
@@ -701,11 +719,13 @@ void drawTracksDepthDose(Int_t Runs, Int_t dataType, Bool_t recreate, Float_t en
    run_energy = energy;
    kDataType = dataType;
    kEventsPerRun = eventsPerRun;
-   
+  
+  /* 
    if (kUseDegrader) {
       run_energy = getEnergyFromDegraderThickness(degraderThickness);
       printf("Using degrader, expecting nominal residual energy %.2f MeV\n", run_energy);
    }
+   */
    
    Bool_t         removeHighAngleTracks = true;
    Bool_t         removeNuclearInteractions = false;
@@ -778,10 +798,12 @@ void drawTracksRangeHistogram(Int_t Runs, Int_t dataType, Bool_t recreate, Float
    kEventsPerRun = eventsPerRun;
    kDoTracking = doTracking;
    kFilterNuclearInteractions = excludeNuclearInteractions;
-   
+  
+  /* 
    if (kUseDegrader) {
       run_energy = getEnergyFromDegraderThickness(degraderThickness);
    }
+   */
 
    printf("Using water degrader of thickness %.0f mm, the initial energy of %.0f MeV is reduced to %.1f MeV.\n", degraderThickness, energy, run_energy);
 
@@ -1188,14 +1210,14 @@ void drawClusterSizeDistribution(Int_t Runs, Int_t dataType, Bool_t recreate, Fl
          di->getMCFrame(i, cf);
          cf->diffuseFrame(new TRandom3(0));
          hits = cf->findHits();
-         clusters = hits->findClustersFromHits();
+         hits->findClustersFromHits(clusters);
       }
 
       else if (dataType == kData) {
          di->getDataFrame(i, cf, energy);
          hits = cf->findHits();
          printf("Found %d hits\n", hits->GetEntriesFast());
-         clusters = hits->findClustersFromHits();
+         hits->findClustersFromHits(clusters);
          printf("Found %d clusters\n", clusters->GetEntriesFast());
          clusters->removeSmallClusters(2);
          clusters->removeAllClustersAfterLayer(8);
@@ -1807,9 +1829,10 @@ void analyseHelium(Int_t Runs, Int_t dataType, Bool_t recreate, Int_t switchLaye
    nTotal = tracks->GetEntries();
 
    // From a no-halo filter run
-   nTotal = 126881;
-   nPrimariesEnd = 50265;
-   nSecondariesEnd = 76616;
+   
+   nTotal = 126923;
+   nPrimariesEnd = 65433;
+   nSecondariesEnd = 61490;
 
    Float_t  cutHalo = 12;
    Float_t  cutMaxAngle = 60;
@@ -1817,7 +1840,6 @@ void analyseHelium(Int_t Runs, Int_t dataType, Bool_t recreate, Int_t switchLaye
    Float_t  cutEdep = 10;
 
    printf("Found in total %d tracks. %d primaries, %d secondaries\n", nTotal, nPrimariesEnd, nSecondariesEnd);
-
 
 // Don't use
 //   track->removeHighChiSquare(210);
@@ -1864,8 +1886,8 @@ void analyseHelium(Int_t Runs, Int_t dataType, Bool_t recreate, Int_t switchLaye
 
    TCanvas *cAllEdep = new TCanvas("cAllEdep","cAllEdep",1200,600);
    cAllEdep->Divide(2,1);
-   TH1F * cAllEdepP = new TH1F("allEdepP", "Primary at end;E_{dep} all layers [keV/#mum];Entries",100,0,100);
-   TH1F * cAllEdepS = new TH1F("allEdepS", "Secondary at end;E_{dep} all layers [kev/#mum];Entries",100,0,100);
+   TH1F * cAllEdepP = new TH1F("allEdepP", "Primary at end;E_{dep} last two [keV/#mum];Entries",100,0,100);
+   TH1F * cAllEdepS = new TH1F("allEdepS", "Secondary at end;E_{dep} last two layers [kev/#mum];Entries",100,0,100);
    
    TCanvas *cAngle = new TCanvas("cAngle","cAngle",1200,600);
    cAngle->Divide(2,1);
@@ -1893,6 +1915,11 @@ void analyseHelium(Int_t Runs, Int_t dataType, Bool_t recreate, Int_t switchLaye
    cMaxDeltaTheta->Divide(2,1);
    TH1F *hMaxDeltaThetaP = new TH1F("hMaxDeltaThetaP", "Primary at end;Max layer-wise angular change [mrad];Entries",100,0,300);
    TH1F *hMaxDeltaThetaS = new TH1F("hMaxDeltaThetaS", "Secondary at end;Max layer-wise angular change [mrad];Entries",100,0,300);
+
+   TCanvas *cCS = new TCanvas("cCS", "Cluster sizes", 1200,600);
+   cCS->Divide(2,1);
+   TH1F *hCSP = new TH1F("hCSP", "Primary at end;Cluster size;Entries", 50, 0, 50);
+   TH1F *hCSS = new TH1F("hCSS", "Secondary at end;Cluster size;Entries", 50, 0, 50);
 
    TCanvas *cHits = new TCanvas("cHits", "cHits", 1200,600);
    cHits->Divide(2,1);
@@ -1949,6 +1976,7 @@ void analyseHelium(Int_t Runs, Int_t dataType, Bool_t recreate, Int_t switchLaye
          angleP->Fill(angle);
          rangeP->Fill(range);
          braggP->Fill(bragg);
+         hCSP->Fill(thisTrack->Last()->getSize());
 
          if (last>5) { // thisTrack->At(last-5) && thisTrack->At(last-4)) {
             float edep_mid = thisTrack->getDepositedEnergy(last-5);
@@ -1964,6 +1992,7 @@ void analyseHelium(Int_t Runs, Int_t dataType, Bool_t recreate, Int_t switchLaye
          angleS->Fill(angle);
          rangeS->Fill(range);
          braggS->Fill(bragg);
+         hCSS->Fill(thisTrack->Last()->getSize());
          hMaxDeltaThetaS->Fill(thisTrack->getMaximumSlopeAngleChange() * 3.1415 / 180 * 1000);
          if (last>5) {
             float edep_mid = thisTrack->getDepositedEnergy(last-5);
@@ -2011,6 +2040,8 @@ void analyseHelium(Int_t Runs, Int_t dataType, Bool_t recreate, Int_t switchLaye
    hMaxDeltaThetaS->SetFillColor(kGreen-3);
    cHitsP->SetFillColor(kGray);
    cHitsS->SetFillColor(kGreen-3);
+   hCSP->SetFillColor(kGray);
+   hCSS->SetFillColor(kGreen-3);
 
    // Please tell me how to do this properly with gStyle
    rangePS->SetLineColor(kBlack);
@@ -2029,6 +2060,8 @@ void analyseHelium(Int_t Runs, Int_t dataType, Bool_t recreate, Int_t switchLaye
    hMaxDeltaThetaS->SetLineColor(kBlack);
    cHitsP->SetLineColor(kBlack);
    cHitsS->SetLineColor(kBlack);
+   hCSP->SetLineColor(kBlack);
+   hCSS->SetLineStyle(kBlack);
 
    TLine *l1, *l2;
 
@@ -2130,6 +2163,11 @@ void analyseHelium(Int_t Runs, Int_t dataType, Bool_t recreate, Int_t switchLaye
    l1->SetLineColor(kBlack);
    l1->Draw();
 
+   cCS->cd(1);
+   hCSP->Draw();
+   cCS->cd(2);
+   hCSS->Draw();
+
    // True positive: Secondaries removed by filter
    // True negative: Primaries not removed filter
    // False positive: Primaries removed by filter
@@ -2196,7 +2234,7 @@ void analyseHelium(Int_t Runs, Int_t dataType, Bool_t recreate, Int_t switchLaye
    float chi2FN = (braggS->Integral() - braggS->Integral(bmin,100)) / float(ntracks);
 
    bmin = cAllEdepP->GetXaxis()->FindBin(20);
-   int removedByAllEdep = cAllEdepS->Integral(0,bmin) + cAllEdepP->Integral(bmin,100);
+   int removedByAllEdep = cAllEdepS->Integral(0,bmin) + cAllEdepP->Integral(0, bmin);
    int removedByAllEdep2nd = cAllEdepS->Integral(0,bmin);
    
    float allEdepTP = cAllEdepS->Integral(bmin,100) / float(ntracks);
@@ -2474,14 +2512,14 @@ void analyseHelium(Int_t Runs, Int_t dataType, Bool_t recreate, Int_t switchLaye
    }
 
    leg->SetTextFont(22);
-   leg->SetTextSize(0.04);
+   leg->SetTextSize(0.05);
    leg->Draw();
  
    // ADD % TO AXIS
    TText *t = new TText();
    hPDGpro->GetYaxis()->SetLabelOffset(5);
    t->SetTextAlign(32);
-   t->SetTextSize(0.04);
+   t->SetTextSize(0.05);
    t->SetTextFont(22);
    Float_t at;
    for (Int_t i=0; i<8;i++) {
@@ -2638,17 +2676,19 @@ void drawTracks3D(Int_t Runs, Int_t dataType, Bool_t recreate, Int_t switchLayer
       else numberOfSecondaries++;
    }
    cout << "Number of primaries = " << numberOfPrimaries << ", number of secondaries = " << numberOfSecondaries << endl;
+   
+   Float_t  cutHalo = 12;
+   Float_t  cutMaxAngle = 60;
+   Float_t  cutAngle = 40;
+   Float_t  cutEdep = 10;
  
-   tracks->removeHighAngleTracks(30); // mrad -> 30 He
-   tracks->removeNuclearInteractions();
-   tracks->removeEmptyTracks();
-
-   tracks->fillOutIncompleteTracks(0.05);
+   /*
+   tracks->removeHighAngleTracks(cutAngle); // mrad
+   tracks->removeHighAngularChangeTracks(cutMaxAngle); // mrad
    tracks->doTrackFit();
-
-//   tracks->removeHighChiSquare(2500);
+   tracks->removeNuclearInteractions();
    tracks->removeThreeSigmaShortTracks();
-   tracks->removeEmptyTracks();
+   */
 
    Bool_t   kDraw = true;
 

@@ -48,7 +48,6 @@ Bool_t   kHelium = true;
 Bool_t   kSpotScanning = false;
 Bool_t   kPhantom = false;
 Bool_t   kDoTracking = true; 
-Bool_t   kUseEmpiricalMCS = true;
 Bool_t   kFilterNuclearInteractions = false; 
 Bool_t   kDoDiffusion = true;
 Int_t    kEventsPerRun = 50;
@@ -66,7 +65,7 @@ Bool_t   kUseDegrader = false;
 
 const Int_t sizeOfEventID = 25;
 const Int_t nChildrenInNode = 2; // max concurrent track segments to follow
-const Float_t     kMaxTrackScore = 0.3; // This number is a placeholder, optimized through MC scans in Classes/Clusters/findTracks.C
+Float_t     kMaxTrackScore = 0.3; // This number is a placeholder, optimized through MC scans in Classes/Clusters/findTracks.C
 Float_t     kMaxTrackAngle = 0.05; // allow for consecutive 50 mrad changes
 Bool_t      kConcatenateHits = false;
 
@@ -113,6 +112,7 @@ Bool_t kUseCSDA = false; // Use CSDA for range calculations and MC truth input
 // Use experimental ALPIDE data clustering model -- empirical model with updated parameters
 // Otherwise use "old" gaussian model from FOCAL data
 const Bool_t kUseExperimentalClustering = true;
+const Bool_t kUseExperimentalClusterPainting = true;
 const Bool_t kUseRefinedClustering = true;
 
 // Tracking parameters

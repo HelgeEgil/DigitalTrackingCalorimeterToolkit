@@ -11,4 +11,6 @@ Clusters  * getClusters(Int_t Runs, Int_t dataType = kMC, Int_t frameType = kCal
 void        saveTracks(Tracks* tracks, Clusters * clusters, Int_t dataType, Float_t energy);
 Tracks    * loadTracks(Int_t Runs, Int_t dataType, Float_t energy, Clusters *clusters);
 Tracks    * loadOrCreateTracks(Bool_t recreate, Int_t Runs, Int_t dataType, Float_t energy, Float_t spotx = 0, Float_t spoty = 0, Clusters *c = nullptr);
+Hits      * diffuseHits(TRandom3 *gRandom, Hits * hits);
+Hits      * diffuseHitsMT(Hits * hits);
 #endif
