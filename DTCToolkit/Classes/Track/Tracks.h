@@ -70,7 +70,7 @@ class Tracks : public TObject {
       virtual Bool_t    isUsedClustersInTrack(Int_t i)         { return At(i)->isUsedClustersInTrack(); }
       virtual Int_t     getNumberOfConflictClusters(Int_t i)   { return At(i)->getNumberOfConflictClusters(); }
       virtual void      extrapolateToLayer0();
-      virtual void      doTrackFit();
+      virtual void      doTrackFit(Bool_t freeScale = false);
       void              removeNANs();
       void              propagateSecondaryStatus();
 
@@ -103,6 +103,7 @@ class Tracks : public TObject {
       void              fillOutIncompleteTracks(float angleLimit = 0.1);
       void              removeEmptyTracks();
       void              removeTracksEndingInGapRegion();
+      void              removeTracksEndingInHalo(Float_t haloRadius = 15);
 
    ClassDef(Tracks,2)
 };

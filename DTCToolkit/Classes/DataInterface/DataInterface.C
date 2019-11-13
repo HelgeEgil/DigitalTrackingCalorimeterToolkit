@@ -460,7 +460,7 @@ void  DataInterface::getMCClustersThreshold(Int_t runNo, Clusters *clusters, Hit
 
    // let = (n/4.23)^1/0.65 [Pettersen et al. Phys Med 2019]
    // n < 2 -> let < (2/4.23)^1/0.65 = 0.316 keV/um
-   // edep = let * 14 um = 0.316 kev/um * 14 um = 4.4e-3 MeV ~ 4e-3 Mev
+   // edep = let * 14 um = 0.316 kev/um * 14 um = 4.4e-3 MeV ~ 4e-3 MeV
 
    Float_t threshold = 4e-3;
    Int_t particlesBelowThreshold = 0;
@@ -480,7 +480,11 @@ void  DataInterface::getMCClustersThreshold(Int_t runNo, Clusters *clusters, Hit
       }
 
       fChain->GetEntry(jentry);
-      if (lastEventID != eventID) primariesInSpot_++;
+      if (lastEventID != eventID) {
+         primariesInSpot_++;
+         isSecondary = false;
+      }
+
       
       if (!kSpotScanning) {
          if (eventID < eventIdFrom) {
@@ -513,36 +517,67 @@ void  DataInterface::getMCClustersThreshold(Int_t runNo, Clusters *clusters, Hit
       
       layer = level1ID + baseID - 1;
       if (kPhantom) layer++;
-
-      if (parentID != 0) { // Secondary track
+      
+      if (parentID != 0 || TString(processName) == "alphaInelastic") { // Secondary track
          isSecondary = true;
+
+         /*
+         if (clusters) {
+            clusters->propagateSecondaryStatusFromTop();
+            }
+
+         if (hits) {
+            hits->propagateSecondaryStatusFromTop();
+         }
+         */
 
          // If secondary particle is not electron or gamma, propagate secondary status to eventID-particle
          if (clusters && lastPropagated != eventID) {
             if (clusters->Last()) { // This would give segfault sometimes
                if (clusters->Last()->getEventID() == eventID && PDGEncoding > 1000) {
                   clusters->Last()->setSecondary(true);
+//                  clusters->propagateSecondaryStatusFromTop(eventID);
+                  lastPropagated = eventID;
+               }
+            }
+         }
+
+         if (hits && lastPropagated != eventID) {
+            if (hits->Last()) { // This would give segfault sometimes
+               if (hits->Last()->getEventID() == eventID && PDGEncoding > 1000) {
+                  hits->Last()->setSecondary(true);
+//                  hits->propagateSecondaryStatusFromTop(eventID);
                   lastPropagated = eventID;
                }
             }
          }
       }
       else {
-         isSecondary = false;
+//         isSecondary = false;
       }
       
       if (edep < threshold) {
          particlesBelowThreshold++;
          continue;
-      } 
+      }
 
       x = posX / dx + nx/2;
       y = posY / dy + ny/2;
-
-      if (layer < nLayers) {
-         if (hits)      hits->appendPoint(x,y,layer,edep*1000/14,eventID,isSecondary,PDGEncoding);
-         if (clusters)  clusters->appendClusterEdep(x,y,layer,edep*1000/14,eventID,isSecondary,PDGEncoding);
+/*
+      printf("VolumeIDs layer %d: ", layer);
+      for (Int_t i=0; i<10; i++) {
+         printf("%d = %d; ", i, volumeID[i]);
       }
+      printf("\n");
+*/
+
+      if (volumeID[3] == 0 && volumeID[4] == 0 && volumeID[5] == -1) {
+         if (layer < nLayers) {
+            if (hits)      hits->appendPoint(x,y,layer,edep*1000/14,eventID,isSecondary,PDGEncoding);
+            if (clusters)  clusters->appendClusterEdep(x,y,layer,edep*1000/14,eventID,isSecondary,PDGEncoding);
+         }
+      }
+
       lastEventID = eventID;
    }
 }
@@ -627,7 +662,7 @@ void  DataInterface::getMCClusters(Int_t runNo, Clusters *clusters, Hits * hits,
 
       if (lastEventID == eventID && trackID > 1) {// && PDGEncoding != 100002004) {
          isSecondary = true;
-         cout << "Particle " << PDGEncoding << " generated from " << lastProcessName[0] << " at " << lastZ << endl;
+//         cout << "Particle " << PDGEncoding << " generated from " << lastProcessName[0] << " at " << lastZ << endl;
       }
 
       if (TString(lastProcessName) == "alphaInelastic" || lastParentID > 0) {

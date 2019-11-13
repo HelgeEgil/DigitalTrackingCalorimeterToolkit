@@ -137,7 +137,7 @@ void Tracks::removeTracksLeavingDetector() {
       if (!lastCluster) continue;
 
       lastLayer = lastCluster->getLayer();
-      if (lastLayer == 0) continue;
+      if (lastLayer <= 1) continue;
 
       showDebug("Tracks::removeTracksLeavingDetector(): lastLayer = " << lastLayer << endl);
       nextPoint = getTrackExtrapolationToLayer(At(i), lastLayer + 1);
@@ -449,9 +449,12 @@ void Tracks::removeTracksEndingInGapRegion() {
       thisTrack = At(i);
       if (!thisTrack) continue;
       lastLayer = thisTrack->Last()->getLayer();
+
+      if (lastLayer <= 1) continue;
       
       extrapolatedCluster = getTrackExtrapolationToLayer(thisTrack, lastLayer + 1);
       y = extrapolatedCluster->getYmm();
+      delete extrapolatedCluster;
 
       if (gapYfrom < y && y < gapYto) {
          removeTrack(thisTrack);
@@ -464,6 +467,39 @@ void Tracks::removeTracksEndingInGapRegion() {
    Compress();
 
    printf("Removed %d tracks ending in gap region\n", removedTracks);
+}
+
+void Tracks::removeTracksEndingInHalo(Float_t haloRadius) {
+   Track     * thisTrack = nullptr;
+   Cluster   * extrapolatedCluster = nullptr;
+   Int_t       lastLayer, removedTracks = 0;
+   Float_t     x,y;
+
+   for (Int_t i=0; i<GetEntriesFast(); i++) {
+      thisTrack = At(i);
+      if (!thisTrack) continue;
+      lastLayer = thisTrack->Last()->getLayer();
+      if (thisTrack->Last()->getDepositedEnergy() > 15) continue;
+
+      if (lastLayer <= 1) continue;
+
+      extrapolatedCluster = getTrackExtrapolationToLayer(thisTrack, lastLayer + 1);
+      if (!extrapolatedCluster) continue;
+
+      x = extrapolatedCluster->getXmm();
+      y = extrapolatedCluster->getYmm();
+      delete extrapolatedCluster;
+
+      if (sqrt(x*x+y*y) > haloRadius) {
+         removeTrack(thisTrack);
+         removedTracks++;
+         continue;
+      }
+   }
+   removeEmptyTracks();
+   Compress();
+
+   printf("Removed %d tracks ending in halo region.\n", removedTracks);
 }
 
 void Tracks::removeHighChiSquare(Float_t chi2limit) {
@@ -502,7 +538,7 @@ void Tracks::removeNuclearInteractions() {
    for (Int_t i=0; i<nTotal; i++) {
       thisTrack = At(i);
       if (!At(i)) continue;
-      if (thisTrack->doesTrackEndAbruptly()) {
+      if (thisTrack->doesTrackEndAbruptly() || thisTrack->getAverageDepositedEnergy(0, thisTrack->GetEntriesFast()-5) < 3.5) {
          if (thisTrack->Last()->isSecondary()) nRemovedNuclear++;
          removeTrack(thisTrack);
          nRemoved++;
@@ -550,7 +586,14 @@ void Tracks::removeThreeSigmaShortTracks() {
    for (Int_t i=0; i<=nTotal; i++) {
       thisTrack = At(i);
       if (!At(i)) continue;
+      /*
       if (getUnitFromTL(thisTrack->getFitParameterRange()) < cutRangeLow || getUnitFromTL(thisTrack->getFitParameterRange()) > cutRangeHigh) {
+         if (thisTrack->Last()->isSecondary()) nRemovedNuclear++;
+         removeTrack(thisTrack);
+         nRemoved++;
+      }
+      */
+      if (getUnitFromTL(thisTrack->getRangemm()) < cutRangeLow || getUnitFromTL(thisTrack->getRangemm()) > cutRangeHigh) {
          if (thisTrack->Last()->isSecondary()) nRemovedNuclear++;
          removeTrack(thisTrack);
          nRemoved++;

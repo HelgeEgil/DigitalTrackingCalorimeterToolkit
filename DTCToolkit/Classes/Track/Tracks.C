@@ -81,6 +81,7 @@ void Tracks::appendTrack(Track *copyTrack, Int_t startOffset /* default 0 */) {
 
       track->appendCluster(copyTrack->At(i), startOffset);
    }
+   track->setIncomplete(copyTrack->isIncomplete());
    showDebug(endl);
 }
 
@@ -157,10 +158,10 @@ void Tracks::extrapolateToLayer0() {
    }
 }
 
-void Tracks::doTrackFit() {
+void Tracks::doTrackFit(Bool_t freeScale) {
    for (Int_t i=0; i<GetEntriesFast(); i++) {
       if (!At(i)) continue;
-      At(i)->doTrackFit();
+      At(i)->doTrackFit(freeScale);
    }
 }
 

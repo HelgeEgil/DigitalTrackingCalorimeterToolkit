@@ -107,7 +107,7 @@ Tracks * loadOrCreateTracks(Bool_t recreate, Int_t Runs, Int_t dataType, Float_t
    Tracks * tracks = nullptr;
    
    if (recreate) {
-      tracks = getTracksFromClustersMT(Runs, dataType, kCalorimeter, energy, spotx, spoty, clusters);
+      tracks = getTracksFromClusters(Runs, dataType, kCalorimeter, energy, spotx, spoty, clusters);
       saveTracks(tracks, clusters, dataType, energy);
    }
 
@@ -115,7 +115,7 @@ Tracks * loadOrCreateTracks(Bool_t recreate, Int_t Runs, Int_t dataType, Float_t
       tracks = loadTracks(Runs, dataType, energy, clusters);
       if (!tracks) {
          cout << "!tracks, creating new file\n";
-         tracks = getTracksFromClustersMT(Runs, dataType, kCalorimeter, energy, spotx, spoty, clusters);
+         tracks = getTracksFromClusters(Runs, dataType, kCalorimeter, energy, spotx, spoty, clusters);
          saveTracks(tracks, clusters, dataType, energy);
       }
    }
@@ -150,8 +150,8 @@ Tracks * getTracksFromClusters(Int_t Runs, Int_t dataType, Int_t frameType, Floa
       if (kDoDiffusion) {
          Hits * hits = new Hits();
          Hits * diffusedHits = nullptr;
-         di->getMCClusters(i, nullptr, hits, spotx, spoty);
-//         hits->removeHaloAtSigma(6);
+         di->getMCClustersThreshold(i, nullptr, hits, spotx, spoty);
+//         hits->removeHaloAtRadius(20);
          hits->sortHits(); 
          diffusedHits = diffuseHits(gRandom, hits);
          diffusedHits->sortHits();
@@ -164,9 +164,14 @@ Tracks * getTracksFromClusters(Int_t Runs, Int_t dataType, Int_t frameType, Floa
       }
       else {
          di->getMCClustersThreshold(i, clusters, nullptr, spotx, spoty);
-//         Int_t nRem = clusters->removeClustersInGap(1, 0);
+         showDebug("Found " << clusters->GetEntries() << " clusters...removing halo...");
+//         clusters->removeHaloAtRadius(30);
+         showDebug("ok\n");
+
+//       Int_t nRem = clusters->removeClustersInGap(1, 0); 
+      }
          
-         clusters->removeHaloAtSigma(6);
+      if (saveClusters) {
          for (Int_t j=0; j<=clusters->GetEntriesFast(); j++) {
             if (!clusters->At(j)) continue;
             saveClusters->appendCluster(clusters->At(j));
@@ -207,7 +212,6 @@ Tracks * getTracksFromClusters(Int_t Runs, Int_t dataType, Int_t frameType, Floa
       tracks->removeNANs();
       showDebug("ok!\nsortTracks...");
       tracks->sortTracks(); // reverse order from retrograde reconstruction
-
       tracks->removeEmptyTracks();
       
       t3.Start(false);
@@ -220,6 +224,16 @@ Tracks * getTracksFromClusters(Int_t Runs, Int_t dataType, Int_t frameType, Floa
       tracks->CompressClusters();
       showDebug("ok\n");
       
+      // Flag tracks as too short
+      Track * thisTrack;
+      tracks->appendClustersWithoutTrack(clusters->getClustersWithoutTrack());
+      for (Int_t i=0; i<tracks->GetEntriesFast(); i++) {
+         thisTrack = tracks->At(i);
+         if (tracks->getNMissingClustersWithEventID(thisTrack->getEventID(0), thisTrack->Last()->getLayer(), i)) {
+            thisTrack->setIncomplete(true);
+         }
+      }
+
       showDebug("append tracks to alltracks...");
       for (Int_t j=0; j<tracks->GetEntriesFast(); j++) {
          if (!tracks->At(j)) continue;
@@ -280,7 +294,7 @@ Tracks * getTracksFromClustersMT(Int_t Runs, Int_t dataType, Int_t frameType, Fl
          Hits * diffusedHits = nullptr;
          t3.Start(false);
          di->getMCClustersThreshold(runID, nullptr, hits, spotx, spoty);
-//         hits->removeHaloAtSigma(6);
+         hits->removeHaloAtRadius(15);
          hits->sortHits();
          t3.Stop();
          t4.Start(false);
@@ -316,7 +330,7 @@ Tracks * getTracksFromClustersMT(Int_t Runs, Int_t dataType, Int_t frameType, Fl
 
       else {
          di->getMCClustersThreshold(runID, clusters, nullptr, spotx, spoty);
-         clusters->removeHaloAtSigma(6);
+         clusters->removeHaloAtRadius(15);
       }
       
       if (saveClusters) {
@@ -387,6 +401,15 @@ Tracks * getTracksFromClustersMT(Int_t Runs, Int_t dataType, Int_t frameType, Fl
       allTracks->appendTrack(allTracksShared->At(i));
    }
    allTracks->appendClustersWithoutTrack(allTracksShared->getClustersWithoutTrack());
+      
+   // Flag tracks as too short
+   Track * thisTrack;
+   for (Int_t i=0; i<allTracks->GetEntriesFast(); i++) {
+      thisTrack = allTracks->At(i);
+      if (allTracks->getNMissingClustersWithEventID(thisTrack->getEventID(0), thisTrack->Last()->getLayer(), i)) {
+         thisTrack->setIncomplete(true);
+      }
+   }
 
    allTracks->SetOwner(kTRUE);
    clusterFile.Close();
@@ -404,7 +427,6 @@ Tracks * getTracksFromClustersMT(Int_t Runs, Int_t dataType, Int_t frameType, Fl
    allTracks->CompressClusters();
    allTracks->removeEmptyTracks();
    
-//   allTracks->appendClustersWithoutTrack(clusters->getClustersWithoutTrack());
 
    printf("Timing: Cluster retrieval: %.3f s. Tracking: %.3f s. hits log %.3f s, diffusion %.3f s, findClusterFromHits %.3f s\n", t1.CpuTime(), t2.CpuTime(), t3.CpuTime(), t4.CpuTime(), t5.CpuTime());
 
@@ -446,7 +468,7 @@ Hits * diffuseHits(TRandom3 *gRandom, Hits * hits) {
       randomClusterIdx = gRandom->Integer(CDB_sortIndex[cs+1] - CDB_sortIndex[cs]) + CDB_sortIndex[cs];
       CDB_treeCluster->GetEntry(randomClusterIdx);
 
-      if (cs < 27 && cs > 1) {
+      if (cs < 27 && kUseExperimentalClusterPainting) {
          idx_x = 0;
          for (Int_t i=0; i<10; i++) {
             for (Int_t binPosPow = 0; binPosPow < 10; binPosPow++) {

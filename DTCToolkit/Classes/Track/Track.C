@@ -26,6 +26,7 @@ Track::Track() : track_("DTC::Cluster", MaxTrackLength) {
    fitRange_ = 0;
    fitScale_ = 0;
    fitError_ = 0;
+   isIncomplete_ = false;
 }
 
 Track::Track(Cluster *cluster) : track_("DTC::Cluster", MaxTrackLength) {
@@ -35,6 +36,7 @@ Track::Track(Cluster *cluster) : track_("DTC::Cluster", MaxTrackLength) {
    fitRange_ = 0;
    fitScale_ = 0;
    fitError_ = 0;
+   isIncomplete_ = false;
 }
 
 Track::~Track() {

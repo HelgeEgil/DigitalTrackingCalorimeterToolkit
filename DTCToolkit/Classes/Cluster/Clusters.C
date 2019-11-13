@@ -419,8 +419,8 @@ Float_t Clusters::removeClustersInGap(Float_t gapSizemm, Float_t gapPosmm) {
 }
 
 
-void Clusters::propagateSecondaryStatusFromTop() {
-   Int_t eventID = Last()->getEventID();
+void Clusters::propagateSecondaryStatusFromTop(Int_t eventID) {
+   if (eventID < 0) eventID = Last()->getEventID();
    Int_t n = 0;
 
    for (Int_t i=GetEntriesFast()-1; i>0; i--) {
@@ -435,17 +435,34 @@ void Clusters::propagateSecondaryStatusFromTop() {
    printf("Back-converted %d particles with eventID %d as secondaries\n", n, eventID);
 }
 
-void Clusters::removeHaloAtSigma(Float_t sigmaNumber) {
+void Clusters::removeHaloAtRadius(Float_t radius) {
    Cluster * cluster = nullptr;
    float x,y;
-   float cut = 12; // from histo ID
+   Int_t lastRemovedEventID = -1;
 
    for (Int_t i=0; i<GetEntriesFast(); i++) {
       cluster = At(i);
+      if (!cluster) continue;
+
       x = cluster->getXmm();
       y = cluster->getYmm();
 
-      if (sqrt(x*x+y*y) > cut) {
+      if (sqrt(x*x+y*y) > radius) {
+         
+         // Propagate any found 2nd status in this track to i-1
+         if (i>0) {
+            if (lastRemovedEventID != getEventID(i)) {
+               for (Int_t j=i; j<i+200; j++) {
+                  if (!At(j) || !At(i-1)) break;
+                  if (getEventID(j) != getEventID(i)) break;
+                  if (At(j)->isSecondary()) {
+                     At(i-1)->setSecondary(true);
+                     break;
+                  }
+               }
+            }
+         }
+         lastRemovedEventID = At(i)->getEventID();
          removeClusterAt(i);
       }
    }

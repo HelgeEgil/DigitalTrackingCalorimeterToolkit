@@ -40,7 +40,7 @@ public:
    void              appendPoint(Int_t x, Int_t y, Int_t layer = -1, Float_t edep = 0, Int_t event = -1, Bool_t isSecondary = false, Int_t PDG = 0);
    void              appendHits(Hits *hits);
    void              appendHit(Hit *hit);
-   void              removeHaloAtSigma(Float_t sigmaNumber);
+   void              removeHaloAtRadius(Float_t radius);
 
    // Getters and setters
    virtual Int_t     getX(Int_t i)        { return At(i)->getX(); }
@@ -53,6 +53,7 @@ public:
    virtual Bool_t    isSecondary(Int_t i) { return At(i)->isSecondary(); }
    virtual Int_t     getPDG(Int_t i)      { return At(i)->getPDG(); }
    virtual Int_t     getI(Int_t x, Int_t y);
+   void              propagateSecondaryStatusFromTop(Int_t eventID = -1);
    
    // Layer indexing - optimizstion
    void              makeLayerIndex();

@@ -25,6 +25,7 @@ class Track : public TObject {
       Float_t  fitError_;
       Float_t  fitChi2_;
       Float_t  precomputeFactor;
+      Bool_t   isIncomplete_;
 
    public:
       Track();
@@ -63,6 +64,8 @@ class Track : public TObject {
       virtual Float_t   getDepositedEnergyError(Int_t i, Bool_t c = false) { return At(i)->getDepositedEnergyError(c); }
       Bool_t            isUsed(Int_t i)                  { return At(i)->isUsed(); }
       Bool_t            isSecondary(Int_t i)             { return At(i)->isSecondary(); }
+      void              setIncomplete(Bool_t inc)        { isIncomplete_ = inc; }
+      Bool_t            isIncomplete()                   { return isIncomplete_; }
       
       // TRACK PROPERTIES - Event IDs
       Int_t             getModeEventID(); // (vs. median)
@@ -79,7 +82,7 @@ class Track : public TObject {
       Float_t           getRiseFactor();
       Int_t             getNMissingLayers();
       void              propagateSecondaryStatus();
-      Float_t           getAverageDepositedEnergy(Int_t fromIdx, Int_t toIdxExclusive);
+      Float_t           getAverageDepositedEnergy(Int_t fromIdx = 0, Int_t toIdxExclusive = -1);
 
       // TRACK PROPERTIES - Ranges and energies
       // trackRangeCalculations.C

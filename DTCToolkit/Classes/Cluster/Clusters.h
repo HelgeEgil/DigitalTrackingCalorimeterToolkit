@@ -68,7 +68,7 @@ public:
    // Event ID operations
    Int_t             getClustersForEventID(Int_t eventID);
    void              findNumberOfClustersForEachEventID();
-   void              propagateSecondaryStatusFromTop();
+   void              propagateSecondaryStatusFromTop(Int_t eventID = -1);
 
    // Getters and setters
    virtual Float_t   getX(Int_t i)        { return At(i)->getX(); }
@@ -90,7 +90,7 @@ public:
    // Longer functions in Clusters.C
    virtual void makeLayerIndex();
    virtual void matchWithEventIDs(Hits * eventIDs);
-   virtual void removeHaloAtSigma(Float_t sigma);
+   virtual void removeHaloAtRadius(Float_t radius);
 
    // in file findTracks.C 
    // This is the tracking algo used in 2018 WoC paper

@@ -105,7 +105,7 @@ Float_t Track::getAverageDepositedEnergy(Int_t fromIdx, Int_t toIdxExclusive) { 
    Cluster * thisCluster = nullptr;
 
    if (fromIdx < 0) fromIdx = 0;
-   if (toIdxExclusive > GetEntriesFast()) toIdxExclusive = GetEntriesFast();
+   if (toIdxExclusive > GetEntriesFast() || toIdxExclusive < 0) toIdxExclusive = GetEntriesFast();
 
    for (Int_t i=fromIdx; i<toIdxExclusive; i++) {
       if (At(i)) {

@@ -220,7 +220,9 @@ Tracks * Clusters::findCalorimeterTracksWithMCTruth() {
       if (eventID != lastEventID) {
          // Cluster from new event ID encountered, store what we have already
          showDebug("Track at  is full, storing the pointer to tracks having currently " << tracks->GetEntriesFast() << " elements.\n");
-         tracks->appendTrack(track);
+         if (track->GetEntries()) {
+            tracks->appendTrack(track);
+         }
          track->Clear("C");
       }
 

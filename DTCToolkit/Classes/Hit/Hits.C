@@ -35,6 +35,7 @@ Long64_t Hits::Merge(TCollection *hlist) {
    return 1;
 }
 
+
 void Hits::appendPoint(Int_t x, Int_t y, Int_t layer,  Float_t edep, Int_t eventID, Bool_t isSecondary, Int_t PDGEncoding) {
    Int_t i = GetEntriesFast();
 
@@ -240,17 +241,32 @@ Int_t Hits::getLastIndexAfterY(Int_t y) {
    return idx;
 }
 
-void Hits::removeHaloAtSigma(Float_t sigmaNumber) {
+void Hits::propagateSecondaryStatusFromTop(Int_t eventID) {
+   if (eventID < 0) eventID = Last()->getEventID();
+   Int_t n = 0;
+
+   for (Int_t i=GetEntriesFast()-1; i>0; i--) {
+      if (!At(i)) continue;
+
+      if (eventID == At(i)->getEventID()) {
+         At(i)->setSecondary(true);
+         n++;
+      }
+      else break;
+   }
+   printf("Back-converted %d particles with eventID %d as secondaries\n", n, eventID);
+}
+
+void Hits::removeHaloAtRadius(Float_t radius) {
    Hit * hit = nullptr;
    float x,y;
-   float cut = 12;
 
    for (Int_t i=0; i<GetEntriesFast(); i++) {
       hit = At(i);
       x = hit->getXmm();
       y = hit->getYmm();
 
-      if (sqrt(x*x+y*y) > cut) {
+      if (sqrt(x*x+y*y) > radius) {
          removeHitAt(i);
       }
    }

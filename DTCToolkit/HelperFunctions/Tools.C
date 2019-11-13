@@ -408,6 +408,8 @@ Hit * sumHits(Hit * a, Hit * b) {
 }
 
 Cluster * getTrackExtrapolationToLayer(Track * track, Int_t layer) {
+   if (track->GetEntriesFast() == 1) return nullptr;
+
    Int_t fromLayer = track->getLayer(track->GetEntriesFast() - 1);
    showDebug("Cluster::getTrackExtrapolationToLayer(" << track <<"," << layer << "): fromLayer = " << fromLayer << endl);
 

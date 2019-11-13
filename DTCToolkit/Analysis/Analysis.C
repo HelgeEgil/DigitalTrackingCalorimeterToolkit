@@ -692,14 +692,21 @@ void drawFitScale(Int_t Runs, Int_t dataType, Bool_t recreate, Float_t energy) {
    TH1F *hScale = new TH1F("hScale", "Scale histogram", 800, 0, 50);
    TGraphErrors *outputGraph;
 
+   run_degraderThickness = 100;
    Tracks * tracks = loadOrCreateTracks(recreate, Runs, dataType, energy);
-   
+
    for (Int_t j=0; j<tracks->GetEntriesFast(); j++) {
       Track *thisTrack = tracks->At(j);
       if (!thisTrack) continue;
-      if (thisTrack->doesTrackEndAbruptly()) continue;
+     // if (thisTrack->doesTrackEndAbruptly()) continue;
+      Bool_t contains2nd = false;
+      for (Int_t i=0; i<=thisTrack->GetEntriesFast(); i++) {
+         if (!thisTrack->At(i)) continue;
+         contains2nd += thisTrack->At(i)->isSecondary();
+      }
+      if (contains2nd) continue;
 
-      outputGraph = (TGraphErrors*) thisTrack->doTrackFit(true, kUseCSDA);
+      outputGraph = (TGraphErrors*) thisTrack->doTrackFit(true, false); // kUseCSDA);
       if (!outputGraph) continue;
       
       Float_t fitScale = thisTrack->getFitParameterScale();
@@ -720,15 +727,13 @@ void drawTracksDepthDose(Int_t Runs, Int_t dataType, Bool_t recreate, Float_t en
    kDataType = dataType;
    kEventsPerRun = eventsPerRun;
   
-  /* 
    if (kUseDegrader) {
       run_energy = getEnergyFromDegraderThickness(degraderThickness);
       printf("Using degrader, expecting nominal residual energy %.2f MeV\n", run_energy);
    }
-   */
    
    Bool_t         removeHighAngleTracks = true;
-   Bool_t         removeNuclearInteractions = false;
+   Bool_t         removeNuclearInteractions = true;
    Bool_t         removeShortTracks = false;
    Float_t        fitRange, fitScale, fitError;
    Int_t          nCutDueToTrackEndingAbruptly = 0;
@@ -748,11 +753,27 @@ void drawTracksDepthDose(Int_t Runs, Int_t dataType, Bool_t recreate, Float_t en
    gPad->SetBottomMargin(0.05);
    gPad->SetLeftMargin(0.15);
 
-   Tracks * tracks = loadOrCreateTracks(recreate, Runs, dataType, run_energy,15,15);
+   Tracks * tracks = loadOrCreateTracks(recreate, Runs, dataType, energy,15,15);
    tracks->removeEmptyTracks();
+   
+   Float_t  cutHalo = 12;
+   Float_t  cutMaxAngle = 60;
+   Float_t  cutAngle = 40;
+   Float_t  cutEdep = 10;
 
+   tracks->doTrackFit(); 
+   tracks->removeNuclearInteractions();
+   tracks->removeThreeSigmaShortTracks();
+
+//   tracks->removeHighAngleTracks(cutAngle); // mrad
+//   tracks->removeHighAngularChangeTracks(cutMaxAngle); // mrad
+//   tracks->removeNuclearInteractions();
+//   tracks->removeTracksEndingInHalo();
+//   tracks->removeThreeSigmaShortTracks();
+
+   /*
    if (removeHighAngleTracks) {
-      tracks->removeHighAngleTracks(100);
+      tracks->removeHighAngleTracks(40);
    }
 
    if (removeNuclearInteractions) {
@@ -762,12 +783,15 @@ void drawTracksDepthDose(Int_t Runs, Int_t dataType, Bool_t recreate, Float_t en
    if (removeShortTracks) {
       tracks->removeThreeSigmaShortTracks();
    }
+   */
 
    for (Int_t j=0; j<tracks->GetEntriesFast(); j++) {
-      if (j < skipPlot) continue;
+//      if (j < skipPlot) continue;
 
       Track *thisTrack = tracks->At(j);
       if (!thisTrack) continue;
+
+      if (!thisTrack->Last()->isSecondary()) continue;
 
       // Do track fit, extract all parameters for this track
       outputGraph = (TGraphErrors*) thisTrack->doTrackFit(false, kUseCSDA); // (bool isScaleVariable, bool useTrackLength (~ CSDA))
@@ -799,11 +823,9 @@ void drawTracksRangeHistogram(Int_t Runs, Int_t dataType, Bool_t recreate, Float
    kDoTracking = doTracking;
    kFilterNuclearInteractions = excludeNuclearInteractions;
   
-  /* 
    if (kUseDegrader) {
       run_energy = getEnergyFromDegraderThickness(degraderThickness);
    }
-   */
 
    printf("Using water degrader of thickness %.0f mm, the initial energy of %.0f MeV is reduced to %.1f MeV.\n", degraderThickness, energy, run_energy);
 
@@ -842,13 +864,28 @@ void drawTracksRangeHistogram(Int_t Runs, Int_t dataType, Bool_t recreate, Float
 
    hFitResults->SetLineColor(kBlack); hFitResults->SetFillColor(kGreen-5);
 
-   Tracks * tracks = loadOrCreateTracks(recreate, Runs, dataType, run_energy);
+   Tracks * tracks = loadOrCreateTracks(recreate, Runs, dataType, energy);
+   /*
    if (removeHighAngleTracks) {
       tracks->removeHighAngleTracks(75);
    }
    if (removeNuclearInteractions) {
       tracks->removeNuclearInteractions();
    }
+   */
+   
+   Float_t  cutHalo = 12;
+   Float_t  cutMaxAngle = 60;
+   Float_t  cutAngle = 40;
+   Float_t  cutEdep = 10;
+
+
+// Use
+   tracks->removeHighAngleTracks(cutAngle); // mrad
+   tracks->removeHighAngularChangeTracks(cutMaxAngle); // mrad
+   tracks->doTrackFit();
+   tracks->removeNuclearInteractions();
+//   tracks->removeThreeSigmaShortTracks();
 
    for (Int_t j=0; j<tracks->GetEntriesFast(); j++) {
       Track *thisTrack = tracks->At(j);
@@ -1820,9 +1857,40 @@ void analyseHelium(Int_t Runs, Int_t dataType, Bool_t recreate, Int_t switchLaye
 
    Tracks * tracks = loadOrCreateTracks(recreate, Runs, dataType, energy,0,0, savedClusters);
    tracks->removeEmptyTracks();
+   
+   Track * thisTrack;
+   Int_t n=0;
+   for (Int_t i=0; i<tracks->GetEntriesFast(); i++) {
+      thisTrack = tracks->At(i);
+      if (!thisTrack) continue;
+
+      if (thisTrack->isIncomplete()) {   
+         thisTrack->Last()->setSecondary(true);
+         n++;
+      }
+   }
+
+   printf("Set %d (MC tagged) too short tracks to 2nd.\n", n);
+   
+   Cluster *c = nullptr;
+   // propagate secondary status
+   Int_t nSecFirst = 0;
+   /*
+   for (Int_t i=0; i<tracks->GetEntriesFast(); i++) { // It's OK to follow electrons for a few layers then the He ... if the EID is equal
+      // is confused?
+      if (tracks->At(i)->Last()->getEventID() != tracks->At(i)->At(0)->getEventID()) {
+         if (!tracks->At(i)->Last()->isSecondary() && tracks->At(i)->At(0)->isSecondary()) {
+            nSecFirst++;
+            tracks->At(i)->Last()->setSecondary(true);
+         }
+      }
+   }
+   if (nSecFirst) printf("Converted %d confused tracks with 2nd to 2nd track\n", nSecFirst);
+*/
 
    Int_t nSecondariesEnd = 0, nPrimariesEnd = 0, nTotal = 0;
    for (Int_t i=0; i<tracks->GetEntriesFast(); i++) {
+      if (!tracks->At(i)) continue;
       nSecondariesEnd += tracks->At(i)->Last()->isSecondary();
       nPrimariesEnd += (!tracks->At(i)->Last()->isSecondary());
    }
@@ -1830,14 +1898,16 @@ void analyseHelium(Int_t Runs, Int_t dataType, Bool_t recreate, Int_t switchLaye
 
    // From a no-halo filter run
    
-   nTotal = 126923;
-   nPrimariesEnd = 65433;
-   nSecondariesEnd = 61490;
+   nTotal = 127039;
+   nPrimariesEnd = 50072;
+   nSecondariesEnd = 76967;  
 
-   Float_t  cutHalo = 12;
-   Float_t  cutMaxAngle = 60;
-   Float_t  cutAngle = 40;
+   Float_t  cutHalo = 15;
+   Float_t  cutMaxAngle = 70;
+   Float_t  cutAngle = 80;
    Float_t  cutEdep = 10;
+   Float_t  cutChi2 = 500;
+   Float_t  cutEdepPlateau = 3.5;
 
    printf("Found in total %d tracks. %d primaries, %d secondaries\n", nTotal, nPrimariesEnd, nSecondariesEnd);
 
@@ -1845,34 +1915,46 @@ void analyseHelium(Int_t Runs, Int_t dataType, Bool_t recreate, Int_t switchLaye
 //   track->removeHighChiSquare(210);
 
 // Use
-//   tracks->removeHighAngleTracks(cutAngle); // mrad
+//   tracks->removeTracksEndingInHalo(30);
 //   tracks->removeHighAngularChangeTracks(cutMaxAngle); // mrad
+//   tracks->removeHighAngleTracks(cutAngle); // mrad
 //   tracks->doTrackFit();
-//   tracks->removeNuclearInteractions();
-//   tracks->removeThreeSigmaShortTracks();
-   
+   tracks->removeNuclearInteractions();
+   tracks->removeThreeSigmaShortTracks();
+  
+
    Int_t nfSecondariesEnd = 0, nfPrimariesEnd = 0, nfTotal = 0;
+   Int_t nfHe = 0, nfHe3 = 0;
    for (Int_t i=0; i<tracks->GetEntriesFast(); i++) {
-      nfSecondariesEnd += tracks->At(i)->Last()->isSecondary();
-      nfPrimariesEnd += (!tracks->At(i)->Last()->isSecondary());
+      c = tracks->At(i)->Last();
+      nfSecondariesEnd += c->isSecondary();
+      nfPrimariesEnd += (!c->isSecondary());
+      nfHe += (c->isSecondary() && c->getPDG() == 1000020040);
+      nfHe3 += (c->isSecondary() && c->getPDG() == 1000020030);
    }
    nfTotal = tracks->GetEntries();
 
    printf("After filtering: %d tracks. %d primaries, %d secondaries\n", nfTotal, nfPrimariesEnd, nfSecondariesEnd);
+   printf("%d He, %d He3\n", nfHe, nfHe3);
 
-   printf("True positives (filtered secondaries): %.1f %%\n", float(nSecondariesEnd-nfSecondariesEnd)/nTotal*100);
-   printf("False positives (filtered primaries): %.1f %%\n", float(nPrimariesEnd-nfPrimariesEnd)/nTotal*100);
-   printf("True negatives (unfiltered primaries): %.1f %%\n", (nfPrimariesEnd)/float(nTotal) * 100);
-   printf("False negatives (unfiltered secondaries): %.1f %%\n", (nfSecondariesEnd)/float(nTotal) * 100);
+
+   printf("True positives (filtered secondaries): %.2f %%\n", float(nSecondariesEnd-nfSecondariesEnd)/nTotal*100);
+   printf("False positives (filtered primaries): %.2f %%\n", float(nPrimariesEnd-nfPrimariesEnd)/nTotal*100);
+   printf("True negatives (unfiltered primaries): %.2f %%\n", (nfPrimariesEnd)/float(nTotal) * 100);
+   printf("False negatives (unfiltered secondaries): %.2f %%\n", (nfSecondariesEnd)/float(nTotal) * 100);
 
    /*
    tracks->removeEmptyTracks();
    tracks->fillOutIncompleteTracks(0.05);
    */
 
-   Track *thisTrack = nullptr;
    Cluster *a, *b;
    Float_t angle, range, edep, bragg;
+
+   TCanvas *cPosition = new TCanvas("cPosition", "cPosition", 1200, 600);
+   cPosition->Divide(2,1);
+   TH1F *hPositionP = new TH1F("hPositionP", "Primary at end;Radial profile first layer;Entries",100,0,100);
+   TH1F *hPositionS = new TH1F("hPositionS", "Secondary at end;Radial profile first layer;Entries",100,0,100);
 
    TCanvas *cEdep = new TCanvas("cEdep","cEdep",1200,600);
    cEdep->Divide(2,1);
@@ -1886,8 +1968,13 @@ void analyseHelium(Int_t Runs, Int_t dataType, Bool_t recreate, Int_t switchLaye
 
    TCanvas *cAllEdep = new TCanvas("cAllEdep","cAllEdep",1200,600);
    cAllEdep->Divide(2,1);
-   TH1F * cAllEdepP = new TH1F("allEdepP", "Primary at end;E_{dep} last two [keV/#mum];Entries",100,0,100);
-   TH1F * cAllEdepS = new TH1F("allEdepS", "Secondary at end;E_{dep} last two layers [kev/#mum];Entries",100,0,100);
+   TH1F * cAllEdepP = new TH1F("allEdepP", "Primary at end;Average E_{dep} (plateau) [keV/#mum];Entries",100,0,20);
+   TH1F * cAllEdepS = new TH1F("allEdepS", "Secondary at end;Average E_{dep} (plateau) [kev/#mum];Entries",100,0,20);
+   
+   TCanvas *cAllVarEdep = new TCanvas("cAllVarEdep","cAllVarEdep",1200,600);
+   cAllVarEdep->Divide(2,1);
+   TH1F * cAllVarEdepP = new TH1F("allVarEdepP", "Primary at end;Rise factor BP/plateau;Entries",100,0,5);
+   TH1F * cAllVarEdepS = new TH1F("allVarEdepS", "Secondary at end;Rise factor BP/plateau;Entries",100,0,5);
    
    TCanvas *cAngle = new TCanvas("cAngle","cAngle",1200,600);
    cAngle->Divide(2,1);
@@ -1942,15 +2029,22 @@ void analyseHelium(Int_t Runs, Int_t dataType, Bool_t recreate, Int_t switchLaye
       }
       int last = thisTrack->GetEntriesFast() - 1;
       if (last>=3) {
-         float edeplast = thisTrack->Last()->getDepositedEnergy();
-         float edepnlast = thisTrack->At(last-1)->getDepositedEnergy();
-         float edepnnlast = thisTrack->At(last-2)->getDepositedEnergy();
-         float edepnnnlast = thisTrack->At(last-3)->getDepositedEnergy();
+         Float_t meanEdep = 0, sdEdep = 0;
+         for (Int_t j=0; j<thisTrack->GetEntriesFast()-5; j++) {
+            if (!thisTrack->At(j)) continue;
+            meanEdep += thisTrack->At(j)->getDepositedEnergy();
+         }
+         meanEdep /= (thisTrack->GetEntriesFast()-5);
+
+         Float_t riseFactor = thisTrack->Last()->getDepositedEnergy() / meanEdep;
+
          if (!thisTrack->Last()->isSecondary()) {
-               cAllEdepP->Fill(edeplast+edepnlast);
+               cAllEdepP->Fill(meanEdep);
+               cAllVarEdepP->Fill(riseFactor);
          }
          else {
-               cAllEdepS->Fill(edeplast+edepnlast);
+               cAllEdepS->Fill(meanEdep);
+               cAllVarEdepS->Fill(riseFactor);
          }
       }
       
@@ -1971,11 +2065,19 @@ void analyseHelium(Int_t Runs, Int_t dataType, Bool_t recreate, Int_t switchLaye
       }
 
       rangePS->Fill(range);
+      Float_t maxRadius = 0;
+      for (Int_t j=0; j<thisTrack->GetEntriesFast(); j++) {
+         if (!thisTrack->At(j)) continue;
+         maxRadius = max(maxRadius, sqrt(pow(thisTrack->At(j)->getXmm(),2) + pow(thisTrack->At(j)->getYmm(),2)));
+      }
+
+
       if (!thisTrack->Last()->isSecondary()) {
          edepP->Fill(edep);
          angleP->Fill(angle);
          rangeP->Fill(range);
          braggP->Fill(bragg);
+         hPositionP->Fill(maxRadius);
          hCSP->Fill(thisTrack->Last()->getSize());
 
          if (last>5) { // thisTrack->At(last-5) && thisTrack->At(last-4)) {
@@ -1993,6 +2095,7 @@ void analyseHelium(Int_t Runs, Int_t dataType, Bool_t recreate, Int_t switchLaye
          rangeS->Fill(range);
          braggS->Fill(bragg);
          hCSS->Fill(thisTrack->Last()->getSize());
+         hPositionS->Fill(maxRadius);
          hMaxDeltaThetaS->Fill(thisTrack->getMaximumSlopeAngleChange() * 3.1415 / 180 * 1000);
          if (last>5) {
             float edep_mid = thisTrack->getDepositedEnergy(last-5);
@@ -2013,8 +2116,6 @@ void analyseHelium(Int_t Runs, Int_t dataType, Bool_t recreate, Int_t switchLaye
       y = cl->getYmm();
       z = cl->getLayer();
       
-      if (y<0) sgn = -1;
-
       if (cl->isSecondary()) {
         cHitsS->Fill(sgn*sqrt(x*x+y*y));
       }
@@ -2035,6 +2136,8 @@ void analyseHelium(Int_t Runs, Int_t dataType, Bool_t recreate, Int_t switchLaye
    braggS->SetFillColor(kGreen-3);
    cAllEdepP->SetFillColor(kGray);
    cAllEdepS->SetFillColor(kGreen-3);
+   cAllVarEdepP->SetFillColor(kGray);
+   cAllVarEdepS->SetFillColor(kGreen-3);
    hSec->SetFillColor(kGreen-3);
    hMaxDeltaThetaP->SetFillColor(kGray);
    hMaxDeltaThetaS->SetFillColor(kGreen-3);
@@ -2042,6 +2145,8 @@ void analyseHelium(Int_t Runs, Int_t dataType, Bool_t recreate, Int_t switchLaye
    cHitsS->SetFillColor(kGreen-3);
    hCSP->SetFillColor(kGray);
    hCSS->SetFillColor(kGreen-3);
+   hPositionP->SetFillColor(kGray);
+   hPositionS->SetFillColor(kGreen-3);
 
    // Please tell me how to do this properly with gStyle
    rangePS->SetLineColor(kBlack);
@@ -2055,6 +2160,8 @@ void analyseHelium(Int_t Runs, Int_t dataType, Bool_t recreate, Int_t switchLaye
    braggS->SetLineColor(kBlack);
    cAllEdepP->SetLineColor(kBlack);
    cAllEdepS->SetLineColor(kBlack);
+   cAllVarEdepP->SetLineColor(kBlack);
+   cAllVarEdepS->SetLineColor(kBlack);
    hSec->SetLineColor(kBlack);
    hMaxDeltaThetaP->SetLineColor(kBlack);
    hMaxDeltaThetaS->SetLineColor(kBlack);
@@ -2062,6 +2169,8 @@ void analyseHelium(Int_t Runs, Int_t dataType, Bool_t recreate, Int_t switchLaye
    cHitsS->SetLineColor(kBlack);
    hCSP->SetLineColor(kBlack);
    hCSS->SetLineStyle(kBlack);
+   hPositionP->SetLineColor(kBlack);
+   hPositionS->SetLineColor(kBlack);
 
    TLine *l1, *l2;
 
@@ -2129,36 +2238,54 @@ void analyseHelium(Int_t Runs, Int_t dataType, Bool_t recreate, Int_t switchLaye
 
    cBragg->cd(1);
    braggP->Draw();
-   l1 = new TLine(450, 0, 450, braggP->GetMaximum()*1.05);
+   l1 = new TLine(cutChi2, 0, cutChi2, braggP->GetMaximum()*1.05);
    l1->SetLineStyle(7);
    l1->SetLineColor(kBlack);
    l1->Draw();
    cBragg->cd(2);
    braggS->Draw();
-   l1 = new TLine(450, 0, 450, braggS->GetMaximum()*1.05);
+   l1 = new TLine(cutChi2, 0, cutChi2, braggS->GetMaximum()*1.05);
    l1->SetLineStyle(7);
    l1->SetLineColor(kBlack);
    l1->Draw();
 
    cAllEdep->cd(1);
    cAllEdepP->Draw();
+   l1 = new TLine(cutEdepPlateau, 0, cutEdepPlateau, cAllEdepP->GetMaximum()*1.05);
+   l1->SetLineStyle(7);
+   l1->SetLineColor(kBlack);
+   l1->Draw();
    cAllEdep->cd(2);
    cAllEdepS->Draw();
+   l1 = new TLine(cutEdepPlateau, 0, cutEdepPlateau, cAllEdepS->GetMaximum()*1.05);
+   l1->SetLineStyle(7);
+   l1->SetLineColor(kBlack);
+   l1->Draw();
+   
+   cAllVarEdep->cd(1);
+   cAllVarEdepP->Draw();
+   cAllVarEdep->cd(2);
+   cAllVarEdepS->Draw();
 
    cEdep2D->cd(1);
    edep2DP->Draw("colz");
    cEdep2D->cd(2);
    edep2DS->Draw("colz");
 
+   cPosition->cd(1);
+   hPositionP->Draw();
+   cPosition->cd(2);
+   hPositionS->Draw();
+
    cHits->cd(1);
    cHitsP->Draw();
-   l1 = new TLine(12, 0, 12, cHitsP->GetMaximum()*1.05);
+   l1 = new TLine(cutHalo, 0, cutHalo, cHitsP->GetMaximum()*1.05);
    l1->SetLineStyle(7);
    l1->SetLineColor(kBlack);
    l1->Draw();
    cHits->cd(2);
    cHitsS->Draw();
-   l1 = new TLine(12, 0, 12, cHitsS->GetMaximum()*1.05);
+   l1 = new TLine(cutHalo, 0, cutHalo, cHitsS->GetMaximum()*1.05);
    l1->SetLineStyle(7);
    l1->SetLineColor(kBlack);
    l1->Draw();
@@ -2177,7 +2304,7 @@ void analyseHelium(Int_t Runs, Int_t dataType, Bool_t recreate, Int_t switchLaye
    int bmin, bmax;
    int ntracks = tracks->GetEntries();
 
-   bmin = cHitsP->GetXaxis()->FindBin(12);
+   bmin = cHitsP->GetXaxis()->FindBin(cutHalo);
    int totalHalo = cHitsS->Integral() + cHitsP->Integral();
    int removedByHalo = cHitsS->Integral(bmin,100) + cHitsP->Integral(bmin,100);
    int removedByHalo2nd = cHitsS->Integral(bmin,100);
@@ -2215,16 +2342,16 @@ void analyseHelium(Int_t Runs, Int_t dataType, Bool_t recreate, Int_t switchLaye
    float rangeFP = (rangeP->Integral() - rangeP->Integral(bmin-1,bmax+1)) / float(ntracks);
    float rangeFN = (rangeS->Integral(bmin,bmax)) / float(ntracks);
 
-   bmin = edepP->GetXaxis()->FindBin(10);
+   bmin = edepP->GetXaxis()->FindBin(cutEdep);
    int removedByED = edepS->Integral(0,bmin) + edepP->Integral(0,bmin);
    int removedByED2nd = edepS->Integral(0,bmin);
    
-   float edepTP = edepS->Integral(bmin,100) / float(ntracks);
-   float edepTN = (edepP->Integral() - edepP->Integral(bmin,100)) / float(ntracks);
-   float edepFP = edepP->Integral(bmin,100) / float(ntracks);
-   float edepFN = (edepS->Integral() - edepS->Integral(bmin,100)) / float(ntracks);
+   float edepTP = edepS->Integral(0,bmin) / float(ntracks);
+   float edepTN = (edepP->Integral() - edepP->Integral(0,bmin)) / float(ntracks);
+   float edepFP = edepP->Integral(0,bmin) / float(ntracks);
+   float edepFN = (edepS->Integral() - edepS->Integral(0,bmin)) / float(ntracks);
 
-   bmin = braggP->GetXaxis()->FindBin(450);
+   bmin = braggP->GetXaxis()->FindBin(cutChi2);
    int removedByChi2 = braggS->Integral(bmin,100) + braggP->Integral(bmin,100);
    int removedByChi22nd = braggS->Integral(bmin,100);
    
@@ -2237,10 +2364,10 @@ void analyseHelium(Int_t Runs, Int_t dataType, Bool_t recreate, Int_t switchLaye
    int removedByAllEdep = cAllEdepS->Integral(0,bmin) + cAllEdepP->Integral(0, bmin);
    int removedByAllEdep2nd = cAllEdepS->Integral(0,bmin);
    
-   float allEdepTP = cAllEdepS->Integral(bmin,100) / float(ntracks);
-   float allEdepTN = (cAllEdepP->Integral() - cAllEdepP->Integral(bmin,100)) / float(ntracks);
-   float allEdepFP = cAllEdepP->Integral(bmin,100) / float(ntracks);
-   float allEdepFN = (cAllEdepS->Integral() - cAllEdepS->Integral(bmin,100)) / float(ntracks);
+   float allEdepTP = cAllEdepS->Integral(0,bmin) / float(ntracks);
+   float allEdepTN = (cAllEdepP->Integral() - cAllEdepP->Integral(0,bmin)) / float(ntracks);
+   float allEdepFP = cAllEdepP->Integral(0,bmin) / float(ntracks);
+   float allEdepFN = (cAllEdepS->Integral() - cAllEdepS->Integral(0,bmin)) / float(ntracks);
       
    printf("Total number of tracks = %d\n", ntracks);
    printf("Tracks removed by Halo: %d (%d secondaries) (%.1f%% purity) (%.1f%% removed)\n", removedByHalo, removedByHalo2nd, 100.*removedByHalo2nd/removedByHalo, 100.*removedByHalo/totalHalo);
@@ -2284,7 +2411,6 @@ void analyseHelium(Int_t Runs, Int_t dataType, Bool_t recreate, Int_t switchLaye
    Bool_t inList = false;
 
    // last particle
-   Cluster * c = nullptr;
    for (Int_t i=0; i<=tracks->GetEntriesFast(); i++) {
       Track *thisTrack = tracks->At(i);
       if (!thisTrack) continue;
@@ -2356,8 +2482,8 @@ void analyseHelium(Int_t Runs, Int_t dataType, Bool_t recreate, Int_t switchLaye
    TCanvas *cPDG = new TCanvas("cPDG", "PDG(z)");
    cPDG->cd();
    float xfrom = -0.5;
-   float xto = 50.5;
-   int xlen = 51;
+   float xto = 40.5;
+   int xlen = 41;
    
    gStyle->SetOptStat(0);
 /*
@@ -2377,10 +2503,10 @@ void analyseHelium(Int_t Runs, Int_t dataType, Bool_t recreate, Int_t switchLaye
 
    TH1F *hPDGe = new TH1F("hPDGe", "Electrons", xlen, xfrom, xto);
    TH1F *hPDGpos = new TH1F("hPDGpos", "Positrons", xlen, xfrom, xto);
-   TH1F *hPDGpro = new TH1F("hPDGpro", ";Depth in detector [layer number];Fraction of secondary particles", xlen, xfrom, xto);
-   TH1F *hPDGneu = new TH1F("hPDGneu", ";Depth in detector [layer number];Fraction of secondary particles", xlen, xfrom, xto);
+   TH1F *hPDGpro = new TH1F("hPDGpro", ";Depth in detector [layer number];Fraction of secondary species", xlen, xfrom, xto);
+   TH1F *hPDGneu = new TH1F("hPDGneu", ";Depth in detector [layer number];Fraction of secondary species", xlen, xfrom, xto);
    TH1F *hPDGhe = new TH1F("hPDGhe", "Helium", xlen, xfrom, xto);
-   TH1F *hPDGhe3 = new TH1F("hPDGhe3", ";Depth in detector [layer number];Fraction of secondary particles", xlen, xfrom, xto);
+   TH1F *hPDGhe3 = new TH1F("hPDGhe3", ";Depth in detector [layer number];Fraction of secondary species", xlen, xfrom, xto);
    TH1F *hPDGgam = new TH1F("hPDGgam", "Gamma", xlen, xfrom, xto);
    TH1F *hPDGli = new TH1F("hPDGli", "Litium", xlen, xfrom, xto);
    TH1F *hPDGdeu = new TH1F("hPDGdeu", "Deuterium", xlen, xfrom, xto);
@@ -2445,14 +2571,30 @@ void analyseHelium(Int_t Runs, Int_t dataType, Bool_t recreate, Int_t switchLaye
    hPDGli->Scale(100 / totalParticles);
    hPDGneu->Scale(100 / totalParticles);
 
+   hPDGpro->GetYaxis()->SetTitleOffset(1.5);
+
    TLegend *leg = new TLegend(0.8,0.4,0.95,0.95);
 
    hPDGpro->Draw("hist");
    leg->AddEntry(hPDGpro, "Protons", "L");
+   
+   hPDGhe->Draw("same hist"); 
+   leg->AddEntry(hPDGhe, "Helium", "L"); 
+
    hPDGhe3->Draw("same hist"); 
    leg->AddEntry(hPDGhe3, "Helium3", "L");
 
    hPDGpro->GetYaxis()->SetRangeUser(0, 1.2*max(hPDGhe->GetMaximum(), max(hPDGpro->GetMaximum(), hPDGhe3->GetMaximum())));
+   
+   if (hPDGdeu->Integral()) { 
+      hPDGdeu->Draw("same hist"); 
+      leg->AddEntry(hPDGdeu, "Deuterium", "L");
+   }
+
+   if (hPDGtri->Integral()) { 
+      hPDGtri->Draw("same hist"); 
+      leg->AddEntry(hPDGtri, "Tritium", "L");
+   }
 
    if (hPDGe->Integral()) {
       hPDGe->Draw("same hist"); 
@@ -2469,33 +2611,18 @@ void analyseHelium(Int_t Runs, Int_t dataType, Bool_t recreate, Int_t switchLaye
       leg->AddEntry(hPDGpos, "Positrons", "L");
    }
 
-
-   if (hPDGhe->Integral()) {
-      hPDGhe->Draw("same hist"); 
-      leg->AddEntry(hPDGhe, "Helium", "L"); 
-   }
-
-
    if (hPDGgam->Integral()) { 
       hPDGgam->Draw("same hist");
       leg->AddEntry(hPDGgam, "Gamma", "L");
    }
 
+   /*
    if (hPDGli->Integral()) { 
       hPDGli->Draw("same hist"); 
       leg->AddEntry(hPDGli, "Litium", "L");
    }
-
-   if (hPDGdeu->Integral()) { 
-      hPDGdeu->Draw("same hist"); 
-      leg->AddEntry(hPDGdeu, "Deuterium", "L");
-   }
-
-   if (hPDGtri->Integral()) { 
-      hPDGtri->Draw("same hist"); 
-      leg->AddEntry(hPDGtri, "Tritium", "L");
-   }
-
+*/
+/*
    if (hPDGsi->Integral()) { 
       hPDGsi->Draw("same hist"); 
       leg->AddEntry(hPDGsi, "Silicon", "L");
@@ -2510,9 +2637,9 @@ void analyseHelium(Int_t Runs, Int_t dataType, Bool_t recreate, Int_t switchLaye
       hPDGal->Draw("same hist"); 
       leg->AddEntry(hPDGal, "Aluminum", "L");
    }
-
+*/
    leg->SetTextFont(22);
-   leg->SetTextSize(0.05);
+   leg->SetTextSize(0.045);
    leg->Draw();
  
    // ADD % TO AXIS
@@ -2522,11 +2649,11 @@ void analyseHelium(Int_t Runs, Int_t dataType, Bool_t recreate, Int_t switchLaye
    t->SetTextSize(0.05);
    t->SetTextFont(22);
    Float_t at;
-   for (Int_t i=0; i<8;i++) {
+   for (Int_t i=0; i<=4;i++) {
       // max > i*6
       // i < max/6
       
-      at = i/8. * 20; // max(hPDGhe->GetMaximum(), max(hPDGpro->GetMaximum(), hPDGhe3->GetMaximum()));
+      at = i/4. * 20; // max(hPDGhe->GetMaximum(), max(hPDGpro->GetMaximum(), hPDGhe3->GetMaximum()));
       t->DrawText(-0.42, at, Form("%.1f%%", at));
    }
 
@@ -2677,18 +2804,17 @@ void drawTracks3D(Int_t Runs, Int_t dataType, Bool_t recreate, Int_t switchLayer
    }
    cout << "Number of primaries = " << numberOfPrimaries << ", number of secondaries = " << numberOfSecondaries << endl;
    
-   Float_t  cutHalo = 12;
-   Float_t  cutMaxAngle = 60;
+   Float_t  cutHalo = 15;
+   Float_t  cutMaxAngle = 70;
    Float_t  cutAngle = 40;
    Float_t  cutEdep = 10;
- 
-   /*
-   tracks->removeHighAngleTracks(cutAngle); // mrad
-   tracks->removeHighAngularChangeTracks(cutMaxAngle); // mrad
+   
+//   tracks->removeTracksEndingInHalo();
+//   tracks->removeHighAngularChangeTracks(cutMaxAngle); // mrad
+//   tracks->removeHighAngleTracks(cutAngle); // mrad
    tracks->doTrackFit();
    tracks->removeNuclearInteractions();
    tracks->removeThreeSigmaShortTracks();
-   */
 
    Bool_t   kDraw = true;
 
