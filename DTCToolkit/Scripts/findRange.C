@@ -91,7 +91,7 @@ vector<Float_t> findRange::Run(Double_t energy, Double_t sigma_mev, Int_t mm, In
    printf("Found %d proton histories in file.\n", lastID);
    printf("From first search, range = %.2f mm and energy = %.2f MeV\n", firstRange, firstEnergy);
    
-   Float_t xfrom = firstRange - 5, xto = firstRange + 5;
+   Float_t xfrom = firstRange - 7.5, xto = firstRange + 7.5;
    TH1F *hRange = new TH1F("hRange", "Projected range in DTC;Range [mm];Entries", 500, xfrom,xto);
    for (Int_t i=0; i<rangeIdx; i++) hRange->Fill(allRanges[i]);
 
@@ -103,11 +103,15 @@ vector<Float_t> findRange::Run(Double_t energy, Double_t sigma_mev, Int_t mm, In
    // The fitting parameters below
    TF1 *fRange = new TF1("fit_range", "gaus", xfrom, xto);
    fRange->SetLineWidth(3);
-   fRange->SetParameters(hRange->GetMaximum(), firstRange, 1);
+   fRange->SetParameters(hRange->GetMaximum(), firstRange, 1.5);
    hRange->Fit("fit_range", "B");//, "M,W,B", "", xfrom, xto);
    Float_t fR = fRange->GetParameter(1);
    Float_t fRS = fRange->GetParameter(2);
    printf("Estimated range from Gaussian fitting = %.3f +- %.3f\n", fR, fRS); 
+   
+   Float_t hR = hRange->GetMean();
+   Float_t hRS = hRange->GetStdDev();
+   printf("Estimated range from bin counting = %.3f +- %.3f\n", hR, hRS);
    
    c2->cd(1);
    hRange->SetFillColor(kBlue-7);

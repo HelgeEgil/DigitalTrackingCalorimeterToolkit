@@ -27,7 +27,7 @@
 using namespace std;
 
 // IF FLOAT VALUES OF ABSORBER THICKNESS: USE *10 VALUES (3.5 -> 35)
-Int_t absorberThickness = 6;
+Int_t absorberThickness = 35;
 Bool_t kFilterData = false;
 Bool_t kUseCarbon = false;
 Int_t filterSize = 3;
@@ -116,7 +116,7 @@ void plotRangesAndStraggling() {
    Float_t a_dtc = 0, p_dtc = 0;
    ifstream in;
    if (!kUseCarbon) {
-      in.open(Form("../../Data/Ranges/%dmm_Al.csv", absorberThickness));
+      in.open(Form("../../Data/Ranges/%dmm_Al_Helium.csv", absorberThickness));
    }
    else {
       in.open(Form("../../Data/Ranges/%dmm_C.csv", absorberThickness));
@@ -155,7 +155,7 @@ void plotRangesAndStraggling() {
       if (!in.good()) break;
 
       rangesWater[idxWater] = range;
-      energiesWater[idxWater++] = energy;
+      energiesWater[idxWater++] = energy * (917/230.);
    }
    in.close();
 
@@ -165,7 +165,7 @@ void plotRangesAndStraggling() {
    TSpline3 * splineDTCInv = new TSpline3("splineDTCInv", dtcRanges, dtcEnergies, dtcIdx);
 
    if (!kUseCarbon) {
-      in.open("../../OutputFiles/findManyRangesDegrader.csv");
+      in.open("../../OutputFiles/findManyRangesDegraderHelium.csv");
    }
    else {
       in.open("../../OutputFiles/findManyRangesDegraderCarbon.csv");
@@ -175,7 +175,7 @@ void plotRangesAndStraggling() {
    Float_t a_wtr = 0.02387;
    Float_t p_wtr = 1.7547;
 
-   Float_t wepl_ratio = splineWater->Eval(225) / splineDTC->Eval(225);
+   Float_t wepl_ratio = splineWater->Eval(900) / splineDTC->Eval(900);
    Float_t wepl_ratio0 = a_wtr / a_dtc * pow(225 / a_wtr, 1 - p_dtc / p_wtr);
 
    cout << "WEPL ratio (spline) = " << wepl_ratio << endl;
@@ -184,7 +184,7 @@ void plotRangesAndStraggling() {
    Float_t wtr_range = splineWater->Eval(225); // GATE
 
    while (1) {
-      in >>  waterphantomthickness_ >> thickness_ >> nomrange_ >> nomsigma_ >> dummy0 >> energy >> dummy0;
+      in >>  waterphantomthickness_ >> thickness_ >> nomrange_ >> nomsigma_ >> energy >> dummy0;
 
       if (!in.good()) {
          break;
@@ -194,7 +194,8 @@ void plotRangesAndStraggling() {
          continue;
       }
 
-//      wepl_ratio = splineWater->Eval(energy) / splineDTC->Eval(energy);
+      //wepl_ratio = splineWater->Eval(energy) / splineDTC->Eval(energy);
+//      wepl_ratio = 2.09;
 
 //      arrayMCActualSigma[nlines0] = nomsigma_ * wepl_ratio0;
 //      arrayMCActualSigmaRatio[nlines0] = nomsigma_ * 100 * wepl_ratio0 / wtr_range;
@@ -207,7 +208,7 @@ void plotRangesAndStraggling() {
    in.close();
 
    if (!kUseCarbon) {
-      in.open("../../OutputFiles/result_makebraggpeakfit_proj.csv");
+      in.open("../../OutputFiles/result_makebraggpeakfit_Helium.csv");
    }
    else {
       in.open("../../OutputFiles/result_makebraggpeakfitCarbon.csv");
@@ -444,7 +445,9 @@ void plotRangesAndStraggling() {
    // Janni: Straggling in water is 1.063 percent
    // Range in water is 379.4 mm (PSTAR) or 382.57 (Janni)
    // Straggling in water is 3.791 mm as measured in GATE
+   // Need new measurement for Helium
    Float_t waterStraggling = 3.791; // GATE
+   waterStraggling = 1.84;
    TLine *lWaterStraggling = new TLine(gPad->GetUxmin(), waterStraggling, gPad->GetUxmax(), waterStraggling);
    lWaterStraggling->SetLineWidth(2);
    lWaterStraggling->SetLineColor(kGreen);
@@ -511,7 +514,7 @@ void plotRangesAndStraggling() {
    // Janni: Straggling in water is 1.063 percent
    // Range in water is 379.4 mm (PSTAR) or 382.57 (Janni)
    // Straggling in water is 3.791 mm as measured in GATE
-   waterStraggling = 3.791 * 100 / 378.225; // GATE
+   //waterStraggling = 3.791 * 100 / 378.225; // GATE
    TLine *lWaterStraggling2 = new TLine(gPad->GetUxmin(), waterStraggling, gPad->GetUxmax(), waterStraggling);
    lWaterStraggling2->SetLineWidth(2);
    lWaterStraggling2->SetLineColor(kGreen);
@@ -566,7 +569,7 @@ void plotRangesAndStraggling() {
 
    Float_t subtractMCStraggling[arraySize];
    Float_t subtractWaterStraggling[arraySize];
-   waterStraggling = 3.791;
+   // waterStraggling = 3.791;
 
    for (Int_t i=0; i<arraySize; i++) {
       if (arrayEMC[i] > arrayMCActualSigma[i]) {

@@ -72,7 +72,7 @@ DataInterface::DataInterface(TTree *tree) : fChain(0) {
          else {
             printf("Opening HELIUM file with degrader thickness %.0f mm, material is %s and abs. thickness %.0f mm...", run_degraderThickness, materialChar, readoutAbsorber);
             if (!kSpotScanning) {
-               chain->Add(Form("Data/MonteCarlo/DTC_%s_Helium_Absorber%.0fmm_Degrader%03.0fmm_%dMeV.root/Hits", materialChar, readoutAbsorber, run_degraderThickness, kEnergy));
+               chain->Add(Form("Data/MonteCarlo/DTC_Full_%s_Helium_Absorber%.0fmm_Degrader%03.0fmm_%dMeV.root/Hits", materialChar, readoutAbsorber, run_degraderThickness, kEnergy));
             }
             else { // Load phantom (used with spot scanning)
                chain->Add(Form("Data/MonteCarlo/DTC_%s_CarbonHelium_Absorber%.0fmm_Headphantom_%dMeV.root/Hits", materialChar, readoutAbsorber, kEnergy));
@@ -518,6 +518,16 @@ void  DataInterface::getMCClustersThreshold(Int_t runNo, Clusters *clusters, Hit
       layer = level1ID + baseID - 1;
       if (kPhantom) layer++;
       
+      if (posZ < 0) { // Inside degrader, check if nuclear interactions
+         if (TString(processName) == "hadElastic") {
+            isSecondary = true;
+         }
+
+         lastEventID = eventID;
+         continue;
+      }
+
+
       if (parentID != 0 || TString(processName) == "alphaInelastic") { // Secondary track
          isSecondary = true;
 
@@ -558,6 +568,7 @@ void  DataInterface::getMCClustersThreshold(Int_t runNo, Clusters *clusters, Hit
       
       if (edep < threshold) {
          particlesBelowThreshold++;
+         lastEventID = eventID;
          continue;
       }
 

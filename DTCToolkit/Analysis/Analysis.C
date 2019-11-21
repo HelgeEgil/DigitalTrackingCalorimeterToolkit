@@ -1897,30 +1897,32 @@ void analyseHelium(Int_t Runs, Int_t dataType, Bool_t recreate, Int_t switchLaye
    nTotal = tracks->GetEntries();
 
    // From a no-halo filter run
-   
-   nTotal = 127039;
-   nPrimariesEnd = 50072;
-   nSecondariesEnd = 76967;  
+   /*
+   nTotal = 136686;
+   nPrimariesEnd = 51990;
+   nSecondariesEnd = 84696;
+   */
 
    Float_t  cutHalo = 15;
    Float_t  cutMaxAngle = 70;
-   Float_t  cutAngle = 80;
-   Float_t  cutEdep = 10;
+   Float_t  cutAngle = 35;
+   Float_t  cutEdep = 8;
    Float_t  cutChi2 = 500;
    Float_t  cutEdepPlateau = 3.5;
 
    printf("Found in total %d tracks. %d primaries, %d secondaries\n", nTotal, nPrimariesEnd, nSecondariesEnd);
 
 // Don't use
+//   tracks->doTrackFit();
 //   track->removeHighChiSquare(210);
-
-// Use
 //   tracks->removeTracksEndingInHalo(30);
 //   tracks->removeHighAngularChangeTracks(cutMaxAngle); // mrad
-//   tracks->removeHighAngleTracks(cutAngle); // mrad
-//   tracks->doTrackFit();
+
+// Use
+
    tracks->removeNuclearInteractions();
    tracks->removeThreeSigmaShortTracks();
+//   tracks->removeHighAngleTracks(cutAngle); // mrad
   
 
    Int_t nfSecondariesEnd = 0, nfPrimariesEnd = 0, nfTotal = 0;
@@ -1952,37 +1954,37 @@ void analyseHelium(Int_t Runs, Int_t dataType, Bool_t recreate, Int_t switchLaye
    Float_t angle, range, edep, bragg;
 
    TCanvas *cPosition = new TCanvas("cPosition", "cPosition", 1200, 600);
-   cPosition->Divide(2,1);
+   cPosition->Divide(2,1,1e-5,1e-5);
    TH1F *hPositionP = new TH1F("hPositionP", "Primary at end;Radial profile first layer;Entries",100,0,100);
    TH1F *hPositionS = new TH1F("hPositionS", "Secondary at end;Radial profile first layer;Entries",100,0,100);
 
    TCanvas *cEdep = new TCanvas("cEdep","cEdep",1200,600);
-   cEdep->Divide(2,1);
+   cEdep->Divide(2,1,1e-5,1e-5);
    TH1F * edepP = new TH1F("edepP", "Primary at end;E_{dep} last layer [kev/#mum];Entries", 100, 0, 100);
    TH1F * edepS = new TH1F("edepS", "Secondary at end;E_{dep} last layer [kev/#mum];Entries", 100, 0, 100);
 
    TCanvas *cEdep2D = new TCanvas("cEdep2D","cEdep2D",1200,600);
-   cEdep2D->Divide(2,1);
+   cEdep2D->Divide(2,1,1e-5,1e-5);
    TH2F *edep2DP = new TH2F("edep2DP", "Primary at end;Edep last layer [kev/#mum];Edep next-to-last layer", 60, 0, 60, 60, 0, 1000);
    TH2F *edep2DS = new TH2F("edep2DS", "Secondary at end;#Delta E detector mid [kev/#mum]; residual energy after mid [MeV]", 60, 0, 60,60, 0, 1000);
 
    TCanvas *cAllEdep = new TCanvas("cAllEdep","cAllEdep",1200,600);
-   cAllEdep->Divide(2,1);
+   cAllEdep->Divide(2,1,1e-5,1e-5);
    TH1F * cAllEdepP = new TH1F("allEdepP", "Primary at end;Average E_{dep} (plateau) [keV/#mum];Entries",100,0,20);
    TH1F * cAllEdepS = new TH1F("allEdepS", "Secondary at end;Average E_{dep} (plateau) [kev/#mum];Entries",100,0,20);
    
    TCanvas *cAllVarEdep = new TCanvas("cAllVarEdep","cAllVarEdep",1200,600);
-   cAllVarEdep->Divide(2,1);
+   cAllVarEdep->Divide(2,1,1e-5,1e-5);
    TH1F * cAllVarEdepP = new TH1F("allVarEdepP", "Primary at end;Rise factor BP/plateau;Entries",100,0,5);
    TH1F * cAllVarEdepS = new TH1F("allVarEdepS", "Secondary at end;Rise factor BP/plateau;Entries",100,0,5);
    
    TCanvas *cAngle = new TCanvas("cAngle","cAngle",1200,600);
-   cAngle->Divide(2,1);
+   cAngle->Divide(2,1,1e-5,1e-5);
    TH1F * angleP = new TH1F("angleP", "Primary at end;Incoming angle [mrad];Entries;", 100, 0, 200);
    TH1F * angleS = new TH1F("angleS", "Secondary at end;Incoming angle [mrad];Entries;", 100, 0, 200);
    
    TCanvas *cRange = new TCanvas("cRange","cRange",1200,600);
-   cRange->Divide(2,1);
+   cRange->Divide(2,1,1e-5,1e-5);
    TH1F * rangeP = new TH1F("rangeP", "Primary at end;Residual range [WEPL mm];Entries;", 100, 0, 300);
    TH1F * rangeS = new TH1F("rangeS", "Secondary at end;Residual range [WEPL mm];Entries;", 100, 0, 300);
 
@@ -1990,7 +1992,7 @@ void analyseHelium(Int_t Runs, Int_t dataType, Bool_t recreate, Int_t switchLaye
    TH1F * rangePS = new TH1F("rangePS", "All;Residual range [WEPL mm];Entries;", 100, 0, 300);
 
    TCanvas *cBragg = new TCanvas("cBragg","cBragg",1200,600);
-   cBragg->Divide(2,1);
+   cBragg->Divide(2,1,1e-5,1e-5);
    TH1F * braggP = new TH1F("rangeP", "Primary at end;Depth-dose fit log_{10} #chi^{2};Entries;", 100, 1, 2000);
    TH1F * braggS = new TH1F("rangeS", "Secondary at end;Depth-dose fit log_{10} #chi^{2};Entries;", 100, 0, 2000);
    
@@ -1999,17 +2001,17 @@ void analyseHelium(Int_t Runs, Int_t dataType, Bool_t recreate, Int_t switchLaye
    TH1F *hPrim = new TH1F("hPrim", "Primary beam;layer;freq", 50, 0, 50);
 
    TCanvas *cMaxDeltaTheta = new TCanvas("cMaxDeltaTheta","cMaxDeltaTheta", 1200,600);
-   cMaxDeltaTheta->Divide(2,1);
+   cMaxDeltaTheta->Divide(2,1,1e-5,1e-5);
    TH1F *hMaxDeltaThetaP = new TH1F("hMaxDeltaThetaP", "Primary at end;Max layer-wise angular change [mrad];Entries",100,0,300);
    TH1F *hMaxDeltaThetaS = new TH1F("hMaxDeltaThetaS", "Secondary at end;Max layer-wise angular change [mrad];Entries",100,0,300);
 
    TCanvas *cCS = new TCanvas("cCS", "Cluster sizes", 1200,600);
-   cCS->Divide(2,1);
+   cCS->Divide(2,1,1e-5,1e-5);
    TH1F *hCSP = new TH1F("hCSP", "Primary at end;Cluster size;Entries", 50, 0, 50);
    TH1F *hCSS = new TH1F("hCSS", "Secondary at end;Cluster size;Entries", 50, 0, 50);
 
    TCanvas *cHits = new TCanvas("cHits", "cHits", 1200,600);
-   cHits->Divide(2,1);
+   cHits->Divide(2,1,1e-5,1e-5);
    TH1F *cHitsP = new TH1F("cHitsP", "Primary at end;Beam profile at entrance layer #sqrt{x^{2}+y^{2}} [mm];Entries", 100, 0, 100);
    TH1F *cHitsS = new TH1F("cHitsS", "Secondary at end;Beam profile at entrance layer #sqrt{x^{2}+y^{2}} [mm];Entries", 100, 0, 100);
 
@@ -2649,11 +2651,11 @@ void analyseHelium(Int_t Runs, Int_t dataType, Bool_t recreate, Int_t switchLaye
    t->SetTextSize(0.05);
    t->SetTextFont(22);
    Float_t at;
-   for (Int_t i=0; i<=4;i++) {
+   for (Int_t i=0; i<=5;i++) {
       // max > i*6
       // i < max/6
       
-      at = i/4. * 20; // max(hPDGhe->GetMaximum(), max(hPDGpro->GetMaximum(), hPDGhe3->GetMaximum()));
+      at = i/5. * 2.5; // max(hPDGhe->GetMaximum(), max(hPDGpro->GetMaximum(), hPDGhe3->GetMaximum()));
       t->DrawText(-0.42, at, Form("%.1f%%", at));
    }
 
@@ -2805,16 +2807,16 @@ void drawTracks3D(Int_t Runs, Int_t dataType, Bool_t recreate, Int_t switchLayer
    cout << "Number of primaries = " << numberOfPrimaries << ", number of secondaries = " << numberOfSecondaries << endl;
    
    Float_t  cutHalo = 15;
-   Float_t  cutMaxAngle = 70;
-   Float_t  cutAngle = 40;
-   Float_t  cutEdep = 10;
+   Float_t  cutMaxAngle = 60;
+   Float_t  cutAngle = 50;
+   Float_t  cutEdep = 8;
    
 //   tracks->removeTracksEndingInHalo();
 //   tracks->removeHighAngularChangeTracks(cutMaxAngle); // mrad
-//   tracks->removeHighAngleTracks(cutAngle); // mrad
    tracks->doTrackFit();
    tracks->removeNuclearInteractions();
    tracks->removeThreeSigmaShortTracks();
+//   tracks->removeHighAngleTracks(cutAngle); // mrad
 
    Bool_t   kDraw = true;
 
@@ -2828,10 +2830,10 @@ void drawTracks3D(Int_t Runs, Int_t dataType, Bool_t recreate, Int_t switchLayer
 
    TCanvas *c1 = nullptr;
    if (kDraw) {
-      c1 = new TCanvas("c1", "c1", 1000, 1000);
+      c1 = new TCanvas("c1", "c1", 1000, 800);
       c1->SetTitle(Form("Tracks from %.2f MeV protons on %s", energy, getMaterialChar()));
    }
-  
+
    TView *view = nullptr; 
    if (kDraw) view = TView::CreateView(1);
    float fromx = 0.1 * nx;
@@ -2852,8 +2854,8 @@ void drawTracks3D(Int_t Runs, Int_t dataType, Bool_t recreate, Int_t switchLayer
    toy = ny/2 + zoom*2;
 
    Int_t iret;
-   Float_t theta = -3.5;
-   Float_t phi = 89.5;
+   Float_t theta = 337;
+   Float_t phi = 76;
 
    if (kDraw) {
       view->SetRange(fromx, 0, fromy, tox, 35, toy);
@@ -3186,8 +3188,8 @@ void drawTracks3D(Int_t Runs, Int_t dataType, Bool_t recreate, Int_t switchLayer
       axis->SetXTitle("Pixels in X");
       axis->SetYTitle("Layer number");
       axis->SetZTitle("Pixels in Y");
-      axis->SetLabelSize(0.025);
-      axis->SetTitleOffset(2);
+      axis->SetLabelSize(0.035);
+      axis->SetTitleOffset(1.3);
 
    }
 

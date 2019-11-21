@@ -22,7 +22,6 @@
 [Core-0] *************************************************
 [Core-0] 
 [Core-0] You are using Geant4 version 10.5.1
-/control/alias absorberthickness 35
 /control/alias energy 917
 /control/alias degraderthickness 100
 /control/alias halfdegraderthickness -52.000
@@ -48,30 +47,40 @@ G4VUserPhysicsList::SetDefaultCutValue: negative cut values  :-1[mm]
 [Acquisition-0] Simulation will have  = 1 run(s)
 [Acquisition-0] Slice 0 from 0 to 1 s [slice=1 s]
 
-### ===  Deexcitation model UAtomDeexcitation is activated for 23 regions:
+### ===  Deexcitation model UAtomDeexcitation is activated for 33 regions:
           DefaultRegionForTheWorld  1  1  1
           phantom  1  1  1
           degrader  1  1  1
           scanner_1  1  1  1
-          FM_Layer  1  1  1
-          FirstModule  1  1  1
-          FM_ActiveChip  1  1  1
-          FM_PassiveChip  1  1  1
-          FM_ChipGlue  1  1  1
-          FM_PCB  1  1  1
-          FM_PCBGlue  1  1  1
-          FM_Absorber1  1  1  1
-          FM_AbsorberAirGap  1  1  1
+          TRACKER_Layer  1  1  1
+          TRACKER_Absorber  1  1  1
+          TRACKER_Glue1  1  1  1
+          TRACKER_ALPIDE  1  1  1
+          TRACKER_AirGap  1  1  1
+          TRACKER_TopFDI1  1  1  1
+          TRACKER_TopFDI2  1  1  1
+          TRACKER_Glue2  1  1  1
+          TRACKER_Spacer  1  1  1
+          TRACKER_Glue3  1  1  1
+          TRACKER_BottomFDI1  1  1  1
+          TRACKER_BottomFDI2  1  1  1
+          TRACKER_Glue4  1  1  1
           scanner_2  1  1  1
           Layer  1  1  1
-          Module  1  1  1
-          ActiveChip  1  1  1
-          PassiveChip  1  1  1
-          ChipGlue  1  1  1
-          PCB  1  1  1
-          PCBGlue  1  1  1
-          Absorber1  1  1  1
-          AbsorberAirGap  1  1  1
+          Absorber  1  1  1
+          Glue1  1  1  1
+          Spacer1  1  1  1
+          Glue2  1  1  1
+          ALPIDE  1  1  1
+          AirGap  1  1  1
+          TopFDI1  1  1  1
+          TopFDI2  1  1  1
+          Glue3  1  1  1
+          Spacer2  1  1  1
+          Glue4  1  1  1
+          BottomFDI1  1  1  1
+          BottomFDI2  1  1  1
+          Glue5  1  1  1
 ### ===  Ignore cuts flag:   0
 
 phot:  for gamma applyCuts:1  SubType=12 BuildTable=0
@@ -788,30 +797,40 @@ CoulombScat:  for pi-, integral:1  applyCuts:1  SubType=1 BuildTable=1
 WARNING: Scene "none" not found.
   /vis/scene/list to see scenes.
 
-### ===  Deexcitation model UAtomDeexcitation is activated for 23 regions:
+### ===  Deexcitation model UAtomDeexcitation is activated for 33 regions:
           DefaultRegionForTheWorld  1  1  1
           phantom  1  1  1
           degrader  1  1  1
           scanner_1  1  1  1
-          FM_Layer  1  1  1
-          FirstModule  1  1  1
-          FM_ActiveChip  1  1  1
-          FM_PassiveChip  1  1  1
-          FM_ChipGlue  1  1  1
-          FM_PCB  1  1  1
-          FM_PCBGlue  1  1  1
-          FM_Absorber1  1  1  1
-          FM_AbsorberAirGap  1  1  1
+          TRACKER_Layer  1  1  1
+          TRACKER_Absorber  1  1  1
+          TRACKER_Glue1  1  1  1
+          TRACKER_ALPIDE  1  1  1
+          TRACKER_AirGap  1  1  1
+          TRACKER_TopFDI1  1  1  1
+          TRACKER_TopFDI2  1  1  1
+          TRACKER_Glue2  1  1  1
+          TRACKER_Spacer  1  1  1
+          TRACKER_Glue3  1  1  1
+          TRACKER_BottomFDI1  1  1  1
+          TRACKER_BottomFDI2  1  1  1
+          TRACKER_Glue4  1  1  1
           scanner_2  1  1  1
           Layer  1  1  1
-          Module  1  1  1
-          ActiveChip  1  1  1
-          PassiveChip  1  1  1
-          ChipGlue  1  1  1
-          PCB  1  1  1
-          PCBGlue  1  1  1
-          Absorber1  1  1  1
-          AbsorberAirGap  1  1  1
+          Absorber  1  1  1
+          Glue1  1  1  1
+          Spacer1  1  1  1
+          Glue2  1  1  1
+          ALPIDE  1  1  1
+          AirGap  1  1  1
+          TopFDI1  1  1  1
+          TopFDI2  1  1  1
+          Glue3  1  1  1
+          Spacer2  1  1  1
+          Glue4  1  1  1
+          BottomFDI1  1  1  1
+          BottomFDI2  1  1  1
+          Glue5  1  1  1
 ### ===  Ignore cuts flag:   0
 WARNING: command "/vis/viewer/update" could not be applied: no current viewer.
 [Core-0] End of macro Main.mac

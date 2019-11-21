@@ -16,25 +16,25 @@
 
 /gate/world/daughters/name scanner
 /gate/world/daughters/insert box
-/gate/scanner/geometry/setXLength 500. cm
-/gate/scanner/geometry/setYLength 500. cm
-/gate/scanner/geometry/setZLength 500. cm
-/gate/scanner/placement/setTranslation 0 0 0. cm
+/gate/scanner/geometry/setXLength 100. cm
+/gate/scanner/geometry/setYLength 100. cm
+/gate/scanner/geometry/setZLength 100. cm
+/gate/scanner/placement/setTranslation 0 0 50. cm
 /gate/scanner/vis/forceWireframe
 
 /gate/scanner/daughters/name phantom
 /gate/scanner/daughters/insert box
 /gate/phantom/geometry/setXLength 100. cm
 /gate/phantom/geometry/setYLength 100. cm
-/gate/phantom/geometry/setZLength 0.4 mm
+/gate/phantom/geometry/setZLength 100. cm
 /gate/phantom/placement/setTranslation 0 0 0 mm
-/gate/phantom/setMaterial Tungsten
+/gate/phantom/setMaterial Water
 /gate/phantom/vis/forceWireframe
 
 /gate/phantom/attachCrystalSD
 
-#/gate/physics/addPhysicsList QGSP_BIC_EMY
-/gate/physics/addPhysicsList QGSP_BIC_HP
+/gate/physics/addPhysicsList QGSP_BIC_EMZ
+#/gate/physics/addPhysicsList QGSP_BIC_HP
 
 /gate/geometry/setIonisationPotential Water 75 eV
 
@@ -54,21 +54,25 @@
 #/gate/source/PBS/setEllipseYPhiEmittance 20 mm*mrad
 #/gate/source/PBS/setEllipseYPhiRotationNorm negative
 
-/gate/source/addSource uniformBeam gps
-/gate/source/uniformBeam/gps/particle proton
-/gate/source/uniformBeam/gps/ene/type Gauss
-/gate/source/uniformBeam/gps/ene/mono 150 MeV
-/gate/source/uniformBeam/gps/ene/sigma 0 MeV
-/gate/source/uniformBeam/gps/type Plane
-/gate/source/uniformBeam/gps/shape Square
-/gate/source/uniformBeam/gps/direction 0 0 1
-/gate/source/uniformBeam/gps/halfx 0 mm
-/gate/source/uniformBeam/gps/halfy 0 mm
-/gate/source/uniformBeam/gps/centre 0. 0. -2. cm
-/gate/application/setTotalNumberOfPrimaries 100000
+/gate/source/addSource PBS PencilBeam
+/gate/source/PBS/setParticleType GenericIon
+/gate/source/PBS/setIonProperties 2 4 2 0
+#/gate/source/PBS/setIonProperties 6 12 6 0
+/gate/source/PBS/setEnergy 917 MeV
+/gate/source/PBS/setSigmaEnergy 0. MeV
+/gate/source/PBS/setPosition 0. 0. -10 mm
+/gate/source/PBS/setSigmaX 3 mm
+/gate/source/PBS/setSigmaY 3 mm
+/gate/source/PBS/setSigmaTheta 2 mrad
+/gate/source/PBS/setSigmaPhi 2 mrad
+/gate/source/PBS/setEllipseXThetaEmittance 15 mm*mrad
+/gate/source/PBS/setEllipseXThetaRotationNorm negative
+/gate/source/PBS/setEllipseYPhiEmittance 15 mm*mrad
+/gate/source/PBS/setEllipseYPhiRotationNorm negative
+/gate/application/setTotalNumberOfPrimaries 5000
 
 /gate/output/root/enable
-/gate/output/root/setFileName output/neutron_yield_W
+/gate/output/root/setFileName output/waterphantom
 
 /gate/random/setEngineName MersenneTwister
 /gate/random/setEngineSeed auto

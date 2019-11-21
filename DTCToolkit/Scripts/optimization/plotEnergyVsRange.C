@@ -36,7 +36,7 @@ const Int_t xFrom = 40;
 void plotEnergyVsRange() {
    TCanvas *c1 = new TCanvas("c1", "Range accuracy", 1100, 800);
    
-   
+/*   
    TPaveLabel *Ytitle = new TPaveLabel(0.01, 0.05, 0.03, 0.9, "Range deviation [mm WEPL]");
    Ytitle->SetBorderSize(0);
    Ytitle->SetFillColor(kWhite);
@@ -56,11 +56,13 @@ void plotEnergyVsRange() {
    gStyle->SetPadRightMargin(0.025);
    gStyle->SetPadBottomMargin(0.15);
    gStyle->SetPadTopMargin(0.23);
+*/
+//   TCanvas *cRangeAccuracy = new TCanvas("cRangeAccuracy", "Range accuracy", 1200, 300);
 
-   TPad *graphPad = new TPad("Graphs", "Graphs", 0.05, 0.1, 0.95, 0.95);
-   graphPad->Draw();
-   graphPad->cd();
-   graphPad->Divide(1,5,0.00001,0.00001);
+//   TPad *graphPad = new TPad("Graphs", "Graphs", 0.05, 0.1, 0.95, 0.95);
+//   graphPad->Draw();
+//   graphPad->cd();
+   //graphPad->Divide(1,5,0.00001,0.00001);
 
    Float_t  arrayE2[arraySize] = {0}; // energy MC
    Float_t  arrayE3[arraySize] = {0}; // energy MC
@@ -95,7 +97,7 @@ void plotEnergyVsRange() {
    Double_t energiesWater[arraySize] = {0};
    Double_t rangesWater[arraySize] = {0};
 
-   Float_t correction_2 = 0.02, correction_3 = 0.415, correction_35 = 0.74, correction_4 = 0.74, correction_5 = 1.39 , correction_6 = 2.04;
+   Float_t correction_2 = 0.02, correction_3 = 0.415, correction_35 = 0.82, correction_4 = 0.74, correction_5 = 1.39 , correction_6 = 2.04;
 
    gStyle->SetOptStat(0);
 
@@ -119,7 +121,7 @@ void plotEnergyVsRange() {
 
 
    ifstream in1;
-   in1.open("../../Data/Ranges/EnergyAfterDegraderPSTAR.csv");
+   in1.open("../../Data/Ranges/EnergyAfterDegraderHelium.csv");
    Int_t thick, n=0;
    while (1) {
       in1 >> thick >> energy;
@@ -128,14 +130,14 @@ void plotEnergyVsRange() {
       energies[n++] = energy;
    }
    in1.close();
-   printf("Found %d lines in EnergyAfterDegraderPSTAR.csv\n", n);
+   printf("Found %d lines in EnergyAfterDegraderHelium.csv\n", n);
 
    TSpline3 *energySpline = new TSpline3("energySpline", thicknesses, energies, n);
 
    Int_t nlinesR6 = 0, nlinesR2 = 0, nlinesR3 = 0, nlinesR4 = 0, nlinesR5 = 0;
    Float_t dummy, floatenergy_;
    ifstream in2;
-   in2.open("../../OutputFiles/findManyRangesDegrader.csv");
+   in2.open("../../OutputFiles/findManyRangesDegraderHelium.csv");
    while (1) {
       in2 >> degrader_ >> thickness_ >> nomrange_ >> dummy >> dummy >> floatenergy_ >> dummy;
 
@@ -146,7 +148,7 @@ void plotEnergyVsRange() {
          arrayRE2[nlinesR2] = floatenergy_;
          arrayRD2[nlinesR2++] = degrader_;
       }
-      else if (thickness_ == 3) {
+      else if (thickness_ == 35) {
          arrayR3[nlinesR3] = nomrange_;
          arrayRE3[nlinesR3] = floatenergy_;
          arrayRD3[nlinesR3++] = degrader_;
@@ -214,7 +216,7 @@ void plotEnergyVsRange() {
 
    ifstream in;
    if (!kUseCarbon) {
-      in.open("../../OutputFiles/result_makebraggpeakfit_proj.csv");
+      in.open("../../OutputFiles/result_makebraggpeakfit_Helium.csv");
    }
    else {
       in.open("../../OutputFiles/result_makebraggpeakfitCarbon.csv");
@@ -226,6 +228,8 @@ void plotEnergyVsRange() {
    while (1) {
       in >> thickness_ >> energy_ >> nomrange_ >> estrange_ >> nomsigma_ >> sigmaRange_;
       // energy_ here is actually degraderthickness
+
+//      cout << thickness_ << ", " << energy_ << ", " << nomrange_ << ", " << estrange_ << ", " << nomsigma_ << ", " << sigmaRange_ << endl;
 
       if (!in.good()) {
          break;
@@ -249,7 +253,7 @@ void plotEnergyVsRange() {
          if (thickness_ == 6) arrayMC6[nlines6++] = -nomrange_ + estrange_ + correction_6 * kUseDCCorrection;
       }
       else {
-         pass;
+//         pass;
          /*
          if (thickness_ == 2) {
             int index = lookup2[energy_];
@@ -306,7 +310,7 @@ void plotEnergyVsRange() {
    TGraph *hMC4 = new TGraph(nlines4, arrayE4, arrayMC4);
    TGraph *hMC5 = new TGraph(nlines5, arrayE5, arrayMC5);
    TGraph *hMC6 = new TGraph(nlines6, arrayE6, arrayMC6);
-
+/*
    hMC2->SetTitle(";Range [mm WEPL];");
    hMC3->SetTitle(";Range [mm WEPL];");
    hMC35->SetTitle(";Range [mm WEPL];");
@@ -346,6 +350,10 @@ void plotEnergyVsRange() {
    hMC5->GetXaxis()->SetTitleOffset(3);
    hMC6->GetXaxis()->SetTitleOffset(3);
    hMC35->GetXaxis()->SetTitleOffset(3);
+*/
+
+   gStyle->SetTitleSize(0.06, "xy");
+   gStyle->SetLabelSize(0.06, "xy");
 
    hMC2->SetLineColor(kRed+4);
    hMC3->SetLineColor(kRed+3);
@@ -365,7 +373,7 @@ void plotEnergyVsRange() {
 
    Float_t xfrom = 0;
    Float_t xto = 380;
-
+/*
    hMC2->GetXaxis()->SetRangeUser(xfrom, xto);
    hMC3->GetXaxis()->SetRangeUser(xfrom, xto);
    hMC35->GetXaxis()->SetRangeUser(xfrom, xto);
@@ -384,6 +392,7 @@ void plotEnergyVsRange() {
    hMC4->GetYaxis()->SetNdivisions(404);
    hMC5->GetYaxis()->SetNdivisions(404);
    hMC6->GetYaxis()->SetNdivisions(404);
+*/
 
    if (!kUseDCCorrection) {
       hMC2->GetYaxis()->SetRangeUser(yfrom - correction_2, yto - correction_2);
@@ -396,7 +405,7 @@ void plotEnergyVsRange() {
 
    Float_t textX = 7.22;
    Float_t textY = 3;
-
+/*
    graphPad->cd(1);
    gPad->SetGridy();
    hMC2->Draw("LA");
@@ -404,17 +413,17 @@ void plotEnergyVsRange() {
    t2->SetTextSize(0.15);
    t2->SetTextFont(22);
    t2->DrawText(textX, textY - correction_2 * (!kUseDCCorrection), Form("2 mm Al absorber (calibration constant = +%.1f mm)", correction_2)); 
-
-   graphPad->cd(2);
+*/
+//   graphPad->cd(2);
+   c1->cd();
    gPad->SetGridy();
-   hMC3->Draw("LA");
-   t2->DrawText(textX, textY - correction_3 * (!kUseDCCorrection), Form("3 mm Al absorber (calibration constant = +%.1f mm)", correction_3));
+   hMC35->Draw("LA");
+   //t2->DrawText(textX, textY - correction_3 * (!kUseDCCorrection), Form("3 mm Al absorber (calibration constant = +%.1f mm)", correction_3));
    /*
    graphPad->cd(3);
    gPad->SetGridy();
    hMC35->Draw("LA");
    t2->DrawText(textX, textY, "3.5 mm Al absorber");
-*/
    graphPad->cd(3);
    gPad->SetGridy();
    hMC4->Draw("LA");
@@ -429,6 +438,6 @@ void plotEnergyVsRange() {
    gPad->SetGridy();
    hMC6->Draw("LA");
    t2->DrawText(textX, textY - correction_6 * (!kUseDCCorrection), Form("6 mm Al absorber (calibration constant = +%.1f mm)", correction_6));
-
+*/
 
 }

@@ -283,15 +283,26 @@ class Module:
         self.absorberThickness = absorberThickness
         self.absorberMaterial = absorberMaterial
 #        self.firstAbsorberThickness = absorberThickness
-        self.absorberSize = Size(self.chipSize.dx + 1 * cm, self.chipSize.dy + 1*cm, self.absorberThickness)
-        self.glueThickness = 35 * um
-        self.kaptonThickness = 140 * um
+        self.absorberSize = Size(self.chipSize.dx, self.chipSize.dy, self.absorberThickness)
+        self.glueThickness = 5 * um
+        self.kaptonThickness = 75 * um
+        self.spacerThickness = 260 * um
         self.AlCableThickness = 150 * um
-        self.activeChipThickness = 15 * um
-        self.absorberAirGapThickness = 250 * um
+        self.activeChipThickness = 50 * um
+        self.absorberAirGapThickness = 1480 * um
+        self.topFDI_AlThickness = 30 * um
+        self.topFDI_PiThickness = 20 * um
+        self.bottomFDI_AlThickness = 100 * um
+        self.bottomFDI_PiThickness = 20 * um
         self.fromZ = 0
-        self.thickness = 2*self.glueThickness + self.kaptonThickness + self.AlCableThickness + self.activeChipThickness + self.absorberThickness + self.absorberAirGapThickness
-        self.moduleThickness = 2 * self.glueThickness + self.kaptonThickness + self.AlCableThickness + self.activeChipThickness
+#         self.thickness = 2*self.glueThickness + self.kaptonThickness + self.AlCableThickness + self.activeChipThickness + self.absorberThickness + self.absorberAirGapThickness
+#         self.moduleThickness = 2 * self.glueThickness + self.kaptonThickness + self.AlCableThickness + self.activeChipThickness
+        
+        self.thickness = 5 * self.glueThickness + self.absorberThickness + self.spacerThickness + self.activeChipThickness + self.absorberAirGapThickness + 
+                        self.topFDI_AlThickness + self.topFDI_PiThickness + self.kaptonThickness + self.bottomFDI_AlThickness + self.bottomFDI_PiThickness
+
+        self.thickness = 5 * self.glueThickness + self.absorberThickness + self.spacerThickness + self.activeChipThickness + self.absorberAirGapThickness + 
+                        self.topFDI_AlThickness + self.topFDI_PiThickness + self.kaptonThickness + self.bottomFDI_AlThickness + self.bottomFDI_PiThickness
 
         self.size = Size(10*cm, 4*cm, self.thickness)
         self.mother = mother
@@ -404,13 +415,61 @@ class Module:
         name = "KaptonGlue"
         size = Size(self.chipSize.dx + self.chipGap.dx, self.chipSize.dy, self.glueThickness)
         pos = self.getPosDepth(0, self.chipPos.y, size, name)
-        self.addObject(name, pos, size, kGlue, kVisible, kYellow)
+        self.addObject(name, pos, size, kEpoxy, kVisible, kYellow)
 
     def makeKapton(self):
         name = "Kapton"
         size = Size(self.chipSize.dx + self.chipGap.dx, self.chipSize.dy, self.kaptonThickness)
         pos = self.getPosDepth(0, self.chipPos.y, size, name)
         self.addObject(name, pos, size, kKapton, kVisible, kGreen)
+
+    def makeAbsorberGlue(self):
+        name = "AbsorberGlue"
+        size = Size(self.chipSize.dx + self.chipGap.dx, self.chipSize.dy, self.glueThickness)
+        pos = self.getPosDepth(0, self.chipPos.y, size, name)
+        self.addObject(name, pos, size, kEpoxy, kVisible, kYellow)
+   
+    def makeSpacer(self):
+        name = "Spacer"
+        size = Size(self.chipSize.dx + self.chipGap.dx, self.chipSize.dy, self.spacerThickness)
+        pos = self.getPosDepth(0, self.chipPos.y, size, name)
+        self.addObject(name, pos, size, kAluminium, kVisible, kYellow)
+
+    def makeSpacerGlue(self):
+        name = "SpacerGlue"
+        size = Size(self.chipSize.dx + self.chipGap.dx, self.chipSize.dy, self.glueThickness)
+        pos = self.getPosDepth(0, self.chipPos.y, size, name)
+        self.addObject(name, pos, size, kEpoxy, kVisible, kYellow)
+
+    def makeFDIGlue(self):
+        name = "FDIGlue"
+        size = Size(self.chipSize.dx + self.chipGap.dx, self.chipSize.dy, self.glueThickness)
+        pos = self.getPosDepth(0, self.chipPos.y, size, name)
+        self.addObject(name, pos, size, kEpoxy, kVisible, kYellow)
+
+    def makeTopFDI_Al(self):
+        name = "TopFDI_Al"
+        size = Size(self.chipSize.dx + self.chipGap.dx, self.chipSize.dy, self.topFDI_AlThickness)
+        pos = self.getPosDepth(0, self.chipPos.y, size, name)
+        self.addObject(name, pos, size, kAluminium, kVisible, kYellow)
+
+    def makeTopFDI_Pi(self):
+        name = "TopFDI_Pi"
+        size = Size(self.chipSize.dx + self.chipGap.dx, self.chipSize.dy, self.topFDI_PiThickness)
+        pos = self.getPosDepth(0, self.chipPos.y, size, name)
+        self.addObject(name, pos, size, kKapton, kVisible, kYellow)
+
+    def makeBottomFDI_Al(self):
+        name = "BottomFDI_Al"
+        size = Size(self.chipSize.dx + self.chipGap.dx, self.chipSize.dy, self.bottomFDI_AlThickness)
+        pos = self.getPosDepth(0, self.chipPos.y, size, name)
+        self.addObject(name, pos, size, kAluminium, kVisible, kYellow)
+
+    def makeBottomFDI_Pi(self):
+        name = "BottomFDI_Pi"
+        size = Size(self.chipSize.dx + self.chipGap.dx, self.chipSize.dy, self.bottomFDI_PiThickness)
+        pos = self.getPosDepth(0, self.chipPos.y, size, name)
+        self.addObject(name, pos, size, kKapton, kVisible, kYellow)
 
     def makeChipGlue(self):
         name = "ChipGlue"

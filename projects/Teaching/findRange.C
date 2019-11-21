@@ -8,7 +8,7 @@
 using namespace std;
 
 void Run() {
-   TFile  * f = new TFile("output/sobp_200MeV.root");
+   TFile  * f = new TFile("output/waterphantom.root");
    Int_t energy = 200;
    TTree  * tree = (TTree*) f->Get("Hits");
    Float_t  z,edep,lastZ = -1, dE = 0;
@@ -16,23 +16,10 @@ void Run() {
    Float_t  expectedRange = 0.022 * pow(energy, 1.77);
 
    TCanvas *c = new TCanvas("c", "c", 1000, 500);
-//   c->Divide(2, 1,1e-5,1e-5);
+   c->Divide(2, 1,1e-5,1e-5);
 
-   gStyle->SetOptStat(0);
-
-   gStyle->SetTitleFont(22);
-   gStyle->SetLabelFont(22);
-   gStyle->SetTextFont(22);
-   gStyle->SetLabelFont(22, "Y");
-   gStyle->SetTitleFont(22, "Y");
-   gStyle->SetTitleSize(0.06);
-   gStyle->SetLabelSize(0.06);
-   gStyle->SetTextSize(0.06);
-   gStyle->SetLabelSize(0.06, "Y");
-   gStyle->SetTitleSize(0.06, "Y");
-
-   TH1F   * doseHistogram = new TH1F("doseHistogram", "Energy deposition;Range [mm];MeV/proton", 278, 0, expectedRange*1.07);
-   TH1F   * rangeHistogram = new TH1F("rangeHistogram", "Stopping position;Range [mm];Entries", 278*1.5, 0, expectedRange*1.07);
+   TH1F   * doseHistogram = new TH1F("doseHistogram", "Energy deposition;Range [mm];MeV/proton", 800, 0, 400);
+   TH1F   * rangeHistogram = new TH1F("rangeHistogram", "Stopping position;Range [mm];Entries", 800, 0, 400);
 
    tree->SetBranchAddress("posZ", &z);
    tree->SetBranchAddress("eventID", &eventID);
@@ -49,6 +36,7 @@ void Run() {
 
       if (eventID != lastEventID && lastEventID >= 0) {
          rangeHistogram->Fill(lastZ);
+         printf("range = %.2f\n", lastZ);
          dE = 0;
 
       }
@@ -66,10 +54,12 @@ void Run() {
    rangeHistogram->SetLineWidth(2);
 
 
-   rangeHistogram->Scale(doseHistogram->GetMaximum() / rangeHistogram->GetMaximum() * 0.7);
+   //   rangeHistogram->Scale(doseHistogram->GetMaximum() / rangeHistogram->GetMaximum() * 0.7);
 
+   c->cd(1);
    doseHistogram->Draw();
-   rangeHistogram->Draw("same");
+   c->cd(2);
+   rangeHistogram->Draw();
 
 
 //   TF1 *fit = new TF1("fit", "gaus");
