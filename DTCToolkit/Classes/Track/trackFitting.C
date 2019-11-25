@@ -75,7 +75,7 @@ TGraphErrors * Track::doTrackFit(Bool_t isScaleVariable, Bool_t useTrackLength) 
       scaleParameter = 3.42;
    }
 
-   if (kHelium) scaleParameter = 22.5;
+   if (kHelium) scaleParameter = 28; // was 22.5
 
    // scaleParameter *= 1.2; // Empirical tests to reduce range bias
 

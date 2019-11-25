@@ -468,12 +468,14 @@ void  DataInterface::getMCClustersThreshold(Int_t runNo, Clusters *clusters, Hit
    Int_t eventIdFrom = runNo * kEventsPerRun + kSkipTracks;
    Int_t eventIdTo = eventIdFrom + kEventsPerRun + kSkipTracks;
    Int_t lastPropagated = -1;
+   Float_t alpideThickness = 50; // was 14
 
    // let = (n/4.23)^1/0.65 [Pettersen et al. Phys Med 2019]
    // n < 2 -> let < (2/4.23)^1/0.65 = 0.316 keV/um
    // edep = let * 14 um = 0.316 kev/um * 14 um = 4.4e-3 MeV ~ 4e-3 MeV
+   // new design: let * 50 um = 0.316 keV/um * 50 um = 15.8e-3 MeV ~ 1.5e-2 MeV
 
-   Float_t threshold = 4e-3;
+   Float_t threshold = 1.5e-2; // old 4e-3
    Int_t particlesBelowThreshold = 0;
 
    if (runNo == 0 && !kSpotScanning) lastJentry_ = 0;
@@ -598,13 +600,13 @@ void  DataInterface::getMCClustersThreshold(Int_t runNo, Clusters *clusters, Hit
       }
       printf("\n");
       */
-      printf("posz %.3f baseID %d level1ID %d -> layer %d\n", posZ, baseID, level1ID, layer);
+      printf("posz %.3f baseID %d level1ID %d -> layer %d. edep %.2f keV/um, PDG %d, parentID %d\n", posZ, baseID, level1ID, layer, edep/alpideThickness*1000, PDGEncoding, parentID);
 
 
 //      if (volumeID[3] == 0 && volumeID[4] == 0 && volumeID[5] == -1) {
          if (layer < nLayers) {
-            if (hits)      hits->appendPoint(x,y,layer,edep*1000/14,eventID,isSecondary,PDGEncoding);
-            if (clusters)  clusters->appendClusterEdep(x,y,layer,edep*1000/14,eventID,isSecondary,PDGEncoding);
+            if (hits)      hits->appendPoint(x,y,layer,edep*1000/alpideThickness,eventID,isSecondary,PDGEncoding);
+            if (clusters)  clusters->appendClusterEdep(x,y,layer,edep*1000/alpideThickness,eventID,isSecondary,PDGEncoding);
          }
 //      }
 
