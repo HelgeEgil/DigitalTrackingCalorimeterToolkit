@@ -905,25 +905,25 @@ void makePlots() {
 //   c22->SetLogx();
    gPad->SetGridy();
    gPad->SetGridx();
-   gFraction2mm->SetTitle(";Protons / readout frame;Fraction of correctly reconstructed tracks");
-   gFraction2mm->GetXaxis()->SetRangeUser(1, 520);
-   gFraction2mm->SetMaximum(100);
-   gFraction2mm->SetMinimum(20);
-   gFraction2mm->GetXaxis()->SetTitleSize(0.04);
-   gFraction2mm->GetYaxis()->SetTitleSize(0.04);
-   gFraction2mm->GetXaxis()->SetLabelSize(0.04);
-   gFraction2mm->GetXaxis()->SetNdivisions(9);
-   gFraction2mm->GetYaxis()->SetLabelSize(0.04);
-   gFraction2mm->GetXaxis()->SetLabelSize(0.04);
-   gFraction2mm->GetXaxis()->SetTitleFont(22);
-   gFraction2mm->GetYaxis()->SetTitleFont(22);
-   gFraction2mm->GetXaxis()->SetTitleOffset(1);
-   gFraction2mm->GetYaxis()->SetTitleOffset(1.3);
-   gFraction2mm->GetYaxis()->SetLabelOffset(5);
-   gFraction2mm->GetXaxis()->SetLabelFont(22);
-   gFraction2mm->GetXaxis()->SetNoExponent();
-   gFraction2mm->GetXaxis()->SetMoreLogLabels();
-   gFraction2mm->GetYaxis()->SetLabelFont(22);
+   gFraction2mmFilter->SetTitle(";Protons / readout frame;Fraction of correctly reconstructed tracks");
+   gFraction2mmFilter->GetXaxis()->SetRangeUser(1, 520);
+   gFraction2mmFilter->SetMaximum(100);
+   gFraction2mmFilter->SetMinimum(40);
+   gFraction2mmFilter->GetXaxis()->SetTitleSize(0.04);
+   gFraction2mmFilter->GetYaxis()->SetTitleSize(0.04);
+   gFraction2mmFilter->GetXaxis()->SetLabelSize(0.04);
+   gFraction2mmFilter->GetXaxis()->SetNdivisions(9);
+   gFraction2mmFilter->GetYaxis()->SetLabelSize(0.04);
+   gFraction2mmFilter->GetXaxis()->SetLabelSize(0.04);
+   gFraction2mmFilter->GetXaxis()->SetTitleFont(22);
+   gFraction2mmFilter->GetYaxis()->SetTitleFont(22);
+   gFraction2mmFilter->GetXaxis()->SetTitleOffset(1);
+   gFraction2mmFilter->GetYaxis()->SetTitleOffset(1.3);
+   gFraction2mmFilter->GetYaxis()->SetLabelOffset(5);
+   gFraction2mmFilter->GetXaxis()->SetLabelFont(22);
+   gFraction2mmFilter->GetXaxis()->SetNoExponent();
+   gFraction2mmFilter->GetXaxis()->SetMoreLogLabels();
+   gFraction2mmFilter->GetYaxis()->SetLabelFont(22);
 
    gFraction2mm->SetLineWidth(3);
    gFraction3mm->SetLineWidth(3);
@@ -939,9 +939,9 @@ void makePlots() {
    gFraction2mmFilter->SetLineColor(kRed+2);
    gFraction3mmFilter->SetLineColor(kRed);
 
-   gFraction2mm->Draw("LPA");
-   gFraction3mm->Draw("LP");
-   gFraction2mmFilter->Draw("LP");
+//   gFraction2mm->Draw("LPA");
+//   gFraction3mm->Draw("LP");
+   gFraction2mmFilter->Draw("LPA");
    gFraction3mmFilter->Draw("LP");
 //   gFraction35mm->Draw("L");
 //   gFraction4mm->Draw("LP");
@@ -952,7 +952,7 @@ void makePlots() {
    tt->SetTextAlign(32);
    tt->SetTextSize(0.04);
    tt->SetTextFont(22);
-   for (Int_t i=2; i<11;i++) {
+   for (Int_t i=4; i<11;i++) {
       cout << "Drawing text at " << -0.42 << ", " << i*10 << endl;
       tt->DrawText(-0.0052, i*10, Form("%d%%", i*10));
    }
@@ -970,12 +970,12 @@ void makePlots() {
    TText *curveLabel = new TText();
    curveLabel->SetTextFont(22);
    curveLabel->SetTextSize(0.04);
-   curveLabel->DrawText(535, gFraction2mm->Eval(535)*0.98, "Ideal");
-   curveLabel->DrawText(535, gFraction3mm->Eval(535)*0.98, "CD");
+//   curveLabel->DrawText(535, gFraction2mm->Eval(535)*0.98, "Ideal");
+//   curveLabel->DrawText(535, gFraction3mm->Eval(535)*0.98, "CD");
 //   curveLabel->DrawText(535, gFraction35mm->Eval(535)*0.98, "5x5 mm^{2}");
 //   curveLabel->DrawText(535, gFraction4mm->Eval(535)*0.98, "4 mm");
-   curveLabel->DrawText(535, gFraction2mmFilter->Eval(535)*0.98, "Ideal + filter");
-   curveLabel->DrawText(535, gFraction3mmFilter->Eval(535)*0.98, "CD + filter");
+   curveLabel->DrawText(535, gFraction2mmFilter->Eval(535)*0.98, "Ideal");
+   curveLabel->DrawText(535, gFraction3mmFilter->Eval(535)*0.98, "CD");
 //   curveLabel->DrawText(220, 91, "Pixel Diffusion Model");
 
    /*

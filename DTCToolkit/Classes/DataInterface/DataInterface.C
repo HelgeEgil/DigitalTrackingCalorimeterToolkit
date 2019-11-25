@@ -519,8 +519,9 @@ void  DataInterface::getMCClustersThreshold(Int_t runNo, Clusters *clusters, Hit
       if (kPhantom) layer++;
       
       if (posZ < 0) { // Inside degrader, check if nuclear interactions
+         
          if (TString(processName) == "hadElastic") {
-            isSecondary = true;
+         //   isSecondary = true;
          }
 
          lastEventID = eventID;

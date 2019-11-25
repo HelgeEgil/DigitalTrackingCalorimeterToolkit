@@ -450,9 +450,9 @@ void getTracksReconstructionEfficiency(Int_t dataType, Float_t energy, Float_t d
    run_energy = energy;
    run_degraderThickness = degraderThickness;
 
-   Int_t nRunArray[12] = {3,4,5,8,16,32,64,128,181,256,512,1024};
+   Int_t nRunArray[15] = {3,4,5,8,16,25,32,50,64,100,128,181,200,256,512};
 
-   for (Int_t i=0; i<12; i++) { // 1 -> 30
+   for (Int_t i=0; i<15; i++) { // 1 -> 30
       nRuns = nRunArray[i];
 
       kEventsPerRun = nRuns;
@@ -484,14 +484,14 @@ void getTracksReconstructionEfficiency(Int_t dataType, Float_t energy, Float_t d
    
       Float_t  cutHalo = 12;
       Float_t  cutMaxAngle = 60;
-      Float_t  cutAngle = 40;
-      Float_t  cutEdep = 10;
+      Float_t  cutAngle = 35;
+      Float_t  cutEdep = 8;
    
-      tracks->removeHighAngleTracks(cutAngle); // mrad
-      tracks->removeHighAngularChangeTracks(cutMaxAngle); // mrad
+//      tracks->removeHighAngularChangeTracks(cutMaxAngle); // mrad
       tracks->doTrackFit();
       tracks->removeNuclearInteractions();
       tracks->removeThreeSigmaShortTracks();
+      tracks->removeHighAngleTracks(cutAngle); // mrad
       
       Int_t nTotalAfterFilter = 0;
       Int_t nFirstAndLastAllTracksAfterFilter = 0;
@@ -508,7 +508,7 @@ void getTracksReconstructionEfficiency(Int_t dataType, Float_t energy, Float_t d
       
       Float_t ratioFirstAndLastAllTracksAfterFilter = (float) nFirstAndLastAllTracksAfterFilter / nTotalAfterFilter;
 
-      ofstream file2(Form("OutputFiles/lastLayerCorrect_different_nodiff_nRuns_%.0f.csv", kAbsorberThickness), ofstream::out | ofstream::app);
+      ofstream file2(Form("OutputFiles/lastLayerCorrect_different_nRuns_Helium.csv"), ofstream::out | ofstream::app);
       file2 << readoutAbsorber << " " << nRuns << " " << " " << ratioFirstAndLastAllTracks << " " << ratioFirstAndLastAllTracksAfterFilter << endl;
       file2.close();
       
@@ -1921,7 +1921,7 @@ void analyseHelium(Int_t Runs, Int_t dataType, Bool_t recreate, Int_t switchLaye
 // Use
 
    tracks->removeNuclearInteractions();
-   tracks->removeThreeSigmaShortTracks();
+//   tracks->removeThreeSigmaShortTracks();
 //   tracks->removeHighAngleTracks(cutAngle); // mrad
   
 
@@ -1965,8 +1965,8 @@ void analyseHelium(Int_t Runs, Int_t dataType, Bool_t recreate, Int_t switchLaye
 
    TCanvas *cEdep2D = new TCanvas("cEdep2D","cEdep2D",1200,600);
    cEdep2D->Divide(2,1,1e-5,1e-5);
-   TH2F *edep2DP = new TH2F("edep2DP", "Primary at end;Edep last layer [kev/#mum];Edep next-to-last layer", 60, 0, 60, 60, 0, 1000);
-   TH2F *edep2DS = new TH2F("edep2DS", "Secondary at end;#Delta E detector mid [kev/#mum]; residual energy after mid [MeV]", 60, 0, 60,60, 0, 1000);
+   TH2F *edep2DP = new TH2F("edep2DP", "Primary at end;Edep plateau [keV/#mum];Edep last layer [keV/#mum]", 60, 0, 30, 60, 0, 30);
+   TH2F *edep2DS = new TH2F("edep2DS", "Secondary at end;Edep plateau [keV/#mum];Edep last layer [keV/#mum];", 60, 0, 30,60, 0, 30);
 
    TCanvas *cAllEdep = new TCanvas("cAllEdep","cAllEdep",1200,600);
    cAllEdep->Divide(2,1,1e-5,1e-5);
@@ -2043,10 +2043,12 @@ void analyseHelium(Int_t Runs, Int_t dataType, Bool_t recreate, Int_t switchLaye
          if (!thisTrack->Last()->isSecondary()) {
                cAllEdepP->Fill(meanEdep);
                cAllVarEdepP->Fill(riseFactor);
+               edep2DP->Fill(thisTrack->Last()->getDepositedEnergy(), meanEdep);
          }
          else {
                cAllEdepS->Fill(meanEdep);
                cAllVarEdepS->Fill(riseFactor);
+               edep2DS->Fill(thisTrack->Last()->getDepositedEnergy(), meanEdep);
          }
       }
       
@@ -2085,7 +2087,7 @@ void analyseHelium(Int_t Runs, Int_t dataType, Bool_t recreate, Int_t switchLaye
          if (last>5) { // thisTrack->At(last-5) && thisTrack->At(last-4)) {
             float edep_mid = thisTrack->getDepositedEnergy(last-5);
             float residual_energy = getEnergyAtWEPL(917,thisTrack->getRangeWEPLAt(last-4));
-            edep2DP->Fill(edep_mid, residual_energy);
+//            edep2DP->Fill(edep_mid, residual_energy);
          }
 
 
@@ -2102,7 +2104,7 @@ void analyseHelium(Int_t Runs, Int_t dataType, Bool_t recreate, Int_t switchLaye
          if (last>5) {
             float edep_mid = thisTrack->getDepositedEnergy(last-5);
             float residual_energy = getEnergyAtWEPL(917,thisTrack->getRangeWEPLAt(last-4));
-            edep2DS->Fill(edep_mid, residual_energy);
+//            edep2DS->Fill(edep_mid, residual_energy);
          }
       }
    }
@@ -2808,7 +2810,7 @@ void drawTracks3D(Int_t Runs, Int_t dataType, Bool_t recreate, Int_t switchLayer
    
    Float_t  cutHalo = 15;
    Float_t  cutMaxAngle = 60;
-   Float_t  cutAngle = 50;
+   Float_t  cutAngle = 35;
    Float_t  cutEdep = 8;
    
 //   tracks->removeTracksEndingInHalo();
@@ -2816,9 +2818,9 @@ void drawTracks3D(Int_t Runs, Int_t dataType, Bool_t recreate, Int_t switchLayer
    tracks->doTrackFit();
    tracks->removeNuclearInteractions();
    tracks->removeThreeSigmaShortTracks();
-//   tracks->removeHighAngleTracks(cutAngle); // mrad
+   tracks->removeHighAngleTracks(cutAngle); // mrad
 
-   Bool_t   kDraw = true;
+   Bool_t   kDraw = false;
 
    TH1I  *hWEPLCorrect = new TH1I("hWEPLCorrect", ";Range in detector [mm WEPL];Frequency", 400, 0, 250);
    TH1I  *hWEPLSecondary = new TH1I("hWEPLSecondary", "", 400, 0, 250);

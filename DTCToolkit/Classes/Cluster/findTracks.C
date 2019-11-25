@@ -180,7 +180,7 @@ void Clusters::doRecursiveWeightedTracking(Node * seedNode, vector<Node*> * endN
          nextAngle = thisNode->getNodeAngle(nextCluster);
 
          float alwaysAllowAngle = 0.03;
-         if (kHelium) alwaysAllowAngle = 0.02;
+         if (kHelium) alwaysAllowAngle = 0.03;
 
           if ((nextScore < thisMaxTrackScore || (nextAngle < alwaysAllowAngle)) ){// || (nextAngle < kMaxTrackAngle)) {
               thisNode->addChild(new Node(thisNode, nextCluster, nextScore)); // it is either appended to the tree or deleted if thisNode is full
