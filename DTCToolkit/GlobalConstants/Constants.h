@@ -42,7 +42,7 @@
 
 #ifdef FINALDESIGN
 #undef DZ
-#define DZ 2.01
+#define DZ 2.0
 #endif
 
 // -------------------------------------
