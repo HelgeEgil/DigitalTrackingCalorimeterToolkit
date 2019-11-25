@@ -11,6 +11,7 @@
 #define USEALPIDE // Comment to use experimental data; uncomment to use Monte Carlo data
 // #define USEDEBUG // Uncomment to print more debug information
 // #define ONECHIP // (MC) Limit the data area to a single chip (simplify visualization & memory usage)
+#define FINALDESIGN
 
 #ifdef USEDEBUG
 #define showDebug(x) std::cout << x
@@ -37,6 +38,11 @@
 #undef NY
 #define NX 1024
 #define NY 512
+#endif
+
+#ifdef FINALDESIGN
+#undef DZ
+#define DZ 2.01
 #endif
 
 // -------------------------------------
@@ -85,10 +91,18 @@ const Float_t kAbsorberThickness = 3.5; // ALPIDE, CHANGE TO FIT MC DATA GEOMETR
 const Float_t kAbsorberThickness = 3.3; // FOCAL EXPERIMENTAL DATA, DON'T CHANGE
 #endif
 
+
 // nLayers are loaded in MaterialConstants.C according to the detector geometry
 const Float_t dx = DX; // mm
 const Float_t dy = DY; // mm
 const Float_t dz = DZ + kAbsorberThickness;
+const Float_t dz2 = 2.795;
+
+#ifdef FINALDESIGN
+const Bool_t kFinalDesign = true;
+#else
+const Bool_t kFinalDesign = false;
+#endif
 
 // Used for treatment of available experimental data files
 const Int_t nEnergies = 6;

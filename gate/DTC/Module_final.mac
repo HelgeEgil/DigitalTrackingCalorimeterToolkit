@@ -178,7 +178,7 @@
 /gate/Glue1/geometry/setXLength 270.0 mm
 /gate/Glue1/geometry/setYLength 135.0 mm
 /gate/Glue1/geometry/setZLength 5 um
-/gate/Glue1/placement/setTranslation 0 0 722.5 um
+/gate/Glue1/placement/setTranslation 0 0 722.5 um # to 725
 /gate/Glue1/setMaterial Epoxy
 /gate/Glue1/vis/setColor yellow
 
@@ -186,8 +186,8 @@
 /gate/Layer/daughters/insert box
 /gate/Spacer1/geometry/setXLength 270.0 mm
 /gate/Spacer1/geometry/setYLength 135.0 mm
-/gate/Spacer1/geometry/setZLength 50 um
-/gate/Spacer1/placement/setTranslation 0 0 855 um
+/gate/Spacer1/geometry/setZLength 200 um
+/gate/Spacer1/placement/setTranslation 0 0 825 um # from 725: 825; to 925
 /gate/Spacer1/setMaterial Aluminium
 /gate/Spacer1/vis/setColor green
 
@@ -196,7 +196,7 @@
 /gate/Glue2/geometry/setXLength 270.0 mm
 /gate/Glue2/geometry/setYLength 135.0 mm
 /gate/Glue2/geometry/setZLength 5 um
-/gate/Glue2/placement/setTranslation 0 0 987.5 um
+/gate/Glue2/placement/setTranslation 0 0 922.5 um # from 925 to 930: 922.5 
 /gate/Glue2/setMaterial Epoxy
 /gate/Glue2/vis/setColor yellow
 
@@ -205,7 +205,7 @@
 /gate/ALPIDE/geometry/setXLength 270.0 mm
 /gate/ALPIDE/geometry/setYLength 135.0 mm
 /gate/ALPIDE/geometry/setZLength 50 um
-/gate/ALPIDE/placement/setTranslation 0 0 1015 um
+/gate/ALPIDE/placement/setTranslation 0 0 955 um # from 930 to 980: 955
 /gate/ALPIDE/setMaterial Silicon
 /gate/ALPIDE/vis/setColor green
 
@@ -214,7 +214,7 @@
 /gate/AirGap/geometry/setXLength 270.0 mm
 /gate/AirGap/geometry/setYLength 135.0 mm
 /gate/AirGap/geometry/setZLength 1480 um
-/gate/AirGap/placement/setTranslation 0 0 1780 um
+/gate/AirGap/placement/setTranslation 0 0 1720 um # from 980 to 2460
 /gate/AirGap/setMaterial Air
 /gate/AirGap/vis/setVisible false
 
@@ -223,7 +223,7 @@
 /gate/TopFDI1/geometry/setXLength 270.0 mm
 /gate/TopFDI1/geometry/setYLength 135.0 mm
 /gate/TopFDI1/geometry/setZLength 30 um
-/gate/TopFDI1/placement/setTranslation 0 0 2535 um
+/gate/TopFDI1/placement/setTranslation 0 0 2475 um # from 2460 to 2490: 2475
 /gate/TopFDI1/setMaterial Aluminium
 /gate/TopFDI1/vis/setColor blue
 
@@ -232,7 +232,7 @@
 /gate/TopFDI2/geometry/setXLength 270.0 mm
 /gate/TopFDI2/geometry/setYLength 135.0 mm
 /gate/TopFDI2/geometry/setZLength 20 um
-/gate/TopFDI2/placement/setTranslation 0 0 2560 um
+/gate/TopFDI2/placement/setTranslation 0 0 2500 um # from 2490 to 2510: 2500
 /gate/TopFDI2/setMaterial Kapton
 /gate/TopFDI2/vis/setColor blue
 
@@ -241,7 +241,7 @@
 /gate/Glue3/geometry/setXLength 270.0 mm
 /gate/Glue3/geometry/setYLength 135.0 mm
 /gate/Glue3/geometry/setZLength 5 um
-/gate/Glue3/placement/setTranslation 0 0 2572.5 um
+/gate/Glue3/placement/setTranslation 0 0 2512.5 um # from 2510 to 2515
 /gate/Glue3/setMaterial Epoxy
 /gate/Glue3/vis/setColor yellow
 
@@ -250,7 +250,7 @@
 /gate/Spacer2/geometry/setXLength 270.0 mm
 /gate/Spacer2/geometry/setYLength 135.0 mm
 /gate/Spacer2/geometry/setZLength 75 um
-/gate/Spacer2/placement/setTranslation 0 0 2612.5 um
+/gate/Spacer2/placement/setTranslation 0 0 2552.5 um # from 2515 to 2590
 /gate/Spacer2/setMaterial Kapton
 /gate/Spacer2/vis/setColor green
 
@@ -259,7 +259,7 @@
 /gate/Glue4/geometry/setXLength 270.0 mm
 /gate/Glue4/geometry/setYLength 135.0 mm
 /gate/Glue4/geometry/setZLength 5 um
-/gate/Glue4/placement/setTranslation 0 0 2652.5 um
+/gate/Glue4/placement/setTranslation 0 0 2592.5 um # from 2590 to 2595
 /gate/Glue4/setMaterial Epoxy
 /gate/Glue4/vis/setColor yellow
 
@@ -268,7 +268,7 @@
 /gate/BottomFDI1/geometry/setXLength 270.0 mm
 /gate/BottomFDI1/geometry/setYLength 135.0 mm
 /gate/BottomFDI1/geometry/setZLength 100 um
-/gate/BottomFDI1/placement/setTranslation 0 0 2705 um
+/gate/BottomFDI1/placement/setTranslation 0 0 2645 um # from 2595 to 2695: 2645
 /gate/BottomFDI1/setMaterial Aluminium
 /gate/BottomFDI1/vis/setColor blue
 
@@ -277,7 +277,7 @@
 /gate/BottomFDI2/geometry/setXLength 270.0 mm
 /gate/BottomFDI2/geometry/setYLength 135.0 mm
 /gate/BottomFDI2/geometry/setZLength 20 um
-/gate/BottomFDI2/placement/setTranslation 0 0 2765 um
+/gate/BottomFDI2/placement/setTranslation 0 0 2705 um # from 2695 to 2715: 2705
 /gate/BottomFDI2/setMaterial Kapton
 /gate/BottomFDI2/vis/setColor blue
 
@@ -286,7 +286,7 @@
 /gate/Glue5/geometry/setXLength 270.0 mm
 /gate/Glue5/geometry/setYLength 135.0 mm
 /gate/Glue5/geometry/setZLength 5 um
-/gate/Glue5/placement/setTranslation 0 0 2777.5 um
+/gate/Glue5/placement/setTranslation 0 0 2717.5 um # from 2715 to 2720: 2717.5
 /gate/Glue5/setMaterial Epoxy
 /gate/Glue5/vis/setColor yellow
 

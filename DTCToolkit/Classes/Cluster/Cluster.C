@@ -74,7 +74,21 @@ Double_t Cluster::getLayermm() {
    }
 
    else {
-      z = layerNo_*dz;
+      if (!kFinalDesign) { // Regular design with all layers the same
+         z = layerNo_*dz;
+      }
+      else { // First two layers thinner + ALPIDE not at front of absorber
+         // First alpide at 1.03 mm ; second at 1.03 mm + dz2
+         // WEPL calibration in this area is a bit wonky though
+         if (layerNo_ < 2) {
+            z = 1.03 + layerNo_ * dz2;
+         }
+         else {
+            // First two layers = 2 dz2
+            // Subsequent layers: alpide at 3.735 mm (mid of alpide)
+            z = 2 * dz2 + 3.735 + (layerNo_ - 2) * dz;
+         }
+      }
    }
 
    return z;

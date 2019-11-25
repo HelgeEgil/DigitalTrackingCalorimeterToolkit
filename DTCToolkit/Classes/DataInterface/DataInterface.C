@@ -63,6 +63,17 @@ DataInterface::DataInterface(TTree *tree) : fChain(0) {
 //         chain->Add(Form("Data/MonteCarlo/DTC_%s_%.0fMeV_%.0fmm.root/Hits", materialChar, run_energy, kAbsorberThickness));
          chain->Add(Form("Data/MonteCarlo/phantom_%.0fMeV_highacc3.root/Hits", run_energy));
       }
+      else if (kFinalDesign) {
+         if (!kHelium) {
+            printf("Opening PROTON file with degrader thickness %.0f mm and FINAL design (3.5 mm)", run_degraderThickness);
+            chain->Add(Form("Data/MonteCarlo/DTC_Final_Degrader%.0fmm_%dMeV.root/Hits", run_degraderThickness, kEnergy));
+         }
+         else {
+            printf("Opening HELIUM file with degrader thickness %.0f mm and FINAL design (3.5 mm)", run_degraderThickness);
+            chain->Add(Form("Data/MonteCarlo/DTC_Final_Helium_Degrader%.0fmm_%dMeV.root/Hits", run_degraderThickness, kEnergy));
+         }
+      }
+
       else {
          if (!kHelium) {
             printf("Opening PROTON file with degrader thickness %.0f mm, material is %s and abs. thickness %.0f mm...", run_degraderThickness, materialChar, readoutAbsorber);
@@ -515,8 +526,12 @@ void  DataInterface::getMCClustersThreshold(Int_t runNo, Clusters *clusters, Hit
          }
       }
       
-      layer = level1ID + baseID - 1;
+      layer = level1ID + baseID - 2;
       if (kPhantom) layer++;
+
+      if (kFinalDesign) {
+         layer = baseID*2 + level1ID - 2;
+      }
       
       if (posZ < 0) { // Inside degrader, check if nuclear interactions
          
@@ -575,20 +590,23 @@ void  DataInterface::getMCClustersThreshold(Int_t runNo, Clusters *clusters, Hit
 
       x = posX / dx + nx/2;
       y = posY / dy + ny/2;
-/*
-      printf("VolumeIDs layer %d: ", layer);
+
+      /*
+      printf("VolumeIDs layer %d posz %.3f: ", layer, posZ);
       for (Int_t i=0; i<10; i++) {
          printf("%d = %d; ", i, volumeID[i]);
       }
       printf("\n");
-*/
+      */
+      printf("posz %.3f baseID %d level1ID %d -> layer %d\n", posZ, baseID, level1ID, layer);
 
-      if (volumeID[3] == 0 && volumeID[4] == 0 && volumeID[5] == -1) {
+
+//      if (volumeID[3] == 0 && volumeID[4] == 0 && volumeID[5] == -1) {
          if (layer < nLayers) {
             if (hits)      hits->appendPoint(x,y,layer,edep*1000/14,eventID,isSecondary,PDGEncoding);
             if (clusters)  clusters->appendClusterEdep(x,y,layer,edep*1000/14,eventID,isSecondary,PDGEncoding);
          }
-      }
+//      }
 
       lastEventID = eventID;
    }

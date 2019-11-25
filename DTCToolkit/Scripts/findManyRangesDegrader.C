@@ -15,7 +15,7 @@ void findManyRanges(Int_t degraderFrom, Int_t degraderIncrement, Int_t degraderT
    if (mmTo < 0) mmTo = mmFrom;
 
    vector<Float_t> resultVector;
-   std::ofstream filename("../OutputFiles/findManyRangesDegraderHelium.csv");// , std::ofstream::out | std::ofstream::app);
+   std::ofstream filename("../OutputFiles/findManyRangesDegraderHelium_final.csv");// , std::ofstream::out | std::ofstream::app);
 
    for (Int_t mm=mmFrom; mm<=mmTo; mm += mmIncrement) {
       for (Int_t degrader=degraderFrom; degrader<=degraderTo; degrader += degraderIncrement) {

@@ -154,11 +154,18 @@ void  createSplines() {
    }
    else {
       if (kHelium) {
-         in.open("Data/Ranges/35mm_Al_Helium.csv"); // for 917 MeV
-         if (readoutAbsorber != 35) {
-            printf("REMEMBER TO ADD CALIBRATION FOR THIS ABSORBER THICKNESS (using 3.5 mm)!!! (%.1f)\n", kAbsorberThickness);
+         if (!kFinalDesign) {
+            in.open("Data/Ranges/35mm_Al_Helium.csv"); // for 917 MeV
+            if (readoutAbsorber != 35) {
+               printf("REMEMBER TO ADD CALIBRATION FOR THIS ABSORBER THICKNESS (using 3.5 mm)!!! (%.1f)\n", kAbsorberThickness);
+            }
+            if (kEnergy != 917) printf("SYSTEM NOT CALIBRATED FOR %d MeV!!\n", kEnergy);
          }
-         if (kEnergy != 917) printf("SYSTEM NOT CALIBRATED FOR %d MeV!!\n", kEnergy);
+         else {
+            in.open("Data/Ranges/Final_Al_Helium.csv"); // for 917 MeV
+            if (kEnergy != 917) printf("SYSTEM NOT CALIBRATED FOR %d MeV!!\n", kEnergy);
+           
+         }
       }
 
       else if (kEnergy == 250) { // the energy is off anywho

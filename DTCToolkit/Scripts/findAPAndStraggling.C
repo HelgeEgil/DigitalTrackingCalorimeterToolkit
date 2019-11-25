@@ -17,6 +17,7 @@
 #include <TLegend.h>
 #include <THStack.h>
 #include <TRandom3.h>
+#include <TSpline.h>
 #include <TPad.h>
 #include <TMath.h>
 
@@ -45,7 +46,7 @@ void findAPAndStraggling(Int_t absorberthickness) {
    Bool_t   useDegrader = true;
    Float_t  energyStraggling;
    Int_t    degraderThickness;
-   ifstream inWater, inMaterial;
+   ifstream inWater, inMaterial, inEnergy;
 
 
    // 2 mm: 0.0096, 1.784
@@ -71,8 +72,32 @@ void findAPAndStraggling(Int_t absorberthickness) {
 
    inWater.close();
 
+   inEnergy.open("../Data/Ranges/EnergyAfterDegraderHelium.csv");
+
+
+   Double_t ead_d[500] = {};
+   Double_t ead_e[500] = {};
+   Double_t ead_es[500] = {};
+   Int_t ead_idx = 0;
+
+   while (1) {
+      inEnergy >> degraderThickness >> energyFloat >> energyStraggling;
+      if (!inEnergy.good()) break;
+
+      ead_d[ead_idx] = degraderThickness;
+      ead_es[ead_idx] = energyStraggling;
+      ead_e[ead_idx++] = energyFloat;
+   }
+
+   TSpline3 *spline_e = new TSpline3("spline_e", ead_d, ead_e, ead_idx);
+   TSpline3 *spline_es = new TSpline3("spline_es", ead_d, ead_es, ead_idx);
+   
+   inEnergy.close();
+
+   cout << "Degrader 100 -> energy = " << spline_e->Eval(100) << endl;
+
    if (useDegrader) {
-      inMaterial.open("../OutputFiles/findManyRangesDegraderHelium.csv");
+      inMaterial.open("../OutputFiles/findManyRangesDegraderHelium_final.csv");
    }
    else {
       inMaterial.open("../OutputFiles/findManyRanges.csv");
@@ -94,18 +119,27 @@ void findAPAndStraggling(Int_t absorberthickness) {
          continue;
       }
 
-      arrayEMaterial[nlinesMaterial] = energyFloat;
+//      arrayEMaterial[nlinesMaterial] = energyFloat;
       arrayRange[nlinesMaterial] = range;
       arrayDegrader[nlinesMaterial] = degraderThickness;
       arrayStraggling[nlinesMaterial] = straggling;
-      arrayEnergyStraggling[nlinesMaterial] = energyStraggling;
+//      arrayEnergyStraggling[nlinesMaterial] = energyStraggling;
+      arrayEMaterial[nlinesMaterial] = spline_e->Eval(degraderThickness);
+      arrayEnergyStraggling[nlinesMaterial] = spline_es->Eval(degraderThickness);
 
 //      weplfactor = arrayRangeWater[nlinesMaterial] / range;
-      weplfactor = aw / a * pow(range / aw, 1-p/pw);
+//      weplfactor = aw / a * pow(range / aw, 1-p/pw);
+      weplfactor = 2.10;
       arrayRangeWater[nlinesMaterial] = range * weplfactor; 
       arrayWEPLStraggling[nlinesMaterial++] = straggling * weplfactor;
    }
    inMaterial.close();
+
+   std::ofstream outMaterials("../OutputFiles/final_Helium.csv");
+   for (Int_t ii=0; ii<nlinesMaterial; ii++) {
+      outMaterials << arrayEMaterial[ii] << " " << arrayRange[ii] << endl;
+   }
+   outMaterials.close();
 
 
    Int_t nLinesChange = 381;
@@ -172,6 +206,8 @@ void findAPAndStraggling(Int_t absorberthickness) {
    gEnergy->SetMarkerStyle(7);
    gEnergy->SetMarkerColor(kBlue);
    gEnergy->Draw("AP");
+
+   c1->SaveAs("../OutputFiles/Helium_final.png");
 
 
    printf("-----------------------------------\n");

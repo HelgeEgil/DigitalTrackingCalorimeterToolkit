@@ -62,7 +62,7 @@ Float_t Track::getRangemm() {
    Float_t range;
    if (!At(0)) return 0;
 
-   range = Last()->getLayermm() - getLayermm(0);
+   range = Last()->getLayermm(); //  - getLayermm(0);
 
    return range;
 }
@@ -73,7 +73,7 @@ Float_t Track::getRangemmAt(Int_t i) {
    if (i==0) return 0;
    if (i>GetEntriesFast()) return 0;
 
-   return getLayermm(i) - getLayermm(0);
+   return getLayermm(i); //  - getLayermm(0);
 }
 
 Float_t Track::getWEPL() {

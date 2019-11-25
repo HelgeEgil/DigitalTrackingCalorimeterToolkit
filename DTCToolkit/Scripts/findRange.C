@@ -128,8 +128,8 @@ vector<Float_t> findRange::Run(Double_t energy, Double_t sigma_mev, Int_t mm, In
 
    printf("Estimated remaining energy from Gaussian fitting: %.2f +- %.2f MeV.\n", fE, fES);
 
-   returnValues.push_back(fR);
-   returnValues.push_back(fRS);
+   returnValues.push_back(hR);
+   returnValues.push_back(hRS);
    returnValues.push_back(fE);
    returnValues.push_back(fES);
 
@@ -139,8 +139,8 @@ vector<Float_t> findRange::Run(Double_t energy, Double_t sigma_mev, Int_t mm, In
    hEnergyAtInterface->SetFillColor(kBlue-7);
    hEnergyAtInterface->Draw();
 
-   std::ofstream filename(Form("../OutputFiles/findManyRangesDegraderHelium_idx%d.csv", fileIdx));// , std::ofstream::out | std::ofstream::app);
-   filename << degrader << " " << mm << " " << fR << " " << fRS << " " << fE << " " << fES << endl; 
+   std::ofstream filename(Form("../OutputFiles/findManyRangesDegraderHelium_final_idx%d.csv", fileIdx));// , std::ofstream::out | std::ofstream::app);
+   filename << degrader << " " << mm << " " << hR << " " << hRS << " " << fE << " " << fES << endl; 
    
 //   delete c2;
 //   delete hRange;

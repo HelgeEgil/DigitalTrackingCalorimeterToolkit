@@ -3,7 +3,7 @@
 NCORES=8
 IDX=1
 
-for i in `seq -w 100 5 100`; do
+for i in `seq -w 1 4 330`; do
    hdt=`echo "scale=3; -$i/2-2" | bc`
    beampos=`echo "scale=3; -$i-5" | bc`
 #      Gate -a "'[absorberthickness,$j] [energy,2751] [degraderthickness,$i] [halfdegraderthickness,$hdt] [beampos,$beampos]'" Main.mac > terminal_output.txt &
