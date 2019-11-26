@@ -13,8 +13,9 @@
 #include <Math/Vector3D.h>
 #include <TRandom3.h>
 
-// #include "Math/GSLMinimizer.h"
-#include "Math/GSLSimAnMinimizer.h"
+//#include "Math/GSLMinimizer.h"
+//#include "Math/GSLSimAnMinimizer.h"
+#include "Minuit2/Minuit2Minimizer.h"
 #include "Math/Functor.h"
 
 #define USEHIGHENERGY
@@ -85,7 +86,7 @@ double findMLP(const double *aa) {
    
    Double_t    phantomSize = 200;
    Double_t    rotation = -1, spotsize = -1, initialEnergy = 230;
-   Int_t       material = kWater, kModelType = kUiB;
+   Int_t       material = kWater, kModelType = kLL;
    Bool_t      kModelUncertainties = true;
    Int_t       printed = 0;
    const Int_t eventsToUse = 1000;
@@ -100,6 +101,7 @@ double findMLP(const double *aa) {
    Double_t     wepl, wet, Lambda0, Lambda2;
    Double_t     theta_x_0, theta_y_0, theta_x_2, theta_y_2, tps_theta_x_0, tps_theta_y_0;
    Double_t     X_mlp_start, Y_mlp_start, theta_X_mlp_start, theta_Y_mlp_start;
+   Double_t     X_mlp_end, Y_mlp_end, theta_X_mlp_end, theta_Y_mlp_end;
    Double_t     theta_X_mlp, theta_Y_mlp, X_mlp, Y_mlp, X_mlp_sigma, Y_mlp_sigma;
    ifstream    in;
    TSpline3  * splineMCx, * splineMCy;
@@ -143,7 +145,7 @@ double findMLP(const double *aa) {
    Int_t       aIdxMC = 0;
    Int_t       aIdxMLP = 0;
    Bool_t      stop = false; 
-   TRandom3  * gRandom = new TRandom3(0);
+   TRandom3  * gRandom = new TRandom3(123);
    Double_t     f10xAvg = 0;
    Double_t     f10yAvg = 0;
    Double_t     spotSizeAtX0 = 0;
@@ -280,6 +282,7 @@ double findMLP(const double *aa) {
 
       if (lastEID != eventID) {
          // Add scattering
+         
          scatXp2.SetCoordinates(gRandom->Gaus(0, sigmaPos), gRandom->Gaus(0, sigmaPos), 0);
          scatXp3.SetCoordinates(gRandom->Gaus(0, sigmaPos), gRandom->Gaus(0, sigmaPos), 0);
          P2 = (Xp3 - Xp2) / (Xp3.Z() - Xp2.Z());
@@ -288,11 +291,20 @@ double findMLP(const double *aa) {
          P2gaus.SetCoordinates(atan(theta_x_gaus), atan(theta_y_gaus), 1);
          Xp2prime = Xp2 + scatXp2;
          Xp3prime = Xp2 + P2gaus * d_T + scatXp3;
+         
+         scatXp0.SetCoordinates(gRandom->Gaus(0, sigmaPos), gRandom->Gaus(0, sigmaPos), 0);
+         scatXp1.SetCoordinates(gRandom->Gaus(0, sigmaPos), gRandom->Gaus(0, sigmaPos), 0);
+         P0 = (Xp1 - Xp0) / (Xp1.Z() - Xp0.Z());
+         theta_x_gaus = gRandom->Gaus(tan(P0.X()), sigmaTheta);
+         theta_y_gaus = gRandom->Gaus(tan(P0.Y()), sigmaTheta);
+         P0gaus.SetCoordinates(atan(theta_x_gaus), atan(theta_y_gaus), 1);
+         Xp1prime = Xp1 + scatXp0;
+         Xp0prime = Xp1 - P0gaus * d_T + scatXp0;
 
          // Redefine X2, P2 to account for different scattering uncertainties
-         X0 = Xp1;
+         X0 = Xp1prime;
          X2 = Xp2prime;
-         P0 = (Xp1 - Xp0) / (Xp1.Z() - Xp0.Z());
+         P0 = (Xp1prime - Xp0prime) / (Xp1prime.Z() - Xp0prime.Z());
          P2 = (Xp3prime - Xp2prime) / (Xp3prime.Z() - Xp2prime.Z());
          
          P2prime = P2 - P0tps;
@@ -638,21 +650,149 @@ double findMLP(const double *aa) {
             X_mlp_start = X_mlp;
             theta_Y_mlp_start = theta_Y_mlp;
             theta_X_mlp_start = theta_X_mlp;
+            
+            // CALCULATE OPTIMIZED VALUES END
+            posz = X2cm.Z() - step_length;
 
-            XYZVector X0Krah(X_mlp_start*10, Y_mlp_start*10, 0);
+            sz2 = Sigmaz2(X2cm.Z() - X0cm.Z(), posz - X0cm.Z());
+            stz2 = Sigmatz2(X2cm.Z() - X0cm.Z(), posz - X0cm.Z());
+            st2 = Sigmat2(X2cm.Z() - X0cm.Z(), posz - X0cm.Z());
+
+            R_0[0] = 1;
+            R_0[1] = posz - X0cm.Z();
+            R_0[2] = 0;
+            R_0[3] = 1;
+
+            R_0_transpose[0] = 1;
+            R_0_transpose[1] = 0;
+            R_0_transpose[2] = posz - X0cm.Z();
+            R_0_transpose[3] = 1;
+
+            R_1_inverse[0] = 1;
+            R_1_inverse[1] = -(X2cm.Z() - posz); // ok
+            R_1_inverse[2] = 0;
+            R_1_inverse[3] = 1;
+
+            R_1_inverse_transpose[0] = 1;
+            R_1_inverse_transpose[1] = 0;
+            R_1_inverse_transpose[2] = -(X2cm.Z() - posz);
+            R_1_inverse_transpose[3] = 1;
+      
+            scatter_2[0] = sz2;
+            scatter_2[1] = stz2;
+            scatter_2[2] = stz2;
+            scatter_2[3] = st2;
+
+            // pre-factors C1 + C2 as in Krah et al. (2018)
+            C1_1[0] = (sigma_beam[0] * R_0_transpose[0]) + (sigma_beam[1] * R_0_transpose[2]);
+            C1_1[1] = (sigma_beam[0] * R_0_transpose[1]) + (sigma_beam[1] * R_0_transpose[3]);
+            C1_1[2] = (sigma_beam[2] * R_0_transpose[0]) + (sigma_beam[3] * R_0_transpose[2]);
+            C1_1[3] = (sigma_beam[2] * R_0_transpose[1]) + (sigma_beam[3] * R_0_transpose[3]);
+
+            C1_2[0] = (R_0[0] * C1_1[0]) + (R_0[1] * C1_1[2]);
+            C1_2[1] = (R_0[0] * C1_1[1]) + (R_0[1] * C1_1[3]);
+            C1_2[2] = (R_0[2] * C1_1[0]) + (R_0[3] * C1_1[2]);
+            C1_2[3] = (R_0[2] * C1_1[1]) + (R_0[3] * C1_1[3]);
+
+            for (a=0; a<4; a++) C1[a] = C1_2[a];
+
+            C2_1[0] = (track_uncert[0] * R_1_inverse_transpose[0]) + (track_uncert[1] * R_1_inverse_transpose[2]);
+            C2_1[1] = (track_uncert[0] * R_1_inverse_transpose[1]) + (track_uncert[1] * R_1_inverse_transpose[3]);
+            C2_1[2] = (track_uncert[2] * R_1_inverse_transpose[0]) + (track_uncert[3] * R_1_inverse_transpose[2]);
+            C2_1[3] = (track_uncert[2] * R_1_inverse_transpose[1]) + (track_uncert[3] * R_1_inverse_transpose[3]);
+
+            C2_2[0] = (scatter_2[0] * R_1_inverse_transpose[0]) + (scatter_2[1] * R_1_inverse_transpose[2]);
+            C2_2[1] = (scatter_2[0] * R_1_inverse_transpose[1]) + (scatter_2[1] * R_1_inverse_transpose[3]);
+            C2_2[2] = (scatter_2[2] * R_1_inverse_transpose[0]) + (scatter_2[3] * R_1_inverse_transpose[2]);
+            C2_2[3] = (scatter_2[2] * R_1_inverse_transpose[1]) + (scatter_2[3] * R_1_inverse_transpose[3]);
+        
+            C2[0] = (R_1_inverse[0] * C2_1[0]) + (R_1_inverse[1] * C2_1[2]) + (R_1_inverse[0] * C2_2[0]) + (R_1_inverse[1] * C2_2[2]);
+            C2[1] = (R_1_inverse[0] * C2_1[1]) + (R_1_inverse[1] * C2_1[3]) + (R_1_inverse[0] * C2_2[1]) + (R_1_inverse[1] * C2_2[3]);
+            C2[2] = (R_1_inverse[2] * C2_1[0]) + (R_1_inverse[3] * C2_1[2]) + (R_1_inverse[2] * C2_2[0]) + (R_1_inverse[3] * C2_2[2]);
+            C2[3] = (R_1_inverse[2] * C2_1[1]) + (R_1_inverse[3] * C2_1[3]) + (R_1_inverse[2] * C2_2[1]) + (R_1_inverse[3] * C2_2[3]);
+
+            for (a=0; a<4; a++) C12[a] = C1[a] + C2[a];
+
+            // invert to get the complete prefactor (C1 + C2)^-1
+            determinant_C12 = (C12[0] * C12[3]) - (C12[1] * C12[2]);
+            C12_inverse[0] =  C12[3] / determinant_C12;
+            C12_inverse[1] = -C12[1] / determinant_C12;
+            C12_inverse[2] = -C12[2] / determinant_C12;
+            C12_inverse[3] =  C12[0] / determinant_C12;
+
+            first_first[0] = (C2[0] * C12_inverse[0]) + (C2[1] * C12_inverse[2]);
+            first_first[1] = (C2[0] * C12_inverse[1]) + (C2[1] * C12_inverse[3]);
+            first_first[2] = (C2[2] * C12_inverse[0]) + (C2[3] * C12_inverse[2]);
+            first_first[3] = (C2[2] * C12_inverse[1]) + (C2[3] * C12_inverse[3]);
+
+            second_first[0] = (C1[0] * C12_inverse[0]) + (C1[1] * C12_inverse[2]);
+            second_first[1] = (C1[0] * C12_inverse[1]) + (C1[1] * C12_inverse[3]);
+            second_first[2] = (C1[2] * C12_inverse[0]) + (C1[3] * C12_inverse[2]);
+            second_first[3] = (C1[2] * C12_inverse[1]) + (C1[3] * C12_inverse[3]);
+
+            y_0[0] = X0cm.X();
+            y_0[1] = tan(P0tps.X());
+            y_2[0] = X2cm.X();
+            y_2[1] = tan(P2.X());
+   
+            first_second[0] = (R_0[0] * y_0[0]) + (R_0[1] * y_0[1]);
+            first_second[1] = (R_0[2] * y_0[0]) + (R_0[3] * y_0[1]);
+            second_second[0] = (R_1_inverse[0] * y_2[0]) + (R_1_inverse[1] * y_2[1]);
+            second_second[1] = (R_1_inverse[2] * y_2[0]) + (R_1_inverse[3] * y_2[1]);
+
+            first[0] = (first_first[0] * first_second[0]) + (first_first[1] * first_second[1]);
+            first[1] = (first_first[2] * first_second[0]) + (first_first[3] * first_second[1]);
+            second[0] = (second_first[0] * second_second[0]) + (second_first[1] * second_second[1]);
+            second[1] = (second_first[2] * second_second[0]) + (second_first[3] * second_second[1]);
+
+            X_mlp = first[0] + second[0];
+            theta_X_mlp = (first[1] + second[1]);
+
+            // now do the y value
+            y_0[0] = X0cm.Y();
+            y_0[1] = tan(P0tps.Y());
+            y_2[0] = X2cm.Y();
+            y_2[1] = tan(P2.Y());
+            
+            first_second[0] = (R_0[0] * y_0[0]) + (R_0[1] * y_0[1]);
+            first_second[1] = (R_0[2] * y_0[0]) + (R_0[3] * y_0[1]);
+
+            second_second[0] = (R_1_inverse[0] * y_2[0]) + (R_1_inverse[1] * y_2[1]);
+            second_second[1] = (R_1_inverse[2] * y_2[0]) + (R_1_inverse[3] * y_2[1]);
+
+            first[0] = (first_first[0] * first_second[0]) + (first_first[1] * first_second[1]);
+            first[1] = (first_first[2] * first_second[0]) + (first_first[3] * first_second[1]);
+
+            second[0] = (second_first[0] * second_second[0]) + (second_first[1] * second_second[1]);
+            second[1] = (second_first[2] * second_second[0]) + (second_first[3] * second_second[1]);
+
+            Y_mlp = first[0] + second[0];
+            theta_Y_mlp = first[1] + second[1];
+            Y_mlp_sigma = C12_inverse[2] * C2[1] + C12_inverse[3] * C2[3];
+            
+            Y_mlp_end = Y_mlp;
+            X_mlp_end = X_mlp;
+            theta_Y_mlp_end = theta_Y_mlp;
+            theta_X_mlp_end = theta_X_mlp;
+
+            XYZVector X0Krah(X_mlp_start*10, Y_mlp_start*10, X0.Z());
             XYZVector P0Krah(atan(theta_X_mlp_start), atan(theta_Y_mlp_start), 1);
 
+            XYZVector X2Krah(X_mlp_end*10, Y_mlp_end*10, X2.Z());
+            XYZVector P2Krah(atan(theta_X_mlp_end), atan(theta_Y_mlp_end), 1);
+
             // Find lambda values using polynomial in Fig. 4 in Fekete et al. 2015
-            
             Lambda0 = 1.01 + 0.43 * w2;
             Lambda2 = 0.99 - 0.46 * w2;
 
             // CSP optimization
-            Lambda0 *= 1/(Lambdaa * spotSizeAtX0);
+//            Lambda0 *= 1/(Lambdaa * spotSizeAtX0);
 //            Lambda2 *= 1/(Lambdab * spotSizeAtX0);
+            Lambda0 *= Lambdaa;
+            Lambda2 *= Lambdab;            
 
-            for (Double_t t=0; t<1; t += 0.01) {
-               S = SplineMLP(t, X0Krah, X2, P0Krah, P2, Lambda0, Lambda2); // niels'
+            for (Double_t t=0; t<1; t += 0.025) {
+               S = SplineMLP(t, X0Krah, X2Krah, P0Krah, P2Krah, Lambda0, Lambda2); // niels'
                arSplineMLPz[idxSplineMLP] = S.Z();
                arSplineMLPKrahx[idxSplineMLP] = S.X();
                arSplineMLPKrahy[idxSplineMLP++] = S.Y();
@@ -673,7 +813,7 @@ double findMLP(const double *aa) {
                Double_t diff_x, diff_y;
                idxDifferenceArray = 0; // Sweep each time
                nInDifferenceArray++; // To average at end
-               for (Double_t zSweep = 0; zSweep < phantomSize; zSweep += 0.25) { // Keep Sweep increment high to speed up!
+               for (Double_t zSweep = 0; zSweep < phantomSize; zSweep += 5) { // Keep Sweep increment high to speed up!
                   differenceArrayZ[idxDifferenceArray] = zSweep;
 
                   diff_x = fabs(splineMCx->Eval(zSweep) - splineMLPKrahx->Eval(zSweep));
@@ -733,22 +873,24 @@ double findMLP(const double *aa) {
    }
 
    double worstError = 0;
+   Float_t RMS = 0;
    for (Int_t i=0; i<idxDifferenceArray; i++) {
       differenceArrayDiffKrah[i]  /= nInDifferenceArray;
       differenceSplineDiffKrah[i] /= nInDifferenceArray;
 
-      differenceArrayKrahCSP[i] = 1000*fabs(differenceArrayDiffKrah[i] - differenceSplineDiffKrah[i]);
-      worstError = fmax(differenceArrayKrahCSP[i], worstError);
+//      differenceArrayKrahCSP[i] = 1000*fabs(differenceArrayDiffKrah[i] - differenceSplineDiffKrah[i]);
+//      worstError = fmax(differenceArrayKrahCSP[i], worstError);
+      RMS += 1000 * pow(differenceArrayDiffKrah[i] - differenceSplineDiffKrah[i], 2);
    }
-
+ 
    /*
    TGraph *g = new TGraph(idxDifferenceArray, differenceArrayZ, differenceArrayKrahCSP);
    g->Draw("AL");
    */
 
-   printf("a = %.2f, b = %.2f, error = %.2f.\n", Lambdaa, Lambdab, worstError);
+   printf("a = %.4f, b = %.4f, RMS error = %.4f.\n", Lambdaa, Lambdab, sqrt(RMS));
 
-   return worstError;
+   return sqrt(RMS);
 }
 
 
@@ -805,26 +947,32 @@ double Sigmatz2(double sep, double position)
 
 int NumericalMinimization() {
 //   ROOT::Math::GSLMinimizer min(ROOT::Math::kSteepestDescent);
-   ROOT::Math::GSLSimAnMinimizer min;
+//   ROOT::Math::GSLSimAnMinimizer min;
+   ROOT::Minuit2::Minuit2Minimizer min (ROOT::Minuit2::kMigrad);
 
    min.SetMaxFunctionCalls(1000);
    min.SetMaxIterations(1000);
    min.SetTolerance(0.001);
 
-   ROOT::Math::Functor f(&findMLP,1);
-   double step[1] = {0.01};//, 0.01};
-   double variable[1] = {1};//, -0.3};
+   ROOT::Math::Functor f(&findMLP,2);
+   double step[2] = {0.01, 0.01};
+   double variable[2] = {1, 1};
 
    min.SetFunction(f);
 
    min.SetVariable(0, "x", variable[0], step[0]);
-//   min.SetVariable(1, "y", variable[1], step[1]);
+   min.SetVariable(1, "y", variable[1], step[1]);
+
+//   min.SetVariableLowerLimit(0, 0);
+//   min.SetVariableLowerLimit(1, 0);
+//   min.SetVariableUpperLimit(0, 1);
+//   min.SetVariableUpperLimit(1, 1);
 
    min.Minimize();
 
    const double *xs = min.X();
-//   cout << "Minimum: f(" << xs[0] << ", "<< xs[1] << "): " << findMLP(xs) << endl;
-   cout << "Minimum: f(" << xs[0] << "): " << findMLP(xs) << endl;
+   cout << "Minimum: f(" << xs[0] << ", "<< xs[1] << "): " << findMLP(xs) << endl;
+//   cout << "Minimum: f(" << xs[0] << "): " << findMLP(xs) << endl;
 
    return 0;
 }
