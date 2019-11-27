@@ -40,9 +40,10 @@
 #define NY 512
 #endif
 
+// When the final design is used, add the air gap and Al spacer in mid detector:
 #ifdef FINALDESIGN
 #undef DZ
-#define DZ 2.0
+#define DZ 2.05
 #endif
 
 // -------------------------------------
