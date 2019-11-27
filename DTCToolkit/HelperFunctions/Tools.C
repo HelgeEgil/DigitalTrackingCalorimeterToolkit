@@ -708,7 +708,7 @@ void drawIndividualGraphs(TCanvas *cGraph, TGraphErrors* outputGraph, Float_t fi
    Bool_t kDrawText = true;
 
    outputGraph->SetMinimum(0);
-   outputGraph->SetMaximum(20);
+   outputGraph->SetMaximum(30);
    outputGraph->SetTitle(Form("%.0f mm Al", kAbsorberThickness));
    
    if (kOutputUnit == kWEPL || kOutputUnit == kUnitEnergy) {
@@ -792,7 +792,7 @@ void drawIndividualGraphs(TCanvas *cGraph, TGraphErrors* outputGraph, Float_t fi
       Float_t energy_error = getEnergyStragglingFromTLStraggling(fitRange, fitError); // remove this, assumes WEPL
       Float_t energy_fit = getEnergyFromTL(fitRange); // remove this, assumes WEPL
 //      TLatex *text = new TLatex(15, 18, Form("Estimated E_{0}: %.1f #pm %.1f mm", fitRange, fitError)); // Take back this
-      TLatex *text = new TLatex(15, 18, Form("Fitted range: %.1f #pm %.1f mm WET", weplRange, weplError));
+      TLatex *text = new TLatex(15, 25, Form("Fitted range: %.1f #pm %.1f mm WET", weplRange, weplError));
       text->SetTextSize(0.05);
       text->SetTextFont(22);
       text->Draw();

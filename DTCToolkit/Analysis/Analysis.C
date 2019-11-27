@@ -762,8 +762,8 @@ void drawTracksDepthDose(Int_t Runs, Int_t dataType, Bool_t recreate, Float_t en
    Float_t  cutEdep = 10;
 
    tracks->doTrackFit(); 
-   tracks->removeNuclearInteractions();
-   tracks->removeThreeSigmaShortTracks();
+//   tracks->removeNuclearInteractions();
+//   tracks->removeThreeSigmaShortTracks();
 
 //   tracks->removeHighAngleTracks(cutAngle); // mrad
 //   tracks->removeHighAngularChangeTracks(cutMaxAngle); // mrad
@@ -791,7 +791,7 @@ void drawTracksDepthDose(Int_t Runs, Int_t dataType, Bool_t recreate, Float_t en
       Track *thisTrack = tracks->At(j);
       if (!thisTrack) continue;
 
-      if (!thisTrack->Last()->isSecondary()) continue;
+//      if (thisTrack->Last()->isSecondary()) continue;
 
       // Do track fit, extract all parameters for this track
       outputGraph = (TGraphErrors*) thisTrack->doTrackFit(false, kUseCSDA); // (bool isScaleVariable, bool useTrackLength (~ CSDA))
@@ -881,10 +881,10 @@ void drawTracksRangeHistogram(Int_t Runs, Int_t dataType, Bool_t recreate, Float
 
 
 // Use
-   tracks->removeHighAngleTracks(cutAngle); // mrad
-   tracks->removeHighAngularChangeTracks(cutMaxAngle); // mrad
+//   tracks->removeHighAngleTracks(cutAngle); // mrad
+//   tracks->removeHighAngularChangeTracks(cutMaxAngle); // mrad
    tracks->doTrackFit();
-   tracks->removeNuclearInteractions();
+//   tracks->removeNuclearInteractions();
 //   tracks->removeThreeSigmaShortTracks();
 
    for (Int_t j=0; j<tracks->GetEntriesFast(); j++) {
@@ -1920,7 +1920,7 @@ void analyseHelium(Int_t Runs, Int_t dataType, Bool_t recreate, Int_t switchLaye
 
 // Use
 
-   tracks->removeNuclearInteractions();
+//   tracks->removeNuclearInteractions();
 //   tracks->removeThreeSigmaShortTracks();
 //   tracks->removeHighAngleTracks(cutAngle); // mrad
   
@@ -2820,7 +2820,7 @@ void drawTracks3D(Int_t Runs, Int_t dataType, Bool_t recreate, Int_t switchLayer
    tracks->removeThreeSigmaShortTracks();
    tracks->removeHighAngleTracks(cutAngle); // mrad
 
-   Bool_t   kDraw = false;
+   Bool_t   kDraw = true;
 
    TH1I  *hWEPLCorrect = new TH1I("hWEPLCorrect", ";Range in detector [mm WEPL];Frequency", 400, 0, 250);
    TH1I  *hWEPLSecondary = new TH1I("hWEPLSecondary", "", 400, 0, 250);
