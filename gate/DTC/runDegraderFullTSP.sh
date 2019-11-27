@@ -3,10 +3,10 @@
 NCORES=8
 IDX=1
 
-for i in `seq -w 274 4 330`; do
+for i in `seq -w 300 1 330`; do
    hdt=`echo "scale=3; -$i/2-2" | bc`
    beampos=`echo "scale=3; -$i-5" | bc`
-   tsp Gate -a "'[energy,917] [degraderthickness,$i] [halfdegraderthickness,$hdt] [beampos,$beampos]'" Main.mac
+   tsp Gate -a "'[energy,230] [degraderthickness,$i] [halfdegraderthickness,$hdt] [beampos,$beampos]'" Main_full.mac
    PIDLIST="$PIDLIST $!"
-   echo "Running: Absorber thickness = $j mm; degrader thickness = $i mm"
+   echo "Running: degrader thickness = $i mm"
 done

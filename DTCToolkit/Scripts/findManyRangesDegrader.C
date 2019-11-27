@@ -20,9 +20,7 @@ void findManyRanges(Int_t degraderFrom, Int_t degraderIncrement, Int_t degraderT
    for (Int_t mm=mmFrom; mm<=mmTo; mm += mmIncrement) {
       for (Int_t degrader=degraderFrom; degrader<=degraderTo; degrader += degraderIncrement) {
          findRange f(917, mm, degrader);
-         printf("e\n");
          resultVector = f.Run();
-         printf("f\n");
          if (resultVector.size() > 1) {
             Float_t expectedRange = resultVector.at(0);
             Float_t expectedSigma = resultVector.at(1);

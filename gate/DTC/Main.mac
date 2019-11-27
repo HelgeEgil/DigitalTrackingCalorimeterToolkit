@@ -1,14 +1,12 @@
 /gate/geometry/setMaterialDatabase GateMaterials.db
 
-/control/execute Module_35.mac
+/control/execute Module_final.mac
 
-/gate/systems/scanner_1/level1/attach FM_Layer
-/gate/systems/scanner_1/level2/attach FirstModule
-/gate/systems/scanner_2/level1/attach Module
-/gate/systems/scanner_2/level2/attach Layer
+/gate/systems/scanner_1/level1/attach TRACKER_Layer
+/gate/systems/scanner_2/level1/attach Layer
 /gate/systems/phantom/level1/attach degrader
 
-/control/execute readout.mac
+/control/execute readout_final.mac
 
 #=================#
 # Physics			#
@@ -155,7 +153,7 @@
 
 /gate/output/root/enable
 /gate/output/root/setRootSinglesFlag 0
-/gate/output/root/setFileName ../../DTCToolkit/Data/MonteCarlo/DTC_Aluminum_Absorber35mm_Degrader{degraderthickness}mm_{energy}MeV
+/gate/output/root/setFileName ../../DTCToolkit/Data/MonteCarlo/DTC_Final_Degrader{degraderthickness}mm_{energy}MeV
 
 #===============#
 # START BEAMS	#

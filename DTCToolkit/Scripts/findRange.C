@@ -46,8 +46,8 @@ vector<Float_t> findRange::Run(Double_t energy, Double_t sigma_mev, Int_t mm, In
    TH1F *hFirstRange = new TH1F("firstRange", "firstRange", 1000, 0, 400);
    TH1F *hFirstEnergy = new TH1F("firstEnergy", "firstEnergy", 1000, 0, 1000);
 
-   Float_t allRanges[50000];
-   Float_t allEnergies[50000];
+   Float_t allRanges[150000];
+   Float_t allEnergies[150000];
    Int_t rangeIdx = 0, energyIdx = 0;
 
    Long64_t ientry = LoadTree(0);
@@ -65,7 +65,8 @@ vector<Float_t> findRange::Run(Double_t energy, Double_t sigma_mev, Int_t mm, In
 
       if (lastID < 0) lastID = eventID;
       if (parentID == 0) {
-         if (baseID == 0) { // inside degrader
+   /*
+      if (baseID == 0) { // inside degrader
             dE += edep;
          }
 
@@ -74,7 +75,7 @@ vector<Float_t> findRange::Run(Double_t energy, Double_t sigma_mev, Int_t mm, In
             allEnergies[energyIdx++] = energy - dE;
             dE = 0;
          }
-
+*/
          if (eventID != lastID) {
             hFirstRange->Fill(lastRange);
             allRanges[rangeIdx++] = lastRange;
@@ -133,20 +134,22 @@ vector<Float_t> findRange::Run(Double_t energy, Double_t sigma_mev, Int_t mm, In
    returnValues.push_back(fE);
    returnValues.push_back(fES);
 
-   c2->SaveAs(Form("../OutputFiles/straggling/straggling_absorber%dmm_degrader%.0fmm_Helium.png", mm, run_degraderThickness));
+   c2->SaveAs(Form("OutputFiles/straggling/straggling_absorber%dmm_degrader%.0fmm_Helium.png", mm, run_degraderThickness));
 
    c2->cd(2);
    hEnergyAtInterface->SetFillColor(kBlue-7);
    hEnergyAtInterface->Draw();
 
-   std::ofstream filename(Form("../OutputFiles/findManyRangesDegraderHelium_final_idx%d.csv", fileIdx));// , std::ofstream::out | std::ofstream::app);
+   std::ofstream filename(Form("OutputFiles/findManyRangesDegraderHelium_final_idx%d.csv", fileIdx));// , std::ofstream::out | std::ofstream::app);
    filename << degrader << " " << mm << " " << hR << " " << hRS << " " << fE << " " << fES << endl; 
    
-//   delete c2;
-//   delete hRange;
-//   delete fRemainingEnergy;
-//   delete fRange;
-//   delete hEnergyAtInterface;
+   delete c2;
+   delete hRange;
+   delete hFirstRange;
+   delete hFirstEnergy;
+   delete fRemainingEnergy;
+   delete fRange;
+   delete hEnergyAtInterface;
 
    return returnValues;
    
