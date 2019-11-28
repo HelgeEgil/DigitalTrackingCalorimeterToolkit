@@ -184,7 +184,12 @@ void  createSplines() {
             in.open(Form("Data/Ranges/%.0fmm_W_230MeV.csv", readoutAbsorber));
          }
          else if  (kMaterial == kAluminum) {
-            in.open(Form("Data/Ranges/%.0fmm_Al_230MeV.csv", readoutAbsorber));
+            if (!kFinalDesign) {
+               in.open(Form("Data/Ranges/%.0fmm_Al_230MeV.csv", readoutAbsorber));
+            }
+            else {
+               in.open("Data/Ranges/Final_Al_Proton.csv"); // 230 MeV
+            }
          }
          else if  (kMaterial == kCarbon) {
             in.open(Form("Data/Ranges/%.0fmm_C_230MeV.csv", readoutAbsorber));
