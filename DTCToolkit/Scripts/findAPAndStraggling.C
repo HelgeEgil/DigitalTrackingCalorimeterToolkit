@@ -72,7 +72,7 @@ void findAPAndStraggling(Int_t absorberthickness) {
 
    inWater.close();
 
-   inEnergy.open("../Data/Ranges/EnergyAfterDegraderHelium.csv");
+   inEnergy.open("../Data/Ranges/EnergyAfterDegrader230MeV.csv");
 
 
    Double_t ead_d[500] = {};
@@ -81,7 +81,7 @@ void findAPAndStraggling(Int_t absorberthickness) {
    Int_t ead_idx = 0;
 
    while (1) {
-      inEnergy >> degraderThickness >> energyFloat >> energyStraggling;
+      inEnergy >> degraderThickness >> energyFloat; //  >> energyStraggling;
       if (!inEnergy.good()) break;
 
       ead_d[ead_idx] = degraderThickness;
@@ -97,7 +97,7 @@ void findAPAndStraggling(Int_t absorberthickness) {
    cout << "Degrader 100 -> energy = " << spline_e->Eval(100) << endl;
 
    if (useDegrader) {
-      inMaterial.open("../OutputFiles/findManyRangesDegraderHelium_final.csv");
+      inMaterial.open("../OutputFiles/findManyRangesDegrader_final.csv");
    }
    else {
       inMaterial.open("../OutputFiles/findManyRanges.csv");
@@ -135,7 +135,7 @@ void findAPAndStraggling(Int_t absorberthickness) {
    }
    inMaterial.close();
 
-   std::ofstream outMaterials("../OutputFiles/final_Helium.csv");
+   std::ofstream outMaterials("../OutputFiles/final_Proton.csv");
    for (Int_t ii=0; ii<nlinesMaterial; ii++) {
       outMaterials << arrayEMaterial[ii] << " " << arrayRange[ii] << endl;
    }
@@ -207,7 +207,7 @@ void findAPAndStraggling(Int_t absorberthickness) {
    gEnergy->SetMarkerColor(kBlue);
    gEnergy->Draw("AP");
 
-   c1->SaveAs("../OutputFiles/Helium_final.png");
+   c1->SaveAs("../OutputFiles/Proton_final.png");
 
 
    printf("-----------------------------------\n");

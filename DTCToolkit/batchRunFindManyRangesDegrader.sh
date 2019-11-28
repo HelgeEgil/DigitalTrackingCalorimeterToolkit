@@ -30,8 +30,8 @@ if [ $# -eq 6 ]; then
 
       for j in `seq 1 1 $IDX`;
       do
-         cat OutputFiles/findManyRangesDegraderHelium_final_idx$j.csv >> OutputFiles/findManyRangesDegraderHelium_final.csv
-         rm OutputFiles/findManyRangesDegraderHelium_final_idx$j.csv
+         cat OutputFiles/findManyRangesDegrader_final_idx$j.csv >> OutputFiles/findManyRangesDegrader_final.csv
+         rm OutputFiles/findManyRangesDegrader_final_idx$j.csv
       done
    done
 fi

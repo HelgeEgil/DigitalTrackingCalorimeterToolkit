@@ -39,7 +39,7 @@ void findManyRangesDegraderParallel(Int_t mm, Int_t degrader, Int_t fileIdx) {
    */
 
    gROOT->ProcessLine(".L Scripts/findRange.C+");
-   gROOT->ProcessLine(Form("findRange f(917, %d, %d);", mm, degrader));
+   gROOT->ProcessLine(Form("findRange f(230, %d, %d);", mm, degrader));
    gROOT->ProcessLine(Form("f.Run(100, 0, %d, %d, %d);", mm, degrader, fileIdx));//, expectedEnergy, expectedEnergySpread));
    
    /*

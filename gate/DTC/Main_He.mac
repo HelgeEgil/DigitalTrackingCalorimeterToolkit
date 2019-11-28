@@ -4,7 +4,7 @@
 
 /gate/systems/scanner_1/level1/attach TRACKER_Layer
 /gate/systems/scanner_2/level1/attach Layer
-#/gate/systems/phantom/level1/attach degrader
+/gate/systems/phantom/level1/attach degrader
 
 /control/execute readout_full_final.mac
 
@@ -161,5 +161,5 @@
 
 /gate/random/setEngineName MersenneTwister
 /gate/random/setEngineSeed auto
-/gate/application/setTotalNumberOfPrimaries 5000
+/gate/application/setTotalNumberOfPrimaries 10000
 /gate/application/start

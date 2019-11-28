@@ -134,13 +134,13 @@ vector<Float_t> findRange::Run(Double_t energy, Double_t sigma_mev, Int_t mm, In
    returnValues.push_back(fE);
    returnValues.push_back(fES);
 
-   c2->SaveAs(Form("OutputFiles/straggling/straggling_absorber%dmm_degrader%.0fmm_Helium.png", mm, run_degraderThickness));
+   c2->SaveAs(Form("OutputFiles/straggling/straggling_absorber%dmm_degrader%.0fmm.png", mm, run_degraderThickness));
 
    c2->cd(2);
    hEnergyAtInterface->SetFillColor(kBlue-7);
    hEnergyAtInterface->Draw();
 
-   std::ofstream filename(Form("OutputFiles/findManyRangesDegraderHelium_final_idx%d.csv", fileIdx));// , std::ofstream::out | std::ofstream::app);
+   std::ofstream filename(Form("OutputFiles/findManyRangesDegrader_final_idx%d.csv", fileIdx));// , std::ofstream::out | std::ofstream::app);
    filename << degrader << " " << mm << " " << hR << " " << hRS << " " << fE << " " << fES << endl; 
    
    delete c2;

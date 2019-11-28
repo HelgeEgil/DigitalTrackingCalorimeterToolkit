@@ -1,4 +1,4 @@
-#ifndef Constants_h
+ifndef Constants_h
 #define Constants_h
 
 #include <cstring>
