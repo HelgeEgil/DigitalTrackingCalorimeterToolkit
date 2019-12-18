@@ -1,4 +1,4 @@
-ifndef Constants_h
+#ifndef Constants_h
 #define Constants_h
 
 #include <cstring>
@@ -7,10 +7,7 @@ ifndef Constants_h
 #include <TMath.h>
 
 // Set these compiler directives to adjust the logic flow of this file
-
-#define USEALPIDE // Comment to use experimental data; uncomment to use Monte Carlo data
 // #define USEDEBUG // Uncomment to print more debug information
-// #define ONECHIP // (MC) Limit the data area to a single chip (simplify visualization & memory usage)
 #define FINALDESIGN
 
 #ifdef USEDEBUG
@@ -19,26 +16,11 @@ ifndef Constants_h
 #define showDebug(x)
 #endif
 
-#ifdef USEALPIDE // Monte Carlo
 #define NX 9000
 #define DX 0.030
 #define DY 0.030
 #define NY 4500
 #define DZ 0.435
-#else // exp. data
-#define NX 1280
-#define NY 1280
-#define DX 0.03
-#define DY 0.03
-#define DZ 0.975
-#endif
-
-#ifdef ONECHIP // In case 9000 x 4500 x (number of layers) is too taxing
-#undef NX
-#undef NY
-#define NX 1024
-#define NY 512
-#endif
 
 // When the final design is used, add the air gap and Al spacer in mid detector:
 #ifdef FINALDESIGN
@@ -48,27 +30,17 @@ ifndef Constants_h
 
 // -------------------------------------
 
-Bool_t   kIsAluminumPlate = false;
-Bool_t   kIsScintillator = false;
-Bool_t   kIsFirstLayerAir = true;
-Bool_t   kHelium = true;
+Bool_t   kHelium = false;
 Bool_t   kSpotScanning = false;
 Bool_t   kPhantom = false;
 Bool_t   kDoTracking = true; 
 Bool_t   kFilterNuclearInteractions = false; 
 Bool_t   kDoDiffusion = true;
 Int_t    kEventsPerRun = 50;
-Int_t    kSkipTracks = 0;
-Float_t  kMultiplyTrackingByThis = 1;
-const Int_t    kEnergy = 917; // 917 MeV_Helium ~= 230 MeV_proton // 600 HeC phantom
-
-#ifdef USEALPIDE
+Int_t    kSkipTracks = 0; // during readout
+const Int_t    kEnergy = 230; // 917 MeV_Helium ~= 230 MeV_proton // 600 HeC phantom
 Bool_t   kUseDegrader = true; 
 Bool_t   kUseAlpide = true;
-#else
-Bool_t   kUseAlpide = false;
-Bool_t   kUseDegrader = false;
-#endif
 
 const Int_t sizeOfEventID = 25;
 const Int_t nChildrenInNode = 2; // max concurrent track segments to follow
@@ -85,13 +57,7 @@ const Float_t kRad = 3.14159265/180.;
 const Int_t nx = NX;
 const Int_t ny = NY;
 const Int_t nTrackers = 4;
-
-#ifdef USEALPIDE
-const Float_t kAbsorberThickness = 3.5; // ALPIDE, CHANGE TO FIT MC DATA GEOMETRY
-#else
-const Float_t kAbsorberThickness = 3.3; // FOCAL EXPERIMENTAL DATA, DON'T CHANGE
-#endif
-
+const Float_t kAbsorberThickness = 3.5;
 
 // nLayers are loaded in MaterialConstants.C according to the detector geometry
 const Float_t dx = DX; // mm
@@ -114,12 +80,7 @@ enum eFrameType {kCalorimeter, kTracker};
 enum eDataType {kMC, kData};
 enum eMaterial {kTungsten, kAluminum, kPMMA, kWater, kCarbon};
 enum eOutputUnit {kPhysical, kWEPL, kUnitEnergy};
-
-#ifdef USEALPIDE
 const Int_t kMaterial = kAluminum;
-#else
-const Int_t kMaterial = kTungsten;
-#endif
 
 Int_t kOutputUnit = kWEPL;
 Bool_t kUseCSDA = false; // Use CSDA for range calculations and MC truth input
@@ -127,7 +88,7 @@ Bool_t kUseCSDA = false; // Use CSDA for range calculations and MC truth input
 // Use experimental ALPIDE data clustering model -- empirical model with updated parameters
 // Otherwise use "old" gaussian model from FOCAL data
 const Bool_t kUseExperimentalClustering = true;
-const Bool_t kUseExperimentalClusterPainting = true;
+const Bool_t kUseExperimentalClusterPainting = false;
 const Bool_t kUseRefinedClustering = true;
 
 // Tracking parameters

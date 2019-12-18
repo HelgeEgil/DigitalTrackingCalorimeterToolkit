@@ -61,6 +61,9 @@ Copper: d=8.96 g/cm3; n=1; state=solid
 Carbon: d=2.267 g/cm3; n=1; state=solid
         +el: name=Carbon     ; n=1
 
+CarbonFoam: d=0.7 g/cm3; n=1; state=solid
+        +el: name=Carbon     ; n=1
+
 AluminiumEGS: d=2.702 g/cm3 ; n=1 ; state=solid
         +el: name=Aluminium  ; n=1
 
@@ -514,8 +517,20 @@ PCB:    d=3.566 g/cm3; n=5; state=Solid
         +el: name=Silicon    ; f=0.1836
         +el: name=Copper     ; f=0.1329
 
-Glue:   d=5.25 g/cm3; n=1; state=Solid
-		  +el: name=Silver	  ; f=1
+Glue:   d=1.2 g/cm3; n=4; state=Solid
+        +el: name=Hydrogen   ; f=0.066
+        +el: name=Carbon     ; f=0.674
+        +el: name=Oxygen     ; f=0.149
+        +el: name=Chlorine   ; f=0.111
+
+CarbonFiber: d=1.66 g/cm3; n=1; state=Solid
+       +el: name=Carbon      ; n=1
+
+Kapton: d=1.42 g/cm3; n=4; state=Solid
+        +el: name=Hydrogen   ; f=0.0264
+        +el: name=Carbon     ; f=0.6911
+        +el: name=Nitrogen   ; f=0.0733
+        +el: name=Oxygen     ; f=0.2092
 
 focalTungsten: d=17.7715 g/cm3; n=6; state=Solid
 		  +el: name=Hydrogen	  ; f=0.0191
@@ -539,11 +554,6 @@ focalPMMA: d=1.125 g/cm3; n=5; state=Solid
 		  +el: name=Oxygen	  ; f=0.1433
 		  +el: name=Silicon	  ; f=0.0376
 		  +el: name=Copper	  ; f=0.0102
-
-Kapton: d=1.39 g/cm3; n=3; state=Solid
-        +el: name=Hydrogen   ; n=4
-        +el: name=Carbon     ; n=5
-        +el: name=Oxygen     ; n=2
 
 Epoxy: d=1.2 g/cm3; n=2;   state=Solid
        +el: name=Hydrogen    ; n=2

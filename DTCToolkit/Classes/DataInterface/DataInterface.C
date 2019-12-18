@@ -65,25 +65,25 @@ DataInterface::DataInterface(TTree *tree) : fChain(0) {
       }
       else if (kFinalDesign) {
          if (!kHelium) {
-            printf("Opening PROTON file with degrader thickness %.0f mm and FINAL design (3.5 mm)", run_degraderThickness);
+            printf("Opening PROTON file with degrader thickness %.0f mm and FINAL design (3.5 mm)\n", run_degraderThickness);
             chain->Add(Form("Data/MonteCarlo/DTC_Final_Degrader%.0fmm_%dMeV.root/Hits", run_degraderThickness, kEnergy));
          }
          else {
-            printf("Opening HELIUM file with degrader thickness %.0f mm and FINAL design (3.5 mm)", run_degraderThickness);
+            printf("Opening HELIUM file with degrader thickness %.0f mm and FINAL design (3.5 mm)\n", run_degraderThickness);
             chain->Add(Form("Data/MonteCarlo/DTC_Final_Helium_Degrader%.0fmm_%dMeV.root/Hits", run_degraderThickness, kEnergy));
          }
       }
 
       else {
          if (!kHelium) {
-            printf("Opening PROTON file with degrader thickness %.0f mm, material is %s and abs. thickness %.0f mm...", run_degraderThickness, materialChar, readoutAbsorber);
+            printf("Opening PROTON file with degrader thickness %.0f mm, material is %s and abs. thickness %.0f mm...\n", run_degraderThickness, materialChar, readoutAbsorber);
             chain->Add(Form("Data/MonteCarlo/DTC_%s_Absorber%.0fmm_Degrader%03.0fmm_%dMeV.root/Hits", materialChar, readoutAbsorber, run_degraderThickness, kEnergy)); // Fix if original run_energy is != 250
             printf("OK!\n");
          }
          else {
-            printf("Opening HELIUM file with degrader thickness %.0f mm, material is %s and abs. thickness %.0f mm...", run_degraderThickness, materialChar, readoutAbsorber);
+            printf("Opening HELIUM file with degrader thickness %.0f mm, material is %s and abs. thickness %.0f mm...\n", run_degraderThickness, materialChar, readoutAbsorber);
             if (!kSpotScanning) {
-               chain->Add(Form("Data/MonteCarlo/DTC_Full_%s_Helium_Absorber%.0fmm_Degrader%03.0fmm_%dMeV.root/Hits", materialChar, readoutAbsorber, run_degraderThickness, kEnergy));
+               chain->Add(Form("Data/MonteCarlo/DTC_%s_Helium_Absorber%.0fmm_Degrader%03.0fmm_%dMeV.root/Hits", materialChar, readoutAbsorber, run_degraderThickness, kEnergy));
             }
             else { // Load phantom (used with spot scanning)
                chain->Add(Form("Data/MonteCarlo/DTC_%s_CarbonHelium_Absorber%.0fmm_Headphantom_%dMeV.root/Hits", materialChar, readoutAbsorber, kEnergy));
@@ -475,7 +475,7 @@ void  DataInterface::getMCClustersThreshold(Int_t runNo, Clusters *clusters, Hit
    // edep = let * 14 um = 0.316 kev/um * 14 um = 4.4e-3 MeV ~ 4e-3 MeV
    // new design: let * 50 um = 0.316 keV/um * 50 um = 15.8e-3 MeV ~ 1.5e-2 MeV
 
-   Float_t threshold = 1.5e-2; // old 4e-3
+   Float_t threshold = 1.5e-2; // old 1.5e-2
    Int_t particlesBelowThreshold = 0;
 
    if (runNo == 0 && !kSpotScanning) lastJentry_ = 0;
@@ -498,7 +498,6 @@ void  DataInterface::getMCClustersThreshold(Int_t runNo, Clusters *clusters, Hit
          isSecondary = false;
       }
 
-      
       if (!kSpotScanning) {
          if (eventID < eventIdFrom) {
             continue;
@@ -535,18 +534,18 @@ void  DataInterface::getMCClustersThreshold(Int_t runNo, Clusters *clusters, Hit
          layer = baseID*2 + level1ID - 2;
       }
       
+//      printf("posz %.3f edep %.2f keV/um, PDG %d, parentID %d, processName %s\n", posZ, edep/alpideThickness*1000, PDGEncoding, parentID, processName);
       if (posZ < 0) { // Inside degrader, check if nuclear interactions
          
-         if (TString(processName) == "hadElastic") {
-         //   isSecondary = true;
+         if (TString(processName) == "xxhadElastic" || TString(processName) == "alphaInelastic" || TString(processName) == "protonInelastic") {
+            isSecondary = true;
          }
 
          lastEventID = eventID;
          continue;
       }
 
-
-      if (parentID != 0 || TString(processName) == "alphaInelastic") { // Secondary track
+      if (parentID != 0 || TString(processName) == "alphaInelastic" || TString(processName) == "protonInelastic") { // Secondary track
          isSecondary = true;
 
          /*
@@ -580,9 +579,6 @@ void  DataInterface::getMCClustersThreshold(Int_t runNo, Clusters *clusters, Hit
             }
          }
       }
-      else {
-//         isSecondary = false;
-      }
       
       if (edep < threshold) {
          particlesBelowThreshold++;
@@ -600,7 +596,7 @@ void  DataInterface::getMCClustersThreshold(Int_t runNo, Clusters *clusters, Hit
       }
       printf("\n");
       */
-      printf("posz %.3f baseID %d level1ID %d -> layer %d. edep %.2f keV/um, PDG %d, parentID %d\n", posZ, baseID, level1ID, layer, edep/alpideThickness*1000, PDGEncoding, parentID);
+//      printf("posz %.3f baseID %d level1ID %d -> layer %d. edep %.2f keV/um, PDG %d, parentID %d\n", posZ, baseID, level1ID, layer, edep/alpideThickness*1000, PDGEncoding, parentID);
 
 
 //      if (volumeID[3] == 0 && volumeID[4] == 0 && volumeID[5] == -1) {

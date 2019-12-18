@@ -123,18 +123,6 @@ class Track : public TObject {
       Float_t           getMeanSizeToIdx(Int_t i);
       Float_t           getStdSizeToIdx(Int_t toIdx);
 
-
-      // TRACK PROPERTIES - Pre-sensor material
-      // trackPreSensorMaterial.C
-      Bool_t            isHitOnScintillatorH();
-      Bool_t            isHitOnScintillatorV();
-      Bool_t            isHitOnScintillators();
-      Int_t             getNScintillators();
-      Float_t           getPreEnergyLoss();
-      Float_t           getPreEnergyLossError();
-      Float_t           getPreTL();
-      Float_t           getPreWEPL();
-
       // TRACK PROPERTIES - Extrapolations
       // trackExtrapolations.C
       Cluster         * getInterpolatedClusterAt(Int_t layer);

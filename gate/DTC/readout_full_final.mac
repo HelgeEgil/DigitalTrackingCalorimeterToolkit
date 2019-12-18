@@ -1,8 +1,12 @@
 /gate/degrader/attachCrystalSD
-/gate/TRACKER_Absorber/attachCrystalSD
+/gate/TRACKER_Absorber1/attachCrystalSD
+/gate/TRACKER_Absorber2/attachCrystalSD
 /gate/TRACKER_Glue1/attachCrystalSD
-/gate/TRACKER_ALPIDE/attachCrystalSD
-/gate/TRACKER_AirGap/attachCrystalSD
+/gate/TRACKER_ALPIDEFront/attachCrystalSD
+/gate/TRACKER_ALPIDEEpi/attachCrystalSD
+/gate/TRACKER_ALPIDESub/attachCrystalSD
+/gate/TRACKER_AirGap1/attachCrystalSD
+/gate/TRACKER_AirGap2/attachCrystalSD
 /gate/TRACKER_TopFDI1/attachCrystalSD
 /gate/TRACKER_TopFDI2/attachCrystalSD
 /gate/TRACKER_Glue2/attachCrystalSD
@@ -16,7 +20,9 @@
 /gate/Glue1/attachCrystalSD
 /gate/Spacer1/attachCrystalSD
 /gate/Glue2/attachCrystalSD
-/gate/ALPIDE/attachCrystalSD
+/gate/ALPIDEFront/attachCrystalSD
+/gate/ALPIDEEpi/attachCrystalSD
+/gate/ALPIDESub/attachCrystalSD
 /gate/AirGap/attachCrystalSD
 /gate/TopFDI1/attachCrystalSD
 /gate/TopFDI2/attachCrystalSD

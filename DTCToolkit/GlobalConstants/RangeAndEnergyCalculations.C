@@ -80,7 +80,7 @@ Float_t getTLFromEnergy(Float_t energy) {
 Float_t getWEPLFromEnergy(Float_t energy) {
    if (energy == 0) return 0;
    Float_t wepl = getTLFromEnergy(energy, splineWater);
-
+/*
    if (kIsFirstLayerAir) {
       // This is an approximation to increase the accuracy of the range determination
       // Due to the lack of absorber in the first layer, and thus dz * tl does not represent the 'average' energy loss path length (but DZ does)
@@ -89,7 +89,7 @@ Float_t getWEPLFromEnergy(Float_t energy) {
       Float_t tl = getTLFromEnergy(energy, splineMaterial);
       wepl -= wepl/tl * (dz);
    }
-   
+  */ 
    return fmax(wepl, 0);
 }
 
@@ -366,6 +366,7 @@ Float_t getEnergyFromDegraderThickness(Double_t degraderThickness) {
    
    if (kHelium) {
       in.open("Data/Ranges/EnergyAfterDegraderHelium.csv");
+      printf("Loading EnergyAfterDegrader.csv - Helium 917 MeV\n");
       while (1) {
          in >> dt >> e >> es;
          if (!in.good()) break;
@@ -376,6 +377,7 @@ Float_t getEnergyFromDegraderThickness(Double_t degraderThickness) {
 
    else if (kEnergy == 250) {
       in.open("Data/Ranges/EnergyAfterDegraderPSTAR.csv");
+      printf("Loading EnergyAfterDegrader.csv - proton 250 MeV\n");
       while (1) {
          in >> dt >> e >> es;
          if (!in.good()) break;
@@ -385,6 +387,7 @@ Float_t getEnergyFromDegraderThickness(Double_t degraderThickness) {
    }
    else if (kEnergy == 230) {
       in.open("Data/Ranges/EnergyAfterDegrader230MeV.csv");
+      printf("Loading EnergyAfterDegraderHelium - proton 230 MeV\n");
       while (1) {
          in >> dt >> e;
          if (!in.good()) break;

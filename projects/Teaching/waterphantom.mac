@@ -38,7 +38,14 @@
 
 /gate/geometry/setIonisationPotential Water 75 eV
 
+#/gate/physics/addProcess HadronElastic
+#/gate/physics/processes/HadronElastic/setModel G4HadronElastic
+#/gate/physics/processes/HadronElastic/setDataSet G4HadronElasticDataSet
+
 /gate/run/initialize
+
+#/process/inactivate hadElastic
+#/process/inactivate msc
 
 #/gate/source/addSource PBS PencilBeam
 #/gate/source/PBS/setParticleType proton
@@ -69,10 +76,10 @@
 /gate/source/PBS/setEllipseXThetaRotationNorm negative
 /gate/source/PBS/setEllipseYPhiEmittance 15 mm*mrad
 /gate/source/PBS/setEllipseYPhiRotationNorm negative
-/gate/application/setTotalNumberOfPrimaries 5000
+/gate/application/setTotalNumberOfPrimaries 1000
 
 /gate/output/root/enable
-/gate/output/root/setFileName output/waterphantom
+/gate/output/root/setFileName output/waterphantom_HE
 
 /gate/random/setEngineName MersenneTwister
 /gate/random/setEngineSeed auto

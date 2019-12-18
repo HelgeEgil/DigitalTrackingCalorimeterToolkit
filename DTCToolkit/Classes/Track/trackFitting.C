@@ -31,8 +31,7 @@ TGraphErrors * Track::doTrackFit(Bool_t isScaleVariable, Bool_t useTrackLength) 
    Int_t          n = GetEntriesFast();
    Float_t        x[n], y[n];
    Float_t        erx[n], ery[n];
-   Float_t        preTL = getPreTL();
-   Float_t        trackLength = preTL;
+   Float_t        trackLength = 0;
    Float_t        maxRange, minRange, estimatedRange;
    Float_t        scaleParameter = 0;
    Float_t        overFittingDistance, startFittingDistance;
@@ -51,7 +50,7 @@ TGraphErrors * Track::doTrackFit(Bool_t isScaleVariable, Bool_t useTrackLength) 
       }
 
       else {
-         x[i] = getLayermm(i) + preTL;
+         x[i] = getLayermm(i);
       }
 
       y[i] = getDepositedEnergy(i, checkResistivity);
@@ -75,6 +74,7 @@ TGraphErrors * Track::doTrackFit(Bool_t isScaleVariable, Bool_t useTrackLength) 
       scaleParameter = 3.42;
    }
 
+   scaleParameter = 10;
    if (kHelium) scaleParameter = 28; // was 22.5
 
    // scaleParameter *= 1.2; // Empirical tests to reduce range bias

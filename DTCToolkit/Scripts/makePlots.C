@@ -293,7 +293,7 @@ void makePlots() {
    ifstream in2;
    ifstream in2uni;
 //   in2.open("OutputFiles/lastLayerCorrect_different_nRuns_elastic_noinelastic.csv");
-   in2.open("OutputFiles/lastLayerCorrect_Helium.csv");
+   in2.open("OutputFiles/lastLayerCorrect_HeliumAndProton.csv");
    in2uni.open("OutputFiles/lastLayerCorrect_different_nRuns_uniform.csv");
    Float_t np, correctLast, correctWhole, lastIsFirst, lastIsAlmostFirst;
    Int_t   mmAbsorber_;
@@ -965,7 +965,7 @@ void makePlots() {
    axis->SetTitleSize(0.04);
    axis->SetLabelSize(0.04);
 //   axis->SetTitleOffset(0.95);
-   axis->SetTitle("Million protons/s");
+   axis->SetTitle("Million primaries/s");
    
    TText *curveLabel = new TText();
    curveLabel->SetTextFont(22);
@@ -974,8 +974,8 @@ void makePlots() {
 //   curveLabel->DrawText(535, gFraction3mm->Eval(535)*0.98, "CD");
 //   curveLabel->DrawText(535, gFraction35mm->Eval(535)*0.98, "5x5 mm^{2}");
 //   curveLabel->DrawText(535, gFraction4mm->Eval(535)*0.98, "4 mm");
-   curveLabel->DrawText(535, gFraction2mmFilter->Eval(535)*0.98, "Ideal");
-   curveLabel->DrawText(535, gFraction3mmFilter->Eval(535)*0.98, "CD");
+   curveLabel->DrawText(535, gFraction2mmFilter->Eval(535)*0.98, "Helium");
+   curveLabel->DrawText(535, gFraction3mmFilter->Eval(535)*0.98, "Proton");
 //   curveLabel->DrawText(220, 91, "Pixel Diffusion Model");
 
    /*

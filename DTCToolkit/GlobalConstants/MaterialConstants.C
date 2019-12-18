@@ -124,76 +124,46 @@ void  createSplines() {
 
    Float_t readoutAbsorber = (roundf(kAbsorberThickness) == kAbsorberThickness) ? kAbsorberThickness : kAbsorberThickness*10;
 
-   if (kUseCSDA) {
-      if (kHelium) {
-         in.open("Data/Ranges/35mm_Al_Helium.csv");
+   if (kHelium) {
+      if (!kFinalDesign) {
+         in.open("Data/Ranges/35mm_Al_Helium.csv"); // for 917 MeV
+         if (readoutAbsorber != 35) {
+            printf("REMEMBER TO ADD CALIBRATION FOR THIS ABSORBER THICKNESS (using 3.5 mm)!!! (%.1f)\n", kAbsorberThickness);
+         }
+         if (kEnergy != 917) printf("SYSTEM NOT CALIBRATED FOR %d MeV!!\n", kEnergy);
       }
-
-      else if (kEnergy == 250) {
-         if       (kMaterial == kTungsten) {
-            in.open(Form("Data/Ranges/%.0fmm_W_csda.csv", readoutAbsorber));
-         }
-         else if  (kMaterial == kAluminum) {
-            in.open(Form("Data/Ranges/%.0fmm_Al_csda.csv", readoutAbsorber));
-         }
-         else if  (kMaterial == kCarbon) {
-            in.open(Form("Data/Ranges/%.0fmm_C_csda.csv", readoutAbsorber));
-         }
-      }
-      else if (kEnergy == 230) {
-         if       (kMaterial == kTungsten) {
-            in.open(Form("Data/Ranges/%.0fmm_W_csda_230MeV.csv", readoutAbsorber));
-         }
-         else if  (kMaterial == kAluminum) {
-            in.open(Form("Data/Ranges/%.0fmm_Al_csda_230MeV.csv", readoutAbsorber));
-         }
-         else if  (kMaterial == kCarbon) {
-            in.open(Form("Data/Ranges/%.0fmm_C_csda_230MeV.csv", readoutAbsorber));
-         }
+      else {
+         in.open("Data/Ranges/Final_Al_Helium.csv"); // for 917 MeV
+         if (kEnergy != 917) printf("SYSTEM NOT CALIBRATED FOR %d MeV!!\n", kEnergy);
+        
       }
    }
-   else {
-      if (kHelium) {
+
+   else if (kEnergy == 250) { // the energy is off anywho
+      if       (kMaterial == kTungsten) {
+         in.open(Form("Data/Ranges/%.0fmm_W.csv", readoutAbsorber));
+      }
+      else if  (kMaterial == kAluminum) {
+         in.open(Form("Data/Ranges/%.0fmm_Al.csv", readoutAbsorber));
+      }
+      else if  (kMaterial == kCarbon) {
+         in.open(Form("Data/Ranges/%.0fmm_C.csv", readoutAbsorber));
+      }
+   }
+   else if (kEnergy == 230) {
+      if       (kMaterial == kTungsten) {
+         in.open(Form("Data/Ranges/%.0fmm_W_230MeV.csv", readoutAbsorber));
+      }
+      else if  (kMaterial == kAluminum) {
          if (!kFinalDesign) {
-            in.open("Data/Ranges/35mm_Al_Helium.csv"); // for 917 MeV
-            if (readoutAbsorber != 35) {
-               printf("REMEMBER TO ADD CALIBRATION FOR THIS ABSORBER THICKNESS (using 3.5 mm)!!! (%.1f)\n", kAbsorberThickness);
-            }
-            if (kEnergy != 917) printf("SYSTEM NOT CALIBRATED FOR %d MeV!!\n", kEnergy);
+            in.open(Form("Data/Ranges/%.0fmm_Al_230MeV.csv", readoutAbsorber));
          }
          else {
-            in.open("Data/Ranges/Final_Al_Helium.csv"); // for 917 MeV
-            if (kEnergy != 917) printf("SYSTEM NOT CALIBRATED FOR %d MeV!!\n", kEnergy);
-           
+            in.open("Data/Ranges/Final_Al_Proton.csv"); // 230 MeV
          }
       }
-
-      else if (kEnergy == 250) { // the energy is off anywho
-         if       (kMaterial == kTungsten) {
-            in.open(Form("Data/Ranges/%.0fmm_W.csv", readoutAbsorber));
-         }
-         else if  (kMaterial == kAluminum) {
-            in.open(Form("Data/Ranges/%.0fmm_Al.csv", readoutAbsorber));
-         }
-         else if  (kMaterial == kCarbon) {
-            in.open(Form("Data/Ranges/%.0fmm_C.csv", readoutAbsorber));
-         }
-      }
-      else if (kEnergy == 230) {
-         if       (kMaterial == kTungsten) {
-            in.open(Form("Data/Ranges/%.0fmm_W_230MeV.csv", readoutAbsorber));
-         }
-         else if  (kMaterial == kAluminum) {
-            if (!kFinalDesign) {
-               in.open(Form("Data/Ranges/%.0fmm_Al_230MeV.csv", readoutAbsorber));
-            }
-            else {
-               in.open("Data/Ranges/Final_Al_Proton.csv"); // 230 MeV
-            }
-         }
-         else if  (kMaterial == kCarbon) {
-            in.open(Form("Data/Ranges/%.0fmm_C_230MeV.csv", readoutAbsorber));
-         }
+      else if  (kMaterial == kCarbon) {
+         in.open(Form("Data/Ranges/%.0fmm_C_230MeV.csv", readoutAbsorber));
       }
    }
 
@@ -330,11 +300,10 @@ void  createSplines() {
       CDB_treeCluster->SetBranchAddress("x_mean", &CDB_x_mean);
       CDB_treeCluster->SetBranchAddress("y_mean", &CDB_y_mean);
       CDB_treeCluster->SetBranchAddress("hit_array", &CDB_hit_array, &CDB_b_hit_array);
-//      CDB_treeCluster->BuildIndex("size");
 
       for (int i=0; i<50; i++) CDB_sortIndex[i] = -1;
       
-      // Load pre-sorted list 
+      // Load pre-sorted size index 
       in.open("Data/ClusterSizes/ALPIDE/sortIndex.csv");
       Int_t clustersize_, index_;
       while (1) {
@@ -343,44 +312,22 @@ void  createSplines() {
          CDB_sortIndex[clustersize_] = index_;
       }
       in.close();
-
-      /*
-      //      CDB_index = (TTreeIndex*) CDB_treeCluster->GetTreeIndex();
-
-      printf("Test... Should have correct CSs\n");
-      for (Int_t j=2; j<30; j++) {
-//         Long64_t local = CDB_treeCluster->LoadTree(CDB_index->GetIndex()[CDB_sortIndex[j]]);
-         CDB_treeCluster->GetEntry(CDB_sortIndex[j]);
-//         CDB_treeCluster->GetEntry(local);
-         printf("ClusterSize at j=%d is %d\n  hitarray: ", j, CDB_clusterSize);
-         for (int i=0; i<10; i++) { printf("%d ", CDB_hit_array[i]); }
-         cout << endl;
-      }
-          
-      // Sort clusters based on cluster size
-      
-      for (int i=0; i<CDB_index->GetN()-1; i++) {
-         Long64_t local = CDB_treeCluster->LoadTree(CDB_index->GetIndex()[i]);
-         CDB_treeCluster->GetEntry(local);
-         if (lastClusterSize < 0 || lastClusterSize != CDB_clusterSize) {
-            CDB_sortIndex[CDB_clusterSize] = i;
-            lastClusterSize = CDB_clusterSize;
-         }
-      }
-      */
    }
 }
 
 Double_t getLayerPositionmm(Int_t i) {
    Double_t z = 0;
 
-   if (!kUseAlpide) {
-      if (i>0) {
-         z = ( firstUpperLayerZ + firstLowerLayerZ ) / 2 + dz * i;
+   if (kFinalDesign) {
+      if (i < 2) {
+         z = 1.03 + i * dz2;
+      }
+      else {
+         z = 2 * dz2 + 3.735 + (i - 2) * dz;
       }
    }
    else {
-      z = dz * i;
+      z = i * dz;
    }
 
    return z;

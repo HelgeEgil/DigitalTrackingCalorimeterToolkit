@@ -450,7 +450,7 @@ void getTracksReconstructionEfficiency(Int_t dataType, Float_t energy, Float_t d
    run_energy = energy;
    run_degraderThickness = degraderThickness;
 
-   Int_t nRunArray[15] = {3,4,5,8,16,25,32,50,64,100,128,181,200,256,512};
+   Int_t nRunArray[15] = {4,8,16,25,32,50,64,85,100,128,181,200,256,350,512};
 
    for (Int_t i=0; i<15; i++) { // 1 -> 30
       nRuns = nRunArray[i];
@@ -482,10 +482,8 @@ void getTracksReconstructionEfficiency(Int_t dataType, Float_t energy, Float_t d
       Float_t ratioFirstAndLastAllTracks = (float) nFirstAndLastAllTracks / nTotal;
       Float_t readoutAbsorber = (roundf(kAbsorberThickness) == kAbsorberThickness) ? kAbsorberThickness : kAbsorberThickness*10;
    
-      Float_t  cutHalo = 12;
-      Float_t  cutMaxAngle = 60;
-      Float_t  cutAngle = 35;
-      Float_t  cutEdep = 8;
+      Float_t  cutAngle = 45; // 2.5 sigma
+      Float_t  cutEdep = 12;
    
 //      tracks->removeHighAngularChangeTracks(cutMaxAngle); // mrad
       tracks->doTrackFit();
@@ -508,7 +506,7 @@ void getTracksReconstructionEfficiency(Int_t dataType, Float_t energy, Float_t d
       
       Float_t ratioFirstAndLastAllTracksAfterFilter = (float) nFirstAndLastAllTracksAfterFilter / nTotalAfterFilter;
 
-      ofstream file2(Form("OutputFiles/lastLayerCorrect_different_nRuns_Helium.csv"), ofstream::out | ofstream::app);
+      ofstream file2(Form("OutputFiles/lastLayerCorrect_different_nRuns_helium.csv"), ofstream::out | ofstream::app);
       file2 << readoutAbsorber << " " << nRuns << " " << " " << ratioFirstAndLastAllTracks << " " << ratioFirstAndLastAllTracksAfterFilter << endl;
       file2.close();
       
@@ -762,13 +760,11 @@ void drawTracksDepthDose(Int_t Runs, Int_t dataType, Bool_t recreate, Float_t en
    Float_t  cutEdep = 10;
 
    tracks->doTrackFit(); 
-//   tracks->removeNuclearInteractions();
-//   tracks->removeThreeSigmaShortTracks();
+//   tracks->removeTracksEndingInHalo();
 
-//   tracks->removeHighAngleTracks(cutAngle); // mrad
+   tracks->removeHighAngleTracks(cutAngle); // mrad
 //   tracks->removeHighAngularChangeTracks(cutMaxAngle); // mrad
 //   tracks->removeNuclearInteractions();
-//   tracks->removeTracksEndingInHalo();
 //   tracks->removeThreeSigmaShortTracks();
 
    /*
@@ -792,6 +788,7 @@ void drawTracksDepthDose(Int_t Runs, Int_t dataType, Bool_t recreate, Float_t en
       if (!thisTrack) continue;
 
 //      if (thisTrack->Last()->isSecondary()) continue;
+      if (thisTrack->getRangemm() >50) continue;
 
       // Do track fit, extract all parameters for this track
       outputGraph = (TGraphErrors*) thisTrack->doTrackFit(false, kUseCSDA); // (bool isScaleVariable, bool useTrackLength (~ CSDA))
@@ -859,8 +856,6 @@ void drawTracksRangeHistogram(Int_t Runs, Int_t dataType, Bool_t recreate, Float
    printf("Histogram limits: %.2f to %.2f.\n", lowHistogramLimit, highHistogramLimit);
    printf("At energy %.0f, expecting range %.2f mm and WEPL %.2f mm.\n", run_energy, getTLFromEnergy(run_energy), getWEPLFromEnergy(run_energy));
    printf("This corresponds to a WEPL factor of %.2f.\n", getWEPLFactorFromEnergy(run_energy));
-   cout << "Correcting for aluminum plate: " << kIsAluminumPlate << endl;
-   cout << "Correcting for scintillators: " << kIsScintillator << endl;
 
    hFitResults->SetLineColor(kBlack); hFitResults->SetFillColor(kGreen-5);
 
@@ -881,11 +876,11 @@ void drawTracksRangeHistogram(Int_t Runs, Int_t dataType, Bool_t recreate, Float
 
 
 // Use
-//   tracks->removeHighAngleTracks(cutAngle); // mrad
 //   tracks->removeHighAngularChangeTracks(cutMaxAngle); // mrad
    tracks->doTrackFit();
-//   tracks->removeNuclearInteractions();
+   tracks->removeNuclearInteractions();
 //   tracks->removeThreeSigmaShortTracks();
+   tracks->removeHighAngleTracks(cutAngle); // mrad
 
    for (Int_t j=0; j<tracks->GetEntriesFast(); j++) {
       Track *thisTrack = tracks->At(j);
@@ -1314,317 +1309,6 @@ void drawClusterSizeDistribution(Int_t Runs, Int_t dataType, Bool_t recreate, Fl
 
 }
 
-void compareChargeDiffusionModels(Int_t Runs, Bool_t recreate, Float_t energy) {
-   run_energy = energy;
-
-   DataInterface *di = new DataInterface();
-
-   Int_t nClusters = kEventsPerRun * 5 * nLayers;
-   Int_t nHits = kEventsPerRun * 50;
-   Int_t nLayersToUse = 6;
-   
-   TCanvas *c = new TCanvas("c", "Compare charge diffusion models", 1200, 800);
-   TCanvas *c4 = new TCanvas("c4", "Compare charge diffusion models", 1200, 800);
-   
-   TCanvas *c2 = new TCanvas("c2", "Compare charge diffusion models", 1200, 800);
-   c2->Divide(3,2,1e-6,1e-6);
-
-   TCanvas *c3 = new TCanvas("c3", "Compare charge diffusion models", 1200, 800);
-   c3->Divide(2,1,1e-6,1e-6);
-
-   int binx = 40;
-
-   Float_t  edeps[1000];
-   Float_t  css[1000];
-   Float_t  edeps_error[1000];
-   Float_t  css_error_high[1000];
-   Float_t  css_error_low[1000];
-   Int_t    graphIdx = 0;
-
-   gStyle->SetTitleFont(22);
-   gStyle->SetLabelFont(22);
-   gStyle->SetTextFont(22);
-   gStyle->SetLabelFont(22, "Y");
-   gStyle->SetTitleFont(22, "Y");
-
-   TH2F *hEdepVSCS = new TH2F("hEdepVSCS", ";E_{dep} [keV/#mum]; Calibrated cluster size", binx, 0.5, 5, 31, 0, 30);
-   TH2F *hEdepVSCS1 = new TH2F("hEdepVSCS1", "122 MeV;E_{dep} [keV/#mum]; Calibrated cluster size", binx, 0.5, 5, 31, 0, 30);
-   TH2F *hEdepVSCS2 = new TH2F("hEdepVSCS2", "140 MeV;E_{dep} [keV/#mum]; Calibrated cluster size", binx, 0.5, 5, 31, 0, 30);
-   TH2F *hEdepVSCS3 = new TH2F("hEdepVSCS3", "150 MeV;E_{dep} [keV/#mum]; Calibrated cluster size", binx, 0.5, 5, 31, 0, 30);
-   TH2F *hEdepVSCS4 = new TH2F("hEdepVSCS4", "170 MeV;E_{dep} [keV/#mum]; Calibrated cluster size", binx, 0.5, 5, 31, 0, 30);
-   TH2F *hEdepVSCS5 = new TH2F("hEdepVSCS5", "180 MeV;E_{dep} [keV/#mum]; Calibrated cluster size", binx, 0.5, 5, 31, 0, 30);
-   TH2F *hEdepVSCS6 = new TH2F("hEdepVSCS6", "188 MeV;E_{dep} [keV/#mum]; Calibrated cluster size", binx, 0.5, 5, 31, 0, 30);
-   TH2F *hEnergyVSCSCal = new TH2F("hEnergyVSCSCal", "Calibrated;Residual energy [MeV];Cluster Size", 200, 0, 250, 31, 0, 30);
-   TH2F *hEnergyVSCSUncal = new TH2F("hEnergyVSCSUncal", "Uncalibrated;Residual energy [MeV];Cluster Size", 200, 0, 250, 31, 0, 30);
-   TF1 *fPheno2 = new TF1("fPheno2", "6.6177 * x ** 0.9383", 0, 50);
-   TF1 *fPheno3 = new TF1("fPheno3", "7.77457 * x ** 0.7674", 0, 50);
-   TF1 *fAnaly_30 = new TF1("fAnaly_30", "[0] + 6.16421 * x ** 3.81925e-1", 0, 50);
-   TF1 *fAnaly_60 = new TF1("fAnaly_60", "[0] + 8.72351 * x ** 4.47309e-1", 0, 50);
-   TF1 *fAnaly_65 = new TF1("fAnaly_65", "[0] + 8.99963 * x ** 4.54506e-1", 0, 50);
-   TF1 *fAnaly_infty = new TF1("fAnaly_infty", "[0] + 8.99963 * x ** 4.54506e-1", 0, 50);
-   TF1 *fAnaly_45 = new TF1("fAnaly_45", "[0] + 1.67988 * x ** 5.66446e-1", 0, 50);
-   TF1 *fFinck = new TF1("fFinck", "2*3.1415 * [0] * log(14*x / (2*3.1415 * 0.0036 * [1]))", 0, 50);
-   Cluster * cluster = nullptr;
-   Float_t inst_wepl, inst_dedx, range, calcEnergy;
-   Int_t inst_cs;
-
-   fAnaly_30->SetParameter(0, 0);
-   fAnaly_45->SetParameter(0, 0);
-   fAnaly_65->SetParameter(0, 0);
-   fAnaly_60->SetParameter(0, 0);
-   fAnaly_infty->SetParameter(0, 0);
-
-   fAnaly_30->SetParLimits(0, 0, 0.001);
-   fAnaly_45->SetParLimits(0, 0, 0.001);
-   fAnaly_60->SetParLimits(0, 0, 0.001);
-   fAnaly_65->SetParLimits(0, 0, 0.001);
-   fAnaly_infty->SetParLimits(0, 0, 0.001);
-
-   fFinck->SetParameters(1.202, 221.58);
-
-   fPheno2->SetLineWidth(5);
-   fPheno3->SetLineWidth(5);
-   fAnaly_30->SetLineWidth(5);
-   fAnaly_60->SetLineWidth(5);
-   fAnaly_45->SetLineWidth(5);
-   fAnaly_65->SetLineWidth(5);
-   fAnaly_infty->SetLineWidth(5);
-   fFinck->SetLineWidth(5);
-
-   fFinck->SetLineColor(kBlack);
-   fPheno2->SetLineColor(kBlue-4);
-   fPheno3->SetLineColor(kBlack);
-   fAnaly_30->SetLineColor(kBlack);
-   fAnaly_65->SetLineColor(kBlack);
-   fAnaly_infty->SetLineColor(kBlack);
-
-   CalorimeterFrame *cf = new CalorimeterFrame();
-   Clusters * clusters = new Clusters(nClusters);
-   Hits * hits = new Hits(nHits);
-   Tracks *tracks = nullptr;
-
-   for (Int_t e=0; e<nEnergies; e++) {
-      energy = energies[e];
-      run_energy = energy;
-      tracks = loadOrCreateTracks(recreate, Runs, 1, energy);
-
-      for (Int_t k=0; k<tracks->GetEntriesFast(); k++) {
-         if (!tracks->At(k)) continue;
-
-         TGraphErrors * graph = (TGraphErrors*) tracks->At(k)->doTrackFit(false, kUseCSDA);
-         if (!graph) continue;
-
-         range = tracks->At(k)->getFitParameterRange();
-         calcEnergy = getEnergyFromTL(range);
-
-         for (Int_t j=0; j<tracks->At(k)->GetEntriesFast(); j++) {
-            if (!tracks->At(k)->At(j)) continue;
-            cluster = tracks->At(k)->At(j); 
-
-            inst_wepl = getWEPLFromTL(cluster->getLayermm() + tracks->At(k)->getPreTL());
-            inst_dedx = 43.95 * pow(getEnergyAtWEPL(energy, inst_wepl), -0.748);
-
-            inst_cs =   cluster->getCalibratedSize();
-
-            if (inst_cs < 0) continue;
-            if (inst_dedx > 3) {
-            }
-               hEnergyVSCSCal->Fill(getEnergyAtWEPL(energy, inst_wepl), inst_cs);
-               hEnergyVSCSUncal->Fill(getEnergyAtWEPL(energy, inst_wepl), cluster->getSize());
-
-            hEdepVSCS->Fill(inst_dedx, inst_cs);
-
-            if       (energy == 122) hEdepVSCS1->Fill(inst_dedx, inst_cs);
-            else if  (energy == 140) hEdepVSCS2->Fill(inst_dedx, inst_cs);
-            else if  (energy == 150) hEdepVSCS3->Fill(inst_dedx, inst_cs);
-            else if  (energy == 170) hEdepVSCS4->Fill(inst_dedx, inst_cs);
-            else if  (energy == 180) hEdepVSCS5->Fill(inst_dedx, inst_cs);
-            else if  (energy == 188) hEdepVSCS6->Fill(inst_dedx, inst_cs);
-         }
-      }
-   }
-
-   hEdepVSCS->GetXaxis()->SetTitleFont(22);
-   hEdepVSCS->GetXaxis()->SetLabelFont(22);
-   hEdepVSCS->GetXaxis()->SetTitleSize(0.05);
-   hEdepVSCS->GetXaxis()->SetLabelSize(0.05);
-   hEdepVSCS->GetYaxis()->SetTitleFont(22);
-   hEdepVSCS->GetYaxis()->SetLabelFont(22);
-   hEdepVSCS->GetYaxis()->SetTitleSize(0.05);
-   hEdepVSCS->GetYaxis()->SetLabelSize(0.05);
-   hEdepVSCS->GetZaxis()->SetLabelFont(22);
-   hEdepVSCS->GetZaxis()->SetLabelSize(0.05);
-
-   gStyle->SetOptStat(0);
-
-   c->cd();
-   gPad->SetBottomMargin(0.12);
-   gPad->SetRightMargin(0.2);
-   gPad->SetTopMargin(0.05);
-   gPad->SetLogz();
-   hEdepVSCS->GetYaxis()->SetTitleOffset(0.8);
-   hEdepVSCS->Draw("COL");
-   gPad->Update();
-
-   TLatex *t1 = new TLatex(5, 25, "Power fit");
-   TLatex *t4 = new TLatex(5, 20, "Gaussian fit");
-   TLatex *t2 = new TLatex(5, 15, "#splitline{Analytical}{#lambda = 30 #mum}");
-   TLatex *t3 = new TLatex(5, 10, "Analytical model");
-   t1->SetTextFont(22);
-   t2->SetTextFont(22);
-   t3->SetTextFont(22);
-   t4->SetTextFont(22);
-   t1->SetTextSize(0.05);
-   t2->SetTextSize(0.05);
-   t3->SetTextSize(0.05);
-   t4->SetTextSize(0.05);
-   t1->Draw();
-//   t2->Draw();
-   t3->Draw();
-   t4->Draw();
-
-   c4->cd();
-   TF1 * fitFunc = new TF1("fitFunc", "[0] * x ** [1]", 0, 5);
-   fitFunc->SetParameters(6.6177, 0.9383); // pheno2
-   
-   // CALCULATE STATISTICS FROM hEdepVSCS:
-   Float_t  sum_mean;
-   Float_t  sum_variance;
-   Float_t  sum_variance_high;
-   Float_t  sum_variance_low;
-   Float_t  mean;
-   Float_t  standarddeviation;
-   Float_t  standarddeviation_high;
-   Float_t  standarddeviation_low;
-   Float_t  fScale_high, fScale_low;
-   Int_t    nEntries = 0;
-   Int_t    nEntries_high = 0;
-   Int_t    nEntries_low = 0;
-   TAxis *xaxis = hEdepVSCS->GetXaxis();
-   TAxis *yaxis = hEdepVSCS->GetYaxis();
-
-   Int_t    ntotal = hEdepVSCS->Integral();
-   Int_t    nEntries0 = 0;
-
-   for (Int_t horiz=0; horiz<hEdepVSCS->GetNbinsX(); horiz++) {
-      sum_mean = 0;
-      sum_variance = 0;
-      sum_variance_high = 0;
-      sum_variance_low = 0;
-      nEntries = 0;
-      nEntries_high = 0;
-      nEntries_low = 0;
-
-      // calculate mean
-      for (Int_t vert=0; vert<hEdepVSCS->GetNbinsY(); vert++) {
-         sum_mean += yaxis->GetBinCenter(vert) * hEdepVSCS->GetBinContent(horiz, vert);
-         nEntries += hEdepVSCS->GetBinContent(horiz, vert);
-      }
-      
-      if (nEntries > 0) {
-         if (!nEntries0) nEntries0 = nEntries;
-         mean = sum_mean / nEntries;
-
-         printf("Mean value at %.1f kev/um is %.1f\n", xaxis->GetBinCenter(horiz), mean);
-      
-         for (Int_t vert=0; vert<hEdepVSCS->GetNbinsY(); vert++) {
-            if (yaxis->GetBinCenter(vert) < mean) {
-               sum_variance_low += hEdepVSCS->GetBinContent(horiz, vert) * pow( yaxis->GetBinCenter(vert) - mean, 2);
-               nEntries_low += hEdepVSCS->GetBinContent(horiz,vert);
-            }
-            else {
-               sum_variance_high += hEdepVSCS->GetBinContent(horiz, vert) * pow( yaxis->GetBinCenter(vert) - mean, 2);
-               nEntries_high += hEdepVSCS->GetBinContent(horiz,vert);
-            }
-         }
-
-         // rescale  nentries to the total number of entries, so that the nEntries number also acts as a point WEIGHT
-         // so that nEntries_high + nEntries_low = ntotal
-
-         if (!nEntries_high || !nEntries_low) continue;
-         
-         fScale_high = (nEntries0 / nEntries_high) * 2;
-         fScale_low = (nEntries0 / nEntries_low) * 2;
-
-         printf("At %.1f keV/um, fScale l/h is %.2f / %.2f.\n", xaxis->GetBinCenter(horiz), fScale_low, fScale_high);
-
-         if (nEntries_high == 1) nEntries_high = 2;
-         if (nEntries_low == 1) nEntries_low = 2;
-
-         standarddeviation_high = sqrt(sum_variance_high / (nEntries_low - 1));
-         standarddeviation_low = sqrt(sum_variance_low / (nEntries_high - 1));
-         
-         css[graphIdx] = mean;
-         css_error_high[graphIdx] = standarddeviation_high;
-         css_error_low[graphIdx] = standarddeviation_low;
-         edeps[graphIdx] = xaxis->GetBinCenter(horiz);
-         edeps_error[graphIdx++] = 0;
-      }
-   }
-
-   TGraphAsymmErrors *gEdepVSCS = new TGraphAsymmErrors(graphIdx, edeps, css, edeps_error, edeps_error, css_error_low, css_error_high);
-   gEdepVSCS->SetMarkerStyle(21);
-   gEdepVSCS->Draw("AP");
-   fitFunc->SetParameters(7.85, 0.7265);
-   
-   fitFunc->Draw("same");
-
-   printf("Fit function: %.3f * edep ^ %.3f\n", fitFunc->GetParameter(0), fitFunc->GetParameter(1));
-   printf("Finck function: rs = %.3f, Ts = %.3f\n", fFinck->GetParameter(0), fFinck->GetParameter(1));
-
-   fFinck->Draw("same");
-   fAnaly_infty->Draw("same");
-   
-   TLatex *tt1 = new TLatex(5, 25, "Power Fit");
-   TLatex *tt4 = new TLatex(5, 20, "Gaussian Intensity");
-   TLatex *tt3 = new TLatex(5, 10, "First Principles");
-   tt1->SetTextFont(22);
-   tt3->SetTextFont(22);
-   tt4->SetTextFont(22);
-   tt1->SetTextSize(0.05);
-   tt3->SetTextSize(0.05);
-   tt4->SetTextSize(0.05);
-   tt1->Draw();
-   tt3->Draw();
-   tt4->Draw();
-
-
-   c2->cd(1);
-   gPad->SetLogz();
-   hEdepVSCS1->Draw("COLZ");
-   c2->cd(2);
-   gPad->SetLogz();
-   hEdepVSCS2->Draw("COLZ");
-   c2->cd(3);
-   gPad->SetLogz();
-   hEdepVSCS3->Draw("COLZ");
-   c2->cd(4);
-   gPad->SetLogz();
-   hEdepVSCS4->Draw("COLZ");
-   c2->cd(5);
-   gPad->SetLogz();
-   hEdepVSCS5->Draw("COLZ");
-   c2->cd(6);
-   gPad->SetLogz();
-   hEdepVSCS6->Draw("COLZ");
-   c->cd();
-   fPheno3->Draw("same");
-   fAnaly_infty->Draw("same");
-   fFinck->Draw("same");
-
-   TLegend *leg = new TLegend(0.55, 0.17, 0.85, 0.34);
-   leg->AddEntry(fPheno3, "Phenomenological", "L");
-   leg->AddEntry(fAnaly_infty, "Analytic #lambda = #infty #mum", "L");
-   leg->SetTextFont(22);
-
-
-   c3->cd(1);
-   hEnergyVSCSCal->Draw("COLZ");
-   c3->cd(2);
-   hEnergyVSCSUncal->Draw("COLZ");
-
-}
-
 void secondaryAnalysis(Int_t Runs, Int_t dataType, Bool_t recreate, Int_t switchLayer, Float_t energy, Float_t degraderThickness, Int_t tracksperrun, Bool_t doTracking) {
    run_energy = energy;
    run_degraderThickness = degraderThickness;
@@ -1875,18 +1559,6 @@ void analyseHelium(Int_t Runs, Int_t dataType, Bool_t recreate, Int_t switchLaye
    Cluster *c = nullptr;
    // propagate secondary status
    Int_t nSecFirst = 0;
-   /*
-   for (Int_t i=0; i<tracks->GetEntriesFast(); i++) { // It's OK to follow electrons for a few layers then the He ... if the EID is equal
-      // is confused?
-      if (tracks->At(i)->Last()->getEventID() != tracks->At(i)->At(0)->getEventID()) {
-         if (!tracks->At(i)->Last()->isSecondary() && tracks->At(i)->At(0)->isSecondary()) {
-            nSecFirst++;
-            tracks->At(i)->Last()->setSecondary(true);
-         }
-      }
-   }
-   if (nSecFirst) printf("Converted %d confused tracks with 2nd to 2nd track\n", nSecFirst);
-*/
 
    Int_t nSecondariesEnd = 0, nPrimariesEnd = 0, nTotal = 0;
    for (Int_t i=0; i<tracks->GetEntriesFast(); i++) {
@@ -1905,25 +1577,34 @@ void analyseHelium(Int_t Runs, Int_t dataType, Bool_t recreate, Int_t switchLaye
 
    Float_t  cutHalo = 15;
    Float_t  cutMaxAngle = 70;
-   Float_t  cutAngle = 35;
-   Float_t  cutEdep = 8;
+   Float_t  cutAngle = 50;
+   Float_t  cutEdep = 3.5;
    Float_t  cutChi2 = 500;
-   Float_t  cutEdepPlateau = 3.5;
+   Float_t  cutEdepPlateau = 1.5;
+   if (kHelium) {
+      cutHalo = 15;
+      cutMaxAngle = 70;
+      cutAngle = 45; // 2.5 sigma 
+      cutEdep = 12;
+      cutChi2 = 500;
+      cutEdepPlateau = 4;
+   }
+
 
    printf("Found in total %d tracks. %d primaries, %d secondaries\n", nTotal, nPrimariesEnd, nSecondariesEnd);
 
-// Don't use
 //   tracks->doTrackFit();
+
+
+// Use
+   tracks->removeNuclearInteractions();
+   tracks->removeThreeSigmaShortTracks();
+   tracks->removeHighAngleTracks(cutAngle); // mrad
+  
+// Don't use
 //   track->removeHighChiSquare(210);
 //   tracks->removeTracksEndingInHalo(30);
 //   tracks->removeHighAngularChangeTracks(cutMaxAngle); // mrad
-
-// Use
-
-//   tracks->removeNuclearInteractions();
-//   tracks->removeThreeSigmaShortTracks();
-//   tracks->removeHighAngleTracks(cutAngle); // mrad
-  
 
    Int_t nfSecondariesEnd = 0, nfPrimariesEnd = 0, nfTotal = 0;
    Int_t nfHe = 0, nfHe3 = 0;
@@ -1955,46 +1636,49 @@ void analyseHelium(Int_t Runs, Int_t dataType, Bool_t recreate, Int_t switchLaye
 
    TCanvas *cPosition = new TCanvas("cPosition", "cPosition", 1200, 600);
    cPosition->Divide(2,1,1e-5,1e-5);
-   TH1F *hPositionP = new TH1F("hPositionP", "Primary at end;Radial profile first layer;Entries",100,0,100);
-   TH1F *hPositionS = new TH1F("hPositionS", "Secondary at end;Radial profile first layer;Entries",100,0,100);
+   TH1F *hPositionP = new TH1F("hPositionP", "Primary particle;Radial profile first layer;Entries",100,0,100);
+   TH1F *hPositionS = new TH1F("hPositionS", "Secondary particle;Radial profile first layer;Entries",100,0,100);
 
    TCanvas *cEdep = new TCanvas("cEdep","cEdep",1200,600);
    cEdep->Divide(2,1,1e-5,1e-5);
-   TH1F * edepP = new TH1F("edepP", "Primary at end;E_{dep} last layer [kev/#mum];Entries", 100, 0, 100);
-   TH1F * edepS = new TH1F("edepS", "Secondary at end;E_{dep} last layer [kev/#mum];Entries", 100, 0, 100);
+   TH1F * edepP = new TH1F("edepP", "Primary particle;E_{dep} last layer [kev/#mum];Entries", 100, 0, 100);
+   TH1F * edepS = new TH1F("edepS", "Secondary particle;E_{dep} last layer [kev/#mum];Entries", 100, 0, 100);
 
    TCanvas *cEdep2D = new TCanvas("cEdep2D","cEdep2D",1200,600);
    cEdep2D->Divide(2,1,1e-5,1e-5);
-   TH2F *edep2DP = new TH2F("edep2DP", "Primary at end;Edep plateau [keV/#mum];Edep last layer [keV/#mum]", 60, 0, 30, 60, 0, 30);
-   TH2F *edep2DS = new TH2F("edep2DS", "Secondary at end;Edep plateau [keV/#mum];Edep last layer [keV/#mum];", 60, 0, 30,60, 0, 30);
+   TH2F *edep2DP = new TH2F("edep2DP", "Primary particle;Edep plateau [keV/#mum];Edep last layer [keV/#mum]", 60, 0, 30, 60, 0, 30);
+   TH2F *edep2DS = new TH2F("edep2DS", "Secondary particle;Edep plateau [keV/#mum];Edep last layer [keV/#mum];", 60, 0, 30,60, 0, 30);
 
    TCanvas *cAllEdep = new TCanvas("cAllEdep","cAllEdep",1200,600);
    cAllEdep->Divide(2,1,1e-5,1e-5);
-   TH1F * cAllEdepP = new TH1F("allEdepP", "Primary at end;Average E_{dep} (plateau) [keV/#mum];Entries",100,0,20);
-   TH1F * cAllEdepS = new TH1F("allEdepS", "Secondary at end;Average E_{dep} (plateau) [kev/#mum];Entries",100,0,20);
+   TH1F * cAllEdepP = new TH1F("allEdepP", "Primary particle;Average E_{dep} (plateau) [keV/#mum];Entries",100,0,20);
+   TH1F * cAllEdepS = new TH1F("allEdepS", "Secondary particle;Average E_{dep} (plateau) [kev/#mum];Entries",100,0,20);
    
    TCanvas *cAllVarEdep = new TCanvas("cAllVarEdep","cAllVarEdep",1200,600);
    cAllVarEdep->Divide(2,1,1e-5,1e-5);
-   TH1F * cAllVarEdepP = new TH1F("allVarEdepP", "Primary at end;Rise factor BP/plateau;Entries",100,0,5);
-   TH1F * cAllVarEdepS = new TH1F("allVarEdepS", "Secondary at end;Rise factor BP/plateau;Entries",100,0,5);
+   TH1F * cAllVarEdepP = new TH1F("allVarEdepP", "Primary particle;Rise factor BP/plateau;Entries",100,0,5);
+   TH1F * cAllVarEdepS = new TH1F("allVarEdepS", "Secondary particle;Rise factor BP/plateau;Entries",100,0,5);
    
    TCanvas *cAngle = new TCanvas("cAngle","cAngle",1200,600);
    cAngle->Divide(2,1,1e-5,1e-5);
-   TH1F * angleP = new TH1F("angleP", "Primary at end;Incoming angle [mrad];Entries;", 100, 0, 200);
-   TH1F * angleS = new TH1F("angleS", "Secondary at end;Incoming angle [mrad];Entries;", 100, 0, 200);
+   TH1F * angleP = new TH1F("angleP", "Primary particle;Incoming angle [mrad];Entries;", 100, 0, 200);
+   TH1F * angleS = new TH1F("angleS", "Secondary particle;Incoming angle [mrad];Entries;", 100, 0, 200);
+
+   TCanvas *cAngleAll = new TCanvas("cAngleAll", "cAngleAll", 700, 600);
+   TH1F * angleAll = new TH1F("angleAll", "Primary + secondary;Incoming angle [mrad];Entries;", 100, 0, 200);
    
    TCanvas *cRange = new TCanvas("cRange","cRange",1200,600);
    cRange->Divide(2,1,1e-5,1e-5);
-   TH1F * rangeP = new TH1F("rangeP", "Primary at end;Residual range [WEPL mm];Entries;", 100, 0, 300);
-   TH1F * rangeS = new TH1F("rangeS", "Secondary at end;Residual range [WEPL mm];Entries;", 100, 0, 300);
+   TH1F * rangeP = new TH1F("rangeP", "Primary particle;Residual range [WEPL mm];Entries;", 100, 0, 300);
+   TH1F * rangeS = new TH1F("rangeS", "Secondary particle;Residual range [WEPL mm];Entries;", 100, 0, 300);
 
    TCanvas *cRange2 = new TCanvas("cRange2", "cRange", 800, 600);
    TH1F * rangePS = new TH1F("rangePS", "All;Residual range [WEPL mm];Entries;", 100, 0, 300);
 
    TCanvas *cBragg = new TCanvas("cBragg","cBragg",1200,600);
    cBragg->Divide(2,1,1e-5,1e-5);
-   TH1F * braggP = new TH1F("rangeP", "Primary at end;Depth-dose fit log_{10} #chi^{2};Entries;", 100, 1, 2000);
-   TH1F * braggS = new TH1F("rangeS", "Secondary at end;Depth-dose fit log_{10} #chi^{2};Entries;", 100, 0, 2000);
+   TH1F * braggP = new TH1F("rangeP", "Primary particle;Depth-dose fit log_{10} #chi^{2};Entries;", 100, 1, 2000);
+   TH1F * braggS = new TH1F("rangeS", "Secondary particle;Depth-dose fit log_{10} #chi^{2};Entries;", 100, 0, 2000);
    
    TCanvas *cSecondary = new TCanvas();
    TH1F *hSec = new TH1F("hSec", "Secondary prouction depth;Detector layer;Entries", 46, -0.5, 45.5);
@@ -2002,18 +1686,18 @@ void analyseHelium(Int_t Runs, Int_t dataType, Bool_t recreate, Int_t switchLaye
 
    TCanvas *cMaxDeltaTheta = new TCanvas("cMaxDeltaTheta","cMaxDeltaTheta", 1200,600);
    cMaxDeltaTheta->Divide(2,1,1e-5,1e-5);
-   TH1F *hMaxDeltaThetaP = new TH1F("hMaxDeltaThetaP", "Primary at end;Max layer-wise angular change [mrad];Entries",100,0,300);
-   TH1F *hMaxDeltaThetaS = new TH1F("hMaxDeltaThetaS", "Secondary at end;Max layer-wise angular change [mrad];Entries",100,0,300);
+   TH1F *hMaxDeltaThetaP = new TH1F("hMaxDeltaThetaP", "Primary particle;Max layer-wise angular change [mrad];Entries",100,0,300);
+   TH1F *hMaxDeltaThetaS = new TH1F("hMaxDeltaThetaS", "Secondary particle;Max layer-wise angular change [mrad];Entries",100,0,300);
 
    TCanvas *cCS = new TCanvas("cCS", "Cluster sizes", 1200,600);
    cCS->Divide(2,1,1e-5,1e-5);
-   TH1F *hCSP = new TH1F("hCSP", "Primary at end;Cluster size;Entries", 50, 0, 50);
-   TH1F *hCSS = new TH1F("hCSS", "Secondary at end;Cluster size;Entries", 50, 0, 50);
+   TH1F *hCSP = new TH1F("hCSP", "Primary particle;Cluster size;Entries", 50, 0, 50);
+   TH1F *hCSS = new TH1F("hCSS", "Secondary particle;Cluster size;Entries", 50, 0, 50);
 
    TCanvas *cHits = new TCanvas("cHits", "cHits", 1200,600);
    cHits->Divide(2,1,1e-5,1e-5);
-   TH1F *cHitsP = new TH1F("cHitsP", "Primary at end;Beam profile at entrance layer #sqrt{x^{2}+y^{2}} [mm];Entries", 100, 0, 100);
-   TH1F *cHitsS = new TH1F("cHitsS", "Secondary at end;Beam profile at entrance layer #sqrt{x^{2}+y^{2}} [mm];Entries", 100, 0, 100);
+   TH1F *cHitsP = new TH1F("cHitsP", "Primary particle;Beam profile at entrance layer #sqrt{x^{2}+y^{2}} [mm];Entries", 100, 0, 100);
+   TH1F *cHitsS = new TH1F("cHitsS", "Secondary particle;Beam profile at entrance layer #sqrt{x^{2}+y^{2}} [mm];Entries", 100, 0, 100);
 
    for (int i=0; i<tracks->GetEntriesFast(); i++) {
       thisTrack = tracks->At(i);
@@ -2036,7 +1720,9 @@ void analyseHelium(Int_t Runs, Int_t dataType, Bool_t recreate, Int_t switchLaye
             if (!thisTrack->At(j)) continue;
             meanEdep += thisTrack->At(j)->getDepositedEnergy();
          }
-         meanEdep /= (thisTrack->GetEntriesFast()-5);
+
+         if (thisTrack->GetEntriesFast() < 5 ) meanEdep = thisTrack->At(0)->getDepositedEnergy();
+         else meanEdep /= (thisTrack->GetEntriesFast()-5);
 
          Float_t riseFactor = thisTrack->Last()->getDepositedEnergy() / meanEdep;
 
@@ -2076,6 +1762,7 @@ void analyseHelium(Int_t Runs, Int_t dataType, Bool_t recreate, Int_t switchLaye
       }
 
 
+      angleAll->Fill(angle);
       if (!thisTrack->Last()->isSecondary()) {
          edepP->Fill(edep);
          angleP->Fill(angle);
@@ -2084,7 +1771,7 @@ void analyseHelium(Int_t Runs, Int_t dataType, Bool_t recreate, Int_t switchLaye
          hPositionP->Fill(maxRadius);
          hCSP->Fill(thisTrack->Last()->getSize());
 
-         if (last>5) { // thisTrack->At(last-5) && thisTrack->At(last-4)) {
+         if (last>5) { // thisTrack->At(last-5) && thisTrack->At(last-4)) 
             float edep_mid = thisTrack->getDepositedEnergy(last-5);
             float residual_energy = getEnergyAtWEPL(917,thisTrack->getRangeWEPLAt(last-4));
 //            edep2DP->Fill(edep_mid, residual_energy);
@@ -2203,6 +1890,9 @@ void analyseHelium(Int_t Runs, Int_t dataType, Bool_t recreate, Int_t switchLaye
    l1->SetLineStyle(7);
    l1->SetLineColor(kBlack);
    l1->Draw();
+
+   cAngleAll->cd();
+   angleAll->Draw();
 
    Float_t mu = rangePS->GetXaxis()->GetBinCenter(rangePS->GetMaximumBin());
    Float_t sigma = 10; // as expected from ~homogenous area // WEPL 
@@ -2548,15 +2238,15 @@ void analyseHelium(Int_t Runs, Int_t dataType, Bool_t recreate, Int_t switchLaye
       }
    }
 
-   hPDGhe->SetLineColor(8); hPDGpro->SetLineColor(1); hPDGdeu->SetLineColor(2); hPDGhe3->SetLineColor(3);
-   hPDGtri->SetLineColor(4); hPDGe->SetLineColor(9); hPDGgam->SetLineColor(6); hPDGpos->SetLineColor(7);
+   hPDGhe->SetLineColor(kOrange); hPDGpro->SetLineColor(1); hPDGdeu->SetLineColor(2); hPDGhe3->SetLineColor(3);
+   hPDGtri->SetLineColor(4); hPDGe->SetLineColor(kMagenta); hPDGgam->SetLineColor(6); hPDGpos->SetLineColor(7);
    hPDGal->SetLineColor(14); hPDGsi->SetLineColor(16); hPDGmg->SetLineColor(18); hPDGli->SetLineColor(12);
    hPDGneu->SetLineColor(28); 
 
-   hPDGhe->SetLineWidth(2); hPDGpro->SetLineWidth(2); hPDGdeu->SetLineWidth(2); hPDGhe3->SetLineWidth(2);
-   hPDGtri->SetLineWidth(2); hPDGe->SetLineWidth(2); hPDGli->SetLineWidth(2); hPDGgam->SetLineWidth(2);
-   hPDGal->SetLineWidth(2); hPDGsi->SetLineWidth(2); hPDGmg->SetLineWidth(2); hPDGpos->SetLineWidth(2);
-   hPDGneu->SetLineWidth(2);
+   hPDGhe->SetLineWidth(3); hPDGpro->SetLineWidth(3); hPDGdeu->SetLineWidth(3); hPDGhe3->SetLineWidth(3);
+   hPDGtri->SetLineWidth(3); hPDGe->SetLineWidth(3); hPDGli->SetLineWidth(3); hPDGgam->SetLineWidth(3);
+   hPDGal->SetLineWidth(3); hPDGsi->SetLineWidth(3); hPDGmg->SetLineWidth(3); hPDGpos->SetLineWidth(3);
+   hPDGneu->SetLineWidth(3);
 
    // NORMALIZE
    Float_t totalParticles = tracks->GetEntries();
@@ -2576,33 +2266,37 @@ void analyseHelium(Int_t Runs, Int_t dataType, Bool_t recreate, Int_t switchLaye
    hPDGneu->Scale(100 / totalParticles);
 
    hPDGpro->GetYaxis()->SetTitleOffset(1.5);
+   hPDGhe3->GetYaxis()->SetTitleOffset(1.5);
 
    TLegend *leg = new TLegend(0.8,0.4,0.95,0.95);
-
-   hPDGpro->Draw("hist");
-   leg->AddEntry(hPDGpro, "Protons", "L");
+   
+   hPDGhe3->Draw("hist"); 
+   leg->AddEntry(hPDGhe3, "Helium3", "L");
    
    hPDGhe->Draw("same hist"); 
    leg->AddEntry(hPDGhe, "Helium", "L"); 
 
-   hPDGhe3->Draw("same hist"); 
-   leg->AddEntry(hPDGhe3, "Helium3", "L");
-
+   if (hPDGe->Integral()) {
+      hPDGe->Draw("same hist"); 
+      leg->AddEntry(hPDGe, "Electrons", "L");
+   }
+   
+   hPDGpro->Draw("same hist");
+   leg->AddEntry(hPDGpro, "Protons", "L");
+   
+   
    hPDGpro->GetYaxis()->SetRangeUser(0, 1.2*max(hPDGhe->GetMaximum(), max(hPDGpro->GetMaximum(), hPDGhe3->GetMaximum())));
+   hPDGhe3->GetYaxis()->SetRangeUser(0, 1.2*max(hPDGhe->GetMaximum(), max(hPDGpro->GetMaximum(), hPDGhe3->GetMaximum())));
    
    if (hPDGdeu->Integral()) { 
       hPDGdeu->Draw("same hist"); 
       leg->AddEntry(hPDGdeu, "Deuterium", "L");
    }
-
+   
+   
    if (hPDGtri->Integral()) { 
       hPDGtri->Draw("same hist"); 
       leg->AddEntry(hPDGtri, "Tritium", "L");
-   }
-
-   if (hPDGe->Integral()) {
-      hPDGe->Draw("same hist"); 
-      leg->AddEntry(hPDGe, "Electrons", "L");
    }
 
    if (hPDGneu->Integral()) {
@@ -2610,12 +2304,12 @@ void analyseHelium(Int_t Runs, Int_t dataType, Bool_t recreate, Int_t switchLaye
       leg->AddEntry(hPDGneu, "Neutrons", "L");
    }
 
-   if (hPDGpos->Integral()) {
+   if (hPDGpos->Integral() && false) {
       hPDGpos->Draw("same hist");
       leg->AddEntry(hPDGpos, "Positrons", "L");
    }
 
-   if (hPDGgam->Integral()) { 
+   if (hPDGgam->Integral() && false) { 
       hPDGgam->Draw("same hist");
       leg->AddEntry(hPDGgam, "Gamma", "L");
    }
@@ -2649,16 +2343,17 @@ void analyseHelium(Int_t Runs, Int_t dataType, Bool_t recreate, Int_t switchLaye
    // ADD % TO AXIS
    TText *t = new TText();
    hPDGpro->GetYaxis()->SetLabelOffset(5);
+   hPDGhe3->GetYaxis()->SetLabelOffset(5);
    t->SetTextAlign(32);
    t->SetTextSize(0.05);
    t->SetTextFont(22);
    Float_t at;
-   for (Int_t i=0; i<=5;i++) {
+   for (Int_t i=0; i<=6;i++) {
       // max > i*6
       // i < max/6
       
-      at = i/5. * 2.5; // max(hPDGhe->GetMaximum(), max(hPDGpro->GetMaximum(), hPDGhe3->GetMaximum()));
-      t->DrawText(-0.42, at, Form("%.1f%%", at));
+      at = i/6. * 1.5; // 10*round(max(hPDGhe->GetMaximum(), max(hPDGpro->GetMaximum(), hPDGhe3->GetMaximum())/10);
+      t->DrawText(-0.42, at, Form("%.2f%%", at));
    }
 
 }
@@ -2810,8 +2505,8 @@ void drawTracks3D(Int_t Runs, Int_t dataType, Bool_t recreate, Int_t switchLayer
    
    Float_t  cutHalo = 15;
    Float_t  cutMaxAngle = 60;
-   Float_t  cutAngle = 35;
-   Float_t  cutEdep = 8;
+   Float_t  cutAngle = 45;
+   Float_t  cutEdep = 12;
    
 //   tracks->removeTracksEndingInHalo();
 //   tracks->removeHighAngularChangeTracks(cutMaxAngle); // mrad
@@ -2820,7 +2515,7 @@ void drawTracks3D(Int_t Runs, Int_t dataType, Bool_t recreate, Int_t switchLayer
    tracks->removeThreeSigmaShortTracks();
    tracks->removeHighAngleTracks(cutAngle); // mrad
 
-   Bool_t   kDraw = true;
+   Bool_t   kDraw = false;
 
    TH1I  *hWEPLCorrect = new TH1I("hWEPLCorrect", ";Range in detector [mm WEPL];Frequency", 400, 0, 250);
    TH1I  *hWEPLSecondary = new TH1I("hWEPLSecondary", "", 400, 0, 250);
@@ -3165,7 +2860,7 @@ void drawTracks3D(Int_t Runs, Int_t dataType, Bool_t recreate, Int_t switchLayer
                l->Draw();
             }
             if (l->GetLineColor() == kGray) l->Draw();
-            l->Draw();
+//            l->Draw();
          }
 
          if (l->GetLineColor() == kGreen) badSecondary++;
@@ -3174,7 +2869,7 @@ void drawTracks3D(Int_t Runs, Int_t dataType, Bool_t recreate, Int_t switchLayer
          else okPrimary++;
          
          if (kDraw) {
-            trackPoints->Draw();
+   //         trackPoints->Draw();
    //         EIDMarker->Draw();
    //      conflictMarker->Draw();
          }

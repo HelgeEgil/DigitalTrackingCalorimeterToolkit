@@ -55,9 +55,9 @@ Bool_t Track::doesTrackEndAbruptly() {
 //   See full information in PhD thesis 
    if (GetEntriesFast() < 3) return 1;
 
-   Bool_t   endsAbruptly = (Last()->getDepositedEnergy() < 2.5);
+   Bool_t   endsAbruptly = (Last()->getDepositedEnergy() < 3.5);
    if (kDataType == kData) endsAbruptly = (Last()->getDepositedEnergy() < 4);
-   if (kHelium) endsAbruptly = (Last()->getDepositedEnergy() < 8);
+   if (kHelium) endsAbruptly = (Last()->getDepositedEnergy() < 12);
 
    return endsAbruptly; 
 }

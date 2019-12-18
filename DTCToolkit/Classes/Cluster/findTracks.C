@@ -74,6 +74,7 @@ Tracks * Clusters::findTracksWithRecursiveWeighting() {
 
    if (kAbsorberThickness == 2) thisMaxTrackScore *= 2; // phenomenological factor ..? 
 
+   thisMaxTrackScore = 0.25;
    if (kHelium) thisMaxTrackScore = 0.175;
 
    for (Int_t i=0; i<GetEntriesFast(); i++) {
@@ -179,7 +180,7 @@ void Clusters::doRecursiveWeightedTracking(Node * seedNode, vector<Node*> * endN
          nextScore = thisNode->getNextScore(nextCluster);
          nextAngle = thisNode->getNodeAngle(nextCluster);
 
-         float alwaysAllowAngle = 0.03;
+         float alwaysAllowAngle = 0.1;
          if (kHelium) alwaysAllowAngle = 0.03;
 
           if ((nextScore < thisMaxTrackScore || (nextAngle < alwaysAllowAngle)) ){// || (nextAngle < kMaxTrackAngle)) {

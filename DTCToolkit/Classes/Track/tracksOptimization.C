@@ -535,10 +535,16 @@ void Tracks::removeNuclearInteractions() {
    Int_t    nTotal = GetEntriesFast();
    Int_t    nTotalStart = GetEntries();
 
+   Float_t plateauThreshold = 0.8;
+   if (kHelium) plateauThreshold = 4;
+
+   Float_t plateauEdep;
+
    for (Int_t i=0; i<nTotal; i++) {
       thisTrack = At(i);
       if (!At(i)) continue;
-      if (thisTrack->doesTrackEndAbruptly() || thisTrack->getAverageDepositedEnergy(0, thisTrack->GetEntriesFast()-5) < 3.5) {
+      plateauEdep = thisTrack->getAverageDepositedEnergy(0, thisTrack->GetEntriesFast()-5);
+      if (thisTrack->doesTrackEndAbruptly()  || plateauEdep < plateauThreshold) {
          if (thisTrack->Last()->isSecondary()) nRemovedNuclear++;
          removeTrack(thisTrack);
          nRemoved++;

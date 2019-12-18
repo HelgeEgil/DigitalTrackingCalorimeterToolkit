@@ -708,7 +708,8 @@ void drawIndividualGraphs(TCanvas *cGraph, TGraphErrors* outputGraph, Float_t fi
    Bool_t kDrawText = true;
 
    outputGraph->SetMinimum(0);
-   outputGraph->SetMaximum(30);
+   if (kHelium) outputGraph->SetMaximum(30);
+   else outputGraph->SetMaximum(20);
    outputGraph->SetTitle(Form("%.0f mm Al", kAbsorberThickness));
    
    if (kOutputUnit == kWEPL || kOutputUnit == kUnitEnergy) {
