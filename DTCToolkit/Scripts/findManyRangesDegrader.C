@@ -15,18 +15,19 @@ void findManyRanges(Int_t degraderFrom, Int_t degraderIncrement, Int_t degraderT
    if (mmTo < 0) mmTo = mmFrom;
 
    vector<Float_t> resultVector;
-   std::ofstream filename("../OutputFiles/findManyRangesDegraderHelium_final.csv");// , std::ofstream::out | std::ofstream::app);
+   std::ofstream filename("../OutputFiles/findManyRangesDegrader_final.csv");// , std::ofstream::out | std::ofstream::app);
 
    for (Int_t mm=mmFrom; mm<=mmTo; mm += mmIncrement) {
       for (Int_t degrader=degraderFrom; degrader<=degraderTo; degrader += degraderIncrement) {
-         findRange f(917, mm, degrader);
+         findRange f(230, mm, degrader);
          resultVector = f.Run();
          if (resultVector.size() > 1) {
             Float_t expectedRange = resultVector.at(0);
             Float_t expectedSigma = resultVector.at(1);
             Float_t expectedEnergy = resultVector.at(2);
             Float_t expectedEnergySpread = resultVector.at(3);
-            filename << degrader << " " << mm << " " << expectedRange << " " << expectedSigma << " " <<  expectedEnergy << " " << expectedEnergySpread  << endl;
+            // Degrader thickness ; WET ; Range ; Sigma Range ; Energy after degrader ; Sigma Energy after degrader
+            filename << degrader << " " << 330.0 - degrader << " " << expectedRange << " " << expectedSigma << " " <<  expectedEnergy << " " << expectedEnergySpread  << endl;
          }
       }
    }

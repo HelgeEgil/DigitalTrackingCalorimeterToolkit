@@ -8,7 +8,7 @@
 using namespace std;
 
 void Run() {
-   TFile  * f = new TFile("output/waterphantom.root");
+   TFile  * f = new TFile("output/waterphantom_78eV.root");
    Int_t energy = 200;
    TTree  * tree = (TTree*) f->Get("Hits");
    Float_t  z,edep,lastZ = -1, dE = 0;

@@ -35,16 +35,17 @@ vector<Float_t> findRange::Run(Double_t energy, Double_t sigma_mev, Int_t mm, In
    Bool_t useDegrader = true; 
 
    TCanvas *c2 = new TCanvas("c2", "Ranges and energies", 500, 500);
-   c2->Divide(2,1);
+   c2->Divide(3,1);
    gStyle->SetOptStat(0);
 
    Int_t    lastEvent = -1;
    Float_t  lastRange = 0;
    Int_t    lastID = -1;
-   Float_t  dE = 0;
+   Float_t  dE = 0, dE2 = 0;
 
    TH1F *hFirstRange = new TH1F("firstRange", "firstRange", 1000, 0, 400);
-   TH1F *hFirstEnergy = new TH1F("firstEnergy", "firstEnergy", 1000, 0, 1000);
+   TH1F *hFirstEnergy = new TH1F("firstEnergy", "firstEnergy", 1000, 0, 250);
+   TH1F *hFirstEnergy2 = new TH1F("firstEnergy2", "Energy loss in trackers", 1000, 0, 5);
 
    Float_t allRanges[150000];
    Float_t allEnergies[150000];
@@ -65,20 +66,26 @@ vector<Float_t> findRange::Run(Double_t energy, Double_t sigma_mev, Int_t mm, In
 
       if (lastID < 0) lastID = eventID;
       if (parentID == 0) {
-   /*
-      if (baseID == 0) { // inside degrader
+      
+         if (baseID == 0) { // inside degrader + first layers
+            printf("dE = %.2f + %.2f\n", dE, edep);
             dE += edep;
+         }
+   
+         else if (volumeID[1] == 1) {
+            dE2 += edep;
          }
 
          else if (dE > 0) {
             hFirstEnergy->Fill(energy-dE);
+            hFirstEnergy2->Fill(dE2);
             allEnergies[energyIdx++] = energy - dE;
             dE = 0;
+            dE2 = 0;
          }
-*/
          if (eventID != lastID) {
-            hFirstRange->Fill(lastRange);
-            allRanges[rangeIdx++] = lastRange;
+            hFirstRange->Fill(lastRange - 225);
+            allRanges[rangeIdx++] = lastRange-225;
          }
 
          lastRange = posZ;
@@ -91,8 +98,10 @@ vector<Float_t> findRange::Run(Double_t energy, Double_t sigma_mev, Int_t mm, In
 
    printf("Found %d proton histories in file.\n", lastID);
    printf("From first search, range = %.2f mm and energy = %.2f MeV\n", firstRange, firstEnergy);
-   
-   Float_t xfrom = firstRange - 7.5, xto = firstRange + 7.5;
+  
+   // WHAT about WEPL range = Residual WET ?? Absolutely no inverse calculations of the spline
+
+   Float_t xfrom = firstRange - 10, xto = firstRange + 10;
    TH1F *hRange = new TH1F("hRange", "Projected range in DTC;Range [mm];Entries", 500, xfrom,xto);
    for (Int_t i=0; i<rangeIdx; i++) hRange->Fill(allRanges[i]);
 
@@ -139,10 +148,14 @@ vector<Float_t> findRange::Run(Double_t energy, Double_t sigma_mev, Int_t mm, In
    c2->cd(2);
    hEnergyAtInterface->SetFillColor(kBlue-7);
    hEnergyAtInterface->Draw();
+   
+   c2->cd(3);
+   hFirstEnergy2->SetFillColor(kBlue-7);
+   hFirstEnergy2->Draw();
 
    std::ofstream filename(Form("OutputFiles/findManyRangesDegrader_final_idx%d.csv", fileIdx));// , std::ofstream::out | std::ofstream::app);
    filename << degrader << " " << mm << " " << hR << " " << hRS << " " << fE << " " << fES << endl; 
-   
+   /*
    delete c2;
    delete hRange;
    delete hFirstRange;
@@ -150,7 +163,7 @@ vector<Float_t> findRange::Run(Double_t energy, Double_t sigma_mev, Int_t mm, In
    delete fRemainingEnergy;
    delete fRange;
    delete hEnergyAtInterface;
-
+*/
    return returnValues;
    
 }

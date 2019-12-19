@@ -36,15 +36,16 @@
 /gate/physics/addPhysicsList QGSP_BIC_EMZ
 #/gate/physics/addPhysicsList QGSP_BIC_HP
 
-/gate/geometry/setIonisationPotential Water 75 eV
+/gate/physics/SetMaxStepSizeInRegion world 2 mm
+/gate/physics/ActivateStepLimiter proton
 
-#/gate/physics/addProcess HadronElastic
-#/gate/physics/processes/HadronElastic/setModel G4HadronElastic
-#/gate/physics/processes/HadronElastic/setDataSet G4HadronElasticDataSet
+/gate/geometry/setIonisationPotential Water 78 eV
 
 /gate/run/initialize
 
-#/process/inactivate hadElastic
+/process/inactivate hadElastic
+/process/inactivate protonInelastic
+
 #/process/inactivate msc
 
 #/gate/source/addSource PBS PencilBeam
@@ -62,10 +63,11 @@
 #/gate/source/PBS/setEllipseYPhiRotationNorm negative
 
 /gate/source/addSource PBS PencilBeam
-/gate/source/PBS/setParticleType GenericIon
-/gate/source/PBS/setIonProperties 2 4 2 0
+/gate/source/PBS/setParticleType proton
+#/gate/source/PBS/setParticleType GenericIon
+#/gate/source/PBS/setIonProperties 2 4 2 0
 #/gate/source/PBS/setIonProperties 6 12 6 0
-/gate/source/PBS/setEnergy 917 MeV
+/gate/source/PBS/setEnergy 230 MeV
 /gate/source/PBS/setSigmaEnergy 0. MeV
 /gate/source/PBS/setPosition 0. 0. -10 mm
 /gate/source/PBS/setSigmaX 3 mm
@@ -76,10 +78,10 @@
 /gate/source/PBS/setEllipseXThetaRotationNorm negative
 /gate/source/PBS/setEllipseYPhiEmittance 15 mm*mrad
 /gate/source/PBS/setEllipseYPhiRotationNorm negative
-/gate/application/setTotalNumberOfPrimaries 1000
+/gate/application/setTotalNumberOfPrimaries 100000
 
 /gate/output/root/enable
-/gate/output/root/setFileName output/waterphantom_HE
+/gate/output/root/setFileName output/waterphantom_78eV
 
 /gate/random/setEngineName MersenneTwister
 /gate/random/setEngineSeed auto

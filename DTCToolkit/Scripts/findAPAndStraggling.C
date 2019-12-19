@@ -31,6 +31,7 @@ void findAPAndStraggling(Int_t absorberthickness) {
 
    Float_t  arrayE[1500] = {0}; 
    Float_t  arrayRange[1500] = {0};
+   Float_t  arrayWET[1500] = {0};
    Float_t  arrayDegrader[1500] = {0};
    Float_t  arrayEMaterial[1500] = {0};
    Float_t  arrayStraggling[1500] = {0};
@@ -74,7 +75,6 @@ void findAPAndStraggling(Int_t absorberthickness) {
 
    inEnergy.open("../Data/Ranges/EnergyAfterDegrader230MeV.csv");
 
-
    Double_t ead_d[500] = {};
    Double_t ead_e[500] = {};
    Double_t ead_es[500] = {};
@@ -103,12 +103,13 @@ void findAPAndStraggling(Int_t absorberthickness) {
       inMaterial.open("../OutputFiles/findManyRanges.csv");
    }
 
+   Float_t WET;
    while (1) {
       if (!useDegrader) {
          inMaterial >> energy >> thickness >> range >> straggling >> inelasticfraction;
       }
       else {
-         inMaterial >> degraderThickness >> thickness >> range >> straggling >> energyFloat >> energyStraggling;
+         inMaterial >> degraderThickness >> WET >> range >> straggling >> energyFloat >> energyStraggling;
       }
 
       if (!inMaterial.good()) {
@@ -121,6 +122,7 @@ void findAPAndStraggling(Int_t absorberthickness) {
 
 //      arrayEMaterial[nlinesMaterial] = energyFloat;
       arrayRange[nlinesMaterial] = range;
+      arrayWET[nlinesMaterial] = WET;
       arrayDegrader[nlinesMaterial] = degraderThickness;
       arrayStraggling[nlinesMaterial] = straggling;
 //      arrayEnergyStraggling[nlinesMaterial] = energyStraggling;
@@ -144,6 +146,8 @@ void findAPAndStraggling(Int_t absorberthickness) {
 
    Int_t nLinesChange = 381;
    TGraph *gRange = new TGraph(nlinesMaterial, arrayEMaterial, arrayRange);
+   TGraph *gWET = new TGraph(nlinesMaterial, arrayEMaterial, arrayWET);
+   TGraph *gRangeWET = new TGraph(nlinesMaterial, arrayWET, arrayRange);
    TGraph *gEnergy = new TGraph(nlinesMaterial, arrayDegrader, arrayEMaterial);
    TGraph *gStraggling = new TGraph(nLinesChange, arrayRange, arrayStraggling);
    TGraph *gStraggling2 = new TGraph(nlinesMaterial-nLinesChange, arrayRange+nLinesChange, arrayStraggling+nLinesChange);
@@ -163,6 +167,19 @@ void findAPAndStraggling(Int_t absorberthickness) {
       gEnergyStraggling->SetTitle(Form("Energy straggling in DTC for %.1f mm absorber;Energy [MeV];Energy straggling [MeV]", float(absorberthickness)/10));
    }
 
+   gWET->SetTitle("WET range in detector; Initial energy [MeV];Water Equivalent Thickness [mm]");
+   gRangeWET->SetTitle("Range in detector;Water Equivalent Thickness [mm];Physical range [mm]");
+
+   TCanvas *c2 = new TCanvas();
+   c2->Divide(2,1,1e-5,1e-5);
+   c2->cd(1);
+   gWET->SetMarkerStyle(7);
+   gWET->SetMarkerColor(kBlue);
+   gWET->Draw("AP");
+   c2->cd(1);
+   gRangeWET->SetMarkerStyle(7);
+   gRangeWET->SetMarkerColor(kBlue);
+   gRangeWET->Draw("AP");
 
    c1->cd(1);
    gRange->SetMarkerStyle(7);
@@ -171,7 +188,6 @@ void findAPAndStraggling(Int_t absorberthickness) {
    TF1 *BK = new TF1("BK", "[0] * pow(x, [1])");
    BK->SetParameters(0.01, 1.77);
    gRange->Fit("BK", "B,Q,M", "", 15, 920);
-
 
    c1->cd(3);
    gStraggling->SetMarkerStyle(7);
