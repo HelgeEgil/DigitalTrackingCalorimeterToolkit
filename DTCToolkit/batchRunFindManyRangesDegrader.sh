@@ -20,13 +20,13 @@ if [ $# -eq 6 ]; then
          fi
 
          # Runs, dataType, recreate, energy, degraderthickness, eventsPerRun, outputFileIdx, drawFitResults, doTracking, excludeNuclearReactions, skipTracks
-         tsp root -l -b -q 'Scripts/findManyRangesDegraderParallel.C('$k', '$i', '$IDX')' 
+#         tsp root -l -b -q 'Scripts/findManyRangesDegraderParallel.C('$k', '$i', '$IDX')' 
       done
       
       # Be sure that all jobs have completed, please tell me if there is a better way .... (tsp -w waits for the last job added to be completed, but not for the last job finished)
-      for i in `seq $1 $2 $3`; do
-         tsp -w
-      done
+#      for i in `seq $1 $2 $3`; do
+#         tsp -w
+#      done
 
       for j in `seq 1 1 $IDX`;
       do

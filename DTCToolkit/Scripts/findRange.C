@@ -68,7 +68,7 @@ vector<Float_t> findRange::Run(Double_t energy, Double_t sigma_mev, Int_t mm, In
       if (parentID == 0) {
       
          if (baseID == 0) { // inside degrader + first layers
-            printf("dE = %.2f + %.2f\n", dE, edep);
+//            printf("dE = %.2f + %.2f\n", dE, edep);
             dE += edep;
          }
    
@@ -85,7 +85,7 @@ vector<Float_t> findRange::Run(Double_t energy, Double_t sigma_mev, Int_t mm, In
          }
          if (eventID != lastID) {
             hFirstRange->Fill(lastRange - 225);
-            allRanges[rangeIdx++] = lastRange-225;
+            allRanges[rangeIdx++] = lastRange - 225;
          }
 
          lastRange = posZ;
@@ -154,8 +154,8 @@ vector<Float_t> findRange::Run(Double_t energy, Double_t sigma_mev, Int_t mm, In
    hFirstEnergy2->Draw();
 
    std::ofstream filename(Form("OutputFiles/findManyRangesDegrader_final_idx%d.csv", fileIdx));// , std::ofstream::out | std::ofstream::app);
-   filename << degrader << " " << mm << " " << hR << " " << hRS << " " << fE << " " << fES << endl; 
-   /*
+   filename << degrader << " " << 330.9 -degrader << " " << hR << " " << hRS << " " << fE << " " << fES << endl; 
+   
    delete c2;
    delete hRange;
    delete hFirstRange;
@@ -163,7 +163,6 @@ vector<Float_t> findRange::Run(Double_t energy, Double_t sigma_mev, Int_t mm, In
    delete fRemainingEnergy;
    delete fRange;
    delete hEnergyAtInterface;
-*/
-   return returnValues;
    
+   return returnValues;
 }
