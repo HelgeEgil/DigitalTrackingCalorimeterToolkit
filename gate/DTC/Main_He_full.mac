@@ -16,13 +16,15 @@
 /gate/physics/addPhysicsList QGSP_BIC_EMZ
 /gate/physics/SetMaxStepSizeInRegion world 1 mm
 /gate/physics/ActivateStepLimiter proton
+/gate/physics/ActivateStepLimiter alpha
 
 # Should cross check this with uniform cuts in all regions !!
 /gate/run/initialize
 
 /process/inactivate hadElastic
 /process/inactivate protonInelastic
-#/process/inactivate ionInelastic
+/process/inactivate alphaInelastic
+/process/inactivate ionInelastic
 #/process/inactivate msc
 
 #=======================#
@@ -30,9 +32,9 @@
 #=======================#
 
 /gate/source/addSource PBS PencilBeam
-/gate/source/PBS/setParticleType proton
-#/gate/source/PBS/setParticleType GenericIon
-#/gate/source/PBS/setIonProperties 2 4 2 0
+#/gate/source/PBS/setParticleType proton
+/gate/source/PBS/setParticleType GenericIon
+/gate/source/PBS/setIonProperties 2 4 2 0
 #/gate/source/PBS/setIonProperties 6 12 6 0
 /gate/source/PBS/setEnergy {energy} MeV
 /gate/source/PBS/setSigmaEnergy 0. MeV
@@ -48,7 +50,7 @@
 
 /gate/output/root/enable
 /gate/output/root/setRootSinglesFlag 0
-/gate/output/root/setFileName ../../DTCToolkit/Data/MonteCarlo/DTC_Full_Final_Degrader{degraderthickness}mm_{energy}MeV
+/gate/output/root/setFileName ../../DTCToolkit/Data/MonteCarlo/DTC_Full_Final_Helium_Degrader{degraderthickness}mm_{energy}MeV
 
 #===============#
 # START BEAMS	#

@@ -1,11 +1,8 @@
 #!/bin/bash
 
-NCORES=8
-IDX=1
-
-for i in `seq -w 160 1 160`; do
+for i in `seq -w 2 4 330`; do
 #   hdt=`echo "scale=3; -$i/2-2" | bc`
-   Gate -a "'[energy,230] [degraderthickness,$i]'" Main.mac
+   tsp /build/gate/Gate-8.2reducedRootOutput-install/bin/Gate -a "'[energy,230] [degraderthickness,$i]'" Main_He_full.mac
    PIDLIST="$PIDLIST $!"
    echo "Running: degrader thickness = $i mm"
 done

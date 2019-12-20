@@ -268,7 +268,7 @@
 /gate/AirGap/geometry/setXLength 270.0 mm
 /gate/AirGap/geometry/setYLength 135.0 mm
 /gate/AirGap/geometry/setZLength 1480 um
-/gate/AirGap/placement/setTranslation 0 0 1714 um # from 980 to 2460
+/gate/AirGap/placement/setTranslation 0 0 1750 um # from 980 to 2460
 /gate/AirGap/setMaterial Air
 /gate/AirGap/vis/setVisible false
 
