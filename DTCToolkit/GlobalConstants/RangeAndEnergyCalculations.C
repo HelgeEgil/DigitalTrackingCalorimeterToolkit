@@ -386,8 +386,8 @@ Float_t getEnergyFromDegraderThickness(Double_t degraderThickness) {
       }
    }
    else if (kEnergy == 230) {
-      in.open("Data/Ranges/EnergyAfterDegrader230MeV.csv");
-      printf("Loading EnergyAfterDegraderHelium - proton 230 MeV\n");
+      in.open("Data/Ranges/EnergyAfterDegrader230MeV_78eV.csv");
+      printf("Loading EnergyAfterDegraderHelium - proton 230 MeV (78 eV)\n");
       while (1) {
          in >> dt >> e;
          if (!in.good()) break;

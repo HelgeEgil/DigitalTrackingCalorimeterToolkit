@@ -116,18 +116,20 @@ void findAPAndStraggling(Int_t absorberthickness) {
          break;
       }
 
+      /*
       if (thickness != absorberthickness) {
          continue;
       }
+      */
 
-//      arrayEMaterial[nlinesMaterial] = energyFloat;
+      arrayEMaterial[nlinesMaterial] = energyFloat;
       arrayRange[nlinesMaterial] = range;
       arrayWET[nlinesMaterial] = WET;
       arrayDegrader[nlinesMaterial] = degraderThickness;
       arrayStraggling[nlinesMaterial] = straggling;
-//      arrayEnergyStraggling[nlinesMaterial] = energyStraggling;
-      arrayEMaterial[nlinesMaterial] = spline_e->Eval(degraderThickness);
-      arrayEnergyStraggling[nlinesMaterial] = spline_es->Eval(degraderThickness);
+      arrayEnergyStraggling[nlinesMaterial] = energyStraggling;
+//      arrayEMaterial[nlinesMaterial] = spline_e->Eval(degraderThickness);
+//      arrayEnergyStraggling[nlinesMaterial] = spline_es->Eval(degraderThickness);
 
 //      weplfactor = arrayRangeWater[nlinesMaterial] / range;
 //      weplfactor = aw / a * pow(range / aw, 1-p/pw);
@@ -142,6 +144,12 @@ void findAPAndStraggling(Int_t absorberthickness) {
       outMaterials << arrayEMaterial[ii] << " " << arrayRange[ii] << endl;
    }
    outMaterials.close();
+
+   std::ofstream outEnergyAfterDegrader("../OutputFiles/energyAfterDegrader.csv");
+   for (Int_t ii=0; ii<nlinesMaterial; ii++) {
+      outEnergyAfterDegrader << arrayDegrader[ii] << " " << arrayEMaterial[ii] << " " << arrayEnergyStraggling[ii] << endl;
+   }
+   outEnergyAfterDegrader.close();
 
 
    Int_t nLinesChange = 381;
@@ -169,6 +177,7 @@ void findAPAndStraggling(Int_t absorberthickness) {
 
    gWET->SetTitle("WET range in detector; Initial energy [MeV];Water Equivalent Thickness [mm]");
    gRangeWET->SetTitle("Range in detector;Water Equivalent Thickness [mm];Physical range [mm]");
+   gEnergy->SetTitle("Residual energy;Degrader thickness;Residual energy");
 
    TCanvas *c2 = new TCanvas();
    c2->Divide(2,1,1e-5,1e-5);
@@ -176,7 +185,7 @@ void findAPAndStraggling(Int_t absorberthickness) {
    gWET->SetMarkerStyle(7);
    gWET->SetMarkerColor(kBlue);
    gWET->Draw("AP");
-   c2->cd(1);
+   c2->cd(2);
    gRangeWET->SetMarkerStyle(7);
    gRangeWET->SetMarkerColor(kBlue);
    gRangeWET->Draw("AP");
@@ -187,7 +196,7 @@ void findAPAndStraggling(Int_t absorberthickness) {
    gRange->Draw("AP");
    TF1 *BK = new TF1("BK", "[0] * pow(x, [1])");
    BK->SetParameters(0.01, 1.77);
-   gRange->Fit("BK", "B,Q,M", "", 15, 920);
+   gRange->Fit("BK", "B,Q,M", "", 0, 230);
 
    c1->cd(3);
    gStraggling->SetMarkerStyle(7);
@@ -196,7 +205,7 @@ void findAPAndStraggling(Int_t absorberthickness) {
 //   TF1 *Straggling = new TF1("Straggling", "[0]*x + [1]*pow(x,2)");
    TF1 *Straggling = new TF1("Straggling", "[0] + [1]*x");
    gStraggling->GetYaxis()->SetRangeUser(0,6);
-   gStraggling->Fit("Straggling", "Q,M", "", 10, 200);
+   gStraggling->Fit("Straggling", "Q,M", "", 100, 350);
    
    gStraggling2->SetMarkerStyle(7);
    gStraggling2->SetMarkerColor(kRed);

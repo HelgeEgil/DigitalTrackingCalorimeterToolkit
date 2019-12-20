@@ -66,11 +66,11 @@ DataInterface::DataInterface(TTree *tree) : fChain(0) {
       else if (kFinalDesign) {
          if (!kHelium) {
             printf("Opening PROTON file with degrader thickness %.0f mm and FINAL design (3.5 mm)\n", run_degraderThickness);
-            chain->Add(Form("Data/MonteCarlo/DTC_Final_Degrader%.0fmm_%dMeV.root/Hits", run_degraderThickness, kEnergy));
+            chain->Add(Form("Data/MonteCarlo/DTC_Final_Degrader%03.0fmm_%dMeV.root/Hits", run_degraderThickness, kEnergy));
          }
          else {
             printf("Opening HELIUM file with degrader thickness %.0f mm and FINAL design (3.5 mm)\n", run_degraderThickness);
-            chain->Add(Form("Data/MonteCarlo/DTC_Final_Helium_Degrader%.0fmm_%dMeV.root/Hits", run_degraderThickness, kEnergy));
+            chain->Add(Form("Data/MonteCarlo/DTC_Final_Helium_Degrader%03.0fmm_%dMeV.root/Hits", run_degraderThickness, kEnergy));
          }
       }
 
@@ -468,14 +468,15 @@ void  DataInterface::getMCClustersThreshold(Int_t runNo, Clusters *clusters, Hit
    Int_t eventIdFrom = runNo * kEventsPerRun + kSkipTracks;
    Int_t eventIdTo = eventIdFrom + kEventsPerRun + kSkipTracks;
    Int_t lastPropagated = -1;
-   Float_t alpideThickness = 50; // was 14
+   Float_t alpideThickness = 25; // was 14
 
    // let = (n/4.23)^1/0.65 [Pettersen et al. Phys Med 2019]
    // n < 2 -> let < (2/4.23)^1/0.65 = 0.316 keV/um
    // edep = let * 14 um = 0.316 kev/um * 14 um = 4.4e-3 MeV ~ 4e-3 MeV
    // new design: let * 50 um = 0.316 keV/um * 50 um = 15.8e-3 MeV ~ 1.5e-2 MeV
+   // new design 2: let * 25 um = 0.316 keV/um * 25 um = 7.9e-3 MeV ~ 8e-3 MeV
 
-   Float_t threshold = 1.5e-2; // old 1.5e-2
+   Float_t threshold = 8e-3;
    Int_t particlesBelowThreshold = 0;
 
    if (runNo == 0 && !kSpotScanning) lastJentry_ = 0;
@@ -569,7 +570,7 @@ void  DataInterface::getMCClustersThreshold(Int_t runNo, Clusters *clusters, Hit
             }
          }
 
-         if (hits && lastPropagated != eventID) {
+         if (hits && lastPropagated != eventID && false) {
             if (hits->Last()) { // This would give segfault sometimes
                if (hits->Last()->getEventID() == eventID && PDGEncoding > 1000) {
                   hits->Last()->setSecondary(true);
@@ -589,13 +590,13 @@ void  DataInterface::getMCClustersThreshold(Int_t runNo, Clusters *clusters, Hit
       x = posX / dx + nx/2;
       y = posY / dy + ny/2;
 
-      /*
+/*      
       printf("VolumeIDs layer %d posz %.3f: ", layer, posZ);
       for (Int_t i=0; i<10; i++) {
          printf("%d = %d; ", i, volumeID[i]);
       }
       printf("\n");
-      */
+  */    
 //      printf("posz %.3f baseID %d level1ID %d -> layer %d. edep %.2f keV/um, PDG %d, parentID %d\n", posZ, baseID, level1ID, layer, edep/alpideThickness*1000, PDGEncoding, parentID);
 
 

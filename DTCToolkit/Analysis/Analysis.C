@@ -788,7 +788,7 @@ void drawTracksDepthDose(Int_t Runs, Int_t dataType, Bool_t recreate, Float_t en
       if (!thisTrack) continue;
 
 //      if (thisTrack->Last()->isSecondary()) continue;
-      if (thisTrack->getRangemm() >50) continue;
+//      if (thisTrack->getRangemm() >50) continue;
 
       // Do track fit, extract all parameters for this track
       outputGraph = (TGraphErrors*) thisTrack->doTrackFit(false, kUseCSDA); // (bool isScaleVariable, bool useTrackLength (~ CSDA))
@@ -878,7 +878,7 @@ void drawTracksRangeHistogram(Int_t Runs, Int_t dataType, Bool_t recreate, Float
 // Use
 //   tracks->removeHighAngularChangeTracks(cutMaxAngle); // mrad
    tracks->doTrackFit();
-   tracks->removeNuclearInteractions();
+//   tracks->removeNuclearInteractions();
 //   tracks->removeThreeSigmaShortTracks();
    tracks->removeHighAngleTracks(cutAngle); // mrad
 
@@ -1597,9 +1597,9 @@ void analyseHelium(Int_t Runs, Int_t dataType, Bool_t recreate, Int_t switchLaye
 
 
 // Use
-   tracks->removeNuclearInteractions();
-   tracks->removeThreeSigmaShortTracks();
-   tracks->removeHighAngleTracks(cutAngle); // mrad
+//   tracks->removeNuclearInteractions();
+//   tracks->removeThreeSigmaShortTracks();
+//   tracks->removeHighAngleTracks(cutAngle); // mrad
   
 // Don't use
 //   track->removeHighChiSquare(210);
@@ -1641,8 +1641,8 @@ void analyseHelium(Int_t Runs, Int_t dataType, Bool_t recreate, Int_t switchLaye
 
    TCanvas *cEdep = new TCanvas("cEdep","cEdep",1200,600);
    cEdep->Divide(2,1,1e-5,1e-5);
-   TH1F * edepP = new TH1F("edepP", "Primary particle;E_{dep} last layer [kev/#mum];Entries", 100, 0, 100);
-   TH1F * edepS = new TH1F("edepS", "Secondary particle;E_{dep} last layer [kev/#mum];Entries", 100, 0, 100);
+   TH1F * edepP = new TH1F("edepP", "Primary particle;E_{dep} last layer [kev/#mum];Entries", 100, 0, 10);
+   TH1F * edepS = new TH1F("edepS", "Secondary particle;E_{dep} last layer [kev/#mum];Entries", 100, 0, 10);
 
    TCanvas *cEdep2D = new TCanvas("cEdep2D","cEdep2D",1200,600);
    cEdep2D->Divide(2,1,1e-5,1e-5);
@@ -1651,8 +1651,8 @@ void analyseHelium(Int_t Runs, Int_t dataType, Bool_t recreate, Int_t switchLaye
 
    TCanvas *cAllEdep = new TCanvas("cAllEdep","cAllEdep",1200,600);
    cAllEdep->Divide(2,1,1e-5,1e-5);
-   TH1F * cAllEdepP = new TH1F("allEdepP", "Primary particle;Average E_{dep} (plateau) [keV/#mum];Entries",100,0,20);
-   TH1F * cAllEdepS = new TH1F("allEdepS", "Secondary particle;Average E_{dep} (plateau) [kev/#mum];Entries",100,0,20);
+   TH1F * cAllEdepP = new TH1F("allEdepP", "Primary particle;Average E_{dep} (plateau) [keV/#mum];Entries",100,0,2);
+   TH1F * cAllEdepS = new TH1F("allEdepS", "Secondary particle;Average E_{dep} (plateau) [kev/#mum];Entries",100,0,2);
    
    TCanvas *cAllVarEdep = new TCanvas("cAllVarEdep","cAllVarEdep",1200,600);
    cAllVarEdep->Divide(2,1,1e-5,1e-5);
@@ -2511,11 +2511,11 @@ void drawTracks3D(Int_t Runs, Int_t dataType, Bool_t recreate, Int_t switchLayer
 //   tracks->removeTracksEndingInHalo();
 //   tracks->removeHighAngularChangeTracks(cutMaxAngle); // mrad
    tracks->doTrackFit();
-   tracks->removeNuclearInteractions();
+//   tracks->removeNuclearInteractions();
    tracks->removeThreeSigmaShortTracks();
    tracks->removeHighAngleTracks(cutAngle); // mrad
 
-   Bool_t   kDraw = false;
+   Bool_t   kDraw = true;
 
    TH1I  *hWEPLCorrect = new TH1I("hWEPLCorrect", ";Range in detector [mm WEPL];Frequency", 400, 0, 250);
    TH1I  *hWEPLSecondary = new TH1I("hWEPLSecondary", "", 400, 0, 250);
@@ -2555,7 +2555,7 @@ void drawTracks3D(Int_t Runs, Int_t dataType, Bool_t recreate, Int_t switchLayer
    Float_t phi = 76;
 
    if (kDraw) {
-      view->SetRange(fromx, 0, fromy, tox, 35, toy);
+      view->SetRange(fromx, 0, fromy, tox, 350, toy);
       view->SetView(theta, phi, 0, iret);
    }
 
@@ -2583,7 +2583,7 @@ void drawTracks3D(Int_t Runs, Int_t dataType, Bool_t recreate, Int_t switchLayer
       Cluster *thisCluster = (Cluster*) restPoints->At(i);
       Float_t x = thisCluster->getX();
       Float_t z = thisCluster->getY();
-      Float_t y = thisCluster->getLayer();
+      Float_t y = thisCluster->getLayermm();
    
       if (thisCluster->isSecondary()) {
          EIDMarker->SetPoint(i,x,y,z);
@@ -2686,6 +2686,7 @@ void drawTracks3D(Int_t Runs, Int_t dataType, Bool_t recreate, Int_t switchLayer
             }
             if (nMissingEID == 0) { // No missing clusters
                nPrimaryConfused++;
+//               cout << *thisTrack << endl;
             }
 
             else { // Confused and missing clusters
@@ -2831,7 +2832,7 @@ void drawTracks3D(Int_t Runs, Int_t dataType, Bool_t recreate, Int_t switchLayer
 
             Float_t x = thisTrack->getX(j);
             Float_t z = thisTrack->getY(j);
-            Float_t y = thisTrack->getLayer(j);
+            Float_t y = thisTrack->getLayermm(j);
             
             if (thisTrack->getLayer(j) < switchLayer) {
                l->SetPoint(lineElementNumber++,x,y,z);
@@ -2860,7 +2861,7 @@ void drawTracks3D(Int_t Runs, Int_t dataType, Bool_t recreate, Int_t switchLayer
                l->Draw();
             }
             if (l->GetLineColor() == kGray) l->Draw();
-//            l->Draw();
+            l->Draw();
          }
 
          if (l->GetLineColor() == kGreen) badSecondary++;
@@ -2875,7 +2876,7 @@ void drawTracks3D(Int_t Runs, Int_t dataType, Bool_t recreate, Int_t switchLayer
          }
       }
       
-      view->ShowAxis(); // comment for pure display
+//      view->ShowAxis(); // comment for pure display
       c1->Update();
 
       TAxis3D *axis = TAxis3D::GetPadAxis();

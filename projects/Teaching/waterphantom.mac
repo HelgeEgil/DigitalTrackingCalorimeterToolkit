@@ -45,7 +45,6 @@
 
 /process/inactivate hadElastic
 /process/inactivate protonInelastic
-
 #/process/inactivate msc
 
 #/gate/source/addSource PBS PencilBeam
@@ -82,6 +81,8 @@
 
 /gate/output/root/enable
 /gate/output/root/setFileName output/waterphantom_78eV
+/gate/output/root/setRootNtupleFlag 0
+/gate/output/root/setRootSinglesFlag 0
 
 /gate/random/setEngineName MersenneTwister
 /gate/random/setEngineSeed auto

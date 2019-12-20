@@ -535,7 +535,7 @@ void Tracks::removeNuclearInteractions() {
    Int_t    nTotal = GetEntriesFast();
    Int_t    nTotalStart = GetEntries();
 
-   Float_t plateauThreshold = 0.8;
+   Float_t plateauThreshold = 0;
    if (kHelium) plateauThreshold = 4;
 
    Float_t plateauEdep;
