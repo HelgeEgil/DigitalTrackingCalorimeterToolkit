@@ -517,11 +517,10 @@ PCB:    d=3.566 g/cm3; n=5; state=Solid
         +el: name=Silicon    ; f=0.1836
         +el: name=Copper     ; f=0.1329
 
-Glue:   d=1.2 g/cm3; n=4; state=Solid
-        +el: name=Hydrogen   ; f=0.066
-        +el: name=Carbon     ; f=0.674
-        +el: name=Oxygen     ; f=0.149
-        +el: name=Chlorine   ; f=0.111
+Glue:   d=1.05 g/cm3; n=3; state=Solid
+        +el: name=Hydrogen   ; f=0.0709
+        +el: name=Carbon     ; f=0.7603
+        +el: name=Oxygen     ; f=0.1688
 
 CarbonFiber: d=1.66 g/cm3; n=1; state=Solid
        +el: name=Carbon      ; n=1
