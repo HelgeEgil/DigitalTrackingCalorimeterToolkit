@@ -50,29 +50,13 @@ using namespace std;
 using namespace DTC;
 
 Tracks * Clusters::findTracksWithRecursiveWeighting() {
-
    Track     * track = nullptr;
    Tracks    * tracks = new Tracks(50 * 200 * kEventsPerRun);
-  
+   Tracks    * trackerTracks = new Tracks(kEventsPerRun);
    Int_t       spotSize = 33;
-   // for pencil beams.
-   // 22 = 2x2 mm, 33 = 3x3 mm etc.
-   // See WoC publication for description of functions below
-   
    Float_t thisMaxTrackScore = kMaxTrackScore;
-
-   if      (spotSize == 22) thisMaxTrackScore = 0.433 * pow(kEventsPerRun, -0.172);
-   else if (spotSize == 33) thisMaxTrackScore = 0.469 * pow(kEventsPerRun, -0.176);
-   else if (spotSize == 42) thisMaxTrackScore = 0.397 * pow(kEventsPerRun, -0.150);
-   else if (spotSize == 55) thisMaxTrackScore = 0.455 * pow(kEventsPerRun, -0.162);
-   else if (spotSize == 44) thisMaxTrackScore = 0.460 * pow(kEventsPerRun, -0.168);
-   showDebug("makeLayerIndex...");
    makeLayerIndex();
-   showDebug("ok!\nfillMSCradiusList...");
-   showDebug("ok!\n");
    kMCSFactor = 25;
-
-   if (kAbsorberThickness == 2) thisMaxTrackScore *= 2; // phenomenological factor ..? 
 
    thisMaxTrackScore = 0.25;
    if (kHelium) thisMaxTrackScore = 0.175;
@@ -82,76 +66,162 @@ Tracks * Clusters::findTracksWithRecursiveWeighting() {
       appendClusterWithoutTrack(At(i));
    }
 
-    Int_t FirstLayer = nLayers-1;
-    Int_t LastLayer = 0;
- 
-    for (Int_t s=FirstLayer; s>=LastLayer; s--) {
-    Cluster   * nextCluster = nullptr;
-    Float_t     clusterScore;
-    Node      * nextNode = nullptr;
-    Node      * seedNode = nullptr;
-    vector<Int_t> * nextClusters = new vector<Int_t>;
-    vector<Int_t> * seeds = new vector<Int_t>;
-    nextClusters->reserve(100);
-   
-    showDebug("findSeeds from " << GetEntriesFast() << " clusters." << endl);
-    findSeeds(seeds, s, false); // starts in s, false-> does not use a cluster if it has already been used
-    //cout<< "         size seeds in "<<s<<": "<< seeds->size()<< endl;
-    showDebug("Found " << seeds->size() << " seeds in first go.\n");
+   Int_t FirstLayer = nLayers-1;
+   Int_t LastLayer = 2;
+      
+   if (kDoTrackerPropagation) {
+      // Make list of all seed pairs in TRACKER layers where angle a,a,b < 100 mrad
+      // Then use the extrapolated vector to match in first interior layer
+      
+      Cluster * firstTrackerCluster = nullptr;
+      Cluster * secondTrackerCluster = nullptr;
+      Cluster * firstLayerCluster = nullptr;
+      Float_t  angle, bestAngle;
+      Int_t    bestIdxI, bestIdxJ;
+      Int_t    firstLayerIdxFrom = getFirstIndexOfLayer(2); 
+      Int_t    firstLayerIdxTo = getLastIndexOfLayer(2);
+      vector<Int_t> * firstTrackerClusters = new vector<Int_t>;
+      vector<Int_t> * secondTrackerClusters = new vector<Int_t>;
 
-    for (UInt_t i=0; i<seeds->size(); i++) {
-        Cluster *seed = At(seeds->at(i)); //relates each seed to the cluster it belongs
-        nextClusters->clear();
+      /*
+      for (UInt_t i=0; i<firstTrackerClusters->size(); i++) {
+         firstTrackerCluster = At(firstTrackerClusters->at(i));
+         secondTrackerClusters->clear();
+         findClustersFromSeedInLayer(firstTrackerCluster, 1, secondTrackerClusters);
+         bestIdxK = 0; bestIdxJ = 0;
+         bestAngle = 1e5;
 
-        findNearestClustersInNextLayer(seed, nextClusters);
-    
-        seedNode = new Node(nullptr, seed, 0); //   Node(Node *parent, Cluster *connectedCluster, Float_t score);
-        
-//        showDebug("Found " << nextClusters->size() << " nextClusters first time.\n");
-       // cout<< "size next clusters: "<< nextClusters->size() << endl;
-       for (UInt_t j=0; j<nextClusters->size(); j++) {
-           
-            nextCluster = At(nextClusters->at(j)); // analyze cluster by cluster
-            clusterScore = seedNode->getNextScore(nextCluster); // getParent-getChild should not depend on the starting point
+         for (UInt_t j=0; j<secondTrackerClusters->size(); j++) {
+            secondTrackerCluster = At(secondTrackerClusters->at(j));
+            for (Int_t k=firstLayerIdxFrom; k<firstLayerIdxTo; k++) {
+               firstLayerCluster = At(k);
+               if (!firstLayerCluster) continue;
+               angle = getDotProductAngle(firstTrackerCluster, secondTrackerCluster, firstLayerCluster);
+               if (angle < bestAngle) {
+                  bestAngle = angle; 
+                  bestIdxK = k; bestIdxJ = j;
+               }
+            }
+         }
+         */
+      
+      findSeeds(firstTrackerClusters, 0, false);
+      for (Int_t k=firstLayerIdxFrom; k<firstLayerIdxTo; k++) {
+         // Find straightest track for each hit in first interior layer
+
+         firstLayerCluster = At(k);
+         if (!firstLayerCluster) continue;
+
+         bestIdxI = 0; bestIdxJ = 0;
+         bestAngle = 1e5;
+
+         for (UInt_t i=0; i<firstTrackerClusters->size(); i++) {
+            // Loop over clusters in first tracker layer
+
+            firstTrackerCluster = At(firstTrackerClusters->at(i));
+            secondTrackerClusters->clear();
+            findClustersFromSeedInLayer(firstTrackerCluster, 1, secondTrackerClusters);
+
+            for (UInt_t j=0; j<secondTrackerClusters->size(); j++) {
+               secondTrackerCluster = At(secondTrackerClusters->at(j));
+               angle = getDotProductAngle(firstTrackerCluster, secondTrackerCluster, firstLayerCluster);
+               if (angle < bestAngle) {
+                  bestAngle = angle; 
+                  bestIdxI = firstTrackerClusters->at(i); 
+                  bestIdxJ = secondTrackerClusters->at(j);
+               }
+            }
+         }
+
+         if (bestAngle>1) continue; // no hit on first 
+
+         firstTrackerCluster = At(bestIdxI);
+         secondTrackerCluster = At(bestIdxJ);
+
+         Track * trackerTrack = new Track();
+         trackerTrack->appendCluster(firstTrackerCluster);
+         trackerTrack->appendCluster(secondTrackerCluster);
+         trackerTrack->appendCluster(firstLayerCluster);
+         trackerTracks->appendTrack(trackerTrack);
+
+         delete trackerTrack;
+      }
+   }
+
+   for (Int_t s=FirstLayer; s>=LastLayer; s--) {
+      Cluster   * nextCluster = nullptr;
+      Float_t     clusterScore;
+      Node      * nextNode = nullptr;
+      Node      * seedNode = nullptr;
+      Cluster   * seed = nullptr;
+      vector<Int_t> * nextClusters = new vector<Int_t>;
+      vector<Int_t> * seeds = new vector<Int_t>;
+      nextClusters->reserve(200);
+
+      findSeeds(seeds, s, false);
+      for (UInt_t i=0; i<seeds->size(); i++) {
+         seed = At(seeds->at(i)); 
+         findNearestClustersInNextLayer(seed, nextClusters); 
+         seedNode = new Node(nullptr, seed, 0); 
+
+         // Explore all identified clusters
+         for (UInt_t j=0; j<nextClusters->size(); j++) {
+            nextCluster = At(nextClusters->at(j)); 
+            clusterScore = seedNode->getNextScore(nextCluster); 
             clusterScore /= 100;
-            if (std::isnan(clusterScore)) cout << "clusterScore at " << *nextCluster << " isNan!\n";
+//            if (std::isnan(clusterScore)) cout << "clusterScore at " << *nextCluster << " isNan!\n";
             
             if (clusterScore < thisMaxTrackScore) {
-                nextNode = new Node(seedNode, nextCluster, clusterScore); // initial vector is 10 % weighted
-                seedNode->addChild(nextNode);
-//                showDebug("Adding nextNode\n");
+               nextNode = new Node(seedNode, nextCluster, clusterScore); 
+               seedNode->addChild(nextNode);
             }
-        }
-        seedNode->markExplored();
-        vector<Node*> * endNodes = new vector<Node*>;
-        //endNodes->reserve(kEventsPerRun * 5);
-        endNodes->reserve(200* 50 * kEventsPerRun);
-        seedNode->getUnexploredEndNodes(endNodes); //EndNodes=nodes you are studying
-        doRecursiveWeightedTracking(seedNode, endNodes, thisMaxTrackScore); // all other layers, the first part is only done in the first layer
-        track = seedNode->getBestTrack();
-        
-        if ((track->GetEntries() >= (s+1)) && (track->GetEntries() >1)){
-            //cout << "value of s is: " << s <<endl;
-            //cout << " size track: " << track->GetEntries() <<endl;
-            if (track->Last()->getLayer() != 0) {
-               printf("Track without last layer...\n");
-               cout << *track << endl;
+         }
+
+         seedNode->markExplored();
+         vector<Node*> * endNodes = new vector<Node*>;
+         endNodes->reserve(200* 50 * kEventsPerRun);
+         seedNode->getUnexploredEndNodes(endNodes); 
+         doRecursiveWeightedTracking(seedNode, endNodes, thisMaxTrackScore); 
+         track = seedNode->getBestTrack();
+         
+         Int_t tsize = 1;
+         if (kDoTrackerPropagation) tsize = -1;
+         
+         if ((track->GetEntries() >= (s+tsize)) && (track->GetEntries() >1)) {
+
+            if (kDoTrackerPropagation) {
+               // Match track to trackerTrack
+               Cluster * firstClusterInTrack = track->Last(); // Last added, not yet sorted
+               for (Int_t j=0; j<trackerTracks->GetEntriesFast(); j++) {
+                  Cluster *tc = trackerTracks->At(j)->Last();
+                  Bool_t xOK = firstClusterInTrack->getX() == tc->getX();
+                  Bool_t yOK = firstClusterInTrack->getY() == tc->getY();
+                  Bool_t zOK = firstClusterInTrack->getLayer() == tc->getLayer();
+                  if (xOK && yOK && zOK) {
+                     track->appendCluster(trackerTracks->At(j)->At(0));
+                     track->appendCluster(trackerTracks->At(j)->At(1));
+                  }
+               }
             }
+
             track->sortTrack();
+
             tracks->appendTrack(track);
             removeTrackFromClustersWithoutTrack(track);
             markUsedClusters(track);
-        }
-        delete track;
-        seedNode->deleteNodeTree();
-        delete seedNode;
-        delete endNodes;
-    }
-    showDebug("Found " << tracks->GetEntries() << " tracks so far\n");
-    delete seeds;
-    delete nextClusters;
-}
-    return tracks;
+         }
+
+         delete track;
+         seedNode->deleteNodeTree();
+         delete seedNode;
+         delete endNodes;
+      }
+       
+      showDebug("Found " << tracks->GetEntries() << " tracks so far\n");
+      delete seeds;
+      delete nextClusters;
+   }
+   return tracks;
 }
 
 void Clusters::doRecursiveWeightedTracking(Node * seedNode, vector<Node*> * endNodes, Float_t thisMaxTrackScore) {
@@ -163,15 +233,18 @@ void Clusters::doRecursiveWeightedTracking(Node * seedNode, vector<Node*> * endN
    Node    * thisNode;
    Cluster * nextCluster;
    Float_t   nextScore, nextAngle;
-
  
    for (UInt_t i=0; i<endNodes->size(); i++) { // All identified endpoints to the tree so far
       thisNode = endNodes->at(i);
       thisNode->markExplored();
-      Int_t searchLayer = thisNode->getCluster()->getLayer() - 1;  // +1 because you are studying the next layer
-      Int_t idxFrom = getFirstIndexOfLayer(searchLayer); //Only clusters in this layer-first cluster. Clusters contains all the cluster of the detector and depending on the index, these clusters corresponds to one layer or another.
-      Int_t idxTo = getLastIndexOfLayer(searchLayer);// only clusters in this layer-last cluster
-      if (idxFrom < 0) continue; // no more clusters in deeper layers
+
+      Int_t searchLayer = thisNode->getCluster()->getLayer() - 1;
+      Int_t idxFrom = getFirstIndexOfLayer(searchLayer); 
+      Int_t idxTo = getLastIndexOfLayer(searchLayer);
+
+      if (kDoTrackerPropagation && searchLayer < 2) break;
+
+      if (idxFrom < 0) continue; 
 
       for (Int_t j=idxFrom; j<idxTo; j++) { // Loop through possible additions to the track
          nextCluster = At(j);
@@ -183,17 +256,16 @@ void Clusters::doRecursiveWeightedTracking(Node * seedNode, vector<Node*> * endN
          float alwaysAllowAngle = 0.1;
          if (kHelium) alwaysAllowAngle = 0.03;
 
-          if ((nextScore < thisMaxTrackScore || (nextAngle < alwaysAllowAngle)) ){// || (nextAngle < kMaxTrackAngle)) {
-              thisNode->addChild(new Node(thisNode, nextCluster, nextScore)); // it is either appended to the tree or deleted if thisNode is full
-              showDebug("Adding node in layer " << searchLayer << "...\n");
+         if (nextScore < thisMaxTrackScore || nextAngle < alwaysAllowAngle){
+            thisNode->addChild(new Node(thisNode, nextCluster, nextScore));
           }
       }
    }
-   Int_t CurrentLayer =thisNode->getCluster()->getLayer();
-   //cout << "Max angle in layer " << CurrentLayer << " is : " << MaxAngle << endl;
+   
    endNodes->clear();
    seedNode->getUnexploredEndNodes(endNodes);
-  if (endNodes->size() > 0){
+
+   if (endNodes->size() > 0){
       doRecursiveWeightedTracking(seedNode, endNodes, thisMaxTrackScore);
    }
 }
@@ -210,60 +282,44 @@ Tracks * Clusters::findCalorimeterTracksWithMCTruth() {
    lastEventID = At(0)->getEventID();
 
    for (Int_t i=0; i<GetEntriesFast(); i++) {
-      if (!At(i)) {
-         cout << "Clusters::findCalorimeterTracksWithMCTruth could not find cluster at " << i << endl;
-         continue;
-      }
+      if (!At(i)) continue;
 
       cluster = At(i);
       eventID = cluster->getEventID();
 
       if (eventID != lastEventID) {
-         // Cluster from new event ID encountered, store what we have already
-         showDebug("Track at  is full, storing the pointer to tracks having currently " << tracks->GetEntriesFast() << " elements.\n");
          if (track->GetEntries()) {
             tracks->appendTrack(track);
          }
          track->Clear("C");
       }
-
-      showDebug("Appending cluster at " << *cluster << " with  number " << track->GetEntriesFast() + 1 << " to track.\n");
       track->appendCluster(cluster);
-
       lastEventID = eventID;
    }
 
-   // Store last track
    if (track->GetEntriesFast()) {
       tracks->appendTrack(track);
    }
 
    delete track;
-
    return tracks;
 }
 
 void Clusters::findSeeds(vector<Int_t> * seeds, Int_t layer, Bool_t kUsedClustersInSeeds) {
-   showDebug("finding layerIdxFrom...");
    Int_t layerIdxFrom = getFirstIndexOfLayer(layer);
-   showDebug("to...");
    Int_t layerIdxTo = getLastIndexOfLayer(layer);
-   showDebug("ok!\n");
-
-   showDebug("findSeeds: layerIdxFrom = " << layerIdxFrom << ", layerIdxTO = " << layerIdxTo << endl);
 
    if (layerIdxFrom>=0) { 
       for (Int_t i=layerIdxFrom; i<layerIdxTo; i++) {
          if (!At(i)) continue;
          if (!kUsedClustersInSeeds && isUsed(i)) continue;
-         
-
          seeds->push_back(i);
       }
    }
 }
 
 void Clusters::findNearestClustersInNextLayer(Cluster *seed, vector<Int_t> * nextClusters) {
+   nextClusters->clear();
    for (Int_t skipLayers=0; skipLayers<2; skipLayers++) { // Loop to enable tracks skipping a layer without data
       Int_t nextLayer = seed->getLayer() - 1 - skipLayers;
       findClustersFromSeedInLayer(seed, nextLayer, nextClusters);
@@ -276,7 +332,12 @@ void Clusters::findClustersFromSeedInLayer(Cluster *seed, Int_t nextLayer, vecto
    Int_t layerIdxTo = getLastIndexOfLayer(nextLayer);
    Float_t maxAngle, thisAngle;
 
-   maxAngle = 3 * getEmpiricalMCSAngle(nextLayer - 1); // This function is only run once, to find seed candidates in the 2nd layer - here it's okay with a high angle
+   maxAngle = 0.15 * kMCSFactor;
+
+   if (nextLayer == 1) {
+      maxAngle = 0.5; // 500 mrad
+   }
+
    if (layerIdxFrom >= 0) {
       for (Int_t i=layerIdxFrom; i<layerIdxTo; i++) {
          if (!At(i)) { continue; }
@@ -294,6 +355,7 @@ Cluster * Clusters::findNearestNeighbour(Track *track, Cluster *projectedPoint, 
    //
    // In some cases we don't know which track to connect the point to - in that case
    // Track * track = nullptr, and the legacy method (diffmmXY) is used
+
    Cluster *nearestNeighbour = nullptr;
    Float_t  thisAngle, maxAngle;
    Bool_t   kFoundNeighbour = false;
@@ -302,7 +364,7 @@ Cluster * Clusters::findNearestNeighbour(Track *track, Cluster *projectedPoint, 
    Int_t    layerIdxFrom = getFirstIndexOfLayer(searchLayer);
    Int_t    layerIdxTo = getLastIndexOfLayer(searchLayer);
 
-   maxAngle = getEmpiricalMCSAngle(searchLayer-1);
+   maxAngle = 0.05 * kMCSFactor; 
 
    if (layerIdxFrom < 0) return 0;
 

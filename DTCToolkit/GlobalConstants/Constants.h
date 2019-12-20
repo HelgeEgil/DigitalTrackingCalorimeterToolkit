@@ -25,7 +25,7 @@
 // When the final design is used, add the air gap and Al spacer in mid detector:
 #ifdef FINALDESIGN
 #undef DZ
-#define DZ 2.05
+#define DZ 2.00
 #endif
 
 // -------------------------------------
@@ -41,6 +41,7 @@ Int_t    kSkipTracks = 0; // during readout
 const Int_t    kEnergy = 230; // 917 MeV_Helium ~= 230 MeV_proton // 600 HeC phantom
 Bool_t   kUseDegrader = true; 
 Bool_t   kUseAlpide = true;
+Bool_t   kDoTrackerPropagation = true;
 
 const Int_t sizeOfEventID = 25;
 const Int_t nChildrenInNode = 2; // max concurrent track segments to follow
@@ -63,7 +64,7 @@ const Float_t kAbsorberThickness = 3.5;
 const Float_t dx = DX; // mm
 const Float_t dy = DY; // mm
 const Float_t dz = DZ + kAbsorberThickness;
-const Float_t dz2 = 2.795;
+const Float_t dz2 = 52.4;
 
 #ifdef FINALDESIGN
 const Bool_t kFinalDesign = true;

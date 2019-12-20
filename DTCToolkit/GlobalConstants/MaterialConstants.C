@@ -319,16 +319,26 @@ Double_t getLayerPositionmm(Int_t i) {
    Double_t z = 0;
 
    if (kFinalDesign) {
+      /*
       if (i < 2) {
          z = 1.03 + i * dz2;
       }
       else {
          z = 2 * dz2 + 3.735 + (i - 2) * dz;
       }
+      */
+      if (i < 2) {
+         z = 0.2315 + i * dz2;
+      }
+      else {
+         z = 2 * dz2 + 3.749 + (i-2) * dz;
+      }
+
    }
    else {
       z = i * dz;
    }
+   
 
    return z;
 }

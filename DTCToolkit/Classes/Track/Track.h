@@ -41,7 +41,7 @@ class Track : public TObject {
       virtual void      Compress()                       { track_.Compress(); }
       virtual void      Clear(Option_t * option = "")    { track_.Clear(option); }
       void              sortTrack()                      { track_.Sort(); }
-   
+
       // Add and remove clusters
       virtual TObject * removeClusterAt(Int_t i)         { return track_.RemoveAt(i); }
       virtual void      removeCluster(Cluster *c)        { track_.Remove((TObject*) c); }

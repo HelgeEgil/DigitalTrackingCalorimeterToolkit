@@ -36,7 +36,7 @@ void Run() {
 
       if (eventID != lastEventID && lastEventID >= 0) {
          rangeHistogram->Fill(lastZ);
-         printf("range = %.2f\n", lastZ);
+//         printf("range = %.2f\n", lastZ);
          dE = 0;
 
       }
