@@ -450,9 +450,9 @@ void getTracksReconstructionEfficiency(Int_t dataType, Float_t energy, Float_t d
    run_energy = energy;
    run_degraderThickness = degraderThickness;
 
-   Int_t nRunArray[15] = {4,8,16,25,32,50,64,85,100,128,181,200,256,350,512};
+   Int_t nRunArray[13] = {4,8,16,25,32,64,85,100,128,181,256,350,512};
 
-   for (Int_t i=0; i<15; i++) { // 1 -> 30
+   for (Int_t i=0; i<13; i++) { // 1 -> 30
       nRuns = nRunArray[i];
 
       kEventsPerRun = nRuns;
@@ -482,7 +482,7 @@ void getTracksReconstructionEfficiency(Int_t dataType, Float_t energy, Float_t d
       Float_t ratioFirstAndLastAllTracks = (float) nFirstAndLastAllTracks / nTotal;
       Float_t readoutAbsorber = (roundf(kAbsorberThickness) == kAbsorberThickness) ? kAbsorberThickness : kAbsorberThickness*10;
    
-      Float_t  cutAngle = 45; // 2.5 sigma
+      Float_t  cutAngle = 60; // 2.5 sigma
       Float_t  cutEdep = 12;
    
 //      tracks->removeHighAngularChangeTracks(cutMaxAngle); // mrad
@@ -506,7 +506,7 @@ void getTracksReconstructionEfficiency(Int_t dataType, Float_t energy, Float_t d
       
       Float_t ratioFirstAndLastAllTracksAfterFilter = (float) nFirstAndLastAllTracksAfterFilter / nTotalAfterFilter;
 
-      ofstream file2(Form("OutputFiles/lastLayerCorrect_different_nRuns_helium.csv"), ofstream::out | ofstream::app);
+      ofstream file2(Form("OutputFiles/lastLayerCorrect_different_nRuns_proton.csv"), ofstream::out | ofstream::app);
       file2 << readoutAbsorber << " " << nRuns << " " << " " << ratioFirstAndLastAllTracks << " " << ratioFirstAndLastAllTracksAfterFilter << endl;
       file2.close();
       
@@ -2511,7 +2511,7 @@ void drawTracks3D(Int_t Runs, Int_t dataType, Bool_t recreate, Int_t switchLayer
 //   tracks->removeTracksEndingInHalo();
 //   tracks->removeHighAngularChangeTracks(cutMaxAngle); // mrad
    tracks->doTrackFit();
-//   tracks->removeNuclearInteractions();
+   tracks->removeNuclearInteractions();
    tracks->removeThreeSigmaShortTracks();
    tracks->removeHighAngleTracks(cutAngle); // mrad
 
@@ -2686,7 +2686,6 @@ void drawTracks3D(Int_t Runs, Int_t dataType, Bool_t recreate, Int_t switchLayer
             }
             if (nMissingEID == 0) { // No missing clusters
                nPrimaryConfused++;
-//               cout << *thisTrack << endl;
             }
 
             else { // Confused and missing clusters
@@ -2876,7 +2875,7 @@ void drawTracks3D(Int_t Runs, Int_t dataType, Bool_t recreate, Int_t switchLayer
          }
       }
       
-//      view->ShowAxis(); // comment for pure display
+      view->ShowAxis(); // comment for pure display
       c1->Update();
 
       TAxis3D *axis = TAxis3D::GetPadAxis();
