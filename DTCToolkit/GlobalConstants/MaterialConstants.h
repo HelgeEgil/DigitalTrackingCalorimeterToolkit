@@ -37,6 +37,7 @@ TSpline3 *splineMaterialInv;
 TSpline3 *splinePureAl;
 TSpline3 *splinePureAlInv;
 TSpline3 *splineWET;
+TSpline3 *splineWETFromDegrader;
 TSpline3 *splineWEPL;
 
 Double_t X0, X0_tungsten, X0_aluminum, X0_pmma, X0_firstlayer;

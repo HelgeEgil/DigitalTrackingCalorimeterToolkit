@@ -23,6 +23,10 @@ Float_t getWEPLFromLayer(Float_t layer) {
    return splineWET->Eval(layer);
 }
 
+Float_t getWETFromDegrader(Float_t degrader) {
+   return splineWETFromDegrader->Eval(degrader);
+}
+
 Float_t getTLFromEnergy(Float_t energy, TSpline3 *spline) {
    return spline->Eval(energy);
 }

@@ -856,6 +856,7 @@ void drawTracksRangeHistogram(Int_t Runs, Int_t dataType, Bool_t recreate, Float
    printf("Histogram limits: %.2f to %.2f.\n", lowHistogramLimit, highHistogramLimit);
    printf("At energy %.0f, expecting range %.2f mm and WEPL %.2f mm.\n", run_energy, getTLFromEnergy(run_energy), getWEPLFromEnergy(run_energy));
    printf("This corresponds to a WEPL factor of %.2f.\n", getWEPLFactorFromEnergy(run_energy));
+   printf("(Using direct calculation, nominal WET is %.2f mm)\n", getWETFromDegrader(run_degraderThickness));
 
    hFitResults->SetLineColor(kBlack); hFitResults->SetFillColor(kGreen-5);
 
@@ -1035,7 +1036,7 @@ void findTracksRangeAccuracy(Int_t Runs, Int_t dataType, Bool_t recreate, Float_
       if (nTracks > Runs * eventsPerRun) break;
 
       fitRange = thisTrack->getFitParameterRange();
-      hFitResults->Fill(getUnitFromTL(fitRange));
+      hFitResults->Fill(fitRange);
       
       if (nTracks % eventsPerRun == 0) { // DO ANALYSIS
          TF1 *gauss = doSimpleGaussianFit(hFitResults, means, sigmas, outputFileIdx);

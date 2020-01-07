@@ -807,6 +807,8 @@ TF1 *  doSimpleGaussianFit (TH1F *h, Float_t *means, Float_t *sigmas, Int_t idx_
    Float_t nominalMean = getUnitFromEnergy(run_energy);
    Float_t nominalSigma = getUnitStragglingFromEnergy(run_energy, 0);
 
+   nominalMean = getWETFromDegrader(run_degraderThickness);
+
    TAxis *axis = h->GetXaxis();
    TF1 *gauss = new TF1("gauss", "gaus");
    gauss->SetParameter(1, nominalMean);

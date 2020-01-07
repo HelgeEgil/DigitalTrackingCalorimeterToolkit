@@ -20,6 +20,7 @@ Float_t getEnergyAtTLFromPureAluminum(Float_t energy, Float_t depth);
 
 Float_t getWETFromLayer(Float_t layer);
 Float_t getWEPLFromLayer(Float_t layer);
+Float_t getWETFromDegrader(Float_t degrader);
 
 // Conversion to range
 Float_t getTLFromEnergy(Float_t energy);

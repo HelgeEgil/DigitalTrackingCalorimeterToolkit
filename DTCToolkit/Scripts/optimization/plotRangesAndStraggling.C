@@ -115,12 +115,7 @@ void plotRangesAndStraggling() {
 
    Float_t a_dtc = 0, p_dtc = 0;
    ifstream in;
-   if (!kUseCarbon) {
-      in.open(Form("../../Data/Ranges/%dmm_Al_Helium.csv", absorberThickness));
-   }
-   else {
-      in.open(Form("../../Data/Ranges/%dmm_C.csv", absorberThickness));
-   }
+   in.open(Form("../../Data/Ranges/%dmm_Al_Helium.csv", absorberThickness));
 
    Double_t dtcRanges[500];
    Double_t dtcEnergies[500];
@@ -165,7 +160,7 @@ void plotRangesAndStraggling() {
    TSpline3 * splineDTCInv = new TSpline3("splineDTCInv", dtcRanges, dtcEnergies, dtcIdx);
 
    if (!kUseCarbon) {
-      in.open("../../OutputFiles/findManyRangesDegraderHelium.csv");
+      in.open("../../OutputFiles/findManyRangesDegrader.csv");
    }
    else {
       in.open("../../OutputFiles/findManyRangesDegraderCarbon.csv");
@@ -208,7 +203,7 @@ void plotRangesAndStraggling() {
    in.close();
 
    if (!kUseCarbon) {
-      in.open("../../OutputFiles/result_makebraggpeakfit_Helium.csv");
+      in.open("../../OutputFiles/result_makebraggpeakfit.csv");
    }
    else {
       in.open("../../OutputFiles/result_makebraggpeakfitCarbon.csv");

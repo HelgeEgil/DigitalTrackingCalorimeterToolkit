@@ -256,6 +256,7 @@ void  createSplines() {
 
    splineWET = new TSpline3("splineWET", layerNumber, layerWET, layerIdx);
    splineWEPL = new TSpline3("splineWET", layerNumber, layerWEPL, layerIdx);
+   splineWETFromDegrader = new TSpline3("splineWETFromDegrader", layerWEPL, layerWET, layerIdx);
 
    // FIND BRAGG-KLEEMAN PARAMETERS
    TGraph * range_energy = new TGraph(idxDTC, energiesDTC, rangesDTC);

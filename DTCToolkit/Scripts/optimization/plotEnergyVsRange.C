@@ -26,7 +26,7 @@
 using namespace std;
 
 Bool_t kUseCarbon = false;
-Bool_t kUseDCCorrection = true;
+Bool_t kUseDCCorrection = false;
 Bool_t kUseNominalValuesFromRMBPF = true;
 Bool_t kUseWEPL = false;
 
@@ -121,7 +121,7 @@ void plotEnergyVsRange() {
 
 
    ifstream in1;
-   in1.open("../../Data/Ranges/EnergyAfterDegraderHelium.csv");
+   in1.open("../../Data/Ranges/EnergyAfterDegrader230MeV_78eV.csv");
    Int_t thick, n=0;
    while (1) {
       in1 >> thick >> energy;
@@ -130,7 +130,7 @@ void plotEnergyVsRange() {
       energies[n++] = energy;
    }
    in1.close();
-   printf("Found %d lines in EnergyAfterDegraderHelium.csv\n", n);
+   printf("Found %d lines in EnergyAfterDegrader.csv\n", n);
 
    TSpline3 *energySpline = new TSpline3("energySpline", thicknesses, energies, n);
 
@@ -216,7 +216,7 @@ void plotEnergyVsRange() {
 
    ifstream in;
    if (!kUseCarbon) {
-      in.open("../../OutputFiles/result_makebraggpeakfit_Helium.csv");
+      in.open("../../OutputFiles/result_makebraggpeakfit.csv");
    }
    else {
       in.open("../../OutputFiles/result_makebraggpeakfitCarbon.csv");
