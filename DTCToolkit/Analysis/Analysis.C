@@ -879,7 +879,7 @@ void drawTracksRangeHistogram(Int_t Runs, Int_t dataType, Bool_t recreate, Float
 //   tracks->removeHighAngularChangeTracks(cutMaxAngle); // mrad
    tracks->doTrackFit();
 //   tracks->removeNuclearInteractions();
-//   tracks->removeThreeSigmaShortTracks();
+   tracks->removeThreeSigmaShortTracks();
    tracks->removeHighAngleTracks(cutAngle); // mrad
 
    for (Int_t j=0; j<tracks->GetEntriesFast(); j++) {

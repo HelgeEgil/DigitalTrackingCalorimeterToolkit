@@ -187,7 +187,7 @@ Tracks * Clusters::findTracksWithRecursiveWeighting() {
          Int_t tsize = 1;
          if (kDoTrackerPropagation) tsize = -1;
          
-         if ((track->GetEntries() >= (s+tsize)) && (track->GetEntries() >1)) {
+//         if ((track->GetEntries() >= (s+tsize)) && (track->GetEntries() >=1)) {
 
             if (kDoTrackerPropagation) {
                // Match track to trackerTrack
@@ -209,7 +209,7 @@ Tracks * Clusters::findTracksWithRecursiveWeighting() {
             tracks->appendTrack(track);
             removeTrackFromClustersWithoutTrack(track);
             markUsedClusters(track);
-         }
+   //      }
 
          delete track;
          seedNode->deleteNodeTree();
