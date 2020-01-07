@@ -712,14 +712,9 @@ void drawIndividualGraphs(TCanvas *cGraph, TGraphErrors* outputGraph, Float_t fi
    else outputGraph->SetMaximum(20);
    outputGraph->SetTitle(Form("%.0f mm Al", kAbsorberThickness));
    
-   if (kOutputUnit == kWEPL || kOutputUnit == kUnitEnergy) {
-      outputGraph->GetXaxis()->SetTitle("Water Equivalent Thickness [mm]");
-   }
+   outputGraph->GetXaxis()->SetTitle("Water Equivalent Thickness [mm]");
    
-   else if (kOutputUnit == kPhysical) {
-      outputGraph->GetXaxis()->SetTitle("Proton range in DTC [mm]");
-   }
-
+/*
    Float_t WEPLFactor = getWEPLFactorFromEnergy(run_energy);
 
    for (int i=0; i<outputGraph->GetN(); i++) {
@@ -728,7 +723,7 @@ void drawIndividualGraphs(TCanvas *cGraph, TGraphErrors* outputGraph, Float_t fi
 
    Float_t weplRange = WEPLFactor * fitRange;
    Float_t weplError = WEPLFactor * fitError;
-
+*/
    outputGraph->GetYaxis()->SetTitle("Energy loss [keV/#mum]");
    outputGraph->GetYaxis()->SetTitleOffset(1);
    outputGraph->GetXaxis()->SetTitleSize(0.05);
@@ -753,7 +748,7 @@ void drawIndividualGraphs(TCanvas *cGraph, TGraphErrors* outputGraph, Float_t fi
    p = p_water;
    
    TF1 *func = new TF1("fit_BP", fitfunc_DBP, 0, 500, 2);
-   func->SetParameters(weplRange, fitScale);
+   func->SetParameters(fitRange, fitScale);
    func->SetNpx(2500);
 
    func->Draw("same");
@@ -790,10 +785,10 @@ void drawIndividualGraphs(TCanvas *cGraph, TGraphErrors* outputGraph, Float_t fi
    }
 
    if (kDrawText) {
-      Float_t energy_error = getEnergyStragglingFromTLStraggling(fitRange, fitError); // remove this, assumes WEPL
-      Float_t energy_fit = getEnergyFromTL(fitRange); // remove this, assumes WEPL
+//      Float_t energy_error = getEnergyStragglingFromWEPLStraggling(fitRange, fitError); // remove this, assumes WEPL
+//      Float_t energy_fit = getEnergyFromWEPL(fitRange); // remove this, assumes WEPL
 //      TLatex *text = new TLatex(15, 18, Form("Estimated E_{0}: %.1f #pm %.1f mm", fitRange, fitError)); // Take back this
-      TLatex *text = new TLatex(15, 25, Form("Fitted range: %.1f #pm %.1f mm WET", weplRange, weplError));
+      TLatex *text = new TLatex(15, 25, Form("Fitted range: %.1f #pm %.1f mm WET", fitRange, fitError));
       text->SetTextSize(0.05);
       text->SetTextFont(22);
       text->Draw();

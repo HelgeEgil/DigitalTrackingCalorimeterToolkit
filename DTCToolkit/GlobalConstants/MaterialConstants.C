@@ -111,7 +111,7 @@ void  createSplines() {
    Int_t    idxPureAl = 0;
    Int_t    idxW = 0;
    Int_t    layer = 0;
-   Double_t range;
+   Double_t range, wet, wepl;
    Double_t mu, sigma;
    Double_t rangesDTC[1200];
    Double_t energiesDTC[1200];
@@ -121,6 +121,10 @@ void  createSplines() {
    Double_t energiesWater[1200];
    Double_t rangesPureAl[500];
    Double_t energiesPureAl[500];
+
+   Double_t layerNumber[50];
+   Double_t layerWET[50];
+   Double_t layerWEPL[50];
 
    Float_t readoutAbsorber = (roundf(kAbsorberThickness) == kAbsorberThickness) ? kAbsorberThickness : kAbsorberThickness*10;
 
@@ -231,6 +235,16 @@ void  createSplines() {
    }
    in.close();
 
+   Int_t layerIdx = 0;
+   in.open("Data/Ranges/layer_wet_wepl.csv");
+   while (1) {
+      in >> layer >> wet >> wepl;
+      if (!in.good()) break;
+      layerNumber[layerIdx] = layer;
+      layerWET[layerIdx] = wet;
+      layerWEPL[layerIdx++] = wepl;
+   }
+
    splineDTC = new TSpline3("splineDTC", energiesDTC, rangesDTC, idxDTC);
    splineWater = new TSpline3("splineWater", energiesWater, rangesWater, idxWater);
    splinePureAl = new TSpline3("splinePureAl", energiesPureAl, rangesPureAl, idxPureAl);
@@ -239,6 +253,9 @@ void  createSplines() {
    splineWaterInv = new TSpline3("splineWaterInv", rangesWater, energiesWater, idxWater);
    splinePureAlInv = new TSpline3("splineWaterInv", rangesPureAl, energiesPureAl, idxPureAl);
    splineWInv = new TSpline3("splineWInv", rangesW, energiesW, idxW);
+
+   splineWET = new TSpline3("splineWET", layerNumber, layerWET, layerIdx);
+   splineWEPL = new TSpline3("splineWET", layerNumber, layerWEPL, layerIdx);
 
    // FIND BRAGG-KLEEMAN PARAMETERS
    TGraph * range_energy = new TGraph(idxDTC, energiesDTC, rangesDTC);
@@ -317,16 +334,7 @@ void  createSplines() {
 
 Double_t getLayerPositionmm(Int_t i) {
    Double_t z = 0;
-
    if (kFinalDesign) {
-      /*
-      if (i < 2) {
-         z = 1.03 + i * dz2;
-      }
-      else {
-         z = 2 * dz2 + 3.735 + (i - 2) * dz;
-      }
-      */
       if (i < 2) {
          z = 0.2315 + i * dz2;
       }
@@ -338,8 +346,6 @@ Double_t getLayerPositionmm(Int_t i) {
    else {
       z = i * dz;
    }
-   
-
    return z;
 }
 

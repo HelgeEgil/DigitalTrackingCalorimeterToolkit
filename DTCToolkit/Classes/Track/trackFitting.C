@@ -27,6 +27,9 @@ TGraphErrors * Track::doTrackFit(Bool_t isScaleVariable, Bool_t useTrackLength) 
    // The difference should be minimal! However this is how the conversion functions
    // are defined.
 
+   alpha = alpha_water;
+   p = p_water;
+
    TGraphErrors * graph = nullptr;
    Int_t          n = GetEntriesFast();
    Float_t        x[n], y[n];
@@ -43,7 +46,7 @@ TGraphErrors * Track::doTrackFit(Bool_t isScaleVariable, Bool_t useTrackLength) 
 
    for (Int_t i=0; i<n; i++) {
       if (!At(i)) continue;
-
+/*
       if (useTrackLength) {
          trackLength += getTrackLengthmmAt(i);
          x[i] = trackLength;
@@ -51,7 +54,10 @@ TGraphErrors * Track::doTrackFit(Bool_t isScaleVariable, Bool_t useTrackLength) 
 
       else {
          x[i] = getLayermm(i);
+      
       }
+      */
+      x[i] = getWETFromLayer(i);
 
       y[i] = getDepositedEnergy(i, checkResistivity);
       ery[i] = getDepositedEnergyError(i, checkResistivity);
@@ -74,7 +80,7 @@ TGraphErrors * Track::doTrackFit(Bool_t isScaleVariable, Bool_t useTrackLength) 
       scaleParameter = 3.42;
    }
 
-   scaleParameter = 5;
+   scaleParameter = 7;
    if (kHelium) scaleParameter = 28; // was 22.5
 
    // scaleParameter *= 1.2; // Empirical tests to reduce range bias

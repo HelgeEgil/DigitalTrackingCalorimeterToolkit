@@ -15,6 +15,14 @@
 
 using namespace std;
 
+Float_t getWETFromLayer(Float_t layer) {
+   return splineWET->Eval(layer);
+}
+
+Float_t getWEPLFromLayer(Float_t layer) {
+   return splineWET->Eval(layer);
+}
+
 Float_t getTLFromEnergy(Float_t energy, TSpline3 *spline) {
    return spline->Eval(energy);
 }

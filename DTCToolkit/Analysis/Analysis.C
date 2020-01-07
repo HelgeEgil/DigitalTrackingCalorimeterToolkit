@@ -892,13 +892,14 @@ void drawTracksRangeHistogram(Int_t Runs, Int_t dataType, Bool_t recreate, Float
       }
 
       // Do track fit, extract all parameters for this track
-      outputGraph = (TGraphErrors*) thisTrack->doTrackFit(false, kUseCSDA); // (bool isScaleVariable, bool useTrackLength (~ CSDA))
+      outputGraph = (TGraphErrors*) thisTrack->doTrackFit(false, false); // kUseCSDA); // (bool isScaleVariable, bool useTrackLength (~ CSDA))
       if (!outputGraph) continue;
    
       delete outputGraph;
 
       fitRange = thisTrack->getFitParameterRange();
-      hFitResults->Fill(getUnitFromTL(fitRange));
+//      hFitResults->Fill(getUnitFromTL(fitRange));
+      hFitResults->Fill(fitRange);
       hLastLayer->Fill(thisTrack->Last()->getLayer());
    }
   
@@ -2388,7 +2389,7 @@ void showOutputFileForImageReconstruction() {
    hSimpleImage->Divide(hSimpleImageNorm);
    hSimpleImagePrim->Divide(hSimpleImageNormPrim);
 
-   TCanvas *c;
+   TCanvas *c = new TCanvas();
    c->Divide(1,2,1e-5,1e-5);
    c->cd(1);
    hSimpleImage->Draw("COLZ");
