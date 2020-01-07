@@ -259,8 +259,8 @@ void  createSplines() {
    Double_t layerWEPLinv[50], layerWETinv[50];
    for (Int_t i=0; i<50; i++) {
       if (i>=layerIdx) continue;
-      layerWEPLinv[i] = layerWEPL[layerIdx-i];
-      layerWETinv[i] = layerWET[layerIdx-i];
+      layerWEPLinv[i] = layerWEPL[layerIdx-i-1];
+      layerWETinv[i] = layerWET[layerIdx-i-1];
    }
 
    splineWETFromDegrader = new TSpline3("splineWETFromDegrader", layerWEPLinv, layerWETinv, layerIdx);
