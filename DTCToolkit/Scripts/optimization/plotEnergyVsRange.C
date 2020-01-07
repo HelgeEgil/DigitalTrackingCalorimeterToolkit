@@ -26,7 +26,7 @@
 using namespace std;
 
 Bool_t kUseCarbon = false;
-Bool_t kUseDCCorrection = false;
+Bool_t kUseDCCorrection = true;
 Bool_t kUseNominalValuesFromRMBPF = true;
 Bool_t kUseWEPL = false;
 
@@ -240,14 +240,14 @@ void plotEnergyVsRange() {
       if (kUseNominalValuesFromRMBPF) {
          if (thickness_ == 2) arrayE2[nlines2] = nomrange_;
          if (thickness_ == 3) arrayE3[nlines3] = nomrange_;
-         if (thickness_ == 35) arrayE35[nlines35] = nomrange_;
+         if (thickness_ == 35) arrayE35[nlines35] = 330.9 - nomrange_;
          if (thickness_ == 4) arrayE4[nlines4] = nomrange_;
          if (thickness_ == 5) arrayE5[nlines5] = nomrange_;
          if (thickness_ == 6) arrayE6[nlines6] = nomrange_;
 
          if (thickness_ == 2) arrayMC2[nlines2++] = -nomrange_ + estrange_ + correction_2 * kUseDCCorrection;
          if (thickness_ == 3) arrayMC3[nlines3++] = estrange_ - nomrange_ + correction_3 * kUseDCCorrection;
-         if (thickness_ == 35) arrayMC35[nlines35++] = estrange_ - nomrange_ + correction_35 * kUseDCCorrection;
+         if (thickness_ == 35) arrayMC35[nlines35++] = estrange_ - nomrange_ + (2.93 + 0.0036 * estrange_) * kUseDCCorrection;
          if (thickness_ == 4) arrayMC4[nlines4++] = -nomrange_ + estrange_ + correction_4 * kUseDCCorrection;
          if (thickness_ == 5) arrayMC5[nlines5++] = estrange_ - nomrange_ + correction_5 * kUseDCCorrection;
          if (thickness_ == 6) arrayMC6[nlines6++] = -nomrange_ + estrange_ + correction_6 * kUseDCCorrection;

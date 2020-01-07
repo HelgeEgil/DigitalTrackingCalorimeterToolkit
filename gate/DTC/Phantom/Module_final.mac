@@ -1,0 +1,355 @@
+/gate/world/geometry/setXLength 3500.0 mm
+/gate/world/geometry/setYLength 3500.0 mm
+/gate/world/geometry/setZLength 3500.0 mm
+/gate/world/placement/setTranslation 0 0 0 mm
+/gate/world/vis/setVisible false
+
+/gate/world/daughters/name phantom
+/gate/world/daughters/systemType scanner
+/gate/world/daughters/insert box
+/gate/phantom/geometry/setXLength 1650.0 mm
+/gate/phantom/geometry/setYLength 1650.0 mm
+/gate/phantom/geometry/setZLength 400 mm
+/gate/phantom/placement/setTranslation 0 0 0 mm
+/gate/phantom/vis/setVisible false
+
+/gate/phantom/daughters/name degrader
+/gate/phantom/daughters/insert box
+/gate/degrader/geometry/setXLength 1500.0 mm
+/gate/degrader/geometry/setYLength 1500.0 mm
+/gate/degrader/geometry/setZLength {degraderthickness} mm
+/gate/degrader/placement/setTranslation 0 0 0 mm
+/gate/degrader/setMaterial Water
+/gate/degrader/vis/setVisible false
+
+/gate/world/daughters/name scanner_1
+/gate/world/daughters/systemType scanner
+/gate/world/daughters/insert box
+/gate/scanner_1/geometry/setXLength 270.0 mm
+/gate/scanner_1/geometry/setYLength 135.0 mm
+/gate/scanner_1/geometry/setZLength 104.8 mm
+/gate/scanner_1/placement/setTranslation 0 0 277.4 mm
+/gate/scanner_1/vis/setVisible false
+
+/gate/world/daughters/name scanner_2
+/gate/world/daughters/systemType scanner
+/gate/world/daughters/insert box
+/gate/scanner_2/geometry/setXLength 270.0 mm
+/gate/scanner_2/geometry/setYLength 135.0 mm
+/gate/scanner_2/geometry/setZLength 264.0 mm
+/gate/scanner_2/placement/setTranslation 0 0 461.8 mm
+/gate/scanner_2/vis/setVisible false
+
+/gate/scanner_1/daughters/name TRACKER_Layer
+/gate/scanner_1/daughters/insert box
+/gate/TRACKER_Layer/geometry/setXLength 270.0 mm
+/gate/TRACKER_Layer/geometry/setYLength 135.0 mm
+/gate/TRACKER_Layer/geometry/setZLength 52.4 mm
+/gate/TRACKER_Layer/placement/setTranslation 0 0 -26.2 mm
+/gate/TRACKER_Layer/vis/setVisible false
+
+/gate/TRACKER_Layer/daughters/name TRACKER_Absorber1
+/gate/TRACKER_Layer/daughters/insert box
+/gate/TRACKER_Absorber1/geometry/setXLength 270.0 mm
+/gate/TRACKER_Absorber1/geometry/setYLength 135.0 mm
+/gate/TRACKER_Absorber1/geometry/setZLength 200 um
+/gate/TRACKER_Absorber1/placement/setTranslation 0 0 -26100 um
+/gate/TRACKER_Absorber1/setMaterial CarbonFiber # Carbon Foam has similar density
+/gate/TRACKER_Absorber1/vis/setColor grey
+
+/gate/TRACKER_Layer/daughters/name TRACKER_Glue1
+/gate/TRACKER_Layer/daughters/insert box
+/gate/TRACKER_Glue1/geometry/setXLength 270.0 mm
+/gate/TRACKER_Glue1/geometry/setYLength 135.0 mm
+/gate/TRACKER_Glue1/geometry/setZLength 5 um
+/gate/TRACKER_Glue1/placement/setTranslation 0 0 -25997.5 um
+/gate/TRACKER_Glue1/setMaterial Glue
+/gate/TRACKER_Glue1/vis/setColor yellow
+
+/gate/TRACKER_Layer/daughters/name TRACKER_ALPIDESub
+/gate/TRACKER_Layer/daughters/insert box
+/gate/TRACKER_ALPIDESub/geometry/setXLength 270.0 mm
+/gate/TRACKER_ALPIDESub/geometry/setYLength 135.0 mm
+/gate/TRACKER_ALPIDESub/geometry/setZLength 14 um
+/gate/TRACKER_ALPIDESub/placement/setTranslation 0 0 -25988 um
+/gate/TRACKER_ALPIDESub/setMaterial Silicon
+/gate/TRACKER_ALPIDESub/vis/setColor green
+
+/gate/TRACKER_Layer/daughters/name TRACKER_ALPIDEEpi
+/gate/TRACKER_Layer/daughters/insert box
+/gate/TRACKER_ALPIDEEpi/geometry/setXLength 270.0 mm
+/gate/TRACKER_ALPIDEEpi/geometry/setYLength 135.0 mm
+/gate/TRACKER_ALPIDEEpi/geometry/setZLength 25 um
+/gate/TRACKER_ALPIDEEpi/placement/setTranslation 0 0 -25968.5 um
+/gate/TRACKER_ALPIDEEpi/setMaterial Silicon
+/gate/TRACKER_ALPIDEEpi/vis/setColor green
+
+/gate/TRACKER_Layer/daughters/name TRACKER_ALPIDEFront
+/gate/TRACKER_Layer/daughters/insert box
+/gate/TRACKER_ALPIDEFront/geometry/setXLength 270.0 mm
+/gate/TRACKER_ALPIDEFront/geometry/setYLength 135.0 mm
+/gate/TRACKER_ALPIDEFront/geometry/setZLength 11 um
+/gate/TRACKER_ALPIDEFront/placement/setTranslation 0 0 -25950.5 um
+/gate/TRACKER_ALPIDEFront/setMaterial Aluminium
+/gate/TRACKER_ALPIDEFront/vis/setColor green
+
+/gate/TRACKER_Layer/daughters/name TRACKER_AirGap1
+/gate/TRACKER_Layer/daughters/insert box
+/gate/TRACKER_AirGap1/geometry/setXLength 270.0 mm
+/gate/TRACKER_AirGap1/geometry/setYLength 135.0 mm
+/gate/TRACKER_AirGap1/geometry/setZLength 1685 um
+/gate/TRACKER_AirGap1/placement/setTranslation 0 0 -25113.5 um
+/gate/TRACKER_AirGap1/setMaterial Air
+/gate/TRACKER_AirGap1/vis/setVisible false
+
+/gate/TRACKER_Layer/daughters/name TRACKER_TopFDI1
+/gate/TRACKER_Layer/daughters/insert box
+/gate/TRACKER_TopFDI1/geometry/setXLength 270.0 mm
+/gate/TRACKER_TopFDI1/geometry/setYLength 135.0 mm
+/gate/TRACKER_TopFDI1/geometry/setZLength 30 um
+/gate/TRACKER_TopFDI1/placement/setTranslation 0 0 -24245 um
+/gate/TRACKER_TopFDI1/setMaterial Aluminium
+/gate/TRACKER_TopFDI1/vis/setColor blue
+
+/gate/TRACKER_Layer/daughters/name TRACKER_TopFDI2
+/gate/TRACKER_Layer/daughters/insert box
+/gate/TRACKER_TopFDI2/geometry/setXLength 270.0 mm
+/gate/TRACKER_TopFDI2/geometry/setYLength 135.0 mm
+/gate/TRACKER_TopFDI2/geometry/setZLength 20 um
+/gate/TRACKER_TopFDI2/placement/setTranslation 0 0 -24220 um
+/gate/TRACKER_TopFDI2/setMaterial Kapton
+/gate/TRACKER_TopFDI2/vis/setColor blue
+
+/gate/TRACKER_Layer/daughters/name TRACKER_Glue2
+/gate/TRACKER_Layer/daughters/insert box
+/gate/TRACKER_Glue2/geometry/setXLength 270.0 mm
+/gate/TRACKER_Glue2/geometry/setYLength 135.0 mm
+/gate/TRACKER_Glue2/geometry/setZLength 5 um
+/gate/TRACKER_Glue2/placement/setTranslation 0 0 -24207.5 um
+/gate/TRACKER_Glue2/setMaterial Glue
+/gate/TRACKER_Glue2/vis/setColor yellow
+
+/gate/TRACKER_Layer/daughters/name TRACKER_Spacer
+/gate/TRACKER_Layer/daughters/insert box
+/gate/TRACKER_Spacer/geometry/setXLength 270.0 mm
+/gate/TRACKER_Spacer/geometry/setYLength 135.0 mm
+/gate/TRACKER_Spacer/geometry/setZLength 75 um
+/gate/TRACKER_Spacer/placement/setTranslation 0 0 -24167.5 um
+/gate/TRACKER_Spacer/setMaterial Kapton
+/gate/TRACKER_Spacer/vis/setColor green
+
+/gate/TRACKER_Layer/daughters/name TRACKER_Glue3
+/gate/TRACKER_Layer/daughters/insert box
+/gate/TRACKER_Glue3/geometry/setXLength 270.0 mm
+/gate/TRACKER_Glue3/geometry/setYLength 135.0 mm
+/gate/TRACKER_Glue3/geometry/setZLength 5 um
+/gate/TRACKER_Glue3/placement/setTranslation 0 0 -24127.5 um
+/gate/TRACKER_Glue3/setMaterial Glue
+/gate/TRACKER_Glue3/vis/setColor yellow
+
+/gate/TRACKER_Layer/daughters/name TRACKER_BottomFDI1
+/gate/TRACKER_Layer/daughters/insert box
+/gate/TRACKER_BottomFDI1/geometry/setXLength 270.0 mm
+/gate/TRACKER_BottomFDI1/geometry/setYLength 135.0 mm
+/gate/TRACKER_BottomFDI1/geometry/setZLength 100 um
+/gate/TRACKER_BottomFDI1/placement/setTranslation 0 0 -24075 um
+/gate/TRACKER_BottomFDI1/setMaterial Aluminium
+/gate/TRACKER_BottomFDI1/vis/setColor blue
+
+/gate/TRACKER_Layer/daughters/name TRACKER_BottomFDI2
+/gate/TRACKER_Layer/daughters/insert box
+/gate/TRACKER_BottomFDI2/geometry/setXLength 270.0 mm
+/gate/TRACKER_BottomFDI2/geometry/setYLength 135.0 mm
+/gate/TRACKER_BottomFDI2/geometry/setZLength 20 um
+/gate/TRACKER_BottomFDI2/placement/setTranslation 0 0 -24015 um
+/gate/TRACKER_BottomFDI2/setMaterial Kapton
+/gate/TRACKER_BottomFDI2/vis/setColor blue
+
+/gate/TRACKER_Layer/daughters/name TRACKER_Glue4
+/gate/TRACKER_Layer/daughters/insert box
+/gate/TRACKER_Glue4/geometry/setXLength 270.0 mm
+/gate/TRACKER_Glue4/geometry/setYLength 135.0 mm
+/gate/TRACKER_Glue4/geometry/setZLength 5 um
+/gate/TRACKER_Glue4/placement/setTranslation 0 0 -24002.5 um
+/gate/TRACKER_Glue4/setMaterial Glue
+/gate/TRACKER_Glue4/vis/setColor yellow
+
+/gate/TRACKER_Layer/daughters/name TRACKER_Absorber2
+/gate/TRACKER_Layer/daughters/insert box
+/gate/TRACKER_Absorber2/geometry/setXLength 270.0 mm
+/gate/TRACKER_Absorber2/geometry/setYLength 135.0 mm
+/gate/TRACKER_Absorber2/geometry/setZLength 200 um
+/gate/TRACKER_Absorber2/placement/setTranslation 0 0 -23900 um
+/gate/TRACKER_Absorber2/setMaterial CarbonFiber # Carbon Foam has similar density
+/gate/TRACKER_Absorber2/vis/setColor grey
+
+/gate/TRACKER_Layer/daughters/name TRACKER_AirGap2
+/gate/TRACKER_Layer/daughters/insert box
+/gate/TRACKER_AirGap2/geometry/setXLength 270.0 mm
+/gate/TRACKER_AirGap2/geometry/setYLength 135.0 mm
+/gate/TRACKER_AirGap2/geometry/setZLength 50 mm
+/gate/TRACKER_AirGap2/placement/setTranslation 0 0 1200 um
+/gate/TRACKER_AirGap2/setMaterial Air
+/gate/TRACKER_AirGap2/vis/setVisible false
+
+/gate/scanner_2/daughters/name Layer
+/gate/scanner_2/daughters/insert box
+/gate/Layer/geometry/setXLength 270.0 mm
+/gate/Layer/geometry/setYLength 135.0 mm
+/gate/Layer/geometry/setZLength 5.5 mm
+/gate/Layer/placement/setTranslation 0 0 -129.25 mm
+/gate/Layer/vis/setVisible false
+
+/gate/Layer/daughters/name Absorber
+/gate/Layer/daughters/insert box
+/gate/Absorber/geometry/setXLength 270.0 mm
+/gate/Absorber/geometry/setYLength 135.0 mm
+/gate/Absorber/geometry/setZLength 3500 um
+/gate/Absorber/placement/setTranslation 0 0 -1000 um
+/gate/Absorber/setMaterial Aluminium
+/gate/Absorber/vis/setColor grey
+
+/gate/Layer/daughters/name Glue1
+/gate/Layer/daughters/insert box
+/gate/Glue1/geometry/setXLength 270.0 mm
+/gate/Glue1/geometry/setYLength 135.0 mm
+/gate/Glue1/geometry/setZLength 5 um
+/gate/Glue1/placement/setTranslation 0 0 752.5 um # to 725
+/gate/Glue1/setMaterial Glue
+/gate/Glue1/vis/setColor yellow
+
+/gate/Layer/daughters/name Spacer1
+/gate/Layer/daughters/insert box
+/gate/Spacer1/geometry/setXLength 270.0 mm
+/gate/Spacer1/geometry/setYLength 135.0 mm
+/gate/Spacer1/geometry/setZLength 150 um
+/gate/Spacer1/placement/setTranslation 0 0 830 um # from 725: 825; to 925
+/gate/Spacer1/setMaterial Aluminium
+/gate/Spacer1/vis/setColor green
+
+/gate/Layer/daughters/name Glue2
+/gate/Layer/daughters/insert box
+/gate/Glue2/geometry/setXLength 270.0 mm
+/gate/Glue2/geometry/setYLength 135.0 mm
+/gate/Glue2/geometry/setZLength 5 um
+/gate/Glue2/placement/setTranslation 0 0 907.5 um # from 925 to 930: 922.5 
+/gate/Glue2/setMaterial Glue
+/gate/Glue2/vis/setColor yellow
+
+/gate/Layer/daughters/name ALPIDESub
+/gate/Layer/daughters/insert box
+/gate/ALPIDESub/geometry/setXLength 270.0 mm
+/gate/ALPIDESub/geometry/setYLength 135.0 mm
+/gate/ALPIDESub/geometry/setZLength 64 um
+/gate/ALPIDESub/placement/setTranslation 0 0 942 um # from 930 to 980: 955
+/gate/ALPIDESub/setMaterial Silicon
+/gate/ALPIDESub/vis/setColor green
+
+/gate/Layer/daughters/name ALPIDEEpi
+/gate/Layer/daughters/insert box
+/gate/ALPIDEEpi/geometry/setXLength 270.0 mm
+/gate/ALPIDEEpi/geometry/setYLength 135.0 mm
+/gate/ALPIDEEpi/geometry/setZLength 25 um
+/gate/ALPIDEEpi/placement/setTranslation 0 0 986.5 um # from 930 to 980: 955
+/gate/ALPIDEEpi/setMaterial Silicon
+/gate/ALPIDEEpi/vis/setColor green
+
+/gate/Layer/daughters/name ALPIDEFront
+/gate/Layer/daughters/insert box
+/gate/ALPIDEFront/geometry/setXLength 270.0 mm
+/gate/ALPIDEFront/geometry/setYLength 135.0 mm
+/gate/ALPIDEFront/geometry/setZLength 11 um
+/gate/ALPIDEFront/placement/setTranslation 0 0 1004.5 um # from 930 to 980: 955
+/gate/ALPIDEFront/setMaterial Aluminium
+/gate/ALPIDEFront/vis/setColor green
+
+/gate/Layer/daughters/name AirGap
+/gate/Layer/daughters/insert box
+/gate/AirGap/geometry/setXLength 270.0 mm
+/gate/AirGap/geometry/setYLength 135.0 mm
+/gate/AirGap/geometry/setZLength 1480 um
+/gate/AirGap/placement/setTranslation 0 0 1750 um # from 980 to 2460
+/gate/AirGap/setMaterial Air
+/gate/AirGap/vis/setVisible false
+
+/gate/Layer/daughters/name TopFDI1
+/gate/Layer/daughters/insert box
+/gate/TopFDI1/geometry/setXLength 270.0 mm
+/gate/TopFDI1/geometry/setYLength 135.0 mm
+/gate/TopFDI1/geometry/setZLength 30 um
+/gate/TopFDI1/placement/setTranslation 0 0 2505 um # from 2460 to 2490: 2475
+/gate/TopFDI1/setMaterial Aluminium
+/gate/TopFDI1/vis/setColor blue
+
+/gate/Layer/daughters/name TopFDI2
+/gate/Layer/daughters/insert box
+/gate/TopFDI2/geometry/setXLength 270.0 mm
+/gate/TopFDI2/geometry/setYLength 135.0 mm
+/gate/TopFDI2/geometry/setZLength 20 um
+/gate/TopFDI2/placement/setTranslation 0 0 2530 um # from 2490 to 2510: 2500
+/gate/TopFDI2/setMaterial Kapton
+/gate/TopFDI2/vis/setColor blue
+
+/gate/Layer/daughters/name Glue3
+/gate/Layer/daughters/insert box
+/gate/Glue3/geometry/setXLength 270.0 mm
+/gate/Glue3/geometry/setYLength 135.0 mm
+/gate/Glue3/geometry/setZLength 5 um
+/gate/Glue3/placement/setTranslation 0 0 2542.5 um # from 2510 to 2515
+/gate/Glue3/setMaterial Glue
+/gate/Glue3/vis/setColor yellow
+
+/gate/Layer/daughters/name Spacer2
+/gate/Layer/daughters/insert box
+/gate/Spacer2/geometry/setXLength 270.0 mm
+/gate/Spacer2/geometry/setYLength 135.0 mm
+/gate/Spacer2/geometry/setZLength 75 um
+/gate/Spacer2/placement/setTranslation 0 0 2582.5 um # from 2515 to 2590
+/gate/Spacer2/setMaterial Kapton
+/gate/Spacer2/vis/setColor green
+
+/gate/Layer/daughters/name Glue4
+/gate/Layer/daughters/insert box
+/gate/Glue4/geometry/setXLength 270.0 mm
+/gate/Glue4/geometry/setYLength 135.0 mm
+/gate/Glue4/geometry/setZLength 5 um
+/gate/Glue4/placement/setTranslation 0 0 2622.5 um # from 2590 to 2595
+/gate/Glue4/setMaterial Glue
+/gate/Glue4/vis/setColor yellow
+
+/gate/Layer/daughters/name BottomFDI1
+/gate/Layer/daughters/insert box
+/gate/BottomFDI1/geometry/setXLength 270.0 mm
+/gate/BottomFDI1/geometry/setYLength 135.0 mm
+/gate/BottomFDI1/geometry/setZLength 100 um
+/gate/BottomFDI1/placement/setTranslation 0 0 2675 um # from 2595 to 2695: 2645
+/gate/BottomFDI1/setMaterial Aluminium
+/gate/BottomFDI1/vis/setColor blue
+
+/gate/Layer/daughters/name BottomFDI2
+/gate/Layer/daughters/insert box
+/gate/BottomFDI2/geometry/setXLength 270.0 mm
+/gate/BottomFDI2/geometry/setYLength 135.0 mm
+/gate/BottomFDI2/geometry/setZLength 20 um
+/gate/BottomFDI2/placement/setTranslation 0 0 2735 um # from 2695 to 2715: 2705
+/gate/BottomFDI2/setMaterial Kapton
+/gate/BottomFDI2/vis/setColor blue
+
+/gate/Layer/daughters/name Glue5
+/gate/Layer/daughters/insert box
+/gate/Glue5/geometry/setXLength 270.0 mm
+/gate/Glue5/geometry/setYLength 135.0 mm
+/gate/Glue5/geometry/setZLength 5 um
+/gate/Glue5/placement/setTranslation 0 0 2747.5 um # from 2715 to 2720: 2717.5
+/gate/Glue5/setMaterial Glue
+/gate/Glue5/vis/setColor yellow
+
+/gate/TRACKER_Layer/repeaters/insert linear
+/gate/TRACKER_Layer/linear/autoCenter false
+/gate/TRACKER_Layer/linear/setRepeatNumber 2
+/gate/TRACKER_Layer/linear/setRepeatVector 0 0 52.4 mm
+
+/gate/Layer/repeaters/insert linear
+/gate/Layer/linear/autoCenter false
+/gate/Layer/linear/setRepeatNumber 48
+/gate/Layer/linear/setRepeatVector 0 0 5.5 mm

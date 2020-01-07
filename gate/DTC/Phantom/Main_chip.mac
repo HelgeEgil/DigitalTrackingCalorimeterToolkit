@@ -1,0 +1,53 @@
+/gate/geometry/setMaterialDatabase GateMaterials.db
+
+/control/execute Module_final_headphantom.mac
+
+/gate/systems/scanner_1/level1/attach TRACKER_Layer
+/gate/systems/scanner_2/level1/attach Layer
+/gate/systems/phantom/level1/attach degrader
+
+/gate/ALPIDEEpi/attachCrystalSD
+/gate/TRACKER_ALPIDEEpi/attachCrystalSD
+
+#=================#
+# Physics			#
+#=================#
+
+/gate/geometry/setIonisationPotential Water 78 eV
+/gate/physics/addPhysicsList QGSP_BIC_EMZ
+/gate/physics/SetMaxStepSizeInRegion world 1 mm
+/gate/physics/ActivateStepLimiter proton
+
+/gate/run/initialize
+
+#=======================#
+# ADD PROTON BEAM	      #
+#=======================#
+
+/gate/source/addSource PBS PencilBeam
+/gate/source/PBS/setParticleType proton
+/gate/source/PBS/setEnergy 230 MeV
+/gate/source/PBS/setSigmaEnergy 0. MeV
+/gate/source/PBS/setPosition {spotx1} {spoty1} -500 mm
+
+/gate/source/PBS/setSigmaX 2 mm
+/gate/source/PBS/setSigmaY 2 mm
+/gate/source/PBS/setSigmaTheta 2.5 mrad
+/gate/source/PBS/setSigmaPhi 2.5 mrad
+/gate/source/PBS/setEllipseXThetaEmittance 5 mm*mrad
+/gate/source/PBS/setEllipseXThetaRotationNorm negative
+/gate/source/PBS/setEllipseYPhiEmittance 5 mm*mrad
+/gate/source/PBS/setEllipseYPhiRotationNorm negative
+
+/gate/output/root/enable
+/gate/output/root/setRootSinglesFlag 0
+/gate/output/root/setFileName ../../DTCToolkit/Data/MonteCarlo/DTC_Final_HeadPhantom_spotx{spotx}_spoty{spoty}_rotation{rotation}deg
+
+#===============#
+# START BEAMS	#
+#===============#
+
+/gate/random/setEngineName MersenneTwister
+/gate/random/setEngineSeed auto
+/gate/application/setTotalNumberOfPrimaries 15000
+/gate/application/start
