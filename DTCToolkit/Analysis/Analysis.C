@@ -912,7 +912,9 @@ void drawTracksRangeHistogram(Int_t Runs, Int_t dataType, Bool_t recreate, Float
    expectedMean = getUnitFromEnergy(run_energy);
    expectedStraggling = getUnitStragglingFromEnergy(run_energy, sigma_energy);
    nullStraggling = getUnitStragglingFromEnergy(run_energy, 0);
-   
+  
+   expectedMean = getWETFromDegrader(run_degraderThickness);
+
    cout << "OutputUnit is " << kOutputUnit << " and the expected mean value is " << expectedMean 
        << ". The straggling including / excluding energy variation is " << expectedStraggling << " / " << nullStraggling << ".\n";
        
