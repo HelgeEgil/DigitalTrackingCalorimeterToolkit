@@ -174,8 +174,8 @@ void findAPAndStraggling(Int_t absorberthickness) {
    Double_t arrayLayerWET[45];
    for (Int_t l=0; l<45; l++) {
       Double_t lDepth;
-      if (l==0) arrayLayerWET[l] = 1.2; // minus 0.5 MeV
-      else if (l==1) arrayLayerWET[l] = 2.4; // minus 1 MeV
+      if (l==0) arrayLayerWET[l] = 6; // minus 0.5 MeV
+      else if (l==1) arrayLayerWET[l] = 7.8; // minus 1 MeV
       else {
          lDepth = 52.4 * 2 + 3.749 + (l-2) * 5.5;
          arrayLayerWET[l] = sRangeWET->Eval(lDepth);
