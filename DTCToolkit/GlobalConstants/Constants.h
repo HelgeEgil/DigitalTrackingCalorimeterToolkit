@@ -31,8 +31,9 @@
 // -------------------------------------
 
 Bool_t   kHelium = false;
-Bool_t   kSpotScanning = false;
-Bool_t   kPhantom = false;
+Bool_t   kSpotScanning = true;
+Int_t    kRotation = 90; // degrees
+Bool_t   kPhantom = true;
 Bool_t   kDoTracking = true; 
 Bool_t   kFilterNuclearInteractions = false; 
 Bool_t   kDoDiffusion = true;

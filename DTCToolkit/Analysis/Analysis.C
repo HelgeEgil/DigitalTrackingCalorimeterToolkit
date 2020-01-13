@@ -2363,12 +2363,12 @@ void analyseHelium(Int_t Runs, Int_t dataType, Bool_t recreate, Int_t switchLaye
 }
 
 void showOutputFileForImageReconstruction() {
-   TH2F * hSimpleImagePrim = new TH2F("hSimpleImagePrim", "CHeCT projection (only primaries);X [mm];Y [mm]", 150, -75, 75, 150, -75,75);
-   TH2F * hSimpleImageNormPrim = new TH2F("hSimpleImageNormPrim", "CHeCT projection (only primaries);X [mm];Y [mm]", 150, -75, 75, 150, -75,75);
-   TH2F * hSimpleImage = new TH2F("hSimpleImage", "CHeCT projection;X [mm];Y [mm]", 150, -75, 75, 150, -75,75);
-   TH2F * hSimpleImageNorm = new TH2F("hSimpleImageNorm", "CHeCT projection;X [mm];Y [mm]", 150, -75, 75, 150, -75,75);
+   TH2F * hSimpleImagePrim = new TH2F("hSimpleImagePrim", "CHeCT projection (only primaries);X [mm];Y [mm]", 150, -120, 120, 150, -100,100);
+   TH2F * hSimpleImageNormPrim = new TH2F("hSimpleImageNormPrim", "CHeCT projection (only primaries);X [mm];Y [mm]", 150, -120, 120, 150, -100,100);
+   TH2F * hSimpleImage = new TH2F("hSimpleImage", "CHeCT projection;X [mm];Y [mm]", 150,  -120, 120, 150, -100,100);
+   TH2F * hSimpleImageNorm = new TH2F("hSimpleImageNorm", "CHeCT projection;X [mm];Y [mm]", 150,  -120, 120, 150, -100,100);
 
-   TFile *fIn = new TFile("OutputFiles/CHeCT_PedHead_190MeVu_15x15cm2.root");
+   TFile *fIn = new TFile("OutputFiles/PedHeadCarbon.root");
    TTree *tIn = (TTree*) fIn->Get("WEPLData");
 
    Float_t x2x, x2y, wepl;
@@ -2376,10 +2376,11 @@ void showOutputFileForImageReconstruction() {
 
    tIn->SetBranchAddress("X2x", &x2x);
    tIn->SetBranchAddress("X2y", &x2y);
-   tIn->SetBranchAddress("wepl", &wepl);
+   tIn->SetBranchAddress("WEPL", &wepl);
    tIn->SetBranchAddress("isSecondary", &isSecondary);
 
    for (Int_t i=0; i<tIn->GetEntriesFast(); i++) {
+      tIn->GetEntry(i);
       hSimpleImage->Fill(x2x, x2y, wepl);
       hSimpleImageNorm->Fill(x2x, x2y);
 
@@ -2401,19 +2402,20 @@ void showOutputFileForImageReconstruction() {
 
 }
 
-void makeOutputFileForImageReconstruction(Int_t Runs, Int_t tracksperrun, Int_t spotPosY) {
-   run_energy = 760;
+void makeOutputFileForImageReconstruction(Int_t Runs, Int_t tracksperrun) { // , Int_t spotPosY) {
+//   run_energy = 760;
    run_degraderThickness = 180; // This number is useless I hope
+   run_energy = 230;
    kEventsPerRun = tracksperrun;
    kDoTracking = true;
 
    Bool_t  kDraw = true;
-   Float_t spotXFrom = -75;
-   Float_t spotXTo = 75;
-   Float_t spotXSpacing = 5;
-   Float_t spotYFrom = -75;
-   Float_t spotYTo = 75;
-   Float_t spotYSpacing = 5;
+   Float_t spotXFrom = -100;
+   Float_t spotXTo = 100;
+   Float_t spotXSpacing = 100;
+   Float_t spotYFrom = -60;
+   Float_t spotYTo = 60;
+   Float_t spotYSpacing = 10;
 
    TH2F *hSimpleImage = nullptr;
    TH2F *hSimpleImageNorm = nullptr;
@@ -2423,10 +2425,10 @@ void makeOutputFileForImageReconstruction(Int_t Runs, Int_t tracksperrun, Int_t 
       hSimpleImageNorm = new TH2F("hSimpleImageNorm", "Simple Image;X [mm];Y [mm]", 150, -75, 75, 150, -75,75);
    }
 
-   Float_t outSpotX, outSpotY, outWEPL, outX2x, outX2y, outP2x, outP2y, residualRange;
+   Float_t outSpotX, outSpotY, outWEPL, outX2x, outX2y, outP2x, outP2y, residualRange, wepl, wepl_calibrated;
    Track * thisTrack = nullptr;
 
-   TFile *fOut = new TFile(Form("OutputFiles/PedHeadCarbonHelium_spotsy_%03d.root", spotPosY), "recreate");
+   TFile *fOut = new TFile("OutputFiles/PedHeadCarbon.root", "recreate");
    TTree *tOut = new TTree("WEPLData", "Carbon+Helium beam");
 
    tOut->Branch("spotX", &outSpotX, "spotX/F");
@@ -2438,48 +2440,52 @@ void makeOutputFileForImageReconstruction(Int_t Runs, Int_t tracksperrun, Int_t 
    tOut->Branch("P2y", &outP2y, "P2y/F");
 
    Int_t nruns = 0;
+   Float_t  cutMaxAngle = 60;
+   Float_t  cutAngle = 50;
+   Float_t  cutEdep = 12;
 
    for (float spotX = spotXFrom; spotX <= spotXTo; spotX += spotXSpacing) {
-//      for (float spotY = spotYFrom; spotY <= spotYTo; spotY += spotYSpacing) {
-//         printf("Spot (%.0f,%.0f)\n", spotX, spotY);
-      Tracks * tracks = loadOrCreateTracks(true, Runs, false, run_energy, spotX, spotPosY);
-      tracks->removeEmptyTracks();
+      for (float spotY = spotYFrom; spotY <= spotYTo; spotY += spotYSpacing) {
+         printf("Spot (%.0f,%.0f)\n", spotX, spotY);
+         Tracks * tracks = loadOrCreateTracks(true, Runs, false, run_energy, spotX, spotY);
+         tracks->removeEmptyTracks();
+      
+         tracks->doTrackFit();
+//         tracks->removeThreeSigmaShortTracks();
+//         tracks->removeHighAngleTracks(cutAngle); // mrad
 
-      tracks->removeHighAngleTracks(30);
-      tracks->removeNuclearInteractions();
-      tracks->fillOutIncompleteTracks();
-      tracks->doTrackFit();
-      tracks->removeThreeSigmaShortTracks();
-      tracks->removeEmptyTracks();
+         for (Int_t i=0; i<=tracks->GetEntriesFast(); i++) {
+            thisTrack = tracks->At(i);
+            if (!thisTrack) continue;
 
-      for (Int_t i=0; i<=tracks->GetEntriesFast(); i++) {
-         thisTrack = tracks->At(i);
-         if (!thisTrack) continue;
+            outSpotX = spotX;
+            outSpotY = spotY;
+            wepl = thisTrack->getFitParameterRange();
+            wepl_calibrated =  1.0036 * wepl + 2.93; // pol1 calibration
+            outWEPL = 330.9 - wepl_calibrated; // 330.9 mm: 230 MeV proton @ 78 eV H2O
+            if (isnan(outWEPL)) continue;
 
-         outSpotX = spotX;
-         outSpotY = spotPosY;
-         residualRange = getWEPLFromTL(thisTrack->getFitParameterRange());
-         if (isnan(residualRange)) continue;
+//            outWEPL = 238.8 - residualRange; // 190 MeV/u Helium
+            if (!thisTrack->At(0) || !thisTrack->At(1)) continue;
 
-         outWEPL = 238.8 - residualRange; // 190 MeV/u Helium
-         outX2x = thisTrack->At(0)->getXmm();
-         outX2y = thisTrack->At(0)->getYmm();
-         outP2x = (thisTrack->At(1)->getXmm() - outX2x) / dz;
-         outP2y = (thisTrack->At(1)->getYmm() - outX2y) / dz;
+            outX2x = thisTrack->At(0)->getXmm();
+            outX2y = thisTrack->At(0)->getYmm();
+            outP2x = (thisTrack->At(1)->getXmm() - outX2x) / dz2;
+            outP2y = (thisTrack->At(1)->getYmm() - outX2y) / dz2;
 
-         tOut->Fill();
+            tOut->Fill();
 
-         if (kDraw) {
-            hSimpleImage->Fill(outX2x, outX2y, outWEPL);
-            hSimpleImageNorm->Fill(outX2x, outX2y);
+            if (kDraw) {
+               hSimpleImage->Fill(outX2x, outX2y, outWEPL);
+               hSimpleImageNorm->Fill(outX2x, outX2y);
+            }
          }
+         nruns++;
       }
-      nruns++;
-//      }
    }
    
    fOut->Write();
-//   printf("Image Reconstruction Input data written to Output/PedHeadCarbonHelium.root.\n");
+   printf("Image Reconstruction Input data written to Output/PedHeadCarbon.root.\n");
    
    if (kDraw) {
       hSimpleImage->Divide(hSimpleImageNorm);

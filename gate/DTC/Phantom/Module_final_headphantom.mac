@@ -24,7 +24,7 @@
 /gate/patient/geometry/setHUToMaterialFile AttenuationRange.dat
 /gate/patient/placement/setTranslation 0. 0. 0. mm
 /gate/patient/placement/alignToY
-# /gate/patient/geometry/buildAndDumpDistanceTransfo dmap.mhd
+#/gate/patient/geometry/buildAndDumpDistanceTransfo dmap.mhd
 /gate/patient/geometry/distanceMap dmap.mhd
 
 /gate/world/daughters/name scanner_1
