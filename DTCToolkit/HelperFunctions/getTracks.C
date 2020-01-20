@@ -151,7 +151,6 @@ Tracks * getTracksFromClusters(Int_t Runs, Int_t dataType, Int_t frameType, Floa
          Hits * hits = new Hits();
          Hits * diffusedHits = nullptr;
          di->getMCClustersThreshold(i, nullptr, hits, spotx, spoty);
-//         hits->removeHaloAtRadius(20);
          hits->sortHits(); 
          diffusedHits = diffuseHits(gRandom, hits);
          diffusedHits->sortHits();
@@ -165,7 +164,6 @@ Tracks * getTracksFromClusters(Int_t Runs, Int_t dataType, Int_t frameType, Floa
       else {
          di->getMCClustersThreshold(i, clusters, nullptr, spotx, spoty);
          showDebug("Found " << clusters->GetEntries() << " clusters...removing halo...");
-//         clusters->removeHaloAtRadius(30);
          showDebug("ok\n");
 
 //       Int_t nRem = clusters->removeClustersInGap(1, 0); 

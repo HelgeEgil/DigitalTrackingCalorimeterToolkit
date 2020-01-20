@@ -66,8 +66,8 @@ DataInterface::DataInterface(TTree *tree) : fChain(0) {
       else if (kFinalDesign) { // FINAL DESIGN
          if (!kHelium) { // FINAL DESIGN : PROTONS
             if (kSpotScanning) { // FINAL DESIGN : PROTONS : SPOT SCANNING
-               chain->Add(Form("Data/MonteCarlo/DTC_Final_HeadPhantom_rotation%ddeg.root/Hits", kRotation));
-               printf("Opening PROTON phantom file with %d degrees rotation\n", kRotation);
+               chain->Add(Form("Data/MonteCarlo/DTC_Final_HeadPhantom_spotx%04.0f_AllY_rotation%ddeg.root/Hits", kSpotX, kRotation));
+               printf("Opening PROTON phantom file with spotX %04.0f and %d degrees rotation\n", kSpotX, kRotation);
             }
             else { // FINAL DESIGN : PROTONS : SINGLE PENCIL BEAM
                printf("Opening PROTON file with degrader thickness %.0f mm and FINAL design (3.5 mm)\n", run_degraderThickness);
@@ -487,7 +487,13 @@ void  DataInterface::getMCClustersThreshold(Int_t runNo, Clusters *clusters, Hit
    Int_t particlesBelowThreshold = 0;
 
    if (runNo == 0 && !kSpotScanning) lastJentry_ = 0;
-   
+
+/* Split the file instead (to save memory when loading 40x copies...)
+   if (lastJentry_ == 0 && kSpotScanning) {
+      lastJentry_ = findSpotIndex(useSpotX);
+   }
+*/
+
    Int_t    layer = 0, lastEventID=-1;
    Float_t  x,y;
    Bool_t   isSecondary = false;
@@ -621,6 +627,40 @@ void  DataInterface::getMCClustersThreshold(Int_t runNo, Clusters *clusters, Hit
 
       lastEventID = eventID;
    }
+}
+
+Long64_t DataInterface::findSpotIndex(Float_t findSpotX) {
+   // Binary search of input ROOT file to file the first occurence of spot X
+   // The file is of course sorted with increasing spotX values
+   
+   Long64_t nentries = fChain->GetEntriesFast(), firstIndex, maxIndex, nextIndex;
+   nextIndex = nentries / 2;
+   maxIndex = nentries;
+   firstIndex = 0;
+
+   fChain->GetEntry(0);
+   if (spotPosX == findSpotX) return 0;
+
+   Int_t nTries = 0;
+   while (nTries < 200) {
+      nTries++;
+
+      if (maxIndex - firstIndex == 1) break;
+
+      Int_t ientry = fChain->LoadTree(nextIndex);
+      fChain->GetEntry(nextIndex);
+
+      if (spotPosX >= findSpotX || ientry<0) {
+         maxIndex = nextIndex;
+         nextIndex = (firstIndex + maxIndex) / 2; 
+      }
+
+      else if (spotPosX < findSpotX) {
+         firstIndex = nextIndex;
+         nextIndex = (firstIndex + maxIndex) / 2;
+      }
+   }
+   return maxIndex;
 }
 
 void  DataInterface::getMCClusters(Int_t runNo, Clusters *clusters, Hits * hits, Float_t useSpotX, Float_t useSpotY) {

@@ -78,6 +78,8 @@ const Int_t nEnergies = 6;
 Int_t energies[nEnergies] = {122, 140, 150, 170, 180, 188};
 
 
+Float_t kSpotX = 0;
+
 enum eFrameType {kCalorimeter, kTracker};
 enum eDataType {kMC, kData};
 enum eMaterial {kTungsten, kAluminum, kPMMA, kWater, kCarbon};

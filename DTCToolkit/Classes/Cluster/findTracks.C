@@ -221,6 +221,8 @@ Tracks * Clusters::findTracksWithRecursiveWeighting() {
       delete seeds;
       delete nextClusters;
    }
+   
+   if (kDoTrackerPropagation) delete trackerTracks;
    return tracks;
 }
 
