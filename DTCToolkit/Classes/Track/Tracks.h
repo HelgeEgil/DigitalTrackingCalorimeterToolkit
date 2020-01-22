@@ -23,7 +23,7 @@ class Tracks : public TObject {
    private:
       TClonesArray tracks_;
       TClonesArray clustersWithoutTrack_;
-      Int_t        EIDindex_[1000000];
+      Int_t        EIDindex_[100000];
 
    public:
       Tracks() : tracks_("DTC::Track", 2000), clustersWithoutTrack_("DTC::Cluster", 10000) { tracks_.SetOwner(kTRUE); clustersWithoutTrack_.SetOwner(kTRUE); }

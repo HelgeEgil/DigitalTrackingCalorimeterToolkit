@@ -184,32 +184,26 @@ Tracks * Clusters::findTracksWithRecursiveWeighting() {
          doRecursiveWeightedTracking(seedNode, endNodes, thisMaxTrackScore); 
          track = seedNode->getBestTrack();
          
-         Int_t tsize = 1;
-         if (kDoTrackerPropagation) tsize = -1;
-         
-//         if ((track->GetEntries() >= (s+tsize)) && (track->GetEntries() >=1)) {
-
-            if (kDoTrackerPropagation) {
-               // Match track to trackerTrack
-               Cluster * firstClusterInTrack = track->Last(); // Last added, not yet sorted
-               for (Int_t j=0; j<trackerTracks->GetEntriesFast(); j++) {
-                  Cluster *tc = trackerTracks->At(j)->Last();
-                  Bool_t xOK = firstClusterInTrack->getX() == tc->getX();
-                  Bool_t yOK = firstClusterInTrack->getY() == tc->getY();
-                  Bool_t zOK = firstClusterInTrack->getLayer() == tc->getLayer();
-                  if (xOK && yOK && zOK) {
-                     track->appendCluster(trackerTracks->At(j)->At(0));
-                     track->appendCluster(trackerTracks->At(j)->At(1));
-                  }
+         if (kDoTrackerPropagation) {
+            // Match track to trackerTrack
+            Cluster * firstClusterInTrack = track->Last(); // Last added, not yet sorted
+            for (Int_t j=0; j<trackerTracks->GetEntriesFast(); j++) {
+               Cluster *tc = trackerTracks->At(j)->Last();
+               Bool_t xOK = firstClusterInTrack->getX() == tc->getX();
+               Bool_t yOK = firstClusterInTrack->getY() == tc->getY();
+               Bool_t zOK = firstClusterInTrack->getLayer() == tc->getLayer();
+               if (xOK && yOK && zOK) {
+                  track->appendCluster(trackerTracks->At(j)->At(0));
+                  track->appendCluster(trackerTracks->At(j)->At(1));
                }
             }
+         }
 
-            track->sortTrack();
+         track->sortTrack();
 
-            tracks->appendTrack(track);
-            removeTrackFromClustersWithoutTrack(track);
-            markUsedClusters(track);
-   //      }
+         tracks->appendTrack(track);
+         removeTrackFromClustersWithoutTrack(track);
+         markUsedClusters(track);
 
          delete track;
          seedNode->deleteNodeTree();

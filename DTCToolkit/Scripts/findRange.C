@@ -153,8 +153,9 @@ vector<Float_t> findRange::Run(Double_t energy, Double_t sigma_mev, Int_t mm, In
    hFirstEnergy2->SetFillColor(kBlue-7);
    hFirstEnergy2->Draw();
 
-   std::ofstream filename(Form("OutputFiles/findManyRangesDegrader_final_idx%d.csv", fileIdx));// , std::ofstream::out | std::ofstream::app);
-   filename << degrader << " " << 330.9 -degrader << " " << hR << " " << hRS << " " << fE << " " << fES << endl; 
+   // helium: 331.7; proton: 330.9
+   std::ofstream filename(Form("OutputFiles/findManyRangesDegrader_final_Helium_idx%d.csv", fileIdx));// , std::ofstream::out | std::ofstream::app);
+   filename << degrader << " " << 331.7 - degrader << " " << hR << " " << hRS << " " << fE << " " << fES << endl; 
    
    delete c2;
    delete hRange;

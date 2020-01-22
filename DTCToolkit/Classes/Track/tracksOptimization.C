@@ -143,7 +143,7 @@ void Tracks::removeTracksLeavingDetector() {
       nextPoint = getTrackExtrapolationToLayer(At(i), lastLayer + 1);
       if (!nextPoint) continue;
       
-      if (isPointOutOfBounds(nextPoint, -15)) {
+      if (isPointOutOfBounds(nextPoint, -30)) {
          removeTrack(At(i));
          nTracksRemoved++;
       }

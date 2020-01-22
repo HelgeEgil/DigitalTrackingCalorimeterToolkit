@@ -2429,7 +2429,7 @@ void makeOutputFileForImageReconstruction(Int_t Runs, Int_t tracksperrun, Float_
    Float_t outSpotX, outSpotY, outWEPL, outX2x, outX2y, outP2x, outP2y, residualRange, wepl, wepl_calibrated, outWEPL_uncalibrated;
    Track * thisTrack = nullptr;
 
-   TFile *fOut = new TFile(Form("OutputFiles/PedHead_spotx%.0f.root", spotPosX), "recreate");
+   TFile *fOut = new TFile(Form("OutputFiles/PedHead_rotation%ddeg_spotx%.0f.root", kRotation, spotPosX), "recreate");
    TTree *tOut = new TTree("WEPLData", "Carbon+Helium beam");
 
    tOut->Branch("spotX", &outSpotX, "spotX/F");

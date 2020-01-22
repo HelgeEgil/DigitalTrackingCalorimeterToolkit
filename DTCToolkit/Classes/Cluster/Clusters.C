@@ -34,6 +34,8 @@ Clusters::Clusters(Bool_t frameType) : clusters_("DTC::Cluster", kEventsPerRun*1
 Clusters::~Clusters() {
    // Destructor
    Clear("C");
+   layerIndex_.clear();   
+   clustersPerEventID_.clear();
    clusters_.Delete();
    clustersWithoutTrack_.Delete();
 }

@@ -140,9 +140,9 @@ findRange::findRange(Float_t energy, Int_t thickness, Float_t degraderThickness,
          chain->Add(Form("Data/MonteCarlo/DTC_Full_Aluminium_%.0fMeV_%dmm.root/Hits", energy, thickness));
       }
       else { // degrader is used, then energy -> degrader thickness and init energy = 230 MeV
-         printf("Opening file  Data/MonteCarlo/DTC_Full_Final_Degrader%03.0fmm_%.0fMeV.root/Hits\n", degraderThickness, energy);
+         printf("Opening file  Data/MonteCarlo/DTC_Full_Final_Helium_Degrader%03.0fmm_%.0fMeV.root/Hits\n", degraderThickness, energy);
       //   chain->Add(Form("../Data/MonteCarlo/DTC_Full_Aluminium_Helium_Absorber%dmm_Degrader%03.0fmm_%.0fMeV.root/Hits", thickness, degraderThickness, energy));
-         chain->Add(Form("Data/MonteCarlo/DTC_Full_Final_Degrader%03.0fmm_%.0fMeV.root/Hits", degraderThickness, energy));
+         chain->Add(Form("Data/MonteCarlo/DTC_Full_Final_Helium_Degrader%03.0fmm_%.0fMeV.root/Hits", degraderThickness, energy));
       }
 
       tree = chain;
@@ -194,41 +194,41 @@ void findRange::Init(TTree *tree)
    fChain->SetMakeClass(1);
 
    fChain->SetBranchAddress("PDGEncoding", &PDGEncoding, &b_PDGEncoding);
-   fChain->SetBranchAddress("trackID", &trackID, &b_trackID);
+//   fChain->SetBranchAddress("trackID", &trackID, &b_trackID);
    fChain->SetBranchAddress("parentID", &parentID, &b_parentID);
-   fChain->SetBranchAddress("time", &time, &b_time);
+//   fChain->SetBranchAddress("time", &time, &b_time);
    fChain->SetBranchAddress("edep", &edep, &b_edep);
-   fChain->SetBranchAddress("stepLength", &stepLength, &b_stepLength);
+//   fChain->SetBranchAddress("stepLength", &stepLength, &b_stepLength);
    fChain->SetBranchAddress("posX", &posX, &b_posX);
    fChain->SetBranchAddress("posY", &posY, &b_posY);
    fChain->SetBranchAddress("posZ", &posZ, &b_posZ);
-   fChain->SetBranchAddress("localPosX", &localPosX, &b_localPosX);
-   fChain->SetBranchAddress("localPosY", &localPosY, &b_localPosY);
-   fChain->SetBranchAddress("localPosZ", &localPosZ, &b_localPosZ);
+//   fChain->SetBranchAddress("localPosX", &localPosX, &b_localPosX);
+//   fChain->SetBranchAddress("localPosY", &localPosY, &b_localPosY);
+//   fChain->SetBranchAddress("localPosZ", &localPosZ, &b_localPosZ);
    fChain->SetBranchAddress("baseID", &baseID, &b_baseID);
    fChain->SetBranchAddress("level1ID", &level1ID, &b_level1ID);
    fChain->SetBranchAddress("level2ID", &level2ID, &b_level2ID);
    fChain->SetBranchAddress("level3ID", &level3ID, &b_level3ID);
    fChain->SetBranchAddress("level4ID", &level4ID, &b_level4ID);
    fChain->SetBranchAddress("layerID", &layerID, &b_layerID);
-   fChain->SetBranchAddress("photonID", &photonID, &b_photonID);
-   fChain->SetBranchAddress("nPhantomCompton", &nPhantomCompton, &b_nPhantomCompton);
-   fChain->SetBranchAddress("nCrystalCompton", &nCrystalCompton, &b_nCrystalCompton);
-   fChain->SetBranchAddress("nPhantomRayleigh", &nPhantomRayleigh, &b_nPhantomRayleigh);
-   fChain->SetBranchAddress("nCrystalRayleigh", &nCrystalRayleigh, &b_nCrystalRayleigh);
-   fChain->SetBranchAddress("primaryID", &primaryID, &b_primaryID);
-   fChain->SetBranchAddress("sourcePosX", &sourcePosX, &b_sourcePosX);
-   fChain->SetBranchAddress("sourcePosY", &sourcePosY, &b_sourcePosY);
-   fChain->SetBranchAddress("sourcePosZ", &sourcePosZ, &b_sourcePosZ);
-   fChain->SetBranchAddress("sourceID", &sourceID, &b_sourceID);
+//   fChain->SetBranchAddress("photonID", &photonID, &b_photonID);
+//   fChain->SetBranchAddress("nPhantomCompton", &nPhantomCompton, &b_nPhantomCompton);
+//   fChain->SetBranchAddress("nCrystalCompton", &nCrystalCompton, &b_nCrystalCompton);
+//   fChain->SetBranchAddress("nPhantomRayleigh", &nPhantomRayleigh, &b_nPhantomRayleigh);
+//   fChain->SetBranchAddress("nCrystalRayleigh", &nCrystalRayleigh, &b_nCrystalRayleigh);
+//   fChain->SetBranchAddress("primaryID", &primaryID, &b_primaryID);
+//   fChain->SetBranchAddress("sourcePosX", &sourcePosX, &b_sourcePosX);
+//   fChain->SetBranchAddress("sourcePosY", &sourcePosY, &b_sourcePosY);
+//   fChain->SetBranchAddress("sourcePosZ", &sourcePosZ, &b_sourcePosZ);
+//   fChain->SetBranchAddress("sourceID", &sourceID, &b_sourceID);
    fChain->SetBranchAddress("eventID", &eventID, &b_eventID);
-   fChain->SetBranchAddress("runID", &runID, &b_runID);
-   fChain->SetBranchAddress("axialPos", &axialPos, &b_axialPos);
-   fChain->SetBranchAddress("rotationAngle", &rotationAngle, &b_rotationAngle);
+//   fChain->SetBranchAddress("runID", &runID, &b_runID);
+//   fChain->SetBranchAddress("axialPos", &axialPos, &b_axialPos);
+//   fChain->SetBranchAddress("rotationAngle", &rotationAngle, &b_rotationAngle);
    fChain->SetBranchAddress("volumeID", volumeID, &b_volumeID);
    fChain->SetBranchAddress("processName", processName, &b_processName);
-   fChain->SetBranchAddress("comptVolName", comptVolName, &b_comptVolName);
-   fChain->SetBranchAddress("RayleighVolName", RayleighVolName, &b_RayleighVolName);
+//   fChain->SetBranchAddress("comptVolName", comptVolName, &b_comptVolName);
+//   fChain->SetBranchAddress("RayleighVolName", RayleighVolName, &b_RayleighVolName);
    Notify();
 }
 
