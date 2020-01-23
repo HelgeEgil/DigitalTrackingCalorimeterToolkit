@@ -44,7 +44,7 @@ vector<Float_t> findRange::Run(Double_t energy, Double_t sigma_mev, Int_t mm, In
    Float_t  dE = 0, dE2 = 0;
 
    TH1F *hFirstRange = new TH1F("firstRange", "firstRange", 1000, 0, 400);
-   TH1F *hFirstEnergy = new TH1F("firstEnergy", "firstEnergy", 1000, 0, 250);
+   TH1F *hFirstEnergy = new TH1F("firstEnergy", "firstEnergy", 1000, 0, 1000);
    TH1F *hFirstEnergy2 = new TH1F("firstEnergy2", "Energy loss in trackers", 1000, 0, 5);
 
    Float_t allRanges[150000];
