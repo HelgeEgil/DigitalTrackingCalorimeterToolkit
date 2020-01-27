@@ -2451,8 +2451,9 @@ void makeOutputFileForImageReconstruction(Int_t Runs, Int_t tracksperrun, Float_
       Tracks * tracks = loadOrCreateTracks(true, Runs, false, run_energy, spotPosX, spotY);
       tracks->removeEmptyTracks();
    
-      tracks->doTrackFit();
-//         tracks->removeThreeSigmaShortTracks();
+      tracks->doTrackFit(false);
+      tracks->removeNuclearInteractions();
+      tracks->removeThreeSigmaShortTracks();
 //         tracks->removeHighAngleTracks(cutAngle); // mrad
 
       for (Int_t i=0; i<=tracks->GetEntriesFast(); i++) {
