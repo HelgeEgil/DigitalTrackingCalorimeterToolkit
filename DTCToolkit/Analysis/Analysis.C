@@ -2363,12 +2363,15 @@ void analyseHelium(Int_t Runs, Int_t dataType, Bool_t recreate, Int_t switchLaye
 }
 
 void showOutputFileForImageReconstruction() {
-   TH2F * hSimpleImagePrim = new TH2F("hSimpleImagePrim", "CHeCT projection (only primaries);X [mm];Y [mm]", 150, -120, 120, 150, -100,100);
-   TH2F * hSimpleImageNormPrim = new TH2F("hSimpleImageNormPrim", "CHeCT projection (only primaries);X [mm];Y [mm]", 150, -120, 120, 150, -100,100);
-   TH2F * hSimpleImage = new TH2F("hSimpleImage", "CHeCT projection;X [mm];Y [mm]", 150,  -120, 120, 150, -100,100);
-   TH2F * hSimpleImageNorm = new TH2F("hSimpleImageNorm", "CHeCT projection;X [mm];Y [mm]", 150,  -120, 120, 150, -100,100);
+   Int_t resX = 256;
+   Int_t resY = 256;
 
-   TFile *fIn = new TFile("OutputFiles/PedHeadCarbon.root");
+   TH2F * hSimpleImagePrim = new TH2F("hSimpleImagePrim", "CHeCT projection (only primaries);X [mm];Y [mm]", resX, -120, 120, resY, -100,100);
+   TH2F * hSimpleImageNormPrim = new TH2F("hSimpleImageNormPrim", "CHeCT projection (only primaries);X [mm];Y [mm]", resX, -120, 120, resY, -100,100);
+   TH2F * hSimpleImage = new TH2F("hSimpleImage", "CHeCT projection;X [mm];Y [mm]", resX,  -120, 120, resY, -100,100);
+   TH2F * hSimpleImageNorm = new TH2F("hSimpleImageNorm", "CHeCT projection;X [mm];Y [mm]", resX,  -120, 120, resY, -100,100);
+
+   TFile *fIn = new TFile("OutputFiles/PedHeadRotation0.root");
    TTree *tIn = (TTree*) fIn->Get("WEPLData");
 
    Float_t x2x, x2y, wepl;
@@ -2394,11 +2397,11 @@ void showOutputFileForImageReconstruction() {
    hSimpleImagePrim->Divide(hSimpleImageNormPrim);
 
    TCanvas *c = new TCanvas();
-   c->Divide(1,2,1e-5,1e-5);
-   c->cd(1);
+//   c->Divide(1,2,1e-5,1e-5);
+//   c->cd(1);
    hSimpleImage->Draw("COLZ");
-   c->cd(2);
-   hSimpleImagePrim->Draw("COLZ");
+//   c->cd(2);
+//   hSimpleImagePrim->Draw("COLZ");
 
 }
 
