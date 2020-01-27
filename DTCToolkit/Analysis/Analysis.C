@@ -762,9 +762,11 @@ void drawTracksDepthDose(Int_t Runs, Int_t dataType, Bool_t recreate, Float_t en
    tracks->doTrackFit(); 
 //   tracks->removeTracksEndingInHalo();
 
-   tracks->removeHighAngleTracks(cutAngle); // mrad
+//   tracks->removeHighAngleTracks(cutAngle); // mrad
 //   tracks->removeHighAngularChangeTracks(cutMaxAngle); // mrad
-//   tracks->removeNuclearInteractions();
+   tracks->removeTracksWithMinWEPL(100); // max 330 - 100 = 230 mm sized phantoms
+   tracks->removeNuclearInteractions();
+
 //   tracks->removeThreeSigmaShortTracks();
 
    /*
@@ -797,6 +799,8 @@ void drawTracksDepthDose(Int_t Runs, Int_t dataType, Bool_t recreate, Float_t en
       fitRange = thisTrack->getFitParameterRange();
       fitScale = thisTrack->getFitParameterScale();
       fitError = quadratureAdd(thisTrack->getFitParameterError(), dz*0.28867); // latter term from error on layer position
+
+      if (fitRange > 50) continue;
 
       if (fitIdx < plotSize) {
          drawIndividualGraphs(cGraph, outputGraph, fitRange, fitScale, fitError, fitIdx++);
@@ -879,9 +883,10 @@ void drawTracksRangeHistogram(Int_t Runs, Int_t dataType, Bool_t recreate, Float
 // Use
 //   tracks->removeHighAngularChangeTracks(cutMaxAngle); // mrad
    tracks->doTrackFit();
-//   tracks->removeNuclearInteractions();
-   tracks->removeThreeSigmaShortTracks();
-   tracks->removeHighAngleTracks(cutAngle); // mrad
+   tracks->removeTracksWithMinWEPL(100);
+   tracks->removeNuclearInteractions();
+//   tracks->removeThreeSigmaShortTracks();
+//   tracks->removeHighAngleTracks(cutAngle); // mrad
 
    for (Int_t j=0; j<tracks->GetEntriesFast(); j++) {
       Track *thisTrack = tracks->At(j);
@@ -956,6 +961,8 @@ void drawTracksRangeHistogram(Int_t Runs, Int_t dataType, Bool_t recreate, Float
          }
       }
 
+      Float_t calibratedMean = empiricalMean * 1.0036 + 2.93; 
+
       gPad->Update();
       gStyle->SetOptStat(11);
       TPaveStats *ps = (TPaveStats*) cFitResults->GetPrimitive("stats");
@@ -966,6 +973,7 @@ void drawTracksRangeHistogram(Int_t Runs, Int_t dataType, Bool_t recreate, Float
       ps->AddText(Form("Nominal WEPL = %.2f #pm %.2f", expectedMean, expectedStraggling));
       ps->AddText(Form("Calculated WEPL = %.2f #pm %.2f", empiricalMean, empiricalSigma));
       ps->AddText(Form("WEPL deviation = %.2f #pm %.2f", empiricalMean - expectedMean, sqrt(pow(empiricalSigma, 2) - pow(expectedStraggling, 2))));
+      ps->AddText(Form("Cal. WEPL deviation = %.2f #pm %.2f", calibratedMean - expectedMean, sqrt(pow(empiricalSigma, 2) - pow(expectedStraggling, 2))));
       cFitResults->Modified();
 
       cFitResults->SaveAs(Form("OutputFiles/RangeHistogram/%.0f_%.0f.png", kAbsorberThickness, degraderThickness));
@@ -2363,12 +2371,16 @@ void analyseHelium(Int_t Runs, Int_t dataType, Bool_t recreate, Int_t switchLaye
 }
 
 void showOutputFileForImageReconstruction() {
-   TH2F * hSimpleImagePrim = new TH2F("hSimpleImagePrim", "CHeCT projection (only primaries);X [mm];Y [mm]", 150, -120, 120, 150, -100,100);
-   TH2F * hSimpleImageNormPrim = new TH2F("hSimpleImageNormPrim", "CHeCT projection (only primaries);X [mm];Y [mm]", 150, -120, 120, 150, -100,100);
-   TH2F * hSimpleImage = new TH2F("hSimpleImage", "CHeCT projection;X [mm];Y [mm]", 150,  -120, 120, 150, -100,100);
-   TH2F * hSimpleImageNorm = new TH2F("hSimpleImageNorm", "CHeCT projection;X [mm];Y [mm]", 150,  -120, 120, 150, -100,100);
+   Int_t resX = 256;
+   Int_t resY = 256;
 
-   TFile *fIn = new TFile("OutputFiles/PedHeadCarbon.root");
+   TH2F * hSimpleImagePrim = new TH2F("hSimpleImagePrim", "CHeCT projection (only primaries);X [mm];Y [mm]", resX, -120, 120, resY, -100,100);
+   TH2F * hSimpleImageNormPrim = new TH2F("hSimpleImageNormPrim", "CHeCT projection (only primaries);X [mm];Y [mm]", resX, -120, 120, resY, -100,100);
+   TH2F * hSimpleImage = new TH2F("hSimpleImage", "CHeCT projection;X [mm];Y [mm]", resX,  -120, 120, resY, -100,100);
+   TH2F * hSimpleImageNorm = new TH2F("hSimpleImageNorm", "CHeCT projection;X [mm];Y [mm]", resX,  -120, 120, resY, -100,100);
+   TH1F * hWEPL = new TH1F("hWEPL", "WEPL values in (-100,0);WEPL [mm];Y [mm]", 100, 0, 330);
+
+   TFile *fIn = new TFile("OutputFiles/PedHeadRotation90.root");
    TTree *tIn = (TTree*) fIn->Get("WEPLData");
 
    Float_t x2x, x2y, wepl;
@@ -2381,6 +2393,10 @@ void showOutputFileForImageReconstruction() {
 
    for (Int_t i=0; i<tIn->GetEntriesFast(); i++) {
       tIn->GetEntry(i);
+      if (fabs(x2x+100) < 1.5 && fabs(x2y) < 1.5) hWEPL->Fill(wepl);
+
+      if (wepl > 250) continue;
+      
       hSimpleImage->Fill(x2x, x2y, wepl);
       hSimpleImageNorm->Fill(x2x, x2y);
 
@@ -2394,11 +2410,13 @@ void showOutputFileForImageReconstruction() {
    hSimpleImagePrim->Divide(hSimpleImageNormPrim);
 
    TCanvas *c = new TCanvas();
-   c->Divide(1,2,1e-5,1e-5);
-   c->cd(1);
+//   c->Divide(1,2,1e-5,1e-5);
+//   c->cd(1);
    hSimpleImage->Draw("COLZ");
-   c->cd(2);
-   hSimpleImagePrim->Draw("COLZ");
+//   c->cd(2);
+//   hSimpleImagePrim->Draw("COLZ");
+   TCanvas *c2 = new TCanvas();
+   hWEPL->Draw();
 
 }
 
@@ -2410,7 +2428,7 @@ void makeOutputFileForImageReconstruction(Int_t Runs, Int_t tracksperrun, Float_
    kDoTracking = true;
    kSpotX = spotPosX; // Use this to open correct file
 
-   Bool_t  kDraw = false;
+   Bool_t  kDraw = true;
    Float_t spotXFrom = -100;
    Float_t spotXTo = 100;
    Float_t spotXSpacing = 5;
@@ -2422,8 +2440,8 @@ void makeOutputFileForImageReconstruction(Int_t Runs, Int_t tracksperrun, Float_
    TH2F *hSimpleImageNorm = nullptr;
 
    if (kDraw) {
-      hSimpleImage = new TH2F("hSimpleImage", "Simple Image;X [mm];Y [mm]", 150, -75, 75, 150, -75,75);
-      hSimpleImageNorm = new TH2F("hSimpleImageNorm", "Simple Image;X [mm];Y [mm]", 150, -75, 75, 150, -75,75);
+      hSimpleImage = new TH2F("hSimpleImage", "Simple Image;X [mm];Y [mm]", 100, -125, -75, 150, -75,75);
+      hSimpleImageNorm = new TH2F("hSimpleImageNorm", "Simple Image;X [mm];Y [mm]", 100, -125, -75, 150, -75,75);
    }
 
    Float_t outSpotX, outSpotY, outWEPL, outX2x, outX2y, outP2x, outP2y, residualRange, wepl, wepl_calibrated, outWEPL_uncalibrated;
@@ -2446,15 +2464,18 @@ void makeOutputFileForImageReconstruction(Int_t Runs, Int_t tracksperrun, Float_
    Float_t  cutAngle = 50;
    Float_t  cutEdep = 12;
 
-   for (float spotY = spotYFrom; spotY <= spotYTo; spotY += spotYSpacing) {
+//   for (float spotY = spotYFrom; spotY <= spotYTo; spotY += spotYSpacing) {
+   Float_t spotY = 0;
+
       printf("Spot (%.0f,%.0f)\n", spotPosX, spotY);
       Tracks * tracks = loadOrCreateTracks(true, Runs, false, run_energy, spotPosX, spotY);
       tracks->removeEmptyTracks();
    
       tracks->doTrackFit(false);
-      tracks->removeNuclearInteractions();
+      tracks->removeTracksWithMinWEPL(100);
       tracks->removeThreeSigmaShortTracks();
-//         tracks->removeHighAngleTracks(cutAngle); // mrad
+//      tracks->removeHighAngleTracks(cutAngle); // mrad
+      tracks->removeNuclearInteractions();
 
       for (Int_t i=0; i<=tracks->GetEntriesFast(); i++) {
          thisTrack = tracks->At(i);
@@ -2485,7 +2506,7 @@ void makeOutputFileForImageReconstruction(Int_t Runs, Int_t tracksperrun, Float_
       }
        nruns++;
        delete tracks;
-   }
+//   }
 
    fOut->ReOpen("update"); // Lost connection due to parallel processes? NOT ANYMORE AMIGO
    tOut->Write();

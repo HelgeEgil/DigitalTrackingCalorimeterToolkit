@@ -66,7 +66,7 @@ DataInterface::DataInterface(TTree *tree) : fChain(0) {
       else if (kFinalDesign) { // FINAL DESIGN
          if (!kHelium) { // FINAL DESIGN : PROTONS
             if (kSpotScanning) { // FINAL DESIGN : PROTONS : SPOT SCANNING
-               chain->Add(Form("Data/MonteCarlo/DTC_Final_HeadPhantom_spotx%04.0f_AllY_rotation%ddeg.root/Hits", kSpotX, kRotation));
+               chain->Add(Form("Data/MonteCarlo/DTC_Final_HeadPhantom_rotation%ddeg.root/Hits", kRotation));
                printf("Opening PROTON phantom file with spotX %04.0f and %d degrees rotation\n", kSpotX, kRotation);
             }
             else { // FINAL DESIGN : PROTONS : SINGLE PENCIL BEAM
@@ -488,11 +488,11 @@ void  DataInterface::getMCClustersThreshold(Int_t runNo, Clusters *clusters, Hit
 
    if (runNo == 0 && !kSpotScanning) lastJentry_ = 0;
 
-/* Split the file instead (to save memory when loading 40x copies...)
+// Split the file instead (to save memory when loading 40x copies...)
    if (lastJentry_ == 0 && kSpotScanning) {
       lastJentry_ = findSpotIndex(useSpotX);
    }
-*/
+
 
    Int_t    layer = 0, lastEventID=-1;
    Float_t  x,y;

@@ -143,13 +143,15 @@ void Tracks::removeTracksLeavingDetector() {
       nextPoint = getTrackExtrapolationToLayer(At(i), lastLayer + 1);
       if (!nextPoint) continue;
       
-      if (isPointOutOfBounds(nextPoint, -30)) {
+      if (isPointOutOfBounds(nextPoint, -30)) { // 30 * ~30 um = 1 mm
          removeTrack(At(i));
          nTracksRemoved++;
       }
 
       delete nextPoint;
    }
+
+   Compress();
 
 //   cout << "Tracks::removeTracksLeavingDetector() has removed " << nTracksRemoved  << " tracks.\n";
 }
@@ -557,6 +559,34 @@ void Tracks::removeNuclearInteractions() {
    Float_t fraction = nTotal ? nRemoved/float(nTotalStart) : 0;
    cout << "Tracks::removeNuclearInteractions() removed " << nRemoved << " of " << nTotalStart << " (" << fraction * 100 << "%) tracks (" << 100*float(nRemovedNuclear)/nRemoved << "% secondaries).\n";
 }
+
+void Tracks::removeTracksWithMinWEPL(Float_t minWEPL) {
+   Track  * thisTrack = nullptr;
+   Int_t    nRemoved = 0;
+   Int_t    nRemovedNuclear = 0;
+   Int_t    nTotal = GetEntriesFast();
+   Int_t    nTotalStart = GetEntries();
+   Int_t    fpr = 0;
+
+   for (Int_t i=0; i<nTotal; i++) {
+      thisTrack = At(i);
+      if (!At(i)) continue;
+
+      fpr = thisTrack->getFitParameterRange();
+      if (fpr < minWEPL) {
+         if (thisTrack->Last()->isSecondary()) nRemovedNuclear++;
+         removeTrack(thisTrack);
+         nRemoved++;
+      }
+   }
+
+   removeEmptyTracks();
+   Compress();
+   
+      Float_t fraction = nTotal ? nRemoved/float(nTotalStart) : 0;
+   cout << "Tracks::removeTracksWithMinWEPL(" << minWEPL << ") removed " << nRemoved << " of " << nTotalStart << " (" << fraction * 100 << "%) tracks (" << 100*float(nRemovedNuclear)/nRemoved << "% secondaries).\n";
+}
+
 
 void Tracks::removeThreeSigmaShortTracks() {
    Track  * thisTrack = nullptr;
