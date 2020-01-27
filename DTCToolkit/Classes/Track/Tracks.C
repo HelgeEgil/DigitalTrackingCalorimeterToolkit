@@ -159,9 +159,12 @@ void Tracks::extrapolateToLayer0() {
 }
 
 void Tracks::doTrackFit(Bool_t freeScale) {
+   TGraph * out = nullptr;
+
    for (Int_t i=0; i<GetEntriesFast(); i++) {
       if (!At(i)) continue;
-      At(i)->doTrackFit(freeScale);
+      out = At(i)->doTrackFit(freeScale);
+      delete out;
    }
 }
 

@@ -12,34 +12,37 @@ using namespace std;
 void combineSpots() {
 
    TFile         *fSimulationIn = nullptr;
-   TFile         *fSimulationOut = new TFile("/home/rttn/workspaceKDevelop/focal/focal/DTCToolkit/Data/MonteCarlo/DTC_Final_HeadPhantom_rotation90deg.root", "recreate");
+   TFile         *fSimulationOut = nullptr;
    TTree         *treeSimulationIn = nullptr;
-   TTree         *treeSimulationOut = new TTree("Hits", "Combined spots");
+   TTree         *treeSimulationOut = nullptr;
 
    Float_t        x,y,z,edep,outX, outY, outZ, outEdep, spotPosX, spotPosY;
    Int_t          parentID, eventID, outEventID, trackID, baseID, level1ID, outBaseID, outLevel1ID, outParentID, outTrackID, PDGEncoding, outPDGEncoding;
     
    Int_t    lastEventID = -1;
    Int_t    totalRunningTally = 0;
+
    
-   treeSimulationOut->Branch("posX", &outX, "posX/F");
-   treeSimulationOut->Branch("posY", &outY, "posY/F");
-   treeSimulationOut->Branch("posZ", &outZ, "posZ/F");
-   treeSimulationOut->Branch("edep",&outEdep, "edep/F");
-   treeSimulationOut->Branch("eventID",&outEventID, "eventID/I");
-   treeSimulationOut->Branch("parentID",&outParentID, "parentID/I");
-   treeSimulationOut->Branch("PDGEncoding", &outPDGEncoding, "PDGEncoding/I");
-   treeSimulationOut->Branch("baseID", &outBaseID, "level1ID/I");
-   treeSimulationOut->Branch("level1ID", &outLevel1ID, "baseID/I");
-   treeSimulationOut->Branch("spotPosX", &spotPosX, "spotPosX/F");
-   treeSimulationOut->Branch("spotPosY", &spotPosY, "spotPosY/F");
-  
-   for (int spotX = -100; spotX <= 100; spotX += 100) {
-      for (int spotY = -100; spotY <= 100; spotY += 10) {
+   for (int spotX = -100; spotX <= 100; spotX += 5) {
+      fSimulationOut = new TFile(Form("../../DTCToolkit/Data/MonteCarlo/DTC_Final_HeadPhantom_spotx%04d_AllY_rotation0deg.root", spotX), "recreate");
+      treeSimulationOut = new TTree("Hits", "Combined spots");
 
-         printf("Running @ spot (%03d, %03d)\n", spotX, spotY);
-         fSimulationIn = new TFile(Form("/home/rttn/workspaceKDevelop/focal/focal/DTCToolkit/Data/MonteCarlo/DTC_Final_HeadPhantom_spotx%04d_spoty%04d_rotation90deg.root", spotX, spotY), "READ");
+      treeSimulationOut->Branch("posX", &outX, "posX/F");
+      treeSimulationOut->Branch("posY", &outY, "posY/F");
+      treeSimulationOut->Branch("posZ", &outZ, "posZ/F");
+      treeSimulationOut->Branch("edep",&outEdep, "edep/F");
+      treeSimulationOut->Branch("eventID",&outEventID, "eventID/I");
+      treeSimulationOut->Branch("parentID",&outParentID, "parentID/I");
+      treeSimulationOut->Branch("PDGEncoding", &outPDGEncoding, "PDGEncoding/I");
+      treeSimulationOut->Branch("baseID", &outBaseID, "level1ID/I");
+      treeSimulationOut->Branch("level1ID", &outLevel1ID, "baseID/I");
+      treeSimulationOut->Branch("spotPosX", &spotPosX, "spotPosX/F");
+      treeSimulationOut->Branch("spotPosY", &spotPosY, "spotPosY/F");
 
+      for (int spotY = -80; spotY <= 80; spotY += 5) {
+
+         printf("Running @ spot (%04d, %04d)\n", spotX, spotY);
+         fSimulationIn = new TFile(Form("../../DTCToolkit/Data/MonteCarlo/DTC_Final_HeadPhantom_spotx%04d_spoty%04d_rotation0deg.root", spotX, spotY), "READ");
          treeSimulationIn = (TTree*) fSimulationIn->Get("Hits");
 
          treeSimulationIn->SetBranchAddress("posX",&x);
@@ -84,9 +87,13 @@ void combineSpots() {
 
             lastEventID = eventID;
          }
+         delete fSimulationIn;
       }
+
+      fSimulationOut->Write();
+      fSimulationOut->Close();
+      delete fSimulationOut;
    }
 
-   fSimulationOut->Write();
    printf("Merged %d primaries.\n", totalRunningTally);
 }

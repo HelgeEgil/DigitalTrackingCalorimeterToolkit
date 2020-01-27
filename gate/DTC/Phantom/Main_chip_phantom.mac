@@ -18,6 +18,17 @@
 /gate/physics/SetMaxStepSizeInRegion world 1 mm
 /gate/physics/ActivateStepLimiter proton
 
+#/gate/actor/addActor PhaseSpaceActor PSA
+#/gate/actor/PSA/save ../../../DTCToolkit/Data/MonteCarlo/DTC_PSA_spotx{spotx}_spoty{spoty}_rotation{rotation}deg.root
+#/gate/actor/PSA/attachTo PSAvolume
+#/gate/actor/PSA/enableEkine true
+#/gate/actor/PSA/enableParticleName true
+#/gate/actor/PSA/storeSecondaries false
+#/gate/actor/PSA/enableProductionProcess false
+#/gate/actor/PSA/enableProductionVolume true
+#/gate/actor/PSA/addFilter particleFilter
+#/gate/actor/PSA/particleFilter/addParticlePDG 2212
+
 /gate/run/initialize
 
 #=======================#
@@ -42,7 +53,7 @@
 
 /gate/output/root/enable
 /gate/output/root/setRootSinglesFlag 0
-/gate/output/root/setFileName ../../../DTCToolkit/Data/MonteCarlo/DTC_Final_HeadPhantom_spotx{spotx}_spoty{spoty}_rotation{rotation}deg
+/gate/output/root/setFileName ../../../DTCToolkit/Data/MonteCarlo/DTC_Final_HeadPhantom_rotation{rotation}deg_spotx{spotx}_spoty{spoty}
 
 #===============#
 # START BEAMS	#
@@ -50,5 +61,5 @@
 
 /gate/random/setEngineName MersenneTwister
 /gate/random/setEngineSeed auto
-/gate/application/setTotalNumberOfPrimaries 1000
+/gate/application/setTotalNumberOfPrimaries 2500
 /gate/application/start

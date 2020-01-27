@@ -132,7 +132,6 @@ Tracks * getTracksFromClusters(Int_t Runs, Int_t dataType, Int_t frameType, Floa
    Tracks          * allTracks = new Tracks(nTracks * Runs);
    TRandom3        * gRandom = new TRandom3(0);
 
-
    allTracks->SetOwner(kTRUE);
 
    TStopwatch t1, t2, t3, t4, t5, t6;
@@ -151,7 +150,6 @@ Tracks * getTracksFromClusters(Int_t Runs, Int_t dataType, Int_t frameType, Floa
          Hits * hits = new Hits();
          Hits * diffusedHits = nullptr;
          di->getMCClustersThreshold(i, nullptr, hits, spotx, spoty);
-//         hits->removeHaloAtRadius(20);
          hits->sortHits(); 
          diffusedHits = diffuseHits(gRandom, hits);
          diffusedHits->sortHits();
@@ -165,9 +163,7 @@ Tracks * getTracksFromClusters(Int_t Runs, Int_t dataType, Int_t frameType, Floa
       else {
          di->getMCClustersThreshold(i, clusters, nullptr, spotx, spoty);
          showDebug("Found " << clusters->GetEntries() << " clusters...removing halo...");
-//         clusters->removeHaloAtRadius(30);
          showDebug("ok\n");
-
 //       Int_t nRem = clusters->removeClustersInGap(1, 0); 
       }
          
@@ -255,6 +251,7 @@ Tracks * getTracksFromClusters(Int_t Runs, Int_t dataType, Int_t frameType, Floa
    printf("Timing: Cluster retrieval: %.3f s. Tracking: %.3f s. Track improvements: %.3f s. Logistics: %.3f s. Sort TCA by layer: %.3f s\n", t1.CpuTime(), t2.CpuTime(), t3.CpuTime(), t4.CpuTime(), t6.CpuTime());
 
    delete di;
+   delete gRandom;
 
    return allTracks;
 }

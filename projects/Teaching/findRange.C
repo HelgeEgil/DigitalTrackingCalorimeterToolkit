@@ -8,7 +8,7 @@
 using namespace std;
 
 void Run() {
-   TFile  * f = new TFile("output/waterphantom_78eV.root");
+   TFile  * f = new TFile("output/waterphantom_Helium_78eV.root");
    Int_t energy = 200;
    TTree  * tree = (TTree*) f->Get("Hits");
    Float_t  z,edep,lastZ = -1, dE = 0;
@@ -19,7 +19,7 @@ void Run() {
    c->Divide(2, 1,1e-5,1e-5);
 
    TH1F   * doseHistogram = new TH1F("doseHistogram", "Energy deposition;Range [mm];MeV/proton", 800, 0, 400);
-   TH1F   * rangeHistogram = new TH1F("rangeHistogram", "Stopping position;Range [mm];Entries", 800, 0, 400);
+   TH1F   * rangeHistogram = new TH1F("rangeHistogram", "Stopping position;Range [mm];Entries", 300, 325, 340);
 
    tree->SetBranchAddress("posZ", &z);
    tree->SetBranchAddress("eventID", &eventID);
@@ -61,11 +61,12 @@ void Run() {
    c->cd(2);
    rangeHistogram->Draw();
 
+   c->SaveAs("output/waterphantom_helium_78.png");
 
-//   TF1 *fit = new TF1("fit", "gaus");
-//   rangeHistogram->Fit(fit, "Q", "", fmax(expectedRange - 20, 0), expectedRange + 20);
+   TF1 *fit = new TF1("fit", "gaus");
+   rangeHistogram->Fit(fit); //  "Q", "", fmax(expectedRange - 20, 0), expectedRange + 20);
 
-   //printf("The range of the %d MeV proton beam is %.3f mm +- %.3f mm.\n", energy, fit->GetParameter(1), fit->GetParameter(2));
-  // printf("%.1f %.3f\n", float(energy), fit->GetParameter(1));
+   printf("The range of the %d MeV proton beam is %.3f mm +- %.3f mm.\n", energy, fit->GetParameter(1), fit->GetParameter(2));
+   printf("%.1f %.3f\n", float(energy), fit->GetParameter(1));
 
 }

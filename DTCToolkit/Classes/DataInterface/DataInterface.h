@@ -143,6 +143,7 @@ public :
    virtual void      getMCData(Int_t runNo, TH3F* Frame3D);
    virtual void      getDataProfile(TH2F *hProfile, TH2F *hProjection, Int_t energy);
    virtual void      getEventIDs(Int_t runNo, Hits* hits);
+   virtual Long64_t  findSpotIndex(Float_t useSpotX);
 };
 }
 #endif

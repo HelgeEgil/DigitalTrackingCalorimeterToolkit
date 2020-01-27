@@ -32,7 +32,7 @@
 
 Bool_t   kHelium = false;
 Bool_t   kSpotScanning = true;
-Int_t    kRotation = 90; // degrees
+Int_t    kRotation = 0; // degrees
 Bool_t   kPhantom = true;
 Bool_t   kDoTracking = true; 
 Bool_t   kFilterNuclearInteractions = false; 
@@ -77,6 +77,8 @@ const Bool_t kFinalDesign = false;
 const Int_t nEnergies = 6;
 Int_t energies[nEnergies] = {122, 140, 150, 170, 180, 188};
 
+
+Float_t kSpotX = 0;
 
 enum eFrameType {kCalorimeter, kTracker};
 enum eDataType {kMC, kData};
