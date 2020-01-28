@@ -2543,7 +2543,7 @@ void makeOutputFileForImageReconstruction(Int_t Runs, Int_t tracksperrun, Float_
       Tracks * tracks = loadOrCreateTracks(true, Runs, false, run_energy, spotPosX, spotY);
       tracks->removeEmptyTracks();
    
-      tracks->doTrackFit();
+      tracks->doTrackFit(false);
       tracks->removeTracksWithMinWEPL(100);
       tracks->removeThreeSigmaShortTracks();
 //      tracks->removeHighAngleTracks(cutAngle); // mrad
