@@ -31,6 +31,14 @@
 /gate/phantom/setMaterial Water
 /gate/phantom/vis/forceWireframe
 
+/gate/world/daughters/name esaVolume
+/gate/world/daughters/insert box
+/gate/esaVolume/geometry/setXLength 100. cm
+/gate/esaVolume/geometry/setYLength 100. cm
+/gate/esaVolume/geometry/setZLength 10. um
+/gate/esaVolume/placement/setTranslation 0 0 51. cm
+/gate/esaVolume/setMaterial Air
+
 /gate/phantom/attachCrystalSD
 
 /gate/physics/addPhysicsList QGSP_BIC_EMZ
@@ -40,6 +48,13 @@
 /gate/physics/ActivateStepLimiter proton
 
 /gate/geometry/setIonisationPotential Water 78 eV
+
+/gate/actor/addActor EnergySpectrumActor MyActor
+/gate/actor/MyActor/save ESA.root
+/gate/actor/MyActor/attachTo esaVolume
+/gate/actor/MyActor/energySpectrum/setEmin 0 eV
+/gate/actor/MyActor/energySpectrum/setEmax 1000 MeV
+/gate/actor/MyActor/energySpectrum/setNumberOfBins 1000
 
 /gate/run/initialize
 
@@ -77,12 +92,12 @@
 /gate/source/PBS/setEllipseXThetaRotationNorm negative
 /gate/source/PBS/setEllipseYPhiEmittance 15 mm*mrad
 /gate/source/PBS/setEllipseYPhiRotationNorm negative
-/gate/application/setTotalNumberOfPrimaries 50000
+/gate/application/setTotalNumberOfPrimaries 500
 
-/gate/output/root/enable
-/gate/output/root/setFileName output/waterphantom_Helium_78eV
-/gate/output/root/setRootNtupleFlag 0
-/gate/output/root/setRootSinglesFlag 0
+#/gate/output/root/enable
+#/gate/output/root/setFileName output/waterphantom_Helium_78eV
+#/gate/output/root/setRootNtupleFlag 0
+#/gate/output/root/setRootSinglesFlag 0
 
 /gate/random/setEngineName MersenneTwister
 /gate/random/setEngineSeed auto

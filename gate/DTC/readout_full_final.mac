@@ -9,6 +9,8 @@
 /gate/TRACKER_AirGap2/attachCrystalSD
 /gate/TRACKER_TopFDI1/attachCrystalSD
 /gate/TRACKER_TopFDI2/attachCrystalSD
+/gate/TRACKER_CableFDI1/attachCrystalSD
+/gate/TRACKER_CableFDI2/attachCrystalSD
 /gate/TRACKER_Glue2/attachCrystalSD
 /gate/TRACKER_Spacer/attachCrystalSD
 /gate/TRACKER_Glue3/attachCrystalSD
@@ -18,7 +20,6 @@
 /gate/Layer/attachCrystalSD
 /gate/Absorber/attachCrystalSD
 /gate/Glue1/attachCrystalSD
-/gate/Spacer1/attachCrystalSD
 /gate/Glue2/attachCrystalSD
 /gate/ALPIDEFront/attachCrystalSD
 /gate/ALPIDEEpi/attachCrystalSD
@@ -27,6 +28,8 @@
 /gate/TopFDI1/attachCrystalSD
 /gate/TopFDI2/attachCrystalSD
 /gate/Glue3/attachCrystalSD
+/gate/CableFDI1/attachCrystalSD
+/gate/CableFDI2/attachCrystalSD
 /gate/Spacer2/attachCrystalSD
 /gate/Glue4/attachCrystalSD
 /gate/BottomFDI1/attachCrystalSD

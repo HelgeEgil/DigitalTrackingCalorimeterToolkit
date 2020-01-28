@@ -2376,9 +2376,13 @@ void showOutputFileForImageReconstruction() {
 
    TH2F * hSimpleImagePrim = new TH2F("hSimpleImagePrim", "CHeCT projection (only primaries);X [mm];Y [mm]", resX, -120, 120, resY, -100,100);
    TH2F * hSimpleImageNormPrim = new TH2F("hSimpleImageNormPrim", "CHeCT projection (only primaries);X [mm];Y [mm]", resX, -120, 120, resY, -100,100);
-   TH2F * hSimpleImage = new TH2F("hSimpleImage", "CHeCT projection;X [mm];Y [mm]", resX,  -120, 120, resY, -100,100);
+   TH2F * hSimpleImage = new TH2F("hSimpleImage", "\"Raw\" mean wepl;X [mm];Y [mm]", resX,  -120, 120, resY, -100,100);
    TH2F * hSimpleImageNorm = new TH2F("hSimpleImageNorm", "CHeCT projection;X [mm];Y [mm]", resX,  -120, 120, resY, -100,100);
    TH1F * hWEPL = new TH1F("hWEPL", "WEPL values in (-100,0);WEPL [mm];Y [mm]", 100, 0, 330);
+
+   TH3I * h3DImage = new TH3I("h3DImage", "3 sigma recon;X [mm];Y [mm]", resX, -120, 120, resY, -100, 100, 330, 0, 330);
+   TH2F * h3DImageProj = new TH2F("h3DImageProj", "3 sigma range;X [mm];Y [mm]", resX, -120, 120, resY, -100, 100);
+   TH2F * h3DImageProjSigma = new TH2F("h3DImageProjSigma", "3 sigma recon - SIGMA;X [mm];Y [mm]", resX, -120, 120, resY, -100, 100);
 
    TFile *fIn = new TFile("OutputFiles/PedHeadRotation90.root");
    TTree *tIn = (TTree*) fIn->Get("WEPLData");
@@ -2393,12 +2397,13 @@ void showOutputFileForImageReconstruction() {
 
    for (Int_t i=0; i<tIn->GetEntriesFast(); i++) {
       tIn->GetEntry(i);
-      if (fabs(x2x+100) < 1.5 && fabs(x2y) < 1.5) hWEPL->Fill(wepl);
+      if (fabs(x2x-100) < 1 && fabs(x2y) < 1) hWEPL->Fill(wepl);
 
       if (wepl > 250) continue;
       
       hSimpleImage->Fill(x2x, x2y, wepl);
       hSimpleImageNorm->Fill(x2x, x2y);
+      h3DImage->Fill(x2x, x2y, wepl);
 
       if (!isSecondary) {
          hSimpleImagePrim->Fill(x2x, x2y, wepl);
@@ -2409,6 +2414,64 @@ void showOutputFileForImageReconstruction() {
    hSimpleImage->Divide(hSimpleImageNorm);
    hSimpleImagePrim->Divide(hSimpleImageNormPrim);
 
+   Int_t thresBinL, thresBinU, N;
+   Float_t mean,sigma;
+   TH1I *hWEPLtemp = new TH1I("hWEPLtemp", "WEPL", 330, 0, 330);
+   TF1 *fit = new TF1("fit", "gaus");
+   for (Int_t xi=0; xi<=resX; xi++) {
+      for (Int_t yi=0; yi<=resY; yi++) {
+         for (Int_t zi=0; zi<=330; zi++) {
+            hWEPLtemp->Fill(zi,h3DImage->GetBinContent(xi,yi,zi));
+         }
+         mean = hWEPLtemp->GetMean();
+         sigma = hWEPLtemp->GetStdDev();
+
+         thresBinU = int(mean+3*sigma);
+         thresBinL = int(mean-3*sigma);
+         mean = 0; sigma = 0; N=0;
+         for (Int_t zi=thresBinL; zi<=thresBinU; zi++) {
+            mean += zi*hWEPLtemp->GetBinContent(zi);
+            N += hWEPLtemp->GetBinContent(zi);
+         }
+         mean /= N;
+         for (Int_t zi=thresBinL; zi<=thresBinU; zi++) {
+            sigma += pow(mean - zi*hWEPLtemp->GetBinContent(zi), 2);
+         }
+         sigma = sqrt(sigma / N);
+         thresBinU = int(mean+3*sigma);
+         thresBinL = int(mean-3*sigma);
+         mean = 0; sigma = 0; N=0;
+         for (Int_t zi=thresBinL; zi<=thresBinU; zi++) {
+            mean += zi*hWEPLtemp->GetBinContent(zi);
+            N += hWEPLtemp->GetBinContent(zi);
+         }
+         mean /= N;
+         for (Int_t zi=thresBinL; zi<=thresBinU; zi++) {
+            sigma += pow(mean - zi*hWEPLtemp->GetBinContent(zi), 2);
+         }
+         sigma = sqrt(sigma / N);
+         thresBinU = int(mean+3*sigma);
+         thresBinL = int(mean-3*sigma);
+         mean = 0; sigma = 0; N=0;
+         for (Int_t zi=thresBinL; zi<=thresBinU; zi++) {
+            mean += zi*hWEPLtemp->GetBinContent(zi);
+            N += hWEPLtemp->GetBinContent(zi);
+         }
+         mean /= N;
+         for (Int_t zi=thresBinL; zi<=thresBinU; zi++) {
+            sigma += pow(mean - zi*hWEPLtemp->GetBinContent(zi), 2);
+         }
+         sigma = sqrt(sigma / N);
+
+         hWEPLtemp->Reset("ICESM");
+
+         if (N>0) {
+            h3DImageProj->Fill(-119.5+xi/float(resX)*240, -99.6+yi/float(resY)*200, mean);
+            h3DImageProjSigma->Fill(-119.5+xi/float(resX)*240, -99.5+yi/float(resY)*200, sigma);
+         }
+      }
+   }
+
    TCanvas *c = new TCanvas();
 //   c->Divide(1,2,1e-5,1e-5);
 //   c->cd(1);
@@ -2417,6 +2480,15 @@ void showOutputFileForImageReconstruction() {
 //   hSimpleImagePrim->Draw("COLZ");
    TCanvas *c2 = new TCanvas();
    hWEPL->Draw();
+
+   TCanvas *c3 = new TCanvas();
+   h3DImageProj->Draw("colz");
+
+   TCanvas *c4 = new TCanvas();
+   h3DImageProjSigma->Draw("colz");
+
+   hSimpleImage->GetZaxis()->SetRangeUser(0, 230);
+   h3DImageProj->GetZaxis()->SetRangeUser(0, 230);
 
 }
 
@@ -2474,7 +2546,7 @@ void makeOutputFileForImageReconstruction(Int_t Runs, Int_t tracksperrun, Float_
       tracks->doTrackFit();
       tracks->removeTracksWithMinWEPL(100);
       tracks->removeThreeSigmaShortTracks();
-      tracks->removeHighAngleTracks(cutAngle); // mrad
+//      tracks->removeHighAngleTracks(cutAngle); // mrad
       tracks->removeNuclearInteractions();
 
       for (Int_t i=0; i<=tracks->GetEntriesFast(); i++) {
