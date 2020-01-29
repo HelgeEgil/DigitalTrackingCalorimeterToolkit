@@ -2384,7 +2384,7 @@ void showOutputFileForImageReconstruction() {
    TH2F * h3DImageProj = new TH2F("h3DImageProj", "3 sigma range;X [mm];Y [mm]", resX, -120, 120, resY, -100, 100);
    TH2F * h3DImageProjSigma = new TH2F("h3DImageProjSigma", "3 sigma recon - SIGMA;X [mm];Y [mm]", resX, -120, 120, resY, -100, 100);
 
-   TFile *fIn = new TFile("OutputFiles/PedHeadRotation90.root");
+   TFile *fIn = new TFile("OutputFiles/PedHeadRotation90NewFilterNP50.root");
    TTree *tIn = (TTree*) fIn->Get("WEPLData");
 
    Float_t x2x, x2y, wepl;

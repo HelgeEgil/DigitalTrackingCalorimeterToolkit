@@ -49,7 +49,7 @@ void findAPAndStraggling(Int_t absorberthickness) {
    Int_t    degraderThickness;
    ifstream inWater, inMaterial, inEnergy;
 
-
+/*
    // 2 mm: 0.0096, 1.784
    // 3 mm: 0.0097, 1.7825
    // 4 mm: 0.0098, 1.7806
@@ -95,9 +95,10 @@ void findAPAndStraggling(Int_t absorberthickness) {
    inEnergy.close();
 
    cout << "Degrader 100 -> energy = " << spline_e->Eval(100) << endl;
+   */
 
    if (useDegrader) {
-      inMaterial.open("../OutputFiles/findManyRangesDegrader_final.csv");
+      inMaterial.open("../OutputFiles/findManyRangesDegrader_final_Helium.csv");
    }
    else {
       inMaterial.open("../OutputFiles/findManyRanges.csv");
@@ -116,15 +117,9 @@ void findAPAndStraggling(Int_t absorberthickness) {
          break;
       }
 
-      /*
-      if (thickness != absorberthickness) {
-         continue;
-      }
-      */
-
       arrayEMaterial[nlinesMaterial] = energyFloat;
       arrayRange[nlinesMaterial] = range;
-      arrayWET[nlinesMaterial] = WET;
+      arrayWET[nlinesMaterial] = WET + 0.6; // ONLY USE THIS ADDITION FOR THE NEW CALIBRATION ON OLD FILES
       arrayDegrader[nlinesMaterial] = degraderThickness;
       arrayStraggling[nlinesMaterial] = straggling;
       arrayEnergyStraggling[nlinesMaterial] = energyStraggling;
@@ -133,7 +128,7 @@ void findAPAndStraggling(Int_t absorberthickness) {
 
 //      weplfactor = arrayRangeWater[nlinesMaterial] / range;
 //      weplfactor = aw / a * pow(range / aw, 1-p/pw);
-      weplfactor = 2.10;
+      weplfactor = 2.10; // WRONG WRONG !!! 
       arrayRangeWater[nlinesMaterial] = range * weplfactor; 
       arrayWEPLStraggling[nlinesMaterial++] = straggling * weplfactor;
    }
@@ -173,7 +168,7 @@ void findAPAndStraggling(Int_t absorberthickness) {
    Double_t arrayLayerNumber[45];
    Double_t arrayLayerWET[45];
    for (Int_t l=0; l<45; l++) {
-      Double_t lDepth;
+      Double_t lDepth = 0;
       if (l==0) arrayLayerWET[l] = 6; // minus 0.5 MeV
       else if (l==1) arrayLayerWET[l] = 7.8; // minus 1 MeV
       else {
