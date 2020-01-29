@@ -31,11 +31,55 @@ vector<Float_t> findRange::Run(Double_t energy, Double_t sigma_mev, Int_t mm, In
    if (fChain == 0) return returnValues;
    if (fChain->GetEntries() == 0) return returnValues;
 
+
+   Float_t energyBeforeTrackerNoDegrader = 299.88; // proton
+   Float_t energyBeforeTrackerNoDegrader = 299.88; // Helium
+
    Long64_t nentries = fChain->GetEntriesFast();
    Bool_t useDegrader = true; 
 
+   TFile *fEkin = new TFile("Data/MonteCarlo/DTC_Full_Final_Helium_Degrader%03.0fmm_%.0fMeV_psa.root");
+   TTree *tEkin = (TTree*) fEkint->Get("PhaseSpace");
+
+   Float_t mean = 0;
+   Float_t sigma = 0;
+   Float_t N = 0;
+   Float_t Ekine;
+   tEkin->SetBranchAddress("Ekine", &Ekine);
+
+   for (Int_t i=0; i<tEkin->GetEntriesFast(); i++) {
+      tEkin->GetEntry(i);
+      if (Ekine<1) continue;
+      mean += Ekine;
+      N++;
+   }
+   mean /= N;
+
+   for (Int_t i=0; i<tEkin->GetEntriesFast(); i++) {
+      tEkin->GetEntry(i);
+      if (Ekine<1) continue;
+      sigma += pow(mean-Ekine,2);
+   }
+   sigma = sqrt(sigma/N);
+
+   TH1I *hEkine = new TH1I("hEkine", "Energy spectrum before first tracker;Energy [MeV];Entries", 200, fmax(0,mean-4*sigma), mean+4*sigma);
+   for (Int_t i=0; i<tEkin->GetEntriesFast(); i++) {
+      tEkin->GetEntry(i);
+      if (Ekine<1) continue;
+      hEkine->Fill(Ekine);
+   }
+
+   TF1 *fitEnergy = new TF1("fitEnergy", "gaus");
+   fitEnergy->SetParameters(100, mean, sigma);
+   hEkine->Fit("fitEnergy");
+
+   Float_t energyBeforeTracker = fitEnergy->GetParameter(1);
+   Float_t energyBeforeTrackerSigma = fitEnergy->GetParameter(2);
+
+   printf("From phase space: Energy before first tracker is %.2f MeV +- %.2f Mev\n", energyBeforeTracker, energyBeforeTrackerSigma);
+
    TCanvas *c2 = new TCanvas("c2", "Ranges and energies", 500, 500);
-   c2->Divide(3,1);
+   c2->Divide(2,1);
    gStyle->SetOptStat(0);
 
    Int_t    lastEvent = -1;
@@ -44,11 +88,11 @@ vector<Float_t> findRange::Run(Double_t energy, Double_t sigma_mev, Int_t mm, In
    Float_t  dE = 0, dE2 = 0;
 
    TH1F *hFirstRange = new TH1F("firstRange", "firstRange", 1000, 0, 400);
-   TH1F *hFirstEnergy = new TH1F("firstEnergy", "firstEnergy", 1000, 0, 1000);
-   TH1F *hFirstEnergy2 = new TH1F("firstEnergy2", "Energy loss in trackers", 1000, 0, 5);
+//   TH1F *hFirstEnergy = new TH1F("firstEnergy", "firstEnergy", 1000, 0, 1000);
+//   TH1F *hFirstEnergy2 = new TH1F("firstEnergy2", "Energy loss in trackers", 1000, 0, 5);
 
    Float_t allRanges[150000];
-   Float_t allEnergies[150000];
+//   Float_t allEnergies[150000];
    Int_t rangeIdx = 0, energyIdx = 0;
 
    Long64_t ientry = LoadTree(0);
@@ -66,7 +110,7 @@ vector<Float_t> findRange::Run(Double_t energy, Double_t sigma_mev, Int_t mm, In
 
       if (lastID < 0) lastID = eventID;
       if (parentID == 0) {
-      
+/*      
          if (baseID == 0) { // inside degrader + first layers
 //            printf("dE = %.2f + %.2f\n", dE, edep);
             dE += edep;
@@ -83,6 +127,7 @@ vector<Float_t> findRange::Run(Double_t energy, Double_t sigma_mev, Int_t mm, In
             dE = 0;
             dE2 = 0;
          }
+*/
          if (eventID != lastID) {
             hFirstRange->Fill(lastRange - 225);
             allRanges[rangeIdx++] = lastRange - 225;
@@ -94,10 +139,11 @@ vector<Float_t> findRange::Run(Double_t energy, Double_t sigma_mev, Int_t mm, In
    }
 
    float firstRange = hFirstRange->GetBinCenter(hFirstRange->GetMaximumBin());
-   float firstEnergy = hFirstEnergy->GetBinCenter(hFirstEnergy->GetMaximumBin());
+//   float firstEnergy = hFirstEnergy->GetBinCenter(hFirstEnergy->GetMaximumBin());
 
    printf("Found %d proton histories in file.\n", lastID);
-   printf("From first search, range = %.2f mm and energy = %.2f MeV\n", firstRange, firstEnergy);
+//   printf("From first search, range = %.2f mm and energy = %.2f MeV\n", firstRange, firstEnergy);
+   printf("From first search, range = %.2f mm\n", firstRange);
   
    // WHAT about WEPL range = Residual WET ?? Absolutely no inverse calculations of the spline
 
@@ -105,9 +151,9 @@ vector<Float_t> findRange::Run(Double_t energy, Double_t sigma_mev, Int_t mm, In
    TH1F *hRange = new TH1F("hRange", "Projected range in DTC;Range [mm];Entries", 500, xfrom,xto);
    for (Int_t i=0; i<rangeIdx; i++) hRange->Fill(allRanges[i]);
 
-   Float_t energyfrom = firstEnergy - 15, energyto = firstEnergy + 15;
-   TH1F *hEnergyAtInterface = new TH1F("hEnergyAtInterface", "Remaining energy after degrader;Energy [MeV];Entries", 500, energyfrom, energyto);
-   for (Int_t i=0; i<energyIdx; i++) hEnergyAtInterface->Fill(allEnergies[i]);
+//   Float_t energyfrom = firstEnergy - 15, energyto = firstEnergy + 15;
+//   TH1F *hEnergyAtInterface = new TH1F("hEnergyAtInterface", "Remaining energy after degrader;Energy [MeV];Entries", 500, energyfrom, energyto);
+//   for (Int_t i=0; i<energyIdx; i++) hEnergyAtInterface->Fill(allEnergies[i]);
 
    c2->cd(1);
    // The fitting parameters below
@@ -129,6 +175,7 @@ vector<Float_t> findRange::Run(Double_t energy, Double_t sigma_mev, Int_t mm, In
    hRange->Draw();
   
    c2->cd(2); 
+   /*
    TF1 *fRemainingEnergy = new TF1("fRemainingEnergy", "gaus");
    fRemainingEnergy->SetLineWidth(3);
    fRemainingEnergy->SetParameters(hEnergyAtInterface->GetMaximum(), firstEnergy, 3);
@@ -152,10 +199,17 @@ vector<Float_t> findRange::Run(Double_t energy, Double_t sigma_mev, Int_t mm, In
    c2->cd(3);
    hFirstEnergy2->SetFillColor(kBlue-7);
    hFirstEnergy2->Draw();
-
+*/
+   c2->cd(2);
+   hEkine->SetFillColor(kBlue-7);
+   hEkine->SetLineColor(kBlack);
+   hEkine->Draw();
+   
    // helium: 331.7; proton: 330.9
+   // Find new numbers after accounting for energy loss due to air!
+   
    std::ofstream filename(Form("OutputFiles/findManyRangesDegrader_final_Helium_idx%d.csv", fileIdx));// , std::ofstream::out | std::ofstream::app);
-   filename << degrader << " " << 331.7 - degrader << " " << hR << " " << hRS << " " << fE << " " << fES << endl; 
+   filename << degrader << " " << 331.7 - degrader << " " << hR << " " << hRS << " " << energyBeforeTracker << " " << energyBeforeTrackerSigma << endl; 
    
    delete c2;
    delete hRange;
