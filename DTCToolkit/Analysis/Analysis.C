@@ -865,6 +865,7 @@ void drawTracksRangeHistogram(Int_t Runs, Int_t dataType, Bool_t recreate, Float
    hFitResults->SetLineColor(kBlack); hFitResults->SetFillColor(kGreen-5);
 
    Tracks * tracks = loadOrCreateTracks(recreate, Runs, dataType, energy);
+   
    /*
    if (removeHighAngleTracks) {
       tracks->removeHighAngleTracks(75);
@@ -876,17 +877,16 @@ void drawTracksRangeHistogram(Int_t Runs, Int_t dataType, Bool_t recreate, Float
    
    Float_t  cutHalo = 12;
    Float_t  cutMaxAngle = 60;
-   Float_t  cutAngle = 40;
+   Float_t  cutAngle = 50;
    Float_t  cutEdep = 10;
-
 
 // Use
 //   tracks->removeHighAngularChangeTracks(cutMaxAngle); // mrad
    tracks->doTrackFit();
-   tracks->removeTracksWithMinWEPL(100);
+//   tracks->removeTracksWithMinWEPL(100);
    tracks->removeNuclearInteractions();
-//   tracks->removeThreeSigmaShortTracks();
-//   tracks->removeHighAngleTracks(cutAngle); // mrad
+   tracks->removeThreeSigmaShortTracks();
+   tracks->removeHighAngleTracks(cutAngle); // mrad
 
    for (Int_t j=0; j<tracks->GetEntriesFast(); j++) {
       Track *thisTrack = tracks->At(j);
@@ -2557,8 +2557,8 @@ void makeOutputFileForImageReconstruction(Int_t Runs, Int_t tracksperrun, Float_
          outSpotY = spotY;
          wepl = thisTrack->getFitParameterRange();
          wepl_calibrated =  1.0036 * wepl + 2.93; // pol1 calibration
-         outWEPL = 330.9 - wepl_calibrated; // 330.9 mm: 230 MeV proton @ 78 eV H2O
-         outWEPL_uncalibrated = 330.9 - wepl;
+         outWEPL = 333.7 - wepl_calibrated; // 332.7 mm: 230 MeV proton @ 78 eV H2O (extrapolated from data...)
+         outWEPL_uncalibrated = 333.7 - wepl;
          if (isnan(outWEPL)) continue;
 
 //            outWEPL = 238.8 - residualRange; // 190 MeV/u Helium
