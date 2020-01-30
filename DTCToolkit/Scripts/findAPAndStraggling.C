@@ -50,102 +50,35 @@ void findAPAndStraggling(Int_t absorberthickness) {
    ifstream inWater, inMaterial, inEnergy;
 
 
-   // 2 mm: 0.0096, 1.784
-   // 3 mm: 0.0097, 1.7825
-   // 4 mm: 0.0098, 1.7806
-   // Focal: 0.0004461, 1.6677
-   // H20:  0.0239, 1.7548
-
-   a = 0.004461, p = 1.6677;
-   aw = 0.0239, pw = 1.7548;
-
-   inWater.open("../Data/Ranges/Water.csv");
-   while (1) {
-      inWater >> energyWater >> range;
-      
-      if (!inWater.good()) {
-         break;
-      }
-
-      arrayE[nlinesWater] = energyWater;
-      arrayRangeWater[nlinesWater++] = range; // file in CM
-   }
-
-   inWater.close();
-
-   inEnergy.open("../Data/Ranges/EnergyAfterDegrader230MeV_78eV.csv");
-
-   Double_t ead_d[500] = {};
-   Double_t ead_e[500] = {};
-   Double_t ead_es[500] = {};
-   Int_t ead_idx = 0;
-
-   while (1) {
-      inEnergy >> degraderThickness >> energyFloat; //  >> energyStraggling;
-      if (!inEnergy.good()) break;
-
-      ead_d[ead_idx] = degraderThickness;
-      ead_es[ead_idx] = energyStraggling;
-      ead_e[ead_idx++] = energyFloat;
-   }
-
-   TSpline3 *spline_e = new TSpline3("spline_e", ead_d, ead_e, ead_idx);
-   TSpline3 *spline_es = new TSpline3("spline_es", ead_d, ead_es, ead_idx);
-   
-   inEnergy.close();
-
-   cout << "Degrader 100 -> energy = " << spline_e->Eval(100) << endl;
-
-   if (useDegrader) {
-      inMaterial.open("../OutputFiles/findManyRangesDegrader_final.csv");
-   }
-   else {
-      inMaterial.open("../OutputFiles/findManyRanges.csv");
-   }
+   inMaterial.open("../OutputFiles/findManyRangesDegrader_final_Helium.csv");
 
    Float_t WET;
    while (1) {
-      if (!useDegrader) {
-         inMaterial >> energy >> thickness >> range >> straggling >> inelasticfraction;
-      }
-      else {
-         inMaterial >> degraderThickness >> WET >> range >> straggling >> energyFloat >> energyStraggling;
-      }
+      inMaterial >> degraderThickness >> WET >> range >> straggling >> energyFloat >> energyStraggling;
 
       if (!inMaterial.good()) {
          break;
       }
 
-      /*
-      if (thickness != absorberthickness) {
-         continue;
-      }
-      */
-
       arrayEMaterial[nlinesMaterial] = energyFloat;
       arrayRange[nlinesMaterial] = range;
-      arrayWET[nlinesMaterial] = WET;
+      arrayWET[nlinesMaterial] = WET + 0.6;
       arrayDegrader[nlinesMaterial] = degraderThickness;
       arrayStraggling[nlinesMaterial] = straggling;
       arrayEnergyStraggling[nlinesMaterial] = energyStraggling;
-//      arrayEMaterial[nlinesMaterial] = spline_e->Eval(degraderThickness);
-//      arrayEnergyStraggling[nlinesMaterial] = spline_es->Eval(degraderThickness);
-
-//      weplfactor = arrayRangeWater[nlinesMaterial] / range;
-//      weplfactor = aw / a * pow(range / aw, 1-p/pw);
       weplfactor = 2.10;
       arrayRangeWater[nlinesMaterial] = range * weplfactor; 
       arrayWEPLStraggling[nlinesMaterial++] = straggling * weplfactor;
    }
    inMaterial.close();
 
-   std::ofstream outMaterials("../OutputFiles/final_Proton.csv");
+   std::ofstream outMaterials("../OutputFiles/final_Helium.csv");
    for (Int_t ii=0; ii<nlinesMaterial; ii++) {
       outMaterials << arrayEMaterial[ii] << " " << arrayRange[ii] << endl;
    }
    outMaterials.close();
 
-   std::ofstream outEnergyAfterDegrader("../OutputFiles/energyAfterDegrader.csv");
+   std::ofstream outEnergyAfterDegrader("../OutputFiles/energyAfterDegrader_Helium.csv");
    for (Int_t ii=0; ii<nlinesMaterial; ii++) {
       outEnergyAfterDegrader << arrayDegrader[ii] << " " << arrayEMaterial[ii] << " " << arrayEnergyStraggling[ii] << endl;
    }
@@ -187,7 +120,7 @@ void findAPAndStraggling(Int_t absorberthickness) {
    TGraph *gLayerWET = new TGraph(45, arrayLayerNumber, arrayLayerWET);
 
 
-   std::ofstream outLW("../OutputFiles/layer_wet.csv");
+   std::ofstream outLW("../OutputFiles/layer_wet_wepl_Helium.csv");
    for (Int_t ii=0; ii<45; ii++) {
       outLW << arrayLayerNumber[ii] << " " << arrayLayerWET[ii] << " " << 330.9 - arrayLayerWET[ii]  << endl;
    }
@@ -269,9 +202,6 @@ void findAPAndStraggling(Int_t absorberthickness) {
    gEnergy->SetMarkerStyle(7);
    gEnergy->SetMarkerColor(kBlue);
    gEnergy->Draw("AP");
-
-   c1->SaveAs("../OutputFiles/Proton_final.png");
-
 
    printf("-----------------------------------\n");
    printf("Bragg-Kleeman parameters: R = %.6f E ^ %.6f\n", BK->GetParameter(0), BK->GetParameter(1));
