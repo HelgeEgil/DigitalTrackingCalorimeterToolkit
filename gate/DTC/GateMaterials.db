@@ -522,7 +522,7 @@ Glue:   d=1.05 g/cm3; n=3; state=Solid
         +el: name=Carbon     ; f=0.7603
         +el: name=Oxygen     ; f=0.1688
 
-CarbonFiber: d=1.66 g/cm3; n=1; state=Solid
+CarbonFiber: d=2.2 g/cm3; n=1; state=Solid
        +el: name=Carbon      ; n=1
 
 Kapton: d=1.42 g/cm3; n=4; state=Solid

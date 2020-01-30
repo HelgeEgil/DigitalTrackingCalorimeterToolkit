@@ -32,14 +32,14 @@ vector<Float_t> findRange::Run(Double_t energy, Double_t sigma_mev, Int_t mm, In
    if (fChain->GetEntries() == 0) return returnValues;
 
 
-   Float_t energyBeforeTrackerNoDegrader = 299.88; // proton
-   Float_t energyBeforeTrackerNoDegrader = 299.88; // Helium
+   Float_t energyBeforeTrackerNoDegrader = 229.88; // proton
+   // Float_t energyBeforeTrackerNoDegrader = 916.46 ; // Helium
 
    Long64_t nentries = fChain->GetEntriesFast();
    Bool_t useDegrader = true; 
 
-   TFile *fEkin = new TFile("Data/MonteCarlo/DTC_Full_Final_Helium_Degrader%03.0fmm_%.0fMeV_psa.root");
-   TTree *tEkin = (TTree*) fEkint->Get("PhaseSpace");
+   TFile *fEkin = new TFile(Form("Data/MonteCarlo/DTC_Full_Final_Degrader%03dmm_230MeV_psa.root", degrader));
+   TTree *tEkin = (TTree*) fEkin->Get("PhaseSpace");
 
    Float_t mean = 0;
    Float_t sigma = 0;
@@ -207,17 +207,20 @@ vector<Float_t> findRange::Run(Double_t energy, Double_t sigma_mev, Int_t mm, In
    
    // helium: 331.7; proton: 330.9
    // Find new numbers after accounting for energy loss due to air!
+   // New calibration: pol2 where E=0
+   // Helium: 332.3 (+0.6 mm diff)
+   // Proton: 
    
-   std::ofstream filename(Form("OutputFiles/findManyRangesDegrader_final_Helium_idx%d.csv", fileIdx));// , std::ofstream::out | std::ofstream::app);
-   filename << degrader << " " << 331.7 - degrader << " " << hR << " " << hRS << " " << energyBeforeTracker << " " << energyBeforeTrackerSigma << endl; 
+   std::ofstream filename(Form("OutputFiles/findManyRangesDegrader_final_idx%d.csv", fileIdx));// , std::ofstream::out | std::ofstream::app);
+   filename << degrader << " " << 330.9 - degrader << " " << hR << " " << hRS << " " << energyBeforeTracker << " " << energyBeforeTrackerSigma << endl; 
    
    delete c2;
    delete hRange;
    delete hFirstRange;
-   delete hFirstEnergy;
-   delete fRemainingEnergy;
+//   delete hFirstEnergy;
+//   delete fRemainingEnergy;
    delete fRange;
-   delete hEnergyAtInterface;
+//   delete hEnergyAtInterface;
    
    return returnValues;
 }
