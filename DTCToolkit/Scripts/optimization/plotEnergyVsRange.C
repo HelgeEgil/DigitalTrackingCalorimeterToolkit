@@ -36,7 +36,6 @@ const Int_t xFrom = 40;
 void plotEnergyVsRange() {
    TCanvas *c1 = new TCanvas("c1", "Range accuracy", 1100, 800);
    
-/*   
    TPaveLabel *Ytitle = new TPaveLabel(0.01, 0.05, 0.03, 0.9, "Range deviation [mm WEPL]");
    Ytitle->SetBorderSize(0);
    Ytitle->SetFillColor(kWhite);
@@ -56,13 +55,13 @@ void plotEnergyVsRange() {
    gStyle->SetPadRightMargin(0.025);
    gStyle->SetPadBottomMargin(0.15);
    gStyle->SetPadTopMargin(0.23);
-*/
-//   TCanvas *cRangeAccuracy = new TCanvas("cRangeAccuracy", "Range accuracy", 1200, 300);
 
-//   TPad *graphPad = new TPad("Graphs", "Graphs", 0.05, 0.1, 0.95, 0.95);
-//   graphPad->Draw();
-//   graphPad->cd();
-   //graphPad->Divide(1,5,0.00001,0.00001);
+   //   TCanvas *cRangeAccuracy = new TCanvas("cRangeAccuracy", "Range accuracy", 1200, 300);
+
+   TPad *graphPad = new TPad("Graphs", "Graphs", 0.05, 0.1, 0.95, 0.95);
+   graphPad->Draw();
+   graphPad->cd();
+   graphPad->Divide(1,2,0.00001,0.00001);
 
    Float_t  arrayE2[arraySize] = {0}; // energy MC
    Float_t  arrayE3[arraySize] = {0}; // energy MC
@@ -97,7 +96,7 @@ void plotEnergyVsRange() {
    Double_t energiesWater[arraySize] = {0};
    Double_t rangesWater[arraySize] = {0};
 
-   Float_t correction_2 = 0.02, correction_3 = 0.415, correction_35 = 0.82, correction_4 = 0.74, correction_5 = 1.39 , correction_6 = 2.04;
+   Float_t correction_2 = 0.02, correction_3 = 0.415, correction_35 = 0.82, correction_4 = 1.45, correction_5 = 1.39 , correction_6 = 2.04;
 
    gStyle->SetOptStat(0);
 
@@ -121,7 +120,7 @@ void plotEnergyVsRange() {
 
 
    ifstream in1;
-   in1.open("../../Data/Ranges/EnergyAfterDegrader230MeV_78eV.csv");
+   in1.open("../../Data/Ranges/EnergyAfterDegraderProton.csv");
    Int_t thick, n=0;
    while (1) {
       in1 >> thick >> energy;
@@ -148,7 +147,7 @@ void plotEnergyVsRange() {
          arrayRE2[nlinesR2] = floatenergy_;
          arrayRD2[nlinesR2++] = degrader_;
       }
-      else if (thickness_ == 35) {
+      else if (thickness_ == 1) {
          arrayR3[nlinesR3] = nomrange_;
          arrayRE3[nlinesR3] = floatenergy_;
          arrayRD3[nlinesR3++] = degrader_;
@@ -240,15 +239,15 @@ void plotEnergyVsRange() {
       if (kUseNominalValuesFromRMBPF) {
          if (thickness_ == 2) arrayE2[nlines2] = nomrange_;
          if (thickness_ == 3) arrayE3[nlines3] = nomrange_;
-         if (thickness_ == 35) arrayE35[nlines35] = 330.9 - nomrange_;
-         if (thickness_ == 4) arrayE4[nlines4] = nomrange_;
+         if (thickness_ == 0) arrayE35[nlines35] = 333.7 - nomrange_;  // Proton
+         if (thickness_ == 1) arrayE4[nlines4] = 332.3 - nomrange_; // Helium
          if (thickness_ == 5) arrayE5[nlines5] = nomrange_;
          if (thickness_ == 6) arrayE6[nlines6] = nomrange_;
 
          if (thickness_ == 2) arrayMC2[nlines2++] = -nomrange_ + estrange_ + correction_2 * kUseDCCorrection;
          if (thickness_ == 3) arrayMC3[nlines3++] = estrange_ - nomrange_ + correction_3 * kUseDCCorrection;
-         if (thickness_ == 35) arrayMC35[nlines35++] = estrange_ - nomrange_ + (2.93 + 0.0036 * estrange_) * kUseDCCorrection;
-         if (thickness_ == 4) arrayMC4[nlines4++] = -nomrange_ + estrange_ + correction_4 * kUseDCCorrection;
+         if (thickness_ == 0) arrayMC35[nlines35++] = estrange_ - nomrange_ + (-0.41 + 0.0024 * estrange_) * kUseDCCorrection; // Proton 
+         if (thickness_ == 1) arrayMC4[nlines4++] = -nomrange_ + estrange_ + correction_4 * kUseDCCorrection; // Helium
          if (thickness_ == 5) arrayMC5[nlines5++] = estrange_ - nomrange_ + correction_5 * kUseDCCorrection;
          if (thickness_ == 6) arrayMC6[nlines6++] = -nomrange_ + estrange_ + correction_6 * kUseDCCorrection;
       }
@@ -304,17 +303,24 @@ void plotEnergyVsRange() {
 
    printf("Found the following number of lines for the different geometries:\n2 mm: %d lines\n3 mm: %d lines\n3.5 mm: %d lines\n4 mm: %d lines\n5 mm: %d lines\n6 mm: %d lines\n", nlines2, nlines3, nlines35, nlines4, nlines5, nlines6);
 
+   gStyle->SetTitleFont(22, "xy");
+   gStyle->SetTitleFont(22, "t");
+   gStyle->SetLabelFont(22, "xy");
+   gStyle->SetTitleSize(0.06, "xy");
+   gStyle->SetLabelSize(0.1, "xy");
+   gStyle->SetTitleOffset(0.5, "y");
    TGraph *hMC2 = new TGraph(nlines2, arrayE2, arrayMC2);
    TGraph *hMC3 = new TGraph(nlines3, arrayE3, arrayMC3);
    TGraph *hMC35 = new TGraph(nlines35, arrayE35, arrayMC35);
    TGraph *hMC4 = new TGraph(nlines4, arrayE4, arrayMC4);
    TGraph *hMC5 = new TGraph(nlines5, arrayE5, arrayMC5);
    TGraph *hMC6 = new TGraph(nlines6, arrayE6, arrayMC6);
-/*
+
+  /* 
    hMC2->SetTitle(";Range [mm WEPL];");
    hMC3->SetTitle(";Range [mm WEPL];");
-   hMC35->SetTitle(";Range [mm WEPL];");
-   hMC4->SetTitle(";Range [mm WEPL];");
+   hMC35->SetTitle("Protons;Range [mm WEPL];");//Range Deviation [mm WEPL]");
+   hMC4->SetTitle("Helium;Range [mm WEPL];");//Range Deviatino [mm WEPL]");
    hMC5->SetTitle(";Range [mm WEPL];");
    hMC6->SetTitle(";Range [mm WEPL];");
 
@@ -404,7 +410,7 @@ void plotEnergyVsRange() {
    }
 
    Float_t textX = 7.22;
-   Float_t textY = 3;
+   Float_t textY = 1.7;
 /*
    graphPad->cd(1);
    gPad->SetGridy();
@@ -414,11 +420,20 @@ void plotEnergyVsRange() {
    t2->SetTextFont(22);
    t2->DrawText(textX, textY - correction_2 * (!kUseDCCorrection), Form("2 mm Al absorber (calibration constant = +%.1f mm)", correction_2)); 
 */
-//   graphPad->cd(2);
-   c1->cd();
+   graphPad->cd(1);
    gPad->SetGridy();
+   hMC35->SetTitle("");
    hMC35->Draw("LA");
-   //t2->DrawText(textX, textY - correction_3 * (!kUseDCCorrection), Form("3 mm Al absorber (calibration constant = +%.1f mm)", correction_3));
+   TText *t2 = new TText();
+   t2->SetTextSize(0.15);
+   t2->SetTextFont(22);
+   t2->DrawText(textX, textY - correction_3 * (!kUseDCCorrection), "230 MeV proton beam");
+
+   graphPad->cd(2);
+   gPad->SetGridy();
+   hMC4->SetTitle("");
+   hMC4->Draw("LA");
+   t2->DrawText(textX, textY - correction_2 * (!kUseDCCorrection), "229.25 MeV/u Helium beam"); 
    /*
    graphPad->cd(3);
    gPad->SetGridy();
