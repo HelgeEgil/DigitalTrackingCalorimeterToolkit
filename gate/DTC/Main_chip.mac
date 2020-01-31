@@ -1,6 +1,6 @@
 /gate/geometry/setMaterialDatabase GateMaterials.db
 
-/control/execute Module_final.mac
+/control/execute Module_final_auto.mac
 
 /gate/systems/scanner_1/level1/attach TRACKER_Layer
 /gate/systems/scanner_2/level1/attach Layer
@@ -14,15 +14,15 @@
 #=================#
 
 /gate/geometry/setIonisationPotential Water 78 eV
-/gate/physics/addPhysicsList QGSP_BIC_EMZ
+/gate/physics/addPhysicsList QBBC_EMZ
 /gate/physics/SetMaxStepSizeInRegion world 1 mm
 /gate/physics/ActivateStepLimiter proton
 
-# Should cross check this with uniform cuts in all regions !!
 /gate/physics/Gamma/SetCutInRegion TRACKER_Glue1 2.5 um
 /gate/physics/Gamma/SetCutInRegion TRACKER_Glue2 2.5 um
 /gate/physics/Gamma/SetCutInRegion TRACKER_Glue3 2.5 um
 /gate/physics/Gamma/SetCutInRegion TRACKER_Glue4 2.5 um
+/gate/physics/Gamma/SetCutInRegion TRACKER_Glue5 2.5 um
 /gate/physics/Gamma/SetCutInRegion TRACKER_Absorber1 100 um
 /gate/physics/Gamma/SetCutInRegion TRACKER_Absorber2 100 um
 /gate/physics/Gamma/SetCutInRegion TRACKER_ALPIDESub 5 um
@@ -32,6 +32,8 @@
 /gate/physics/Gamma/SetCutInRegion TRACKER_AirGap2 1 mm
 /gate/physics/Gamma/SetCutInRegion TRACKER_TopFDI1 15 um
 /gate/physics/Gamma/SetCutInRegion TRACKER_TopFDI2 10 um
+/gate/physics/Gamma/SetCutInRegion TRACKER_CableFDI1 15 um
+/gate/physics/Gamma/SetCutInRegion TRACKER_CableFDI2 10 um
 /gate/physics/Gamma/SetCutInRegion TRACKER_Spacer 40 um
 /gate/physics/Gamma/SetCutInRegion TRACKER_BottomFDI1 50 um
 /gate/physics/Gamma/SetCutInRegion TRACKER_BottomFDI2 10 um
@@ -41,13 +43,14 @@
 /gate/physics/Gamma/SetCutInRegion Glue4 2.5 um
 /gate/physics/Gamma/SetCutInRegion Glue5 2.5 um
 /gate/physics/Gamma/SetCutInRegion Absorber 500 um
+/gate/physics/Gamma/SetCutInRegion CableFDI1 15 um
+/gate/physics/Gamma/SetCutInRegion CableFDI2 10 um
 /gate/physics/Gamma/SetCutInRegion ALPIDESub 30 um
 /gate/physics/Gamma/SetCutInRegion ALPIDEEpi 10 um
 /gate/physics/Gamma/SetCutInRegion ALPIDEFront 5 um
 /gate/physics/Gamma/SetCutInRegion AirGap 750 um
 /gate/physics/Gamma/SetCutInRegion TopFDI1 15 um
 /gate/physics/Gamma/SetCutInRegion TopFDI2 10 um
-/gate/physics/Gamma/SetCutInRegion Spacer1 130 um
 /gate/physics/Gamma/SetCutInRegion Spacer2 40 um
 /gate/physics/Gamma/SetCutInRegion BottomFDI1 50 um
 /gate/physics/Gamma/SetCutInRegion BottomFDI2 10 um
@@ -55,8 +58,11 @@
 /gate/physics/Proton/SetCutInRegion TRACKER_Glue2 2.5 um
 /gate/physics/Proton/SetCutInRegion TRACKER_Glue3 2.5 um
 /gate/physics/Proton/SetCutInRegion TRACKER_Glue4 2.5 um
+/gate/physics/Proton/SetCutInRegion TRACKER_Glue5 2.5 um
 /gate/physics/Proton/SetCutInRegion TRACKER_Absorber1 100 um
 /gate/physics/Proton/SetCutInRegion TRACKER_Absorber2 100 um
+/gate/physics/Proton/SetCutInRegion TRACKER_CableFDI1 15 um
+/gate/physics/Proton/SetCutInRegion TRACKER_CableFDI2 10 um
 /gate/physics/Proton/SetCutInRegion TRACKER_ALPIDESub 5 um
 /gate/physics/Proton/SetCutInRegion TRACKER_ALPIDEEpi 10 um
 /gate/physics/Proton/SetCutInRegion TRACKER_ALPIDEFront 5 um
@@ -73,13 +79,14 @@
 /gate/physics/Proton/SetCutInRegion Glue4 2.5 um
 /gate/physics/Proton/SetCutInRegion Glue5 2.5 um
 /gate/physics/Proton/SetCutInRegion Absorber 500 um
+/gate/physics/Proton/SetCutInRegion CableFDI1 15 um
+/gate/physics/Proton/SetCutInRegion CableFDI2 10 um
 /gate/physics/Proton/SetCutInRegion ALPIDESub 30 um
 /gate/physics/Proton/SetCutInRegion ALPIDEEpi 10 um
 /gate/physics/Proton/SetCutInRegion ALPIDEFront 5 um
 /gate/physics/Proton/SetCutInRegion AirGap 750 um
 /gate/physics/Proton/SetCutInRegion TopFDI1 15 um
 /gate/physics/Proton/SetCutInRegion TopFDI2 10 um
-/gate/physics/Proton/SetCutInRegion Spacer1 130 um
 /gate/physics/Proton/SetCutInRegion Spacer2 40 um
 /gate/physics/Proton/SetCutInRegion BottomFDI1 50 um
 /gate/physics/Proton/SetCutInRegion BottomFDI2 10 um
@@ -87,6 +94,9 @@
 /gate/physics/Electron/SetCutInRegion TRACKER_Glue2 2.5 um
 /gate/physics/Electron/SetCutInRegion TRACKER_Glue3 2.5 um
 /gate/physics/Electron/SetCutInRegion TRACKER_Glue4 2.5 um
+/gate/physics/Electron/SetCutInRegion TRACKER_Glue5 2.5 um
+/gate/physics/Electron/SetCutInRegion TRACKER_CableFDI1 15 um
+/gate/physics/Electron/SetCutInRegion TRACKER_CableFDI2 10 um
 /gate/physics/Electron/SetCutInRegion TRACKER_Absorber1 100 um
 /gate/physics/Electron/SetCutInRegion TRACKER_Absorber2 100 um
 /gate/physics/Electron/SetCutInRegion TRACKER_ALPIDESub 5 um
@@ -104,6 +114,8 @@
 /gate/physics/Electron/SetCutInRegion Glue3 2.5 um
 /gate/physics/Electron/SetCutInRegion Glue4 2.5 um
 /gate/physics/Electron/SetCutInRegion Glue5 2.5 um
+/gate/physics/Electron/SetCutInRegion CableFDI1 15 um
+/gate/physics/Electron/SetCutInRegion CableFDI2 10 um
 /gate/physics/Electron/SetCutInRegion Absorber 500 um
 /gate/physics/Electron/SetCutInRegion ALPIDESub 30 um
 /gate/physics/Electron/SetCutInRegion ALPIDEEpi 10 um
@@ -111,7 +123,6 @@
 /gate/physics/Electron/SetCutInRegion AirGap 750 um
 /gate/physics/Electron/SetCutInRegion TopFDI1 15 um
 /gate/physics/Electron/SetCutInRegion TopFDI2 10 um
-/gate/physics/Electron/SetCutInRegion Spacer1 130 um
 /gate/physics/Electron/SetCutInRegion Spacer2 40 um
 /gate/physics/Electron/SetCutInRegion BottomFDI1 50 um
 /gate/physics/Electron/SetCutInRegion BottomFDI2 10 um
@@ -119,7 +130,10 @@
 /gate/physics/Positron/SetCutInRegion TRACKER_Glue2 2.5 um
 /gate/physics/Positron/SetCutInRegion TRACKER_Glue3 2.5 um
 /gate/physics/Positron/SetCutInRegion TRACKER_Glue4 2.5 um
+/gate/physics/Positron/SetCutInRegion TRACKER_Glue5 2.5 um
 /gate/physics/Positron/SetCutInRegion TRACKER_Absorber1 100 um
+/gate/physics/Positron/SetCutInRegion TRACKER_CableFDI1 15 um
+/gate/physics/Positron/SetCutInRegion TRACKER_CableFDI2 10 um
 /gate/physics/Positron/SetCutInRegion TRACKER_Absorber2 100 um
 /gate/physics/Positron/SetCutInRegion TRACKER_ALPIDESub 5 um
 /gate/physics/Positron/SetCutInRegion TRACKER_ALPIDEEpi 10 um
@@ -136,6 +150,8 @@
 /gate/physics/Positron/SetCutInRegion Glue3 2.5 um
 /gate/physics/Positron/SetCutInRegion Glue4 2.5 um
 /gate/physics/Positron/SetCutInRegion Glue5 2.5 um
+/gate/physics/Positron/SetCutInRegion CableFDI1 15 um
+/gate/physics/Positron/SetCutInRegion CableFDI2 10 um
 /gate/physics/Positron/SetCutInRegion Absorber 500 um
 /gate/physics/Positron/SetCutInRegion ALPIDESub 30 um
 /gate/physics/Positron/SetCutInRegion ALPIDEEpi 10 um
@@ -143,7 +159,6 @@
 /gate/physics/Positron/SetCutInRegion AirGap 750 um
 /gate/physics/Positron/SetCutInRegion TopFDI1 15 um
 /gate/physics/Positron/SetCutInRegion TopFDI2 10 um
-/gate/physics/Positron/SetCutInRegion Spacer1 130 um
 /gate/physics/Positron/SetCutInRegion Spacer2 40 um
 /gate/physics/Positron/SetCutInRegion BottomFDI1 50 um
 /gate/physics/Positron/SetCutInRegion BottomFDI2 10 um
@@ -156,9 +171,6 @@
 
 /gate/source/addSource PBS PencilBeam
 /gate/source/PBS/setParticleType proton
-#/gate/source/PBS/setParticleType GenericIon
-#/gate/source/PBS/setIonProperties 2 4 2 0
-#/gate/source/PBS/setIonProperties 6 12 6 0
 /gate/source/PBS/setEnergy {energy} MeV
 /gate/source/PBS/setSigmaEnergy 0. MeV
 /gate/source/PBS/setPosition 0. 0. -500 mm

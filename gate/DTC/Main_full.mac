@@ -13,7 +13,7 @@
 #=================#
 
 /gate/geometry/setIonisationPotential Water 78 eV
-/gate/physics/addPhysicsList QGSP_BIC_EMZ
+/gate/physics/addPhysicsList QBBC_EMZ
 /gate/physics/SetMaxStepSizeInRegion world 1 mm
 /gate/physics/ActivateStepLimiter proton
 
@@ -72,5 +72,5 @@
 
 /gate/random/setEngineName MersenneTwister
 /gate/random/setEngineSeed auto
-/gate/application/setTotalNumberOfPrimaries 1000
+/gate/application/setTotalNumberOfPrimaries 15000
 /gate/application/start

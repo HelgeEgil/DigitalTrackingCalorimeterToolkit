@@ -20,7 +20,7 @@ Float_t getWETFromLayer(Float_t layer) {
 }
 
 Float_t getWEPLFromLayer(Float_t layer) {
-   return splineWET->Eval(layer);
+   return splineWEPL->Eval(layer);
 }
 
 Float_t getWETFromDegrader(Float_t degrader) {
@@ -398,10 +398,10 @@ Float_t getEnergyFromDegraderThickness(Double_t degraderThickness) {
       }
    }
    else if (kEnergy == 230) {
-      in.open("Data/Ranges/EnergyAfterDegrader230MeV_78eV.csv");
+      in.open("Data/Ranges/EnergyAfterDegraderProton.csv");
       printf("Loading EnergyAfterDegraderHelium - proton 230 MeV (78 eV)\n");
       while (1) {
-         in >> dt >> e;
+         in >> dt >> e >> es;
          if (!in.good()) break;
          phaseSpaceDegraderthickness[idx] = double(dt);
          phaseSpaceEnergy[idx++] = e;

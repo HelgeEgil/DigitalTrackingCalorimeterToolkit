@@ -236,7 +236,13 @@ void  createSplines() {
    in.close();
 
    Int_t layerIdx = 0;
-   in.open("Data/Ranges/layer_wet_wepl.csv");
+   if (!kHelium) {
+      in.open("Data/Ranges/layer_wet_wepl_Proton.csv");
+   }
+   else {
+      in.open("Data/Ranges/layer_wet_wepl_Helium.csv");
+   }
+
    while (1) {
       in >> layer >> wet >> wepl;
       if (!in.good()) break;
