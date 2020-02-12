@@ -222,13 +222,19 @@ Tracks * getTracksFromClusters(Int_t Runs, Int_t dataType, Int_t frameType, Floa
       
       // Flag tracks as too short
       Track * thisTrack;
-      tracks->appendClustersWithoutTrack(clusters->getClustersWithoutTrack());
+      if (kSaveCWT) tracks->appendClustersWithoutTrack(clusters->getClustersWithoutTrack());
       for (Int_t i=0; i<tracks->GetEntriesFast(); i++) {
          thisTrack = tracks->At(i);
          if (tracks->getNMissingClustersWithEventID(thisTrack->getEventID(0), thisTrack->Last()->getLayer(), i)) {
             thisTrack->setIncomplete(true);
          }
       }
+      
+      // DO SOME CUTS HERE INSTEAD TO SAVE MEMORY
+      tracks->removeEmptyTracks();
+      tracks->doTrackFit(false);
+      tracks->removeTracksWithMinWEPL(100);
+      tracks->removeNuclearInteractions();
 
       showDebug("append tracks to alltracks...");
       for (Int_t j=0; j<tracks->GetEntriesFast(); j++) {
@@ -238,12 +244,13 @@ Tracks * getTracksFromClusters(Int_t Runs, Int_t dataType, Int_t frameType, Floa
       showDebug("ok\n");
 
       showDebug("appendClustersWithoutTrack...");
-      allTracks->appendClustersWithoutTrack(clusters->getClustersWithoutTrack());
+      if (kSaveCWT) allTracks->appendClustersWithoutTrack(clusters->getClustersWithoutTrack());
       t4.Stop();
       showDebug("ok\n");
 
       delete clusters;
       delete tracks;
+
 
       if (breakSignal) break;
    }

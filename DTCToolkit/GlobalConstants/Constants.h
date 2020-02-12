@@ -19,7 +19,7 @@
 #define NX 9000
 #define DX 0.030
 #define DY 0.030
-#define NY 4500
+#define NY 5500
 #define DZ 0.435
 
 // When the final design is used, add the air gap and Al spacer in mid detector:
@@ -30,16 +30,16 @@
 
 // -------------------------------------
 
-Bool_t   kHelium = true;
-Bool_t   kSpotScanning = false;
+Bool_t   kHelium = false;
+Bool_t   kSpotScanning = true;
 Int_t    kRotation = 90; // degrees
-Bool_t   kPhantom = false;
+Bool_t   kPhantom = true;
 Bool_t   kDoTracking = true; 
 Bool_t   kFilterNuclearInteractions = false; 
 Bool_t   kDoDiffusion = true;
-Int_t    kEventsPerRun = 50;
+Int_t    kEventsPerRun = 100;
 Int_t    kSkipTracks = 0; // during readout
-const Int_t    kEnergy = 917; // 917 MeV_Helium ~= 230 MeV_proton // 600 HeC phantom
+const Int_t    kEnergy = 230; // 917 MeV_Helium ~= 230 MeV_proton // 600 HeC phantom
 Bool_t   kUseDegrader = true; 
 Bool_t   kUseAlpide = true;
 Bool_t   kDoTrackerPropagation = true;
@@ -101,6 +101,8 @@ Float_t searchRadius = 40 * dx; // 20 if dimensionless
 Float_t kMCSFactor = 3;
 const Double_t SpreadNumber = 0.1; // number of iterations in gaussian spread
 const Double_t SpreadSigma  = 0.7; // sigma (in pixels) to spread
+
+Bool_t kSaveCWT = false;
 
 // Minimum track length (in mm) to account for the track in the bragg peak fitting analysis.
 const Int_t kMinimumTracklength = 5;

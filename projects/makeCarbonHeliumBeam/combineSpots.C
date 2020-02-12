@@ -23,8 +23,8 @@ void combineSpots() {
    Int_t    totalRunningTally = 0;
 
    
-   for (int spotX = -100; spotX <= 100; spotX += 5) {
-      fSimulationOut = new TFile(Form("../../DTCToolkit/Data/MonteCarlo/DTC_Final_HeadPhantom_spotx%04d_AllY_rotation0deg.root", spotX), "recreate");
+   for (int spotX = -98; spotX <= 98; spotX += 7) {
+      fSimulationOut = new TFile(Form("../../DTCToolkit/Data/MonteCarlo/DTC_Final_HeadPhantom_rotation90deg_spotx%04d_AllY.root", spotX), "recreate");
       treeSimulationOut = new TTree("Hits", "Combined spots");
 
       treeSimulationOut->Branch("posX", &outX, "posX/F");
@@ -39,10 +39,9 @@ void combineSpots() {
       treeSimulationOut->Branch("spotPosX", &spotPosX, "spotPosX/F");
       treeSimulationOut->Branch("spotPosY", &spotPosY, "spotPosY/F");
 
-      for (int spotY = -80; spotY <= 80; spotY += 5) {
-
+      for (int spotY = -80; spotY <= 81; spotY += 7) {
          printf("Running @ spot (%04d, %04d)\n", spotX, spotY);
-         fSimulationIn = new TFile(Form("../../DTCToolkit/Data/MonteCarlo/DTC_Final_HeadPhantom_spotx%04d_spoty%04d_rotation0deg.root", spotX, spotY), "READ");
+         fSimulationIn = new TFile(Form("../../DTCToolkit/Data/MonteCarlo/DTC_Final_HeadPhantom_rotation90deg_spotx%04d_spoty%04d.root", spotX, spotY), "READ");
          treeSimulationIn = (TTree*) fSimulationIn->Get("Hits");
 
          treeSimulationIn->SetBranchAddress("posX",&x);

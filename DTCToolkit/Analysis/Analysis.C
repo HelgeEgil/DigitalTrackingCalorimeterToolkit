@@ -488,6 +488,7 @@ void getTracksReconstructionEfficiency(Int_t dataType, Float_t energy, Float_t d
 //      tracks->removeHighAngularChangeTracks(cutMaxAngle); // mrad
       tracks->doTrackFit();
       tracks->removeNuclearInteractions();
+      tracks->removeTracksWithMinWEPL(60);
       tracks->removeThreeSigmaShortTracks();
       tracks->removeHighAngleTracks(cutAngle); // mrad
       
@@ -506,7 +507,7 @@ void getTracksReconstructionEfficiency(Int_t dataType, Float_t energy, Float_t d
       
       Float_t ratioFirstAndLastAllTracksAfterFilter = (float) nFirstAndLastAllTracksAfterFilter / nTotalAfterFilter;
 
-      ofstream file2(Form("OutputFiles/lastLayerCorrect_different_nRuns_proton.csv"), ofstream::out | ofstream::app);
+      ofstream file2(Form("OutputFiles/lastLayerCorrect_different_nRuns_Proton.csv"), ofstream::out | ofstream::app);
       file2 << readoutAbsorber << " " << nRuns << " " << " " << ratioFirstAndLastAllTracks << " " << ratioFirstAndLastAllTracksAfterFilter << endl;
       file2.close();
       
@@ -2492,21 +2493,26 @@ void showOutputFileForImageReconstruction() {
 
 }
 
-void makeOutputFileForImageReconstruction(Int_t Runs, Int_t tracksperrun, Float_t spotPosX) {
+void makeOutputFileForImageReconstruction(Int_t Runs, Int_t tracksperrun, Int_t rotation) {
 //   run_energy = 760;
    run_degraderThickness = 180; // This number is useless I hope
    run_energy = 230;
    kEventsPerRun = tracksperrun;
    kDoTracking = true;
-   kSpotX = spotPosX; // Use this to open correct file
+//   kSpotX = spotPosX; // Use this to open correct file
+   kRotation = rotation;
 
-   Bool_t  kDraw = true;
-   Float_t spotXFrom = -100;
-   Float_t spotXTo = 100;
-   Float_t spotXSpacing = 5;
-   Float_t spotYFrom = -80;
-   Float_t spotYTo = 80;
-   Float_t spotYSpacing = 5;
+
+   // Small phantoms: x = -77 7 77; y = -21 7 21
+   // Head phantom: x = -98 7 98; y = -84 7 84
+
+   Bool_t  kDraw = false;
+   Float_t spotXFrom = -77;
+   Float_t spotXTo = 77;
+   Float_t spotXSpacing = 7;
+   Float_t spotYFrom = -21;
+   Float_t spotYTo = 21;
+   Float_t spotYSpacing = 7;
 
    TH2F *hSimpleImage = nullptr;
    TH2F *hSimpleImageNorm = nullptr;
@@ -2519,13 +2525,14 @@ void makeOutputFileForImageReconstruction(Int_t Runs, Int_t tracksperrun, Float_
    Float_t outSpotX, outSpotY, outWEPL, outX2x, outX2y, outP2x, outP2y, residualRange, wepl, wepl_calibrated, outWEPL_uncalibrated;
    Track * thisTrack = nullptr;
 
-   TFile *fOut = new TFile(Form("OutputFiles/PedHead_rotation%ddeg_spotx%.0f.root", kRotation, spotPosX), "recreate");
-   TTree *tOut = new TTree("WEPLData", "Carbon+Helium beam");
+   // TFile *fOut = new TFile(Form("OutputFiles/PedHead_rotation%ddeg_spotx%.0f.root", kRotation, spotPosX), "recreate");
+   TFile *fOut = new TFile(Form("OutputFiles/linePair/linePair_rotation%03ddeg.root", kRotation), "recreate");
+   TTree *tOut = new TTree("WEPLData", "proton beam");
 
    tOut->Branch("spotX", &outSpotX, "spotX/F");
    tOut->Branch("spotY", &outSpotY, "spotY/F");
    tOut->Branch("WEPL", &outWEPL, "WEPL/F");
-   tOut->Branch("WEPL_uncalibrated", &outWEPL_uncalibrated, "WEPL_uncalibrated/F");
+//   tOut->Branch("WEPL_uncalibrated", &outWEPL_uncalibrated, "WEPL_uncalibrated/F");
    tOut->Branch("X2x", &outX2x, "X2x/F");
    tOut->Branch("X2y", &outX2y, "X2y/F");
    tOut->Branch("P2x", &outP2x, "P2x/F");
@@ -2536,56 +2543,52 @@ void makeOutputFileForImageReconstruction(Int_t Runs, Int_t tracksperrun, Float_
    Float_t  cutAngle = 50;
    Float_t  cutEdep = 12;
 
-//   for (float spotY = spotYFrom; spotY <= spotYTo; spotY += spotYSpacing) {
-   Float_t spotY = 0;
+   for (float spotX = spotXFrom; spotX <= spotXTo; spotX += spotXSpacing) {
+      for (float spotY = spotYFrom; spotY <= spotYTo; spotY += spotYSpacing) {
+   //   Float_t spotY = 0;
 
-      printf("Spot (%.0f,%.0f)\n", spotPosX, spotY);
-      Tracks * tracks = loadOrCreateTracks(true, Runs, false, run_energy, spotPosX, spotY);
-      tracks->removeEmptyTracks();
-   
-      tracks->doTrackFit(false);
-      tracks->removeTracksWithMinWEPL(100);
-      tracks->removeThreeSigmaShortTracks();
-//      tracks->removeHighAngleTracks(cutAngle); // mrad
-      tracks->removeNuclearInteractions();
+         printf("Spot (%.0f,%.0f)\n", spotX, spotY);
+         Tracks * tracks = loadOrCreateTracks(true, Runs, false, run_energy, spotX, spotY);
+         tracks->removeThreeSigmaShortTracks();
 
-      for (Int_t i=0; i<=tracks->GetEntriesFast(); i++) {
-         thisTrack = tracks->At(i);
-         if (!thisTrack) continue;
+         for (Int_t i=0; i<=tracks->GetEntriesFast(); i++) {
+            thisTrack = tracks->At(i);
+            if (!thisTrack) continue;
 
-         outSpotX = spotPosX;
-         outSpotY = spotY;
-         wepl = thisTrack->getFitParameterRange();
-         wepl_calibrated =  1.0036 * wepl + 2.93; // pol1 calibration
-         outWEPL = 333.7 - wepl_calibrated; // 332.7 mm: 230 MeV proton @ 78 eV H2O (extrapolated from data...)
-         outWEPL_uncalibrated = 333.7 - wepl;
-         if (isnan(outWEPL)) continue;
+            outSpotX = spotX;
+            outSpotY = spotY;
+            wepl = thisTrack->getFitParameterRange();
+            wepl_calibrated =  1.0036 * wepl + 2.93; // pol1 calibration
+            outWEPL = 333.7 - wepl_calibrated; // 332.7 mm: 230 MeV proton @ 78 eV H2O (extrapolated from data...)
+  //          outWEPL_uncalibrated = 333.7 - wepl;
+            if (isnan(outWEPL)) continue;
 
-//            outWEPL = 238.8 - residualRange; // 190 MeV/u Helium
-         if (!thisTrack->At(0) || !thisTrack->At(1)) continue;
+   //            outWEPL = 238.8 - residualRange; // 190 MeV/u Helium
+            if (!thisTrack->At(0) || !thisTrack->At(1)) continue;
 
-         outX2x = thisTrack->At(0)->getXmm();
-         outX2y = thisTrack->At(0)->getYmm();
-         outP2x = (thisTrack->At(1)->getXmm() - outX2x) / dz2;
-         outP2y = (thisTrack->At(1)->getYmm() - outX2y) / dz2;
+            outX2x = thisTrack->At(0)->getXmm();
+            outX2y = thisTrack->At(0)->getYmm();
+            outP2x = (thisTrack->At(1)->getXmm() - outX2x) / dz2;
+            outP2y = (thisTrack->At(1)->getYmm() - outX2y) / dz2;
 
-         tOut->Fill();
+            tOut->Fill();
 
-         if (kDraw) {
-            hSimpleImage->Fill(outX2x, outX2y, outWEPL);
-            hSimpleImageNorm->Fill(outX2x, outX2y);
+            if (kDraw) {
+               hSimpleImage->Fill(outX2x, outX2y, outWEPL);
+               hSimpleImageNorm->Fill(outX2x, outX2y);
+            }
          }
+          nruns++;
+          delete tracks;
       }
-       nruns++;
-       delete tracks;
-//   }
+   }
 
    fOut->ReOpen("update"); // Lost connection due to parallel processes? NOT ANYMORE AMIGO
    tOut->Write();
    fOut->Write();
 
    fOut->Close();
-   printf("Image Reconstruction Input data written to Output/PedHead_spotXXX.root.\n");
+   printf("Image Reconstruction Input data written to Output/linePair/linePair_rotation%03d.root.\n", kRotation);
    
    if (kDraw) {
       hSimpleImage->Divide(hSimpleImageNorm);
@@ -2618,14 +2621,10 @@ void drawTracks3D(Int_t Runs, Int_t dataType, Bool_t recreate, Int_t switchLayer
    Float_t  cutAngle = 45;
    Float_t  cutEdep = 12;
    
-//   tracks->removeTracksEndingInHalo();
-//   tracks->removeHighAngularChangeTracks(cutMaxAngle); // mrad
-   tracks->doTrackFit();
-   tracks->removeNuclearInteractions();
    tracks->removeThreeSigmaShortTracks();
    tracks->removeHighAngleTracks(cutAngle); // mrad
 
-   Bool_t   kDraw = true;
+   Bool_t   kDraw = false;
 
    TH1I  *hWEPLCorrect = new TH1I("hWEPLCorrect", ";Range in detector [mm WEPL];Frequency", 400, 0, 250);
    TH1I  *hWEPLSecondary = new TH1I("hWEPLSecondary", "", 400, 0, 250);

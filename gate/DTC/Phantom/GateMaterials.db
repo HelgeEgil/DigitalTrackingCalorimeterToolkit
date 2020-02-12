@@ -211,10 +211,6 @@ Lung:  d=0.26 g/cm3 ; n=9
         +el: name=Chlorine   ; f=0.003
         +el: name=Potassium  ; f=0.002
 
-Polyethylene:  d=0.96 g/cm3 ; n=2
-        +el: name=Hydrogen   ; n=2
-        +el: name=Carbon     ; n=1
-
 PVC:  d=1.65 g/cm3 ; n=3 ;  state=solid
         +el: name=Hydrogen   ; n=3
         +el: name=Carbon     ; n=2
@@ -481,82 +477,56 @@ Testis: d=1.04 g/cm3 ; n=9
         +el: name=Chlorine   ; f=0.002000
         +el: name=Potassium  ; f=0.002000
 
+Polyethylene:  d=0.94 g/cm3 ; n=2
+        +el: name=Hydrogen   ; f=0.143711
+        +el: name=Carbon     ; f=0.856289
+
+Polystyrene:  d=1.06 g/cm3 ; n=2; state=solid
+        +el: name=Hydrogen   ; f=0.077418
+        +el: name=Carbon     ; f=0.922582
+
 PMMA:   d=1.195 g/cm3; n=3 ; state=Solid
         +el: name=Hydrogen   ; f=0.080541
         +el: name=Carbon     ; f=0.599846
         +el: name=Oxygen     ; f=0.319613
 
-Carbide: d=15.8 g/cm3; n=2 ; state=Solid
-        +el: name=Tungsten   ; n=1
-        +el: name=Carbon     ; n=1
+PMP: d=0.83 g/cm3; n=2 ; state=Solid
+        +el: name=Carbon     ; f=0.856
+        +el: name=Hydrogen   ; f=0.144
 
-myPMMA: d=0.95 g/cm3; n=3 ; state=Solid
-		  +el: name=Hydrogen	  ; n=8
-		  +el: name=Carbon	  ; n=5
-		  +el: name=Oxygen     ; n=2
+Epoxy: d=1.16 g/cm3; n=4; state=Solid
+        +el: name=Carbon     ; f=0.7109
+        +el: name=Oxygen     ; f=0.1908
+        +el: name=Hydrogen   ; f=0.078
+        +el: name=Nitrogen   ; f=0.0203
 
-myEpoxy: d=1.18 g/cm3; n=3; state=Solid
-        +el: name=Carbon     ; n=18
-        +el: name=Hydrogen   ; n=19
-        +el: name=Oxygen     ; n=3
-
-myScintillator: d=1.03 g/cm3; n=2; state=Solid
-        +el: name=Carbon    ; f=0.915
-        +el: name=Hydrogen  ; f=0.085
-
-FR4:	  d=1.782 g/cm3; n=4; state=Solid
-        +el: name=Hydrogen   ; f=0.1730
-        +el: name=Carbon     ; f=0.1640
-        +el: name=Oxygen     ; f=0.4510
-        +el: name=Silicon    ; f=0.2120
-
-PCB:    d=3.566 g/cm3; n=5; state=Solid
-        +el: name=Hydrogen   ; f=0.1502
-        +el: name=Carbon     ; f=0.1423
-        +el: name=Oxygen     ; f=0.3910
-        +el: name=Silicon    ; f=0.1836
-        +el: name=Copper     ; f=0.1329
-
-Glue:   d=1.05 g/cm3; n=3; state=Solid
-        +el: name=Hydrogen   ; f=0.0709
-        +el: name=Carbon     ; f=0.7603
-        +el: name=Oxygen     ; f=0.1688
-
-CarbonFiber: d=1.66 g/cm3; n=1; state=Solid
-       +el: name=Carbon      ; n=1
-
-Kapton: d=1.42 g/cm3; n=4; state=Solid
+Kapton:    d=1.42 g/cm3; n=4; state=Solid
         +el: name=Hydrogen   ; f=0.0264
         +el: name=Carbon     ; f=0.6911
         +el: name=Nitrogen   ; f=0.0733
         +el: name=Oxygen     ; f=0.2092
 
-focalTungsten: d=17.7715 g/cm3; n=6; state=Solid
-		  +el: name=Hydrogen	  ; f=0.0191
-		  +el: name=Carbon	  ; f=0.0101
-		  +el: name=Oxygen	  ; f=0.0291
-		  +el: name=Silicon	  ; f=0.0493
-		  +el: name=Copper	  ; f=0.0133
-		  +el: name=Tungsten	  ; f=0.8791
 
-focalAluminium: d=2.70 g/cm3; n=6; state=Solid
-		  +el: name=Hydrogen	  ; f=0.0199
-		  +el: name=Carbon	  ; f=0.0105
-		  +el: name=Oxygen	  ; f=0.0304
-		  +el: name=Silicon	  ; f=0.0515
-		  +el: name=Copper	  ; f=0.0139
-		  +el: name=Aluminium  ; f=0.8737
+Glue:   d=1.05 g/cm3; n=3; state=Solid
+        +el: name=Carbon     ; f=0.7603
+        +el: name=Hydrogen   ; f=0.0709
+        +el: name=Oxygen     ; f=0.1688
 
-focalPMMA: d=1.125 g/cm3; n=5; state=Solid
-		  +el: name=Hydrogen	  ; f=0.4987
-		  +el: name=Carbon	  ; f=0.3103
-		  +el: name=Oxygen	  ; f=0.1433
-		  +el: name=Silicon	  ; f=0.0376
-		  +el: name=Copper	  ; f=0.0102
+TungstenCarbide: d=15.8 g/cm3; n=2; state=Solid 
+        +el: name=Carbon     ; f=0.5
+        +el: name=Tungsten   ; f=0.5
 
-Epoxy: d=1.2 g/cm3; n=2;   state=Solid
-       +el: name=Hydrogen    ; n=2
-       +el: name=Carbon      ; n=2
+Teflon: d=2.2 g/cm3; n=2; state=Solid
+        +el: name=Carbon     ; f=0.2402
+        +el: name=Fluorine   ; f=0.7598
+
+Delrin: d=1.41 g/cm3; n=3; state=Solid
+        +el: name=Carbon     ; f=0.4000
+        +el: name=Hydrogen   ; f=0.0671
+        +el: name=Oxygen     ; f=0.5329
+
+cfrp:   d=1.66 g/cm3; n=1; state=Solid
+	+el: name=carbon     ; f=1.0
 
 headSoftTissue: d=1.055 g/cm3; n=6; state=Solid
         +el: name=Hydrogen   ; f=0.0848
@@ -604,6 +574,9 @@ headCorticalBone: d=1.75 g/cm3; n=8; state=Solid
         +el: name=Calcium    ; f=0.2048
         +el: name=Phosphor   ; f=0.0757
 
+CarbonFiber: d=2.2 g/cm3; n=1; state=Solid
+       +el: name=Carbon      ; n=1
+
 headToothDentine: d=1.66 g/cm3; n=9; state=Solid
         +el: name=Hydrogen   ; f=0.0451
         +el: name=Carbon     ; f=0.3535
@@ -625,4 +598,3 @@ headToothEnamel: d=2.04 g/cm3; n=9; state=Solid
         +el: name=Phosphor   ; f=0.1233
         +el: name=Sulfur     ; f=0.0031
         +el: name=Barium     ; f=0.0131
-

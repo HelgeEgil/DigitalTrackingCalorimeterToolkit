@@ -154,7 +154,7 @@ vector<Float_t> findRange::Run(Double_t energy, Double_t sigma_mev, Int_t mm, In
    // proton: 333.7 -> DELTA: 2.8
    // Helium: 332.3 -> DELTA: 0.6
    
-   std::ofstream filename(Form("OutputFiles/findManyRangesDegrader_final_idx%d.csv", fileIdx));// , std::ofstream::out | std::ofstream::app);
+   std::ofstream filename(Form("OutputFiles/findManyRangesDegrader_final_Proton_idx%d.csv", fileIdx));// , std::ofstream::out | std::ofstream::app);
    filename << degrader << " " << 330.9 - degrader << " " << hR << " " << hRS << " " << energyBeforeTracker << " " << energyBeforeTrackerSigma << endl; 
    
    delete c2;
