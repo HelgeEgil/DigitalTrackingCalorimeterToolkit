@@ -26,7 +26,7 @@ Node::Node(Node *parent, Cluster *connectedCluster, Float_t score) {
 Node::~Node() {
 }
 
-void  Node::deleteNodeTree() {
+void  Node::deleteNodeTree() { // Usually run on the seedNode
    vector<Node*> *allNodes = new vector<Node*>;
    getAllNodes(allNodes);
    for (UInt_t i=0; i<allNodes->size(); i++) {
@@ -35,7 +35,6 @@ void  Node::deleteNodeTree() {
    }
    delete allNodes;
 }
-
 
 Cluster * Node::getParentCluster() {
    Node * parent = getParent();
@@ -57,9 +56,9 @@ void Node::addChild(Node *node) {
       Float_t worstScore = getChild(worstChild)->getScore();
       Float_t newScore = node->getScore();
       if (newScore < threshold * worstScore) {
-         // They are dissimilar, use instead the new one
-         removeChild(worstChild);
-         children_[worstChild] = node;
+         // They are dissimilar, use only the new one
+         removeChild(worstChild); // might change order
+         children_[getFirstEmptyChild()] = node;
          
       }
       else if (newScore < worstScore) {
@@ -76,7 +75,8 @@ void Node::addChild(Node *node) {
       Float_t worstScore = getChild(worstChild)->getScore();
 
       if (worstScore > node->getScore()) {
-         children_[worstChild] = node; 
+         removeChild(worstChild); // might change order
+         children_[getFirstEmptyChild()] = node; 
       }
 
       else {

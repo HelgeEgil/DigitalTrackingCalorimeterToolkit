@@ -48,8 +48,7 @@ void findAPAndStraggling(Int_t absorberthickness) {
    Float_t  energyStraggling;
    Int_t    degraderThickness;
    ifstream inWater, inMaterial, inEnergy;
-
-
+   
    inMaterial.open("../OutputFiles/findManyRangesDegrader_final_Helium.csv");
 
    Float_t WET;
@@ -106,7 +105,7 @@ void findAPAndStraggling(Int_t absorberthickness) {
    Double_t arrayLayerNumber[45];
    Double_t arrayLayerWET[45];
    for (Int_t l=0; l<45; l++) {
-      Double_t lDepth;
+      Double_t lDepth = 0;
       if (l==0) arrayLayerWET[l] = 6; // minus 0.5 MeV
       else if (l==1) arrayLayerWET[l] = 7.8; // minus 1 MeV
       else {
