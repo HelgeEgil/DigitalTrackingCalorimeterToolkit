@@ -39,8 +39,9 @@ void Hits::findClustersFromHits(Clusters * clusters) {
             expandedCluster = getAllNeighboursFromCluster(i, checkedIndices); 
             appendNeighboursToClusters(expandedCluster, clusters);
             delete expandedCluster;
-            delete firstHits;
          }
+         
+         delete firstHits;
          
       }
       delete checkedIndices;
