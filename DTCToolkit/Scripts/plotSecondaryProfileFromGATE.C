@@ -75,7 +75,7 @@ void plotSecondaryProfileFromGATE() {
 //      if (i>100000) break;
       l = baseID*2 + level1ID - 2;
 
-      if (parentID == 0) {
+      if (parentID > 0 && PDG == 1000020040) {
          if (edep>8e-3) {
             hPDGAfterhe->Fill(l);
             eidHere = eventID;
