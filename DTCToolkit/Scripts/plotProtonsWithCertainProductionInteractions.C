@@ -6,6 +6,7 @@
 #include <TEllipse.h>
 #include <TCanvas.h>
 #include <TFile.h>
+#include <TSpline.h>
 #include <TStyle.h>
 
 using namespace std;
@@ -55,22 +56,52 @@ void plotProtonsWithCertainProductionInteractions() {
    Int_t gammaParent, neutronParent, heliumParent;
    Int_t goodGammaEvent, goodNeutronEvent, goodGammaPhotEvent, goodGammaComptEvent, goodGammaRaylEvent, goodGammaConvEvent, goodHeliumEvent, goodNeutronInelasticEvent;
 
+   Double_t xp[1000];
+   Double_t yp[1000];
+   Double_t zp[1000];
+   Int_t idxp = 0;
+   TSpline3 *splinexp = nullptr;
+   TSpline3 *splineyp = nullptr;
+   Double_t diffxy;
+
    for (Int_t i=0; i<tree->GetEntries(); i++) {
       // Must find correct trackid also
-      //
-//      if (i>10000) break;
+      
+      if (i>10000) break;
       
       tree->GetEntry(i);
    
+
+      if (parentID == 0) {
+         xp[idxp] = x;
+         yp[idxp] = y;
+         zp[idxp++] = z;
+      }
+      else if (parentID>0 && idxp>0) {
+         
+         if (splinexp) {
+            delete splinexp;
+            delete splineyp;
+         }
+
+         splinexp = new TSpline3("splinexp", zp, xp, idxp);
+         splineyp = new TSpline3("splineyp", zp, yp, idxp);
+         idxp = 0;
+      }
+
 //      cout << "z " << z << ", parentID " << parentID << ", trackID " << trackID << ", processname " << processName << ", PDG " << PDG << endl;
 
       l = baseID*2 + level1ID - 2; // control this
+
+      if (parentID > 0) {
+         diffxy = sqrt(pow(splinexp->Eval(z) - x, 2) + pow(splineyp->Eval(z) - y, 2));
+         if (diffxy < 0.025) continue;
+      }
 
       if (PDG == 1000020040) {
          heliumParent = trackID;
          if (TString(processName) == "alphaInelastic") goodHeliumEvent = eventID;
       }
-
 
       if (PDG == 2112) { 
          neutronParent = trackID;
