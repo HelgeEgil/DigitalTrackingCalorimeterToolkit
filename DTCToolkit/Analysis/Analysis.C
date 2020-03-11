@@ -2583,8 +2583,8 @@ void makeOutputFileForImageReconstruction(Int_t Runs, Int_t tracksperrun, Int_t 
       }
    }
 
-   fOut->ReOpen("update"); // Lost connection due to parallel processes? NOT ANYMORE AMIGO
-   tOut->Write();
+//   fOut->ReOpen("update"); // Lost connection due to parallel processes? NOT ANYMORE AMIGO
+//   tOut->Write();
    fOut->Write();
 
    fOut->Close();
