@@ -22,6 +22,9 @@ using namespace DTC;
 
 Track::Track() : track_("DTC::Cluster", MaxTrackLength) {
    track_.SetOwner(kTRUE);
+   track_.SetBit(kCanDelete);
+   track_.SetBit(kMustCleanup);
+
    fitEnergy_ = 0;
    fitRange_ = 0;
    fitScale_ = 0;
@@ -31,6 +34,9 @@ Track::Track() : track_("DTC::Cluster", MaxTrackLength) {
 
 Track::Track(Cluster *cluster) : track_("DTC::Cluster", MaxTrackLength) {
    track_.SetOwner(kTRUE);
+   track_.SetBit(kCanDelete);
+   track_.SetBit(kMustCleanup);
+
    appendCluster(cluster);
    fitEnergy_ = 0;
    fitRange_ = 0;

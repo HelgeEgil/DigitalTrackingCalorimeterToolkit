@@ -67,8 +67,7 @@ vector<Int_t> * Hits::findNeighbours(Int_t index) {
 
       Int_t dx = abs(getX(index) - getX(j));
       Int_t dy = abs(yGoal - getY(j));
-      if (dx + dy <= 1) { // only diagonal neighbors
-//      if (abs(getX(index) - getX(j)) <= 1 && abs(yGoal - getY(j)) <= 1) {
+      if (dx + dy <= 1) { // no diagonal neighbors
          neighbours->push_back(j);
       }
    }

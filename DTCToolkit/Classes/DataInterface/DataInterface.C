@@ -66,8 +66,8 @@ DataInterface::DataInterface(TTree *tree) : fChain(0) {
       else if (kFinalDesign) { // FINAL DESIGN
          if (!kHelium) { // FINAL DESIGN : PROTONS
             if (kSpotScanning) { // FINAL DESIGN : PROTONS : SPOT SCANNING
-               chain->Add(Form("Data/MonteCarlo/DTC_Final_linePair_rotation%03ddeg.root/Hits", kRotation));
-               printf("Opening PROTON phantom file with %03d degrees rotation\n", kRotation);
+               chain->Add(Form("Data/MonteCarlo/DTC_Final_%s_rotation%03ddeg.root/Hits", kPhantomName.Data(), kRotation));
+               printf("Opening PROTON phantom %s file with %03d degrees rotation\n", kPhantomName.Data(), kRotation);
             }
             else { // FINAL DESIGN : PROTONS : SINGLE PENCIL BEAM
                printf("Opening PROTON file with degrader thickness %.0f mm and FINAL design (3.5 mm)\n", run_degraderThickness);
@@ -485,13 +485,15 @@ void  DataInterface::getMCClustersThreshold(Int_t runNo, Clusters *clusters, Hit
 
    Float_t threshold = 8e-3;
    Int_t particlesBelowThreshold = 0;
+   Int_t nHitsAdded = 0;
 
    if (runNo == 0 && !kSpotScanning) lastJentry_ = 0;
 
 // Split the file instead (to save memory when loading 40x copies...)
 
-   if (lastJentry_ == 0 && kSpotScanning) {
+   if (lastJentry_ >= 0 && runNo == 0 && kSpotScanning) {
       lastJentry_ = findSpotIndex(useSpotX);
+      primariesInSpot_ = 0;
    }
 
    Int_t    layer = 0, lastEventID=-1;
@@ -507,10 +509,6 @@ void  DataInterface::getMCClustersThreshold(Int_t runNo, Clusters *clusters, Hit
       }
 
       fChain->GetEntry(jentry);
-      if (lastEventID != eventID) {
-         primariesInSpot_++;
-         isSecondary = false;
-      }
 
       if (!kSpotScanning) {
          if (eventID < eventIdFrom) {
@@ -524,15 +522,17 @@ void  DataInterface::getMCClustersThreshold(Int_t runNo, Clusters *clusters, Hit
       }
 
       else {
-         if (useSpotX > spotPosX || useSpotY > spotPosY) {
+         if (useSpotX >= spotPosX && useSpotY > spotPosY) {
+            primariesInSpot_ = 0;
             continue;
          }
 
          else if (useSpotX < spotPosX || useSpotY < spotPosY || jentry == nentries-1) { // new spot in data -> Store & exit
             lastJentry_ = jentry;
+            primariesInSpot_ = 0;
             break;
          }
-         else {
+         else { // Correct spot
             if (primariesInSpot_ >= kEventsPerRun) { // same spot, new Run
                primariesInSpot_ = 0;
                lastJentry_ = jentry;
@@ -541,19 +541,18 @@ void  DataInterface::getMCClustersThreshold(Int_t runNo, Clusters *clusters, Hit
          }
       }
       
-      layer = level1ID + baseID - 2;
-
-      if (kFinalDesign) {
-         if (!kPhantom) {
-            layer = baseID*2 + level1ID - 2;
-         }
-
-         else { // Re-ordering of baseID and level1ID due to phantom
-//            layer = 2 * level1ID + baseID;
-            layer = baseID*2 + level1ID;
-         }
+      if (lastEventID != eventID) {
+         primariesInSpot_++;
+         isSecondary = false;
       }
       
+      layer = level1ID + baseID - 2;
+      if (kFinalDesign) {
+         layer = baseID*2 + level1ID - 2;
+         if (kPhantom) layer += 2;
+      }
+     
+     /*
       if (posZ < 0) { // Inside degrader, check if nuclear interactions
          
          if (TString(processName) == "xxhadElastic" || TString(processName) == "alphaInelastic" || TString(processName) == "protonInelastic") {
@@ -566,16 +565,6 @@ void  DataInterface::getMCClustersThreshold(Int_t runNo, Clusters *clusters, Hit
 
       if (parentID != 0 || TString(processName) == "alphaInelastic" || TString(processName) == "protonInelastic") { // Secondary track
          isSecondary = true;
-
-         /*
-         if (clusters) {
-            clusters->propagateSecondaryStatusFromTop();
-            }
-
-         if (hits) {
-            hits->propagateSecondaryStatusFromTop();
-         }
-         */
 
          // If secondary particle is not electron or gamma, propagate secondary status to eventID-particle
          if (clusters && lastPropagated != eventID) {
@@ -598,6 +587,7 @@ void  DataInterface::getMCClustersThreshold(Int_t runNo, Clusters *clusters, Hit
             }
          }
       }
+      */
       
       if (edep < threshold) {
          particlesBelowThreshold++;
@@ -608,23 +598,12 @@ void  DataInterface::getMCClustersThreshold(Int_t runNo, Clusters *clusters, Hit
       x = posX / dx + nx/2;
       y = posY / dy + ny/2;
 
-/*      
-      printf("VolumeIDs layer %d posz %.3f: ", layer, posZ);
-      for (Int_t i=0; i<10; i++) {
-         printf("%d = %d; ", i, volumeID[i]);
+      if (layer < nLayers) {
+         if (hits)      hits->appendPoint(x,y,layer,edep*1000/alpideThickness,eventID,isSecondary,PDGEncoding);
+         if (clusters)  clusters->appendClusterEdep(x,y,layer,edep*1000/alpideThickness,eventID,isSecondary,PDGEncoding);
+         nHitsAdded++;
       }
-      printf("\n");
-  */    
-//      printf("posz %.3f baseID %d level1ID %d -> layer %d. edep %.2f keV/um, PDG %d, parentID %d\n", posZ, baseID, level1ID, layer, edep/alpideThickness*1000, PDGEncoding, parentID);
-
-
-//      if (volumeID[3] == 0 && volumeID[4] == 0 && volumeID[5] == -1) {
-         if (layer < nLayers) {
-            if (hits)      hits->appendPoint(x,y,layer,edep*1000/alpideThickness,eventID,isSecondary,PDGEncoding);
-            if (clusters)  clusters->appendClusterEdep(x,y,layer,edep*1000/alpideThickness,eventID,isSecondary,PDGEncoding);
-         }
-//      }
-
+      
       lastEventID = eventID;
    }
 }
@@ -660,6 +639,7 @@ Long64_t DataInterface::findSpotIndex(Float_t findSpotX) {
          nextIndex = (firstIndex + maxIndex) / 2;
       }
    }
+
    return maxIndex;
 }
 
@@ -702,7 +682,7 @@ void  DataInterface::getMCClusters(Int_t runNo, Clusters *clusters, Hits * hits,
       
       if (kSpotScanning) {
          if (useSpotX > spotPosX || useSpotY > spotPosY) {
-//            if (jentry%1000==0) printf("jentry = %lld\n", jentry)   
+//            if (jentry%1000==0) printf("jentry = %lld\n", jentry)
             lastEventID = -1;
             continue;
          }

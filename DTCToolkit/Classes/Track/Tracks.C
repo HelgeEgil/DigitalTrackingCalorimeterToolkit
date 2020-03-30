@@ -159,7 +159,7 @@ void Tracks::extrapolateToLayer0() {
 }
 
 void Tracks::doTrackFit(Bool_t freeScale) {
-   TGraph * out = nullptr;
+   TGraphErrors * out = nullptr;
 
    for (Int_t i=0; i<GetEntriesFast(); i++) {
       if (!At(i)) continue;
@@ -509,6 +509,7 @@ Int_t Tracks::getNMissingClustersWithEventID(Int_t eventID, Int_t afterLayer, In
    return n;
 }
 
+/*
 void Tracks::createEIDSortList() {
    Int_t eventID;
 
@@ -524,7 +525,8 @@ Track * Tracks::getTrackWithEID(Int_t eid) {
    if (!At(trackIdx)) return nullptr;
    return At(trackIdx);
 }
-  
+*/
+
 void Tracks::propagateSecondaryStatus() {
    Track   *thisTrack = nullptr;
    for (Int_t i=0; i<GetEntriesFast(); i++) {

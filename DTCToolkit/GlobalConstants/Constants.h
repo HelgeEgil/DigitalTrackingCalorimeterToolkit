@@ -3,6 +3,7 @@
 
 #include <cstring>
 #include <vector>
+#include <TString.h>
 #include <TObject.h>
 #include <TMath.h>
 
@@ -43,6 +44,7 @@ const Int_t    kEnergy = 230; // 917 MeV_Helium ~= 230 MeV_proton // 600 HeC pha
 Bool_t   kUseDegrader = true; 
 Bool_t   kUseAlpide = true;
 Bool_t   kDoTrackerPropagation = true;
+TString  kPhantomName = "linePair";
 
 const Int_t sizeOfEventID = 25;
 const Int_t nChildrenInNode = 2; // max concurrent track segments to follow

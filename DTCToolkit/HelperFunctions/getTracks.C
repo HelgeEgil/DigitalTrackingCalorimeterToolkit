@@ -124,13 +124,15 @@ Tracks * loadOrCreateTracks(Bool_t recreate, Int_t Runs, Int_t dataType, Float_t
 
 Tracks * getTracksFromClusters(Int_t Runs, Int_t dataType, Int_t frameType, Float_t energy, Float_t spotx, Float_t spoty, Clusters * saveClusters) {
    DataInterface   * di = new DataInterface();
-   Int_t             nClusters = kEventsPerRun * 5 * nLayers;
+   Int_t             nClusters = kEventsPerRun * 1.5 * nLayers;
    Int_t             nTracks = kEventsPerRun * 2;
    Bool_t            breakSignal = false;
    Clusters        * clusters = nullptr;
    Tracks          * tracks = nullptr;
    Tracks          * allTracks = new Tracks(nTracks * Runs);
    TRandom3        * gRandom = new TRandom3(0);
+
+   Int_t nTotalHits = 0;
 
    allTracks->SetOwner(kTRUE);
 
@@ -219,16 +221,21 @@ Tracks * getTracksFromClusters(Int_t Runs, Int_t dataType, Int_t frameType, Floa
       tracks->Compress();
       tracks->CompressClusters();
       showDebug("ok\n");
+     
+
+      if (kSaveCWT) tracks->appendClustersWithoutTrack(clusters->getClustersWithoutTrack());
+       
       
       // Flag tracks as too short
+      /*
       Track * thisTrack;
-      if (kSaveCWT) tracks->appendClustersWithoutTrack(clusters->getClustersWithoutTrack());
       for (Int_t i=0; i<tracks->GetEntriesFast(); i++) {
          thisTrack = tracks->At(i);
          if (tracks->getNMissingClustersWithEventID(thisTrack->getEventID(0), thisTrack->Last()->getLayer(), i)) {
             thisTrack->setIncomplete(true);
          }
       }
+      */
       
       // DO SOME CUTS HERE INSTEAD TO SAVE MEMORY
       tracks->removeEmptyTracks();
@@ -250,7 +257,6 @@ Tracks * getTracksFromClusters(Int_t Runs, Int_t dataType, Int_t frameType, Floa
 
       delete clusters;
       delete tracks;
-
 
       if (breakSignal) break;
    }

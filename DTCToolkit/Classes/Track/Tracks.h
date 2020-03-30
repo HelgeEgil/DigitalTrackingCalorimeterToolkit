@@ -23,12 +23,12 @@ class Tracks : public TObject {
    private:
       TClonesArray tracks_;
       TClonesArray clustersWithoutTrack_;
-      Int_t        EIDindex_[100000];
+//      Int_t        EIDindex_[100000];
 
    public:
-      Tracks() : tracks_("DTC::Track", 2000), clustersWithoutTrack_("DTC::Cluster", 10000) { tracks_.SetOwner(kTRUE); clustersWithoutTrack_.SetOwner(kTRUE); }
+      Tracks() : tracks_("DTC::Track", 2000), clustersWithoutTrack_("DTC::Cluster", 10000) { tracks_.SetOwner(kTRUE); clustersWithoutTrack_.SetOwner(kTRUE); tracks_.SetBit(kCanDelete); clustersWithoutTrack_.SetBit(kCanDelete); tracks_.SetBit(kMustCleanup); clustersWithoutTrack_.SetBit(kMustCleanup); }
 //      Tracks(Int_t nTracks) : tracks_("DTC::Track", nTracks), clustersWithoutTrack_("DTC::Cluster", nTracks*5) { if (nTracks > 200000) cout << "Remember to increase size of EIDindex array!!!! (now = 100 000)\n"; tracks_.SetOwner(kTRUE); clustersWithoutTrack_.SetOwner(kTRUE); }
-      Tracks(Int_t nTracks) : tracks_("DTC::Track", nTracks), clustersWithoutTrack_("DTC::Cluster", nTracks*5) { tracks_.SetOwner(kTRUE); clustersWithoutTrack_.SetOwner(kTRUE); }
+      Tracks(Int_t nTracks) : tracks_("DTC::Track", nTracks), clustersWithoutTrack_("DTC::Cluster", nTracks*5) { tracks_.SetOwner(kTRUE); clustersWithoutTrack_.SetOwner(kTRUE); tracks_.SetBit(kCanDelete); clustersWithoutTrack_.SetBit(kCanDelete); tracks_.SetBit(kMustCleanup); clustersWithoutTrack_.SetBit(kMustCleanup); }
       virtual ~Tracks(); 
 
       // ROOT & I/O     
@@ -87,8 +87,8 @@ class Tracks : public TObject {
       void              sortTrackByLayer(Int_t track);
       void              checkLayerOrientation();
       Bool_t            isLastEventIDCloseToFirst(Int_t trackIdx);
-      void              createEIDSortList();
-      Track           * getTrackWithEID(Int_t eid);
+//      void              createEIDSortList();
+//      Track           * getTrackWithEID(Int_t eid);
       
       // Optimization of the tracking function
       // tracksOptimization.C

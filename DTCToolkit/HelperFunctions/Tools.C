@@ -858,6 +858,16 @@ TF1 *  doSimpleGaussianFit (TH1F *h, Float_t *means, Float_t *sigmas, Int_t idx_
    cout << "The empirical estimated range is " << empiricalMean << " mm. (which is " << getEnergyFromUnit(empiricalMean) << " MeV).\n";
    cout << "The empirical standard deviation is " << empiricalSigma << " mm.\n";
    
+
+   // CALCULATE FWTM
+   Int_t bin1 = h->FindFirstBinAbove(h->GetMaximum()/10);
+   Int_t bin2 = h->FindLastBinAbove(h->GetMaximum()/10);
+   Float_t fwtm = h->GetBinCenter(bin2) - h->GetBinCenter(bin1);
+
+   bin1 = h->FindFirstBinAbove(h->GetMaximum()/2);
+   bin2 = h->FindLastBinAbove(h->GetMaximum()/2);
+   Float_t fwhm = h->GetBinCenter(bin2) - h->GetBinCenter(bin1);
+
    Float_t readoutAbsorber = (roundf(kAbsorberThickness) == kAbsorberThickness) ? kAbsorberThickness : kAbsorberThickness*10;
  
    TString filename = "OutputFiles/result_makebraggpeakfit";
@@ -869,6 +879,8 @@ TF1 *  doSimpleGaussianFit (TH1F *h, Float_t *means, Float_t *sigmas, Int_t idx_
       filename.Append(".csv");
    }
 
+   printf("Calculated FWTM is %.2f mm. Actual integration yields %.2f mm.\n", empiricalSigma*4.2913, fwtm);
+
    ofstream file2(filename, ofstream::out | ofstream::app);
 
    // absorber thickness; energy; nominal range; estimated range; range sigma
@@ -877,7 +889,7 @@ TF1 *  doSimpleGaussianFit (TH1F *h, Float_t *means, Float_t *sigmas, Int_t idx_
    }
    else {
       // file2 << readoutAbsorber << " " << run_degraderThickness << " " << getUnitFromEnergy(run_energy) << " " << empiricalMean << " " << nominalSigma << " " << empiricalSigma << " " << endl;
-      file2 << readoutAbsorber << " " << run_degraderThickness << " " << getWETFromDegrader(run_degraderThickness) << " " << empiricalMean << " " << nominalSigma << " " << empiricalSigma << " " << endl;
+      file2 << readoutAbsorber << " " << run_degraderThickness << " " << getWETFromDegrader(run_degraderThickness) << " " << empiricalMean << " " << nominalSigma << " " << empiricalSigma << " " << fwhm << " " << fwtm << endl;
    }
 
    file2.close();
