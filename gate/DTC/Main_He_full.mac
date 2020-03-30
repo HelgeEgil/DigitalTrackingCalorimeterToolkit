@@ -18,29 +18,29 @@
 /gate/physics/ActivateStepLimiter proton
 /gate/physics/ActivateStepLimiter alpha
 
-/gate/actor/addActor PhaseSpaceActor psa
-/gate/actor/psa/save ../../DTCToolkit/Data/MonteCarlo/DTC_Full_Final_Helium_Degrader{degraderthickness}mm_{energy}MeV_psa.root
-/gate/actor/psa/attachTo psaVolume
-/gate/actor/psa/enableEkine true
-/gate/actor/psa/enableXPosition false
-/gate/actor/psa/enableYPosition false
-/gate/actor/psa/enableZPosition false
-/gate/actor/psa/enableXDirection false
-/gate/actor/psa/enableYDirection false
-/gate/actor/psa/enableZDirection false
-/gate/actor/psa/enableProductionVolume false
-/gate/actor/psa/enableProductionProcess false
-/gate/actor/psa/enableParticleName false
-/gate/actor/psa/enableWeight false
-/gate/actor/psa/storeSecondaries false
+#/gate/actor/addActor PhaseSpaceActor psa
+#/gate/actor/psa/save ../../DTCToolkit/Data/MonteCarlo/DTC_Full_Final_Helium_Degrader{degraderthickness}mm_{energy}MeV_psa.root
+#/gate/actor/psa/attachTo psaVolume
+#/gate/actor/psa/enableEkine true
+#/gate/actor/psa/enableXPosition false
+#/gate/actor/psa/enableYPosition false
+#/gate/actor/psa/enableZPosition false
+#/gate/actor/psa/enableXDirection false
+#/gate/actor/psa/enableYDirection false
+#/gate/actor/psa/enableZDirection false
+#/gate/actor/psa/enableProductionVolume false
+#/gate/actor/psa/enableProductionProcess false
+#/gate/actor/psa/enableParticleName false
+#/gate/actor/psa/enableWeight false
+#/gate/actor/psa/storeSecondaries false
 
 # Should cross check this with uniform cuts in all regions !!
 /gate/run/initialize
 
-/process/inactivate hadElastic
-/process/inactivate protonInelastic
-/process/inactivate alphaInelastic
-/process/inactivate ionInelastic
+#/process/inactivate hadElastic
+#/process/inactivate protonInelastic
+#/process/inactivate alphaInelastic
+#/process/inactivate ionInelastic
 #/process/inactivate msc
 
 #=======================#
@@ -74,5 +74,5 @@
 
 /gate/random/setEngineName MersenneTwister
 /gate/random/setEngineSeed auto
-/gate/application/setTotalNumberOfPrimaries 15000
+/gate/application/setTotalNumberOfPrimaries 10000
 /gate/application/start

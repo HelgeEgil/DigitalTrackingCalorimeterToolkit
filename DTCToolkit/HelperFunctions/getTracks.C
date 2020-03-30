@@ -157,6 +157,7 @@ Tracks * getTracksFromClusters(Int_t Runs, Int_t dataType, Int_t frameType, Floa
          diffusedHits->sortHits();
          diffusedHits->makeLayerIndex();
          diffusedHits->findClustersFromHits(clusters);
+
 //         Int_t nRem = clusters->removeClustersInGap(1, 0);
 
          delete hits;
@@ -436,7 +437,6 @@ Tracks * getTracksFromClustersMT(Int_t Runs, Int_t dataType, Int_t frameType, Fl
    allTracks->Compress();
    allTracks->CompressClusters();
    allTracks->removeEmptyTracks();
-   
 
    printf("Timing: Cluster retrieval: %.3f s. Tracking: %.3f s. hits log %.3f s, diffusion %.3f s, findClusterFromHits %.3f s\n", t1.CpuTime(), t2.CpuTime(), t3.CpuTime(), t4.CpuTime(), t5.CpuTime());
 

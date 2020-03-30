@@ -27,7 +27,7 @@
 using namespace std;
 
 // IF FLOAT VALUES OF ABSORBER THICKNESS: USE *10 VALUES (3.5 -> 35)
-Int_t absorberThickness = 35;
+Int_t absorberThickness = 1;
 Bool_t kFilterData = false;
 Bool_t kUseCarbon = false;
 Int_t filterSize = 3;
@@ -203,7 +203,7 @@ void plotRangesAndStraggling() {
    in.close();
 
    if (!kUseCarbon) {
-      in.open("../../OutputFiles/result_makebraggpeakfit.csv");
+      in.open("../../OutputFiles/result_makebraggpeakfit_ProtonHelium100k.csv");
    }
    else {
       in.open("../../OutputFiles/result_makebraggpeakfitCarbon.csv");
