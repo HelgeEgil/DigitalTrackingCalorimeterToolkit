@@ -1,0 +1,1190 @@
+
+#--------------------Line Pair Phantom---------------------#
+/gate/world/daughters/name PhantomBox
+/gate/world/daughters/insert            box
+/gate/PhantomBox/geometry/setXLength 200.0 mm
+/gate/PhantomBox/geometry/setYLength 200.0 mm
+/gate/PhantomBox/geometry/setZLength 200.0 mm
+/gate/PhantomBox/placement/setTranslation 0 0 0 mm
+/gate/PhantomBox/placement/setRotationAxis        0 1 0 
+/gate/PhantomBox/placement/setRotationAngle       {rotation} deg
+/gate/PhantomBox/setMaterial Air
+/gate/PhantomBox/vis/setVisible 1
+/gate/PhantomBox/vis/setColor white
+
+/gate/PhantomBox/daughters/name Phantom
+/gate/PhantomBox/daughters/insert            cylinder
+/gate/Phantom/geometry/setRmin 0 mm
+/gate/Phantom/geometry/setRmax 75.0 mm
+/gate/Phantom/geometry/setHeight 40.0 mm
+/gate/Phantom/placement/setTranslation 0 0 0 mm
+/gate/Phantom/placement/alignToY
+/gate/Phantom/setMaterial Epoxy
+/gate/Phantom/vis/setVisible 1
+/gate/Phantom/vis/setColor blue
+
+#97 Al inserts
+/gate/Phantom/daughters/name AlInsert0
+/gate/Phantom/daughters/insert            box
+/gate/AlInsert0/geometry/setXLength 5.0 mm
+/gate/AlInsert0/geometry/setZLength 2.0 mm
+/gate/AlInsert0/geometry/setYLength 5.0 mm
+/gate/AlInsert0/placement/setTranslation 47.5 0.0 1.25 mm
+/gate/AlInsert0/placement/setRotationAxis        1 0 0 
+/gate/AlInsert0/placement/setRotationAngle       0 deg
+/gate/AlInsert0/setMaterial Aluminium
+/gate/AlInsert0/vis/setVisible 1
+/gate/AlInsert0/vis/setColor red
+
+/gate/Phantom/daughters/name AlInsert1
+/gate/Phantom/daughters/insert            box
+/gate/AlInsert1/geometry/setXLength 5.0 mm
+/gate/AlInsert1/geometry/setZLength 2.0 mm
+/gate/AlInsert1/geometry/setYLength 5.0 mm
+/gate/AlInsert1/placement/setTranslation 46.4513 9.92629 1.25 mm
+/gate/AlInsert1/placement/setRotationAxis        0 0 1 
+/gate/AlInsert1/placement/setRotationAngle       12.0623 deg
+/gate/AlInsert1/setMaterial Aluminium
+/gate/AlInsert1/vis/setVisible 1
+/gate/AlInsert1/vis/setColor red
+
+/gate/Phantom/daughters/name AlInsert2
+/gate/Phantom/daughters/insert            box
+/gate/AlInsert2/geometry/setXLength 5.0 mm
+/gate/AlInsert2/geometry/setZLength 2.0 mm
+/gate/AlInsert2/geometry/setYLength 2.5 mm
+/gate/AlInsert2/placement/setTranslation 42.933 20.3226 1.25 mm
+/gate/AlInsert2/placement/setRotationAxis        0 0 1 
+/gate/AlInsert2/placement/setRotationAngle       25.3308 deg
+/gate/AlInsert2/setMaterial Aluminium
+/gate/AlInsert2/vis/setVisible 1
+/gate/AlInsert2/vis/setColor red
+
+/gate/Phantom/daughters/name AlInsert3
+/gate/Phantom/daughters/insert            box
+/gate/AlInsert3/geometry/setXLength 5.0 mm
+/gate/AlInsert3/geometry/setZLength 2.0 mm
+/gate/AlInsert3/geometry/setYLength 2.5 mm
+/gate/AlInsert3/placement/setTranslation 40.5601 24.721 1.25 mm
+/gate/AlInsert3/placement/setRotationAxis        0 0 1 
+/gate/AlInsert3/placement/setRotationAngle       31.3619 deg
+/gate/AlInsert3/setMaterial Aluminium
+/gate/AlInsert3/vis/setVisible 1
+/gate/AlInsert3/vis/setColor red
+
+/gate/Phantom/daughters/name AlInsert4
+/gate/Phantom/daughters/insert            box
+/gate/AlInsert4/geometry/setXLength 5.0 mm
+/gate/AlInsert4/geometry/setZLength 2.0 mm
+/gate/AlInsert4/geometry/setYLength 2.5 mm
+/gate/AlInsert4/placement/setTranslation 37.7382 28.8458 1.25 mm
+/gate/AlInsert4/placement/setRotationAxis        0 0 1 
+/gate/AlInsert4/placement/setRotationAngle       37.393 deg
+/gate/AlInsert4/setMaterial Aluminium
+/gate/AlInsert4/vis/setVisible 1
+/gate/AlInsert4/vis/setColor red
+
+/gate/Phantom/daughters/name AlInsert5
+/gate/Phantom/daughters/insert            box
+/gate/AlInsert5/geometry/setXLength 5.0 mm
+/gate/AlInsert5/geometry/setZLength 2.0 mm
+/gate/AlInsert5/geometry/setYLength 1.67 mm
+/gate/AlInsert5/placement/setTranslation 31.3792 35.6594 1.25 mm
+/gate/AlInsert5/placement/setRotationAxis        0 0 1 
+/gate/AlInsert5/placement/setRotationAngle       48.6532 deg
+/gate/AlInsert5/setMaterial Aluminium
+/gate/AlInsert5/vis/setVisible 1
+/gate/AlInsert5/vis/setColor red
+
+/gate/Phantom/daughters/name AlInsert6
+/gate/Phantom/daughters/insert            box
+/gate/AlInsert6/geometry/setXLength 5.0 mm
+/gate/AlInsert6/geometry/setZLength 2.0 mm
+/gate/AlInsert6/geometry/setYLength 1.67 mm
+/gate/AlInsert6/placement/setTranslation 28.7963 37.7759 1.25 mm
+/gate/AlInsert6/placement/setRotationAxis        0 0 1 
+/gate/AlInsert6/placement/setRotationAngle       52.682 deg
+/gate/AlInsert6/setMaterial Aluminium
+/gate/AlInsert6/vis/setVisible 1
+/gate/AlInsert6/vis/setColor red
+
+/gate/Phantom/daughters/name AlInsert7
+/gate/Phantom/daughters/insert            box
+/gate/AlInsert7/geometry/setXLength 5.0 mm
+/gate/AlInsert7/geometry/setZLength 2.0 mm
+/gate/AlInsert7/geometry/setYLength 1.67 mm
+/gate/AlInsert7/placement/setTranslation 26.0711 39.7057 1.25 mm
+/gate/AlInsert7/placement/setRotationAxis        0 0 1 
+/gate/AlInsert7/placement/setRotationAngle       56.7108 deg
+/gate/AlInsert7/setMaterial Aluminium
+/gate/AlInsert7/vis/setVisible 1
+/gate/AlInsert7/vis/setColor red
+
+/gate/Phantom/daughters/name AlInsert8
+/gate/Phantom/daughters/insert            box
+/gate/AlInsert8/geometry/setXLength 5.0 mm
+/gate/AlInsert8/geometry/setZLength 2.0 mm
+/gate/AlInsert8/geometry/setYLength 1.67 mm
+/gate/AlInsert8/placement/setTranslation 23.2171 41.4393 1.25 mm
+/gate/AlInsert8/placement/setRotationAxis        0 0 1 
+/gate/AlInsert8/placement/setRotationAngle       60.7396 deg
+/gate/AlInsert8/setMaterial Aluminium
+/gate/AlInsert8/vis/setVisible 1
+/gate/AlInsert8/vis/setColor red
+
+/gate/Phantom/daughters/name AlInsert9
+/gate/Phantom/daughters/insert            box
+/gate/AlInsert9/geometry/setXLength 5.0 mm
+/gate/AlInsert9/geometry/setZLength 2.0 mm
+/gate/AlInsert9/geometry/setYLength 1.25 mm
+/gate/AlInsert9/placement/setTranslation 15.2717 44.9781 1.25 mm
+/gate/AlInsert9/placement/setRotationAxis        0 0 1 
+/gate/AlInsert9/placement/setRotationAngle       71.2458 deg
+/gate/AlInsert9/setMaterial Aluminium
+/gate/AlInsert9/vis/setVisible 1
+/gate/AlInsert9/vis/setColor red
+
+/gate/Phantom/daughters/name AlInsert10
+/gate/Phantom/daughters/insert            box
+/gate/AlInsert10/geometry/setXLength 5.0 mm
+/gate/AlInsert10/geometry/setZLength 2.0 mm
+/gate/AlInsert10/geometry/setYLength 1.25 mm
+/gate/AlInsert10/placement/setTranslation 12.8844 45.7192 1.25 mm
+/gate/AlInsert10/placement/setRotationAxis        0 0 1 
+/gate/AlInsert10/placement/setRotationAngle       74.2614 deg
+/gate/AlInsert10/setMaterial Aluminium
+/gate/AlInsert10/vis/setVisible 1
+/gate/AlInsert10/vis/setColor red
+
+/gate/Phantom/daughters/name AlInsert11
+/gate/Phantom/daughters/insert            box
+/gate/AlInsert11/geometry/setXLength 5.0 mm
+/gate/AlInsert11/geometry/setZLength 2.0 mm
+/gate/AlInsert11/geometry/setYLength 1.25 mm
+/gate/AlInsert11/placement/setTranslation 10.4614 46.3337 1.25 mm
+/gate/AlInsert11/placement/setRotationAxis        0 0 1 
+/gate/AlInsert11/placement/setRotationAngle       77.2769 deg
+/gate/AlInsert11/setMaterial Aluminium
+/gate/AlInsert11/vis/setVisible 1
+/gate/AlInsert11/vis/setColor red
+
+/gate/Phantom/daughters/name AlInsert12
+/gate/Phantom/daughters/insert            box
+/gate/AlInsert12/geometry/setXLength 5.0 mm
+/gate/AlInsert12/geometry/setZLength 2.0 mm
+/gate/AlInsert12/geometry/setYLength 1.25 mm
+/gate/AlInsert12/placement/setTranslation 8.00938 46.8199 1.25 mm
+/gate/AlInsert12/placement/setRotationAxis        0 0 1 
+/gate/AlInsert12/placement/setRotationAngle       80.2925 deg
+/gate/AlInsert12/setMaterial Aluminium
+/gate/AlInsert12/vis/setVisible 1
+/gate/AlInsert12/vis/setColor red
+
+/gate/Phantom/daughters/name AlInsert13
+/gate/Phantom/daughters/insert            box
+/gate/AlInsert13/geometry/setXLength 5.0 mm
+/gate/AlInsert13/geometry/setZLength 2.0 mm
+/gate/AlInsert13/geometry/setYLength 1.0 mm
+/gate/AlInsert13/placement/setTranslation -0.327172 47.4989 1.25 mm
+/gate/AlInsert13/placement/setRotationAxis        0 0 1 
+/gate/AlInsert13/placement/setRotationAngle       90.3946 deg
+/gate/AlInsert13/setMaterial Aluminium
+/gate/AlInsert13/vis/setVisible 1
+/gate/AlInsert13/vis/setColor red
+
+/gate/Phantom/daughters/name AlInsert14
+/gate/Phantom/daughters/insert            box
+/gate/AlInsert14/geometry/setXLength 5.0 mm
+/gate/AlInsert14/geometry/setZLength 2.0 mm
+/gate/AlInsert14/geometry/setYLength 1.0 mm
+/gate/AlInsert14/placement/setTranslation -2.32624 47.443 1.25 mm
+/gate/AlInsert14/placement/setRotationAxis        0 0 1 
+/gate/AlInsert14/placement/setRotationAngle       92.8071 deg
+/gate/AlInsert14/setMaterial Aluminium
+/gate/AlInsert14/vis/setVisible 1
+/gate/AlInsert14/vis/setColor red
+
+/gate/Phantom/daughters/name AlInsert15
+/gate/Phantom/daughters/insert            box
+/gate/AlInsert15/geometry/setXLength 5.0 mm
+/gate/AlInsert15/geometry/setZLength 2.0 mm
+/gate/AlInsert15/geometry/setYLength 1.0 mm
+/gate/AlInsert15/placement/setTranslation -4.32119 47.303 1.25 mm
+/gate/AlInsert15/placement/setRotationAxis        0 0 1 
+/gate/AlInsert15/placement/setRotationAngle       95.2196 deg
+/gate/AlInsert15/setMaterial Aluminium
+/gate/AlInsert15/vis/setVisible 1
+/gate/AlInsert15/vis/setColor red
+
+/gate/Phantom/daughters/name AlInsert16
+/gate/Phantom/daughters/insert            box
+/gate/AlInsert16/geometry/setXLength 5.0 mm
+/gate/AlInsert16/geometry/setZLength 2.0 mm
+/gate/AlInsert16/geometry/setYLength 1.0 mm
+/gate/AlInsert16/placement/setTranslation -6.30848 47.0792 1.25 mm
+/gate/AlInsert16/placement/setRotationAxis        0 0 1 
+/gate/AlInsert16/placement/setRotationAngle       97.632 deg
+/gate/AlInsert16/setMaterial Aluminium
+/gate/AlInsert16/vis/setVisible 1
+/gate/AlInsert16/vis/setColor red
+
+/gate/Phantom/daughters/name AlInsert17
+/gate/Phantom/daughters/insert            box
+/gate/AlInsert17/geometry/setXLength 5.0 mm
+/gate/AlInsert17/geometry/setZLength 2.0 mm
+/gate/AlInsert17/geometry/setYLength 0.83 mm
+/gate/AlInsert17/placement/setTranslation -14.2684 45.3063 1.25 mm
+/gate/AlInsert17/placement/setRotationAxis        0 0 1 
+/gate/AlInsert17/placement/setRotationAngle       107.481 deg
+/gate/AlInsert17/setMaterial Aluminium
+/gate/AlInsert17/vis/setVisible 1
+/gate/AlInsert17/vis/setColor red
+
+/gate/Phantom/daughters/name AlInsert18
+/gate/Phantom/daughters/insert            box
+/gate/AlInsert18/geometry/setXLength 5.0 mm
+/gate/AlInsert18/geometry/setZLength 2.0 mm
+/gate/AlInsert18/geometry/setYLength 0.83 mm
+/gate/AlInsert18/placement/setTranslation -15.8427 44.7801 1.25 mm
+/gate/AlInsert18/placement/setRotationAxis        0 0 1 
+/gate/AlInsert18/placement/setRotationAngle       109.483 deg
+/gate/AlInsert18/setMaterial Aluminium
+/gate/AlInsert18/vis/setVisible 1
+/gate/AlInsert18/vis/setColor red
+
+/gate/Phantom/daughters/name AlInsert19
+/gate/Phantom/daughters/insert            box
+/gate/AlInsert19/geometry/setXLength 5.0 mm
+/gate/AlInsert19/geometry/setZLength 2.0 mm
+/gate/AlInsert19/geometry/setYLength 0.83 mm
+/gate/AlInsert19/placement/setTranslation -17.3976 44.1992 1.25 mm
+/gate/AlInsert19/placement/setRotationAxis        0 0 1 
+/gate/AlInsert19/placement/setRotationAngle       111.486 deg
+/gate/AlInsert19/setMaterial Aluminium
+/gate/AlInsert19/vis/setVisible 1
+/gate/AlInsert19/vis/setColor red
+
+/gate/Phantom/daughters/name AlInsert20
+/gate/Phantom/daughters/insert            box
+/gate/AlInsert20/geometry/setXLength 5.0 mm
+/gate/AlInsert20/geometry/setZLength 2.0 mm
+/gate/AlInsert20/geometry/setYLength 0.83 mm
+/gate/AlInsert20/placement/setTranslation -18.9314 43.5644 1.25 mm
+/gate/AlInsert20/placement/setRotationAxis        0 0 1 
+/gate/AlInsert20/placement/setRotationAngle       113.488 deg
+/gate/AlInsert20/setMaterial Aluminium
+/gate/AlInsert20/vis/setVisible 1
+/gate/AlInsert20/vis/setColor red
+
+/gate/Phantom/daughters/name AlInsert21
+/gate/Phantom/daughters/insert            box
+/gate/AlInsert21/geometry/setXLength 5.0 mm
+/gate/AlInsert21/geometry/setZLength 2.0 mm
+/gate/AlInsert21/geometry/setYLength 0.83 mm
+/gate/AlInsert21/placement/setTranslation -20.4419 42.8763 1.25 mm
+/gate/AlInsert21/placement/setRotationAxis        0 0 1 
+/gate/AlInsert21/placement/setRotationAngle       115.49 deg
+/gate/AlInsert21/setMaterial Aluminium
+/gate/AlInsert21/vis/setVisible 1
+/gate/AlInsert21/vis/setColor red
+
+/gate/Phantom/daughters/name AlInsert22
+/gate/Phantom/daughters/insert            box
+/gate/AlInsert22/geometry/setXLength 5.0 mm
+/gate/AlInsert22/geometry/setZLength 2.0 mm
+/gate/AlInsert22/geometry/setYLength 0.71 mm
+/gate/AlInsert22/placement/setTranslation -27.3562 38.8315 1.25 mm
+/gate/AlInsert22/placement/setRotationAxis        0 0 1 
+/gate/AlInsert22/placement/setRotationAngle       125.164 deg
+/gate/AlInsert22/setMaterial Aluminium
+/gate/AlInsert22/vis/setVisible 1
+/gate/AlInsert22/vis/setColor red
+
+/gate/Phantom/daughters/name AlInsert23
+/gate/Phantom/daughters/insert            box
+/gate/AlInsert23/geometry/setXLength 5.0 mm
+/gate/AlInsert23/geometry/setZLength 2.0 mm
+/gate/AlInsert23/geometry/setYLength 0.71 mm
+/gate/AlInsert23/placement/setTranslation -28.5047 37.9965 1.25 mm
+/gate/AlInsert23/placement/setRotationAxis        0 0 1 
+/gate/AlInsert23/placement/setRotationAngle       126.877 deg
+/gate/AlInsert23/setMaterial Aluminium
+/gate/AlInsert23/vis/setVisible 1
+/gate/AlInsert23/vis/setColor red
+
+/gate/Phantom/daughters/name AlInsert24
+/gate/Phantom/daughters/insert            box
+/gate/AlInsert24/geometry/setXLength 5.0 mm
+/gate/AlInsert24/geometry/setZLength 2.0 mm
+/gate/AlInsert24/geometry/setYLength 0.71 mm
+/gate/AlInsert24/placement/setTranslation -29.6277 37.1275 1.25 mm
+/gate/AlInsert24/placement/setRotationAxis        0 0 1 
+/gate/AlInsert24/placement/setRotationAngle       128.59 deg
+/gate/AlInsert24/setMaterial Aluminium
+/gate/AlInsert24/vis/setVisible 1
+/gate/AlInsert24/vis/setColor red
+
+/gate/Phantom/daughters/name AlInsert25
+/gate/Phantom/daughters/insert            box
+/gate/AlInsert25/geometry/setXLength 5.0 mm
+/gate/AlInsert25/geometry/setZLength 2.0 mm
+/gate/AlInsert25/geometry/setYLength 0.71 mm
+/gate/AlInsert25/placement/setTranslation -30.7242 36.2253 1.25 mm
+/gate/AlInsert25/placement/setRotationAxis        0 0 1 
+/gate/AlInsert25/placement/setRotationAngle       130.303 deg
+/gate/AlInsert25/setMaterial Aluminium
+/gate/AlInsert25/vis/setVisible 1
+/gate/AlInsert25/vis/setColor red
+
+/gate/Phantom/daughters/name AlInsert26
+/gate/Phantom/daughters/insert            box
+/gate/AlInsert26/geometry/setXLength 5.0 mm
+/gate/AlInsert26/geometry/setZLength 2.0 mm
+/gate/AlInsert26/geometry/setYLength 0.71 mm
+/gate/AlInsert26/placement/setTranslation -31.7933 35.2908 1.25 mm
+/gate/AlInsert26/placement/setRotationAxis        0 0 1 
+/gate/AlInsert26/placement/setRotationAngle       132.016 deg
+/gate/AlInsert26/setMaterial Aluminium
+/gate/AlInsert26/vis/setVisible 1
+/gate/AlInsert26/vis/setColor red
+
+/gate/Phantom/daughters/name AlInsert27
+/gate/Phantom/daughters/insert            box
+/gate/AlInsert27/geometry/setXLength 5.0 mm
+/gate/AlInsert27/geometry/setZLength 2.0 mm
+/gate/AlInsert27/geometry/setYLength 0.63 mm
+/gate/AlInsert27/placement/setTranslation -37.2094 29.5248 1.25 mm
+/gate/AlInsert27/placement/setRotationAxis        0 0 1 
+/gate/AlInsert27/placement/setRotationAngle       141.569 deg
+/gate/AlInsert27/setMaterial Aluminium
+/gate/AlInsert27/vis/setVisible 1
+/gate/AlInsert27/vis/setColor red
+
+/gate/Phantom/daughters/name AlInsert28
+/gate/Phantom/daughters/insert            box
+/gate/AlInsert28/geometry/setXLength 5.0 mm
+/gate/AlInsert28/geometry/setZLength 2.0 mm
+/gate/AlInsert28/geometry/setYLength 0.63 mm
+/gate/AlInsert28/placement/setTranslation -37.9794 28.5275 1.25 mm
+/gate/AlInsert28/placement/setRotationAxis        0 0 1 
+/gate/AlInsert28/placement/setRotationAngle       143.089 deg
+/gate/AlInsert28/setMaterial Aluminium
+/gate/AlInsert28/vis/setVisible 1
+/gate/AlInsert28/vis/setColor red
+
+/gate/Phantom/daughters/name AlInsert29
+/gate/Phantom/daughters/insert            box
+/gate/AlInsert29/geometry/setXLength 5.0 mm
+/gate/AlInsert29/geometry/setZLength 2.0 mm
+/gate/AlInsert29/geometry/setYLength 0.63 mm
+/gate/AlInsert29/placement/setTranslation -38.7227 27.5101 1.25 mm
+/gate/AlInsert29/placement/setRotationAxis        0 0 1 
+/gate/AlInsert29/placement/setRotationAngle       144.609 deg
+/gate/AlInsert29/setMaterial Aluminium
+/gate/AlInsert29/vis/setVisible 1
+/gate/AlInsert29/vis/setColor red
+
+/gate/Phantom/daughters/name AlInsert30
+/gate/Phantom/daughters/insert            box
+/gate/AlInsert30/geometry/setXLength 5.0 mm
+/gate/AlInsert30/geometry/setZLength 2.0 mm
+/gate/AlInsert30/geometry/setYLength 0.63 mm
+/gate/AlInsert30/placement/setTranslation -39.4387 26.4734 1.25 mm
+/gate/AlInsert30/placement/setRotationAxis        0 0 1 
+/gate/AlInsert30/placement/setRotationAngle       146.128 deg
+/gate/AlInsert30/setMaterial Aluminium
+/gate/AlInsert30/vis/setVisible 1
+/gate/AlInsert30/vis/setColor red
+
+/gate/Phantom/daughters/name AlInsert31
+/gate/Phantom/daughters/insert            box
+/gate/AlInsert31/geometry/setXLength 5.0 mm
+/gate/AlInsert31/geometry/setZLength 2.0 mm
+/gate/AlInsert31/geometry/setYLength 0.63 mm
+/gate/AlInsert31/placement/setTranslation -40.127 25.418 1.25 mm
+/gate/AlInsert31/placement/setRotationAxis        0 0 1 
+/gate/AlInsert31/placement/setRotationAngle       147.648 deg
+/gate/AlInsert31/setMaterial Aluminium
+/gate/AlInsert31/vis/setVisible 1
+/gate/AlInsert31/vis/setColor red
+
+/gate/Phantom/daughters/name AlInsert32
+/gate/Phantom/daughters/insert            box
+/gate/AlInsert32/geometry/setXLength 5.0 mm
+/gate/AlInsert32/geometry/setZLength 2.0 mm
+/gate/AlInsert32/geometry/setYLength 0.56 mm
+/gate/AlInsert32/placement/setTranslation -43.7599 18.4749 1.25 mm
+/gate/AlInsert32/placement/setRotationAxis        0 0 1 
+/gate/AlInsert32/placement/setRotationAngle       157.111 deg
+/gate/AlInsert32/setMaterial Aluminium
+/gate/AlInsert32/vis/setVisible 1
+/gate/AlInsert32/vis/setColor red
+
+/gate/Phantom/daughters/name AlInsert33
+/gate/Phantom/daughters/insert            box
+/gate/AlInsert33/geometry/setXLength 5.0 mm
+/gate/AlInsert33/geometry/setZLength 2.0 mm
+/gate/AlInsert33/geometry/setYLength 0.56 mm
+/gate/AlInsert33/placement/setTranslation -44.1833 17.4381 1.25 mm
+/gate/AlInsert33/placement/setRotationAxis        0 0 1 
+/gate/AlInsert33/placement/setRotationAngle       158.462 deg
+/gate/AlInsert33/setMaterial Aluminium
+/gate/AlInsert33/vis/setVisible 1
+/gate/AlInsert33/vis/setColor red
+
+/gate/Phantom/daughters/name AlInsert34
+/gate/Phantom/daughters/insert            box
+/gate/AlInsert34/geometry/setXLength 5.0 mm
+/gate/AlInsert34/geometry/setZLength 2.0 mm
+/gate/AlInsert34/geometry/setYLength 0.56 mm
+/gate/AlInsert34/placement/setTranslation -44.5821 16.3915 1.25 mm
+/gate/AlInsert34/placement/setRotationAxis        0 0 1 
+/gate/AlInsert34/placement/setRotationAngle       159.813 deg
+/gate/AlInsert34/setMaterial Aluminium
+/gate/AlInsert34/vis/setVisible 1
+/gate/AlInsert34/vis/setColor red
+
+/gate/Phantom/daughters/name AlInsert35
+/gate/Phantom/daughters/insert            box
+/gate/AlInsert35/geometry/setXLength 5.0 mm
+/gate/AlInsert35/geometry/setZLength 2.0 mm
+/gate/AlInsert35/geometry/setYLength 0.56 mm
+/gate/AlInsert35/placement/setTranslation -44.9562 15.3359 1.25 mm
+/gate/AlInsert35/placement/setRotationAxis        0 0 1 
+/gate/AlInsert35/placement/setRotationAngle       161.164 deg
+/gate/AlInsert35/setMaterial Aluminium
+/gate/AlInsert35/vis/setVisible 1
+/gate/AlInsert35/vis/setColor red
+
+/gate/Phantom/daughters/name AlInsert36
+/gate/Phantom/daughters/insert            box
+/gate/AlInsert36/geometry/setXLength 5.0 mm
+/gate/AlInsert36/geometry/setZLength 2.0 mm
+/gate/AlInsert36/geometry/setYLength 0.56 mm
+/gate/AlInsert36/placement/setTranslation -45.3053 14.2717 1.25 mm
+/gate/AlInsert36/placement/setRotationAxis        0 0 1 
+/gate/AlInsert36/placement/setRotationAngle       162.515 deg
+/gate/AlInsert36/setMaterial Aluminium
+/gate/AlInsert36/vis/setVisible 1
+/gate/AlInsert36/vis/setColor red
+
+/gate/Phantom/daughters/name AlInsert37
+/gate/Phantom/daughters/insert            box
+/gate/AlInsert37/geometry/setXLength 5.0 mm
+/gate/AlInsert37/geometry/setZLength 2.0 mm
+/gate/AlInsert37/geometry/setYLength 0.5 mm
+/gate/AlInsert37/placement/setTranslation -47.0261 6.6933 1.25 mm
+/gate/AlInsert37/placement/setRotationAxis        0 0 1 
+/gate/AlInsert37/placement/setRotationAngle       171.899 deg
+/gate/AlInsert37/setMaterial Aluminium
+/gate/AlInsert37/vis/setVisible 1
+/gate/AlInsert37/vis/setColor red
+
+/gate/Phantom/daughters/name AlInsert38
+/gate/Phantom/daughters/insert            box
+/gate/AlInsert38/geometry/setXLength 5.0 mm
+/gate/AlInsert38/geometry/setZLength 2.0 mm
+/gate/AlInsert38/geometry/setYLength 0.5 mm
+/gate/AlInsert38/placement/setTranslation -47.1565 5.70187 1.25 mm
+/gate/AlInsert38/placement/setRotationAxis        0 0 1 
+/gate/AlInsert38/placement/setRotationAngle       173.106 deg
+/gate/AlInsert38/setMaterial Aluminium
+/gate/AlInsert38/vis/setVisible 1
+/gate/AlInsert38/vis/setColor red
+
+/gate/Phantom/daughters/name AlInsert39
+/gate/Phantom/daughters/insert            box
+/gate/AlInsert39/geometry/setXLength 5.0 mm
+/gate/AlInsert39/geometry/setZLength 2.0 mm
+/gate/AlInsert39/geometry/setYLength 0.5 mm
+/gate/AlInsert39/placement/setTranslation -47.2661 4.70791 1.25 mm
+/gate/AlInsert39/placement/setRotationAxis        0 0 1 
+/gate/AlInsert39/placement/setRotationAngle       174.312 deg
+/gate/AlInsert39/setMaterial Aluminium
+/gate/AlInsert39/vis/setVisible 1
+/gate/AlInsert39/vis/setColor red
+
+/gate/Phantom/daughters/name AlInsert40
+/gate/Phantom/daughters/insert            box
+/gate/AlInsert40/geometry/setXLength 5.0 mm
+/gate/AlInsert40/geometry/setZLength 2.0 mm
+/gate/AlInsert40/geometry/setYLength 0.5 mm
+/gate/AlInsert40/placement/setTranslation -47.3547 3.71186 1.25 mm
+/gate/AlInsert40/placement/setRotationAxis        0 0 1 
+/gate/AlInsert40/placement/setRotationAngle       175.518 deg
+/gate/AlInsert40/setMaterial Aluminium
+/gate/AlInsert40/vis/setVisible 1
+/gate/AlInsert40/vis/setColor red
+
+/gate/Phantom/daughters/name AlInsert41
+/gate/Phantom/daughters/insert            box
+/gate/AlInsert41/geometry/setXLength 5.0 mm
+/gate/AlInsert41/geometry/setZLength 2.0 mm
+/gate/AlInsert41/geometry/setYLength 0.5 mm
+/gate/AlInsert41/placement/setTranslation -47.4224 2.71417 1.25 mm
+/gate/AlInsert41/placement/setRotationAxis        0 0 1 
+/gate/AlInsert41/placement/setRotationAngle       176.724 deg
+/gate/AlInsert41/setMaterial Aluminium
+/gate/AlInsert41/vis/setVisible 1
+/gate/AlInsert41/vis/setColor red
+
+/gate/Phantom/daughters/name AlInsert42
+/gate/Phantom/daughters/insert            box
+/gate/AlInsert42/geometry/setXLength 5.0 mm
+/gate/AlInsert42/geometry/setZLength 2.0 mm
+/gate/AlInsert42/geometry/setYLength 0.45 mm
+/gate/AlInsert42/placement/setTranslation -47.2361 -5.00007 1.25 mm
+/gate/AlInsert42/placement/setRotationAxis        0 0 1 
+/gate/AlInsert42/placement/setRotationAngle       186.042 deg
+/gate/AlInsert42/setMaterial Aluminium
+/gate/AlInsert42/vis/setVisible 1
+/gate/AlInsert42/vis/setColor red
+
+/gate/Phantom/daughters/name AlInsert43
+/gate/Phantom/daughters/insert            box
+/gate/AlInsert43/geometry/setXLength 5.0 mm
+/gate/AlInsert43/geometry/setZLength 2.0 mm
+/gate/AlInsert43/geometry/setYLength 0.45 mm
+/gate/AlInsert43/placement/setTranslation -47.1329 -5.89412 1.25 mm
+/gate/AlInsert43/placement/setRotationAxis        0 0 1 
+/gate/AlInsert43/placement/setRotationAngle       187.128 deg
+/gate/AlInsert43/setMaterial Aluminium
+/gate/AlInsert43/vis/setVisible 1
+/gate/AlInsert43/vis/setColor red
+
+/gate/Phantom/daughters/name AlInsert44
+/gate/Phantom/daughters/insert            box
+/gate/AlInsert44/geometry/setXLength 5.0 mm
+/gate/AlInsert44/geometry/setZLength 2.0 mm
+/gate/AlInsert44/geometry/setYLength 0.45 mm
+/gate/AlInsert44/placement/setTranslation -47.0128 -6.78605 1.25 mm
+/gate/AlInsert44/placement/setRotationAxis        0 0 1 
+/gate/AlInsert44/placement/setRotationAngle       188.214 deg
+/gate/AlInsert44/setMaterial Aluminium
+/gate/AlInsert44/vis/setVisible 1
+/gate/AlInsert44/vis/setColor red
+
+/gate/Phantom/daughters/name AlInsert45
+/gate/Phantom/daughters/insert            box
+/gate/AlInsert45/geometry/setXLength 5.0 mm
+/gate/AlInsert45/geometry/setZLength 2.0 mm
+/gate/AlInsert45/geometry/setYLength 0.45 mm
+/gate/AlInsert45/placement/setTranslation -46.8758 -7.67555 1.25 mm
+/gate/AlInsert45/placement/setRotationAxis        0 0 1 
+/gate/AlInsert45/placement/setRotationAngle       189.299 deg
+/gate/AlInsert45/setMaterial Aluminium
+/gate/AlInsert45/vis/setVisible 1
+/gate/AlInsert45/vis/setColor red
+
+/gate/Phantom/daughters/name AlInsert46
+/gate/Phantom/daughters/insert            box
+/gate/AlInsert46/geometry/setXLength 5.0 mm
+/gate/AlInsert46/geometry/setZLength 2.0 mm
+/gate/AlInsert46/geometry/setYLength 0.45 mm
+/gate/AlInsert46/placement/setTranslation -46.7219 -8.56229 1.25 mm
+/gate/AlInsert46/placement/setRotationAxis        0 0 1 
+/gate/AlInsert46/placement/setRotationAngle       190.385 deg
+/gate/AlInsert46/setMaterial Aluminium
+/gate/AlInsert46/vis/setVisible 1
+/gate/AlInsert46/vis/setColor red
+
+/gate/Phantom/daughters/name AlInsert47
+/gate/Phantom/daughters/insert            box
+/gate/AlInsert47/geometry/setXLength 5.0 mm
+/gate/AlInsert47/geometry/setZLength 2.0 mm
+/gate/AlInsert47/geometry/setYLength 0.42 mm
+/gate/AlInsert47/placement/setTranslation -44.7325 -15.9766 1.25 mm
+/gate/AlInsert47/placement/setRotationAxis        0 0 1 
+/gate/AlInsert47/placement/setRotationAngle       199.655 deg
+/gate/AlInsert47/setMaterial Aluminium
+/gate/AlInsert47/vis/setVisible 1
+/gate/AlInsert47/vis/setColor red
+
+/gate/Phantom/daughters/name AlInsert48
+/gate/Phantom/daughters/insert            box
+/gate/AlInsert48/geometry/setXLength 5.0 mm
+/gate/AlInsert48/geometry/setZLength 2.0 mm
+/gate/AlInsert48/geometry/setYLength 0.42 mm
+/gate/AlInsert48/placement/setTranslation -44.443 -16.7652 1.25 mm
+/gate/AlInsert48/placement/setRotationAxis        0 0 1 
+/gate/AlInsert48/placement/setRotationAngle       200.668 deg
+/gate/AlInsert48/setMaterial Aluminium
+/gate/AlInsert48/vis/setVisible 1
+/gate/AlInsert48/vis/setColor red
+
+/gate/Phantom/daughters/name AlInsert49
+/gate/Phantom/daughters/insert            box
+/gate/AlInsert49/geometry/setXLength 5.0 mm
+/gate/AlInsert49/geometry/setZLength 2.0 mm
+/gate/AlInsert49/geometry/setYLength 0.42 mm
+/gate/AlInsert49/placement/setTranslation -44.1396 -17.5484 1.25 mm
+/gate/AlInsert49/placement/setRotationAxis        0 0 1 
+/gate/AlInsert49/placement/setRotationAngle       201.681 deg
+/gate/AlInsert49/setMaterial Aluminium
+/gate/AlInsert49/vis/setVisible 1
+/gate/AlInsert49/vis/setColor red
+
+/gate/Phantom/daughters/name AlInsert50
+/gate/Phantom/daughters/insert            box
+/gate/AlInsert50/geometry/setXLength 5.0 mm
+/gate/AlInsert50/geometry/setZLength 2.0 mm
+/gate/AlInsert50/geometry/setYLength 0.42 mm
+/gate/AlInsert50/placement/setTranslation -43.8224 -18.3262 1.25 mm
+/gate/AlInsert50/placement/setRotationAxis        0 0 1 
+/gate/AlInsert50/placement/setRotationAngle       202.694 deg
+/gate/AlInsert50/setMaterial Aluminium
+/gate/AlInsert50/vis/setVisible 1
+/gate/AlInsert50/vis/setColor red
+
+/gate/Phantom/daughters/name AlInsert51
+/gate/Phantom/daughters/insert            box
+/gate/AlInsert51/geometry/setXLength 5.0 mm
+/gate/AlInsert51/geometry/setZLength 2.0 mm
+/gate/AlInsert51/geometry/setYLength 0.42 mm
+/gate/AlInsert51/placement/setTranslation -43.4914 -19.0983 1.25 mm
+/gate/AlInsert51/placement/setRotationAxis        0 0 1 
+/gate/AlInsert51/placement/setRotationAngle       203.708 deg
+/gate/AlInsert51/setMaterial Aluminium
+/gate/AlInsert51/vis/setVisible 1
+/gate/AlInsert51/vis/setColor red
+
+/gate/Phantom/daughters/name AlInsert52
+/gate/Phantom/daughters/insert            box
+/gate/AlInsert52/geometry/setXLength 5.0 mm
+/gate/AlInsert52/geometry/setZLength 2.0 mm
+/gate/AlInsert52/geometry/setYLength 0.38 mm
+/gate/AlInsert52/placement/setTranslation -39.8661 -25.8253 1.25 mm
+/gate/AlInsert52/placement/setRotationAxis        0 0 1 
+/gate/AlInsert52/placement/setRotationAngle       212.935 deg
+/gate/AlInsert52/setMaterial Aluminium
+/gate/AlInsert52/vis/setVisible 1
+/gate/AlInsert52/vis/setColor red
+
+/gate/Phantom/daughters/name AlInsert53
+/gate/Phantom/daughters/insert            box
+/gate/AlInsert53/geometry/setXLength 5.0 mm
+/gate/AlInsert53/geometry/setZLength 2.0 mm
+/gate/AlInsert53/geometry/setYLength 0.38 mm
+/gate/AlInsert53/placement/setTranslation -39.4478 -26.4598 1.25 mm
+/gate/AlInsert53/placement/setRotationAxis        0 0 1 
+/gate/AlInsert53/placement/setRotationAngle       213.852 deg
+/gate/AlInsert53/setMaterial Aluminium
+/gate/AlInsert53/vis/setVisible 1
+/gate/AlInsert53/vis/setColor red
+
+/gate/Phantom/daughters/name AlInsert54
+/gate/Phantom/daughters/insert            box
+/gate/AlInsert54/geometry/setXLength 5.0 mm
+/gate/AlInsert54/geometry/setZLength 2.0 mm
+/gate/AlInsert54/geometry/setYLength 0.38 mm
+/gate/AlInsert54/placement/setTranslation -39.0194 -27.0876 1.25 mm
+/gate/AlInsert54/placement/setRotationAxis        0 0 1 
+/gate/AlInsert54/placement/setRotationAngle       214.769 deg
+/gate/AlInsert54/setMaterial Aluminium
+/gate/AlInsert54/vis/setVisible 1
+/gate/AlInsert54/vis/setColor red
+
+/gate/Phantom/daughters/name AlInsert55
+/gate/Phantom/daughters/insert            box
+/gate/AlInsert55/geometry/setXLength 5.0 mm
+/gate/AlInsert55/geometry/setZLength 2.0 mm
+/gate/AlInsert55/geometry/setYLength 0.38 mm
+/gate/AlInsert55/placement/setTranslation -38.581 -27.7084 1.25 mm
+/gate/AlInsert55/placement/setRotationAxis        0 0 1 
+/gate/AlInsert55/placement/setRotationAngle       215.685 deg
+/gate/AlInsert55/setMaterial Aluminium
+/gate/AlInsert55/vis/setVisible 1
+/gate/AlInsert55/vis/setColor red
+
+/gate/Phantom/daughters/name AlInsert56
+/gate/Phantom/daughters/insert            box
+/gate/AlInsert56/geometry/setXLength 5.0 mm
+/gate/AlInsert56/geometry/setZLength 2.0 mm
+/gate/AlInsert56/geometry/setYLength 0.38 mm
+/gate/AlInsert56/placement/setTranslation -38.1328 -28.3221 1.25 mm
+/gate/AlInsert56/placement/setRotationAxis        0 0 1 
+/gate/AlInsert56/placement/setRotationAngle       216.602 deg
+/gate/AlInsert56/setMaterial Aluminium
+/gate/AlInsert56/vis/setVisible 1
+/gate/AlInsert56/vis/setColor red
+
+/gate/Phantom/daughters/name AlInsert57
+/gate/Phantom/daughters/insert            box
+/gate/AlInsert57/geometry/setXLength 5.0 mm
+/gate/AlInsert57/geometry/setZLength 2.0 mm
+/gate/AlInsert57/geometry/setYLength 0.36 mm
+/gate/AlInsert57/placement/setTranslation -33.1191 -34.0496 1.25 mm
+/gate/AlInsert57/placement/setRotationAxis        0 0 1 
+/gate/AlInsert57/placement/setRotationAngle       225.794 deg
+/gate/AlInsert57/setMaterial Aluminium
+/gate/AlInsert57/vis/setVisible 1
+/gate/AlInsert57/vis/setColor red
+
+/gate/Phantom/daughters/name AlInsert58
+/gate/Phantom/daughters/insert            box
+/gate/AlInsert58/geometry/setXLength 5.0 mm
+/gate/AlInsert58/geometry/setZLength 2.0 mm
+/gate/AlInsert58/geometry/setYLength 0.36 mm
+/gate/AlInsert58/placement/setTranslation -32.5992 -34.5477 1.25 mm
+/gate/AlInsert58/placement/setRotationAxis        0 0 1 
+/gate/AlInsert58/placement/setRotationAngle       226.662 deg
+/gate/AlInsert58/setMaterial Aluminium
+/gate/AlInsert58/vis/setVisible 1
+/gate/AlInsert58/vis/setColor red
+
+/gate/Phantom/daughters/name AlInsert59
+/gate/Phantom/daughters/insert            box
+/gate/AlInsert59/geometry/setXLength 5.0 mm
+/gate/AlInsert59/geometry/setZLength 2.0 mm
+/gate/AlInsert59/geometry/setYLength 0.36 mm
+/gate/AlInsert59/placement/setTranslation -32.0718 -35.0378 1.25 mm
+/gate/AlInsert59/placement/setRotationAxis        0 0 1 
+/gate/AlInsert59/placement/setRotationAngle       227.531 deg
+/gate/AlInsert59/setMaterial Aluminium
+/gate/AlInsert59/vis/setVisible 1
+/gate/AlInsert59/vis/setColor red
+
+/gate/Phantom/daughters/name AlInsert60
+/gate/Phantom/daughters/insert            box
+/gate/AlInsert60/geometry/setXLength 5.0 mm
+/gate/AlInsert60/geometry/setZLength 2.0 mm
+/gate/AlInsert60/geometry/setYLength 0.36 mm
+/gate/AlInsert60/placement/setTranslation -31.5371 -35.5199 1.25 mm
+/gate/AlInsert60/placement/setRotationAxis        0 0 1 
+/gate/AlInsert60/placement/setRotationAngle       228.399 deg
+/gate/AlInsert60/setMaterial Aluminium
+/gate/AlInsert60/vis/setVisible 1
+/gate/AlInsert60/vis/setColor red
+
+/gate/Phantom/daughters/name AlInsert61
+/gate/Phantom/daughters/insert            box
+/gate/AlInsert61/geometry/setXLength 5.0 mm
+/gate/AlInsert61/geometry/setZLength 2.0 mm
+/gate/AlInsert61/geometry/setYLength 0.36 mm
+/gate/AlInsert61/placement/setTranslation -30.9951 -35.9938 1.25 mm
+/gate/AlInsert61/placement/setRotationAxis        0 0 1 
+/gate/AlInsert61/placement/setRotationAngle       229.268 deg
+/gate/AlInsert61/setMaterial Aluminium
+/gate/AlInsert61/vis/setVisible 1
+/gate/AlInsert61/vis/setColor red
+
+/gate/Phantom/daughters/name AlInsert62
+/gate/Phantom/daughters/insert            box
+/gate/AlInsert62/geometry/setXLength 5.0 mm
+/gate/AlInsert62/geometry/setZLength 2.0 mm
+/gate/AlInsert62/geometry/setYLength 0.33 mm
+/gate/AlInsert62/placement/setTranslation -24.869 -40.4696 1.25 mm
+/gate/AlInsert62/placement/setRotationAxis        0 0 1 
+/gate/AlInsert62/placement/setRotationAngle       238.429 deg
+/gate/AlInsert62/setMaterial Aluminium
+/gate/AlInsert62/vis/setVisible 1
+/gate/AlInsert62/vis/setColor red
+
+/gate/Phantom/daughters/name AlInsert63
+/gate/Phantom/daughters/insert            box
+/gate/AlInsert63/geometry/setXLength 5.0 mm
+/gate/AlInsert63/geometry/setZLength 2.0 mm
+/gate/AlInsert63/geometry/setYLength 0.33 mm
+/gate/AlInsert63/placement/setTranslation -24.3043 -40.8112 1.25 mm
+/gate/AlInsert63/placement/setRotationAxis        0 0 1 
+/gate/AlInsert63/placement/setRotationAngle       239.225 deg
+/gate/AlInsert63/setMaterial Aluminium
+/gate/AlInsert63/vis/setVisible 1
+/gate/AlInsert63/vis/setColor red
+
+/gate/Phantom/daughters/name AlInsert64
+/gate/Phantom/daughters/insert            box
+/gate/AlInsert64/geometry/setXLength 5.0 mm
+/gate/AlInsert64/geometry/setZLength 2.0 mm
+/gate/AlInsert64/geometry/setYLength 0.33 mm
+/gate/AlInsert64/placement/setTranslation -23.7349 -41.1449 1.25 mm
+/gate/AlInsert64/placement/setRotationAxis        0 0 1 
+/gate/AlInsert64/placement/setRotationAngle       240.021 deg
+/gate/AlInsert64/setMaterial Aluminium
+/gate/AlInsert64/vis/setVisible 1
+/gate/AlInsert64/vis/setColor red
+
+/gate/Phantom/daughters/name AlInsert65
+/gate/Phantom/daughters/insert            box
+/gate/AlInsert65/geometry/setXLength 5.0 mm
+/gate/AlInsert65/geometry/setZLength 2.0 mm
+/gate/AlInsert65/geometry/setYLength 0.33 mm
+/gate/AlInsert65/placement/setTranslation -23.1609 -41.4707 1.25 mm
+/gate/AlInsert65/placement/setRotationAxis        0 0 1 
+/gate/AlInsert65/placement/setRotationAngle       240.817 deg
+/gate/AlInsert65/setMaterial Aluminium
+/gate/AlInsert65/vis/setVisible 1
+/gate/AlInsert65/vis/setColor red
+
+/gate/Phantom/daughters/name AlInsert66
+/gate/Phantom/daughters/insert            box
+/gate/AlInsert66/geometry/setXLength 5.0 mm
+/gate/AlInsert66/geometry/setZLength 2.0 mm
+/gate/AlInsert66/geometry/setYLength 0.33 mm
+/gate/AlInsert66/placement/setTranslation -22.5825 -41.7885 1.25 mm
+/gate/AlInsert66/placement/setRotationAxis        0 0 1 
+/gate/AlInsert66/placement/setRotationAngle       241.613 deg
+/gate/AlInsert66/setMaterial Aluminium
+/gate/AlInsert66/vis/setVisible 1
+/gate/AlInsert66/vis/setColor red
+
+/gate/Phantom/daughters/name AlInsert67
+/gate/Phantom/daughters/insert            box
+/gate/AlInsert67/geometry/setXLength 5.0 mm
+/gate/AlInsert67/geometry/setZLength 2.0 mm
+/gate/AlInsert67/geometry/setYLength 0.31 mm
+/gate/AlInsert67/placement/setTranslation -15.6647 -44.8427 1.25 mm
+/gate/AlInsert67/placement/setRotationAxis        0 0 1 
+/gate/AlInsert67/placement/setRotationAngle       250.744 deg
+/gate/AlInsert67/setMaterial Aluminium
+/gate/AlInsert67/vis/setVisible 1
+/gate/AlInsert67/vis/setColor red
+
+/gate/Phantom/daughters/name AlInsert68
+/gate/Phantom/daughters/insert            box
+/gate/AlInsert68/geometry/setXLength 5.0 mm
+/gate/AlInsert68/geometry/setZLength 2.0 mm
+/gate/AlInsert68/geometry/setYLength 0.31 mm
+/gate/AlInsert68/placement/setTranslation -15.078 -45.0433 1.25 mm
+/gate/AlInsert68/placement/setRotationAxis        0 0 1 
+/gate/AlInsert68/placement/setRotationAngle       251.492 deg
+/gate/AlInsert68/setMaterial Aluminium
+/gate/AlInsert68/vis/setVisible 1
+/gate/AlInsert68/vis/setColor red
+
+/gate/Phantom/daughters/name AlInsert69
+/gate/Phantom/daughters/insert            box
+/gate/AlInsert69/geometry/setXLength 5.0 mm
+/gate/AlInsert69/geometry/setZLength 2.0 mm
+/gate/AlInsert69/geometry/setYLength 0.31 mm
+/gate/AlInsert69/placement/setTranslation -14.4888 -45.2363 1.25 mm
+/gate/AlInsert69/placement/setRotationAxis        0 0 1 
+/gate/AlInsert69/placement/setRotationAngle       252.24 deg
+/gate/AlInsert69/setMaterial Aluminium
+/gate/AlInsert69/vis/setVisible 1
+/gate/AlInsert69/vis/setColor red
+
+/gate/Phantom/daughters/name AlInsert70
+/gate/Phantom/daughters/insert            box
+/gate/AlInsert70/geometry/setXLength 5.0 mm
+/gate/AlInsert70/geometry/setZLength 2.0 mm
+/gate/AlInsert70/geometry/setYLength 0.31 mm
+/gate/AlInsert70/placement/setTranslation -13.8972 -45.4216 1.25 mm
+/gate/AlInsert70/placement/setRotationAxis        0 0 1 
+/gate/AlInsert70/placement/setRotationAngle       252.988 deg
+/gate/AlInsert70/setMaterial Aluminium
+/gate/AlInsert70/vis/setVisible 1
+/gate/AlInsert70/vis/setColor red
+
+/gate/Phantom/daughters/name AlInsert71
+/gate/Phantom/daughters/insert            box
+/gate/AlInsert71/geometry/setXLength 5.0 mm
+/gate/AlInsert71/geometry/setZLength 2.0 mm
+/gate/AlInsert71/geometry/setYLength 0.31 mm
+/gate/AlInsert71/placement/setTranslation -13.3031 -45.5991 1.25 mm
+/gate/AlInsert71/placement/setRotationAxis        0 0 1 
+/gate/AlInsert71/placement/setRotationAngle       253.736 deg
+/gate/AlInsert71/setMaterial Aluminium
+/gate/AlInsert71/vis/setVisible 1
+/gate/AlInsert71/vis/setColor red
+
+/gate/Phantom/daughters/name AlInsert72
+/gate/Phantom/daughters/insert            box
+/gate/AlInsert72/geometry/setXLength 5.0 mm
+/gate/AlInsert72/geometry/setZLength 2.0 mm
+/gate/AlInsert72/geometry/setYLength 0.29 mm
+/gate/AlInsert72/placement/setTranslation -5.91806 -47.1299 1.25 mm
+/gate/AlInsert72/placement/setRotationAxis        0 0 1 
+/gate/AlInsert72/placement/setRotationAngle       262.843 deg
+/gate/AlInsert72/setMaterial Aluminium
+/gate/AlInsert72/vis/setVisible 1
+/gate/AlInsert72/vis/setColor red
+
+/gate/Phantom/daughters/name AlInsert73
+/gate/Phantom/daughters/insert            box
+/gate/AlInsert73/geometry/setXLength 5.0 mm
+/gate/AlInsert73/geometry/setZLength 2.0 mm
+/gate/AlInsert73/geometry/setYLength 0.29 mm
+/gate/AlInsert73/placement/setTranslation -5.34215 -47.1986 1.25 mm
+/gate/AlInsert73/placement/setRotationAxis        0 0 1 
+/gate/AlInsert73/placement/setRotationAngle       263.542 deg
+/gate/AlInsert73/setMaterial Aluminium
+/gate/AlInsert73/vis/setVisible 1
+/gate/AlInsert73/vis/setColor red
+
+/gate/Phantom/daughters/name AlInsert74
+/gate/Phantom/daughters/insert            box
+/gate/AlInsert74/geometry/setXLength 5.0 mm
+/gate/AlInsert74/geometry/setZLength 2.0 mm
+/gate/AlInsert74/geometry/setYLength 0.29 mm
+/gate/AlInsert74/placement/setTranslation -4.76545 -47.2603 1.25 mm
+/gate/AlInsert74/placement/setRotationAxis        0 0 1 
+/gate/AlInsert74/placement/setRotationAngle       264.242 deg
+/gate/AlInsert74/setMaterial Aluminium
+/gate/AlInsert74/vis/setVisible 1
+/gate/AlInsert74/vis/setColor red
+
+/gate/Phantom/daughters/name AlInsert75
+/gate/Phantom/daughters/insert            box
+/gate/AlInsert75/geometry/setXLength 5.0 mm
+/gate/AlInsert75/geometry/setZLength 2.0 mm
+/gate/AlInsert75/geometry/setYLength 0.29 mm
+/gate/AlInsert75/placement/setTranslation -4.18803 -47.315 1.25 mm
+/gate/AlInsert75/placement/setRotationAxis        0 0 1 
+/gate/AlInsert75/placement/setRotationAngle       264.942 deg
+/gate/AlInsert75/setMaterial Aluminium
+/gate/AlInsert75/vis/setVisible 1
+/gate/AlInsert75/vis/setColor red
+
+/gate/Phantom/daughters/name AlInsert76
+/gate/Phantom/daughters/insert            box
+/gate/AlInsert76/geometry/setXLength 5.0 mm
+/gate/AlInsert76/geometry/setZLength 2.0 mm
+/gate/AlInsert76/geometry/setYLength 0.29 mm
+/gate/AlInsert76/placement/setTranslation -3.60999 -47.3626 1.25 mm
+/gate/AlInsert76/placement/setRotationAxis        0 0 1 
+/gate/AlInsert76/placement/setRotationAngle       265.641 deg
+/gate/AlInsert76/setMaterial Aluminium
+/gate/AlInsert76/vis/setVisible 1
+/gate/AlInsert76/vis/setColor red
+
+/gate/Phantom/daughters/name AlInsert77
+/gate/Phantom/daughters/insert            box
+/gate/AlInsert77/geometry/setXLength 5.0 mm
+/gate/AlInsert77/geometry/setZLength 2.0 mm
+/gate/AlInsert77/geometry/setYLength 0.28 mm
+/gate/AlInsert77/placement/setTranslation 3.91707 -47.3382 1.25 mm
+/gate/AlInsert77/placement/setRotationAxis        0 0 1 
+/gate/AlInsert77/placement/setRotationAngle       274.73 deg
+/gate/AlInsert77/setMaterial Aluminium
+/gate/AlInsert77/vis/setVisible 1
+/gate/AlInsert77/vis/setColor red
+
+/gate/Phantom/daughters/name AlInsert78
+/gate/Phantom/daughters/insert            box
+/gate/AlInsert78/geometry/setXLength 5.0 mm
+/gate/AlInsert78/geometry/setZLength 2.0 mm
+/gate/AlInsert78/geometry/setYLength 0.28 mm
+/gate/AlInsert78/placement/setTranslation 4.47488 -47.2887 1.25 mm
+/gate/AlInsert78/placement/setRotationAxis        0 0 1 
+/gate/AlInsert78/placement/setRotationAngle       275.406 deg
+/gate/AlInsert78/setMaterial Aluminium
+/gate/AlInsert78/vis/setVisible 1
+/gate/AlInsert78/vis/setColor red
+
+/gate/Phantom/daughters/name AlInsert79
+/gate/Phantom/daughters/insert            box
+/gate/AlInsert79/geometry/setXLength 5.0 mm
+/gate/AlInsert79/geometry/setZLength 2.0 mm
+/gate/AlInsert79/geometry/setYLength 0.28 mm
+/gate/AlInsert79/placement/setTranslation 5.03206 -47.2327 1.25 mm
+/gate/AlInsert79/placement/setRotationAxis        0 0 1 
+/gate/AlInsert79/placement/setRotationAngle       276.081 deg
+/gate/AlInsert79/setMaterial Aluminium
+/gate/AlInsert79/vis/setVisible 1
+/gate/AlInsert79/vis/setColor red
+
+/gate/Phantom/daughters/name AlInsert80
+/gate/Phantom/daughters/insert            box
+/gate/AlInsert80/geometry/setXLength 5.0 mm
+/gate/AlInsert80/geometry/setZLength 2.0 mm
+/gate/AlInsert80/geometry/setYLength 0.28 mm
+/gate/AlInsert80/placement/setTranslation 5.58855 -47.1701 1.25 mm
+/gate/AlInsert80/placement/setRotationAxis        0 0 1 
+/gate/AlInsert80/placement/setRotationAngle       276.757 deg
+/gate/AlInsert80/setMaterial Aluminium
+/gate/AlInsert80/vis/setVisible 1
+/gate/AlInsert80/vis/setColor red
+
+/gate/Phantom/daughters/name AlInsert81
+/gate/Phantom/daughters/insert            box
+/gate/AlInsert81/geometry/setXLength 5.0 mm
+/gate/AlInsert81/geometry/setZLength 2.0 mm
+/gate/AlInsert81/geometry/setYLength 0.28 mm
+/gate/AlInsert81/placement/setTranslation 6.14426 -47.1009 1.25 mm
+/gate/AlInsert81/placement/setRotationAxis        0 0 1 
+/gate/AlInsert81/placement/setRotationAngle       277.432 deg
+/gate/AlInsert81/setMaterial Aluminium
+/gate/AlInsert81/vis/setVisible 1
+/gate/AlInsert81/vis/setColor red
+
+/gate/Phantom/daughters/name AlInsert82
+/gate/Phantom/daughters/insert            box
+/gate/AlInsert82/geometry/setXLength 5.0 mm
+/gate/AlInsert82/geometry/setZLength 2.0 mm
+/gate/AlInsert82/geometry/setYLength 0.26 mm
+/gate/AlInsert82/placement/setTranslation 13.4931 -45.5432 1.25 mm
+/gate/AlInsert82/placement/setRotationAxis        0 0 1 
+/gate/AlInsert82/placement/setRotationAngle       286.503 deg
+/gate/AlInsert82/setMaterial Aluminium
+/gate/AlInsert82/vis/setVisible 1
+/gate/AlInsert82/vis/setColor red
+
+/gate/Phantom/daughters/name AlInsert83
+/gate/Phantom/daughters/insert            box
+/gate/AlInsert83/geometry/setXLength 5.0 mm
+/gate/AlInsert83/geometry/setZLength 2.0 mm
+/gate/AlInsert83/geometry/setYLength 0.26 mm
+/gate/AlInsert83/placement/setTranslation 13.9909 -45.3928 1.25 mm
+/gate/AlInsert83/placement/setRotationAxis        0 0 1 
+/gate/AlInsert83/placement/setRotationAngle       287.13 deg
+/gate/AlInsert83/setMaterial Aluminium
+/gate/AlInsert83/vis/setVisible 1
+/gate/AlInsert83/vis/setColor red
+
+/gate/Phantom/daughters/name AlInsert84
+/gate/Phantom/daughters/insert            box
+/gate/AlInsert84/geometry/setXLength 5.0 mm
+/gate/AlInsert84/geometry/setZLength 2.0 mm
+/gate/AlInsert84/geometry/setYLength 0.26 mm
+/gate/AlInsert84/placement/setTranslation 14.487 -45.2369 1.25 mm
+/gate/AlInsert84/placement/setRotationAxis        0 0 1 
+/gate/AlInsert84/placement/setRotationAngle       287.757 deg
+/gate/AlInsert84/setMaterial Aluminium
+/gate/AlInsert84/vis/setVisible 1
+/gate/AlInsert84/vis/setColor red
+
+/gate/Phantom/daughters/name AlInsert85
+/gate/Phantom/daughters/insert            box
+/gate/AlInsert85/geometry/setXLength 5.0 mm
+/gate/AlInsert85/geometry/setZLength 2.0 mm
+/gate/AlInsert85/geometry/setYLength 0.26 mm
+/gate/AlInsert85/placement/setTranslation 14.9813 -45.0756 1.25 mm
+/gate/AlInsert85/placement/setRotationAxis        0 0 1 
+/gate/AlInsert85/placement/setRotationAngle       288.385 deg
+/gate/AlInsert85/setMaterial Aluminium
+/gate/AlInsert85/vis/setVisible 1
+/gate/AlInsert85/vis/setColor red
+
+/gate/Phantom/daughters/name AlInsert86
+/gate/Phantom/daughters/insert            box
+/gate/AlInsert86/geometry/setXLength 5.0 mm
+/gate/AlInsert86/geometry/setZLength 2.0 mm
+/gate/AlInsert86/geometry/setYLength 0.26 mm
+/gate/AlInsert86/placement/setTranslation 15.4739 -44.9089 1.25 mm
+/gate/AlInsert86/placement/setRotationAxis        0 0 1 
+/gate/AlInsert86/placement/setRotationAngle       289.012 deg
+/gate/AlInsert86/setMaterial Aluminium
+/gate/AlInsert86/vis/setVisible 1
+/gate/AlInsert86/vis/setColor red
+
+/gate/Phantom/daughters/name AlInsert87
+/gate/Phantom/daughters/insert            box
+/gate/AlInsert87/geometry/setXLength 5.0 mm
+/gate/AlInsert87/geometry/setZLength 2.0 mm
+/gate/AlInsert87/geometry/setYLength 0.25 mm
+/gate/AlInsert87/placement/setTranslation 22.3473 -41.9148 1.25 mm
+/gate/AlInsert87/placement/setRotationAxis        0 0 1 
+/gate/AlInsert87/placement/setRotationAngle       298.065 deg
+/gate/AlInsert87/setMaterial Aluminium
+/gate/AlInsert87/vis/setVisible 1
+/gate/AlInsert87/vis/setColor red
+
+/gate/Phantom/daughters/name AlInsert88
+/gate/Phantom/daughters/insert            box
+/gate/AlInsert88/geometry/setXLength 5.0 mm
+/gate/AlInsert88/geometry/setZLength 2.0 mm
+/gate/AlInsert88/geometry/setYLength 0.25 mm
+/gate/AlInsert88/placement/setTranslation 22.7872 -41.6772 1.25 mm
+/gate/AlInsert88/placement/setRotationAxis        0 0 1 
+/gate/AlInsert88/placement/setRotationAngle       298.668 deg
+/gate/AlInsert88/setMaterial Aluminium
+/gate/AlInsert88/vis/setVisible 1
+/gate/AlInsert88/vis/setColor red
+
+/gate/Phantom/daughters/name AlInsert89
+/gate/Phantom/daughters/insert            box
+/gate/AlInsert89/geometry/setXLength 5.0 mm
+/gate/AlInsert89/geometry/setZLength 2.0 mm
+/gate/AlInsert89/geometry/setYLength 0.25 mm
+/gate/AlInsert89/placement/setTranslation 23.2246 -41.4351 1.25 mm
+/gate/AlInsert89/placement/setRotationAxis        0 0 1 
+/gate/AlInsert89/placement/setRotationAngle       299.271 deg
+/gate/AlInsert89/setMaterial Aluminium
+/gate/AlInsert89/vis/setVisible 1
+/gate/AlInsert89/vis/setColor red
+
+/gate/Phantom/daughters/name AlInsert90
+/gate/Phantom/daughters/insert            box
+/gate/AlInsert90/geometry/setXLength 5.0 mm
+/gate/AlInsert90/geometry/setZLength 2.0 mm
+/gate/AlInsert90/geometry/setYLength 0.25 mm
+/gate/AlInsert90/placement/setTranslation 23.6595 -41.1883 1.25 mm
+/gate/AlInsert90/placement/setRotationAxis        0 0 1 
+/gate/AlInsert90/placement/setRotationAngle       299.874 deg
+/gate/AlInsert90/setMaterial Aluminium
+/gate/AlInsert90/vis/setVisible 1
+/gate/AlInsert90/vis/setColor red
+
+/gate/Phantom/daughters/name AlInsert91
+/gate/Phantom/daughters/insert            box
+/gate/AlInsert91/geometry/setXLength 5.0 mm
+/gate/AlInsert91/geometry/setZLength 2.0 mm
+/gate/AlInsert91/geometry/setYLength 0.25 mm
+/gate/AlInsert91/placement/setTranslation 24.0918 -40.937 1.25 mm
+/gate/AlInsert91/placement/setRotationAxis        0 0 1 
+/gate/AlInsert91/placement/setRotationAngle       300.477 deg
+/gate/AlInsert91/setMaterial Aluminium
+/gate/AlInsert91/vis/setVisible 1
+/gate/AlInsert91/vis/setColor red
+
+/gate/Phantom/daughters/name AlInsert92
+/gate/Phantom/daughters/insert            box
+/gate/AlInsert92/geometry/setXLength 5.0 mm
+/gate/AlInsert92/geometry/setZLength 2.0 mm
+/gate/AlInsert92/geometry/setYLength 0.24 mm
+/gate/AlInsert92/placement/setTranslation 30.2251 -36.6428 1.25 mm
+/gate/AlInsert92/placement/setRotationAxis        0 0 1 
+/gate/AlInsert92/placement/setRotationAngle       309.518 deg
+/gate/AlInsert92/setMaterial Aluminium
+/gate/AlInsert92/vis/setVisible 1
+/gate/AlInsert92/vis/setColor red
+
+/gate/Phantom/daughters/name AlInsert93
+/gate/Phantom/daughters/insert            box
+/gate/AlInsert93/geometry/setXLength 5.0 mm
+/gate/AlInsert93/geometry/setZLength 2.0 mm
+/gate/AlInsert93/geometry/setYLength 0.24 mm
+/gate/AlInsert93/placement/setTranslation 30.5939 -36.3355 1.25 mm
+/gate/AlInsert93/placement/setRotationAxis        0 0 1 
+/gate/AlInsert93/placement/setRotationAngle       310.097 deg
+/gate/AlInsert93/setMaterial Aluminium
+/gate/AlInsert93/vis/setVisible 1
+/gate/AlInsert93/vis/setColor red
+
+/gate/Phantom/daughters/name AlInsert94
+/gate/Phantom/daughters/insert            box
+/gate/AlInsert94/geometry/setXLength 5.0 mm
+/gate/AlInsert94/geometry/setZLength 2.0 mm
+/gate/AlInsert94/geometry/setYLength 0.24 mm
+/gate/AlInsert94/placement/setTranslation 30.9595 -36.0245 1.25 mm
+/gate/AlInsert94/placement/setRotationAxis        0 0 1 
+/gate/AlInsert94/placement/setRotationAngle       310.676 deg
+/gate/AlInsert94/setMaterial Aluminium
+/gate/AlInsert94/vis/setVisible 1
+/gate/AlInsert94/vis/setColor red
+
+/gate/Phantom/daughters/name AlInsert95
+/gate/Phantom/daughters/insert            box
+/gate/AlInsert95/geometry/setXLength 5.0 mm
+/gate/AlInsert95/geometry/setZLength 2.0 mm
+/gate/AlInsert95/geometry/setYLength 0.24 mm
+/gate/AlInsert95/placement/setTranslation 31.3219 -35.7098 1.25 mm
+/gate/AlInsert95/placement/setRotationAxis        0 0 1 
+/gate/AlInsert95/placement/setRotationAngle       311.255 deg
+/gate/AlInsert95/setMaterial Aluminium
+/gate/AlInsert95/vis/setVisible 1
+/gate/AlInsert95/vis/setColor red
+
+/gate/Phantom/daughters/name AlInsert96
+/gate/Phantom/daughters/insert            box
+/gate/AlInsert96/geometry/setXLength 5.0 mm
+/gate/AlInsert96/geometry/setZLength 2.0 mm
+/gate/AlInsert96/geometry/setYLength 0.24 mm
+/gate/AlInsert96/placement/setTranslation 31.6812 -35.3914 1.25 mm
+/gate/AlInsert96/placement/setRotationAxis        0 0 1 
+/gate/AlInsert96/placement/setRotationAngle       311.834 deg
+/gate/AlInsert96/setMaterial Aluminium
+/gate/AlInsert96/vis/setVisible 1
+/gate/AlInsert96/vis/setColor red
+

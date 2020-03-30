@@ -1,0 +1,247 @@
+
+#--------------------Sensitom Phantom---------------------#
+/gate/world/daughters/name PhantomBox
+/gate/world/daughters/insert            box
+/gate/PhantomBox/geometry/setXLength 200.0 mm
+/gate/PhantomBox/geometry/setYLength 200.0 mm
+/gate/PhantomBox/geometry/setZLength 200.0 mm
+/gate/PhantomBox/placement/setTranslation 0 0 0 mm
+/gate/PhantomBox/placement/setRotationAxis        0 1 0 
+/gate/PhantomBox/placement/setRotationAngle       {rotation} deg
+/gate/PhantomBox/setMaterial Air
+/gate/PhantomBox/vis/setVisible 1
+/gate/PhantomBox/vis/setColor white
+
+/gate/PhantomBox/daughters/name Phantom
+/gate/PhantomBox/daughters/insert            cylinder
+/gate/Phantom/geometry/setRmin 0 mm
+/gate/Phantom/geometry/setRmax 75.0 mm
+/gate/Phantom/geometry/setHeight 25.0 mm
+/gate/Phantom/placement/setTranslation 0 0 0 mm
+/gate/Phantom/placement/alignToY
+/gate/Phantom/setMaterial Epoxy
+/gate/Phantom/vis/setVisible 1
+/gate/Phantom/vis/setColor gray
+
+#cylinder Inserts
+/gate/Phantom/daughters/name airInsert
+/gate/Phantom/daughters/insert            cylinder
+/gate/airInsert/geometry/setRmin 0 mm
+/gate/airInsert/geometry/setRmax 6.1 mm
+/gate/airInsert/geometry/setHeight 25.0 mm
+/gate/airInsert/placement/setTranslation 58.5 0 0 mm
+/gate/airInsert/setMaterial Air
+/gate/airInsert/vis/setVisible 1
+/gate/airInsert/vis/setColor red
+
+/gate/Phantom/daughters/name polystyreneInsert
+/gate/Phantom/daughters/insert            cylinder
+/gate/polystyreneInsert/geometry/setRmin 0 mm
+/gate/polystyreneInsert/geometry/setRmax 6.1 mm
+/gate/polystyreneInsert/geometry/setHeight 25.0 mm
+/gate/polystyreneInsert/placement/setTranslation 50.663 29.25 0 mm
+/gate/polystyreneInsert/setMaterial Polystyrene
+/gate/polystyreneInsert/vis/setVisible 1
+/gate/polystyreneInsert/vis/setColor blue
+
+/gate/Phantom/daughters/name polyethyleneInsert
+/gate/Phantom/daughters/insert            cylinder
+/gate/polyethyleneInsert/geometry/setRmin 0 mm
+/gate/polyethyleneInsert/geometry/setRmax 6.1 mm
+/gate/polyethyleneInsert/geometry/setHeight 25.0 mm
+/gate/polyethyleneInsert/placement/setTranslation 0 58.5 0 mm
+/gate/polyethyleneInsert/setMaterial Polyethylene
+/gate/polyethyleneInsert/vis/setVisible 1
+/gate/polyethyleneInsert/vis/setColor green
+
+/gate/Phantom/daughters/name pmpInsert
+/gate/Phantom/daughters/insert            cylinder
+/gate/pmpInsert/geometry/setRmin 0 mm
+/gate/pmpInsert/geometry/setRmax 6.1 mm
+/gate/pmpInsert/geometry/setHeight 25.0 mm
+/gate/pmpInsert/placement/setTranslation -50.663 29.25 0 mm
+/gate/pmpInsert/setMaterial PMP
+/gate/pmpInsert/vis/setVisible 1
+/gate/pmpInsert/vis/setColor white
+
+/gate/Phantom/daughters/name airInsert2
+/gate/Phantom/daughters/insert            cylinder
+/gate/airInsert2/geometry/setRmin 0 mm
+/gate/airInsert2/geometry/setRmax 6.1 mm
+/gate/airInsert2/geometry/setHeight 25.0 mm
+/gate/airInsert2/placement/setTranslation -58.5 0 0 mm
+/gate/airInsert2/setMaterial Air
+/gate/airInsert2/vis/setVisible 1
+/gate/airInsert2/vis/setColor red
+
+/gate/Phantom/daughters/name teflonInsert
+/gate/Phantom/daughters/insert            cylinder
+/gate/teflonInsert/geometry/setRmin 0 mm
+/gate/teflonInsert/geometry/setRmax 6.1 mm
+/gate/teflonInsert/geometry/setHeight 25.0 mm
+/gate/teflonInsert/placement/setTranslation -50.663 -29.25 0 mm
+/gate/teflonInsert/setMaterial Teflon
+/gate/teflonInsert/vis/setVisible 1
+/gate/teflonInsert/vis/setColor blue
+
+/gate/Phantom/daughters/name delrinInsert
+/gate/Phantom/daughters/insert            cylinder
+/gate/delrinInsert/geometry/setRmin 0 mm
+/gate/delrinInsert/geometry/setRmax 6.1 mm
+/gate/delrinInsert/geometry/setHeight 25.0 mm
+/gate/delrinInsert/placement/setTranslation 0 -58.5 0 mm
+/gate/delrinInsert/setMaterial Delrin
+/gate/delrinInsert/vis/setVisible 1
+/gate/delrinInsert/vis/setColor yellow
+
+/gate/Phantom/daughters/name pmmaInsert
+/gate/Phantom/daughters/insert            cylinder
+/gate/pmmaInsert/geometry/setRmin 0 mm
+/gate/pmmaInsert/geometry/setRmax 6.1 mm
+/gate/pmmaInsert/geometry/setHeight 25.0 mm
+/gate/pmmaInsert/placement/setTranslation 50.663 -29.25 0 mm
+/gate/pmmaInsert/setMaterial PMMA
+/gate/pmmaInsert/vis/setVisible 1
+/gate/pmmaInsert/vis/setColor white
+
+/gate/Phantom/daughters/name airInsert3
+/gate/Phantom/daughters/insert            cylinder
+/gate/airInsert3/geometry/setRmin 0 mm
+/gate/airInsert3/geometry/setRmax 1.5 mm
+/gate/airInsert3/geometry/setHeight 25.0 mm
+/gate/airInsert3/placement/setTranslation 25.0 25.0 0 mm
+/gate/airInsert3/setMaterial Air
+/gate/airInsert3/vis/setVisible 1
+/gate/airInsert3/vis/setColor red
+
+/gate/Phantom/daughters/name airInsert4
+/gate/Phantom/daughters/insert            cylinder
+/gate/airInsert4/geometry/setRmin 0 mm
+/gate/airInsert4/geometry/setRmax 1.5 mm
+/gate/airInsert4/geometry/setHeight 25.0 mm
+/gate/airInsert4/placement/setTranslation -25.0 25.0 0 mm
+/gate/airInsert4/setMaterial Air
+/gate/airInsert4/vis/setVisible 1
+/gate/airInsert4/vis/setColor red
+
+/gate/Phantom/daughters/name airInsert5
+/gate/Phantom/daughters/insert            cylinder
+/gate/airInsert5/geometry/setRmin 0 mm
+/gate/airInsert5/geometry/setRmax 1.5 mm
+/gate/airInsert5/geometry/setHeight 25.0 mm
+/gate/airInsert5/placement/setTranslation 25.0 -25.0 0 mm
+/gate/airInsert5/setMaterial Air
+/gate/airInsert5/vis/setVisible 1
+/gate/airInsert5/vis/setColor red
+
+/gate/Phantom/daughters/name teflonRodInsert
+/gate/Phantom/daughters/insert            cylinder
+/gate/teflonRodInsert/geometry/setRmin 0 mm
+/gate/teflonRodInsert/geometry/setRmax 1.5 mm
+/gate/teflonRodInsert/geometry/setHeight 25.0 mm
+/gate/teflonRodInsert/placement/setTranslation -25.0 -25.0 0 mm
+/gate/teflonRodInsert/setMaterial Teflon
+/gate/teflonRodInsert/vis/setVisible 1
+/gate/teflonRodInsert/vis/setColor blue
+
+/gate/Phantom/daughters/name pmmaSphereInsert
+/gate/Phantom/daughters/insert            sphere
+/gate/pmmaSphereInsert/geometry/setRmin 0 mm
+/gate/pmmaSphereInsert/geometry/setRmax 5 mm
+/gate/pmmaSphereInsert/placement/setTranslation -15.0 0.0 0 mm
+/gate/pmmaSphereInsert/setMaterial PMMA
+/gate/pmmaSphereInsert/vis/setVisible 1
+/gate/pmmaSphereInsert/vis/setColor white
+
+/gate/Phantom/daughters/name pmmaSphereInsert2
+/gate/Phantom/daughters/insert            sphere
+/gate/pmmaSphereInsert2/geometry/setRmin 0 mm
+/gate/pmmaSphereInsert2/geometry/setRmax 4 mm
+/gate/pmmaSphereInsert2/placement/setTranslation -4.635 14.266 0 mm
+/gate/pmmaSphereInsert2/setMaterial PMMA
+/gate/pmmaSphereInsert2/vis/setVisible 1
+/gate/pmmaSphereInsert2/vis/setColor white
+
+/gate/Phantom/daughters/name pmmaSphereInsert3
+/gate/Phantom/daughters/insert            sphere
+/gate/pmmaSphereInsert3/geometry/setRmin 0 mm
+/gate/pmmaSphereInsert3/geometry/setRmax 3 mm
+/gate/pmmaSphereInsert3/placement/setTranslation 12.135 8.817 0 mm
+/gate/pmmaSphereInsert3/setMaterial PMMA
+/gate/pmmaSphereInsert3/vis/setVisible 1
+/gate/pmmaSphereInsert3/vis/setColor white
+
+/gate/Phantom/daughters/name pmmaSphereInsert4
+/gate/Phantom/daughters/insert            sphere
+/gate/pmmaSphereInsert4/geometry/setRmin 0 mm
+/gate/pmmaSphereInsert4/geometry/setRmax 2 mm
+/gate/pmmaSphereInsert4/placement/setTranslation 12.135 -8.817 0 mm
+/gate/pmmaSphereInsert4/setMaterial PMMA
+/gate/pmmaSphereInsert4/vis/setVisible 1
+/gate/pmmaSphereInsert4/vis/setColor white
+
+/gate/Phantom/daughters/name pmmaSphereInsert5
+/gate/Phantom/daughters/insert            sphere
+/gate/pmmaSphereInsert5/geometry/setRmin 0 mm
+/gate/pmmaSphereInsert5/geometry/setRmax 1 mm
+/gate/pmmaSphereInsert5/placement/setTranslation -4.635 -14.266 0 mm
+/gate/pmmaSphereInsert5/setMaterial PMMA
+/gate/pmmaSphereInsert5/vis/setVisible 1
+/gate/pmmaSphereInsert5/vis/setColor white
+
+/gate/Phantom/daughters/name wireInsert
+/gate/Phantom/daughters/insert            cylinder
+/gate/wireInsert/geometry/setRmin 0 mm
+/gate/wireInsert/geometry/setRmax 0.1 mm
+/gate/wireInsert/geometry/setHeight 47.5 mm
+#/gate/wireInsert/geometry/setPhiStart 1.0 rad
+#/gate/wireInsert/geometry/setDeltaPhi 1.5 rad
+/gate/wireInsert/placement/setTranslation 37.5 0.0 0.0 mm
+/gate/wireInsert/placement/setRotationAxis        1 0 0  
+/gate/wireInsert/placement/setRotationAngle       67 deg
+/gate/wireInsert/setMaterial TungstenCarbide
+/gate/wireInsert/vis/setVisible 1
+/gate/wireInsert/vis/setColor magenta
+
+/gate/Phantom/daughters/name wireInsert2
+/gate/Phantom/daughters/insert            cylinder
+/gate/wireInsert2/geometry/setRmin 0 mm
+/gate/wireInsert2/geometry/setRmax 0.1 mm
+/gate/wireInsert2/geometry/setHeight 47.5 mm
+#/gate/wireInsert2/geometry/setPhiStart 1.0 rad
+#/gate/wireInsert2/geometry/setDeltaPhi 1.5 rad
+/gate/wireInsert2/placement/setTranslation 0.0 37.5 0.0 mm
+/gate/wireInsert2/placement/setRotationAxis        0 1 0  
+/gate/wireInsert2/placement/setRotationAngle       67 deg
+/gate/wireInsert2/setMaterial TungstenCarbide
+/gate/wireInsert2/vis/setVisible 1
+/gate/wireInsert2/vis/setColor magenta
+
+/gate/Phantom/daughters/name wireInsert3
+/gate/Phantom/daughters/insert            cylinder
+/gate/wireInsert3/geometry/setRmin 0 mm
+/gate/wireInsert3/geometry/setRmax 0.1 mm
+/gate/wireInsert3/geometry/setHeight 47.5 mm
+#/gate/wireInsert3/geometry/setPhiStart 1.0 rad
+#/gate/wireInsert3/geometry/setDeltaPhi 1.5 rad
+/gate/wireInsert3/placement/setTranslation -37.5 0.0 0.0 mm
+/gate/wireInsert3/placement/setRotationAxis        1 0 0  
+/gate/wireInsert3/placement/setRotationAngle       -67 deg
+/gate/wireInsert3/setMaterial TungstenCarbide
+/gate/wireInsert3/vis/setVisible 1
+/gate/wireInsert3/vis/setColor magenta
+
+/gate/Phantom/daughters/name wireInsert4
+/gate/Phantom/daughters/insert            cylinder
+/gate/wireInsert4/geometry/setRmin 0 mm
+/gate/wireInsert4/geometry/setRmax 0.1 mm
+/gate/wireInsert4/geometry/setHeight 47.5 mm
+#/gate/wireInsert4/geometry/setPhiStart 1.0 rad
+#/gate/wireInsert4/geometry/setDeltaPhi 1.5 rad
+/gate/wireInsert4/placement/setTranslation 0.0 -37.5 0.0 mm
+/gate/wireInsert4/placement/setRotationAxis        0 1 0  
+/gate/wireInsert4/placement/setRotationAngle       -67 deg
+/gate/wireInsert4/setMaterial TungstenCarbide
+/gate/wireInsert4/vis/setVisible 1
+/gate/wireInsert4/vis/setColor magenta
+
