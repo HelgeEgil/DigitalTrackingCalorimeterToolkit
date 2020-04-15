@@ -240,9 +240,9 @@ Tracks * getTracksFromClusters(Int_t Runs, Int_t dataType, Int_t frameType, Floa
       
       // DO SOME CUTS HERE INSTEAD TO SAVE MEMORY
       tracks->removeEmptyTracks();
-      tracks->doTrackFit(false);
-      tracks->removeTracksWithMinWEPL(100);
-      tracks->removeNuclearInteractions();
+//      tracks->doTrackFit(false);
+//      tracks->removeTracksWithMinWEPL(100);
+//      tracks->removeNuclearInteractions();
 
       showDebug("append tracks to alltracks...");
       for (Int_t j=0; j<tracks->GetEntriesFast(); j++) {

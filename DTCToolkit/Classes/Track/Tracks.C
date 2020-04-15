@@ -577,6 +577,47 @@ void  Tracks::removeHighAngleTracks(Float_t mradLimit) {
    Compress();
 }
 
+void  Tracks::removeHighAngleTracksRelativeToSpot(Float_t mradLimit, Float_t angleX, Float_t angleY) {
+   Cluster *a = nullptr;
+   Cluster *b = nullptr;
+   Cluster *c = nullptr;
+   Cluster *a2 = nullptr;
+   Cluster *b2 = nullptr;
+   Track   *thisTrack = nullptr;
+   Float_t  incomingAngle, outgoingAngle;
+   Int_t    nRemoved = 0;
+   Int_t    nRemovedNuclear = 0;
+   Int_t    last;
+
+   for (Int_t i=0; i<GetEntriesFast(); i++) {
+      thisTrack = At(i);
+      if (!At(i)) continue;
+
+      last = thisTrack->GetEntriesFast() - 1;
+
+      if (last<1) continue;
+
+      a = thisTrack->At(0);
+      b = thisTrack->At(1);
+      c = new Cluster(a->getX(), a->getY(), a->getLayer());
+
+      c->setXmm(a->getXmm() + tan(angleX/1000) * dz2);
+      c->setYmm(a->getYmm() + tan(angleY/1000) * dz2);
+
+      if (!a || !b) continue;
+      incomingAngle = getDotProductAngle(a, c, b);
+      if (incomingAngle > mradLimit / 1000.) {
+         if (thisTrack->Last()->isSecondary()) nRemovedNuclear++;
+         removeTrackAt(i);
+         nRemoved++;
+      }
+   }
+   printf("Removed %d tracks with higher than %.0f mrad incoming angle (%.2f%% secondaries).\n", nRemoved, mradLimit, 100*float(nRemovedNuclear)/nRemoved);
+
+   removeEmptyTracks();
+   Compress();
+}
+
 void  Tracks::removeHighAngularChangeTracks(Float_t mradLimit) {
    Track   *thisTrack = nullptr;
    Float_t  maxChange;

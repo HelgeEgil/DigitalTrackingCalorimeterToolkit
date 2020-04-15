@@ -15,7 +15,7 @@ for x in `seq -f "%04.f" -98 7 98`; do
          axis_x=1
          axis_y=0
       fi
-     tsp /build/gate/Gate-8.2reducedRootOutput-install/bin/Gate -a "'[phantom,$phantom] [spotx,$x] [spoty,$y] [theta,$theta] [axisx,$axis_x] [axisy,$axis_y] [rotation,90]'" Main_chip_phantom.mac
+     tsp /build/gate/Gate-8.2reducedRootOutput-install/bin/Gate -a "'[phantom,$phantom] [spotx,$x] [spoty,$y] [theta,$theta] [axisx,$axis_x] [axisy,$axis_y] [rotation,90]'" Main_phantom.mac
       PIDLIST="$PIDLIST $!"
       echo "Running at spot ($x,$y) -- total angle $theta and axis of rotation $axis_x $axis_y"
    done

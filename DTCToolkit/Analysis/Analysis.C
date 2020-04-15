@@ -2493,7 +2493,122 @@ void showOutputFileForImageReconstruction() {
 
 }
 
-void makeOutputFileForImageReconstruction(Int_t Runs, Int_t tracksperrun, Int_t rotation) {
+void makeOutputFileForImageReconstructionRad(Int_t Runs, Int_t tracksperrun, Int_t rotation, Int_t useSpotX) {
+//   run_energy = 760;
+   run_degraderThickness = 180; // This number is useless I hope
+   run_energy = 230;
+   kEventsPerRun = tracksperrun;
+   kDoTracking = true;
+   kSpotX = useSpotX; // Use this to open correct file
+   kRotation = rotation;
+
+   Bool_t  kDraw = false;
+
+   Float_t spotXFrom, spotXTo, spotXSpacing;
+   Float_t spotYFrom, spotYTo, spotYSpacing;
+
+   if (kPhantomName == "linePair" || kPhantomName == "CTP404") {
+      spotXFrom = -77;
+      spotXTo = 77;
+      spotXSpacing = 7;
+
+      spotYFrom = -21;
+      spotYTo = 21;
+      spotYSpacing = 7;
+   }
+
+   else { // Headphantom
+      spotXFrom = -98;
+      spotXTo = 98;
+      spotXSpacing = 7;
+
+      spotYFrom = -88;
+      spotYTo = 88;
+      spotYSpacing = 7;
+   }  
+
+   TH2F *hSimpleImage = nullptr;
+   TH2F *hSimpleImageNorm = nullptr;
+
+   if (kDraw) {
+      hSimpleImage = new TH2F("hSimpleImage", "Simple Image;X [mm];Y [mm]", 100, -125, -75, 150, -75,75);
+      hSimpleImageNorm = new TH2F("hSimpleImageNorm", "Simple Image;X [mm];Y [mm]", 100, -125, -75, 150, -75,75);
+   }
+
+   Float_t outSpotX, outSpotY, outWEPL, outX2x, outX2y, outP2x, outP2y, residualRange, wepl, wepl_calibrated, outWEPL_uncalibrated;
+   Track * thisTrack = nullptr;
+
+   TFile *fOut = new TFile(Form("OutputFiles/%s/%s_rotation%03ddeg_spotx%04d.root", kPhantomName.Data(), kPhantomName.Data(), kRotation, kSpotX), "recreate");
+   TTree *tOut = new TTree("WEPLData", "proton beam");
+
+   tOut->Branch("spotX", &outSpotX, "spotX/F");
+   tOut->Branch("spotY", &outSpotY, "spotY/F");
+   tOut->Branch("WEPL", &outWEPL, "WEPL/F");
+   tOut->Branch("X2x", &outX2x, "X2x/F");
+   tOut->Branch("X2y", &outX2y, "X2y/F");
+   tOut->Branch("P2x", &outP2x, "P2x/F");
+   tOut->Branch("P2y", &outP2y, "P2y/F");
+
+   Int_t nruns = 0;
+   Float_t  cutMaxAngle = 60;
+   Float_t  cutAngle = 50;
+   Float_t  cutEdep = 12;
+
+   Float_t spotX = float(useSpotX);
+   Float_t angleX, angleY;
+
+   // Find the angles based on the geometry
+
+   for (float spotY = spotYFrom; spotY <= spotYTo; spotY += spotYSpacing) {
+      printf("Spot (%.0f,%.0f)\n", spotX, spotY);
+      Tracks * tracks = loadOrCreateTracks(true, Runs, false, run_energy, spotX, spotY);
+      printf("lastJentry = %lld\n", lastJentry_);
+      tracks->removeHighAngleTracksRelativeToSpot(65, angleX, angleY);
+      tracks->removeTracksWithMinWEPL(100);
+      tracks->removeThreeSigmaShortTracks();
+
+      for (Int_t i=0; i<=tracks->GetEntriesFast(); i++) {
+         thisTrack = tracks->At(i);
+         if (!thisTrack) continue;
+
+         outSpotX = spotX;
+         outSpotY = spotY;
+         wepl = thisTrack->getFitParameterRange();
+         wepl_calibrated =  1.0024 * wepl - 0.41; // pol1 calibration for protons
+         outWEPL = 333.7 - wepl_calibrated; // 333.7 mm: 230 MeV proton @ 78 eV H2O (extrapolated from data...)
+//          outWEPL_uncalibrated = 333.7 - wepl;
+         if (isnan(outWEPL)) continue;
+
+//            outWEPL = 238.8 - residualRange; // 190 MeV/u Helium
+         if (!thisTrack->At(0) || !thisTrack->At(1)) continue;
+
+         outX2x = thisTrack->At(0)->getXmm();
+         outX2y = thisTrack->At(0)->getYmm();
+         outP2x = (thisTrack->At(1)->getXmm() - outX2x) / dz2;
+         outP2y = (thisTrack->At(1)->getYmm() - outX2y) / dz2;
+
+         tOut->Fill();
+
+         if (kDraw) {
+            hSimpleImage->Fill(outX2x, outX2y, outWEPL);
+            hSimpleImageNorm->Fill(outX2x, outX2y);
+         }
+      }
+       nruns++;
+       delete tracks;
+   }
+
+   fOut->Write();
+   fOut->Close();
+   printf("Image Reconstruction Input data written to Output/%s/%s_rotation%03d_spotx%04d.root.\n", kPhantomName.Data(), kPhantomName.Data(), kRotation, kSpotX);
+   
+   if (kDraw) {
+      hSimpleImage->Divide(hSimpleImageNorm);
+      hSimpleImage->Draw("COLZ");
+   }
+}
+
+void makeOutputFileForImageReconstructionCT(Int_t Runs, Int_t tracksperrun, Int_t rotation) {
 //   run_energy = 760;
    run_degraderThickness = 180; // This number is useless I hope
    run_energy = 230;

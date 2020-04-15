@@ -1083,7 +1083,7 @@ Float_t doNGaussianFit ( TH1F *h, Float_t *means, Float_t *sigmas) {
 
    file << endl;
    file.close();
-   printf("Calculated FWTM is %.2f mm. Actual integration yields %.2f mm.\n", empiricalSigma*4.2
+//    printf("Calculated FWTM is %.2f mm. Actual integration yields %.2f mm.\n", empiricalSigma*4.2);
    
    Float_t last_range = array_mean[0];
    if (array_constant[1] > 0.1) last_range = array_mean[1];

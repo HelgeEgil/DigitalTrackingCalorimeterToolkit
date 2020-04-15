@@ -66,8 +66,14 @@ DataInterface::DataInterface(TTree *tree) : fChain(0) {
       else if (kFinalDesign) { // FINAL DESIGN
          if (!kHelium) { // FINAL DESIGN : PROTONS
             if (kSpotScanning) { // FINAL DESIGN : PROTONS : SPOT SCANNING
-               chain->Add(Form("Data/MonteCarlo/DTC_Final_%s_rotation%03ddeg.root/Hits", kPhantomName.Data(), kRotation));
-               printf("Opening PROTON phantom %s file with %03d degrees rotation\n", kPhantomName.Data(), kRotation);
+               if (!kSplitSpotColumnsPerRotation) {
+                  chain->Add(Form("Data/MonteCarlo/DTC_Final_%s_rotation%03ddeg.root/Hits", kPhantomName.Data(), kRotation));
+                  printf("Opening PROTON phantom %s file with %03d degrees rotation\n", kPhantomName.Data(), kRotation);
+               }
+               else {
+                  chain->Add(Form("Data/MonteCarlo/DTC_Final_%s_rotation%ddeg_spotx%04d_AllY.root/Hits", kPhantomName.Data(), kRotation, kSpotX));
+                  printf("Opening PROTON phantom %s file with %d degrees rotation and spotX = %.04d\n", kPhantomName.Data(), kRotation, kSpotX);
+               }
             }
             else { // FINAL DESIGN : PROTONS : SINGLE PENCIL BEAM
                printf("Opening PROTON file with degrader thickness %.0f mm and FINAL design (3.5 mm)\n", run_degraderThickness);

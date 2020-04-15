@@ -55,6 +55,7 @@ class Tracks : public TObject {
       void              appendTrack(Track *copyTrack, Int_t startOffset = 0);
       void              appendClustersWithoutTrack(TClonesArray *clustersWithoutTrack);
       void              removeHighAngleTracks(Float_t mradLimit);
+      void              removeHighAngleTracksRelativeToSpot(Float_t mradLimit, Float_t angleX, Float_t angleY);
       void              removeHighAngularChangeTracks(Float_t mradLimit);
 
       // Retrieve tracks
