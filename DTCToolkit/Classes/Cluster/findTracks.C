@@ -329,16 +329,25 @@ void Clusters::findClustersFromSeedInLayer(Cluster *seed, Int_t nextLayer, vecto
    Float_t maxAngle, thisAngle;
 
    maxAngle = 0.15 * kMCSFactor;
+   Cluster * seedCorr = new Cluster();
 
    if (nextLayer == 1) {
       maxAngle = 0.5; // 500 mrad
+      seedCorr->setXmm(seed->getXmm() - tan(getAngleAtSpot(kSpotX)*dz2)); 
+      seedCorr->setYmm(seed->getYmm() - tan(getAngleAtSpot(kSpotY)*dz2)); 
+      seedCorr->setLayer(-1);
+   }
+   else {
+      seedCorr->setXmm(seed->getXmm()); 
+      seedCorr->setYmm(seed->getYmm()); 
+      seedCorr->setLayer(0);
    }
 
    if (layerIdxFrom >= 0) {
       for (Int_t i=layerIdxFrom; i<layerIdxTo; i++) {
          if (!At(i)) { continue; }
-         thisAngle = getDotProductAngle(seed, seed, At(i));
-          if ((thisAngle < maxAngle)&& !isUsed(i)){
+         thisAngle = getDotProductAngle(seedCorr, seed, At(i));
+          if ((thisAngle < maxAngle) && !isUsed(i)){
             nextClusters->push_back(i);
          }
       }

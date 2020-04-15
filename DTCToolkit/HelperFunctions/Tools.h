@@ -64,4 +64,6 @@ Bool_t		getCutTrackLength(Float_t energy, Track *track);
 Bool_t		getCutWEPL(Track *track);
 Bool_t		getCutChipNumber(Track *track);
 Bool_t		getCutBraggPeakInTrack(Track *track);
+Float_t     getAngleAtSpot(Float_t spotPosInMM);
+Float_t     getAngleAtSpot(Float_t spotPosInMM_x, Float_t spotPosInMM_y);
 #endif /* FOCALCODE_TOOLS_H_ */

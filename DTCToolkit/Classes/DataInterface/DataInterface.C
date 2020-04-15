@@ -71,8 +71,8 @@ DataInterface::DataInterface(TTree *tree) : fChain(0) {
                   printf("Opening PROTON phantom %s file with %03d degrees rotation\n", kPhantomName.Data(), kRotation);
                }
                else {
-                  chain->Add(Form("Data/MonteCarlo/DTC_Final_%s_rotation%ddeg_spotx%04d_AllY.root/Hits", kPhantomName.Data(), kRotation, kSpotX));
-                  printf("Opening PROTON phantom %s file with %d degrees rotation and spotX = %.04d\n", kPhantomName.Data(), kRotation, kSpotX);
+                  chain->Add(Form("Data/MonteCarlo/DTC_Final_%s_rotation%ddeg_spotx%04.f_AllY.root/Hits", kPhantomName.Data(), kRotation, kSpotX));
+                  printf("Opening PROTON phantom %s file with %d degrees rotation and spotX = %04.f\n", kPhantomName.Data(), kRotation, kSpotX);
                }
             }
             else { // FINAL DESIGN : PROTONS : SINGLE PENCIL BEAM

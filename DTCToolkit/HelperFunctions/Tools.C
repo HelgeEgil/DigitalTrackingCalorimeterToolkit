@@ -354,7 +354,7 @@ Float_t getDotProductAngle(Cluster *a, Cluster *b, Cluster *c) {
 
    Double_t in[3]  = {b->getXmm() - a->getXmm(), b->getYmm() - a->getYmm(), b->getLayermm() - a->getLayermm()};
    Double_t out[3] = {c->getXmm() - b->getXmm(), c->getYmm() - b->getYmm(), c->getLayermm() - b->getLayermm()};
-   if (a == b) in[2] = out[2];
+   if (a == b) in[2] = out[2]; // NOT RIGHT WHEN USING TRACKER LAYERS
    if (b == c) out[2] = in[2];
 
    Double_t dot    = in[0] * out[0] + in[1] * out[1] + in[2] * out[2];
@@ -1162,4 +1162,19 @@ Bool_t getCutBraggPeakInTrack(Track *track) {
       else return false;
    }
 }
+
+Float_t getAngleAtSpot(Float_t spotPosInMM) {
+   Float_t dIsocenter = 6600;
+   return atan2(spotPosInMM, dIsocenter);
+}
+
+Float_t getAngleAtSpot(Float_t spotPosInMM_x, Float_t spotPosInMM_y) {
+   // Returns in Rad
+   Float_t dIsocenter = 6600;
+   Float_t theta_x = atan2(spotPosInMM_x, dIsocenter);
+   Float_t theta_y = atan2(spotPosInMM_y, dIsocenter);
+
+   return sqrt(pow(theta_x, 2) + pow(theta_y, 2));
+}
+
 #endif

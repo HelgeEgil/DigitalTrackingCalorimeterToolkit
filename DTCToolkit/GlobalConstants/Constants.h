@@ -80,7 +80,8 @@ const Bool_t kFinalDesign = false;
 const Int_t nEnergies = 6;
 Int_t energies[nEnergies] = {122, 140, 150, 170, 180, 188};
 
-Int_t kSpotX = 0;
+Float_t kSpotX = 0;
+Float_t kSpotY = 0;
 
 enum eFrameType {kCalorimeter, kTracker};
 enum eDataType {kMC, kData};

@@ -2540,7 +2540,7 @@ void makeOutputFileForImageReconstructionRad(Int_t Runs, Int_t tracksperrun, Int
    Float_t outSpotX, outSpotY, outWEPL, outX2x, outX2y, outP2x, outP2y, residualRange, wepl, wepl_calibrated, outWEPL_uncalibrated;
    Track * thisTrack = nullptr;
 
-   TFile *fOut = new TFile(Form("OutputFiles/%s/%s_rotation%03ddeg_spotx%04d.root", kPhantomName.Data(), kPhantomName.Data(), kRotation, kSpotX), "recreate");
+   TFile *fOut = new TFile(Form("OutputFiles/%s/%s_rotation%03ddeg_spotx%04.f.root", kPhantomName.Data(), kPhantomName.Data(), kRotation, kSpotX), "recreate");
    TTree *tOut = new TTree("WEPLData", "proton beam");
 
    tOut->Branch("spotX", &outSpotX, "spotX/F");
@@ -2557,15 +2557,19 @@ void makeOutputFileForImageReconstructionRad(Int_t Runs, Int_t tracksperrun, Int
    Float_t  cutEdep = 12;
 
    Float_t spotX = float(useSpotX);
-   Float_t angleX, angleY;
+   kSpotX = spotX;
+   Float_t angleXmrad, angleYmrad;
 
    // Find the angles based on the geometry
+   angleXmrad = getAngleAtSpot(spotX) * 1000;
 
    for (float spotY = spotYFrom; spotY <= spotYTo; spotY += spotYSpacing) {
+      kSpotY = spotY;
+      angleYmrad = getAngleAtSpot(spotY) * 1000;
       printf("Spot (%.0f,%.0f)\n", spotX, spotY);
       Tracks * tracks = loadOrCreateTracks(true, Runs, false, run_energy, spotX, spotY);
       printf("lastJentry = %lld\n", lastJentry_);
-      tracks->removeHighAngleTracksRelativeToSpot(65, angleX, angleY);
+      tracks->removeHighAngleTracksRelativeToSpot(65, angleXmrad, angleYmrad);
       tracks->removeTracksWithMinWEPL(100);
       tracks->removeThreeSigmaShortTracks();
 
@@ -2602,7 +2606,7 @@ void makeOutputFileForImageReconstructionRad(Int_t Runs, Int_t tracksperrun, Int
 
    fOut->Write();
    fOut->Close();
-   printf("Image Reconstruction Input data written to Output/%s/%s_rotation%03d_spotx%04d.root.\n", kPhantomName.Data(), kPhantomName.Data(), kRotation, kSpotX);
+   printf("Image Reconstruction Input data written to Output/%s/%s_rotation%03d_spotx%04.f.root.\n", kPhantomName.Data(), kPhantomName.Data(), kRotation, kSpotX);
    
    if (kDraw) {
       hSimpleImage->Divide(hSimpleImageNorm);
@@ -2616,8 +2620,6 @@ void makeOutputFileForImageReconstructionCT(Int_t Runs, Int_t tracksperrun, Int_
    run_energy = 230;
    kEventsPerRun = tracksperrun;
    kDoTracking = true;
-//   kSpotX = spotPosX; // Use this to open correct file
-// Or, rather, make another function for RADIOGRAPHY files
    kRotation = rotation;
 
    Bool_t  kDraw = false;
@@ -2673,7 +2675,9 @@ void makeOutputFileForImageReconstructionCT(Int_t Runs, Int_t tracksperrun, Int_
    Float_t  cutEdep = 12;
 
    for (float spotX = spotXFrom; spotX <= spotXTo; spotX += spotXSpacing) {
+      kSpotX = spotX;
       for (float spotY = spotYFrom; spotY <= spotYTo; spotY += spotYSpacing) {
+         kSpotY = spotY;
    //   Float_t spotY = 0;
 
          printf("Spot (%.0f,%.0f)\n", spotX, spotY);
