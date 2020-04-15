@@ -174,7 +174,6 @@ Tracks * getTracksFromClusters(Int_t Runs, Int_t dataType, Int_t frameType, Floa
          di->getMCClustersThreshold(i, nullptr, hits, spotx, spoty);
          hits->sortHits(); 
 
-         
          // DETECTOR RESPONSE THRESHOLD
          for (Int_t j=0; j<=hits->GetEntriesFast(); j++) {
             if (hits->At(j)) {
@@ -191,7 +190,12 @@ Tracks * getTracksFromClusters(Int_t Runs, Int_t dataType, Int_t frameType, Floa
          diffusedHits->findClustersFromHits(clusters);
 
          // EDEPish CUT
-         clusters->removeSmallClusters(6);
+         if (kHelium) {
+            clusters->removeSmallClusters(6);
+         }
+         else {
+            clusters->removeSmallClusters(1); // VALIDATE !!!!
+         }
 
 //         Int_t nRem = clusters->removeClustersInGap(1, 0);
 

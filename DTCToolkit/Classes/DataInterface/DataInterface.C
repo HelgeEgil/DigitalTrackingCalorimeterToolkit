@@ -502,7 +502,7 @@ void  DataInterface::getMCClustersThreshold(Int_t runNo, Clusters *clusters, Hit
    Int_t particlesBelowThreshold = 0;
    Int_t nHitsAdded = 0;
 
-   threshold = 3e-3; // (3 keV ~ ) (0.1 kev/um)
+//   threshold = 3e-3; // (3 keV ~ ) (0.1 kev/um)
    threshold = 0;
 
    if (runNo == 0 && !kSpotScanning) lastJentry_ = 0;

@@ -58,7 +58,7 @@ Tracks * Clusters::findTracksWithRecursiveWeighting() {
    makeLayerIndex();
    kMCSFactor = 25;
 
-   thisMaxTrackScore = 0.25;
+   thisMaxTrackScore = 0.3;
    if (kHelium) thisMaxTrackScore = 0.175;
 
    for (Int_t i=0; i<GetEntriesFast(); i++) {
@@ -67,7 +67,7 @@ Tracks * Clusters::findTracksWithRecursiveWeighting() {
    }
 
    Int_t FirstLayer = nLayers-1;
-   Int_t LastLayer = 2;
+   Int_t LastLayer = 0;
       
    if (kDoTrackerPropagation) {
       // Make list of all seed pairs in TRACKER layers where angle a,a,b < 100 mrad
@@ -82,28 +82,6 @@ Tracks * Clusters::findTracksWithRecursiveWeighting() {
       Int_t    firstLayerIdxTo = getLastIndexOfLayer(2);
       vector<Int_t> * firstTrackerClusters = new vector<Int_t>;
       vector<Int_t> * secondTrackerClusters = new vector<Int_t>;
-
-      /*
-      for (UInt_t i=0; i<firstTrackerClusters->size(); i++) {
-         firstTrackerCluster = At(firstTrackerClusters->at(i));
-         secondTrackerClusters->clear();
-         findClustersFromSeedInLayer(firstTrackerCluster, 1, secondTrackerClusters);
-         bestIdxK = 0; bestIdxJ = 0;
-         bestAngle = 1e5;
-
-         for (UInt_t j=0; j<secondTrackerClusters->size(); j++) {
-            secondTrackerCluster = At(secondTrackerClusters->at(j));
-            for (Int_t k=firstLayerIdxFrom; k<firstLayerIdxTo; k++) {
-               firstLayerCluster = At(k);
-               if (!firstLayerCluster) continue;
-               angle = getDotProductAngle(firstTrackerCluster, secondTrackerCluster, firstLayerCluster);
-               if (angle < bestAngle) {
-                  bestAngle = angle; 
-                  bestIdxK = k; bestIdxJ = j;
-               }
-            }
-         }
-         */
       
       findSeeds(firstTrackerClusters, 0, false);
       for (Int_t k=firstLayerIdxFrom; k<firstLayerIdxTo; k++) {
@@ -133,7 +111,7 @@ Tracks * Clusters::findTracksWithRecursiveWeighting() {
             }
          }
 
-         if (bestAngle>1) continue; // no hit on first 
+         if (bestAngle>0.2) continue; // no hit on first 
 
          firstTrackerCluster = At(bestIdxI);
          secondTrackerCluster = At(bestIdxJ);
@@ -168,7 +146,7 @@ Tracks * Clusters::findTracksWithRecursiveWeighting() {
          for (UInt_t j=0; j<nextClusters->size(); j++) {
             nextCluster = At(nextClusters->at(j)); 
             clusterScore = seedNode->getNextScore(nextCluster); 
-            clusterScore /= 100;
+//            clusterScore /= 10;
 //            if (std::isnan(clusterScore)) cout << "clusterScore at " << *nextCluster << " isNan!\n";
             
             if (clusterScore < thisMaxTrackScore) {
@@ -340,7 +318,7 @@ void Clusters::findClustersFromSeedInLayer(Cluster *seed, Int_t nextLayer, vecto
    else {
       seedCorr->setXmm(seed->getXmm()); 
       seedCorr->setYmm(seed->getYmm()); 
-      seedCorr->setLayer(0);
+      seedCorr->setLayer(seed->getLayer());
    }
 
    if (layerIdxFrom >= 0) {

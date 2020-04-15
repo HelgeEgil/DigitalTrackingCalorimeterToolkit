@@ -2571,7 +2571,7 @@ void makeOutputFileForImageReconstructionRad(Int_t Runs, Int_t tracksperrun, Int
       printf("lastJentry = %lld\n", lastJentry_);
       tracks->removeHighAngleTracksRelativeToSpot(65, angleXmrad, angleYmrad);
       tracks->removeTracksWithMinWEPL(100);
-      tracks->removeThreeSigmaShortTracks();
+//      tracks->removeThreeSigmaShortTracks();
 
       for (Int_t i=0; i<=tracks->GetEntriesFast(); i++) {
          thisTrack = tracks->At(i);
@@ -2612,6 +2612,98 @@ void makeOutputFileForImageReconstructionRad(Int_t Runs, Int_t tracksperrun, Int
       hSimpleImage->Divide(hSimpleImageNorm);
       hSimpleImage->Draw("COLZ");
    }
+}
+
+void makeEfficiencyVsDegraderThickness() {
+   run_energy = 230;
+   kDoTracking = 1;
+
+   Double_t degraderthickness[7];
+   Double_t correct50[7];
+   Double_t correct100[7];
+   Track * thisTrack = nullptr;
+   Int_t nprimaries50[7] = {};
+   Int_t nprimaries100[7] = {};
+   Int_t nsecondaries50[7] = {};
+   Int_t nsecondaries100[7] = {};
+   Int_t idx = 0;
+
+   for (Float_t dt = 1; dt<=301; dt += 50) {
+      cout << "Running with degraderthickness " << dt << endl;
+      run_degraderThickness = dt;
+      degraderthickness[idx] = dt;
+      kEventsPerRun = 50;
+      Int_t runs = 1000 / kEventsPerRun;
+      Tracks * tracks50 = loadOrCreateTracks(true, runs, false, run_energy, 0, 0);
+      
+      kEventsPerRun = 100;
+      runs = 1000 / kEventsPerRun;
+      Tracks * tracks100 = loadOrCreateTracks(true, runs, false, run_energy, 0, 0);
+
+      for (int i=0; i<tracks50->GetEntriesFast(); i++) {
+         if (!tracks50->At(i)) continue;
+         if (!tracks50->At(i)->Last()->isSecondary()) nprimaries50[idx]++;
+         else nsecondaries50[idx]++;
+      }
+      
+      for (int i=0; i<tracks100->GetEntriesFast(); i++) {
+         if (!tracks100->At(i)) continue;
+         if (!tracks100->At(i)->Last()->isSecondary()) nprimaries100[idx]++;
+         else nsecondaries100[idx]++;
+      }
+      
+      tracks50->removeHighAngleTracks(45);
+      tracks50->removeThreeSigmaShortTracks();
+      tracks100->removeHighAngleTracks(45);
+      tracks100->removeThreeSigmaShortTracks();
+      
+      Int_t nTotal = 0;
+      Int_t nFirstAndLastAllTracks = 0;
+
+      for (Int_t j=0; j<tracks50->GetEntriesFast(); j++) {
+         thisTrack = tracks50->At(j);
+         if (!thisTrack) continue;
+         nTotal++;
+
+         if (thisTrack->isFirstAndLastEventIDEqual() && tracks50->getNMissingClustersWithEventID(thisTrack->getEventID(0), thisTrack->Last()->getLayer(), j) == 0) {
+            nFirstAndLastAllTracks++;
+         }
+      }
+      correct50[idx] = nFirstAndLastAllTracks / float(nTotal) * 100;
+
+      nTotal = 0;
+      nFirstAndLastAllTracks = 0;
+
+      for (Int_t j=0; j<tracks100->GetEntriesFast(); j++) {
+         thisTrack = tracks100->At(j);
+         if (!thisTrack) continue;
+         nTotal++;
+
+         if (thisTrack->isFirstAndLastEventIDEqual() && tracks100->getNMissingClustersWithEventID(thisTrack->getEventID(0), thisTrack->Last()->getLayer(), j) == 0) {
+            nFirstAndLastAllTracks++;
+         }
+      }
+      correct100[idx] = nFirstAndLastAllTracks / float(nTotal) * 100;
+      
+      
+      idx++;
+      delete tracks50;
+      delete tracks100;
+   }
+
+   for (Int_t i=0; i<7; i++) {
+      printf("dt = %.0f mm; correct50 = %.3f%%; correct100 = %.3f%%; nprim50 = %d; nprim100 = %d; nsec50 = %d; nsec100 = %d\n", degraderthickness[i], correct50[i], 
+            correct100[i], nprimaries50[i], nprimaries100[i], nsecondaries50[i], nsecondaries100[i]);
+   }
+
+   TCanvas *c = new TCanvas();
+   TGraph *t50 = new TGraph(7, degraderthickness, correct50);
+   TGraph *t100 = new TGraph(7, degraderthickness, correct100);
+   t50->SetLineColor(kRed);
+   t100->SetLineColor(kBlue);
+   t50->Draw("AL");
+   t100->Draw("L");
+
 }
 
 void makeOutputFileForImageReconstructionCT(Int_t Runs, Int_t tracksperrun, Int_t rotation) {
@@ -2753,9 +2845,9 @@ void drawTracks3D(Int_t Runs, Int_t dataType, Bool_t recreate, Int_t switchLayer
    Float_t  cutEdep = 12;
    
    tracks->removeHighAngleTracks(cutAngle); // mrad
-   tracks->removeHighAngularChangeTracks(cutMaxAngle);
-   // tracks->removeNuclearInteractions();
-   tracks->removeThreeSigmaShortTracks();
+//   tracks->removeHighAngularChangeTracks(cutMaxAngle);
+//   tracks->removeNuclearInteractions();
+   // tracks->removeThreeSigmaShortTracks();
 
    Bool_t   kDraw = true;
 

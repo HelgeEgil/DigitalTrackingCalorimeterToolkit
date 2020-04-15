@@ -43,7 +43,7 @@ Int_t    kSkipTracks = 0; // during readout
 const Int_t    kEnergy = 230; // 917 MeV_Helium ~= 230 MeV_proton // 600 HeC phantom
 Bool_t   kUseDegrader = true; 
 Bool_t   kUseAlpide = true;
-Bool_t   kDoTrackerPropagation = true;
+Bool_t   kDoTrackerPropagation = false; // Some foul bugs here
 TString  kPhantomName = "HeadPhantom";
 Bool_t   kSplitSpotColumnsPerRotation = true;
 
@@ -51,7 +51,7 @@ const Int_t sizeOfEventID = 25;
 const Int_t nChildrenInNode = 2; // max concurrent track segments to follow
 Float_t     kMaxTrackScore = 0.3; // This number is a placeholder, optimized through MC scans in Classes/Clusters/findTracks.C
 Float_t     kMaxTrackAngle = 0.05; // allow for consecutive 50 mrad changes
-Bool_t      kConcatenateHits = true;
+Bool_t      kConcatenateHits = false;
 
 // natural unit is mm
 const Float_t cm = 0.1;
@@ -105,7 +105,7 @@ Float_t kMCSFactor = 3;
 const Double_t SpreadNumber = 0.1; // number of iterations in gaussian spread
 const Double_t SpreadSigma  = 0.7; // sigma (in pixels) to spread
 
-Bool_t kSaveCWT = false;
+Bool_t kSaveCWT = true;
 
 // Minimum track length (in mm) to account for the track in the bragg peak fitting analysis.
 const Int_t kMinimumTracklength = 5;
