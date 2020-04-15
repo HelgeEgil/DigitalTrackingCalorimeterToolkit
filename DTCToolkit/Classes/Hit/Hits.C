@@ -18,9 +18,13 @@ using namespace DTC;
 
 Hits::~Hits() {
    hits_.Delete();
+//   verticalIndexOfLayer_.clear();
+   layerIndex_.clear();
 }
 
 void Hits::Clear(Option_t *option) {
+//   verticalIndexOfLayer_.clear();
+   layerIndex_.clear();
    hits_.Clear(option);
 }
 
@@ -167,7 +171,7 @@ Int_t Hits::getLastActiveLayer() {
    }
    return lastActiveLayer;
 }
-
+/*
 void Hits::makeVerticalIndexOnLayer(Int_t layer) {
    // Run this command when a new layer is to be used
    // It can only hold a single layer
@@ -245,7 +249,7 @@ Int_t Hits::getLastIndexAfterY(Int_t y) {
    if (idx == -1) idx = GetEntriesFast()-1;
    return idx;
 }
-
+*/
 void Hits::propagateSecondaryStatusFromTop(Int_t eventID) {
    if (eventID < 0) eventID = Last()->getEventID();
    Int_t n = 0;

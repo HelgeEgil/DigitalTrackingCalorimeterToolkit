@@ -2,7 +2,7 @@
 
 #phantom="CTP404" # x = `seq -77 7 77`; y = `seq -21 7 21`
 # phantom="linePair" # x =`seq -77 7 77`; y = `seq -21 7 21`
-phantom="headphantom" # x = `seq -98 7 98`; y = `seq -84 7 84`
+phantom="headphantom" # x = `seq -98 7 98`; y = `seq -88 7 88`
 
 #for rot in `seq -f "%03.0f" 0 2 358`; do
 #   echo "Running at rotation $rot deg"
@@ -33,11 +33,11 @@ phantom="headphantom" # x = `seq -98 7 98`; y = `seq -84 7 84`
 #   rm ../../../DTCToolkit/Data/MonteCarlo/DTC_Final_${phantom}_rotation${rot}deg_spot*
 #done
 
-phantom="CTP404" # x = `seq -77 7 77`; y = `seq -21 7 21`
-#phantom="linePair" # x =`seq -77 7 77`; y = `seq -21 7 21`
-# phantom="headphantom" # x = `seq -98 7 98`; y = `seq -84 7 84`
+#phantom="CTP404" # x = `seq -77 7 77`; y = `seq -21 7 21`
+phantom="linePair" # x =`seq -77 7 77`; y = `seq -21 7 21`
+# phantom="headphantom" # x = `seq -98 7 98`; y = `seq -88 7 88`
 #
-for rot in `seq -f "%03.0f" 0 2 0`; do
+for rot in `seq -f "%03.0f" 4 4 356`; do
    echo "Running at rotation $rot deg"
    for x in `seq -f "%04.f" -77 7 77`; do
       for y in `seq -f "%04.f" -21 7 21`; do

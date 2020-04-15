@@ -46,19 +46,8 @@ TGraphErrors * Track::doTrackFit(Bool_t isScaleVariable, Bool_t useTrackLength) 
 
    for (Int_t i=0; i<n; i++) {
       if (!At(i)) continue;
-/*
-      if (useTrackLength) {
-         trackLength += getTrackLengthmmAt(i);
-         x[i] = trackLength;
-      }
 
-      else {
-         x[i] = getLayermm(i);
-      
-      }
-      */
       x[i] = getWETFromLayer(i);
-
       y[i] = getDepositedEnergy(i, checkResistivity);
       ery[i] = getDepositedEnergyError(i, checkResistivity);
       erx[i] = dz * 0.28867; // 1/sqrt(12)
@@ -115,7 +104,8 @@ Float_t Track::getFitParameterRange() {
          return 0;
       }
       else {
-         doTrackFit();
+         TGraphErrors *out = doTrackFit();
+         delete out;
       }
    }
 
@@ -128,7 +118,8 @@ Float_t Track::getFitParameterScale() {
          return 0;
       }
       else {
-         doTrackFit();
+         TGraphErrors *out = doTrackFit();
+         delete out;
       }
    }
    return fitScale_;
@@ -140,7 +131,8 @@ Float_t Track::getFitParameterError() {
          return 0;
       }
       else {
-         doTrackFit();
+         TGraphErrors *out = doTrackFit();
+         delete out;
       }
    }
    return fitError_;
@@ -152,7 +144,8 @@ Float_t Track::getFitParameterChiSquare() {
          return 0;
       }
       else {
-         doTrackFit();
+         TGraphErrors *out = doTrackFit();
+         delete out;
       }
    }
    return fitChi2_;

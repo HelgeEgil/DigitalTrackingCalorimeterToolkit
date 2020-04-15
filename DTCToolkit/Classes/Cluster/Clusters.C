@@ -24,6 +24,12 @@ Clusters::Clusters(Bool_t frameType) : clusters_("DTC::Cluster", kEventsPerRun*1
 
    clusters_.SetOwner(kTRUE);
    clustersWithoutTrack_.SetOwner(kTRUE);
+   clusters_.SetBit(kCanDelete);
+   clustersWithoutTrack_.SetBit(kCanDelete);
+   clusters_.SetBit(kMustCleanup);
+   clustersWithoutTrack_.SetBit(kMustCleanup);
+
+
    kMCSFactorFirstPass = 2; // 1
    kMCSFactorSecondPass = 3; // 4
    kMCSFactorLastPass1 = 3; // 6
@@ -33,7 +39,8 @@ Clusters::Clusters(Bool_t frameType) : clusters_("DTC::Cluster", kEventsPerRun*1
 
 Clusters::~Clusters() {
    // Destructor
-   Clear("C");
+   Clear("C+C");
+   clustersWithoutTrack_.Clear("C+C");
    layerIndex_.clear();   
    clustersPerEventID_.clear();
    clusters_.Delete();

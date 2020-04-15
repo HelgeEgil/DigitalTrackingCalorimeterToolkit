@@ -1,0 +1,134 @@
+[Materials]
+Vacuum: d=0.000001 mg/cm3 ; n=1 
+        +el: name=Hydrogen   ; n=1
+
+Aluminium: d=2.7 g/cm3 ; n=1 ; state=solid
+        +el: name=auto       ; n=1
+
+Water: d=1.00 g/cm3; n=2 ; state=liquid
+        +el: name=Hydrogen   ; f=0.111894
+        +el: name=Oxygen     ; f=0.888106
+
+Air: d=1.29 mg/cm3 ; n=4 ; state=gas
+        +el: name=Nitrogen   ; f=0.755268
+        +el: name=Oxygen     ; f=0.231781
+        +el: name=Argon      ; f=0.012827
+        +el: name=Carbon     ; f=0.000124
+
+Polyethylene:  d=0.94 g/cm3 ; n=2
+        +el: name=Hydrogen   ; f=0.143711
+        +el: name=Carbon     ; f=0.856289
+
+Polystyrene:  d=1.06 g/cm3 ; n=2; state=solid
+        +el: name=Hydrogen   ; f=0.077418
+        +el: name=Carbon     ; f=0.922582
+
+PMMA:   d=1.195 g/cm3; n=3 ; state=Solid
+        +el: name=Hydrogen   ; f=0.080541
+        +el: name=Carbon     ; f=0.599846
+        +el: name=Oxygen     ; f=0.319613
+
+PMP: d=0.83 g/cm3; n=2 ; state=Solid
+        +el: name=Carbon     ; f=0.856
+        +el: name=Hydrogen   ; f=0.144
+
+Epoxy: d=1.16 g/cm3; n=4; state=Solid
+        +el: name=Carbon     ; f=0.7109
+        +el: name=Oxygen     ; f=0.1908
+        +el: name=Hydrogen   ; f=0.078
+        +el: name=Nitrogen   ; f=0.0203
+
+Kapton:    d=1.42 g/cm3; n=4; state=Solid
+        +el: name=Hydrogen   ; f=0.0264
+        +el: name=Carbon     ; f=0.6911
+        +el: name=Nitrogen   ; f=0.0733
+        +el: name=Oxygen     ; f=0.2092
+
+Glue:   d=1.05 g/cm3; n=4; state=Solid
+        +el: name=Carbon     ; f=0.7603
+        +el: name=Hydrogen   ; f=0.0709
+        +el: name=Oxygen     ; f=0.1688
+
+TungstenCarbide: d=15.8 g/cm3; n=2; state=Solid 
+        +el: name=Carbon     ; f=0.5
+        +el: name=Tungsten   ; f=0.5
+
+Teflon: d=2.2 g/cm3; n=2; state=Solid
+        +el: name=Carbon     ; f=0.2402
+        +el: name=Fluorine   ; f=0.7598
+
+Delrin: d=1.41 g/cm3; n=3; state=Solid
+        +el: name=Carbon     ; f=0.4000
+        +el: name=Hydrogen   ; f=0.0671
+        +el: name=Oxygen     ; f=0.5329
+
+cfrp:   d=1.66 g/cm3; n=1; state=Solid
+	+el: name=carbon     ; f=1.0
+
+headSoftTissue: d=1.055 g/cm3; n=6; state=Solid
+        +el: name=Hydrogen   ; f=0.0848
+        +el: name=Carbon     ; f=0.5745
+        +el: name=Nitrogen   ; f=0.0165
+        +el: name=Oxygen     ; f=0.2460
+        +el: name=Magnesium  ; f=0.0762
+        +el: name=Chlorine   ; f=0.0019
+
+headBrainTissue: d=1.07 g/cm3; n=6; state=Solid
+        +el: name=Hydrogen   ; f=0.0817
+        +el: name=Carbon     ; f=0.5362
+        +el: name=Nitrogen   ; f=0.0153
+        +el: name=Oxygen     ; f=0.2651
+        +el: name=Magnesium  ; f=0.0998
+        +el: name=Chlorine   ; f=0.0019
+
+headSpinalDisk: d=1.10 g/cm3; n=7; state=Solid
+        +el: name=Hydrogen   ; f=0.0707
+        +el: name=Carbon     ; f=0.5246
+        +el: name=Nitrogen   ; f=0.0211
+        +el: name=Oxygen     ; f=0.2760
+        +el: name=Magnesium  ; f=0.0955
+        +el: name=Chlorine   ; f=0.0021
+        +el: name=Calcium    ; f=0.0098
+
+
+headTrabecularBone: d=1.13 g/cm3; n=8; state=Solid
+        +el: name=Hydrogen   ; f=0.0839
+        +el: name=Carbon     ; f=0.5965
+        +el: name=Nitrogen   ; f=0.0155
+        +el: name=Oxygen     ; f=0.2142
+        +el: name=Magnesium  ; f=0.0146
+        +el: name=Chlorine   ; f=0.0012
+        +el: name=Calcium    ; f=0.0503
+        +el: name=Phosphor   ; f=0.0233
+
+headCorticalBone: d=1.75 g/cm3; n=8; state=Solid
+        +el: name=Hydrogen   ; f=0.0413
+        +el: name=Carbon     ; f=0.2970
+        +el: name=Nitrogen   ; f=0.0085
+        +el: name=Oxygen     ; f=0.3412
+        +el: name=Magnesium  ; f=0.0311
+        +el: name=Chlorine   ; f=0.0004
+        +el: name=Calcium    ; f=0.2048
+        +el: name=Phosphor   ; f=0.0757
+
+headToothDentine: d=1.66 g/cm3; n=9; state=Solid
+        +el: name=Hydrogen   ; f=0.0451
+        +el: name=Carbon     ; f=0.3535
+        +el: name=Nitrogen   ; f=0.0123
+        +el: name=Oxygen     ; f=0.2941
+        +el: name=Chlorine   ; f=0.0004
+        +el: name=Calcium    ; f=0.1984
+        +el: name=Phosphor   ; f=0.0920
+        +el: name=Sulfur     ; f=0.0008
+        +el: name=Barium     ; f=0.0033
+
+headToothEnamel: d=2.04 g/cm3; n=9; state=Solid
+        +el: name=Hydrogen   ; f=0.0277
+        +el: name=Carbon     ; f=0.2181
+        +el: name=Nitrogen   ; f=0.0082
+        +el: name=Oxygen     ; f=0.3402
+        +el: name=Chlorine   ; f=0.0003
+        +el: name=Calcium    ; f=0.2660
+        +el: name=Phosphor   ; f=0.1233
+        +el: name=Sulfur     ; f=0.0031
+        +el: name=Barium     ; f=0.0131

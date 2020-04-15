@@ -557,7 +557,7 @@ void Tracks::removeNuclearInteractions() {
    Compress();
 
    Float_t fraction = nTotal ? nRemoved/float(nTotalStart) : 0;
-   cout << "Tracks::removeNuclearInteractions() removed " << nRemoved << " of " << nTotalStart << " (" << fraction * 100 << "%) tracks (" << 100*float(nRemovedNuclear)/nRemoved << "% secondaries).\n";
+//   cout << "Tracks::removeNuclearInteractions() removed " << nRemoved << " of " << nTotalStart << " (" << fraction * 100 << "%) tracks (" << 100*float(nRemovedNuclear)/nRemoved << "% secondaries).\n";
 }
 
 void Tracks::removeTracksWithMinWEPL(Float_t minWEPL) {
@@ -584,7 +584,7 @@ void Tracks::removeTracksWithMinWEPL(Float_t minWEPL) {
    Compress();
    
       Float_t fraction = nTotal ? nRemoved/float(nTotalStart) : 0;
-   cout << "Tracks::removeTracksWithMinWEPL(" << minWEPL << ") removed " << nRemoved << " of " << nTotalStart << " (" << fraction * 100 << "%) tracks (" << 100*float(nRemovedNuclear)/nRemoved << "% secondaries).\n";
+//   cout << "Tracks::removeTracksWithMinWEPL(" << minWEPL << ") removed " << nRemoved << " of " << nTotalStart << " (" << fraction * 100 << "%) tracks (" << 100*float(nRemovedNuclear)/nRemoved << "% secondaries).\n";
 }
 
 
@@ -605,7 +605,6 @@ void Tracks::removeThreeSigmaShortTracks() {
    for (Int_t i=0; i<=nTotal; i++) {
       thisTrack = At(i);
       if (!At(i)) continue;
-//      fpm = thisTrack->getFitParameterRange();
       fpm = getUnitFromTL(thisTrack->getRangemm());
       if (!isnan(fpm)) h->Fill(fpm);
    }
@@ -622,13 +621,6 @@ void Tracks::removeThreeSigmaShortTracks() {
    for (Int_t i=0; i<=nTotal; i++) {
       thisTrack = At(i);
       if (!At(i)) continue;
-      /*
-      if (getUnitFromTL(thisTrack->getFitParameterRange()) < cutRangeLow || getUnitFromTL(thisTrack->getFitParameterRange()) > cutRangeHigh) {
-         if (thisTrack->Last()->isSecondary()) nRemovedNuclear++;
-         removeTrack(thisTrack);
-         nRemoved++;
-      }
-      */
       if (getUnitFromTL(thisTrack->getRangemm()) < cutRangeLow || getUnitFromTL(thisTrack->getRangemm()) > cutRangeHigh) {
          if (thisTrack->Last()->isSecondary()) nRemovedNuclear++;
          removeTrack(thisTrack);
@@ -640,11 +632,10 @@ void Tracks::removeThreeSigmaShortTracks() {
    Compress();
 
    Float_t fraction = nTotal ? nRemoved/float(nTotalStart) : 0;
-   cout << "Tracks::removeThreeSigmaShortTracks() removed " << nRemoved << " of " << nTotalStart << " (" << fraction * 100 << "%) tracks (" << 100*float(nRemovedNuclear)/nRemoved << "% secondaries).\n";
+//   cout << "Tracks::removeThreeSigmaShortTracks() removed " << nRemoved << " of " << nTotalStart << " (" << fraction * 100 << "%) tracks (" << 100*float(nRemovedNuclear)/nRemoved << "% secondaries).\n";
 }
 
 void Tracks::removeEmptyTracks() {
-   Track * thisTrack = nullptr;
    for (int i=0; i<GetEntriesFast(); i++) {
       if (!At(i)) continue;
       if (!GetEntriesFast(i)) {

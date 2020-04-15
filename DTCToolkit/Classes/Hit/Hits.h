@@ -17,12 +17,12 @@ class Hits : public TObject {
 private:
    TClonesArray hits_;
    vector<Int_t> layerIndex_;
-   vector<Int_t> verticalIndexOfLayer_;
+//   vector<Int_t> verticalIndexOfLayer_;
 
 public:
-   Hits(Int_t nHits) : hits_("DTC::Hit", nHits) { hits_.SetOwner(kTRUE); }
-   Hits() : hits_("DTC::Hit", kEventsPerRun*1000) { hits_.SetOwner(kTRUE); }
-   virtual ~Hits(); 
+   Hits(Int_t nHits) : hits_("DTC::Hit", nHits) { hits_.SetOwner(kTRUE); hits_.SetBit(kCanDelete); hits_.SetBit(kMustCleanup); }
+   Hits() : hits_("DTC::Hit", kEventsPerRun*1000) { hits_.SetOwner(kTRUE); hits_.SetBit(kCanDelete); hits_.SetBit(kMustCleanup); }
+   virtual ~Hits();
 
    // ROOT & I/O
    virtual Hit     * At(Int_t i)          { return ((Hit*) hits_.At(i)); }
@@ -60,9 +60,9 @@ public:
    Int_t             getFirstIndexOfLayer(UInt_t layer);
    Int_t             getLastIndexOfLayer(UInt_t layer);
    Int_t             getLastActiveLayer();
-   void              makeVerticalIndexOnLayer(Int_t layer);
-   Int_t             getFirstIndexBeforeY(Int_t y);
-   Int_t             getLastIndexAfterY(Int_t y);
+//   void              makeVerticalIndexOnLayer(Int_t layer);
+//   Int_t             getFirstIndexBeforeY(Int_t y);
+//   Int_t             getLastIndexAfterY(Int_t y);
 
    // In file findClusters.C
    // Methods to find clusters from the hits

@@ -1,0 +1,21 @@
+/gate/world/daughters/name PatientBox
+/gate/world/daughters/insert            box
+/gate/PatientBox/geometry/setXLength 200.0 mm
+/gate/PatientBox/geometry/setYLength 200.0 mm
+/gate/PatientBox/geometry/setZLength 200.0 mm
+/gate/PatientBox/placement/setTranslation 0 0 0 mm
+/gate/PatientBox/placement/setRotationAxis 0 1 0 
+/gate/PatientBox/placement/setRotationAngle {rotation} deg
+/gate/PatientBox/setMaterial Air
+/gate/PatientBox/vis/setVisible 1
+/gate/PatientBox/vis/setColor white
+
+#Head phantom is 160mm tall, 180mm nose to back, 147 ear to ear (x,z image directions are both 192mm)
+/gate/PatientBox/daughters/name patient
+/gate/PatientBox/daughters/insert ImageRegionalizedVolume
+/gate/patient/geometry/setImage imageDump.mhd 
+/gate/patient/geometry/setHUToMaterialFile AttenuationRange.dat
+/gate/patient/placement/setTranslation 0. 0. 0. mm
+/gate/patient/placement/alignToY
+#/gate/patient/geometry/buildAndDumpDistanceTransfo dmap.mhd
+/gate/patient/geometry/distanceMap dmap.mhd
