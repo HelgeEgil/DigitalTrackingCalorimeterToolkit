@@ -48,7 +48,7 @@ const Int_t sizeOfEventID = 25;
 const Int_t nChildrenInNode = 2; // max concurrent track segments to follow
 Float_t     kMaxTrackScore = 0.3; // This number is a placeholder, optimized through MC scans in Classes/Clusters/findTracks.C
 Float_t     kMaxTrackAngle = 0.05; // allow for consecutive 50 mrad changes
-Bool_t      kConcatenateHits = false;
+Bool_t      kConcatenateHits = true;
 
 // natural unit is mm
 const Float_t cm = 0.1;

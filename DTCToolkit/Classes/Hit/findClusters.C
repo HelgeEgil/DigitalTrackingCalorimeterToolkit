@@ -117,19 +117,22 @@ void Hits::appendNeighboursToClusters(vector<Int_t> *expandedCluster, Clusters *
    Int_t maxPDG = -1000;
    Int_t maxEventID = -1000; 
    Bool_t maxSecondary = false;
+   Bool_t isPrimaryInCluster = false;
 
    for (Int_t j=0; j<cSize; j++) {
+      if (!isSecondary(idx)) isPrimaryInCluster = true;
+
       idx = expandedCluster->at(j);
       sumX += getX(idx) - 0.5; // -0.5  to get
       sumY += getY(idx) - 0.5; // pixel center
       if (getPDG(idx) > maxPDG) { // use PDG and eventID of "heaviest" particle
          maxPDG = getPDG(idx);
          maxEventID = getEventID(idx);
-         maxSecondary = isSecondary(idx);
+//         maxSecondary = isSecondary(idx);
       }
    }
 
-   clusters->appendCluster(sumX / cSize, sumY / cSize, layerNo, cSize, maxEventID, maxSecondary, maxPDG); //firstHit->getEventID(), firstHit->isSecondary(), firstHit->getPDG());
+   clusters->appendCluster(sumX / cSize, sumY / cSize, layerNo, cSize, maxEventID, !isPrimaryInCluster, maxPDG); //firstHit->getEventID(), firstHit->isSecondary(), firstHit->getPDG());
 }
 
 void Hits::checkAndAppendAllNextCandidates(vector<Int_t> * nextCandidates, vector<Int_t> *checkedIndices,

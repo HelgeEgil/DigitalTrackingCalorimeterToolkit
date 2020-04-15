@@ -154,6 +154,7 @@ void Clusters::removeSmallClusters(Int_t size) {
          removeClusterAt(i);
       }
    }
+   Compress();
 }
 
 void Clusters::removeAllClustersAfterLayer(Int_t afterLayer) {

@@ -12,6 +12,9 @@
 #include <TStyle.h>
 #include <TStopwatch.h>
 #include <TView.h>
+#include <TLegend.h>
+#include <TH1F.h>
+#include <TCanvas.h>
 #include <TLeaf.h>
 #include <TTree.h>
 #include <TTreeIndex.h>
@@ -132,6 +135,23 @@ Tracks * getTracksFromClusters(Int_t Runs, Int_t dataType, Int_t frameType, Floa
    Tracks          * allTracks = new Tracks(nTracks * Runs);
    TRandom3        * gRandom = new TRandom3(0);
 
+   /*
+   TH1F * hBefE = new TH1F("hBefE", ";Depth in detector [Layer number];Fraction of secondary particles", 41, -0.5, 40.5);
+   TH1F * hBefP = new TH1F("hBefP", ";Depth in detector [Layer number];Fraction of secondary particles", 41, -0.5, 40.5);
+   TH1F * hBefD = new TH1F("hBefD", ";Depth in detector [Layer number];Fraction of secondary particles", 41, -0.5, 40.5);
+   TH1F * hBefHe3 = new TH1F("hBefHe3", ";Depth in detector [Layer number];Fraction of secondary particles", 41, -0.5, 40.5);
+   TH1F * hBefT = new TH1F("hBefT", ";Depth in detector [Layer number];Fraction of secondary particles", 41, -0.5, 40.5);
+   TH1F * hBefHe = new TH1F("hBefHe", ";Depth in detector [Layer number];Fraction of secondary particles", 41, -0.5, 40.5);
+   TH1F * hBefN = new TH1F("hBefN", ";Depth in detector [Layer number];Fraction of secondary particles", 41, -0.5, 40.5);
+   TH1F * hAftE = new TH1F("hAftE", ";Depth in detector [Layer number];Fraction of secondary particles", 41, -0.5, 40.5);
+   TH1F * hAftP = new TH1F("hAftP", ";Depth in detector [Layer number];Fraction of secondary particles", 41, -0.5, 40.5);
+   TH1F * hAftD = new TH1F("hAftD", ";Depth in detector [Layer number];Fraction of secondary particles", 41, -0.5, 40.5);
+   TH1F * hAftHe3 = new TH1F("hAftHe3", ";Depth in detector [Layer number];Fraction of secondary particles", 41, -0.5, 40.5);
+   TH1F * hAftT = new TH1F("hAftT", ";Depth in detector [Layer number];Fraction of secondary particles", 41, -0.5, 40.5);
+   TH1F * hAftHe = new TH1F("hAftHe", ";Depth in detector [Layer number];Fraction of secondary particles", 41, -0.5, 40.5);
+   TH1F * hAftN = new TH1F("hAftN", ";Depth in detector [Layer number];Fraction of secondary particles", 41, -0.5, 40.5);
+*/
+
    allTracks->SetOwner(kTRUE);
 
    TStopwatch t1, t2, t3, t4, t5, t6;
@@ -142,6 +162,8 @@ Tracks * getTracksFromClusters(Int_t Runs, Int_t dataType, Int_t frameType, Floa
    t5.Reset();
    t6.Reset();
 
+   Cluster * thisCluster = nullptr;
+
    for (Int_t i=0; i<Runs; i++) {
       clusters = new Clusters(nClusters);
       showDebug("Start getMCClusters\n");
@@ -151,10 +173,25 @@ Tracks * getTracksFromClusters(Int_t Runs, Int_t dataType, Int_t frameType, Floa
          Hits * diffusedHits = nullptr;
          di->getMCClustersThreshold(i, nullptr, hits, spotx, spoty);
          hits->sortHits(); 
+
+         
+         // DETECTOR RESPONSE THRESHOLD
+         for (Int_t j=0; j<=hits->GetEntriesFast(); j++) {
+            if (hits->At(j)) {
+               if (hits->At(j)->getEdep() < 0.1) {
+                  hits->removeHitAt(j);
+               }
+            }
+         }
+         hits->Compress();
+         
          diffusedHits = diffuseHits(gRandom, hits);
          diffusedHits->sortHits();
          diffusedHits->makeLayerIndex();
          diffusedHits->findClustersFromHits(clusters);
+
+         // EDEPish CUT
+         clusters->removeSmallClusters(6);
 
 //         Int_t nRem = clusters->removeClustersInGap(1, 0);
 
@@ -174,8 +211,42 @@ Tracks * getTracksFromClusters(Int_t Runs, Int_t dataType, Int_t frameType, Floa
             saveClusters->appendCluster(clusters->At(j));
          }
       }
+      /*
+      Int_t layer;
+      for (Int_t j=0; j<clusters->GetEntriesFast(); j++) {
+         thisCluster = clusters->At(j);
+         if (!thisCluster) continue;
+         
+         layer = thisCluster->getLayer();
+         if (thisCluster->getPDG() == 1000020040)  {
+            hBefHe->Fill(layer);
+            if (thisCluster->getSize() > 6) hAftHe->Fill(layer);
+         }
 
-//      printf("Found %d clusters...\n", clusters->GetEntriesFast());
+         if (thisCluster->isSecondary()) {
+            if (thisCluster->getPDG() == 11)          hBefE->Fill(layer);
+            if (thisCluster->getPDG() == 2112)        hBefN->Fill(layer);
+            if (thisCluster->getPDG() == 2212)        hBefP->Fill(layer);
+            if (thisCluster->getPDG() == 1000010020)  hBefD->Fill(layer);
+            if (thisCluster->getPDG() == 1000010030)  hBefT->Fill(layer);
+            if (thisCluster->getPDG() == 1000020030)  hBefHe3->Fill(layer);
+
+            if (thisCluster->getSize() > 6) {
+               if (thisCluster->getPDG() == 11)          hAftE->Fill(layer);
+               if (thisCluster->getPDG() == 2112)        hAftN->Fill(layer);
+               if (thisCluster->getPDG() == 2212)        hAftP->Fill(layer);
+               if (thisCluster->getPDG() == 1000010020)  hAftD->Fill(layer);
+               if (thisCluster->getPDG() == 1000010030)  hAftT->Fill(layer);
+               if (thisCluster->getPDG() == 1000020030)  hAftHe3->Fill(layer);
+            }
+         }
+      }
+
+      delete clusters;
+      continue;
+
+   */
+
       if (!clusters->GetEntriesFast()) continue;
 
       t1.Stop();
@@ -233,9 +304,9 @@ Tracks * getTracksFromClusters(Int_t Runs, Int_t dataType, Int_t frameType, Floa
       
       // DO SOME CUTS HERE INSTEAD TO SAVE MEMORY
       tracks->removeEmptyTracks();
-      tracks->doTrackFit(false);
-      tracks->removeTracksWithMinWEPL(100);
-      tracks->removeNuclearInteractions();
+//      tracks->doTrackFit(false);
+//      tracks->removeTracksWithMinWEPL(100);
+//      tracks->removeNuclearInteractions();
 
       showDebug("append tracks to alltracks...");
       for (Int_t j=0; j<tracks->GetEntriesFast(); j++) {
@@ -254,6 +325,95 @@ Tracks * getTracksFromClusters(Int_t Runs, Int_t dataType, Int_t frameType, Floa
 
       if (breakSignal) break;
    }
+
+/*
+   gStyle->SetOptStat(0);
+
+   TCanvas *c = new TCanvas("secondaryClusters", "Secondary clusters", 1200, 600);
+   c->Divide(2,1,1e-5,1e-5);
+
+   Float_t tp = 100000;
+   hBefE->Scale(1/tp);
+   hBefP->Scale(1/tp);
+   hBefN->Scale(1/tp);
+   hBefT->Scale(1/tp);
+   hBefD->Scale(1/tp);
+   hBefHe->Scale(1/tp);
+   hBefHe3->Scale(1/tp);
+   hAftE->Scale(1/tp);
+   hAftP->Scale(1/tp);
+   hAftN->Scale(1/tp);
+   hAftT->Scale(1/tp);
+   hAftD->Scale(1/tp);
+   hAftHe->Scale(1/tp);
+   hAftHe3->Scale(1/tp);
+
+   printf("hBefHe = %.5f; hAftHe = %.5f\n", hBefHe->Integral(), hAftHe->Integral());
+   
+   cout << "Relative decrease of He4: " << 100 * ( 1 - hAftHe->Integral() / hBefHe->Integral()) << endl;
+   cout << "Relative decrease of He3: " << 100 * ( 1 - hAftHe3->Integral() / hBefHe3->Integral()) << endl;
+   cout << "Relative decrease of E: " << 100 * ( 1 - hAftE->Integral() / hBefE->Integral()) << endl;
+   cout << "Relative decrease of T: " << 100 * ( 1 - hAftT->Integral() / hBefT->Integral()) << endl;
+   cout << "Relative decrease of D: " << 100 * ( 1 - hAftD->Integral() / hBefD->Integral()) << endl;
+   cout << "Relative decrease of N: " << 100 * ( 1 - hAftN->Integral() / hBefN->Integral()) << endl;
+   cout << "Relative decrease of P: " << 100 * ( 1 - hAftP->Integral() / hBefP->Integral()) << endl;
+
+   hBefE->SetLineWidth(3); hBefE->SetLineColor(kMagenta);
+   hBefP->SetLineWidth(3); hBefP->SetLineColor(kBlack);
+   hBefD->SetLineWidth(3); hBefD->SetLineColor(kRed);
+   hBefHe3->SetLineWidth(3); hBefHe3->SetLineColor(kGreen);
+   hBefT->SetLineWidth(3); hBefT->SetLineColor(kBlue);
+   hBefHe->SetLineWidth(3); hBefHe->SetLineColor(kYellow);
+   hBefN->SetLineWidth(3); hBefN->SetLineColor(kOrange+4);
+
+   hAftE->SetLineWidth(3); hAftE->SetLineColor(kMagenta);
+   hAftP->SetLineWidth(3); hAftP->SetLineColor(kBlack);
+   hAftD->SetLineWidth(3); hAftD->SetLineColor(kRed);
+   hAftHe3->SetLineWidth(3); hAftHe3->SetLineColor(kGreen);
+   hAftT->SetLineWidth(3); hAftT->SetLineColor(kBlue);
+   hAftHe->SetLineWidth(3); hAftHe->SetLineColor(kYellow);
+   hAftN->SetLineWidth(3); hAftN->SetLineColor(kOrange+4);
+
+   c->cd(1);
+   hBefE->Draw("hist");
+   hBefP->Draw("hist same");
+   hBefD->Draw("hist same");
+   hBefT->Draw("hist same");
+   hBefN->Draw("hist same");
+   hBefHe->Draw("hist same");
+   hBefHe3->Draw("hist same");
+  
+   TLegend *leg = new TLegend(0.65, 0.75, 0.98, 0.98);
+   leg->AddEntry(hBefE, "Electrons", "L");
+   leg->AddEntry(hBefP, "Protons", "L");
+   leg->AddEntry(hBefD, "Deuterons", "L");
+   leg->AddEntry(hBefHe3, "Helium3", "L");
+   leg->AddEntry(hBefT, "Tritons", "L");
+   leg->AddEntry(hBefHe, "Helium", "L");
+   leg->AddEntry(hBefN, "Neutrons", "L");
+   leg->SetTextFont(22);
+   leg->Draw();
+
+   c->cd(2);
+   hAftE->Draw("hist");
+   hAftP->Draw("hist same");
+   hAftD->Draw("hist same");
+   hAftT->Draw("hist same");
+   hAftN->Draw("hist same");
+   hAftHe->Draw("hist same");
+   hAftHe3->Draw("hist same");
+   
+   TLegend *leg2 = new TLegend(0.65, 0.75, 0.98, 0.98);
+   leg2->AddEntry(hAftE, "Electrons", "L");
+   leg2->AddEntry(hAftP, "Protons", "L");
+   leg2->AddEntry(hAftD, "Deuterons", "L");
+   leg2->AddEntry(hAftHe3, "Helium3", "L");
+   leg2->AddEntry(hAftT, "Tritons", "L");
+   leg2->AddEntry(hAftHe, "Helium", "L");
+   leg2->AddEntry(hAftN, "Neutrons", "L");
+   leg2->SetTextFont(22);
+   leg2->Draw();
+*/
 
    printf("Timing: Cluster retrieval: %.3f s. Tracking: %.3f s. Track improvements: %.3f s. Logistics: %.3f s. Sort TCA by layer: %.3f s\n", t1.CpuTime(), t2.CpuTime(), t3.CpuTime(), t4.CpuTime(), t6.CpuTime());
 

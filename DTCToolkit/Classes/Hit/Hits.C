@@ -41,12 +41,17 @@ void Hits::appendPoint(Int_t x, Int_t y, Int_t layer,  Float_t edep, Int_t event
 
    if (kConcatenateHits) {
       Bool_t added = false;
+      Bool_t primary;
 
       // search through hits
       for (int j=0; j<i; j++) {
-         if (getX(j) == x && getY(j) == y && getLayer(j) && layer) {
+         if (getX(j) == x && getY(j) == y && getLayer(j) == layer) {
             // Hit found at same position, ADD to edep instead
-            if (getEdep(j) < edep) {
+//            if (getEdep(j) < edep) {            
+            primary = !this->isSecondary(j) || !isSecondary;
+            At(j)->setSecondary(!primary);
+         
+            if (getPDG(j) < PDGEncoding) { // Use highest PDG in position
                At(j)->setEventID(eventID);
             }
             At(j)->setEdep(getEdep(j) + edep);

@@ -763,12 +763,12 @@ void drawTracksDepthDose(Int_t Runs, Int_t dataType, Bool_t recreate, Float_t en
    tracks->doTrackFit(); 
 //   tracks->removeTracksEndingInHalo();
 
-//   tracks->removeHighAngleTracks(cutAngle); // mrad
-//   tracks->removeHighAngularChangeTracks(cutMaxAngle); // mrad
-   tracks->removeTracksWithMinWEPL(100); // max 330 - 100 = 230 mm sized phantoms
-   tracks->removeNuclearInteractions();
+   tracks->removeHighAngleTracks(cutAngle); // mrad
+   tracks->removeHighAngularChangeTracks(cutMaxAngle); // mrad
+//   tracks->removeTracksWithMinWEPL(100); // max 330 - 100 = 230 mm sized phantoms
+//   tracks->removeNuclearInteractions();
 
-//   tracks->removeThreeSigmaShortTracks();
+   tracks->removeThreeSigmaShortTracks();
 
    /*
    if (removeHighAngleTracks) {
@@ -801,7 +801,7 @@ void drawTracksDepthDose(Int_t Runs, Int_t dataType, Bool_t recreate, Float_t en
       fitScale = thisTrack->getFitParameterScale();
       fitError = quadratureAdd(thisTrack->getFitParameterError(), dz*0.28867); // latter term from error on layer position
 
-      if (fitRange > 50) continue;
+//      if (fitRange > 50) continue;
 
       if (fitIdx < plotSize) {
          drawIndividualGraphs(cGraph, outputGraph, fitRange, fitScale, fitError, fitIdx++);
@@ -1588,6 +1588,7 @@ void analyseHelium(Int_t Runs, Int_t dataType, Bool_t recreate, Int_t switchLaye
    nSecondariesEnd = 84696;
    */
 
+
    Float_t  cutHalo = 15;
    Float_t  cutMaxAngle = 70;
    Float_t  cutAngle = 50;
@@ -1605,6 +1606,7 @@ void analyseHelium(Int_t Runs, Int_t dataType, Bool_t recreate, Int_t switchLaye
 
 
    printf("Found in total %d tracks. %d primaries, %d secondaries\n", nTotal, nPrimariesEnd, nSecondariesEnd);
+   nTotal = 100000; // normalize to the number of primaries
 
 //   tracks->doTrackFit();
 
@@ -2603,7 +2605,7 @@ void drawTracks3D(Int_t Runs, Int_t dataType, Bool_t recreate, Int_t switchLayer
    kDoTracking = doTracking;
    
    Tracks * tracks = loadOrCreateTracks(recreate, Runs, dataType, energy, 0, 0);
-   tracks->removeEmptyTracks();
+//   tracks->removeEmptyTracks();
 
    printf("Found %d tracks before filtering.\n", tracks->GetEntries());
 
@@ -2621,10 +2623,12 @@ void drawTracks3D(Int_t Runs, Int_t dataType, Bool_t recreate, Int_t switchLayer
    Float_t  cutAngle = 45;
    Float_t  cutEdep = 12;
    
-   tracks->removeThreeSigmaShortTracks();
    tracks->removeHighAngleTracks(cutAngle); // mrad
+   tracks->removeHighAngularChangeTracks(cutMaxAngle);
+   // tracks->removeNuclearInteractions();
+   tracks->removeThreeSigmaShortTracks();
 
-   Bool_t   kDraw = false;
+   Bool_t   kDraw = true;
 
    TH1I  *hWEPLCorrect = new TH1I("hWEPLCorrect", ";Range in detector [mm WEPL];Frequency", 400, 0, 250);
    TH1I  *hWEPLSecondary = new TH1I("hWEPLSecondary", "", 400, 0, 250);

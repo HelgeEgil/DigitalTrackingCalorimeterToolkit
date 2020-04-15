@@ -482,9 +482,21 @@ void  DataInterface::getMCClustersThreshold(Int_t runNo, Clusters *clusters, Hit
    // edep = let * 14 um = 0.316 kev/um * 14 um = 4.4e-3 MeV ~ 4e-3 MeV
    // new design: let * 50 um = 0.316 keV/um * 50 um = 15.8e-3 MeV ~ 1.5e-2 MeV
    // new design 2: let * 25 um = 0.316 keV/um * 25 um = 7.9e-3 MeV ~ 8e-3 MeV
+   // TEST: actual threshold = n < 0.25 -> treshold = 9e-4 MeV
+/*
+   Float_t primaryX[1000];
+   Float_t primaryY[1000];
+   Int_t lastLayerInList = -1;
+
+   TH1I * hDevX = new TH1I("hDevX", "X deviation;X secondary - X primary [#mum];Entries", 100, -200, 200);
+   TH1I * hDevY = new TH1I("hDevY", "Y deviation;Y secondary - Y primary [#mum];Entries", 100, -200, 200);
+   */
 
    Float_t threshold = 8e-3;
    Int_t particlesBelowThreshold = 0;
+
+   threshold = 3e-3; // (3 keV ~ ) (0.1 kev/um)
+   threshold = 0;
 
    if (runNo == 0 && !kSpotScanning) lastJentry_ = 0;
 
@@ -512,6 +524,20 @@ void  DataInterface::getMCClustersThreshold(Int_t runNo, Clusters *clusters, Hit
          isSecondary = false;
       }
 
+      
+      layer = baseID*2 + level1ID - 2;
+      /*
+      if (parentID == 0) {
+         primaryX[layer] = posX;
+         primaryY[layer] = posY;
+         lastLayerInList = layer;
+      }
+      
+      else if (PDGEncoding == 11 && layer <= lastLayerInList) {
+         hDevX->Fill(1000 * (posX - primaryX[layer]));
+         hDevY->Fill(1000 * (posY - primaryY[layer]));
+      }
+*/
       if (!kSpotScanning) {
          if (eventID < eventIdFrom) {
             continue;
@@ -627,6 +653,26 @@ void  DataInterface::getMCClustersThreshold(Int_t runNo, Clusters *clusters, Hit
 
       lastEventID = eventID;
    }
+
+   /*
+   TCanvas *c = new TCanvas("c", "deviations", 1200, 800);
+   c->Divide(2,1,1e-5,1e-5);
+   c->cd(1);
+   hDevX->Draw();
+   gPad->Update();
+   TLine *l1 = new TLine(-15, 0, -15, gPad->GetUymax());
+   l1->Draw();
+   TLine *l2 = new TLine(15, 0, 15, gPad->GetUymax());
+   l2->Draw();
+
+   c->cd(2);
+   hDevY->Draw();
+   gPad->Update();
+   TLine *l3 = new TLine(-15, 0, -15, gPad->GetUymax());
+   l3->Draw();
+   TLine *l4 = new TLine(15, 0, 15, gPad->GetUymax());
+   l4->Draw();
+   */
 }
 
 Long64_t DataInterface::findSpotIndex(Float_t findSpotX) {

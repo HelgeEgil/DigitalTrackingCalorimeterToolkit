@@ -6,7 +6,8 @@
 /gate/systems/scanner_2/level1/attach Layer
 /gate/systems/phantom/level1/attach degrader
 
-/control/execute readout_full_final.mac
+#/control/execute readout_full_final.mac
+/gate/world/attachCrystalSD
 
 #=================#
 # Physics			#

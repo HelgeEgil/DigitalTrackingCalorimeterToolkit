@@ -26,10 +26,19 @@
 /gate/scanner/daughters/insert box
 /gate/phantom/geometry/setXLength 100. cm
 /gate/phantom/geometry/setYLength 100. cm
-/gate/phantom/geometry/setZLength 100. cm
-/gate/phantom/placement/setTranslation 0 0 0 mm
+/gate/phantom/geometry/setZLength 20. cm
+/gate/phantom/placement/setTranslation 0 0 -40. cm
 /gate/phantom/setMaterial Water
 /gate/phantom/vis/forceWireframe
+
+/gate/scanner/daughters/name phantom2
+/gate/scanner/daughters/insert box
+/gate/phantom2/geometry/setXLength 100. cm
+/gate/phantom2/geometry/setYLength 100. cm
+/gate/phantom2/geometry/setZLength 80. cm
+/gate/phantom2/placement/setTranslation 0 0 10. cm
+/gate/phantom2/setMaterial Aluminium
+/gate/phantom2/vis/forceWireframe
 
 /gate/world/daughters/name esaVolume
 /gate/world/daughters/insert box
@@ -40,26 +49,28 @@
 /gate/esaVolume/setMaterial Air
 
 /gate/phantom/attachCrystalSD
+/gate/phantom2/attachCrystalSD
 
-/gate/physics/addPhysicsList QGSP_BIC_EMZ
+#/gate/physics/addPhysicsList QGSP_BIC_EMZ
 #/gate/physics/addPhysicsList QGSP_BIC_HP
+/gate/physics/addPhysicsList QGSP_BIC_HP
 
-/gate/physics/SetMaxStepSizeInRegion world 2 mm
-/gate/physics/ActivateStepLimiter proton
+#/gate/physics/SetMaxStepSizeInRegion world 2 mm
+#/gate/physics/ActivateStepLimiter proton
 
 /gate/geometry/setIonisationPotential Water 78 eV
 
-/gate/actor/addActor EnergySpectrumActor MyActor
-/gate/actor/MyActor/save ESA.root
-/gate/actor/MyActor/attachTo esaVolume
-/gate/actor/MyActor/energySpectrum/setEmin 0 eV
-/gate/actor/MyActor/energySpectrum/setEmax 1000 MeV
-/gate/actor/MyActor/energySpectrum/setNumberOfBins 1000
+#/gate/actor/addActor EnergySpectrumActor MyActor
+#/gate/actor/MyActor/save ESA.root
+#/gate/actor/MyActor/attachTo esaVolume
+#/gate/actor/MyActor/energySpectrum/setEmin 0 eV
+#/gate/actor/MyActor/energySpectrum/setEmax 1000 MeV
+#/gate/actor/MyActor/energySpectrum/setNumberOfBins 1000
 
 /gate/run/initialize
 
-/process/inactivate hadElastic
-/process/inactivate alphaInelastic
+#/process/inactivate hadElastic
+#/process/inactivate alphaInelastic
 #/process/inactivate msc
 
 #/gate/source/addSource PBS PencilBeam
@@ -92,12 +103,12 @@
 /gate/source/PBS/setEllipseXThetaRotationNorm negative
 /gate/source/PBS/setEllipseYPhiEmittance 15 mm*mrad
 /gate/source/PBS/setEllipseYPhiRotationNorm negative
-/gate/application/setTotalNumberOfPrimaries 500
+/gate/application/setTotalNumberOfPrimaries 50000
 
-#/gate/output/root/enable
-#/gate/output/root/setFileName output/waterphantom_Helium_78eV
-#/gate/output/root/setRootNtupleFlag 0
-#/gate/output/root/setRootSinglesFlag 0
+/gate/output/root/enable
+/gate/output/root/setFileName output/waterphantom_Helium_Al_10k
+/gate/output/root/setRootNtupleFlag 0
+/gate/output/root/setRootSinglesFlag 0
 
 /gate/random/setEngineName MersenneTwister
 /gate/random/setEngineSeed auto
