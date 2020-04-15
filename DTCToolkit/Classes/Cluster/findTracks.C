@@ -58,7 +58,7 @@ Tracks * Clusters::findTracksWithRecursiveWeighting() {
    makeLayerIndex();
    kMCSFactor = 25;
 
-   thisMaxTrackScore = 0.3;
+   thisMaxTrackScore = 0.275;
    if (kHelium) thisMaxTrackScore = 0.175;
 
    for (Int_t i=0; i<GetEntriesFast(); i++) {

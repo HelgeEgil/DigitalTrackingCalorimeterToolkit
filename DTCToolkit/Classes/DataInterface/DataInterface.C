@@ -594,6 +594,7 @@ void  DataInterface::getMCClustersThreshold(Int_t runNo, Clusters *clusters, Hit
          lastEventID = eventID;
          continue;
       }
+      */
 
       if (parentID != 0 || TString(processName) == "alphaInelastic" || TString(processName) == "protonInelastic") { // Secondary track
          isSecondary = true;
@@ -619,7 +620,7 @@ void  DataInterface::getMCClustersThreshold(Int_t runNo, Clusters *clusters, Hit
             }
          }
       }
-      */
+      
       
       if (edep < threshold) {
          particlesBelowThreshold++;

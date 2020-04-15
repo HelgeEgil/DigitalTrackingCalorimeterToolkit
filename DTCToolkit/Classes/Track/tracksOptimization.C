@@ -621,7 +621,7 @@ void Tracks::removeThreeSigmaShortTracks() {
    for (Int_t i=0; i<=nTotal; i++) {
       thisTrack = At(i);
       if (!At(i)) continue;
-      if (getUnitFromTL(thisTrack->getRangemm()) < cutRangeLow || getUnitFromTL(thisTrack->getRangemm()) > cutRangeHigh) {
+      if (getUnitFromTL(thisTrack->getRangemm()) < cutRangeLow || getUnitFromTL(thisTrack->getRangemm()) > cutRangeHigh || thisTrack->getLayer(0) > 2) {
          if (thisTrack->Last()->isSecondary()) nRemovedNuclear++;
          removeTrack(thisTrack);
          nRemoved++;

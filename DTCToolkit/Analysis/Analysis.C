@@ -2633,12 +2633,17 @@ void makeEfficiencyVsDegraderThickness() {
       run_degraderThickness = dt;
       degraderthickness[idx] = dt;
       kEventsPerRun = 50;
-      Int_t runs = 1000 / kEventsPerRun;
+      Int_t runs = 10000 / kEventsPerRun;
       Tracks * tracks50 = loadOrCreateTracks(true, runs, false, run_energy, 0, 0);
       
       kEventsPerRun = 100;
-      runs = 1000 / kEventsPerRun;
+      runs = 10000 / kEventsPerRun;
       Tracks * tracks100 = loadOrCreateTracks(true, runs, false, run_energy, 0, 0);
+      
+      tracks50->removeHighAngleTracks(45);
+      tracks50->removeThreeSigmaShortTracks();
+      tracks100->removeHighAngleTracks(45);
+      tracks100->removeThreeSigmaShortTracks();
 
       for (int i=0; i<tracks50->GetEntriesFast(); i++) {
          if (!tracks50->At(i)) continue;
@@ -2652,10 +2657,6 @@ void makeEfficiencyVsDegraderThickness() {
          else nsecondaries100[idx]++;
       }
       
-      tracks50->removeHighAngleTracks(45);
-      tracks50->removeThreeSigmaShortTracks();
-      tracks100->removeHighAngleTracks(45);
-      tracks100->removeThreeSigmaShortTracks();
       
       Int_t nTotal = 0;
       Int_t nFirstAndLastAllTracks = 0;
