@@ -97,11 +97,15 @@ Tracks * Clusters::findTracksWithRecursiveWeighting() {
             // Loop over clusters in first tracker layer
 
             firstTrackerCluster = At(firstTrackerClusters->at(i));
+            if (firstTrackerCluster->isUsed()) continue;
+            
             secondTrackerClusters->clear();
             findClustersFromSeedInLayer(firstTrackerCluster, 1, secondTrackerClusters);
 
             for (UInt_t j=0; j<secondTrackerClusters->size(); j++) {
                secondTrackerCluster = At(secondTrackerClusters->at(j));
+               if (secondTrackerCluster->isUsed()) continue;
+
                angle = getDotProductAngle(firstTrackerCluster, secondTrackerCluster, firstLayerCluster);
                if (angle < bestAngle) {
                   bestAngle = angle; 
@@ -119,6 +123,9 @@ Tracks * Clusters::findTracksWithRecursiveWeighting() {
          Track * trackerTrack = new Track();
          trackerTrack->appendCluster(firstTrackerCluster);
          trackerTrack->appendCluster(secondTrackerCluster);
+         
+         markUsedClusters(trackerTrack);
+
          trackerTrack->appendCluster(firstLayerCluster);
          trackerTracks->appendTrack(trackerTrack);
 
@@ -179,9 +186,11 @@ Tracks * Clusters::findTracksWithRecursiveWeighting() {
 
          track->sortTrack();
 
-         tracks->appendTrack(track);
-         removeTrackFromClustersWithoutTrack(track);
-         markUsedClusters(track);
+         if (track->At(0)->getLayer() < 2) {
+            tracks->appendTrack(track);
+            removeTrackFromClustersWithoutTrack(track);
+            markUsedClusters(track);
+         }
 
          delete track;
          seedNode->deleteNodeTree();

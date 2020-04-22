@@ -622,6 +622,46 @@ void  Tracks::removeHighAngleTracksRelativeToSpot(Float_t mradLimit, Float_t ang
    Compress();
 }
 
+Bool_t Tracks::isTrackIncomplete(Track * originalTrack) {
+   Int_t eventID = originalTrack->Last()->getEventID();
+   Track * thisTrack = nullptr;
+
+   for (Int_t i=0; i<GetEntriesFast(); i++) {
+      thisTrack = At(i);
+      if (!thisTrack) continue;
+      if (!thisTrack->At(0)) continue;
+      if (thisTrack == originalTrack) continue;
+      
+      if (thisTrack->At(0)->getEventID() == eventID && !thisTrack->At(0)->isSecondary() && !originalTrack->Last()->isSecondary()) {
+         //cout << "Tracks are similar! original = " << *originalTrack << endl << "similar = " << *thisTrack << endl;
+         return true;
+      }
+   }
+
+   return false;
+}
+
+void Tracks::removeTracksStartingInDetector() {
+   Track * thisTrack = nullptr;
+   Int_t n=0;
+
+   for (Int_t i=0; i<GetEntriesFast(); i++) {
+      thisTrack = At(i);
+      if (!At(i)) continue;
+
+      if (thisTrack->At(0)->getLayer() > 1) {
+         removeTrackAt(i);
+         n++;
+      }
+
+   }
+
+//   printf("Removed %d tracks starting inside the detector\n.", n);
+   Compress();
+
+}
+
+
 void  Tracks::removeHighAngularChangeTracks(Float_t mradLimit) {
    Track   *thisTrack = nullptr;
    Float_t  maxChange;

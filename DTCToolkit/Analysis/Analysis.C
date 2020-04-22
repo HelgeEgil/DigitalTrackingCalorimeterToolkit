@@ -792,6 +792,8 @@ void drawTracksDepthDose(Int_t Runs, Int_t dataType, Bool_t recreate, Float_t en
 
 //      if (thisTrack->Last()->isSecondary()) continue;
 //      if (thisTrack->getRangemm() >50) continue;
+      //if (thisTrack->Last()->getDepositedEnergy() > thisTrack->At(thisTrack->GetEntriesFast()-2)->getDepositedEnergy()) continue;
+      if (thisTrack->Last()->getDepositedEnergy() > 10) continue;
 
       // Do track fit, extract all parameters for this track
       outputGraph = (TGraphErrors*) thisTrack->doTrackFit(false, kUseCSDA); // (bool isScaleVariable, bool useTrackLength (~ CSDA))
@@ -1656,8 +1658,8 @@ void analyseHelium(Int_t Runs, Int_t dataType, Bool_t recreate, Int_t switchLaye
 
    TCanvas *cEdep = new TCanvas("cEdep","cEdep",1200,600);
    cEdep->Divide(2,1,1e-5,1e-5);
-   TH1F * edepP = new TH1F("edepP", "Primary particle;E_{dep} last layer [kev/#mum];Entries", 100, 0, 10);
-   TH1F * edepS = new TH1F("edepS", "Secondary particle;E_{dep} last layer [kev/#mum];Entries", 100, 0, 10);
+   TH1F * edepP = new TH1F("edepP", "Primary particle;E_{dep} last layer [kev/#mum];Entries", 100, 0, 100);
+   TH1F * edepS = new TH1F("edepS", "Secondary particle;E_{dep} last layer [kev/#mum];Entries", 100, 0, 100);
 
    TCanvas *cEdep2D = new TCanvas("cEdep2D","cEdep2D",1200,600);
    cEdep2D->Divide(2,1,1e-5,1e-5);
@@ -1666,8 +1668,8 @@ void analyseHelium(Int_t Runs, Int_t dataType, Bool_t recreate, Int_t switchLaye
 
    TCanvas *cAllEdep = new TCanvas("cAllEdep","cAllEdep",1200,600);
    cAllEdep->Divide(2,1,1e-5,1e-5);
-   TH1F * cAllEdepP = new TH1F("allEdepP", "Primary particle;Average E_{dep} (plateau) [keV/#mum];Entries",100,0,2);
-   TH1F * cAllEdepS = new TH1F("allEdepS", "Secondary particle;Average E_{dep} (plateau) [kev/#mum];Entries",100,0,2);
+   TH1F * cAllEdepP = new TH1F("allEdepP", "Primary particle;Average E_{dep} (plateau) [keV/#mum];Entries",100,0,20);
+   TH1F * cAllEdepS = new TH1F("allEdepS", "Secondary particle;Average E_{dep} (plateau) [kev/#mum];Entries",100,0,20);
    
    TCanvas *cAllVarEdep = new TCanvas("cAllVarEdep","cAllVarEdep",1200,600);
    cAllVarEdep->Divide(2,1,1e-5,1e-5);
@@ -1767,6 +1769,7 @@ void analyseHelium(Int_t Runs, Int_t dataType, Bool_t recreate, Int_t switchLaye
       if (thisTrack->GetEntriesFast() > 3) {
 //         edep = thisTrack->getDepositedEnergy(last) + thisTrack->getDepositedEnergy(last-1);
          edep = thisTrack->getDepositedEnergy(last);
+//         edep = max(edep, thisTrack->getDepositedEnergy(last-1));
       }
 
       rangePS->Fill(range);
@@ -2845,7 +2848,7 @@ void drawTracks3D(Int_t Runs, Int_t dataType, Bool_t recreate, Int_t switchLayer
    Float_t  cutAngle = 45;
    Float_t  cutEdep = 12;
    
-   tracks->removeHighAngleTracks(cutAngle); // mrad
+//   tracks->removeHighAngleTracks(cutAngle); // mrad
 //   tracks->removeHighAngularChangeTracks(cutMaxAngle);
 //   tracks->removeNuclearInteractions();
    // tracks->removeThreeSigmaShortTracks();
@@ -2896,24 +2899,42 @@ void drawTracks3D(Int_t Runs, Int_t dataType, Bool_t recreate, Int_t switchLayer
 
    TClonesArray *restPoints = tracks->getClustersWithoutTrack();
    Clusters * conflictClusters = nullptr;
+   printf("There are %d restpoints.\n", restPoints->GetEntriesFast());
 
    Int_t nClusters = 0;
    for (Int_t i=0; i<tracks->GetEntriesFast(); i++) {
       if (!tracks->At(i)) continue;
       nClusters += tracks->GetEntriesFast(i);
    }
+   
+   Int_t restPrimary = 0;
+   Int_t restSecondary = 0;
+   
+   for (Int_t i=0; i<restPoints->GetEntriesFast(); i++) {
+      if (!restPoints->At(i)) 
+         continue;
 
-   TPolyMarker3D *pMarker = new TPolyMarker3D(restPoints->GetEntriesFast(), 7);
-   TPolyMarker3D *EIDMarker = new TPolyMarker3D(nClusters, 7);
+      Cluster *thisCluster = (Cluster*) restPoints->At(i);
+
+      if (thisCluster->isSecondary()) restSecondary++;
+      else restPrimary++;
+   }
+   printf("S = %d, P = %d", restSecondary, restPrimary);
+
+   TPolyMarker3D *pMarker = new TPolyMarker3D(restPrimary, 7);
+   TPolyMarker3D *EIDMarker = new TPolyMarker3D(restSecondary, 7);
    TPolyMarker3D *conflictMarker = new TPolyMarker3D(nClusters, 7);
    pMarker->SetMarkerColor(kBlue); // Missing cluster
 //   pMarker->SetMarkerStyle(15);
    EIDMarker->SetMarkerColor(kGreen);
    conflictMarker->SetMarkerColor(kRed); // Conflicting cluster
-   
+  
+
+   Int_t iPrim = 0, iSec = 0;
    for (Int_t i=0; i<restPoints->GetEntriesFast(); i++) {
-      if (!restPoints->At(i))
+      if (!restPoints->At(i)) {
          continue;
+      }
 
       Cluster *thisCluster = (Cluster*) restPoints->At(i);
       Float_t x = thisCluster->getX();
@@ -2921,17 +2942,15 @@ void drawTracks3D(Int_t Runs, Int_t dataType, Bool_t recreate, Int_t switchLayer
       Float_t y = thisCluster->getLayermm();
    
       if (thisCluster->isSecondary()) {
-         EIDMarker->SetPoint(i,x,y,z);
+         EIDMarker->SetPoint(iSec++,x,y,z);
+         printf("s");
       }
       else {
-         pMarker->SetPoint(i, x, y, z);
+         pMarker->SetPoint(iPrim++, x, y, z);
+         printf("p");
       }
    }
 
-   printf("There are %d unused clusters.\n", restPoints->GetEntries());
-
-   if (kDraw) pMarker->Draw();
-   
    Int_t ntracks = tracks->GetEntriesFast();
    Int_t EIDidx = 0;
    Int_t conflictIdx = 0;
@@ -2974,13 +2993,14 @@ void drawTracks3D(Int_t Runs, Int_t dataType, Bool_t recreate, Int_t switchLayer
       if (!thisTrack) continue;
       if (isnan(thisTrack->getFitParameterRange())) continue;
 
+
       nMissingEID = tracks->getNMissingClustersWithEventID(thisTrack->getEventID(0), thisTrack->Last()->getLayer(), i); 
 
       if (!thisTrack->Last()->isSecondary() && !thisTrack->isSecondary(0)) { // primary
          numberOfPrimaries++;
 
          if (thisTrack->isFirstAndLastEventIDEqual()) { // No confused tracks
-            if (nMissingEID == 0) { // NO missing clusters
+            if (nMissingEID == 0 && !tracks->isTrackIncomplete(thisTrack)) { // No missing clusters
                nOkPrimary++;
                hWEPLCorrect->Fill(getUnitFromTL(thisTrack->getFitParameterRange()));
             }
@@ -3019,7 +3039,7 @@ void drawTracks3D(Int_t Runs, Int_t dataType, Bool_t recreate, Int_t switchLayer
                   hProjConfused->Fill(delta);
                }
             }
-            if (nMissingEID == 0) { // No missing clusters
+            if (nMissingEID == 0 && !tracks->isTrackIncomplete(thisTrack)) { // No missing clusters
                nPrimaryConfused++;
             }
 
@@ -3044,7 +3064,7 @@ void drawTracks3D(Int_t Runs, Int_t dataType, Bool_t recreate, Int_t switchLayer
          }
 
          else { // Confused tracks
-            if (nMissingEID == 0) { // No missing clusters
+            if (nMissingEID == 0 && !tracks->isTrackIncomplete(thisTrack)) { // No missing clusters
                nSecondaryConfused++;
             }
             else { // Confused AND Missing clusters
@@ -3151,7 +3171,7 @@ void drawTracks3D(Int_t Runs, Int_t dataType, Bool_t recreate, Int_t switchLayer
             l->SetLineColor(kRed);
          }
 
-         else if (nMissingEID>0) {
+         else if (nMissingEID>0 || tracks->isTrackIncomplete(thisTrack)) {
             l->SetLineColor(kGray);
          }
         
@@ -3204,9 +3224,10 @@ void drawTracks3D(Int_t Runs, Int_t dataType, Bool_t recreate, Int_t switchLayer
          else okPrimary++;
          
          if (kDraw) {
-   //         trackPoints->Draw();
-   //         EIDMarker->Draw();
-   //      conflictMarker->Draw();
+//            trackPoints->Draw();
+//            EIDMarker->Draw();
+//            conflictMarker->Draw();
+            pMarker->Draw();
          }
       }
       

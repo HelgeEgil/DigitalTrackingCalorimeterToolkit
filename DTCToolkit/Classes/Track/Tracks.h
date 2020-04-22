@@ -57,6 +57,7 @@ class Tracks : public TObject {
       void              removeHighAngleTracks(Float_t mradLimit);
       void              removeHighAngleTracksRelativeToSpot(Float_t mradLimit, Float_t angleX, Float_t angleY);
       void              removeHighAngularChangeTracks(Float_t mradLimit);
+      void              removeTracksStartingInDetector();
 
       // Retrieve tracks
       TClonesArray    * getClustersWithoutTrack() { return (TClonesArray*) &clustersWithoutTrack_; }
@@ -88,6 +89,7 @@ class Tracks : public TObject {
       void              sortTrackByLayer(Int_t track);
       void              checkLayerOrientation();
       Bool_t            isLastEventIDCloseToFirst(Int_t trackIdx);
+      Bool_t            isTrackIncomplete(Track * originalTrack);
 //      void              createEIDSortList();
 //      Track           * getTrackWithEID(Int_t eid);
       

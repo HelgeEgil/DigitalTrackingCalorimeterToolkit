@@ -297,7 +297,7 @@ Tracks * getTracksFromClusters(Int_t Runs, Int_t dataType, Int_t frameType, Floa
       showDebug("ok\n");
      
 
-      if (kSaveCWT) tracks->appendClustersWithoutTrack(clusters->getClustersWithoutTrack());
+//      if (kSaveCWT) tracks->appendClustersWithoutTrack(clusters->getClustersWithoutTrack());
        
       
       // Flag tracks as too short
@@ -313,6 +313,7 @@ Tracks * getTracksFromClusters(Int_t Runs, Int_t dataType, Int_t frameType, Floa
       
       // DO SOME CUTS HERE INSTEAD TO SAVE MEMORY
       tracks->removeEmptyTracks();
+//       tracks->removeTracksStartingInDetector();
 //      tracks->doTrackFit(false);
 //      tracks->removeTracksWithMinWEPL(100);
 //      tracks->removeNuclearInteractions();
