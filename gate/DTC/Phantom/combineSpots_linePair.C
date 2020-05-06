@@ -36,8 +36,8 @@ void combineSpots_linePair(Int_t rotation) {
    treeSimulationOut->Branch("spotPosX", &spotPosX, "spotPosX/F");
    treeSimulationOut->Branch("spotPosY", &spotPosY, "spotPosY/F");
 
-   for (int spotX = -77; spotX <= 77; spotX += 7) {
-      for (int spotY = -21; spotY <= 21; spotY += 7) {
+   for (int spotX = -84; spotX <= 84; spotX += 7) {
+      for (int spotY = -28; spotY <= 28; spotY += 7) {
 
          printf("Running @ spot (%04d, %04d)\n", spotX, spotY);
          fSimulationIn = new TFile(Form("../../../DTCToolkit/Data/MonteCarlo/DTC_Final_linePair_rotation%03ddeg_spotx%04d_spoty%04d.root", rotation, spotX, spotY), "READ");

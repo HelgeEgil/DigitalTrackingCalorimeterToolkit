@@ -31,21 +31,21 @@
 
 // -------------------------------------
 
-Bool_t   kHelium = true;
-Bool_t   kSpotScanning = false;
+Bool_t   kHelium = false;
+Bool_t   kSpotScanning = true;
 Int_t    kRotation = 90; // degrees
-Bool_t   kPhantom = false;
+Bool_t   kPhantom = true;
 Bool_t   kDoTracking = true; 
 Bool_t   kFilterNuclearInteractions = false; 
 Bool_t   kDoDiffusion = true;
 Int_t    kEventsPerRun = 100;
 Int_t    kSkipTracks = 0; // during readout
-const Int_t    kEnergy = 917; // 917 MeV_Helium ~= 230 MeV_proton // 600 HeC phantom
+const Int_t    kEnergy = 230; // 917 MeV_Helium ~= 230 MeV_proton // 600 HeC phantom
 Bool_t   kUseDegrader = true; 
 Bool_t   kUseAlpide = true;
 Bool_t   kDoTrackerPropagation = false; // Some foul bugs here
-TString  kPhantomName = "HeadPhantom";
-Bool_t   kSplitSpotColumnsPerRotation = true;
+TString  kPhantomName = "headphantom";
+Bool_t   kSplitSpotColumnsPerRotation = false;
 
 const Int_t sizeOfEventID = 25;
 const Int_t nChildrenInNode = 2; // max concurrent track segments to follow

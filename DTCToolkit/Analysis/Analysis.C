@@ -2724,12 +2724,12 @@ void makeOutputFileForImageReconstructionCT(Int_t Runs, Int_t tracksperrun, Int_
    Float_t spotYFrom, spotYTo, spotYSpacing;
 
    if (kPhantomName == "linePair" || kPhantomName == "CTP404") {
-      spotXFrom = -77;
-      spotXTo = 77;
+      spotXFrom = -84;
+      spotXTo = 84;
       spotXSpacing = 7;
 
-      spotYFrom = -21;
-      spotYTo = 21;
+      spotYFrom = -28;
+      spotYTo = 28;
       spotYSpacing = 7;
    }
 
@@ -2752,6 +2752,8 @@ void makeOutputFileForImageReconstructionCT(Int_t Runs, Int_t tracksperrun, Int_
    }
 
    Float_t outSpotX, outSpotY, outWEPL, outX2x, outX2y, outP2x, outP2y, residualRange, wepl, wepl_calibrated, outWEPL_uncalibrated;
+   Float_t lastEdep;
+   Bool_t isSingleEventID, isLastHitSecondary;
    Track * thisTrack = nullptr;
 
    TFile *fOut = new TFile(Form("OutputFiles/%s/%s_rotation%03ddeg.root", kPhantomName.Data(), kPhantomName.Data(), kRotation), "recreate");
@@ -2764,21 +2766,30 @@ void makeOutputFileForImageReconstructionCT(Int_t Runs, Int_t tracksperrun, Int_
    tOut->Branch("X2y", &outX2y, "X2y/F");
    tOut->Branch("P2x", &outP2x, "P2x/F");
    tOut->Branch("P2y", &outP2y, "P2y/F");
+   tOut->Branch("lastEdep", &lastEdep, "lastEdep/F");
+   tOut->Branch("isSingleEventID", &isSingleEventID, "isSingleEventID/O");
+   tOut->Branch("isLastHitSecondary", &isLastHitSecondary, "isLastHitSecondary/O");
 
    Int_t nruns = 0;
    Float_t  cutMaxAngle = 60;
    Float_t  cutAngle = 50;
    Float_t  cutEdep = 12;
 
+   Float_t angleXmrad, angleYmrad;
+
    for (float spotX = spotXFrom; spotX <= spotXTo; spotX += spotXSpacing) {
       kSpotX = spotX;
+      angleXmrad = getAngleAtSpot(spotX) * 1000;
       for (float spotY = spotYFrom; spotY <= spotYTo; spotY += spotYSpacing) {
          kSpotY = spotY;
    //   Float_t spotY = 0;
+         angleYmrad = getAngleAtSpot(spotY) * 1000;
 
          printf("Spot (%.0f,%.0f)\n", spotX, spotY);
          Tracks * tracks = loadOrCreateTracks(true, Runs, false, run_energy, spotX, spotY);
          printf("lastJentry = %lld\n", lastJentry_);
+         tracks->removeHighAngleTracksRelativeToSpot(65, angleXmrad, angleYmrad);
+         tracks->removeTracksWithMinWEPL(100);
 //         tracks->removeThreeSigmaShortTracks();
 
          for (Int_t i=0; i<=tracks->GetEntriesFast(); i++) {
@@ -2801,6 +2812,12 @@ void makeOutputFileForImageReconstructionCT(Int_t Runs, Int_t tracksperrun, Int_
             outP2x = (thisTrack->At(1)->getXmm() - outX2x) / dz2;
             outP2y = (thisTrack->At(1)->getYmm() - outX2y) / dz2;
 
+            lastEdep = thisTrack->Last()->getDepositedEnergy();
+            isSingleEventID = thisTrack->isFirstAndLastEventIDEqual();
+            isLastHitSecondary = thisTrack->Last()->isSecondary();
+
+            printf("lastEdep = %.2f; isSingleEventID = %d; isLastHitSecondary = %d\n", lastEdep, isSingleEventID, isLastHitSecondary);
+
             tOut->Fill();
 
             if (kDraw) {
@@ -2813,6 +2830,7 @@ void makeOutputFileForImageReconstructionCT(Int_t Runs, Int_t tracksperrun, Int_
       }
    }
 
+   fOut->cd();
    fOut->Write();
    fOut->Close();
    printf("Image Reconstruction Input data written to Output/%s/%s_rotation%03d.root.\n", kPhantomName.Data(), kPhantomName.Data(), kRotation);
