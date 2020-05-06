@@ -763,12 +763,12 @@ void drawTracksDepthDose(Int_t Runs, Int_t dataType, Bool_t recreate, Float_t en
    tracks->doTrackFit(); 
 //   tracks->removeTracksEndingInHalo();
 
-   tracks->removeHighAngleTracks(cutAngle); // mrad
-   tracks->removeHighAngularChangeTracks(cutMaxAngle); // mrad
+//   tracks->removeHighAngleTracks(cutAngle); // mrad
+//   tracks->removeHighAngularChangeTracks(cutMaxAngle); // mrad
 //   tracks->removeTracksWithMinWEPL(100); // max 330 - 100 = 230 mm sized phantoms
 //   tracks->removeNuclearInteractions();
 
-   tracks->removeThreeSigmaShortTracks();
+//   tracks->removeThreeSigmaShortTracks();
 
    /*
    if (removeHighAngleTracks) {
@@ -793,7 +793,7 @@ void drawTracksDepthDose(Int_t Runs, Int_t dataType, Bool_t recreate, Float_t en
 //      if (thisTrack->Last()->isSecondary()) continue;
 //      if (thisTrack->getRangemm() >50) continue;
       //if (thisTrack->Last()->getDepositedEnergy() > thisTrack->At(thisTrack->GetEntriesFast()-2)->getDepositedEnergy()) continue;
-      if (thisTrack->Last()->getDepositedEnergy() > 10) continue;
+      if (thisTrack->Last()->getDepositedEnergy() > 10 || thisTrack->Last()->isSecondary()) continue;
 
       // Do track fit, extract all parameters for this track
       outputGraph = (TGraphErrors*) thisTrack->doTrackFit(false, kUseCSDA); // (bool isScaleVariable, bool useTrackLength (~ CSDA))
@@ -1349,6 +1349,7 @@ void secondaryAnalysis(Int_t Runs, Int_t dataType, Bool_t recreate, Int_t switch
    TH1F   * hAngleAnalysisAfter = new TH1F("hAngleAnalysisAfter", "Angular distribution of incoming tracks (After);Incoming angle [mrad];Frequency", 100, 0, 500);
    TH1F   * hRangeAnalysisP = new TH1F("hRangeAnalysisP", "Range distribution of tracks (primary);Range [mm WEPL];Frequency", 100, 0, 300);
    TH1F   * hRangeAnalysisS = new TH1F("hRangeAnalysisS", "Range distribution of tracks (scndary);Range [mm WEPL];Frequency", 100, 0, 300);
+         
    TH1F   * hRangeAnalysisAfter = new TH1F("hRangeAnalysisAfter", "Range distribution of tracks (after);Range [mm WEPL];Frequency", 100, 0, 300);
 
    for (Int_t i=0; i<tracks->GetEntriesFast(); i++) {
@@ -1563,7 +1564,8 @@ void analyseHelium(Int_t Runs, Int_t dataType, Bool_t recreate, Int_t switchLaye
       thisTrack = tracks->At(i);
       if (!thisTrack) continue;
 
-      if (thisTrack->isIncomplete()) {   
+//      if (thisTrack->isIncomplete()) {   
+      if (tracks->isTrackIncomplete(thisTrack)) {
          thisTrack->Last()->setSecondary(true);
          n++;
       }
@@ -2832,6 +2834,10 @@ void drawTracks3D(Int_t Runs, Int_t dataType, Bool_t recreate, Int_t switchLayer
    Tracks * tracks = loadOrCreateTracks(recreate, Runs, dataType, energy, 0, 0);
 //   tracks->removeEmptyTracks();
 
+   tracks->sortTracksByLength();
+   tracks->fillOutIncompleteTracks(0.4);
+   // Complete incomplete tracks
+
    printf("Found %d tracks before filtering.\n", tracks->GetEntries());
 
    Int_t numberOfPrimaries = 0;
@@ -2897,9 +2903,8 @@ void drawTracks3D(Int_t Runs, Int_t dataType, Bool_t recreate, Int_t switchLayer
       view->SetView(theta, phi, 0, iret);
    }
 
-   TClonesArray *restPoints = tracks->getClustersWithoutTrack();
+//   TClonesArray *restPoints = tracks->getClustersWithoutTrack();
    Clusters * conflictClusters = nullptr;
-   printf("There are %d restpoints.\n", restPoints->GetEntriesFast());
 
    Int_t nClusters = 0;
    for (Int_t i=0; i<tracks->GetEntriesFast(); i++) {
@@ -2910,11 +2915,12 @@ void drawTracks3D(Int_t Runs, Int_t dataType, Bool_t recreate, Int_t switchLayer
    Int_t restPrimary = 0;
    Int_t restSecondary = 0;
    
-   for (Int_t i=0; i<restPoints->GetEntriesFast(); i++) {
-      if (!restPoints->At(i)) 
+//   for (Int_t i=0; i<restPoints->GetEntriesFast(); i++) {
+   for (Int_t i=0; i<tracks->GetEntriesFastCWT(); i++) {
+      if (!tracks->AtCWT(i)) 
          continue;
 
-      Cluster *thisCluster = (Cluster*) restPoints->At(i);
+      Cluster *thisCluster = (Cluster*) tracks->AtCWT(i);
 
       if (thisCluster->isSecondary()) restSecondary++;
       else restPrimary++;
@@ -2931,23 +2937,21 @@ void drawTracks3D(Int_t Runs, Int_t dataType, Bool_t recreate, Int_t switchLayer
   
 
    Int_t iPrim = 0, iSec = 0;
-   for (Int_t i=0; i<restPoints->GetEntriesFast(); i++) {
-      if (!restPoints->At(i)) {
-         continue;
-      }
 
-      Cluster *thisCluster = (Cluster*) restPoints->At(i);
+   for (Int_t i=0; i<tracks->GetEntriesFastCWT(); i++) {
+      if (!tracks->AtCWT(i)) 
+         continue;
+
+      Cluster *thisCluster = (Cluster*) tracks->AtCWT(i);
       Float_t x = thisCluster->getX();
       Float_t z = thisCluster->getY();
       Float_t y = thisCluster->getLayermm();
    
       if (thisCluster->isSecondary()) {
          EIDMarker->SetPoint(iSec++,x,y,z);
-         printf("s");
       }
       else {
          pMarker->SetPoint(iPrim++, x, y, z);
-         printf("p");
       }
    }
 
@@ -2987,12 +2991,11 @@ void drawTracks3D(Int_t Runs, Int_t dataType, Bool_t recreate, Int_t switchLayer
 
    Track * thisTrack = nullptr;
 //   tracks->createEIDSortList();
-
+   
    for (Int_t i=0; i<tracks->GetEntriesFast(); i++) {
       thisTrack = tracks->At(i);
       if (!thisTrack) continue;
       if (isnan(thisTrack->getFitParameterRange())) continue;
-
 
       nMissingEID = tracks->getNMissingClustersWithEventID(thisTrack->getEventID(0), thisTrack->Last()->getLayer(), i); 
 
@@ -3000,13 +3003,14 @@ void drawTracks3D(Int_t Runs, Int_t dataType, Bool_t recreate, Int_t switchLayer
          numberOfPrimaries++;
 
          if (thisTrack->isFirstAndLastEventIDEqual()) { // No confused tracks
-            if (nMissingEID == 0 && !tracks->isTrackIncomplete(thisTrack)) { // No missing clusters
+            if (nMissingEID == 0) { //  && !tracks->isTrackIncomplete(thisTrack)) { // No missing clusters
                nOkPrimary++;
                hWEPLCorrect->Fill(getUnitFromTL(thisTrack->getFitParameterRange()));
             }
             
             else { // Missing clusters
                nPrimaryIncomplete++;
+//               cout << "Incomplete track: " << *thisTrack << endl << endl;
                hWEPLConfused->Fill(getUnitFromTL(thisTrack->getFitParameterRange()));
             }
 
@@ -3039,7 +3043,7 @@ void drawTracks3D(Int_t Runs, Int_t dataType, Bool_t recreate, Int_t switchLayer
                   hProjConfused->Fill(delta);
                }
             }
-            if (nMissingEID == 0 && !tracks->isTrackIncomplete(thisTrack)) { // No missing clusters
+            if (nMissingEID == 0) { // && !tracks->isTrackIncomplete(thisTrack)) { // No missing clusters
                nPrimaryConfused++;
             }
 
@@ -3064,7 +3068,7 @@ void drawTracks3D(Int_t Runs, Int_t dataType, Bool_t recreate, Int_t switchLayer
          }
 
          else { // Confused tracks
-            if (nMissingEID == 0 && !tracks->isTrackIncomplete(thisTrack)) { // No missing clusters
+            if (nMissingEID == 0) { //  && !tracks->isTrackIncomplete(thisTrack)) { // No missing clusters
                nSecondaryConfused++;
             }
             else { // Confused AND Missing clusters
@@ -3171,7 +3175,7 @@ void drawTracks3D(Int_t Runs, Int_t dataType, Bool_t recreate, Int_t switchLayer
             l->SetLineColor(kRed);
          }
 
-         else if (nMissingEID>0 || tracks->isTrackIncomplete(thisTrack)) {
+         else if (nMissingEID>0) { // || tracks->isTrackIncomplete(thisTrack)) {
             l->SetLineColor(kGray);
          }
         
@@ -3207,7 +3211,6 @@ void drawTracks3D(Int_t Runs, Int_t dataType, Bool_t recreate, Int_t switchLayer
             conflictMarker->SetPoint(conflictIdx++, x,y,z);
          }
          if (kDraw) {
-   //       l->SetLineColor(kBlack);
             l->SetLineWidth(3);
             if (l->GetLineColor() == kRed) l->Draw();
             if (l->GetLineColor() == kGreen) {
@@ -3215,7 +3218,7 @@ void drawTracks3D(Int_t Runs, Int_t dataType, Bool_t recreate, Int_t switchLayer
                l->Draw();
             }
             if (l->GetLineColor() == kGray) l->Draw();
-            l->Draw();
+            if (l->GetLineColor() == kBlack) l->Draw();
          }
 
          if (l->GetLineColor() == kGreen) badSecondary++;
