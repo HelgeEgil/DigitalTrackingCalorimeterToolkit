@@ -52,9 +52,9 @@ public:
    void              sortClusters()             { clusters_.Sort(); }
    
    // Add and remove clusters
-   virtual void      removeCluster(Cluster *c)              { clusters_.Remove((TObject*) c); }
-   virtual TObject * removeClusterAt(Int_t i)               { return clusters_.RemoveAt(i); }
    virtual TObject * removeClusterWithoutTrackAt(Int_t i)   { return clustersWithoutTrack_.RemoveAt(i); }
+   virtual void      removeCluster(Cluster *c);
+   virtual TObject * removeClusterAt(Int_t i);
    void              removeAllClustersInTrack(Track *track);
    void              removeTrackFromClustersWithoutTrack(Track *track);
    void              removeSmallClusters(Int_t size);

@@ -91,6 +91,16 @@ void Clusters::Clear(Option_t *option) {
    frameType_ = 0;
 }
 
+TObject * Clusters::removeClusterAt(Int_t i) {
+   appendClusterWithoutTrack(At(i));
+   return clusters_.RemoveAt(i);
+}
+
+void Clusters::removeCluster(Cluster * cluster) {
+   appendClusterWithoutTrack(cluster);
+   clusters_.Remove((TObject*) cluster);
+}
+
 void Clusters::removeAllClustersInTrack(Track *track) {
    Int_t    lastIndex = 0;
    Float_t  x, y;
