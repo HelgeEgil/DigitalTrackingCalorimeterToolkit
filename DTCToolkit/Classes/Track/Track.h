@@ -33,6 +33,7 @@ class Track : public TObject {
 
       virtual ~Track(); 
 
+
       // ROOT & I/O
       virtual Cluster * At(Int_t i)                      { return ((Cluster*) track_.At(i)); }
       virtual Cluster * Last()                           { return ((Cluster*) track_.At(GetEntriesFast()-1)); }
@@ -41,6 +42,10 @@ class Track : public TObject {
       virtual void      Compress()                       { track_.Compress(); }
       virtual void      Clear(Option_t * option = "")    { track_.Clear(option); }
       void              sortTrack()                      { track_.Sort(); }
+
+      // Sorting
+      Int_t             Compare(const TObject* obj) const;
+      Bool_t            isSortable() const { return kTRUE; }
 
       // Add and remove clusters
       virtual TObject * removeClusterAt(Int_t i)         { return track_.RemoveAt(i); }

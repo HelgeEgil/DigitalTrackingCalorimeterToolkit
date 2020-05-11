@@ -763,12 +763,12 @@ void drawTracksDepthDose(Int_t Runs, Int_t dataType, Bool_t recreate, Float_t en
    tracks->doTrackFit(); 
 //   tracks->removeTracksEndingInHalo();
 
-   tracks->removeHighAngleTracks(cutAngle); // mrad
-   tracks->removeHighAngularChangeTracks(cutMaxAngle); // mrad
+//   tracks->removeHighAngleTracks(cutAngle); // mrad
+//   tracks->removeHighAngularChangeTracks(cutMaxAngle); // mrad
 //   tracks->removeTracksWithMinWEPL(100); // max 330 - 100 = 230 mm sized phantoms
 //   tracks->removeNuclearInteractions();
 
-   tracks->removeThreeSigmaShortTracks();
+//   tracks->removeThreeSigmaShortTracks();
 
    /*
    if (removeHighAngleTracks) {
@@ -793,7 +793,7 @@ void drawTracksDepthDose(Int_t Runs, Int_t dataType, Bool_t recreate, Float_t en
 //      if (thisTrack->Last()->isSecondary()) continue;
 //      if (thisTrack->getRangemm() >50) continue;
       //if (thisTrack->Last()->getDepositedEnergy() > thisTrack->At(thisTrack->GetEntriesFast()-2)->getDepositedEnergy()) continue;
-      if (thisTrack->Last()->getDepositedEnergy() > 10) continue;
+      if (thisTrack->Last()->getDepositedEnergy() > 10 || thisTrack->Last()->isSecondary()) continue;
 
       // Do track fit, extract all parameters for this track
       outputGraph = (TGraphErrors*) thisTrack->doTrackFit(false, kUseCSDA); // (bool isScaleVariable, bool useTrackLength (~ CSDA))
@@ -1349,6 +1349,7 @@ void secondaryAnalysis(Int_t Runs, Int_t dataType, Bool_t recreate, Int_t switch
    TH1F   * hAngleAnalysisAfter = new TH1F("hAngleAnalysisAfter", "Angular distribution of incoming tracks (After);Incoming angle [mrad];Frequency", 100, 0, 500);
    TH1F   * hRangeAnalysisP = new TH1F("hRangeAnalysisP", "Range distribution of tracks (primary);Range [mm WEPL];Frequency", 100, 0, 300);
    TH1F   * hRangeAnalysisS = new TH1F("hRangeAnalysisS", "Range distribution of tracks (scndary);Range [mm WEPL];Frequency", 100, 0, 300);
+         
    TH1F   * hRangeAnalysisAfter = new TH1F("hRangeAnalysisAfter", "Range distribution of tracks (after);Range [mm WEPL];Frequency", 100, 0, 300);
 
    for (Int_t i=0; i<tracks->GetEntriesFast(); i++) {
@@ -1563,7 +1564,8 @@ void analyseHelium(Int_t Runs, Int_t dataType, Bool_t recreate, Int_t switchLaye
       thisTrack = tracks->At(i);
       if (!thisTrack) continue;
 
-      if (thisTrack->isIncomplete()) {   
+//      if (thisTrack->isIncomplete()) {   
+      if (tracks->isTrackIncomplete(thisTrack)) {
          thisTrack->Last()->setSecondary(true);
          n++;
       }
@@ -2498,8 +2500,11 @@ void showOutputFileForImageReconstruction() {
 
 }
 
-void makeOutputFileForImageReconstructionRad(Int_t Runs, Int_t tracksperrun, Int_t rotation, Int_t useSpotX) {
+void makeOutputFileForImageReconstructionRad(Int_t Runs, Int_t tracksperrun, Int_t rotation, Int_t useSpotX, TString phantomName) {
 //   run_energy = 760;
+   kSplitSpotColumnsPerRotation = true;
+   kPhantomName = phantomName;
+
    run_degraderThickness = 180; // This number is useless I hope
    run_energy = 230;
    kEventsPerRun = tracksperrun;
@@ -2509,27 +2514,25 @@ void makeOutputFileForImageReconstructionRad(Int_t Runs, Int_t tracksperrun, Int
 
    Bool_t  kDraw = false;
 
-   Float_t spotXFrom, spotXTo, spotXSpacing;
-   Float_t spotYFrom, spotYTo, spotYSpacing;
+   Float_t lastEdep;
+   Bool_t isSingleEventID, isLastHitSecondary;
+   Float_t spotXlim, spotYlim, spotStep;
+
+   spotStep = 7;
 
    if (kPhantomName == "linePair" || kPhantomName == "CTP404") {
-      spotXFrom = -77;
-      spotXTo = 77;
-      spotXSpacing = 7;
+      spotXlim = 84;
+      spotYlim = 28;
+   }
 
-      spotYFrom = -21;
-      spotYTo = 21;
-      spotYSpacing = 7;
+   else if (kPhantomName == "wedge") {
+      spotXlim = 84;
+      spotYlim = 7;
    }
 
    else { // Headphantom
-      spotXFrom = -98;
-      spotXTo = 98;
-      spotXSpacing = 7;
-
-      spotYFrom = -88;
-      spotYTo = 88;
-      spotYSpacing = 7;
+     spotXlim = 98;
+     spotYlim = 88;
    }  
 
    TH2F *hSimpleImage = nullptr;
@@ -2542,6 +2545,7 @@ void makeOutputFileForImageReconstructionRad(Int_t Runs, Int_t tracksperrun, Int
 
    Float_t outSpotX, outSpotY, outWEPL, outX2x, outX2y, outP2x, outP2y, residualRange, wepl, wepl_calibrated, outWEPL_uncalibrated;
    Track * thisTrack = nullptr;
+   Float_t trackLateralDistance, trackOutgoingAngle;
 
    TFile *fOut = new TFile(Form("OutputFiles/%s/%s_rotation%03ddeg_spotx%04.f.root", kPhantomName.Data(), kPhantomName.Data(), kRotation, kSpotX), "recreate");
    TTree *tOut = new TTree("WEPLData", "proton beam");
@@ -2553,8 +2557,13 @@ void makeOutputFileForImageReconstructionRad(Int_t Runs, Int_t tracksperrun, Int
    tOut->Branch("X2y", &outX2y, "X2y/F");
    tOut->Branch("P2x", &outP2x, "P2x/F");
    tOut->Branch("P2y", &outP2y, "P2y/F");
+   tOut->Branch("lastEdep", &lastEdep, "lastEdep/F");
+   tOut->Branch("isSingleEventID", &isSingleEventID, "isSingleEventID/O");
+   tOut->Branch("isLastHitSecondary", &isLastHitSecondary, "isLastHitSecondary/O");
+   tOut->Branch("trackLateralDifference", &trackLateralDistance, "trackLateralDifference/F");
+   tOut->Branch("trackOutgoingAngle", &trackOutgoingAngle, "trackOutgoingAngle/F");
 
-   Int_t nruns = 0;
+   Int_t    nruns = 0;
    Float_t  cutMaxAngle = 60;
    Float_t  cutAngle = 50;
    Float_t  cutEdep = 12;
@@ -2566,7 +2575,7 @@ void makeOutputFileForImageReconstructionRad(Int_t Runs, Int_t tracksperrun, Int
    // Find the angles based on the geometry
    angleXmrad = getAngleAtSpot(spotX) * 1000;
 
-   for (float spotY = spotYFrom; spotY <= spotYTo; spotY += spotYSpacing) {
+   for (float spotY = -spotYlim; spotY <= spotYlim; spotY += spotStep) {
       kSpotY = spotY;
       angleYmrad = getAngleAtSpot(spotY) * 1000;
       printf("Spot (%.0f,%.0f)\n", spotX, spotY);
@@ -2595,6 +2604,27 @@ void makeOutputFileForImageReconstructionRad(Int_t Runs, Int_t tracksperrun, Int
          outX2y = thisTrack->At(0)->getYmm();
          outP2x = (thisTrack->At(1)->getXmm() - outX2x) / dz2;
          outP2y = (thisTrack->At(1)->getYmm() - outX2y) / dz2;
+         lastEdep = thisTrack->Last()->getDepositedEnergy();
+         isSingleEventID = thisTrack->isFirstAndLastEventIDEqual();
+         isLastHitSecondary = thisTrack->Last()->isSecondary();
+         
+         Int_t last = thisTrack->GetEntriesFast()-1;
+         Cluster *c0 = thisTrack->At(0);
+         Cluster *c1 = thisTrack->At(last-1);
+         Cluster *c2 = thisTrack->At(last);
+         if (c1&&c2) {
+            trackOutgoingAngle = getDotProductAngle(c1, c1, c2);
+         }
+         else {
+            trackOutgoingAngle = 0;
+         }
+
+         if (c0&&c2) {
+            trackLateralDistance = sqrt(pow(c2->getXmm() - c0->getXmm(),2) + pow(c2->getYmm() - c0->getYmm(),2));
+         }
+         else {
+            trackLateralDistance = 0;
+         }
 
          tOut->Fill();
 
@@ -2710,8 +2740,11 @@ void makeEfficiencyVsDegraderThickness() {
 
 }
 
-void makeOutputFileForImageReconstructionCT(Int_t Runs, Int_t tracksperrun, Int_t rotation) {
+void makeOutputFileForImageReconstructionCT(Int_t Runs, Int_t tracksperrun, Int_t rotation, TString phantomName) {
 //   run_energy = 760;
+   kSplitSpotColumnsPerRotation = false;
+   kPhantomName = phantomName;
+
    run_degraderThickness = 180; // This number is useless I hope
    run_energy = 230;
    kEventsPerRun = tracksperrun;
@@ -2719,28 +2752,24 @@ void makeOutputFileForImageReconstructionCT(Int_t Runs, Int_t tracksperrun, Int_
    kRotation = rotation;
 
    Bool_t  kDraw = false;
+   
+   Float_t spotXlim, spotYlim, spotStep;
 
-   Float_t spotXFrom, spotXTo, spotXSpacing;
-   Float_t spotYFrom, spotYTo, spotYSpacing;
+   spotStep = 7;
 
    if (kPhantomName == "linePair" || kPhantomName == "CTP404") {
-      spotXFrom = -84;
-      spotXTo = 84;
-      spotXSpacing = 7;
+      spotXlim = 84;
+      spotYlim = 28;
+   }
 
-      spotYFrom = -28;
-      spotYTo = 28;
-      spotYSpacing = 7;
+   else if (kPhantomName == "wedge") {
+      spotXlim = 84;
+      spotYlim = 7;
    }
 
    else { // Headphantom
-      spotXFrom = -98;
-      spotXTo = 98;
-      spotXSpacing = 7;
-
-      spotYFrom = -88;
-      spotYTo = 88;
-      spotYSpacing = 7;
+     spotXlim = 98;
+     spotYlim = 88;
    }  
 
    TH2F *hSimpleImage = nullptr;
@@ -2777,10 +2806,10 @@ void makeOutputFileForImageReconstructionCT(Int_t Runs, Int_t tracksperrun, Int_
 
    Float_t angleXmrad, angleYmrad;
 
-   for (float spotX = spotXFrom; spotX <= spotXTo; spotX += spotXSpacing) {
+   for (float spotX = -spotXlim; spotX <= spotXlim; spotX += spotStep) {
       kSpotX = spotX;
       angleXmrad = getAngleAtSpot(spotX) * 1000;
-      for (float spotY = spotYFrom; spotY <= spotYTo; spotY += spotYSpacing) {
+      for (float spotY = -spotYlim; spotY <= spotYlim; spotY += spotStep) {
          kSpotY = spotY;
    //   Float_t spotY = 0;
          angleYmrad = getAngleAtSpot(spotY) * 1000;
@@ -2816,8 +2845,6 @@ void makeOutputFileForImageReconstructionCT(Int_t Runs, Int_t tracksperrun, Int_
             isSingleEventID = thisTrack->isFirstAndLastEventIDEqual();
             isLastHitSecondary = thisTrack->Last()->isSecondary();
 
-            printf("lastEdep = %.2f; isSingleEventID = %d; isLastHitSecondary = %d\n", lastEdep, isSingleEventID, isLastHitSecondary);
-
             tOut->Fill();
 
             if (kDraw) {
@@ -2849,6 +2876,10 @@ void drawTracks3D(Int_t Runs, Int_t dataType, Bool_t recreate, Int_t switchLayer
    
    Tracks * tracks = loadOrCreateTracks(recreate, Runs, dataType, energy, 0, 0);
 //   tracks->removeEmptyTracks();
+
+   tracks->sortTracksByLength();
+   tracks->fillOutIncompleteTracks(0.4);
+   // Complete incomplete tracks
 
    printf("Found %d tracks before filtering.\n", tracks->GetEntries());
 
@@ -2915,9 +2946,8 @@ void drawTracks3D(Int_t Runs, Int_t dataType, Bool_t recreate, Int_t switchLayer
       view->SetView(theta, phi, 0, iret);
    }
 
-   TClonesArray *restPoints = tracks->getClustersWithoutTrack();
+//   TClonesArray *restPoints = tracks->getClustersWithoutTrack();
    Clusters * conflictClusters = nullptr;
-   printf("There are %d restpoints.\n", restPoints->GetEntriesFast());
 
    Int_t nClusters = 0;
    for (Int_t i=0; i<tracks->GetEntriesFast(); i++) {
@@ -2928,11 +2958,12 @@ void drawTracks3D(Int_t Runs, Int_t dataType, Bool_t recreate, Int_t switchLayer
    Int_t restPrimary = 0;
    Int_t restSecondary = 0;
    
-   for (Int_t i=0; i<restPoints->GetEntriesFast(); i++) {
-      if (!restPoints->At(i)) 
+//   for (Int_t i=0; i<restPoints->GetEntriesFast(); i++) {
+   for (Int_t i=0; i<tracks->GetEntriesFastCWT(); i++) {
+      if (!tracks->AtCWT(i)) 
          continue;
 
-      Cluster *thisCluster = (Cluster*) restPoints->At(i);
+      Cluster *thisCluster = (Cluster*) tracks->AtCWT(i);
 
       if (thisCluster->isSecondary()) restSecondary++;
       else restPrimary++;
@@ -2949,23 +2980,21 @@ void drawTracks3D(Int_t Runs, Int_t dataType, Bool_t recreate, Int_t switchLayer
   
 
    Int_t iPrim = 0, iSec = 0;
-   for (Int_t i=0; i<restPoints->GetEntriesFast(); i++) {
-      if (!restPoints->At(i)) {
-         continue;
-      }
 
-      Cluster *thisCluster = (Cluster*) restPoints->At(i);
+   for (Int_t i=0; i<tracks->GetEntriesFastCWT(); i++) {
+      if (!tracks->AtCWT(i)) 
+         continue;
+
+      Cluster *thisCluster = (Cluster*) tracks->AtCWT(i);
       Float_t x = thisCluster->getX();
       Float_t z = thisCluster->getY();
       Float_t y = thisCluster->getLayermm();
    
       if (thisCluster->isSecondary()) {
          EIDMarker->SetPoint(iSec++,x,y,z);
-         printf("s");
       }
       else {
          pMarker->SetPoint(iPrim++, x, y, z);
-         printf("p");
       }
    }
 
@@ -3005,12 +3034,11 @@ void drawTracks3D(Int_t Runs, Int_t dataType, Bool_t recreate, Int_t switchLayer
 
    Track * thisTrack = nullptr;
 //   tracks->createEIDSortList();
-
+   
    for (Int_t i=0; i<tracks->GetEntriesFast(); i++) {
       thisTrack = tracks->At(i);
       if (!thisTrack) continue;
       if (isnan(thisTrack->getFitParameterRange())) continue;
-
 
       nMissingEID = tracks->getNMissingClustersWithEventID(thisTrack->getEventID(0), thisTrack->Last()->getLayer(), i); 
 
@@ -3018,13 +3046,14 @@ void drawTracks3D(Int_t Runs, Int_t dataType, Bool_t recreate, Int_t switchLayer
          numberOfPrimaries++;
 
          if (thisTrack->isFirstAndLastEventIDEqual()) { // No confused tracks
-            if (nMissingEID == 0 && !tracks->isTrackIncomplete(thisTrack)) { // No missing clusters
+            if (nMissingEID == 0) { //  && !tracks->isTrackIncomplete(thisTrack)) { // No missing clusters
                nOkPrimary++;
                hWEPLCorrect->Fill(getUnitFromTL(thisTrack->getFitParameterRange()));
             }
             
             else { // Missing clusters
                nPrimaryIncomplete++;
+//               cout << "Incomplete track: " << *thisTrack << endl << endl;
                hWEPLConfused->Fill(getUnitFromTL(thisTrack->getFitParameterRange()));
             }
 
@@ -3057,7 +3086,7 @@ void drawTracks3D(Int_t Runs, Int_t dataType, Bool_t recreate, Int_t switchLayer
                   hProjConfused->Fill(delta);
                }
             }
-            if (nMissingEID == 0 && !tracks->isTrackIncomplete(thisTrack)) { // No missing clusters
+            if (nMissingEID == 0) { // && !tracks->isTrackIncomplete(thisTrack)) { // No missing clusters
                nPrimaryConfused++;
             }
 
@@ -3082,7 +3111,7 @@ void drawTracks3D(Int_t Runs, Int_t dataType, Bool_t recreate, Int_t switchLayer
          }
 
          else { // Confused tracks
-            if (nMissingEID == 0 && !tracks->isTrackIncomplete(thisTrack)) { // No missing clusters
+            if (nMissingEID == 0) { //  && !tracks->isTrackIncomplete(thisTrack)) { // No missing clusters
                nSecondaryConfused++;
             }
             else { // Confused AND Missing clusters
@@ -3189,7 +3218,7 @@ void drawTracks3D(Int_t Runs, Int_t dataType, Bool_t recreate, Int_t switchLayer
             l->SetLineColor(kRed);
          }
 
-         else if (nMissingEID>0 || tracks->isTrackIncomplete(thisTrack)) {
+         else if (nMissingEID>0) { // || tracks->isTrackIncomplete(thisTrack)) {
             l->SetLineColor(kGray);
          }
         
@@ -3225,7 +3254,6 @@ void drawTracks3D(Int_t Runs, Int_t dataType, Bool_t recreate, Int_t switchLayer
             conflictMarker->SetPoint(conflictIdx++, x,y,z);
          }
          if (kDraw) {
-   //       l->SetLineColor(kBlack);
             l->SetLineWidth(3);
             if (l->GetLineColor() == kRed) l->Draw();
             if (l->GetLineColor() == kGreen) {
@@ -3233,7 +3261,7 @@ void drawTracks3D(Int_t Runs, Int_t dataType, Bool_t recreate, Int_t switchLayer
                l->Draw();
             }
             if (l->GetLineColor() == kGray) l->Draw();
-            l->Draw();
+            if (l->GetLineColor() == kBlack) l->Draw();
          }
 
          if (l->GetLineColor() == kGreen) badSecondary++;

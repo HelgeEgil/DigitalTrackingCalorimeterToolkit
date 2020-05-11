@@ -280,23 +280,23 @@ Tracks * getTracksFromClusters(Int_t Runs, Int_t dataType, Int_t frameType, Floa
       // Track improvements
       Int_t nTracksBefore = 0, nTracksAfter = 0;
       Int_t nIsInelastic = 0, nIsNotInelastic = 0;
-      showDebug("removeNANs...");
-      tracks->removeNANs();
-      showDebug("ok!\nsortTracks...");
-      tracks->sortTracks(); // reverse order from retrograde reconstruction
-      tracks->removeEmptyTracks();
       
+      tracks->removeNANs();
+      tracks->sortTracks(); // reverse order from retrograde reconstruction
+
       t3.Start(false);
-      showDebug("ok!\nRemoving tracks leaving detector...");
+      // clusters->appendTracksToClustersWithoutTracks .. but give them the removed tracks !
+      tracks->removeEmptyTracks();
+      tracks->removeShortTracks(2);
       tracks->removeTracksLeavingDetector();
-      showDebug("ok\ncompress tracks and clusters...");      
+      tracks->fillOutIncompleteTracks(0.4);
       t3.Stop();
+
       t4.Start(false);
       tracks->Compress();
       tracks->CompressClusters();
       showDebug("ok\n");
      
-
 //      if (kSaveCWT) tracks->appendClustersWithoutTrack(clusters->getClustersWithoutTrack());
        
       
@@ -312,7 +312,7 @@ Tracks * getTracksFromClusters(Int_t Runs, Int_t dataType, Int_t frameType, Floa
       */
       
       // DO SOME CUTS HERE INSTEAD TO SAVE MEMORY
-      tracks->removeEmptyTracks();
+//      tracks->removeEmptyTracks();
 //       tracks->removeTracksStartingInDetector();
 //      tracks->doTrackFit(false);
 //      tracks->removeTracksWithMinWEPL(100);
@@ -326,6 +326,7 @@ Tracks * getTracksFromClusters(Int_t Runs, Int_t dataType, Int_t frameType, Floa
       showDebug("ok\n");
 
       showDebug("appendClustersWithoutTrack...");
+      if (kSaveCWT) allTracks->appendClustersWithoutTrack(tracks->getClustersWithoutTrack());
       if (kSaveCWT) allTracks->appendClustersWithoutTrack(clusters->getClustersWithoutTrack());
       t4.Stop();
       showDebug("ok\n");

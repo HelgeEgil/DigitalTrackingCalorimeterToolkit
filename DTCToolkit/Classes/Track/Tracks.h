@@ -46,18 +46,23 @@ class Tracks : public TObject {
       virtual void      CompressClusters();
       virtual void      Clear(Option_t * option = "");
       virtual void      sortTracks();
+      void              sortTracksByLength() { tracks_.Sort(); }
       virtual Long64_t  Merge(TCollection *tlist);
 
+      Bool_t            isSortable() const { return kTRUE; }
+
       // Add and remove tracks
-      virtual void      removeTrack(Track *t)   { tracks_.Remove((TObject*) t); }
-      virtual TObject*  removeTrackAt(Int_t i)  { return tracks_.RemoveAt(i); }
+      virtual void      removeTrack(Track *t); //   { tracks_.Remove((TObject*) t); }
+      virtual TObject*  removeTrackAt(Int_t i); //  { return tracks_.RemoveAt(i); }
       virtual TObject*  removeCWTAt(Int_t i)    { return clustersWithoutTrack_.RemoveAt(i); }
       void              appendTrack(Track *copyTrack, Int_t startOffset = 0);
       void              appendClustersWithoutTrack(TClonesArray *clustersWithoutTrack);
+      void              appendClusterWithoutTrack(Cluster * c);
       void              removeHighAngleTracks(Float_t mradLimit);
       void              removeHighAngleTracksRelativeToSpot(Float_t mradLimit, Float_t angleX, Float_t angleY);
       void              removeHighAngularChangeTracks(Float_t mradLimit);
       void              removeTracksStartingInDetector();
+      void              removeShortTracks(Int_t len);
 
       // Retrieve tracks
       TClonesArray    * getClustersWithoutTrack() { return (TClonesArray*) &clustersWithoutTrack_; }

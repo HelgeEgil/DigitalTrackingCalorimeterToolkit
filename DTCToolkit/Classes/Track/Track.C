@@ -50,6 +50,13 @@ Track::~Track() {
    track_.Delete();
 }
 
+Int_t Track::Compare(const TObject *obj) const {
+   Int_t length = ((Track*) this)->Last()->getLayer();
+   if (length == ((Track*) obj)->Last()->getLayer()) return 0;
+   else if (length > ((Track*) obj)->Last()->getLayer()) return -1;
+   else return 1;
+}
+
 void Track::setTrack(Track *copyTrack, Int_t startOffset /* default 0 */) {
    Clear("C");
 

@@ -2,8 +2,8 @@
 
 using namespace std;
 
-void makeInputFileForImageReconstructionCT(Int_t Runs, Int_t eventsPerRun, Int_t rotation) {
+void makeInputFileForImageReconstructionCT(Int_t Runs, Int_t eventsPerRun, Int_t rotation, TString phantomName) {
 	gROOT->ProcessLine(".x Load.C");
-	gROOT->ProcessLine(Form("makeOutputFileForImageReconstructionCT(%d, %d, %d)", Runs, eventsPerRun, rotation));
+	gROOT->ProcessLine(Form("makeOutputFileForImageReconstructionCT(%d, %d, %d, \"%s\")", Runs, eventsPerRun, rotation, phantomName.Data()));
 //	gROOT->ProcessLine(".q");
 }

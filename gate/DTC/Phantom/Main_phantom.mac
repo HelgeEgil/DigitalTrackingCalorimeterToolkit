@@ -61,5 +61,5 @@
 
 /gate/random/setEngineName MersenneTwister
 /gate/random/setEngineSeed auto
-/gate/application/setTotalNumberOfPrimaries 12500 # 10k for small phantoms; 5k for head phantom
+/gate/application/setTotalNumberOfPrimaries 25000 # 10k for small phantoms; 5k for head phantom
 /gate/application/start

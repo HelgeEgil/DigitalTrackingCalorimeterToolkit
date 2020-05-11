@@ -209,6 +209,21 @@ void Clusters::appendClusterWithoutTrack(Cluster *cluster) {
    c->setPDG(cluster->getPDG());
 }
 
+
+void Clusters::appendTrackToClustersWithoutTrack(Track *track) {
+   Cluster * cluster = nullptr;
+   for (Int_t j=0; j<=track->GetEntriesFast(); j++) {
+      Int_t i = clustersWithoutTrack_.GetEntriesFast();
+      Cluster *c = (Cluster*) clustersWithoutTrack_.ConstructedAt(i);
+      cluster = track->At(j);
+
+      c->set(cluster->getX(), cluster->getY(), cluster->getLayer(), cluster->getSize());
+      c->setEventID(cluster->getEventID());
+      c->setSecondary(cluster->isSecondary());
+      c->setPDG(cluster->getPDG());
+   }
+}
+
 void Clusters::markUsedClusters(Track *track) {
    Int_t    layer, idx;
    Float_t  x, y;

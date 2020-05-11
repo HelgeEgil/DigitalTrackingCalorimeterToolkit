@@ -61,6 +61,32 @@ Long64_t Tracks::Merge(TCollection *tlist) {
    }
    return 1;
 }
+      
+void Tracks::removeTrack(Track *t) {
+   Cluster *thisCluster = nullptr;
+
+   for (Int_t i=0; i<t->GetEntriesFast(); i++) {
+      thisCluster = t->At(i);
+      if (!thisCluster) continue;
+      appendClusterWithoutTrack(thisCluster);
+   }
+
+   tracks_.Remove((TObject*) t);
+}
+
+TObject*  Tracks::removeTrackAt(Int_t idx) {
+   Cluster *thisCluster = nullptr;
+   Track *t = At(idx);
+
+   for (Int_t i=0; i<t->GetEntriesFast(); i++) {
+      thisCluster = t->At(i);
+      if (!thisCluster) continue;
+      appendClusterWithoutTrack(thisCluster);
+   }
+
+   TObject *to = (TObject*) tracks_.RemoveAt(idx);
+   return to;
+}
 
 void Tracks::sortTracks() {
    for (Int_t i=0; i<GetEntriesFast(); i++) {
@@ -83,6 +109,12 @@ void Tracks::appendTrack(Track *copyTrack, Int_t startOffset /* default 0 */) {
    }
    track->setIncomplete(copyTrack->isIncomplete());
    showDebug(endl);
+}
+
+void Tracks::appendClusterWithoutTrack(Cluster *cluster) {
+   Int_t i = clustersWithoutTrack_.GetEntriesFast();
+   Cluster *c = (Cluster*) clustersWithoutTrack_.ConstructedAt(i+1);
+   c->set(cluster);
 }
 
 void Tracks::appendClustersWithoutTrack(TClonesArray *copyCWT) {
@@ -335,56 +367,6 @@ void Tracks::matchWithEventIDs(Hits * eventIDs) {
    cout << "Number of clusters without eventID: " << cWithoutEventID << "( " << (float) cWithoutEventID / nClusters * 100 << "%)\n";
 }
 
-void Tracks::sortTrackByLayer(Int_t trackIdx) {
-   // FIXME Check that this functions does what it should... It looks a bit strange!
-   // FIXME2 : Add Sort function on track, use this instead
-
-   Int_t       lastLayer = 0;
-   Bool_t      isSorted = true;
-   Cluster   * lastCluster = nullptr;
-   Track     * newTrack = new Track();
-   Cluster   * nextCluster = nullptr;
-   Int_t       firstLayer = 0;
-   Int_t       n = GetEntriesFast(trackIdx);
-
-   for (Int_t i=0; i<n; i++) {
-      if (!At(i)) continue;
-      firstLayer = i;
-      break;
-   }
-
-   for (Int_t i=0; i<n; i++) {
-      if (!At(trackIdx)->At(i)) continue;
-
-      if (lastLayer > At( trackIdx )->getLayer(i))
-         isSorted = false;
-
-      lastLayer = At( trackIdx )->getLayer(i);
-   }
-   
-   if (!isSorted) {
-      vector<Int_t> sortList;
-      sortList.resize(nLayers);
-      for (Int_t i=0; i<nLayers; i++) sortList.at(i) = -1;
-      for (Int_t i=0; i<n; i++) {
-         if (!At(trackIdx)->At(i)) continue;
-         sortList.at(At(trackIdx)->getLayer(i)) = i;
-      }
-
-      for (UInt_t i=0; i<sortList.size(); i++) {
-         if (sortList.at(i) <0) continue;
-         nextCluster = At(trackIdx)->At(sortList.at(i));
-         newTrack->appendCluster(nextCluster, firstLayer);
-      }
-
-      if (newTrack->GetEntriesFast()) {
-         appendTrack(newTrack);
-         removeTrackAt(trackIdx);
-         newTrack->Clear("C");
-      }
-   }
-}
-
 void Tracks::checkLayerOrientation() {
    Float_t     n[nLayers-1], x[nLayers-1], y[nLayers-1];
    Float_t     dx, dy;
@@ -473,18 +455,36 @@ Bool_t Tracks::isLastEventIDCloseToFirst(Int_t trackIdx) {
    return false;
 }
 
+void Tracks::removeShortTracks(Int_t len) {
+   Int_t n=0;
+
+   for (Int_t i=0; i<GetEntriesFast(); i++) {
+      if (!At(i)) continue;
+
+      if (At(i)->GetEntries() <= len) {
+         removeTrackAt(i);
+         n++;
+      }
+   }
+   printf("Removed %d tracks with >= %d entries.\n", n, len);
+}
+
+
 Int_t Tracks::getNMissingClustersWithEventID(Int_t eventID, Int_t afterLayer, Int_t trackID) {
    Int_t n = 0;
 
    for (Int_t i=0; i<GetEntriesFastCWT(); i++) {
       if (!AtCWT(i)) continue;
       if (!At(trackID)) continue;
-      if (AtCWT(i)->isSecondary()) continue;
+//      if (AtCWT(i)->isSecondary()) continue;
 
       Bool_t missingClusterWithEventID = (AtCWT(i)->getEventID() == eventID);
-      Bool_t missingInLastLayers = (AtCWT(i)->getLayer() > afterLayer);
+      Bool_t missingInLastLayers = (AtCWT(i)->getLayer() < afterLayer + 2);
       Bool_t missingInFirstLayers = (AtCWT(i)->getLayer() < At(trackID)->getLayer(0));
-      if (missingClusterWithEventID && (missingInLastLayers || missingInFirstLayers)) n++;
+      if (missingClusterWithEventID && (missingInLastLayers || missingInFirstLayers)) {
+         n++;
+      }
+      
    }
 
    /*
