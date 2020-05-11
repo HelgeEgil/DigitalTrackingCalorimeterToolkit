@@ -1,0 +1,24 @@
+#Phantom
+/gate/world/daughters/name triangleRotationBox
+/gate/world/daughters/insert box
+/gate/triangleRotationBox/geometry/setXLength 320.0 mm
+/gate/triangleRotationBox/geometry/setYLength 180.0 mm
+/gate/triangleRotationBox/geometry/setZLength 240.0 mm
+/gate/triangleRotationBox/placement/setTranslation 0 0 0 mm
+/gate/triangleRotationBox/placement/setRotationAxis 0 1 0
+/gate/triangleRotationBox/placement/setRotationAngle 90 deg
+/gate/triangleRotationBox/vis/setVisible false
+/gate/triangleRotationBox/setMaterial Air
+
+/gate/triangleRotationBox/daughters/name waterTriangle
+/gate/triangleRotationBox/daughters/insert            wedge
+/gate/waterTriangle/geometry/setXLength           300.0 mm
+/gate/waterTriangle/geometry/setNarrowerXLength   1.0 um
+/gate/waterTriangle/geometry/setYLength           220.0 mm
+/gate/waterTriangle/geometry/setZLength           160. mm
+/gate/waterTriangle/placement/setTranslation -75 0 0 mm
+/gate/waterTriangle/placement/setRotationAxis 1 0 0
+/gate/waterTriangle/placement/setRotationAngle -90 deg
+/gate/waterTriangle/setMaterial Water
+/gate/waterTriangle/vis/setVisible 1
+/gate/waterTriangle/vis/setColor blue
