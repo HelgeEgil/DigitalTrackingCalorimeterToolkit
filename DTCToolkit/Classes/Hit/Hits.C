@@ -39,6 +39,40 @@ Long64_t Hits::Merge(TCollection *hlist) {
    return 1;
 }
 
+Int_t Hits::findLayerIndex(Int_t findLayer) {
+   // Binary search of input ROOT file to file the first occurence of spot X
+   // The file is of course sorted with increasing spotX values
+   
+   Int_t nentries = GetEntriesFast();
+   Int_t nextIndex = nentries / 2;
+   Int_t maxIndex = nentries-1;
+   Int_t firstIndex = 0;
+
+   if (nentries==0) return 0;
+   if (findLayer == 0) return 0;
+
+   Int_t nTries = 0;
+   Int_t layer;
+   while (nTries < 200) {
+      nTries++;
+
+      if (maxIndex - firstIndex == 1) break;
+
+      layer = getLayer(nextIndex);
+
+      if (layer >= findLayer) {
+         maxIndex = nextIndex;
+         nextIndex = (firstIndex + maxIndex) / 2; 
+      }
+
+      else if (layer < findLayer) {
+         firstIndex = nextIndex;
+         nextIndex = (firstIndex + maxIndex) / 2;
+      }
+   }
+
+   return maxIndex;
+}
 
 void Hits::appendPoint(Int_t x, Int_t y, Int_t layer,  Float_t edep, Int_t eventID, Bool_t isSecondary, Int_t PDGEncoding) {
    Int_t i = GetEntriesFast();
@@ -48,10 +82,11 @@ void Hits::appendPoint(Int_t x, Int_t y, Int_t layer,  Float_t edep, Int_t event
       Bool_t primary;
 
       // search through hits
-      for (int j=0; j<i; j++) {
+      Int_t layerIdxFrom = findLayerIndex(layer);
+      for (int j=layerIdxFrom; j<i; j++) {
+         if (getLayer(j) > layer) break;
+
          if (getX(j) == x && getY(j) == y && getLayer(j) == layer) {
-            // Hit found at same position, ADD to edep instead
-//            if (getEdep(j) < edep) {            
             primary = !this->isSecondary(j) || !isSecondary;
             At(j)->setSecondary(!primary);
          
@@ -63,6 +98,7 @@ void Hits::appendPoint(Int_t x, Int_t y, Int_t layer,  Float_t edep, Int_t event
             break;
          }
       }
+   
       if (!added) {
          Hit *hit = (Hit*) hits_.ConstructedAt(i);
          hit->set(x,y,layer,edep,eventID, isSecondary,PDGEncoding);

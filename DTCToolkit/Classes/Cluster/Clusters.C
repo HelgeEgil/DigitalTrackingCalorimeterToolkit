@@ -168,6 +168,7 @@ void Clusters::removeTrackFromClustersWithoutTrack(Track *track) {
 void Clusters::removeSmallClusters(Int_t size) {
    for (Int_t i=0; i<GetEntriesFast(); i++) {
       if (getSize(i) <= size) {
+         At(i)->markUsed();
          removeClusterAt(i);
       }
    }

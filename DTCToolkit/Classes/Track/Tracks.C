@@ -466,45 +466,25 @@ void Tracks::removeShortTracks(Int_t len) {
          n++;
       }
    }
-   printf("Removed %d tracks with >= %d entries.\n", n, len);
+   Compress();
+//   printf("Removed %d tracks with >= %d entries.\n", n, len);
 }
 
 
-Int_t Tracks::getNMissingClustersWithEventID(Int_t eventID, Int_t afterLayer, Int_t trackID) {
+Int_t Tracks::getNMissingClustersWithEventID(Int_t eventID, Int_t afterLayer, Int_t beforeLayer) {
    Int_t n = 0;
 
    for (Int_t i=0; i<GetEntriesFastCWT(); i++) {
       if (!AtCWT(i)) continue;
-      if (!At(trackID)) continue;
-//      if (AtCWT(i)->isSecondary()) continue;
+      if (AtCWT(i)->isSecondary() && AtCWT(i)->getPDG() < 1000) continue;
 
       Bool_t missingClusterWithEventID = (AtCWT(i)->getEventID() == eventID);
-      Bool_t missingInLastLayers = (AtCWT(i)->getLayer() < afterLayer + 2);
-      Bool_t missingInFirstLayers = (AtCWT(i)->getLayer() < At(trackID)->getLayer(0));
+      Bool_t missingInLastLayers = (AtCWT(i)->getLayer() > afterLayer);
+      Bool_t missingInFirstLayers = (AtCWT(i)->getLayer() < beforeLayer);
       if (missingClusterWithEventID && (missingInLastLayers || missingInFirstLayers)) {
          n++;
       }
-      
    }
-
-   /*
-   if (n>0) {
-      printf("The following track misses %d clusters: ", n);
-      cout << *At(trackID) << endl;
-      printf("The missing clusters are: \n");
-      for (Int_t i=0; i<GetEntriesFastCWT(); i++) {
-         if (!AtCWT(i)) continue;
-         if (!At(trackID)) continue;
-         Bool_t missingClusterWithEventID = (AtCWT(i)->getEventID() == eventID);
-         Bool_t missingInLastLayers = (AtCWT(i)->getLayer() > afterLayer);
-         Bool_t missingInFirstLayers = (AtCWT(i)->getLayer() < At(trackID)->getLayer(0));
-         if (missingClusterWithEventID && (missingInLastLayers || missingInFirstLayers)) {
-            cout << *AtCWT(i) << ", with angle " << getDotProductAngle(At(trackID)->At(GetEntriesFast(trackID)-2), At(trackID)->Last(), AtCWT(i)) * 1000 << " mrad.\n";
-         }
-      }
-      cout << endl;
-   }
-   */
 
    return n;
 }
@@ -626,6 +606,7 @@ Bool_t Tracks::isTrackIncomplete(Track * originalTrack) {
    Int_t eventID = originalTrack->Last()->getEventID();
    Track * thisTrack = nullptr;
 
+   /*
    for (Int_t i=0; i<GetEntriesFast(); i++) {
       thisTrack = At(i);
       if (!thisTrack) continue;
@@ -635,8 +616,12 @@ Bool_t Tracks::isTrackIncomplete(Track * originalTrack) {
       if (thisTrack->At(0)->getEventID() == eventID && !thisTrack->At(0)->isSecondary() && !originalTrack->Last()->isSecondary()) {
          //cout << "Tracks are similar! original = " << *originalTrack << endl << "similar = " << *thisTrack << endl;
          return true;
-      }
+      }   
    }
+   */
+
+   if (getNMissingClustersWithEventID(eventID, originalTrack->Last()->getLayer(), originalTrack->At(0)->getLayer()) > 0) return true;
+
 
    return false;
 }

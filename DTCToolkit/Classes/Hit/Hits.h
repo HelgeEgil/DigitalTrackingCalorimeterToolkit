@@ -56,6 +56,7 @@ public:
    void              propagateSecondaryStatusFromTop(Int_t eventID = -1);
    
    // Layer indexing - optimizstion
+   Int_t             findLayerIndex(Int_t findLayer); // Without precaching
    void              makeLayerIndex();
    Int_t             getFirstIndexOfLayer(UInt_t layer);
    Int_t             getLastIndexOfLayer(UInt_t layer);

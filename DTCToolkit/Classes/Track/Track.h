@@ -24,6 +24,7 @@ class Track : public TObject {
       Float_t  fitScale_;
       Float_t  fitError_;
       Float_t  fitChi2_;
+      Float_t  fitSigma_;
       Float_t  precomputeFactor;
       Bool_t   isIncomplete_;
 
@@ -84,7 +85,7 @@ class Track : public TObject {
       Bool_t            hasLayer(Int_t layer);
       Int_t             getIdxFromLayer(Int_t i);
       Bool_t            doesTrackEndAbruptly();
-      Float_t           getRiseFactor();
+      Float_t           getRiseFactor(Int_t n = 5);
       Int_t             getNMissingLayers();
       void              propagateSecondaryStatus();
       Float_t           getAverageDepositedEnergy(Int_t fromIdx = 0, Int_t toIdxExclusive = -1);
@@ -143,6 +144,7 @@ class Track : public TObject {
       Float_t           getFitParameterScale();
       Float_t           getFitParameterError();
       Float_t           getFitParameterChiSquare();
+      Float_t           getFitParameterSigma();
       Float_t           getTrackScore();
 
       ClassDef(Track,5)

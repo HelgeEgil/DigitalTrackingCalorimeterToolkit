@@ -6,8 +6,8 @@
 /gate/systems/scanner_2/level1/attach Layer
 /gate/systems/phantom/level1/attach degrader
 
-#/control/execute readout_full_final.mac
-/gate/world/attachCrystalSD
+/control/execute readout_full_final.mac
+#/gate/world/attachCrystalSD
 
 #=================#
 # Physics			#
@@ -16,8 +16,15 @@
 /gate/geometry/setIonisationPotential Water 78 eV
 /gate/physics/addPhysicsList QBBC_EMZ
 /gate/physics/SetMaxStepSizeInRegion world 1 mm
-/gate/physics/ActivateStepLimiter proton
 /gate/physics/ActivateStepLimiter alpha
+/gate/physics/Gamma/SetCutInRegion TRACKER_ALPIDEEpi 10 um
+/gate/physics/Gamma/SetCutInRegion ALPIDEEpi 10 um
+/gate/physics/Proton/SetCutInRegion TRACKER_ALPIDEEpi 10 um
+/gate/physics/Proton/SetCutInRegion ALPIDEEpi 10 um
+/gate/physics/Electron/SetCutInRegion TRACKER_ALPIDEEpi 10 um
+/gate/physics/Electron/SetCutInRegion ALPIDEEpi 10 um
+/gate/physics/Positron/SetCutInRegion TRACKER_ALPIDEEpi 10 um
+/gate/physics/Positron/SetCutInRegion ALPIDEEpi 10 um
 
 #/gate/actor/addActor PhaseSpaceActor psa
 #/gate/actor/psa/save ../../DTCToolkit/Data/MonteCarlo/DTC_Full_Final_Helium_Degrader{degraderthickness}mm_{energy}MeV_psa.root
@@ -75,5 +82,5 @@
 
 /gate/random/setEngineName MersenneTwister
 /gate/random/setEngineSeed auto
-/gate/application/setTotalNumberOfPrimaries 10000
+/gate/application/setTotalNumberOfPrimaries 100000
 /gate/application/start

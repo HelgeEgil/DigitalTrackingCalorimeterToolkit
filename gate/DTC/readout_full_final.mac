@@ -1,4 +1,4 @@
-/gate/degrader/attachCrystalSD
+#/gate/degrader/attachCrystalSD
 /gate/TRACKER_Absorber1/attachCrystalSD
 /gate/TRACKER_Absorber2/attachCrystalSD
 /gate/TRACKER_Glue1/attachCrystalSD

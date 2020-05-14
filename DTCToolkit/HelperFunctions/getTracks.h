@@ -6,6 +6,7 @@
 
 // Tracks    * getTracksFOCAL(Int_t Runs, Int_t dataType = kMC, Int_t frameType = kCalorimeter, Float_t energy = 188); // See pre-2018-08 version on GH for FOCAL reconstruction methods 
 Tracks    * getTracksFromClusters(Int_t Runs, Int_t dataType = kMC, Int_t frameType = kCalorimeter, Float_t energy = 188, Float_t spotx = 0, Float_t spoty = 0, Clusters * c = nullptr);
+Tracks    * getTracksFromClustersVisualize(Int_t Runs, Int_t dataType = kMC, Int_t frameType = kCalorimeter, Float_t energy = 188, Float_t spotx = 0, Float_t spoty = 0, Clusters * c = nullptr);
 Tracks    * getTracksFromClustersMT(Int_t Runs, Int_t dataType = kMC, Int_t frameType = kCalorimeter, Float_t energy = 188, Float_t spotx = 0, Float_t spoty = 0, Clusters * c = nullptr);
 Clusters  * getClusters(Int_t Runs, Int_t dataType = kMC, Int_t frameType = kCalorimeter, Float_t energy = 188, Float_t spotx = 0, Float_t spoty = 0);
 void        saveTracks(Tracks* tracks, Clusters * clusters, Int_t dataType, Float_t energy);

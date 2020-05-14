@@ -20,12 +20,12 @@ void			drawClusterShapes(Int_t Runs, Bool_t dataType = kMC, Float_t energy = 250
 void			drawFitScale(Int_t Runs, Int_t dataType, Bool_t recreate, Float_t energy);
 void   		drawTracksRangeHistogram(Int_t Runs, Int_t dataType = kMC, Bool_t recreate = 0, Float_t energy = 250, Float_t degraderThickness = 0, Int_t eventsPerRun = kEventsPerRun, Int_t outputFileIdx = -1, Bool_t drawFitResults = true, Bool_t doTracking = kDoTracking, Bool_t excludeNuclearInteractions = kFilterNuclearInteractions, Int_t skipTracks = 0);
 void   		findTracksRangeAccuracy(Int_t Runs, Int_t dataType = kMC, Bool_t recreate = 0, Float_t energy = 250, Float_t degraderThickness = 0, Int_t eventsPerRun = kEventsPerRun, Int_t outputFileIdx = -1, Bool_t doTracking = kDoTracking, Bool_t excludeNuclearInteractions = kFilterNuclearInteractions);
-void   		drawTracksDepthDose(Int_t Runs, Int_t dataType = kMC, Bool_t recreate = 0, Float_t energy = 250, Float_t degraderThickness = 0, Int_t eventsPerRun = kEventsPerRun, Bool_t doTracking = kDoTracking, Bool_t excludeNuclearInteractions = kFilterNuclearInteractions);
+void   		drawTracksDepthDose(Int_t Runs, Int_t tracksperrun = kEventsPerRun, Float_t degraderThickness = 160, Bool_t recreate = true, Bool_t doTracking = kDoTracking);
 void			draw2DProjection(Int_t Runs, Int_t dataType, Bool_t recreate, Float_t energy);
 void			drawClusterSizeDistribution(Int_t Runs, Int_t dataType, Bool_t recreate, Float_t energy);
 void        compareChargeDiffusionModels(Int_t Runs, Bool_t recreate, Float_t energy);
-void			drawTracks3D(Int_t Runs, Int_t dataType = kMC, Bool_t recreate = false, Int_t switchLayer = 0, Float_t energy = 250, Float_t degraderThickness = 0, Int_t tracksperrun = kEventsPerRun, Bool_t doTracking = kDoTracking);
-void			analyseHelium(Int_t Runs, Int_t dataType = kMC, Bool_t recreate = false, Int_t switchLayer = 0, Float_t energy = 250, Float_t degraderThickness = 0, Int_t tracksperrun = kEventsPerRun, Bool_t doTracking = kDoTracking);
+void			drawTracks3D(Int_t Runs, Int_t tracksperrun = kEventsPerRun, Float_t degraderThickness = 160, Bool_t recreate = true, Bool_t doTracking = kDoTracking);
+void			analyseHelium(Int_t Runs, Int_t tracksperrun = kEventsPerRun, Float_t degraderThickness = 160, Bool_t recreate = true, Bool_t doTracking = kDoTracking);
 void			drawAlignmentCheck(Int_t Runs, Int_t dataType = kMC, Bool_t recreate = 0, Float_t energy = 250);
 void			drawDiffusionCheck(Int_t Runs, Int_t Layer, Float_t energy);
 void			drawFrame2D(Int_t dataType = kMC, Int_t Layer = 2, Float_t energy = 250, Float_t degraderThickness = 0);

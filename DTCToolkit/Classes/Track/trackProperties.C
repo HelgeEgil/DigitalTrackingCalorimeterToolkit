@@ -57,46 +57,47 @@ Bool_t Track::doesTrackEndAbruptly() {
 
    Bool_t   endsAbruptly = (Last()->getDepositedEnergy() < 3.5);
    if (kDataType == kData) endsAbruptly = (Last()->getDepositedEnergy() < 4);
-   if (kHelium) endsAbruptly = (Last()->getDepositedEnergy() < 12);
+   if (kHelium) endsAbruptly = (Last()->getDepositedEnergy() < 8);
 
    return endsAbruptly; 
 }
 
-Float_t Track::getRiseFactor() {
-   Float_t  normalization = 0;
+Float_t Track::getRiseFactor(Int_t n) {
    Float_t  riseFactor = 0;
-   Int_t    nNorm = 0;
-   Int_t    nNormActual = 0;
-   Int_t    n = GetEntriesFast();
 
-   if (!n) return 0;
-   if (n-2<0) return 0;
+   Int_t last = GetEntriesFast();
+   Cluster *c = nullptr;
 
-   nNorm = n/2;
+   Float_t sumRise = 0;
+   Float_t sumEdep = 0;
+   Float_t nEdep = 0;
+   Float_t lastEdep = 0;
 
-   for (Int_t i=0; i<nNorm; i++) {
-      if (!At(i)) continue;
-      normalization += getSize(i);
-      nNormActual++;
+   for (Int_t i=1; i<=n; i++) {
+      c = At(last-i);
+      if (c) {
+         sumEdep = c->getDepositedEnergy();
+         nEdep++;
+      }
    }
 
-   normalization /= nNormActual;
+   Float_t mean = sumEdep / nEdep;
 
-   if (At(n-1) && At(n-2)) {
-      riseFactor = (getSize(n-1) + getSize(n-2)) / 2 / normalization;
+   for (Int_t i=1; i<=n; i++) {
+      c = At(last-i);
+      if (c) {
+         if (lastEdep > 0) {
+            sumRise += pow(mean - c->getDepositedEnergy(), 2);
+         }
+         lastEdep = c->getDepositedEnergy();
+      }
    }
 
-   else if (At(n-1) && !At(n-1)) {
-      riseFactor = getSize(n-1) / normalization;
-   }
+   Float_t sigma = sqrt(sumRise / nEdep);
 
-   else if (!At(n-1) && At(n-1)) {
-      riseFactor = getSize(n-2) / normalization;
-   }
+//   printf("SIGMA POL0 = %.2f\n", sigma);
 
-   else return 0;
-
-   return riseFactor;
+   return mean;
 }
 
 Float_t Track::getAverageDepositedEnergy(Int_t fromIdx, Int_t toIdxExclusive) { // exclusive

@@ -6,6 +6,7 @@
 /gate/systems/scanner_2/level1/attach Layer
 /gate/systems/phantom/level1/attach degrader
 
+/gate/degrader/attachCrystalSD
 /gate/ALPIDEEpi/attachCrystalSD
 /gate/TRACKER_ALPIDEEpi/attachCrystalSD
 
@@ -26,7 +27,7 @@
 #/gate/physics/Gamma/SetCutInRegion TRACKER_Absorber1 100 um
 #/gate/physics/Gamma/SetCutInRegion TRACKER_Absorber2 100 um
 #/gate/physics/Gamma/SetCutInRegion TRACKER_ALPIDESub 5 um
-/gate/physics/Gamma/SetCutInRegion TRACKER_ALPIDEEpi 10 um
+#/gate/physics/Gamma/SetCutInRegion TRACKER_ALPIDEEpi 10 um
 #/gate/physics/Gamma/SetCutInRegion TRACKER_ALPIDEFront 5 um
 #/gate/physics/Gamma/SetCutInRegion TRACKER_AirGap1 750 um
 #/gate/physics/Gamma/SetCutInRegion TRACKER_AirGap2 1 mm
@@ -46,7 +47,7 @@
 #/gate/physics/Gamma/SetCutInRegion CableFDI1 15 um
 #/gate/physics/Gamma/SetCutInRegion CableFDI2 10 um
 #/gate/physics/Gamma/SetCutInRegion ALPIDESub 30 um
-/gate/physics/Gamma/SetCutInRegion ALPIDEEpi 10 um
+#/gate/physics/Gamma/SetCutInRegion ALPIDEEpi 10 um
 #/gate/physics/Gamma/SetCutInRegion ALPIDEFront 5 um
 #/gate/physics/Gamma/SetCutInRegion AirGap 750 um
 #/gate/physics/Gamma/SetCutInRegion TopFDI1 15 um
@@ -64,7 +65,7 @@
 #/gate/physics/Proton/SetCutInRegion TRACKER_CableFDI1 15 um
 #/gate/physics/Proton/SetCutInRegion TRACKER_CableFDI2 10 um
 #/gate/physics/Proton/SetCutInRegion TRACKER_ALPIDESub 5 um
-/gate/physics/Proton/SetCutInRegion TRACKER_ALPIDEEpi 10 um
+#/gate/physics/Proton/SetCutInRegion TRACKER_ALPIDEEpi 10 um
 #/gate/physics/Proton/SetCutInRegion TRACKER_ALPIDEFront 5 um
 #/gate/physics/Proton/SetCutInRegion TRACKER_AirGap1 750 um
 #/gate/physics/Proton/SetCutInRegion TRACKER_AirGap2 1 mm
@@ -82,7 +83,7 @@
 #/gate/physics/Proton/SetCutInRegion CableFDI1 15 um
 #/gate/physics/Proton/SetCutInRegion CableFDI2 10 um
 #/gate/physics/Proton/SetCutInRegion ALPIDESub 30 um
-/gate/physics/Proton/SetCutInRegion ALPIDEEpi 10 um
+#/gate/physics/Proton/SetCutInRegion ALPIDEEpi 10 um
 #/gate/physics/Proton/SetCutInRegion ALPIDEFront 5 um
 #/gate/physics/Proton/SetCutInRegion AirGap 750 um
 #/gate/physics/Proton/SetCutInRegion TopFDI1 15 um
@@ -100,7 +101,7 @@
 #/gate/physics/Electron/SetCutInRegion TRACKER_Absorber1 100 um
 #/gate/physics/Electron/SetCutInRegion TRACKER_Absorber2 100 um
 #/gate/physics/Electron/SetCutInRegion TRACKER_ALPIDESub 5 um
-/gate/physics/Electron/SetCutInRegion TRACKER_ALPIDEEpi 10 um
+#/gate/physics/Electron/SetCutInRegion TRACKER_ALPIDEEpi 10 um
 #/gate/physics/Electron/SetCutInRegion TRACKER_ALPIDEFront 5 um
 #/gate/physics/Electron/SetCutInRegion TRACKER_AirGap1 750 um
 #/gate/physics/Electron/SetCutInRegion TRACKER_AirGap2 1 mm
@@ -118,7 +119,7 @@
 #/gate/physics/Electron/SetCutInRegion CableFDI2 10 um
 #/gate/physics/Electron/SetCutInRegion Absorber 500 um
 #/gate/physics/Electron/SetCutInRegion ALPIDESub 30 um
-/gate/physics/Electron/SetCutInRegion ALPIDEEpi 10 um
+#/gate/physics/Electron/SetCutInRegion ALPIDEEpi 10 um
 #/gate/physics/Electron/SetCutInRegion ALPIDEFront 5 um
 #/gate/physics/Electron/SetCutInRegion AirGap 750 um
 #/gate/physics/Electron/SetCutInRegion TopFDI1 15 um
@@ -163,6 +164,15 @@
 #/gate/physics/Positron/SetCutInRegion BottomFDI1 50 um
 #/gate/physics/Positron/SetCutInRegion BottomFDI2 10 um
 
+/gate/physics/Gamma/SetCutInRegion TRACKER_ALPIDEEpi 10 um
+/gate/physics/Gamma/SetCutInRegion ALPIDEEpi 10 um
+/gate/physics/Proton/SetCutInRegion TRACKER_ALPIDEEpi 10 um
+/gate/physics/Proton/SetCutInRegion ALPIDEEpi 10 um
+/gate/physics/Electron/SetCutInRegion TRACKER_ALPIDEEpi 10 um
+/gate/physics/Electron/SetCutInRegion ALPIDEEpi 10 um
+/gate/physics/Positron/SetCutInRegion TRACKER_ALPIDEEpi 10 um
+/gate/physics/Positron/SetCutInRegion ALPIDEEpi 10 um
+
 /gate/run/initialize
 
 #=======================#
@@ -187,7 +197,7 @@
 
 /gate/output/root/enable
 /gate/output/root/setRootSinglesFlag 0
-/gate/output/root/setFileName ../../DTCToolkit/Data/MonteCarlo/DTC_Final_Helium_defThres_Degrader{degraderthickness}mm_{energy}MeV
+/gate/output/root/setFileName ../../DTCToolkit/Data/MonteCarlo/DTC_Final_Helium_Degrader{degraderthickness}mm_{energy}MeV
 
 #===============#
 # START BEAMS	#
