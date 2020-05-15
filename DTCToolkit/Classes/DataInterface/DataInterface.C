@@ -82,7 +82,8 @@ DataInterface::DataInterface(TTree *tree) : fChain(0) {
          }
          else { // FINAL DESIGN : HELIUM : SINGLE PENCIL BEAM
             printf("Opening HELIUM file with degrader thickness %.0f mm and FINAL design (3.5 mm)\n", run_degraderThickness);
-            chain->Add(Form("Data/MonteCarlo/DTC_Final_Helium_Degrader%03.0fmm_%dMeV.root/Hits", run_degraderThickness, kEnergy));
+            chain->Add(Form("Data/MonteCarlo/DTC_Final_Helium_Degrader%03.0fmm_%dMeV_nodegraderreadout.root/Hits", run_degraderThickness, kEnergy));
+//            chain->Add(Form("Data/MonteCarlo/DTC_Full_Final_Helium_Degrader%03.0fmm_%dMeV.root/Hits", run_degraderThickness, kEnergy));
          }
       }
 
@@ -189,7 +190,7 @@ void DataInterface::Init(TTree *tree) {
 //   fChain->SetBranchAddress("runID", &runID, &b_runID);
 //   fChain->SetBranchAddress("axialPos", &axialPos, &b_axialPos);
 //   fChain->SetBranchAddress("rotationAngle", &rotationAngle, &b_rotationAngle);
-//   fChain->SetBranchAddress("volumeID", volumeID, &b_volumeID);
+   fChain->SetBranchAddress("volumeID", volumeID, &b_volumeID);
 //   fChain->SetBranchAddress("processName", processName, &b_processName);
 //   fChain->SetBranchAddress("comptVolName", comptVolName, &b_comptVolName);
 //   fChain->SetBranchAddress("RayleighVolName", RayleighVolName, &b_RayleighVolName);
@@ -489,14 +490,6 @@ void  DataInterface::getMCClustersThreshold(Int_t runNo, Clusters *clusters, Hit
    // new design: let * 50 um = 0.316 keV/um * 50 um = 15.8e-3 MeV ~ 1.5e-2 MeV
    // new design 2: let * 25 um = 0.316 keV/um * 25 um = 7.9e-3 MeV ~ 8e-3 MeV
    // TEST: actual threshold = n < 0.25 -> treshold = 9e-4 MeV
-/*
-   Float_t primaryX[1000];
-   Float_t primaryY[1000];
-   Int_t lastLayerInList = -1;
-
-   TH1I * hDevX = new TH1I("hDevX", "X deviation;X secondary - X primary [#mum];Entries", 100, -200, 200);
-   TH1I * hDevY = new TH1I("hDevY", "Y deviation;Y secondary - Y primary [#mum];Entries", 100, -200, 200);
-   */
 
    Float_t threshold = 8e-3;
    Int_t particlesBelowThreshold = 0;
@@ -506,8 +499,6 @@ void  DataInterface::getMCClustersThreshold(Int_t runNo, Clusters *clusters, Hit
    threshold = 0;
 
    if (runNo == 0 && !kSpotScanning) lastJentry_ = 0;
-
-// Split the file instead (to save memory when loading 40x copies...)
 
    if (lastJentry_ >= 0 && runNo == 0 && kSpotScanning) {
       lastJentry_ = findSpotIndex(useSpotX);
@@ -530,18 +521,6 @@ void  DataInterface::getMCClustersThreshold(Int_t runNo, Clusters *clusters, Hit
 
       
       layer = baseID*2 + level1ID - 2;
-      /*
-      if (parentID == 0) {
-         primaryX[layer] = posX;
-         primaryY[layer] = posY;
-         lastLayerInList = layer;
-      }
-      
-      else if (PDGEncoding == 11 && layer <= lastLayerInList) {
-         hDevX->Fill(1000 * (posX - primaryX[layer]));
-         hDevY->Fill(1000 * (posY - primaryY[layer]));
-      }
-*/
       if (!kSpotScanning) {
          if (eventID < eventIdFrom) {
             continue;
@@ -584,18 +563,6 @@ void  DataInterface::getMCClustersThreshold(Int_t runNo, Clusters *clusters, Hit
          if (kPhantom) layer += 2;
       }
      
-     /*
-      if (posZ < 0) { // Inside degrader, check if nuclear interactions
-         
-         if (TString(processName) == "xxhadElastic" || TString(processName) == "alphaInelastic" || TString(processName) == "protonInelastic") {
-            isSecondary = true;
-         }
-
-         lastEventID = eventID;
-         continue;
-      }
-      */
-
       if (parentID != 0 || TString(processName) == "alphaInelastic" || TString(processName) == "protonInelastic") { // Secondary track
          isSecondary = true;
 
@@ -620,13 +587,22 @@ void  DataInterface::getMCClustersThreshold(Int_t runNo, Clusters *clusters, Hit
             }
          }
       }
-      
-      
+
+      /*
+      // if not in epitaxial layer: continue
+      if (volumeID[3] != 3) {
+         lastEventID = eventID;
+         continue;
+      }
+      */
+
+      /*
       if (edep < threshold) {
          particlesBelowThreshold++;
          lastEventID = eventID;
          continue;
       }
+      */
 
       x = posX / dx + nx/2;
       y = posY / dy + ny/2;
@@ -639,26 +615,6 @@ void  DataInterface::getMCClustersThreshold(Int_t runNo, Clusters *clusters, Hit
       
       lastEventID = eventID;
    }
-
-   /*
-   TCanvas *c = new TCanvas("c", "deviations", 1200, 800);
-   c->Divide(2,1,1e-5,1e-5);
-   c->cd(1);
-   hDevX->Draw();
-   gPad->Update();
-   TLine *l1 = new TLine(-15, 0, -15, gPad->GetUymax());
-   l1->Draw();
-   TLine *l2 = new TLine(15, 0, 15, gPad->GetUymax());
-   l2->Draw();
-
-   c->cd(2);
-   hDevY->Draw();
-   gPad->Update();
-   TLine *l3 = new TLine(-15, 0, -15, gPad->GetUymax());
-   l3->Draw();
-   TLine *l4 = new TLine(15, 0, 15, gPad->GetUymax());
-   l4->Draw();
-   */
 }
 
 Long64_t DataInterface::findSpotIndex(Float_t findSpotX) {

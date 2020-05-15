@@ -735,10 +735,10 @@ void drawIndividualGraphs(TCanvas *cGraph, TGraphErrors* outputGraph, Float_t fi
    outputGraph->GetYaxis()->SetTitleFont(22);
    outputGraph->GetYaxis()->SetLabelFont(22);
 
-   Float_t low = getUnitFromEnergy(0);
-   Float_t high = getUnitFromEnergy(run_energy) * 1.7;
+//   Float_t low = getUnitFromEnergy(0);
+//   Float_t high = getUnitFromEnergy(run_energy) * 1.7;
 
-   outputGraph->GetXaxis()->SetLimits(low, high);
+   outputGraph->GetXaxis()->SetLimits(0, 450);
 
    outputGraph->SetMarkerColor(4);
    outputGraph->SetMarkerStyle(21);
@@ -794,7 +794,7 @@ void drawIndividualGraphs(TCanvas *cGraph, TGraphErrors* outputGraph, Float_t fi
       text->Draw();
    }
    
-   outputGraph->GetXaxis()->SetRangeUser(0, 350);
+   outputGraph->GetXaxis()->SetRangeUser(0, 450);
 
    cGraph->Update();
 }

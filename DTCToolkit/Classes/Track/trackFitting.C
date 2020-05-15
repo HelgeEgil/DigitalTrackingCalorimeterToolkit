@@ -87,11 +87,19 @@ TGraphErrors * Track::doTrackFit(Bool_t isScaleVariable, Bool_t useTrackLength) 
    func->SetNpx(750);
 
    graph->Fit("fit_BP", "B, N, Q, W, G", "", 0, maxRange*1.2);
-   
+
    fitRange_ = func->GetParameter(0);
    fitScale_ = func->GetParameter(1);
    fitError_ = func->GetParError(0);
    fitChi2_  = func->GetChisquare();
+
+   fitSigma_ = 0;
+   Int_t ii;
+   for (Int_t i=1; i<6; i++) {
+      ii = GetEntriesFast()-i;
+      fitSigma_ += pow(y[ii] - func->Eval(x[ii]), 2);
+   }
+   fitSigma_ = sqrt(fitSigma_ /(5-1));
 
    delete func;
    
@@ -123,6 +131,10 @@ Float_t Track::getFitParameterScale() {
       }
    }
    return fitScale_;
+}
+
+Float_t Track::getFitParameterSigma() {
+   return fitSigma_;
 }
 
 Float_t Track::getFitParameterError() {

@@ -293,7 +293,7 @@ void makePlots() {
    ifstream in2;
    ifstream in2uni;
 //   in2.open("OutputFiles/lastLayerCorrect_different_nRuns_elastic_noinelastic.csv");
-   in2.open("OutputFiles/lastLayerCorrect_HeliumAndProton.csv");
+   in2.open("OutputFiles/lastLayerCorrect_different_nRuns_ProtonHelium_5cm_2.csv");
    in2uni.open("OutputFiles/lastLayerCorrect_different_nRuns_uniform.csv");
    Float_t np, correctLast, correctWhole, lastIsFirst, lastIsAlmostFirst;
    Int_t   mmAbsorber_;
@@ -350,27 +350,27 @@ void makePlots() {
 
       if (!in2.good()) break;
      
-      if (mmAbsorber_ == 0) { 
+      if (mmAbsorber_ == 0) {  // p 5
          arrayFraction2mmX[nlinesF2] = np;
          arrayFraction2mmY[nlinesF2] = lastIsFirstAllTracks * 100;
          arrayFraction2mmY2[nlinesF2++] = lastIsFirstAllTracksAfterFiltering * 100;
       }
 
-      if (mmAbsorber_ == 1) {
+      if (mmAbsorber_ == 1) { // he 5
          arrayFraction3mmX[nlinesF3] = np;
          arrayFraction3mmY[nlinesF3] = lastIsFirstAllTracks * 100;
          arrayFraction3mmY2[nlinesF3++] = lastIsFirstAllTracksAfterFiltering * 100;
       }
-/*
-      if (mmAbsorber_ == 4) {
+      if (mmAbsorber_ == 2) { // p 16
          arrayFraction4mmX[nlinesF4] = np;
-         arrayFraction4mmY[nlinesF4++] = lastIsFirstAllTracks * 100;
+         arrayFraction4mmY[nlinesF4++] = lastIsFirstAllTracksAfterFiltering * 100;
       }
 
-      if (mmAbsorber_ == 5) {
+      if (mmAbsorber_ == 3) { // he 16
          arrayFraction5mmX[nlinesF5] = np;
-         arrayFraction5mmY[nlinesF5++] = lastIsFirstAllTracks * 100;
+         arrayFraction5mmY[nlinesF5++] = lastIsFirstAllTracksAfterFiltering * 100;
       }
+/*
 
       if (mmAbsorber_ == 6) {
          arrayFraction6mmX[nlinesF6] = np;
@@ -944,8 +944,8 @@ void makePlots() {
    gFraction2mmFilter->Draw("LPA");
    gFraction3mmFilter->Draw("LP");
 //   gFraction35mm->Draw("L");
-//   gFraction4mm->Draw("LP");
-//   gFraction5mm->Draw("LP");
+   gFraction4mm->Draw("LP");
+   gFraction5mm->Draw("LP");
 //   gFraction6mm->Draw("LP");
    
    TText *tt = new TText();   
@@ -971,11 +971,11 @@ void makePlots() {
    curveLabel->SetTextFont(22);
    curveLabel->SetTextSize(0.04);
 //   curveLabel->DrawText(535, gFraction2mm->Eval(535)*0.98, "Ideal");
-//   curveLabel->DrawText(535, gFraction3mm->Eval(535)*0.98, "CD");
-//   curveLabel->DrawText(535, gFraction35mm->Eval(535)*0.98, "5x5 mm^{2}");
-//   curveLabel->DrawText(535, gFraction4mm->Eval(535)*0.98, "4 mm");
-   curveLabel->DrawText(535, gFraction2mmFilter->Eval(535)*0.98, "Helium");
-   curveLabel->DrawText(535, gFraction3mmFilter->Eval(535)*0.98, "Proton");
+   curveLabel->DrawText(220, gFraction5mm->Eval(220)*0.98, "Helium 16 cm");
+//   curveLabel->DrawText(220, gFraction35mm->Eval(220)*0.98, "5x5 mm^{2}");
+   curveLabel->DrawText(220, gFraction4mm->Eval(220)*0.98, "Proton 16 cm");
+   curveLabel->DrawText(220, gFraction2mmFilter->Eval(220)*0.98, "Helium 5 cm");
+   curveLabel->DrawText(220, gFraction3mmFilter->Eval(220)*0.98, "Proton 5 cm");
 //   curveLabel->DrawText(220, 91, "Pixel Diffusion Model");
 
    /*

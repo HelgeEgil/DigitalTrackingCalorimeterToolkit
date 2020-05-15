@@ -31,27 +31,33 @@
 
 // -------------------------------------
 
-Bool_t   kHelium = false;
-Bool_t   kSpotScanning = true;
-Int_t    kRotation = 90; // degrees
-Bool_t   kPhantom = true;
+Bool_t   kHelium = true;
+Int_t    kEnergy = 917; // 917 MeV_Helium ~= 230 MeV_proton // 600 HeC phantom
 Bool_t   kDoTracking = true; 
-Bool_t   kFilterNuclearInteractions = false; 
 Bool_t   kDoDiffusion = true;
-Int_t    kEventsPerRun = 100;
-Int_t    kSkipTracks = 0; // during readout
-const Int_t    kEnergy = 230; // 917 MeV_Helium ~= 230 MeV_proton // 600 HeC phantom
-Bool_t   kUseDegrader = true; 
-Bool_t   kUseAlpide = true;
 Bool_t   kDoTrackerPropagation = false; // Some foul bugs here
-TString  kPhantomName = "headphantom";
-Bool_t   kSplitSpotColumnsPerRotation = false;
+Int_t    kRotation = 90; // degrees
+
+// Somewhat deprecated
+Bool_t   kUseAlpide = true;
+Bool_t   kUseDegrader = true; 
+Int_t    kSkipTracks = 0; // during readout
+Bool_t   kFilterNuclearInteractions = false; 
 
 const Int_t sizeOfEventID = 25;
 const Int_t nChildrenInNode = 2; // max concurrent track segments to follow
 Float_t     kMaxTrackScore = 0.3; // This number is a placeholder, optimized through MC scans in Classes/Clusters/findTracks.C
 Float_t     kMaxTrackAngle = 0.05; // allow for consecutive 50 mrad changes
 Bool_t      kConcatenateHits = true;
+
+// Controlled by functions
+TString  kPhantomName = "headphantom";
+Bool_t   kSpotScanning = false;
+Bool_t   kPhantom = false;
+Bool_t   kSplitSpotColumnsPerRotation = false;
+Int_t    kEventsPerRun = 100;
+Float_t  kSpotX = 0;
+Float_t  kSpotY = 0;
 
 // natural unit is mm
 const Float_t cm = 0.1;
@@ -80,8 +86,6 @@ const Bool_t kFinalDesign = false;
 const Int_t nEnergies = 6;
 Int_t energies[nEnergies] = {122, 140, 150, 170, 180, 188};
 
-Float_t kSpotX = 0;
-Float_t kSpotY = 0;
 
 enum eFrameType {kCalorimeter, kTracker};
 enum eDataType {kMC, kData};
@@ -99,6 +103,7 @@ const Bool_t kUseExperimentalClusterPainting = false;
 const Bool_t kUseRefinedClustering = true;
 
 // Tracking parameters
+// Somewhat deprecated (fixme: move control here from functions)
 Float_t initialSearchRadius = 50 * dx; // 20 if dimensionless
 Float_t searchRadius = 40 * dx; // 20 if dimensionless
 Float_t kMCSFactor = 3;

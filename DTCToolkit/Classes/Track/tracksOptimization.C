@@ -230,6 +230,7 @@ void Tracks::fillOutIncompleteTracks(float angleLimit) {
       thisTrack = At(i);
       if (!thisTrack) continue;
 //      if (thisTrack->Last()->getDepositedEnergy() > 3) continue;
+      if (thisTrack->GetEntriesFast() < 4) continue;
 
 //      printf("Working on track %d with length %d\n", i, thisTrack->Last()->getLayer());
       
@@ -539,7 +540,7 @@ void Tracks::removeNuclearInteractions() {
    Int_t    nTotalStart = GetEntries();
 
    Float_t plateauThreshold = 0;
-   if (kHelium) plateauThreshold = 4;
+   if (kHelium) plateauThreshold = 3.5;
 
    Float_t plateauEdep;
 
@@ -616,7 +617,7 @@ void Tracks::removeThreeSigmaShortTracks() {
    delete h;
 
    cutRangeLow = muRange - 3 * sigmaRange;
-   cutRangeHigh = muRange + 1.5 * sigmaRange;
+   cutRangeHigh = muRange + 3 * sigmaRange;
    printf("muRange = %.3f mm, sigmaRange = %.3f mm, cutRangeLow = %.3f mm, cutRangeHigh = %.3f mm\n", muRange, sigmaRange, cutRangeLow, cutRangeHigh);
 
    for (Int_t i=0; i<=nTotal; i++) {
