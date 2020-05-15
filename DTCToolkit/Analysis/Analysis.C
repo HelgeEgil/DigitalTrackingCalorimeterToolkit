@@ -2515,7 +2515,7 @@ void makeOutputFileForImageReconstructionRad(Int_t Runs, Int_t tracksperrun, Int
    Bool_t  kDraw = false;
 
    Float_t lastEdep;
-   Bool_t isSingleEventID, isLastHitSecondary;
+   Bool_t isSingleEventID, isLastHitSecondary, isAngleTooHigh;
    Float_t spotXlim, spotYlim, spotStep;
 
    spotStep = 7;
@@ -2560,6 +2560,7 @@ void makeOutputFileForImageReconstructionRad(Int_t Runs, Int_t tracksperrun, Int
    tOut->Branch("lastEdep", &lastEdep, "lastEdep/F");
    tOut->Branch("isSingleEventID", &isSingleEventID, "isSingleEventID/O");
    tOut->Branch("isLastHitSecondary", &isLastHitSecondary, "isLastHitSecondary/O");
+//   tOut->Branch("isAngleTooHigh", &isAngleTooHigh, "isAngleTooHigh/O");
    tOut->Branch("trackLateralDifference", &trackLateralDistance, "trackLateralDifference/F");
    tOut->Branch("trackOutgoingAngle", &trackOutgoingAngle, "trackOutgoingAngle/F");
 
@@ -2581,7 +2582,7 @@ void makeOutputFileForImageReconstructionRad(Int_t Runs, Int_t tracksperrun, Int
       printf("Spot (%.0f,%.0f)\n", spotX, spotY);
       Tracks * tracks = loadOrCreateTracks(true, Runs, false, run_energy, spotX, spotY);
       printf("lastJentry = %lld\n", lastJentry_);
-      tracks->removeHighAngleTracksRelativeToSpot(65, angleXmrad, angleYmrad);
+//      tracks->removeHighAngleTracksRelativeToSpot(65, angleXmrad, angleYmrad);
       tracks->removeTracksWithMinWEPL(100);
 //      tracks->removeThreeSigmaShortTracks();
 
@@ -2817,7 +2818,7 @@ void makeOutputFileForImageReconstructionCT(Int_t Runs, Int_t tracksperrun, Int_
          printf("Spot (%.0f,%.0f)\n", spotX, spotY);
          Tracks * tracks = loadOrCreateTracks(true, Runs, false, run_energy, spotX, spotY);
          printf("lastJentry = %lld\n", lastJentry_);
-         tracks->removeHighAngleTracksRelativeToSpot(65, angleXmrad, angleYmrad);
+//         tracks->removeHighAngleTracksRelativeToSpot(65, angleXmrad, angleYmrad);
          tracks->removeTracksWithMinWEPL(100);
 //         tracks->removeThreeSigmaShortTracks();
 
