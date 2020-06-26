@@ -14,7 +14,7 @@
 /gate/triangleRotationBox/daughters/insert            wedge
 /gate/waterTriangle/geometry/setXLength           300.0 mm
 /gate/waterTriangle/geometry/setNarrowerXLength   1.0 um
-/gate/waterTriangle/geometry/setYLength           220.0 mm
+/gate/waterTriangle/geometry/setYLength           200.0 mm
 /gate/waterTriangle/geometry/setZLength           160. mm
 /gate/waterTriangle/placement/setTranslation -75 0 0 mm
 /gate/waterTriangle/placement/setRotationAxis 1 0 0
