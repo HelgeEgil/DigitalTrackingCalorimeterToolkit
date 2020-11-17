@@ -107,11 +107,11 @@ Tracks * loadTracks(Int_t Runs, Int_t dataType, Float_t energy, Clusters * clust
    return tracks;
 }
 
-Tracks * loadOrCreateTracks(Bool_t recreate, Int_t Runs, Int_t dataType, Float_t energy, Float_t spotx, Float_t spoty, Clusters * clusters) {
+Tracks * loadOrCreateTracks(Bool_t recreate, Int_t Runs, Int_t dataType, Float_t energy, Float_t spotx, Float_t spoty, Clusters * clusters, Int_t startRun) {
    Tracks * tracks = nullptr;
    
    if (recreate) {
-      tracks = getTracksFromClusters(Runs, dataType, kCalorimeter, energy, spotx, spoty, clusters);
+      tracks = getTracksFromClusters(Runs, dataType, kCalorimeter, energy, spotx, spoty, clusters, startRun);
 //      tracks = getTracksFromClustersVisualize(Runs, dataType, kCalorimeter, energy, spotx, spoty, clusters);
       if (tracks) saveTracks(tracks, clusters, dataType, energy);
    }
@@ -120,7 +120,7 @@ Tracks * loadOrCreateTracks(Bool_t recreate, Int_t Runs, Int_t dataType, Float_t
       tracks = loadTracks(Runs, dataType, energy, clusters);
       if (!tracks) {
          cout << "!tracks, creating new file\n";
-         tracks = getTracksFromClusters(Runs, dataType, kCalorimeter, energy, spotx, spoty, clusters);
+         tracks = getTracksFromClusters(Runs, dataType, kCalorimeter, energy, spotx, spoty, clusters, startRun);
          saveTracks(tracks, clusters, dataType, energy);
       }
    }
@@ -349,7 +349,7 @@ Tracks * getTracksFromClustersVisualize(Int_t Runs, Int_t dataType, Int_t frameT
    return nullptr;
 }
 
-Tracks * getTracksFromClusters(Int_t Runs, Int_t dataType, Int_t frameType, Float_t energy, Float_t spotx, Float_t spoty, Clusters * saveClusters) {
+Tracks * getTracksFromClusters(Int_t Runs, Int_t dataType, Int_t frameType, Float_t energy, Float_t spotx, Float_t spoty, Clusters * saveClusters, Int_t startRun) {
    DataInterface   * di = new DataInterface();
    Int_t             nClusters = kEventsPerRun * 10 * nLayers;
    Int_t             nTracks = kEventsPerRun * 2;
@@ -375,7 +375,7 @@ Tracks * getTracksFromClusters(Int_t Runs, Int_t dataType, Int_t frameType, Floa
 
    t4.Start(false);
    Cluster * thisCluster = nullptr;
-   for (Int_t i=0; i<Runs; i++) {
+   for (Int_t i=startRun; i<Runs+startRun; i++) {
       clusters = new Clusters(nClusters);
       showDebug("Start getMCClusters\n");
       t1.Start(false);
@@ -440,6 +440,8 @@ Tracks * getTracksFromClusters(Int_t Runs, Int_t dataType, Int_t frameType, Floa
          if (i%10 == 0) printf("Found %d tracks from %d Clusters in run %.2f-%d.\n", tracks->GetEntriesFast(), clusters->GetEntriesFast(), run_energy, i);
       }
       else {
+         showDebug("sortClusters...");
+         clusters->sortClusters();
          tracks = clusters->findCalorimeterTracksWithMCTruth();
       }
       t2.Stop();
@@ -455,17 +457,20 @@ Tracks * getTracksFromClusters(Int_t Runs, Int_t dataType, Int_t frameType, Floa
       // Track improvements
       Int_t nTracksBefore = 0, nTracksAfter = 0;
       Int_t nIsInelastic = 0, nIsNotInelastic = 0;
-      
+     
       tracks->removeNANs();
       tracks->sortTracks(); // reverse order from retrograde reconstruction
       tracks->appendClustersWithoutTrack(clusters->getClustersWithoutTrack());
-
+      
       t3.Start(false);
       tracks->removeEmptyTracks();
-//      tracks->removeShortTracks(4); // rem [0, 4]
-//      tracks->removeTracksLeavingDetector();
+      tracks->removeShortTracks(4); // rem [0, 4]
+      tracks->removeTracksLeavingDetector();
       tracks->fillOutIncompleteTracks(0.4);
       t3.Stop();
+      
+      // tracks->removeNuclearInteractions();
+//      tracks->removeTracksWithMinWEPL(100);
 
       tracks->Compress();
       tracks->CompressClusters();

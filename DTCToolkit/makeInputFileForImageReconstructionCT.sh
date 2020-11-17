@@ -6,6 +6,6 @@ if [ $# -ne 1 ]; then
    exit
 fi
 
-for rot in `seq 0 2 358`; do
-   tsp root -l 'Scripts/makeInputFileForImageReconstructionCT.C(250, 50, '$rot', '$1')'
+for rot in `seq 0 1 359`; do
+   tsp root -l 'Scripts/makeInputFileForImageReconstructionCT.C(200, 50, '$rot', "'$1'")'
 done

@@ -116,7 +116,7 @@ void Hits::appendNeighboursToClusters(vector<Int_t> *expandedCluster, Clusters *
    Int_t maxPDG = -1000;
    Int_t maxEventID = -1000; 
    Bool_t maxSecondary = false;
-   Bool_t isPrimaryInCluster = false;
+   Int_t otherEventID = -1000;
 
    for (Int_t j=0; j<cSize; j++) {
       idx = expandedCluster->at(j);
@@ -127,6 +127,12 @@ void Hits::appendNeighboursToClusters(vector<Int_t> *expandedCluster, Clusters *
          maxPDG = getPDG(idx);
          maxEventID = getEventID(idx);
          maxSecondary = isSecondary(idx);
+      }
+      if (getPDG(idx) == maxPDG && maxEventID != getEventID(idx)) {
+         otherEventID = getEventID(idx);
+//         cout << "Merged clusters, eventID " << otherEventID << " suppressed in layer " << getLayer(idx) << endl;
+         kSuppressedClustersEventID.push_back(otherEventID);
+         kSuppressedClustersLayer.push_back(getLayer(idx));
       }
    }
 

@@ -1,0 +1,79 @@
+/gate/geometry/setMaterialDatabase GateMaterials.db
+
+/control/execute Module_phantom.mac
+
+/gate/systems/scanner_1/level1/attach TRACKER_Layer
+/gate/systems/scanner_2/level1/attach Layer
+# /gate/systems/phantom/level1/attach degrader
+
+/gate/ALPIDEEpi/attachCrystalSD
+/gate/TRACKER_ALPIDEEpi/attachCrystalSD
+
+#=================#
+# Physics			#
+#=================#
+
+/gate/geometry/setIonisationPotential Water 78 eV
+/gate/physics/addPhysicsList QBBC_EMZ
+#/gate/physics/SetMaxStepSizeInRegion world 1 mm
+#/gate/physics/ActivateStepLimiter proton
+
+#/gate/actor/addActor PhaseSpaceActor PSA
+#/gate/actor/PSA/save ../../../DTCToolkit/Data/MonteCarlo/DTC_PSA_spotx{spotx}_spoty{spoty}_rotation{rotation}deg.root
+#/gate/actor/PSA/attachTo PSAvolume
+#/gate/actor/PSA/enableEkine true
+#/gate/actor/PSA/enableParticleName true
+#/gate/actor/PSA/storeSecondaries false
+#/gate/actor/PSA/enableProductionProcess false
+#/gate/actor/PSA/enableProductionVolume true
+#/gate/actor/PSA/addFilter particleFilter
+#/gate/actor/PSA/particleFilter/addParticlePDG 2212
+
+/gate/run/initialize
+
+#=======================#
+# ADD PROTON BEAM	      #
+#=======================#
+
+/gate/source/addSource PBS PencilBeam
+/gate/source/PBS/setParticleType GenericIon
+/gate/source/PBS/setIonProperties 2 4 2 0
+/gate/source/PBS/setEnergy 917. MeV
+/gate/source/PBS/setSigmaEnergy 0. MeV
+/gate/source/PBS/setPosition {spotx} {spoty} -500 mm
+/gate/source/PBS/setSigmaX 2 mm # was 1.1
+/gate/source/PBS/setSigmaY 2 mm # was 1.1
+/gate/source/PBS/setSigmaTheta 2.5 mrad # was 1.2
+/gate/source/PBS/setSigmaPhi 2.5 mrad # was 1.2
+/gate/source/PBS/setRotationAxis {axisx} {axisy} 0
+/gate/source/PBS/setRotationAngle {theta} rad
+/gate/source/PBS/setEllipseXThetaEmittance 3 mm*mrad
+/gate/source/PBS/setEllipseXThetaRotationNorm negative
+/gate/source/PBS/setEllipseYPhiEmittance 3 mm*mrad
+/gate/source/PBS/setEllipseYPhiRotationNorm negative
+#/gate/source/addSource uniformBeam gps
+#/gate/source/uniformBeam/gps/particle GenericIon
+#/gate/source/uniformBeam/gps/setIonProperties 2 4 2 0
+#/gate/source/uniformBeam/gps/ene/type Gauss
+#/gate/source/uniformBeam/gps/ene/mono {energy} MeV
+#/gate/source/uniformBeam/gps/ene/sigma {sigma} MeV
+#/gate/source/uniformBeam/gps/type Plane
+#/gate/source/uniformBeam/gps/shape Square
+#/gate/source/uniformBeam/gps/direction 0 0 1
+#/gate/source/uniformBeam/gps/halfx 49. mm
+#/gate/source/uniformBeam/gps/halfy 42. mm
+#/gate/source/uniformBeam/gps/centre 0. 0. -500.0 cm
+
+
+/gate/output/root/enable
+/gate/output/root/setRootSinglesFlag 0
+/gate/output/root/setFileName ../../../DTCToolkit/Data/MonteCarlo/DTC_Final_Helium_{phantom}_rotation{rotation}deg_spotx{spotx}_spoty{spoty}
+
+#===============#
+# START BEAMS	#
+#===============#
+
+/gate/random/setEngineName MersenneTwister
+/gate/random/setEngineSeed auto
+/gate/application/setTotalNumberOfPrimaries 100000 # 10k for small phantoms; 5k for head phantom
+/gate/application/start

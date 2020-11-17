@@ -481,8 +481,18 @@ Int_t Tracks::getNMissingClustersWithEventID(Int_t eventID, Int_t afterLayer, In
       Bool_t missingClusterWithEventID = (AtCWT(i)->getEventID() == eventID);
       Bool_t missingInLastLayers = (AtCWT(i)->getLayer() > afterLayer);
       Bool_t missingInFirstLayers = (AtCWT(i)->getLayer() < beforeLayer);
+
       if (missingClusterWithEventID && (missingInLastLayers || missingInFirstLayers)) {
          n++;
+      }
+   }
+   
+   // Check also if kSuppressedClustersEventID contains cluster beyond afterlayer!
+   for (UInt_t i=0; i<kSuppressedClustersEventID.size(); i++) {
+      if (kSuppressedClustersEventID.at(i) == eventID) {
+         if (kSuppressedClustersLayer.at(i) > afterLayer) {
+            n++;
+         }
       }
    }
 

@@ -66,11 +66,11 @@ DataInterface::DataInterface(TTree *tree) : fChain(0) {
       else if (kFinalDesign) { // FINAL DESIGN
          if (!kHelium) { // FINAL DESIGN : PROTONS
             if (kSpotScanning) { // FINAL DESIGN : PROTONS : SPOT SCANNING
-               if (!kSplitSpotColumnsPerRotation) {
+               if (!kSplitSpotColumnsPerRotation) { // FINAL DESIGN : PROTONS : SPOT SCANNING : CT
                   chain->Add(Form("Data/MonteCarlo/DTC_Final_%s_rotation%03ddeg.root/Hits", kPhantomName.Data(), kRotation));
                   printf("Opening PROTON phantom %s file with %03d degrees rotation\n", kPhantomName.Data(), kRotation);
                }
-               else {
+               else { // FINAL DESIGN : PROTONS : SPOT SCANNING : RADIOGRAPHY
                   chain->Add(Form("Data/MonteCarlo/DTC_Final_%s_rotation%ddeg_spotx%04.f_AllY.root/Hits", kPhantomName.Data(), kRotation, kSpotX));
                   printf("Opening PROTON phantom %s file with %d degrees rotation and spotX = %04.f\n", kPhantomName.Data(), kRotation, kSpotX);
                }
@@ -80,10 +80,16 @@ DataInterface::DataInterface(TTree *tree) : fChain(0) {
                chain->Add(Form("Data/MonteCarlo/DTC_Final_Degrader%03.0fmm_%dMeV.root/Hits", run_degraderThickness, kEnergy));
             }
          }
-         else { // FINAL DESIGN : HELIUM : SINGLE PENCIL BEAM
-            printf("Opening HELIUM file with degrader thickness %.0f mm and FINAL design (3.5 mm)\n", run_degraderThickness);
-            chain->Add(Form("Data/MonteCarlo/DTC_Final_Helium_Degrader%03.0fmm_%dMeV_nodegraderreadout.root/Hits", run_degraderThickness, kEnergy));
-//            chain->Add(Form("Data/MonteCarlo/DTC_Full_Final_Helium_Degrader%03.0fmm_%dMeV.root/Hits", run_degraderThickness, kEnergy));
+         else { // FINAL DESIGN : HELIUM
+            if (kSpotScanning) { // FINAL DESIGN : HELIUM : SPOT SCANNING (ONLY RADIGRAPHIES SO FAR)
+               printf("Opening HELIUM file with degrader thickness %.0f mm and FINAL design (3.5 mm)\n", run_degraderThickness);
+               chain->Add(Form("Data/MonteCarlo/DTC_Final_Helium_%s_rotation%ddeg_spotx%04.f_AllY.root/Hits", kPhantomName.Data(), kRotation, kSpotX));
+            }
+            else { // FINAL DESIGN : HELIUM : SINGLE PENCIL BEAM
+               printf("Opening HELIUM file with degrader thickness %.0f mm and FINAL design (3.5 mm)\n", run_degraderThickness);
+               chain->Add(Form("Data/MonteCarlo/DTC_Final_Helium_Degrader%03.0fmm_%dMeV.root/Hits", run_degraderThickness, kEnergy));
+            }
+              
          }
       }
 
@@ -190,7 +196,7 @@ void DataInterface::Init(TTree *tree) {
 //   fChain->SetBranchAddress("runID", &runID, &b_runID);
 //   fChain->SetBranchAddress("axialPos", &axialPos, &b_axialPos);
 //   fChain->SetBranchAddress("rotationAngle", &rotationAngle, &b_rotationAngle);
-   fChain->SetBranchAddress("volumeID", volumeID, &b_volumeID);
+//   fChain->SetBranchAddress("volumeID", volumeID, &b_volumeID);
 //   fChain->SetBranchAddress("processName", processName, &b_processName);
 //   fChain->SetBranchAddress("comptVolName", comptVolName, &b_comptVolName);
 //   fChain->SetBranchAddress("RayleighVolName", RayleighVolName, &b_RayleighVolName);

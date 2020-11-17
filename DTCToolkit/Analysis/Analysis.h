@@ -31,6 +31,7 @@ void			drawDiffusionCheck(Int_t Runs, Int_t Layer, Float_t energy);
 void			drawFrame2D(Int_t dataType = kMC, Int_t Layer = 2, Float_t energy = 250, Float_t degraderThickness = 0);
 void        drawDataProfile(Float_t energy);
 void        analyseSecondaryFilters(Int_t Runs = 10, Int_t tracksPerRun = 100, Float_t degradetThickness = 100, Bool_t doTracking = true);
+void        makeInputFileForCNN(Int_t useSpotX);
 // void        drawTrackingError(Int_t Runs, Int_t dataType = kMC, Bool_t recreate = false, Float_t energy = 250, Float_t degraderThickness = 0);
 //
 // We want to make binary files each of the functions. First remove all unneccesary files. Then find a naming convention. I suggest:

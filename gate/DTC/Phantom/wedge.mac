@@ -1,4 +1,21 @@
 #Phantom
+
+/gate/world/daughters/name PSAvolume1
+/gate/world/daughters/insert box
+/gate/PSAvolume1/geometry/setXLength 400.0 mm
+/gate/PSAvolume1/geometry/setYLength 400.0 mm
+/gate/PSAvolume1/geometry/setZLength 0.1 mm
+/gate/PSAvolume1/placement/setTranslation 0 0 -200 mm
+/gate/PSAvolume1/setMaterial Air
+
+/gate/world/daughters/name PSAvolume2
+/gate/world/daughters/insert box
+/gate/PSAvolume2/geometry/setXLength 400.0 mm
+/gate/PSAvolume2/geometry/setYLength 400.0 mm
+/gate/PSAvolume2/geometry/setZLength 0.1 mm
+/gate/PSAvolume2/placement/setTranslation 0 0 200 mm
+/gate/PSAvolume2/setMaterial Air
+
 /gate/world/daughters/name triangleRotationBox
 /gate/world/daughters/insert box
 /gate/triangleRotationBox/geometry/setXLength 320.0 mm

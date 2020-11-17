@@ -37,7 +37,7 @@ phantom="CTP404" # x = `seq -77 7 77`; y = `seq -21 7 21`
 #phantom="linePair" # x =`seq -77 7 77`; y = `seq -21 7 21`
 # phantom="headphantom" # x = `seq -98 7 98`; y = `seq -88 7 88`
 #
-for rot in `seq -f "%03.0f" 4 4 356`; do
+for rot in `seq -f "%03.0f" 180 1 359`; do
    echo "Running at rotation $rot deg"
    for x in `seq -f "%04.f" -84 7 84`; do
       for y in `seq -f "%04.f" -28 7 28`; do

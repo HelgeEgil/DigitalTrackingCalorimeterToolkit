@@ -2468,15 +2468,160 @@ void showOutputFileForImageReconstruction() {
 
 }
 
+void makeInputFileForCNN(Int_t useSpotX) {
+   kSplitSpotColumnsPerRotation = true;
+   kPhantom = true;
+   kSaveCWT = true;
+   kPhantomName = "wedge";
+
+   run_energy = 230;
+   Int_t thisPDG = 2212;
+
+   if (kHelium) {
+      run_energy = 917;
+      thisPDG = 1000020040;
+   }
+
+   ofstream output_csv;
+   output_csv.open(Form("OutputFiles/CNN/myfilter_validation/CNN_training_proton_spotx%03d.csv", useSpotX));
+
+   kEventsPerRun = 100;
+   kDoTracking = false;
+   kSpotX = useSpotX;
+   kSpotY = 0;
+   kRotation = 90;
+
+   Float_t edep_array[45] = {};
+   Int_t hasSecondary, hasBP, layer, pdg;
+   Int_t nMissingEID = 0;
+   Track * thisTrack, *thatTrack;
+   Float_t  angleXmrad = getAngleAtSpot(kSpotX) * 1000;
+
+   printf("Spot %.0f\n", kSpotX);
+   Tracks * tracks = nullptr;
+
+   Float_t X2x, X2y, P2x, P2y, depth, WEPL;
+   Float_t maxWEPL = 333.7;
+   Bool_t isMyBad;
+
+   // 1: Load 2x spot-wise Ekin files
+   Float_t EkinePre, EkinePost, WEPLPre, WEPLPost;
+   Int_t eventIDPre, eventIDPost;
+   TFile *fPre = new TFile(Form("Data/MonteCarlo/DTC_PSA_proton_prephantom_spotx%04d_deg.root", useSpotX));
+   TTree *treePre = (TTree*) fPre->Get("PhaseSpace");
+   treePre->SetBranchAddress("Ekine", &EkinePre);
+   treePre->SetBranchAddress("EventID", &eventIDPre);
+
+   Float_t EkineArrayPre[1000000] = {};
+   Float_t EkineArrayPost[1000000] = {};
+
+   for (Int_t i=0; i<treePre->GetEntriesFast(); i++) {
+      treePre->GetEntry(i);
+      EkineArrayPre[eventIDPre] = EkinePre;
+//      cout << "EventID = " << eventIDPre << ", Ekin = " << EkinePre << endl;
+   }
+     
+   fPre->Close();
+
+   TFile *fPost = new TFile(Form("Data/MonteCarlo/DTC_PSA_proton_postphantom_spotx%04d_deg.root", useSpotX));
+   TTree *treePost = (TTree*) fPost->Get("PhaseSpace");
+   treePost->SetBranchAddress("Ekine", &EkinePost);
+   treePost->SetBranchAddress("EventID", &eventIDPost);
+
+   for (Int_t i=0; i<treePre->GetEntriesFast(); i++) {
+      treePost->GetEntry(i);
+      EkineArrayPost[eventIDPost] = EkinePost;
+   }
+   
+   fPost->Close();
+
+   for (Int_t r=0; r<100; r++) {
+      printf("Starting runs r = %d -> %d\n.", r*10, (r+1)*10-1);
+      tracks = loadOrCreateTracks(true, 100, false, run_energy, kSpotX, 0, nullptr, r*10);
+      tracks->removeHighAngleTracksRelativeToSpot(45, angleXmrad, 0);
+        
+
+      for (Int_t i=0; i<=tracks->GetEntriesFast(); i++) {
+         thisTrack = tracks->At(i);
+         if (i==0) {
+            printf("Event ID = %d\n", thisTrack->At(0)->getEventID());
+         }
+
+         if (!thisTrack) continue;
+
+         for (Int_t j=0; j<45; j++) {
+            edep_array[j] = 0;
+         }
+         hasSecondary = 0;
+         hasBP = 0;
+
+         nMissingEID = tracks->getNMissingClustersWithEventID(thisTrack->Last()->getEventID(), thisTrack->Last()->getLayer(), thisTrack->At(0)->getLayer()); 
+         
+         Int_t lastLayer = thisTrack->Last()->getLayer();
+         Int_t thisEventID = thisTrack->Last()->getEventID();
+
+         for (Int_t j=max(0, i-100); j<min(tracks->GetEntriesFast(), i+100); j++) {
+            thatTrack = tracks->At(j);
+            Int_t thisOtherEventID = thisTrack->getEventID(0);
+            if (!thatTrack) continue;
+            for (Int_t k=0; k<thatTrack->GetEntriesFast(); k++) {
+               if ((thatTrack->getEventID(k) == thisEventID || thatTrack->getEventID(k) == thisOtherEventID) && thatTrack->getLayer(k) > lastLayer) {
+                  nMissingEID++;
+               }
+            }
+         }
+
+         isMyBad = thisTrack->doesTrackEndAbruptly();
+         if (!thisTrack->At(0) || !thisTrack->At(1)) continue;
+
+         X2x = thisTrack->At(0)->getXmm();
+         X2y = thisTrack->At(0)->getYmm();
+         P2x = (thisTrack->At(1)->getXmm() - X2x) / dz2;
+         P2y = (thisTrack->At(1)->getYmm() - X2y) / dz2;
+   
+         WEPLPre = getWEPLFromEnergy(EkineArrayPre[thisTrack->getEventID(0)]);
+         WEPLPost = getWEPLFromEnergy(EkineArrayPost[thisTrack->getEventID(0)]);
+         WEPL = WEPLPre - WEPLPost;
+
+         // IF THERE IS MORE THAN 1 CM DIFFERENCE (>1 layer) BETWEEN RESIDUAL WEPL AND DEPTH -> INCREASE NMISSINGEID
+         if (WEPLPost - thisTrack->Last()->getLayermm() > 10) {
+            nMissingEID++;
+         }
+
+         for (Int_t j=0; j<thisTrack->GetEntriesFast(); j++) {
+
+            layer = thisTrack->getLayer(j);
+            if (layer < 45) {
+               edep_array[layer] = thisTrack->getDepositedEnergy(j);
+            }
+            pdg = thisTrack->At(j)->getPDG();
+            if (pdg != thisPDG) hasSecondary = 1;
+            if ((nMissingEID) == 0) hasBP = 1;
+         }
+      
+         for (Int_t j=0; j<45; j++) {
+            output_csv << edep_array[j] << ";";
+         }
+         output_csv << X2x << ";" << X2y << ";" << P2x << ";" << P2y << ";" << kSpotX << ";" << WEPL << ";" << isMyBad << ";" << hasSecondary << ";" << hasBP << endl;
+      }
+      delete tracks;
+   }
+
+   output_csv.close();
+}
+
 void makeOutputFileForImageReconstructionRad(Int_t Runs, Int_t tracksperrun, Int_t rotation, Int_t useSpotX, TString phantomName) {
 //   run_energy = 760;
    kSplitSpotColumnsPerRotation = true;
    kPhantom = true;
    kSpotScanning = true;
+   kSaveCWT = false;
    kPhantomName = phantomName;
 
    run_degraderThickness = 180; // This number is useless I hope
    run_energy = 230;
+   if (kHelium) run_energy = 917;
+
    kEventsPerRun = tracksperrun;
    kDoTracking = true;
    kSpotX = useSpotX; // Use this to open correct file
@@ -2484,24 +2629,22 @@ void makeOutputFileForImageReconstructionRad(Int_t Runs, Int_t tracksperrun, Int
 
    Bool_t  kDraw = false;
 
-   Float_t lastEdep;
+   Float_t lastEdep, ultEdep, penUltEdep, antePenUltEdep;
+   Int_t ultLayer, penUltLayer, antePenUltLayer;
    Bool_t isSingleEventID, isLastHitSecondary, isAngleTooHigh;
    Float_t spotXlim, spotYlim, spotStep;
 
    spotStep = 7;
 
    if (kPhantomName == "linePair" || kPhantomName == "CTP404") {
-      spotXlim = 84;
       spotYlim = 28;
    }
 
    else if (kPhantomName == "wedge") {
-      spotXlim = 84;
-      spotYlim = 7;
+      spotYlim = 4;
    }
 
    else { // Headphantom
-     spotXlim = 98;
      spotYlim = 88;
    }  
 
@@ -2517,7 +2660,14 @@ void makeOutputFileForImageReconstructionRad(Int_t Runs, Int_t tracksperrun, Int
    Track * thisTrack = nullptr;
    Float_t trackLateralDistance, trackOutgoingAngle;
 
-   TFile *fOut = new TFile(Form("OutputFiles/%s/%s_rotation%03ddeg_spotx%04.f.root", kPhantomName.Data(), kPhantomName.Data(), kRotation, kSpotX), "recreate");
+   TFile *fOut = nullptr;
+   if (!kHelium) {
+      fOut = new TFile(Form("OutputFiles/%s/%s_rotation%03ddeg_spotx%04.f.root", kPhantomName.Data(), kPhantomName.Data(), kRotation, kSpotX), "recreate");
+   }
+   else {
+      fOut = new TFile(Form("OutputFiles/%s_he/%s_rotation%03ddeg_spotx%04.f.root", kPhantomName.Data(), kPhantomName.Data(), kRotation, kSpotX), "recreate");
+   }
+
    TTree *tOut = new TTree("WEPLData", "proton beam");
 
    tOut->Branch("spotX", &outSpotX, "spotX/F");
@@ -2527,12 +2677,17 @@ void makeOutputFileForImageReconstructionRad(Int_t Runs, Int_t tracksperrun, Int
    tOut->Branch("X2y", &outX2y, "X2y/F");
    tOut->Branch("P2x", &outP2x, "P2x/F");
    tOut->Branch("P2y", &outP2y, "P2y/F");
-   tOut->Branch("lastEdep", &lastEdep, "lastEdep/F");
-   tOut->Branch("isSingleEventID", &isSingleEventID, "isSingleEventID/O");
-   tOut->Branch("isLastHitSecondary", &isLastHitSecondary, "isLastHitSecondary/O");
+   tOut->Branch("ultEdep", &ultEdep, "ultEdep/F");
+   tOut->Branch("penUltEdep", &penUltEdep, "penUltEdep/F");
+   tOut->Branch("antePenUltEdep", &antePenUltEdep, "antePenUltEdep/F");
+   tOut->Branch("ultLayer", &ultLayer, "ultLayer/I");
+   tOut->Branch("penUltLayer", &penUltLayer, "penUltLayer/I");
+   tOut->Branch("antePenUltLayer", &antePenUltLayer, "antePenUltLayer/I");
+//   tOut->Branch("isSingleEventID", &isSingleEventID, "isSingleEventID/O");
+//   tOut->Branch("isLastHitSecondary", &isLastHitSecondary, "isLastHitSecondary/O");
 //   tOut->Branch("isAngleTooHigh", &isAngleTooHigh, "isAngleTooHigh/O");
-   tOut->Branch("trackLateralDifference", &trackLateralDistance, "trackLateralDifference/F");
-   tOut->Branch("trackOutgoingAngle", &trackOutgoingAngle, "trackOutgoingAngle/F");
+//   tOut->Branch("trackLateralDifference", &trackLateralDistance, "trackLateralDifference/F");
+//   tOut->Branch("trackOutgoingAngle", &trackOutgoingAngle, "trackOutgoingAngle/F");
 
    Int_t    nruns = 0;
    Float_t  cutMaxAngle = 60;
@@ -2545,6 +2700,10 @@ void makeOutputFileForImageReconstructionRad(Int_t Runs, Int_t tracksperrun, Int
 
    // Find the angles based on the geometry
    angleXmrad = getAngleAtSpot(spotX) * 1000;
+   Float_t maxWEPL = 333.7;
+   if (kHelium) maxWEPL = 332.3;
+
+   Cluster *ultCluster, *penUltCluster, *antePenUltCluster;
 
    for (float spotY = -spotYlim; spotY <= spotYlim; spotY += spotStep) {
       kSpotY = spotY;
@@ -2552,10 +2711,10 @@ void makeOutputFileForImageReconstructionRad(Int_t Runs, Int_t tracksperrun, Int
       printf("Spot (%.0f,%.0f)\n", spotX, spotY);
       Tracks * tracks = loadOrCreateTracks(true, Runs, false, run_energy, spotX, spotY);
       printf("lastJentry = %lld\n", lastJentry_);
-//      tracks->removeHighAngleTracksRelativeToSpot(65, angleXmrad, angleYmrad);
-      tracks->removeTracksWithMinWEPL(100);
+      tracks->removeHighAngleTracksRelativeToSpot(45, angleXmrad, angleYmrad);
+      tracks->removeTracksWithMinWEPL(30);
 //      tracks->removeThreeSigmaShortTracks();
-
+  
       for (Int_t i=0; i<=tracks->GetEntriesFast(); i++) {
          thisTrack = tracks->At(i);
          if (!thisTrack) continue;
@@ -2564,17 +2723,31 @@ void makeOutputFileForImageReconstructionRad(Int_t Runs, Int_t tracksperrun, Int
          outSpotY = spotY;
          wepl = thisTrack->getFitParameterRange();
          wepl_calibrated =  1.0024 * wepl - 0.41; // pol1 calibration for protons
-         outWEPL = 333.7 - wepl_calibrated; // 333.7 mm: 230 MeV proton @ 78 eV H2O (extrapolated from data...)
-//          outWEPL_uncalibrated = 333.7 - wepl;
+//         outWEPL = maxWEPL - wepl_calibrated; // 333.7 mm: 230 MeV proton @ 78 eV H2O (extrapolated from data...)
+         outWEPL = maxWEPL - wepl; // 333.7 mm: 230 MeV proton @ 78 eV H2O (extrapolated from data...)
          if (isnan(outWEPL)) continue;
-
-//            outWEPL = 238.8 - residualRange; // 190 MeV/u Helium
          if (!thisTrack->At(0) || !thisTrack->At(1)) continue;
 
          outX2x = thisTrack->At(0)->getXmm();
          outX2y = thisTrack->At(0)->getYmm();
          outP2x = (thisTrack->At(1)->getXmm() - outX2x) / dz2;
          outP2y = (thisTrack->At(1)->getYmm() - outX2y) / dz2;
+
+         ultCluster = thisTrack->Last();
+         penUltCluster = thisTrack->At(thisTrack->GetEntriesFast()-2);
+         antePenUltCluster = thisTrack->At(thisTrack->GetEntriesFast()-3);
+
+         if (!ultCluster || !penUltCluster || !antePenUltCluster) continue;
+
+         ultEdep = ultCluster->getDepositedEnergy();
+         penUltEdep = penUltCluster->getDepositedEnergy();
+         antePenUltEdep = antePenUltCluster->getDepositedEnergy();
+
+         ultLayer = ultCluster->getLayer();
+         penUltLayer = penUltCluster->getLayer();
+         antePenUltLayer = antePenUltCluster->getLayer();
+
+         /*
          lastEdep = thisTrack->Last()->getDepositedEnergy();
          isSingleEventID = thisTrack->isFirstAndLastEventIDEqual();
          isLastHitSecondary = thisTrack->Last()->isSecondary();
@@ -2583,6 +2756,7 @@ void makeOutputFileForImageReconstructionRad(Int_t Runs, Int_t tracksperrun, Int
          Cluster *c0 = thisTrack->At(0);
          Cluster *c1 = thisTrack->At(last-1);
          Cluster *c2 = thisTrack->At(last);
+         
          if (c1&&c2) {
             trackOutgoingAngle = getDotProductAngle(c1, c1, c2);
          }
@@ -2596,7 +2770,7 @@ void makeOutputFileForImageReconstructionRad(Int_t Runs, Int_t tracksperrun, Int
          else {
             trackLateralDistance = 0;
          }
-
+*/
          tOut->Fill();
 
          if (kDraw) {
@@ -2717,6 +2891,7 @@ void makeOutputFileForImageReconstructionCT(Int_t Runs, Int_t tracksperrun, Int_
    kPhantomName = phantomName;
    kPhantom = true;
    kSpotScanning = true;
+   kSaveCWT = false;
 
    run_degraderThickness = 180; // This number is useless I hope
    run_energy = 230;
@@ -2768,9 +2943,9 @@ void makeOutputFileForImageReconstructionCT(Int_t Runs, Int_t tracksperrun, Int_
    tOut->Branch("X2y", &outX2y, "X2y/F");
    tOut->Branch("P2x", &outP2x, "P2x/F");
    tOut->Branch("P2y", &outP2y, "P2y/F");
-   tOut->Branch("lastEdep", &lastEdep, "lastEdep/F");
-   tOut->Branch("isSingleEventID", &isSingleEventID, "isSingleEventID/O");
-   tOut->Branch("isLastHitSecondary", &isLastHitSecondary, "isLastHitSecondary/O");
+//    tOut->Branch("lastEdep", &lastEdep, "lastEdep/F");
+//   tOut->Branch("isSingleEventID", &isSingleEventID, "isSingleEventID/O");
+//   tOut->Branch("isLastHitSecondary", &isLastHitSecondary, "isLastHitSecondary/O");
 
    Int_t nruns = 0;
    Float_t  cutMaxAngle = 60;
@@ -2791,7 +2966,8 @@ void makeOutputFileForImageReconstructionCT(Int_t Runs, Int_t tracksperrun, Int_
          Tracks * tracks = loadOrCreateTracks(true, Runs, false, run_energy, spotX, spotY);
          printf("lastJentry = %lld\n", lastJentry_);
 //         tracks->removeHighAngleTracksRelativeToSpot(65, angleXmrad, angleYmrad);
-         tracks->removeTracksWithMinWEPL(100);
+//         tracks->removeTracksWithMinWEPL(100);
+//         tracks->removeNuclearInteractions();
 //         tracks->removeThreeSigmaShortTracks();
 
          for (Int_t i=0; i<=tracks->GetEntriesFast(); i++) {
@@ -2801,9 +2977,9 @@ void makeOutputFileForImageReconstructionCT(Int_t Runs, Int_t tracksperrun, Int_
             outSpotX = spotX;
             outSpotY = spotY;
             wepl = thisTrack->getFitParameterRange();
+            // wepl_calibrated + 0.41 = 1.0024 * wepl;
             wepl_calibrated =  1.0024 * wepl - 0.41; // pol1 calibration for protons
             outWEPL = 333.7 - wepl_calibrated; // 333.7 mm: 230 MeV proton @ 78 eV H2O (extrapolated from data...)
-  //          outWEPL_uncalibrated = 333.7 - wepl;
             if (isnan(outWEPL)) continue;
 
    //            outWEPL = 238.8 - residualRange; // 190 MeV/u Helium
@@ -2880,7 +3056,7 @@ void drawTracks3D(Int_t Runs, Int_t tracksperrun /* kEventsPerRun */, Float_t de
 //   tracks->removeNuclearInteractions();
    tracks->removeThreeSigmaShortTracks();
 
-   Bool_t   kDraw = true;
+   Bool_t   kDraw = false;
 
    TH1I  *hWEPLCorrect = new TH1I("hWEPLCorrect", ";Range in detector [mm WEPL];Frequency", 400, 0, 250);
    TH1I  *hWEPLSecondary = new TH1I("hWEPLSecondary", "", 400, 0, 250);

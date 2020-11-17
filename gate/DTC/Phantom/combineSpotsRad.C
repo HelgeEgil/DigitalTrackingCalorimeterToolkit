@@ -25,11 +25,11 @@ void combineSpotsRad() {
    TString phantom = "wedge";
 
    Int_t step, xlim, ylim;
-   step = 7;
+   step = 4;
 
    if (phantom == TString("wedge")) {
-      xlim = 84;
-      ylim = 7;
+      xlim = 104;
+      ylim = 0;
    }
 
    else if (phantom == TString("headphantom")) {
@@ -42,7 +42,8 @@ void combineSpotsRad() {
       ylim = 28;
    }
    
-   for (int spotX = -xlim; spotX <= xlim; spotX += step) {
+
+   for (int spotX = -84; spotX <= xlim; spotX += step) {
       fSimulationOut = new TFile(Form("../../../DTCToolkit/Data/MonteCarlo/DTC_Final_%s_rotation90deg_spotx%04d_AllY.root", phantom.Data(), spotX), "recreate");
       treeSimulationOut = new TTree("Hits", "Combined spots");
 
@@ -92,7 +93,7 @@ void combineSpotsRad() {
             outY = y;
             outZ = z;
             outEdep = edep;
-            outEventID = totalRunningTally;
+            outEventID = eventID; // totalRunningTally;
             outTrackID = trackID;
             outParentID = parentID;
             outLevel1ID = level1ID;

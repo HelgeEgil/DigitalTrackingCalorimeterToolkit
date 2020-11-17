@@ -261,6 +261,8 @@ Tracks * Clusters::findCalorimeterTracksWithMCTruth() {
    Track     * track = new Track();
    Tracks    * tracks = new Tracks(kEventsPerRun * 5);
    Int_t       lastEventID, eventID;
+   Bool_t      hasSecondary = false;
+   Int_t       lastLayer;
 
    lastEventID = At(0)->getEventID();
 
@@ -275,8 +277,32 @@ Tracks * Clusters::findCalorimeterTracksWithMCTruth() {
             tracks->appendTrack(track);
          }
          track->Clear("C");
+         hasSecondary = false;
       }
-      track->appendCluster(cluster);
+
+      // IF SECONDARY LOOP THROUGH ALL, FIND SAME LAYER AND COMPARE PDG, 
+      // CHOOSE HIGHEST PDG
+
+      Int_t thisLayer = cluster->getLayer();
+      Int_t thatLayer;
+      for (Int_t j=0; j<track->GetEntriesFast(); j++) {
+         thatLayer = track->getLayer(j);
+         if (thisLayer == thatLayer) {
+            if (track->At(j)->getPDG() < cluster->getPDG()) {
+               // replace
+               track->At(j)->set(cluster);
+            }
+         }
+      }
+
+      if (cluster->getPDG() > 1000) {
+         track->appendCluster(cluster);
+      }
+            
+      lastLayer = cluster->getLayer();
+
+      if (cluster->isSecondary()) hasSecondary = true;
+
       lastEventID = eventID;
    }
 

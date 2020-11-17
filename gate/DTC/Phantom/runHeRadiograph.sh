@@ -17,7 +17,7 @@ fi
 
 if [ $phantom == "wedge" ]; then
    xlim=104
-   ylim=4
+   ylim=0
 fi
 
 
