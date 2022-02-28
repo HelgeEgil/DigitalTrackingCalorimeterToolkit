@@ -327,8 +327,10 @@ Hits * diffuseHits(TRandom3 *gRandom, Hits * hits) {
             for (Int_t binPosPow = 0; binPosPow < 10; binPosPow++) {
                binPos = binPosLUT[binPosPow];
                if (binPos & CDB_hit_array[i]) {
-                  outX = x + (idx_x - CDB_x_mean) + 0.5;
-                  outY = y + (binPosPow - CDB_y_mean) + 0.5;
+                  // to get the correct placement, the CDB_x/y_mean was interchanged 
+                  // fixed 2021-06-21 by Gabor Papp
+                  outX = x + (idx_x - CDB_y_mean) + 0.5;
+                  outY = y + (binPosPow - CDB_x_mean) + 0.5;
                   hitsOut->appendPoint(outX, outY, layer, edep/CDB_clusterSize, eventID, isSecondary, PDG);
                }
             }
