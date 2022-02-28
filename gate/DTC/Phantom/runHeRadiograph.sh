@@ -4,7 +4,7 @@
 #phantom="CTP404" # x = `seq -77 7 77`; y = `seq -21 7 21`
 #phantom="linePair" # x =`seq -77 7 77`; y = `seq -21 7 21`
 #phantom="headphantom" # x = `seq -98 7 98`; y = `seq -88 7 88`
-phantom="wedge"
+phantom="headphantom"
 
 step=4
 xlim=84

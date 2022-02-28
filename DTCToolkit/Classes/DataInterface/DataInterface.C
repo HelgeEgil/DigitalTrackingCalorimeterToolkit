@@ -71,7 +71,7 @@ DataInterface::DataInterface(TTree *tree) : fChain(0) {
                   printf("Opening PROTON phantom %s file with %03d degrees rotation\n", kPhantomName.Data(), kRotation);
                }
                else { // FINAL DESIGN : PROTONS : SPOT SCANNING : RADIOGRAPHY
-                  chain->Add(Form("Data/MonteCarlo/DTC_Final_%s_rotation%ddeg_spotx%04.f_AllY.root/Hits", kPhantomName.Data(), kRotation, kSpotX));
+                  chain->Add(Form("Data/MonteCarlo/DTC_Final_%s_rotation%02ddeg_spotx%04.f_AllY.root/Hits", kPhantomName.Data(), kRotation, kSpotX));
                   printf("Opening PROTON phantom %s file with %d degrees rotation and spotX = %04.f\n", kPhantomName.Data(), kRotation, kSpotX);
                }
             }
@@ -515,7 +515,7 @@ void  DataInterface::getMCClustersThreshold(Int_t runNo, Clusters *clusters, Hit
    Float_t  x,y;
    Bool_t   isSecondary = false;
    Long64_t nentries = fChain->GetEntriesFast();
-
+   
    for (Long64_t jentry=lastJentry_; jentry<nentries; jentry++) { // new interaction
       Long64_t ientry = LoadTree(jentry);
       if (ientry<0) {
@@ -525,7 +525,6 @@ void  DataInterface::getMCClustersThreshold(Int_t runNo, Clusters *clusters, Hit
 
       fChain->GetEntry(jentry);
 
-      
       layer = baseID*2 + level1ID - 2;
       if (!kSpotScanning) {
          if (eventID < eventIdFrom) {
@@ -621,6 +620,7 @@ void  DataInterface::getMCClustersThreshold(Int_t runNo, Clusters *clusters, Hit
       
       lastEventID = eventID;
    }
+   showDebug("Added " << nHitsAdded << " hits in DataInterface\n");
 }
 
 Long64_t DataInterface::findSpotIndex(Float_t findSpotX) {

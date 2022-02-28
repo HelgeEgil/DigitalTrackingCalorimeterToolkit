@@ -35,7 +35,7 @@ Bool_t   kHelium = false;
 Int_t    kEnergy = 230; // 917 MeV_Helium ~= 230 MeV_proton // 600 HeC phantom
 Bool_t   kDoTracking = true;
 Bool_t   kDoDiffusion = true;
-Bool_t   kDoTrackerPropagation = false; // Some foul bugs here
+Bool_t   kDoTrackerPropagation = false; // Some foul bugs here if true
 Int_t    kRotation = 90; // degrees
 
 // Somewhat deprecated
@@ -51,7 +51,7 @@ Float_t     kMaxTrackAngle = 0.05; // allow for consecutive 50 mrad changes
 Bool_t      kConcatenateHits = true;
 
 // Controlled by functions
-TString  kPhantomName = "wedge";
+TString  kPhantomName = "headphantom";
 Bool_t   kSpotScanning = true;
 Bool_t   kPhantom = true;
 Bool_t   kSplitSpotColumnsPerRotation = true;

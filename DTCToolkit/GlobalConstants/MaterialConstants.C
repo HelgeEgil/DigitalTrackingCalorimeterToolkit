@@ -353,7 +353,8 @@ Double_t getLayerPositionmm(Int_t i) {
          z = 0.2315 + i * dz2; // ALSO OK if i < 0
       }
       else {
-         z = 2 * dz2 + 3.749 + (i-2) * dz;
+//         z = 2 * dz2 + 3.749 + (i-2) * dz; // with spacer
+         z = 2 * dz2 + 3.5815 + (i-2) * dz; // without spacer (1/2 epi layer)
       }
 
    }

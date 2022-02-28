@@ -242,7 +242,7 @@ Tracks * getTracksFromClusters(Int_t Runs, Int_t dataType, Int_t frameType, Floa
       t3.Start(false);
       tracks->removeEmptyTracks();
 //      tracks->removeShortTracks(4); // rem [0, 4]
-//      tracks->removeTracksLeavingDetector();
+      tracks->removeTracksLeavingDetector();
       tracks->fillOutIncompleteTracks(0.4);
       t3.Stop();
       

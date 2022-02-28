@@ -166,7 +166,10 @@ Tracks * Clusters::findTracksWithRecursiveWeighting() {
          vector<Node*> * endNodes = new vector<Node*>;
          endNodes->reserve(200* 50 * kEventsPerRun);
          seedNode->getUnexploredEndNodes(endNodes); 
+
+         showDebug("doTracking");
          doRecursiveWeightedTracking(seedNode, endNodes, thisMaxTrackScore); 
+         showDebug("Tracking DONE");
          track = seedNode->getBestTrack();
          
          if (kDoTrackerPropagation) {
@@ -198,7 +201,7 @@ Tracks * Clusters::findTracksWithRecursiveWeighting() {
          delete endNodes;
       }
        
-      showDebug("Found " << tracks->GetEntries() << " tracks so far\n");
+      showDebug("Found " << tracks->GetEntries() << " tracks so far");
       delete seeds;
       delete nextClusters;
    }
@@ -212,11 +215,10 @@ void Clusters::doRecursiveWeightedTracking(Node * seedNode, vector<Node*> * endN
    // Find all the next potential nodes segments w/acceptable score
    // Output: Vector of nodes (new end nodes)
 
-   //cout<<"doRecursiveWeightedTracking from layer " << endNodes->at(0)->getCluster()->getLayer() << " with "  << seedNode->getNChildren() << " children" <<endl;
    Node    * thisNode;
    Cluster * nextCluster;
    Float_t   nextScore, nextAngle;
- 
+
    for (UInt_t i=0; i<endNodes->size(); i++) { // All identified endpoints to the tree so far
       thisNode = endNodes->at(i);
       thisNode->markExplored();

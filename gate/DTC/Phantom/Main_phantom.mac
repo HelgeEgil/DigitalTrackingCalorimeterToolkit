@@ -18,29 +18,33 @@
 #/gate/physics/SetMaxStepSizeInRegion world 1 mm
 #/gate/physics/ActivateStepLimiter proton
 
-/gate/actor/addActor PhaseSpaceActor PSA1
-/gate/actor/PSA1/save ../../../DTCToolkit/Data/MonteCarlo/DTC_PSA_proton_prephantom_spotx{spotx}_deg.root
-/gate/actor/PSA1/attachTo PSAvolume1
-/gate/actor/PSA1/enableEkine true
-/gate/actor/PSA1/enableParticleName false
-/gate/actor/PSA1/storeSecondaries false
-/gate/actor/PSA1/enableProductionProcess false
-/gate/actor/PSA1/enableProductionVolume false
-/gate/actor/PSA1/addFilter particleFilter
-/gate/actor/PSA1/particleFilter/addParticlePDG 2212
 
-/gate/actor/addActor PhaseSpaceActor PSA2
-/gate/actor/PSA2/save ../../../DTCToolkit/Data/MonteCarlo/DTC_PSA_proton_postphantom_spotx{spotx}_deg.root
-/gate/actor/PSA2/attachTo PSAvolume2
-/gate/actor/PSA2/enableEkine true
-/gate/actor/PSA2/enableParticleName false
-/gate/actor/PSA2/storeSecondaries false
-/gate/actor/PSA2/enableProductionProcess false
-/gate/actor/PSA2/enableProductionVolume false
-/gate/actor/PSA2/addFilter particleFilter
-/gate/actor/PSA2/particleFilter/addParticlePDG 2212
+#/gate/actor/addActor PhaseSpaceActor PSA1
+#/gate/actor/PSA1/save ../../../DTCToolkit/Data/MonteCarlo/DTC_PSA_proton_prephantom_spotx{spotx}_deg.root
+#/gate/actor/PSA1/attachTo PSAvolume1
+#/gate/actor/PSA1/enableEkine true
+#/gate/actor/PSA1/enableParticleName false
+#/gate/actor/PSA1/storeSecondaries false
+#/gate/actor/PSA1/enableProductionProcess false
+#/gate/actor/PSA1/enableProductionVolume false
+#/gate/actor/PSA1/addFilter particleFilter
+#/gate/actor/PSA1/particleFilter/addParticlePDG 2212
+#
+#/gate/actor/addActor PhaseSpaceActor PSA2
+#/gate/actor/PSA2/save ../../../DTCToolkit/Data/MonteCarlo/DTC_PSA_proton_postphantom_spotx{spotx}_deg.root
+#/gate/actor/PSA2/attachTo PSAvolume2
+#/gate/actor/PSA2/enableEkine true
+#/gate/actor/PSA2/enableParticleName false
+#/gate/actor/PSA2/storeSecondaries false
+#/gate/actor/PSA2/enableProductionProcess false
+#/gate/actor/PSA2/enableProductionVolume false
+#/gate/actor/PSA2/addFilter particleFilter
+#/gate/actor/PSA2/particleFilter/addParticlePDG 2212
 
 /gate/run/initialize
+
+/process/inactivate hadElastic
+/process/inactivate protonInelastic
 
 #=======================#
 # ADD PROTON BEAM	      #
@@ -72,5 +76,5 @@
 
 /gate/random/setEngineName MersenneTwister
 /gate/random/setEngineSeed auto
-/gate/application/setTotalNumberOfPrimaries 1000000 # 10k for small phantoms; 5k for head phantom
+/gate/application/setTotalNumberOfPrimaries 30000 # 10k for small phantoms; 5k for head phantom
 /gate/application/start

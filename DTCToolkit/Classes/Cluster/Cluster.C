@@ -49,11 +49,14 @@ Cluster::~Cluster() {
 }
 
 Int_t Cluster::Compare(const TObject *obj) const {
-//   if (layerNo_ == ((Cluster*) obj)->getLayer()) return 0;
-//   else if (layerNo_ < ((Cluster*) obj)->getLayer()) return -1;
+   if (layerNo_ == ((Cluster*) obj)->getLayer()) return 0;
+   else if (layerNo_ < ((Cluster*) obj)->getLayer()) return -1;
+
+/*   
    if (eventID_ == ((Cluster*) obj)->getEventID() && layerNo_ == ((Cluster*) obj)->getLayer()) return 0;
    else if (eventID_ < ((Cluster*) obj)->getEventID()) return -1;
    else if (eventID_ == ((Cluster*) obj)->getEventID() && layerNo_ < ((Cluster*) obj)->getLayer()) return -1;
+*/
    else return 1;
 }
 

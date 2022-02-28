@@ -585,8 +585,8 @@ void Tracks::removeTracksWithMinWEPL(Float_t minWEPL) {
    removeEmptyTracks();
    Compress();
    
-      Float_t fraction = nTotal ? nRemoved/float(nTotalStart) : 0;
-//   cout << "Tracks::removeTracksWithMinWEPL(" << minWEPL << ") removed " << nRemoved << " of " << nTotalStart << " (" << fraction * 100 << "%) tracks (" << 100*float(nRemovedNuclear)/nRemoved << "% secondaries).\n";
+   Float_t fraction = nTotal ? nRemoved/float(nTotalStart) : 0;
+   cout << "Tracks::removeTracksWithMinWEPL(" << minWEPL << ") removed " << nRemoved << " of " << nTotalStart << " (" << fraction * 100 << "%) tracks (" << 100*float(nRemovedNuclear)/nRemoved << "% secondaries).\n";
 }
 
 

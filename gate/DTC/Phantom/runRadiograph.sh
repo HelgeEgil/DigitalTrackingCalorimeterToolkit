@@ -2,10 +2,10 @@
 
 #phantom="CTP404" # x = `seq -77 7 77`; y = `seq -21 7 21`
 #phantom="linePair" # x =`seq -77 7 77`; y = `seq -21 7 21`
-#phantom="headphantom" # x = `seq -98 7 98`; y = `seq -88 7 88`
-phantom="wedge"
+phantom="headphantom" # x = `seq -98 7 98`; y = `seq -88 7 88`
+#phantom="wedge"
 
-step=4
+step=7
 xlim=84
 ylim=28
 
@@ -20,8 +20,8 @@ if [ $phantom == "wedge" ]; then
 fi
 
 
-for x in `seq -f "%04.f" -84 $step $xlim`; do
-   for y in `seq -f "%04.f" 0 $step $ylim`; do
+for x in `seq -f "%04.f" -$xlim $step $xlim`; do
+   for y in `seq -f "%04.f" -$ylim $step $ylim`; do
       arg=`echo "6600/sqrt($x^2+$y^2+6600^2)"|bc -l`
       theta=`echo "a(sqrt(1-1*$arg^2)/$arg)"|bc -l`
       if [ `echo "$x^2 + $y^2"|bc` -gt 0 ]; then

@@ -2468,6 +2468,102 @@ void showOutputFileForImageReconstruction() {
 
 }
 
+
+void maxAehle() {
+   kSplitSpotColumnsPerRotation = true;
+   kPhantom = true;
+   kSaveCWT = true;
+   kPhantomName = "headphantom";
+
+   run_energy = 230;
+   Int_t thisPDG = 2212;
+
+   kEventsPerRun = 100;
+   kDoTracking = true;
+   kSpotX = 0; // center spot
+   kSpotY = 3; // center spot (spots available are `seq -88 7 88`)
+   kRotation = 90;
+
+   Float_t edep_array[45] = {};
+   Int_t hasSecondary, hasBP, layer, pdg;
+   Int_t nMissingEID = 0;
+   Int_t nTracks = 0, nTracksOK = 0;
+   Track * thisTrack, *thatTrack;
+   Float_t  angleXmrad = getAngleAtSpot(kSpotX) * 1000;
+
+   Tracks * tracks = nullptr;
+
+   Float_t X2x, X2y, P2x, P2y, depth, WEPL;
+   Float_t maxWEPL = 333.7;
+   Bool_t isMyBad;
+
+   // Load spot-wise Ekin files
+   Float_t EkinePost, WEPLPost;
+   Int_t eventIDPost;
+   Float_t EkineArrayPost[1000000] = {};
+
+   TFile *fPost = new TFile(Form("Data/MonteCarlo/DTC_PSA_proton_postphantom_spotx%04d_deg.root", int(kSpotX)));
+   TTree *treePost = (TTree*) fPost->Get("PhaseSpace");
+   treePost->SetBranchAddress("Ekine", &EkinePost);
+   treePost->SetBranchAddress("EventID", &eventIDPost);
+
+   for (Int_t i=0; i<treePost->GetEntriesFast(); i++) {
+      treePost->GetEntry(i);
+      EkineArrayPost[eventIDPost] = EkinePost;
+   }
+
+   fPost->Close();
+
+   // Sadly you will have to edit the pertinent variables in Classes/Cluster/findTracks.C each run
+   // 10k tracks: 100 Runs (2nd arg) * 100 (kEventsPerRun)
+   tracks = loadOrCreateTracks(true, 100, false, run_energy, kSpotX, kSpotY, nullptr, 0);
+//   tracks->removeHighAngleTracksRelativeToSpot(45, angleXmrad, 0);
+   cout << "Found " << tracks->GetEntriesFast() << " tracks\n";
+
+   Bool_t okWEPL;
+   Float_t fittedRange;
+
+   for (Int_t i=0; i<=tracks->GetEntriesFast(); i++) {
+      okWEPL = true;
+
+      thisTrack = tracks->At(i);
+      if (!thisTrack) continue;
+      if (EkineArrayPost[thisTrack->getEventID(0)] == 0) {
+         showDebug("Skip track " << i << endl);
+         continue;
+      }
+
+      showDebug("Emptying edep_array\n");
+      for (Int_t j=0; j<45; j++) {
+         edep_array[j] = 0;
+      }
+
+      showDebug("DoTrackFit\n");
+      thisTrack->doTrackFit(false, false);
+      fittedRange = thisTrack->getFitParameterRange();
+
+      showDebug("FindWEPL...");
+      WEPLPost = getWEPLFromEnergy(EkineArrayPost[thisTrack->getEventID(0)]);
+
+      // IF THERE IS MORE THAN 2 CM DIFFERENCE (>1 layer) BETWEEN RESIDUAL WEPL AND DEPTH -> INCREASE NMISSINGEID
+
+      if (fabs(WEPLPost - fittedRange) > 20) {
+         okWEPL = false;
+      }
+
+      if (okWEPL) nTracksOK++;
+      nTracks++;
+
+   }
+   delete tracks;
+
+   cout << "Number of filtered tracks: " << nTracks << endl;
+   cout << "Number of filtered tracks properly reconstructed: " << nTracksOK << endl;
+   cout << "Accuracy: " << float(nTracksOK)/nTracks * 100 << "%" << endl;
+         
+   // here can output to file / redirect STDOUT / save the accuracy as you want
+}
+
 void makeInputFileForCNN(Int_t useSpotX) {
    kSplitSpotColumnsPerRotation = true;
    kPhantom = true;
@@ -2483,10 +2579,10 @@ void makeInputFileForCNN(Int_t useSpotX) {
    }
 
    ofstream output_csv;
-   output_csv.open(Form("OutputFiles/CNN/myfilter_validation/CNN_training_proton_spotx%03d.csv", useSpotX));
+   output_csv.open(Form("OutputFiles/CNN/helium_training/CNN_training_helium_spotx%03d.csv", useSpotX));
 
-   kEventsPerRun = 100;
-   kDoTracking = false;
+   kEventsPerRun = 50;
+//   kDoTracking = false;
    kSpotX = useSpotX;
    kSpotY = 0;
    kRotation = 90;
@@ -2507,7 +2603,7 @@ void makeInputFileForCNN(Int_t useSpotX) {
    // 1: Load 2x spot-wise Ekin files
    Float_t EkinePre, EkinePost, WEPLPre, WEPLPost;
    Int_t eventIDPre, eventIDPost;
-   TFile *fPre = new TFile(Form("Data/MonteCarlo/DTC_PSA_proton_prephantom_spotx%04d_deg.root", useSpotX));
+   TFile *fPre = new TFile(Form("Data/MonteCarlo/DTC_PSA_Helium_prephantom_spotx%04d_deg.root", useSpotX));
    TTree *treePre = (TTree*) fPre->Get("PhaseSpace");
    treePre->SetBranchAddress("Ekine", &EkinePre);
    treePre->SetBranchAddress("EventID", &eventIDPre);
@@ -2523,7 +2619,7 @@ void makeInputFileForCNN(Int_t useSpotX) {
      
    fPre->Close();
 
-   TFile *fPost = new TFile(Form("Data/MonteCarlo/DTC_PSA_proton_postphantom_spotx%04d_deg.root", useSpotX));
+   TFile *fPost = new TFile(Form("Data/MonteCarlo/DTC_PSA_Helium_postphantom_spotx%04d_deg.root", useSpotX));
    TTree *treePost = (TTree*) fPost->Get("PhaseSpace");
    treePost->SetBranchAddress("Ekine", &EkinePost);
    treePost->SetBranchAddress("EventID", &eventIDPost);
@@ -2532,26 +2628,44 @@ void makeInputFileForCNN(Int_t useSpotX) {
       treePost->GetEntry(i);
       EkineArrayPost[eventIDPost] = EkinePost;
    }
+
+   cout << "Last eventID: " << eventIDPost << endl;
    
    fPost->Close();
+
+   // 100 runs; 100 superRuns; 100 per run
+   // -> per spot: 100 * 100 * 100 = 1 M SO SUFFICIENT 
 
    for (Int_t r=0; r<100; r++) {
       printf("Starting runs r = %d -> %d\n.", r*10, (r+1)*10-1);
       tracks = loadOrCreateTracks(true, 100, false, run_energy, kSpotX, 0, nullptr, r*10);
-      tracks->removeHighAngleTracksRelativeToSpot(45, angleXmrad, 0);
-        
+//      tracks->removeHighAngleTracksRelativeToSpot(45, angleXmrad, 0);
+      cout << "Found " << tracks->GetEntriesFast() << " tracks\n";
+      if (!tracks->GetEntriesFast()) continue;
+
+      Bool_t okWEPL;
+      Float_t fittedRange;
 
       for (Int_t i=0; i<=tracks->GetEntriesFast(); i++) {
+         okWEPL = true;
+
          thisTrack = tracks->At(i);
          if (i==0) {
             printf("Event ID = %d\n", thisTrack->At(0)->getEventID());
          }
 
          if (!thisTrack) continue;
+         if (EkineArrayPre[thisTrack->getEventID(0)] == 0 || EkineArrayPost[thisTrack->getEventID(0)] == 0) {
+            showDebug("Skipping track r=" << r << " and i=" << i << endl);
+            continue;
+         }
 
+         showDebug("Emptying edep_array\n");
          for (Int_t j=0; j<45; j++) {
             edep_array[j] = 0;
          }
+
+         /*
          hasSecondary = 0;
          hasBP = 0;
 
@@ -2559,7 +2673,6 @@ void makeInputFileForCNN(Int_t useSpotX) {
          
          Int_t lastLayer = thisTrack->Last()->getLayer();
          Int_t thisEventID = thisTrack->Last()->getEventID();
-
          for (Int_t j=max(0, i-100); j<min(tracks->GetEntriesFast(), i+100); j++) {
             thatTrack = tracks->At(j);
             Int_t thisOtherEventID = thisTrack->getEventID(0);
@@ -2570,39 +2683,59 @@ void makeInputFileForCNN(Int_t useSpotX) {
                }
             }
          }
+*/
 
-         isMyBad = thisTrack->doesTrackEndAbruptly();
-         if (!thisTrack->At(0) || !thisTrack->At(1)) continue;
+         showDebug("DoTrackFit\n");
+         thisTrack->doTrackFit(false, false);
+         fittedRange = thisTrack->getFitParameterRange();
 
+//         isMyBad = thisTrack->doesTrackEndAbruptly();
+//         if (!thisTrack->At(0) || !thisTrack->At(1)) continue;
+
+         /*
          X2x = thisTrack->At(0)->getXmm();
          X2y = thisTrack->At(0)->getYmm();
          P2x = (thisTrack->At(1)->getXmm() - X2x) / dz2;
          P2y = (thisTrack->At(1)->getYmm() - X2y) / dz2;
-   
+*/   
+
+         showDebug("FindWEPL...");
          WEPLPre = getWEPLFromEnergy(EkineArrayPre[thisTrack->getEventID(0)]);
          WEPLPost = getWEPLFromEnergy(EkineArrayPost[thisTrack->getEventID(0)]);
          WEPL = WEPLPre - WEPLPost;
+         showDebug("OK! " << WEPL << " mm.\n");
 
-         // IF THERE IS MORE THAN 1 CM DIFFERENCE (>1 layer) BETWEEN RESIDUAL WEPL AND DEPTH -> INCREASE NMISSINGEID
+         // IF THERE IS MORE THAN 2 CM DIFFERENCE (>1 layer) BETWEEN RESIDUAL WEPL AND DEPTH -> INCREASE NMISSINGEID
+/*
          if (WEPLPost - thisTrack->Last()->getLayermm() > 10) {
             nMissingEID++;
+         }
+*/
+
+         if (fabs(WEPLPost - fittedRange) > 20) {
+            okWEPL = false;
          }
 
          for (Int_t j=0; j<thisTrack->GetEntriesFast(); j++) {
 
             layer = thisTrack->getLayer(j);
             if (layer < 45) {
+               if (!thisTrack->At(j)) continue;
+
                edep_array[layer] = thisTrack->getDepositedEnergy(j);
             }
-            pdg = thisTrack->At(j)->getPDG();
-            if (pdg != thisPDG) hasSecondary = 1;
-            if ((nMissingEID) == 0) hasBP = 1;
+//            pdg = thisTrack->At(j)->getPDG();
+//            if (pdg != thisPDG) hasSecondary = 1;
+//            if ((nMissingEID) == 0) hasBP = 1;
          }
-      
+
+
+         // Layer 0->44 ; WEPL truth ; truthLabel 
+         showDebug("Writing to file\n");
          for (Int_t j=0; j<45; j++) {
             output_csv << edep_array[j] << ";";
          }
-         output_csv << X2x << ";" << X2y << ";" << P2x << ";" << P2y << ";" << kSpotX << ";" << WEPL << ";" << isMyBad << ";" << hasSecondary << ";" << hasBP << endl;
+         output_csv << WEPL << ";" << okWEPL << endl;
       }
       delete tracks;
    }
@@ -2790,6 +2923,113 @@ void makeOutputFileForImageReconstructionRad(Int_t Runs, Int_t tracksperrun, Int
       hSimpleImage->Divide(hSimpleImageNorm);
       hSimpleImage->Draw("COLZ");
    }
+}
+
+void makeOutputFileForImageReconstructionCNNRad(Int_t Runs, Int_t tracksperrun, Int_t rotation, Int_t useSpotX, TString phantomName) {
+//   run_energy = 760;
+   kSplitSpotColumnsPerRotation = true;
+   kPhantom = true;
+   kSpotScanning = true;
+   kSaveCWT = false;
+   kPhantomName = phantomName;
+
+   run_degraderThickness = 180; // This number is useless I hope
+   run_energy = 230;
+   if (kHelium) run_energy = 917;
+
+   kEventsPerRun = tracksperrun;
+   kDoTracking = true;
+   kSpotX = useSpotX; // Use this to open correct file
+   kRotation = rotation;
+
+   Float_t lastEdep, ultEdep, penUltEdep, antePenUltEdep;
+   Int_t ultLayer, penUltLayer, antePenUltLayer;
+   Bool_t isSingleEventID, isLastHitSecondary, isAngleTooHigh;
+   Float_t spotXlim, spotYlim, spotStep;
+
+   spotStep = 7;
+
+   if (kPhantomName == "linePair" || kPhantomName == "CTP404") {
+      spotYlim = 28;
+   }
+
+   else if (kPhantomName == "wedge") {
+      spotYlim = 4;
+   }
+
+   else { // Headphantom
+      spotYlim = 88; // helium 84; proton 88 
+   }  
+
+   ofstream output_csv;
+   output_csv.open(Form("OutputFiles/CNN/no_nuclear/proton_headphantom/%s_spotx%04.f.csv",kPhantomName.Data(), kSpotX));
+
+   // Layer [0 ; 1; ... ; 44] ; spotX ; spotY ; X2x ; X2y ; P2x ; P2y ; WEPL
+
+   Float_t outSpotX, outSpotY, outWEPL, outX2x, outX2y, outP2x, outP2y, wepl;
+   Track * thisTrack = nullptr;
+
+   Int_t    nruns = 0;
+   Float_t spotX = float(useSpotX);
+   kSpotX = spotX;
+   Float_t angleXmrad, angleYmrad;
+   Float_t edep[50] = {};
+
+   // Find the angles based on the geometry
+   angleXmrad = getAngleAtSpot(spotX) * 1000;
+   Float_t maxWEPL = 333.7;
+   if (kHelium) maxWEPL = 332.3;
+
+   for (float spotY = -spotYlim; spotY <= spotYlim; spotY += spotStep) {
+      kSpotY = spotY;
+      angleYmrad = getAngleAtSpot(spotY) * 1000;
+      printf("Spot (%.0f,%.0f)\n", spotX, spotY);
+      Tracks * tracks = loadOrCreateTracks(true, Runs, false, run_energy, spotX, spotY);
+      printf("lastJentry = %lld\n", lastJentry_);
+      tracks->removeHighAngleTracksRelativeToSpot(45, angleXmrad, angleYmrad);
+      tracks->removeTracksWithMinWEPL(30);
+      showDebug("Delete OK");
+  
+      for (Int_t i=0; i<=tracks->GetEntriesFast(); i++) {
+         thisTrack = tracks->At(i);
+         if (!thisTrack) continue;
+
+         outSpotX = spotX;
+         outSpotY = spotY;
+         wepl = thisTrack->getFitParameterRange();
+         outWEPL = maxWEPL - wepl; // 333.7 mm: 230 MeV proton @ 78 eV H2O (extrapolated from data...)
+         if (isnan(outWEPL)) continue;
+         if (!thisTrack->At(0) || !thisTrack->At(1)) continue;
+
+         outX2x = thisTrack->At(0)->getXmm();
+         outX2y = thisTrack->At(0)->getYmm();
+         outP2x = (thisTrack->At(1)->getXmm() - outX2x) / dz2;
+         outP2y = (thisTrack->At(1)->getYmm() - outX2y) / dz2;
+
+         for (Int_t ii=0; ii<45; ii++) edep[ii] = 0.;
+         for (Int_t ii=0; ii<thisTrack->GetEntriesFast(); ii++) {
+            if (thisTrack->At(ii)) {
+               edep[ii] = thisTrack->getDepositedEnergy(ii);
+            }
+         }
+         showDebug("ok! output CSV");
+         
+         for (Int_t ii=0; ii<45; ii++) {
+            output_csv << edep[ii] << ";";
+         }
+
+         showDebug(" pt2 ");
+         output_csv << outSpotX << ";" << outSpotY << ";" << outX2x << ";" << outX2y << ";" << outP2x << ";" << outP2y << ";" << outWEPL << endl;
+
+         showDebug("Ok! ");
+      }
+      showDebug("Done looping over tracks");
+       nruns++;
+       delete tracks;
+       tracks = nullptr;
+   }
+   printf("Image Reconstruction Input data written to Output/CNN/no_nuclear/helium_headphantom/%s_spotx%04.f.csv.\n", kPhantomName.Data(), kSpotX);
+//    output_csv.close();
 }
 
 void makeEfficiencyVsDegraderThickness() {

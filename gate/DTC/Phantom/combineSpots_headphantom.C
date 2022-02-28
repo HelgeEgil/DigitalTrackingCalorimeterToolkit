@@ -40,7 +40,7 @@ void combineSpots_headphantom(Int_t rotation) {
       for (int spotY = -88; spotY <= 88; spotY += 7) {
 
          printf("Running @ spot (%04d, %04d)\n", spotX, spotY);
-         fSimulationIn = new TFile(Form("../../../DTCToolkit/Data/MonteCarlo/DTC_Final_headphantom_rotation%03ddeg_spotx%04d_spoty%04d.root", rotation, spotX, spotY), "READ");
+         fSimulationIn = new TFile(Form("../../../DTCToolkit/Data/MonteCarlo/DTC_Final_headphantom_rotation%02ddeg_spotx%04d_spoty%04d.root", rotation, spotX, spotY), "READ");
          treeSimulationIn = (TTree*) fSimulationIn->Get("Hits");
 
          treeSimulationIn->SetBranchAddress("posX",&x);

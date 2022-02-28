@@ -123,6 +123,7 @@ void Hits::appendNeighboursToClusters(vector<Int_t> *expandedCluster, Clusters *
 //      if (!isSecondary(idx)) isPrimaryInCluster = true;
       sumX += getX(idx) - 0.5; // -0.5  to get
       sumY += getY(idx) - 0.5; // pixel center
+
       if (getPDG(idx) > maxPDG) { // use PDG and eventID of "heaviest" particle
          maxPDG = getPDG(idx);
          maxEventID = getEventID(idx);

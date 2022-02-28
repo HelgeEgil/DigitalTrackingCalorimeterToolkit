@@ -18,18 +18,33 @@
 #/gate/physics/SetMaxStepSizeInRegion world 1 mm
 #/gate/physics/ActivateStepLimiter proton
 
-#/gate/actor/addActor PhaseSpaceActor PSA
-#/gate/actor/PSA/save ../../../DTCToolkit/Data/MonteCarlo/DTC_PSA_spotx{spotx}_spoty{spoty}_rotation{rotation}deg.root
-#/gate/actor/PSA/attachTo PSAvolume
-#/gate/actor/PSA/enableEkine true
-#/gate/actor/PSA/enableParticleName true
-#/gate/actor/PSA/storeSecondaries false
-#/gate/actor/PSA/enableProductionProcess false
-#/gate/actor/PSA/enableProductionVolume true
-#/gate/actor/PSA/addFilter particleFilter
-#/gate/actor/PSA/particleFilter/addParticlePDG 2212
+#/gate/actor/addActor PhaseSpaceActor PSA1
+#/gate/actor/PSA1/save ../../../DTCToolkit/Data/MonteCarlo/DTC_PSA_Helium_prephantom_spotx{spotx}_deg.root
+#/gate/actor/PSA1/attachTo PSAvolume1
+#/gate/actor/PSA1/enableEkine true
+#/gate/actor/PSA1/enableParticleName false
+#/gate/actor/PSA1/storeSecondaries false
+#/gate/actor/PSA1/enableProductionProcess false
+#/gate/actor/PSA1/enableProductionVolume false
+#/gate/actor/PSA1/addFilter particleFilter
+#/gate/actor/PSA1/particleFilter/addParticlePDG 1000020040
+#
+#/gate/actor/addActor PhaseSpaceActor PSA2
+#/gate/actor/PSA2/save ../../../DTCToolkit/Data/MonteCarlo/DTC_PSA_Helium_postphantom_spotx{spotx}_deg.root
+#/gate/actor/PSA2/attachTo PSAvolume2
+#/gate/actor/PSA2/enableEkine true
+#/gate/actor/PSA2/enableParticleName false
+#/gate/actor/PSA2/storeSecondaries false
+#/gate/actor/PSA2/enableProductionProcess false
+#/gate/actor/PSA2/enableProductionVolume false
+#/gate/actor/PSA2/addFilter particleFilter
+#/gate/actor/PSA2/particleFilter/addParticlePDG 1000020040
+
 
 /gate/run/initialize
+
+/process/inactivate hadElastic
+/process/inactivate alphaInelastic
 
 #=======================#
 # ADD PROTON BEAM	      #
@@ -75,5 +90,6 @@
 
 /gate/random/setEngineName MersenneTwister
 /gate/random/setEngineSeed auto
-/gate/application/setTotalNumberOfPrimaries 100000 # 10k for small phantoms; 5k for head phantom
+/gate/application/setTotalNumberOfPrimaries 10000 # 10k for small phantoms; 5k for head phantom # 750k in wedge -> 40M training tracks
+# 10k for helium: ~20M in total, should be _plenty_
 /gate/application/start

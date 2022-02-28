@@ -99,16 +99,12 @@ void Tracks::appendTrack(Track *copyTrack, Int_t startOffset /* default 0 */) {
    Int_t    newIdx = tracks_.GetEntriesFast();
    Track  * track = (Track*) tracks_.ConstructedAt(newIdx);
    
-   showDebug("Copying track ... i = ");
    for (Int_t i=0; i<copyTrack->GetEntriesFast(); i++) {
-      showDebug(i << ", ");
       if(!copyTrack->At(i))
          continue;
-
       track->appendCluster(copyTrack->At(i), startOffset);
    }
    track->setIncomplete(copyTrack->isIncomplete());
-   showDebug(endl);
 }
 
 void Tracks::appendClusterWithoutTrack(Cluster *cluster) {

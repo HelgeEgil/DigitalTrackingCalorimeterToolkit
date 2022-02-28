@@ -3,6 +3,6 @@
 
 xlim=104
 
-for spotx in `seq -84 4 104`; do
+for spotx in `seq -104 4 104`; do
    tsp root -l 'Scripts/makeInputFileForCNNScript.C('$spotx')'
 done
