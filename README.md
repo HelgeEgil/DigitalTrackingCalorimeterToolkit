@@ -430,3 +430,38 @@ and ROOT will run the script <code>Load.C</code> which loads all code and starts
 ```
 ROOT [1] drawBraggPeakGraphFit(...)
 ```
+
+1.	Making Monte Carlo data
+There are several GATE macros and bash scripts looping through these macros, located in gate/DTC/<Phantom>.
+•	The Main_chip.mac and Main_full.mac files contain my most up-to-date detector geometry with a water box phantom in front. The _chip file stores only hits on the ALPIDE slabs, while the _full stores everything happening inside the detector for calibration purposes.
+•	The Main_He_chip/full files are similar, but for helium
+In the Phantom subfolder we find the geometry for several phantoms + the most up-to-date detector geometry. These files are ordered such that Main_[He_]phantom.mac includes the .mac phantom files. Again the runRadiograph.sh and runCT.sh are bash scripts that loops through different variables, most importantly the spot scanning. (While this is possible through GateRTion this is a simple for loop for increased control of file output. Also, note that the Gate executable is run using tsp, which is the task spooler we’re using at the cluster.) The available phantoms are:
+•	CTP404 phantom (sensitometry phantom)
+•	Wedge phantom (for scanning the whole WEPL range in a single wedge-shaped phantom)
+•	Headphantom (the pediatric head phantom)
+The MC data from the spot scanning is saved in git/DTCToolkit/Data/MonteCarlo. The naming is a bit ad hoc, but reflects the particle name, phantom name, rotation (e.g. for the head phantom) and spot position: 
+•	DTC_Final_Helium_headphantom_rotation90deg_spotx-014_spoty0020.root
+A single ROOT file is then made (due to simpler parallelization) with increasing eventID numbering such that:
+•	For CT scans all spots are summed in a single scanning angle
+•	For radiographs all Y spots are summed, yielding ~50 files in X direction
+This is done in combineSpots.C (CT) and combineSpotsRad.C (with versions for the different phantoms). This step is, sadly, manual as the file names have to be edited for each time. It’s not something I did too often to require further automatization.
+The end result for radiographs is, e.g., files such as
+DTC_Final_headphantom_rotation90deg_spotx-007_AllY.root
+2.	Running the DTC Toolkit on the generated MC files
+As you might know all the files are C++ but interpreted through ROOT. This made the workflow quite easy, and allowed for many different runnable functions (in Analysis/Analysis.C) without generating excutables for each.
+The code is executed by:
+•	$ root Load.C
+•	ROOT > <function name in Analysis.C>
+Most of the workshow is controlled by the variables in GlobalConstants/Constants.h: particle type, energy, phantom / water degrader (see MC part above), phantom name, number of events per run, splitting of columns per rotation (True for Rad, False for CT; see combineSpots.C above) and many detector- and algorithm-specific flags. Some of the flags are legacy flags, such as kFinalDesign (always true), kOutputUnit (always WEPL), refined clustering (always true) +++. 
+The interface to the MC files is located in the file Classes/DataInterface/DataInterface.C. The pertinent function is DataInterface::getMCClustersThreshold. If the phantom type and name is specified in Constants.h, it should find the correct MC files if also the spot position is given. 
+This function takes an incrementing run number (eventID: runNumber * events per run), a Clusters* or Hits* object (depending if the output should be pixel hits or cluster positions w/MC true edep) and the spotX, spotY. It then performs a binary search (DataInterface::findSpotIndex) on the ROOT file to find the start index of the wanted spot position, and further searches for the wanted eventID number in that sublist of the ROOT file. When the correct entries are located, the values for layer (“baseID*2 + level1ID – 2”) and x/y pixel number (“posX / dx + nx / 2”) and appends the found Hit* to the Hits* list (which is a TClonesArray of Hit* objects).
+The Hits* object is then given back to the function getTracksFromClusters in HelperFunctions/getTracks.C (which controls the logistics from ROOT to Tracks* objects). The Hits* is run through the diffuseHits functions that makes spread-out hits based on the cluster diffusion. Then diffusedHits->findClustersFromHits() are run, giving back the cluster objects with float x,y (center of gravity) + number of pixels / edep. 
+The next step (after some clean-up) is track reconstruction, through the function clusters->findTracksWithRecursiveWeighting() in Classes/Cluster/findTracks.C. If the data is properly fetched until this point, this process should run without any trouble.
+Two further steps performed in getTrackFromClusters should be mentioned. A lot of filtering (NANs, empty tracks, tracks leaving detector, filling out of tracks leaving the detector) and other sanity checks are performed. Second, a list called CWT or ClustersWithoutTrack is made, for later visualization and calculation.
+All this happens under the hood. For the user, what is necessary is to set the variables and run the loadOrCreateTracks() function from getTracks.C. This is usually done by a user script in Analysis.C. This file is very bloaty since it contains many functions with parameter scanning, filtering, visualization, output file generation and comparion between files. 
+When dealing with spot scanning, the simplest interface is to make a user script in Analysis.C with spotX, spotY as input variables. Then (for parallelization) a bash script runs through the vector of possible spotX values (all spotY in single file, remember):
+for spotx in `seq -$xlim 7 $xlim`; do root -l ‘Scripts/makeInputFileForImageReconstructionRad(‘$runs’, ‘$eventsPerRun’, ‘$rotationAngle’,  ‘$spotx’, “’$1’”)’ (where $1 is the phantom name as argument to the bash script); done
+The Scripts/ file is then just a passthrough between ROOT and the full codebase to allow for arguments. 
+One example from Analysis.C is a simple track depth-dose visualization script:
+   
+
